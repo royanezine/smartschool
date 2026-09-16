@@ -10,7 +10,6 @@ export const globalErrorHandler = (
   let statusCode = err.statusCode || 500;
   let message = err.message || "Internal Server Error";
 
-  // Tangkap error validasi dari Zod menggunakan err.issues
   if (err instanceof ZodError) {
     statusCode = 400;
     message = err.issues

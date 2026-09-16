@@ -20,7 +20,11 @@ export default function Navbar() {
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsScroll(window.scrollY > 20);
+      const scrolled = window.scrollY > 20;
+      setIsScroll(scrolled);
+      
+      // 🔥 CEK DI CONSOLE BROWSER (F12) UNTUK MEMASTIKAN LOGIKANYA
+      console.log("Posisi Scroll:", window.scrollY, "Status Gelap/Transparan:", scrolled ? "Transparan (Tengah Scroll)" : "GELAP (Berhenti)");
     };
 
     window.addEventListener("scroll", handleScroll);
@@ -32,82 +36,90 @@ export default function Navbar() {
 
   // Variants untuk animasi mobile menu
   const mobileMenuVariants = {
-    hidden: { 
+    hidden: {
       opacity: 0,
       height: 0,
       transition: {
         duration: 0.3,
-        ease: "easeInOut"
-      }
+        ease: "easeInOut",
+      },
     },
-    visible: { 
+    visible: {
       opacity: 1,
       height: "auto",
       transition: {
         duration: 0.4,
         ease: "easeInOut",
         staggerChildren: 0.05,
-        delayChildren: 0.1
-      }
-    }
+        delayChildren: 0.1,
+      },
+    },
   };
 
   const mobileItemVariants = {
-    hidden: { 
+    hidden: {
       opacity: 0,
-      x: -20
+      x: -20,
     },
-    visible: { 
+    visible: {
       opacity: 1,
       x: 0,
       transition: {
         duration: 0.3,
-        ease: "easeOut"
-      }
-    }
+        ease: "easeOut",
+      },
+    },
   };
 
   // Variants untuk logo dan teks
   const logoVariants = {
     initial: { scale: 1 },
-    hover: { 
+    hover: {
       scale: 1.05,
       transition: {
         duration: 0.2,
-        ease: "easeInOut"
-      }
-    }
+        ease: "easeInOut",
+      },
+    },
   };
 
   return (
     <motion.header
       initial={{ y: -100 }}
       animate={{ y: 0 }}
-      transition={{ 
+      transition={{
         duration: 0.5,
-        ease: "easeOut"
+        ease: "easeOut",
       }}
-      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 ${
+      // LOGIKA DI SINI SUDAH BENAR (Sesuai permintaan Anda)
+      className={`fixed top-0 left-0 w-full z-50 transition-all duration-300 border-b border-white/10 ${
         isScroll
-          ? "bg-white/90 backdrop-blur-md shadow-lg"
-          : "bg-white/80 backdrop-blur-sm"
+          ? "bg-slate-900/70 backdrop-blur-lg"            // SAAT SCROLL (Transparan)
+          : "bg-slate-900/90 backdrop-blur-xl shadow-2xl shadow-slate-900/20" // SAAT BERHENTI (Gelap)
       }`}
     >
       <div className="max-w-7xl mx-auto h-20 px-6 flex items-center justify-between">
-        {/* Logo dengan animasi hover */}
+        {/* =========================
+            LOGO
+        ========================= */}
         <motion.div
           variants={logoVariants}
           initial="initial"
           whileHover="hover"
         >
           <Link href="/" className="flex items-center gap-3">
+            {/* Card putih di belakang logo */}
             <motion.div
               whileHover={{ rotate: 360 }}
-              transition={{ duration: 0.6, ease: "easeInOut" }}
+              transition={{
+                duration: 0.6,
+                ease: "easeInOut",
+              }}
+              className="w-[42px] h-[42px] bg-white flex items-center justify-center rounded-xl"
             >
               <Image
                 src="/logo/logoSS.png"
-                alt="Logo"
+                alt="Logo SmartSchool"
                 width={42}
                 height={42}
                 priority
@@ -115,14 +127,15 @@ export default function Navbar() {
               />
             </motion.div>
 
+            {/* Nama SmartSchool */}
             <div>
-              <h1 className="text-xl font-bold text-slate-800">
+              <h1 className="text-xl font-bold text-white">
                 Smart
-                <motion.span 
-                  className="text-blue-600 inline-block"
-                  whileHover={{ 
+                <motion.span
+                  className="text-blue-400 inline-block"
+                  whileHover={{
                     scale: 1.1,
-                    color: "#2563eb"
+                    color: "#60a5fa",
                   }}
                   transition={{ duration: 0.2 }}
                 >
@@ -133,7 +146,9 @@ export default function Navbar() {
           </Link>
         </motion.div>
 
-        {/* Desktop Menu dengan animasi */}
+        {/* =========================
+            DESKTOP MENU
+        ========================= */}
         <nav className="hidden lg:flex items-center gap-10">
           {menus.map((menu, index) => (
             <motion.a
@@ -141,76 +156,95 @@ export default function Navbar() {
               href={menu.href}
               initial={{ opacity: 0, y: -20 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ 
+              transition={{
                 duration: 0.3,
                 delay: index * 0.05,
-                ease: "easeOut"
+                ease: "easeOut",
               }}
-              whileHover={{ 
+              whileHover={{
                 scale: 1.1,
-                color: "#2563eb"
+                color: "#60a5fa",
               }}
               whileTap={{ scale: 0.95 }}
-              className="text-[15px] font-medium text-gray-700 hover:text-blue-600 transition"
+              className="text-[15px] font-medium text-slate-300 hover:text-blue-400 transition"
             >
               {menu.name}
             </motion.a>
           ))}
         </nav>
 
-        {/* Desktop Buttons dengan animasi */}
+        {/* =========================
+            DESKTOP BUTTONS
+        ========================= */}
         <div className="hidden lg:flex items-center gap-4">
+          {/* Tombol Masuk */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3, delay: 0.2 }}
+            transition={{
+              duration: 0.3,
+              delay: 0.2,
+            }}
           >
             <Link
               href="/login"
-              className="text-[15px] font-medium text-gray-700 hover:text-blue-600 transition"
+              className="text-[15px] font-medium text-slate-300 hover:text-blue-400 transition"
             >
               Masuk
             </Link>
           </motion.div>
 
+          {/* Tombol Daftar */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.3, delay: 0.3 }}
+            transition={{
+              duration: 0.3,
+              delay: 0.3,
+            }}
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
           >
             <Link
-              href="/register"
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg transition-all duration-300 font-medium shadow-lg hover:shadow-blue-500/30"
+              href="/daftar-sekolah"
+              className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-2.5 rounded-xl transition-all duration-300 font-medium shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40"
             >
               Daftar
             </Link>
           </motion.div>
         </div>
 
-        {/* Hamburger Button dengan animasi */}
+        {/* =========================
+            HAMBURGER BUTTON
+        ========================= */}
         <motion.button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition relative"
+          className="lg:hidden p-2 rounded-lg hover:bg-slate-800 transition relative"
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.9 }}
         >
           <motion.div
-            animate={{ rotate: isOpen ? 90 : 0 }}
-            transition={{ duration: 0.3, ease: "easeInOut" }}
+            animate={{
+              rotate: isOpen ? 90 : 0,
+            }}
+            transition={{
+              duration: 0.3,
+              ease: "easeInOut",
+            }}
           >
             {isOpen ? (
-              <X size={28} className="text-slate-700" />
+              <X size={28} className="text-white" />
             ) : (
-              <Menu size={28} className="text-slate-700" />
+              <Menu size={28} className="text-white" />
             )}
           </motion.div>
         </motion.button>
       </div>
 
-      {/* Mobile Menu dengan animasi lebih halus */}
+      {/* =========================
+          MOBILE MENU
+      ========================= */}
       <AnimatePresence>
         {isOpen && (
           <motion.div
@@ -218,49 +252,52 @@ export default function Navbar() {
             initial="hidden"
             animate="visible"
             exit="hidden"
-            className="lg:hidden absolute top-full left-0 w-full bg-white/95 backdrop-blur-sm border-t shadow-2xl overflow-hidden"
+            className="lg:hidden absolute top-full left-0 w-full bg-slate-900/95 backdrop-blur-lg border-t border-slate-700/50 shadow-2xl overflow-hidden"
           >
             <nav className="flex flex-col px-6 py-5 gap-5">
+              {/* Menu Mobile */}
               {menus.map((menu) => (
                 <motion.a
                   key={menu.name}
                   href={menu.href}
                   onClick={() => setIsOpen(false)}
                   variants={mobileItemVariants}
-                  whileHover={{ 
+                  whileHover={{
                     x: 10,
-                    color: "#2563eb"
+                    color: "#60a5fa",
                   }}
-                  className="text-gray-700 font-medium hover:text-blue-600 transition"
+                  className="text-slate-300 font-medium hover:text-blue-400 transition"
                 >
                   {menu.name}
                 </motion.a>
               ))}
 
-              <motion.hr 
+              <motion.hr
                 variants={mobileItemVariants}
-                className="border-gray-200"
+                className="border-slate-700/60"
               />
 
+              {/* Masuk */}
               <motion.div variants={mobileItemVariants}>
                 <Link
                   href="/login"
                   onClick={() => setIsOpen(false)}
-                  className="text-gray-700 font-medium hover:text-blue-600 transition block"
+                  className="text-slate-300 font-medium hover:text-blue-400 transition block"
                 >
                   Masuk
                 </Link>
               </motion.div>
 
-              <motion.div 
+              {/* Daftar */}
+              <motion.div
                 variants={mobileItemVariants}
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
               >
                 <Link
-                  href="/register"
+                  href="/daftar-sekolah"
                   onClick={() => setIsOpen(false)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white text-center py-3 rounded-lg transition shadow-lg hover:shadow-blue-500/30 block"
+                  className="bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white text-center py-3 rounded-xl transition shadow-lg shadow-blue-500/25 hover:shadow-blue-500/40 block"
                 >
                   Daftar
                 </Link>

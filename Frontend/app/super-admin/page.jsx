@@ -1,638 +1,1217 @@
 "use client";
 
-import { useState } from "react";
-import Sidebar from "@/app/components/Sidebar";
-import Header from "@/app/components/Header";
+import { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
+import Sidebar from "../components/Sidebar";
+import Header from "../components/Header";
+
 import {
-  Package,
-  Layers,
-  Plus,
-  Pencil,
-  Trash2,
-  X,
-  Check,
-  Search,
-  Sparkles,
-  Crown,
-  Star,
-  Zap,
+  LayoutDashboard,
+  School,
+  Building2,
   Users,
-  CircleDollarSign,
-  BadgeCheck,
-  BookOpen,
-  Wallet,
-  UserCog,
-  Library,
-  ClipboardCheck,
-  UserPlus,
-  MessageSquare,
-  Boxes,
-  ChevronDown,
-  MoreHorizontal,
-  Copy,
+  Package,
+  Activity,
+  Calendar,
+  ChevronRight,
+  Edit3,
+  Zap,
+  BarChart3,
+  ArrowUpRight,
+  ArrowDownRight,
+  DollarSign,
+  Bell,
+  CheckCircle2,
+  RefreshCw,
+  Settings,
   ShieldCheck,
+  Database,
+  TrendingUp,
+  CreditCard,
+  UserPlus,
+  FileText,
+  MoreHorizontal,
+  Circle,
+  Clock3,
+  Server,
+  AlertCircle,
 } from "lucide-react";
 
-// ================== DATA AWAL ==================
+// ============================================================
+// DUMMY DATA
+// ============================================================
 
-const MODUL_LIST = [
-  { id: "akademik", nama: "Akademik", desk: "Nilai, jadwal & rapor digital", icon: BookOpen },
-  { id: "keuangan", nama: "Keuangan", desk: "SPP, tagihan & laporan keuangan", icon: Wallet },
-  { id: "kepegawaian", nama: "Kepegawaian", desk: "Data guru & staff sekolah", icon: UserCog },
-  { id: "perpustakaan", nama: "Perpustakaan", desk: "Katalog & sirkulasi buku", icon: Library },
-  { id: "presensi", nama: "Presensi", desk: "Absensi digital siswa & guru", icon: ClipboardCheck },
-  { id: "ppdb", nama: "PPDB", desk: "Pendaftaran siswa baru online", icon: UserPlus },
-  { id: "komunikasi", nama: "Komunikasi", desk: "Pesan ke orang tua & wali murid", icon: MessageSquare },
-  { id: "inventaris", nama: "Inventaris", desk: "Aset & barang milik sekolah", icon: Boxes },
-];
-
-const PAKET_AWAL = [
+const statsData = [
   {
     id: 1,
-    nama: "Starter",
-    icon: Star,
-    warna: "slate",
-    harga: 250000,
-    siklus: "bulan",
-    deskripsi: "Cocok untuk sekolah yang baru memulai digitalisasi.",
-    modul: ["akademik", "presensi"],
-    langganan: 36,
-    status: "aktif",
+    label: "Total Sekolah",
+    value: "128",
+    change: "+12",
+    description: "sekolah terdaftar",
+    trend: "up",
+    icon: School,
+    accent: "primary",
   },
   {
     id: 2,
-    nama: "Professional",
-    icon: Zap,
-    warna: "blue",
-    harga: 550000,
-    siklus: "bulan",
-    deskripsi: "Untuk sekolah yang butuh pengelolaan lebih lengkap.",
-    modul: ["akademik", "presensi", "keuangan", "kepegawaian", "komunikasi"],
-    langganan: 48,
-    status: "aktif",
-    populer: true,
+    label: "Total Yayasan",
+    value: "42",
+    change: "+3",
+    description: "yayasan terdaftar",
+    trend: "up",
+    icon: Building2,
+    accent: "neutral",
   },
   {
     id: 3,
-    nama: "Enterprise",
-    icon: Crown,
-    warna: "purple",
-    harga: 1200000,
-    siklus: "bulan",
-    deskripsi: "Solusi menyeluruh untuk yayasan dengan banyak unit sekolah.",
-    modul: MODUL_LIST.map((m) => m.id),
-    langganan: 18,
-    status: "aktif",
+    label: "Pengguna Aktif",
+    value: "1.198",
+    change: "+54",
+    description: "pengguna aktif",
+    trend: "up",
+    icon: Users,
+    accent: "primary",
   },
   {
     id: 4,
-    nama: "Trial",
-    icon: Sparkles,
-    warna: "amber",
-    harga: 0,
-    siklus: "14 hari",
-    deskripsi: "Uji coba gratis sebelum berlangganan penuh.",
-    modul: ["akademik", "presensi"],
-    langganan: 0,
-    status: "nonaktif",
+    label: "Langganan Aktif",
+    value: "105",
+    change: "-2",
+    description: "dari 128 sekolah",
+    trend: "down",
+    icon: Package,
+    accent: "neutral",
   },
 ];
 
-const WARNA_MAP = {
-  slate: { bg: "bg-slate-50", text: "text-slate-600", border: "border-slate-200", ring: "ring-slate-200", solid: "bg-slate-600" },
-  blue: { bg: "bg-blue-50", text: "text-blue-600", border: "border-blue-200", ring: "ring-blue-200", solid: "bg-blue-600" },
-  purple: { bg: "bg-purple-50", text: "text-purple-600", border: "border-purple-200", ring: "ring-purple-200", solid: "bg-purple-600" },
-  amber: { bg: "bg-amber-50", text: "text-amber-600", border: "border-amber-200", ring: "ring-amber-200", solid: "bg-amber-600" },
+const revenueData = [
+  { month: "Jan", value: 38 },
+  { month: "Feb", value: 43 },
+  { month: "Mar", value: 49 },
+  { month: "Apr", value: 55 },
+  { month: "Mei", value: 61 },
+  { month: "Jun", value: 69 },
+  { month: "Jul", value: 77 },
+  { month: "Agu", value: 86 },
+];
+
+const schoolGrowthData = [
+  { month: "Jan", value: 42 },
+  { month: "Feb", value: 48 },
+  { month: "Mar", value: 55 },
+  { month: "Apr", value: 62 },
+  { month: "Mei", value: 70 },
+  { month: "Jun", value: 78 },
+  { month: "Jul", value: 85 },
+  { month: "Agu", value: 92 },
+];
+
+const recentActivities = [
+  {
+    id: 1,
+    user: "Super Admin",
+    action: "Menambahkan sekolah baru",
+    target: "SMA Bina Bangsa",
+    timestamp: "2026-08-26T14:30:00",
+    type: "create",
+  },
+  {
+    id: 2,
+    user: "Super Admin",
+    action: "Memperbarui paket langganan",
+    target: "SMA Negeri 1 Jakarta",
+    timestamp: "2026-08-26T13:15:00",
+    type: "update",
+  },
+  {
+    id: 3,
+    user: "Admin Sekolah",
+    action: "Menambahkan pengguna baru",
+    target: "SMP BPK Penabur",
+    timestamp: "2026-08-26T12:45:00",
+    type: "create",
+  },
+  {
+    id: 4,
+    user: "Super Admin",
+    action: "Memverifikasi yayasan",
+    target: "YPI Harapan",
+    timestamp: "2026-08-26T11:20:00",
+    type: "verify",
+  },
+  {
+    id: 5,
+    user: "Sistem",
+    action: "Pembayaran berhasil",
+    target: "SMA Al-Azhar",
+    timestamp: "2026-08-26T10:30:00",
+    type: "payment",
+  },
+];
+
+const upcomingTasks = [
+  {
+    id: 1,
+    title: "Backup Database",
+    description: "Backup otomatis database utama",
+    due: "Hari ini · 23:00",
+    priority: "high",
+    icon: Database,
+  },
+  {
+    id: 2,
+    title: "Review Langganan Expired",
+    description: "5 sekolah perlu ditinjau",
+    due: "Besok · 09:00",
+    priority: "medium",
+    icon: CreditCard,
+  },
+  {
+    id: 3,
+    title: "Update Sistem",
+    description: "Persiapan deployment versi 2.1",
+    due: "15 Agu · 10:00",
+    priority: "low",
+    icon: Server,
+  },
+];
+
+const recentNotifications = [
+  {
+    id: 1,
+    title: "Pembaruan Sistem v2.0",
+    desc: "SmartSchool telah diperbarui ke versi terbaru.",
+    read: false,
+    time: "2 jam lalu",
+  },
+  {
+    id: 2,
+    title: "Pengingat Backup Data",
+    desc: "Backup database terakhir berhasil dilakukan.",
+    read: false,
+    time: "5 jam lalu",
+  },
+  {
+    id: 3,
+    title: "Yayasan Baru Mendaftar",
+    desc: "YPI Harapan telah menyelesaikan pendaftaran.",
+    read: true,
+    time: "1 hari lalu",
+  },
+];
+
+const quickActions = [
+  {
+    label: "Tambah Sekolah",
+    description: "Daftarkan sekolah",
+    icon: School,
+    path: "/super-admin/sekolah/tambah",
+  },
+  {
+    label: "Tambah Yayasan",
+    description: "Daftarkan yayasan",
+    icon: Building2,
+    path: "/super-admin/yayasan/tambah",
+  },
+  {
+    label: "Pengumuman",
+    description: "Buat pengumuman",
+    icon: Bell,
+    path: "/super-admin/notifikasi",
+  },
+  {
+    label: "Kelola Paket",
+    description: "Atur paket modul",
+    icon: Package,
+    path: "/super-admin/paketModul",
+  },
+  {
+    label: "Manajemen Akses",
+    description: "Atur hak akses",
+    icon: Users,
+    path: "/super-admin/manajemenAkses",
+  },
+  {
+    label: "Pengaturan",
+    description: "Konfigurasi sistem",
+    icon: Settings,
+    path: "/super-admin/pengaturan",
+  },
+];
+
+// ============================================================
+// HELPERS — palet warna disederhanakan: biru (primary),
+// slate (neutral), emerald/rose hanya untuk indikator naik/turun.
+// ============================================================
+
+const getActivityIcon = (type) => {
+  const map = {
+    create: UserPlus,
+    update: Edit3,
+    verify: CheckCircle2,
+    payment: DollarSign,
+  };
+
+  return map[type] || Activity;
 };
 
-function formatRupiah(angka) {
-  if (angka === 0) return "Gratis";
-  return "Rp" + angka.toLocaleString("id-ID");
-}
+const getActivityColor = (type) => {
+  const map = {
+    create: "bg-blue-50 text-blue-600",
+    update: "bg-slate-100 text-slate-600",
+    verify: "bg-blue-50 text-blue-700",
+    payment: "bg-emerald-50 text-emerald-600",
+  };
 
-// ================== HALAMAN ==================
+  return map[type] || "bg-slate-50 text-slate-500";
+};
 
-export default function PaketModulPage() {
-  const [activeMenu, setActiveMenu] = useState("paket");
+const getAccent = (accent) => {
+  const map = {
+    primary: {
+      icon: "bg-blue-50 text-blue-600",
+      bar: "bg-blue-600",
+    },
+    neutral: {
+      icon: "bg-slate-100 text-slate-600",
+      bar: "bg-slate-400",
+    },
+  };
+
+  return map[accent] || map.primary;
+};
+
+const getPriority = (priority) => {
+  const map = {
+    high: {
+      label: "Tinggi",
+      className: "border-rose-200 bg-rose-50 text-rose-600",
+      dot: "bg-rose-500",
+    },
+    medium: {
+      label: "Sedang",
+      className: "border-amber-200 bg-amber-50 text-amber-600",
+      dot: "bg-amber-500",
+    },
+    low: {
+      label: "Rendah",
+      className: "border-slate-200 bg-slate-100 text-slate-600",
+      dot: "bg-slate-400",
+    },
+  };
+
+  return map[priority] || map.low;
+};
+
+// ============================================================
+// COMPONENT
+// ============================================================
+
+export default function DashboardPage() {
+  const router = useRouter();
+
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [paketList, setPaketList] = useState(PAKET_AWAL);
-  const [modalOpen, setModalOpen] = useState(false);
-  const [editingPaket, setEditingPaket] = useState(null);
-  const [confirmDelete, setConfirmDelete] = useState(null);
-  const [search, setSearch] = useState("");
 
-  const notifications = [
-    { id: 1, title: "Pembaruan Sistem v2.0", desc: "Dikirim 2 jam lalu", read: false },
-    { id: 2, title: "Pengingat: Backup Data", desc: "Dikirim 1 hari lalu", read: false },
-  ];
+  const notifications = useMemo(
+    () =>
+      recentNotifications.map((item) => ({
+        id: item.id,
+        title: item.title,
+        desc: item.desc,
+        read: item.read,
+      })),
+    []
+  );
 
-  const totalPaket = paketList.length;
-  const paketAktif = paketList.filter((p) => p.status === "aktif").length;
-  const totalLangganan = paketList.reduce((sum, p) => sum + p.langganan, 0);
-  const totalPendapatan = paketList.reduce((sum, p) => sum + p.harga * p.langganan, 0);
+  const maxRevenue = Math.max(
+    ...revenueData.map((item) => item.value)
+  );
 
-  function openTambah() {
-    setEditingPaket(null);
-    setModalOpen(true);
-  }
-
-  function openEdit(paket) {
-    setEditingPaket(paket);
-    setModalOpen(true);
-  }
-
-  function simpanPaket(data) {
-    if (editingPaket) {
-      setPaketList((list) => list.map((p) => (p.id === editingPaket.id ? { ...p, ...data } : p)));
-    } else {
-      setPaketList((list) => [
-        ...list,
-        { ...data, id: Math.max(0, ...list.map((p) => p.id)) + 1, langganan: 0, icon: Package, warna: "slate" },
-      ]);
-    }
-    setModalOpen(false);
-  }
-
-  function hapusPaket(id) {
-    setPaketList((list) => list.filter((p) => p.id !== id));
-    setConfirmDelete(null);
-  }
-
-  function duplikatPaket(paket) {
-    setPaketList((list) => [
-      ...list,
-      { ...paket, id: Math.max(0, ...list.map((p) => p.id)) + 1, nama: paket.nama + " (Salinan)", langganan: 0, populer: false },
-    ]);
-  }
-
-  function toggleStatus(id) {
-    setPaketList((list) =>
-      list.map((p) => (p.id === id ? { ...p, status: p.status === "aktif" ? "nonaktif" : "aktif" } : p))
-    );
-  }
-
-  const filteredPaket = paketList.filter((p) => p.nama.toLowerCase().includes(search.toLowerCase()));
+  const maxSchool = Math.max(
+    ...schoolGrowthData.map((item) => item.value)
+  );
 
   return (
-    <div className="flex h-screen bg-white overflow-hidden">
+    <div className="flex h-screen w-full overflow-hidden bg-[#F6F8FC]">
+      {/* ======================================================
+          SIDEBAR
+      ====================================================== */}
+
       <Sidebar
-        active={activeMenu}
-        setActive={setActiveMenu}
+        active="dashboard"
+        setActive={() => {}}
         collapsed={!sidebarOpen}
-        setCollapsed={() => setSidebarOpen(!sidebarOpen)}
+        setCollapsed={() => setSidebarOpen((prev) => !prev)}
       />
-      <div className="flex-1 flex flex-col min-w-0">
+
+      {/* ======================================================
+          MAIN
+      ====================================================== */}
+
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <Header
-          toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+          toggleSidebar={() => setSidebarOpen((prev) => !prev)}
           notifications={notifications}
-          user={{ name: "Sarah", email: "sarah@smartschool.com", avatar: "SA" }}
+          user={{
+            name: "Super Admin",
+            email: "admin@smartschool.com",
+            avatar: "SA",
+          }}
         />
-        <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8 bg-white">
-          <div className="max-w-7xl mx-auto space-y-4 md:space-y-6">
-            {/* HEADER */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 md:gap-4">
-              <div>
-                <h1 className="text-xl md:text-2xl lg:text-3xl font-light text-slate-800 tracking-tight">
-                  Paket &amp; Modul
-                  <span className="ml-2 md:ml-3 text-xs md:text-sm font-normal text-slate-400 bg-white px-2 md:px-3 py-1 rounded-full border border-slate-200/60 shadow-sm">
-                    Super Admin
-                  </span>
-                </h1>
-                <p className="text-xs md:text-sm text-slate-500 mt-0.5 md:mt-1 flex items-center gap-1.5 md:gap-2">
-                  <Sparkles size={12} className="md:size-[14px] text-slate-400" />
-                  Kelola paket langganan dan modul yang tersedia untuk setiap sekolah.
-                </p>
-              </div>
-              <button
-                onClick={openTambah}
-                className="flex items-center justify-center gap-2 px-4 py-2 md:py-2.5 rounded-lg text-xs md:text-sm font-medium text-white bg-slate-800 hover:bg-slate-900 shadow-sm hover:shadow-md transition-all"
-              >
-                <Plus size={16} />
-                Tambah Paket
-              </button>
-            </div>
 
-            {/* STAT CARDS */}
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
-              <StatCard icon={Package} label="Total Paket" value={totalPaket} color="blue" />
-              <StatCard icon={BadgeCheck} label="Paket Aktif" value={paketAktif} color="emerald" />
-              <StatCard icon={Users} label="Total Langganan" value={totalLangganan} color="purple" />
-              <StatCard icon={CircleDollarSign} label="Estimasi Pendapatan" value={formatRupiah(totalPendapatan)} color="orange" />
-            </div>
+        <main className="flex-1 overflow-y-auto">
+          <div className="mx-auto w-full max-w-[1700px] px-4 py-5 sm:px-6 lg:px-8 lg:py-7">
+            <div className="space-y-5 lg:space-y-6">
 
-            {/* SEARCH */}
-            <div className="relative max-w-xs">
-              <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-              <input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Cari paket..."
-                className="w-full pl-8 pr-3 py-2 text-xs md:text-sm rounded-lg border border-slate-200 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-slate-200 text-slate-600 placeholder:text-slate-400"
-              />
-            </div>
+              {/* ==================================================
+                  PAGE HEADER
+              ================================================== */}
 
-            {/* GRID PAKET */}
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-5">
-              {filteredPaket.map((paket) => (
-                <PaketCard
-                  key={paket.id}
-                  paket={paket}
-                  onEdit={() => openEdit(paket)}
-                  onDelete={() => setConfirmDelete(paket)}
-                  onDuplicate={() => duplikatPaket(paket)}
-                  onToggleStatus={() => toggleStatus(paket.id)}
-                />
-              ))}
-              {filteredPaket.length === 0 && (
-                <div className="col-span-full text-center py-10 text-slate-400 text-sm border border-dashed border-slate-200 rounded-xl">
-                  Tidak ada paket yang cocok dengan pencarian.
+              <section className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white px-5 py-5 shadow-[0_1px_3px_rgba(15,23,42,0.04)] sm:px-6 lg:flex-row lg:items-center lg:justify-between">
+                <div className="flex min-w-0 items-center gap-3.5">
+                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm">
+                    <LayoutDashboard
+                      size={20}
+                      strokeWidth={2}
+                    />
+                  </div>
+
+                  <div className="min-w-0">
+                    <div className="flex flex-wrap items-center gap-2.5">
+                      <h1 className="text-xl font-semibold tracking-tight text-slate-800 sm:text-2xl">
+                        Dashboard
+                      </h1>
+
+                      <span className="rounded-md border border-blue-100 bg-blue-50 px-2.5 py-1 text-[10px] font-semibold text-blue-700">
+                        SUPER ADMIN
+                      </span>
+                    </div>
+
+                    <p className="mt-1 text-xs text-slate-400 sm:text-sm">
+                      Ringkasan performa dan aktivitas platform
+                      SmartSchool.
+                    </p>
+                  </div>
                 </div>
-              )}
-            </div>
 
-            {/* TABEL MATRIKS MODUL */}
-            <ModulMatrix paketList={paketList} />
+                <div className="flex items-center gap-2">
+                  <div className="hidden items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-slate-500 sm:flex">
+                    <Clock3 size={14} />
+                    <span>26 Agustus 2026</span>
+                  </div>
+
+                  <button
+                    onClick={() => window.location.reload()}
+                    className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-medium text-slate-600 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
+                  >
+                    <RefreshCw size={14} />
+                    Refresh
+                  </button>
+                </div>
+              </section>
+
+              {/* ==================================================
+                  STATISTICS
+              ================================================== */}
+
+              <section className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+                {statsData.map((stat) => {
+                  const Icon = stat.icon;
+                  const accent = getAccent(stat.accent);
+
+                  return (
+                    <div
+                      key={stat.id}
+                      className="group relative overflow-hidden rounded-xl border border-slate-200 bg-white p-4 shadow-[0_1px_3px_rgba(15,23,42,0.04)] transition duration-200 hover:-translate-y-0.5 hover:border-slate-300 hover:shadow-md sm:p-5"
+                    >
+                      <div className="flex items-start justify-between gap-2">
+                        <div
+                          className={`flex h-10 w-10 items-center justify-center rounded-lg ${accent.icon}`}
+                        >
+                          <Icon
+                            size={18}
+                            strokeWidth={2}
+                          />
+                        </div>
+
+                        <span
+                          className={`inline-flex items-center gap-0.5 rounded-md px-2 py-1 text-[10px] font-semibold ${
+                            stat.trend === "up"
+                              ? "bg-emerald-50 text-emerald-600"
+                              : "bg-rose-50 text-rose-600"
+                          }`}
+                        >
+                          {stat.trend === "up" ? (
+                            <ArrowUpRight size={12} />
+                          ) : (
+                            <ArrowDownRight size={12} />
+                          )}
+
+                          {stat.change}
+                        </span>
+                      </div>
+
+                      <div className="mt-4">
+                        <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
+                          {stat.label}
+                        </p>
+
+                        <div className="mt-1 flex flex-wrap items-end gap-2">
+                          <p className="text-2xl font-semibold tracking-tight text-slate-800">
+                            {stat.value}
+                          </p>
+
+                          <span className="mb-1 text-[10px] text-slate-400">
+                            {stat.description}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div
+                        className={`absolute bottom-0 left-0 h-[2px] w-0 ${accent.bar} transition-all duration-300 group-hover:w-full`}
+                      />
+                    </div>
+                  );
+                })}
+              </section>
+
+              {/* ==================================================
+                  OVERVIEW ROW
+              ================================================== */}
+
+              <section className="grid grid-cols-1 gap-4 xl:grid-cols-3">
+
+                {/* SCHOOL GROWTH */}
+
+                <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(15,23,42,0.04)] xl:col-span-2">
+                  <div className="flex items-start justify-between gap-4">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                        <TrendingUp size={17} />
+                      </div>
+
+                      <div>
+                        <h2 className="text-sm font-semibold text-slate-800">
+                          Pertumbuhan Sekolah
+                        </h2>
+
+                        <p className="mt-0.5 text-xs text-slate-400">
+                          Perkembangan jumlah sekolah sepanjang
+                          tahun 2026
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() =>
+                        router.push("/super-admin/sekolah")
+                      }
+                      className="flex items-center gap-1 text-xs font-medium text-blue-600 transition hover:text-blue-700"
+                    >
+                      Detail
+                      <ChevronRight size={13} />
+                    </button>
+                  </div>
+
+                  <div className="mt-7">
+                    <div className="relative h-52">
+                      <div className="absolute inset-0 flex flex-col justify-between">
+                        {[0, 1, 2, 3, 4].map((item) => (
+                          <div
+                            key={item}
+                            className="border-t border-dashed border-slate-100"
+                          />
+                        ))}
+                      </div>
+
+                      <div className="relative flex h-full items-end gap-2 sm:gap-4">
+                        {schoolGrowthData.map((item, index) => {
+                          const height =
+                            (item.value / maxSchool) * 100;
+
+                          const isLast =
+                            index ===
+                            schoolGrowthData.length - 1;
+
+                          return (
+                            <div
+                              key={item.month}
+                              className="group flex h-full min-w-0 flex-1 flex-col items-center justify-end"
+                            >
+                              <div className="relative flex h-full w-full max-w-[44px] items-end justify-center">
+                                <div
+                                  className={`w-full rounded-t-md transition-all duration-500 ${
+                                    isLast
+                                      ? "bg-blue-600"
+                                      : "bg-blue-100 group-hover:bg-blue-300"
+                                  }`}
+                                  style={{
+                                    height: `${height}%`,
+                                    minHeight: "5px",
+                                  }}
+                                />
+
+                                <div className="pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-800 px-2 py-1 text-[9px] font-medium text-white opacity-0 shadow-md transition group-hover:opacity-100">
+                                  {item.value} sekolah
+                                </div>
+                              </div>
+
+                              <span
+                                className={`mt-2 text-[9px] font-medium sm:text-[10px] ${
+                                  isLast
+                                    ? "font-semibold text-blue-600"
+                                    : "text-slate-400"
+                                }`}
+                              >
+                                {item.month}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    <div className="mt-3 flex items-center justify-between border-t border-slate-100 pt-3">
+                      <div className="flex items-center gap-2">
+                        <span className="h-2 w-2 rounded-full bg-blue-600" />
+                        <span className="text-[10px] text-slate-400">
+                          Jumlah sekolah
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-1 text-[10px] font-medium text-emerald-600">
+                        <ArrowUpRight size={11} />
+                        18,4% pertumbuhan
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* SUBSCRIPTION */}
+
+                <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(15,23,42,0.04)]">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                        <Package size={17} />
+                      </div>
+
+                      <div>
+                        <h2 className="text-sm font-semibold text-slate-800">
+                          Langganan
+                        </h2>
+
+                        <p className="mt-0.5 text-xs text-slate-400">
+                          Status subscription
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() =>
+                        router.push(
+                          "/super-admin/langgananSekolah"
+                        )
+                      }
+                      className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-50 hover:text-slate-600"
+                    >
+                      <MoreHorizontal size={17} />
+                    </button>
+                  </div>
+
+                  <div className="mt-6">
+                    <div className="flex items-end justify-between">
+                      <div>
+                        <p className="text-[11px] uppercase tracking-wide text-slate-400">
+                          Total subscription
+                        </p>
+
+                        <p className="mt-1 text-3xl font-semibold tracking-tight text-slate-800">
+                          128
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-1 text-xs font-medium text-emerald-600">
+                        <ArrowUpRight size={13} />
+                        8,2%
+                      </div>
+                    </div>
+
+                    <div className="mt-5 h-2 overflow-hidden rounded-full bg-slate-100">
+                      <div
+                        className="h-full rounded-full bg-blue-600"
+                        style={{ width: "82%" }}
+                      />
+                    </div>
+
+                    <p className="mt-2 text-[10px] text-slate-400">
+                      82% sekolah memiliki langganan aktif
+                    </p>
+                  </div>
+
+                  <div className="mt-6 divide-y divide-slate-100">
+                    {[
+                      {
+                        label: "Aktif",
+                        value: "105",
+                        color: "bg-blue-600",
+                      },
+                      {
+                        label: "Trial",
+                        value: "18",
+                        color: "bg-slate-400",
+                      },
+                      {
+                        label: "Expired",
+                        value: "5",
+                        color: "bg-rose-400",
+                      },
+                    ].map((item) => (
+                      <div
+                        key={item.label}
+                        className="flex items-center justify-between py-3"
+                      >
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`h-2 w-2 rounded-full ${item.color}`}
+                          />
+
+                          <span className="text-xs text-slate-500">
+                            {item.label}
+                          </span>
+                        </div>
+
+                        <span className="text-sm font-semibold text-slate-700">
+                          {item.value}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <button
+                    onClick={() =>
+                      router.push(
+                        "/super-admin/langgananSekolah"
+                      )
+                    }
+                    className="mt-3 flex w-full items-center justify-center gap-1 rounded-lg border border-slate-200 py-2.5 text-xs font-medium text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600"
+                  >
+                    Kelola Langganan
+                    <ChevronRight size={13} />
+                  </button>
+                </div>
+              </section>
+
+              {/* ==================================================
+                  REVENUE + SYSTEM
+              ================================================== */}
+
+              <section className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+
+                {/* REVENUE */}
+
+                <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(15,23,42,0.04)] lg:col-span-2">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
+                        <DollarSign size={17} />
+                      </div>
+
+                      <div>
+                        <h2 className="text-sm font-semibold text-slate-800">
+                          Pendapatan Langganan
+                        </h2>
+
+                        <p className="mt-0.5 text-xs text-slate-400">
+                          Performa pendapatan platform
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="text-right">
+                      <p className="text-[10px] uppercase tracking-wide text-slate-400">
+                        Bulan ini
+                      </p>
+
+                      <p className="mt-0.5 text-lg font-semibold text-slate-800">
+                        Rp 12,5 Jt
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-7 flex items-end gap-2 sm:gap-4">
+                    {revenueData.map((item, index) => {
+                      const height =
+                        (item.value / maxRevenue) * 100;
+
+                      const isLast =
+                        index === revenueData.length - 1;
+
+                      return (
+                        <div
+                          key={item.month}
+                          className="group flex min-w-0 flex-1 flex-col items-center"
+                        >
+                          <div className="relative flex h-36 w-full items-end justify-center">
+                            <div
+                              className={`w-full max-w-[42px] rounded-t-md transition-all duration-300 ${
+                                isLast
+                                  ? "bg-emerald-500"
+                                  : "bg-emerald-100 group-hover:bg-emerald-300"
+                              }`}
+                              style={{
+                                height: `${height}%`,
+                                minHeight: "5px",
+                              }}
+                            />
+
+                            <div className="pointer-events-none absolute -top-7 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-md bg-slate-800 px-2 py-1 text-[9px] text-white opacity-0 transition group-hover:opacity-100">
+                              Rp {item.value / 10} Jt
+                            </div>
+                          </div>
+
+                          <span
+                            className={`mt-2 text-[9px] font-medium sm:text-[10px] ${
+                              isLast
+                                ? "text-emerald-600"
+                                : "text-slate-400"
+                            }`}
+                          >
+                            {item.month}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+
+                  <div className="mt-5 flex flex-wrap items-center gap-4 border-t border-slate-100 pt-4">
+                    <div className="flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                      <span className="text-[10px] text-slate-400">
+                        Pendapatan
+                      </span>
+                    </div>
+
+                    <span className="text-[10px] text-slate-300">
+                      |
+                    </span>
+
+                    <span className="flex items-center gap-1 text-[10px] font-medium text-emerald-600">
+                      <ArrowUpRight size={11} />
+                      14,8% dibanding bulan lalu
+                    </span>
+                  </div>
+                </div>
+
+                {/* SYSTEM STATUS */}
+
+                <div className="overflow-hidden rounded-xl border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(15,23,42,0.04)]">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                      <ShieldCheck size={18} />
+                    </div>
+
+                    <div>
+                      <h2 className="text-sm font-semibold text-slate-800">
+                        Status Sistem
+                      </h2>
+
+                      <p className="mt-0.5 text-[10px] text-slate-400">
+                        Monitoring platform
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="mt-6 space-y-3">
+                    <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-slate-500">
+                          Server
+                        </span>
+
+                        <span className="flex items-center gap-1.5 text-[10px] font-medium text-emerald-600">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                          Online
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-slate-500">
+                          Database
+                        </span>
+
+                        <span className="flex items-center gap-1.5 text-[10px] font-medium text-emerald-600">
+                          <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                          Normal
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-slate-500">
+                          Backup
+                        </span>
+
+                        <span className="text-[10px] font-medium text-slate-600">
+                          08:00 WIB
+                        </span>
+                      </div>
+                    </div>
+
+                    <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                      <div className="flex items-center justify-between">
+                        <span className="text-xs text-slate-500">
+                          Versi
+                        </span>
+
+                        <span className="text-[10px] font-medium text-slate-600">
+                          v2.0.4
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button
+                    onClick={() =>
+                      router.push("/super-admin/pengaturan")
+                    }
+                    className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white py-2.5 text-xs font-medium text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600"
+                  >
+                    <Settings size={14} />
+                    Pengaturan Sistem
+                  </button>
+                </div>
+              </section>
+
+              {/* ==================================================
+                  ACTIVITIES + TASKS
+              ================================================== */}
+
+              <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+
+                {/* ACTIVITY */}
+
+                <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(15,23,42,0.04)]">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                        <Activity size={17} />
+                      </div>
+
+                      <div>
+                        <h2 className="text-sm font-semibold text-slate-800">
+                          Aktivitas Terbaru
+                        </h2>
+
+                        <p className="mt-0.5 text-xs text-slate-400">
+                          Aktivitas terbaru di platform
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() =>
+                        router.push("/super-admin/profil")
+                      }
+                      className="text-xs font-medium text-blue-600 hover:text-blue-700"
+                    >
+                      Lihat Semua
+                    </button>
+                  </div>
+
+                  <div className="mt-5">
+                    {recentActivities
+                      .slice(0, 5)
+                      .map((activity, index) => {
+                        const Icon = getActivityIcon(
+                          activity.type
+                        );
+
+                        const colorClass =
+                          getActivityColor(activity.type);
+
+                        return (
+                          <div
+                            key={activity.id}
+                            className="relative flex gap-3 pb-5 last:pb-0"
+                          >
+                            {index !==
+                              recentActivities.length - 1 && (
+                              <div className="absolute left-[15px] top-9 h-[calc(100%-18px)] w-px bg-slate-100" />
+                            )}
+
+                            <div
+                              className={`relative z-10 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${colorClass}`}
+                            >
+                              <Icon size={14} />
+                            </div>
+
+                            <div className="min-w-0 flex-1">
+                              <div className="flex flex-wrap items-center gap-x-1.5">
+                                <span className="text-xs font-semibold text-slate-700">
+                                  {activity.user}
+                                </span>
+
+                                <span className="text-xs text-slate-500">
+                                  {activity.action}
+                                </span>
+                              </div>
+
+                              <p className="mt-0.5 truncate text-xs font-medium text-slate-700">
+                                {activity.target}
+                              </p>
+
+                              <p className="mt-1 text-[10px] text-slate-400">
+                                {activity.id === 1
+                                  ? "10 menit lalu"
+                                  : activity.id === 2
+                                  ? "1 jam lalu"
+                                  : activity.id === 3
+                                  ? "2 jam lalu"
+                                  : activity.id === 4
+                                  ? "3 jam lalu"
+                                  : "4 jam lalu"}
+                              </p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                  </div>
+                </div>
+
+                {/* RIGHT */}
+
+                <div className="space-y-4">
+
+                  {/* TASK */}
+
+                  <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(15,23,42,0.04)]">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                          <Calendar size={17} />
+                        </div>
+
+                        <div>
+                          <h2 className="text-sm font-semibold text-slate-800">
+                            Tugas Mendatang
+                          </h2>
+
+                          <p className="mt-0.5 text-xs text-slate-400">
+                            Hal yang perlu diperhatikan
+                          </p>
+                        </div>
+                      </div>
+
+                      <span className="text-[10px] text-slate-400">
+                        {upcomingTasks.length} tugas
+                      </span>
+                    </div>
+
+                    <div className="mt-4 space-y-2">
+                      {upcomingTasks.map((task) => {
+                        const priority = getPriority(
+                          task.priority
+                        );
+
+                        const Icon = task.icon;
+
+                        return (
+                          <div
+                            key={task.id}
+                            className="flex items-center gap-3 rounded-lg border border-transparent p-2.5 transition hover:border-slate-100 hover:bg-slate-50"
+                          >
+                            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-50 text-slate-500">
+                              <Icon size={14} />
+                            </div>
+
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-xs font-medium text-slate-700">
+                                {task.title}
+                              </p>
+
+                              <p className="mt-0.5 truncate text-[10px] text-slate-400">
+                                {task.description}
+                              </p>
+
+                              <p className="mt-1 flex items-center gap-1 text-[9px] text-slate-400">
+                                <Clock3 size={10} />
+                                {task.due}
+                              </p>
+                            </div>
+
+                            <span
+                              className={`shrink-0 rounded-md border px-2 py-1 text-[9px] font-medium ${priority.className}`}
+                            >
+                              {priority.label}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* NOTIFICATION */}
+
+                  <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(15,23,42,0.04)]">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                          <Bell size={17} />
+                        </div>
+
+                        <div>
+                          <h2 className="text-sm font-semibold text-slate-800">
+                            Notifikasi
+                          </h2>
+
+                          <p className="mt-0.5 text-xs text-slate-400">
+                            Informasi terbaru
+                          </p>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() =>
+                          router.push(
+                            "/super-admin/notifikasi"
+                          )
+                        }
+                        className="text-xs font-medium text-blue-600 hover:text-blue-700"
+                      >
+                        Lihat Semua
+                      </button>
+                    </div>
+
+                    <div className="mt-4 space-y-1">
+                      {recentNotifications.map((notif) => (
+                        <div
+                          key={notif.id}
+                          className={`rounded-lg p-2.5 transition hover:bg-slate-50 ${
+                            !notif.read
+                              ? "bg-blue-50/40"
+                              : ""
+                          }`}
+                        >
+                          <div className="flex items-start gap-3">
+                            <div
+                              className={`mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-md ${
+                                notif.read
+                                  ? "bg-slate-50 text-slate-400"
+                                  : "bg-blue-50 text-blue-600"
+                              }`}
+                            >
+                              <Bell size={13} />
+                            </div>
+
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-center gap-2">
+                                <p
+                                  className={`truncate text-xs ${
+                                    notif.read
+                                      ? "font-medium text-slate-600"
+                                      : "font-semibold text-slate-700"
+                                  }`}
+                                >
+                                  {notif.title}
+                                </p>
+
+                                {!notif.read && (
+                                  <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-blue-600" />
+                                )}
+                              </div>
+
+                              <p className="mt-0.5 truncate text-[10px] text-slate-400">
+                                {notif.desc}
+                              </p>
+
+                              <p className="mt-1 text-[9px] text-slate-400">
+                                {notif.time}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </section>
+
+              {/* ==================================================
+                  QUICK ACTION
+              ================================================== */}
+
+              <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-[0_1px_3px_rgba(15,23,42,0.04)]">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                      <Zap size={17} />
+                    </div>
+
+                    <div>
+                      <h2 className="text-sm font-semibold text-slate-800">
+                        Aksi Cepat
+                      </h2>
+
+                      <p className="mt-0.5 text-xs text-slate-400">
+                        Akses fitur yang sering digunakan
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-5 grid grid-cols-2 gap-2.5 sm:grid-cols-3 lg:grid-cols-6">
+                  {quickActions.map((action) => {
+                    const Icon = action.icon;
+
+                    return (
+                      <button
+                        key={action.label}
+                        onClick={() =>
+                          router.push(action.path)
+                        }
+                        className="group flex min-h-[84px] items-center gap-3 rounded-lg border border-slate-200 bg-slate-50/50 px-3 py-3 text-left transition duration-200 hover:border-blue-200 hover:bg-blue-50"
+                      >
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-slate-500 shadow-sm ring-1 ring-slate-100 transition group-hover:bg-blue-600 group-hover:text-white">
+                          <Icon size={16} />
+                        </div>
+
+                        <div className="min-w-0">
+                          <p className="truncate text-[11px] font-semibold text-slate-700 group-hover:text-blue-700">
+                            {action.label}
+                          </p>
+
+                          <p className="mt-0.5 truncate text-[9px] text-slate-400">
+                            {action.description}
+                          </p>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </section>
+
+              {/* ==================================================
+                  FOOTER
+              ================================================== */}
+
+              <footer className="flex flex-col items-center justify-between gap-2 border-t border-slate-200/70 py-4 text-center sm:flex-row sm:text-left">
+                <p className="text-[10px] text-slate-400">
+                  © 2026 SmartSchool · Super Admin Dashboard
+                </p>
+
+                <div className="flex items-center gap-1.5 text-[10px] text-slate-400">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                  Semua sistem berjalan normal
+                </div>
+              </footer>
+
+            </div>
           </div>
         </main>
-      </div>
-
-      {modalOpen && (
-        <PaketModal
-          paket={editingPaket}
-          onClose={() => setModalOpen(false)}
-          onSave={simpanPaket}
-        />
-      )}
-
-      {confirmDelete && (
-        <ConfirmDeleteModal
-          paket={confirmDelete}
-          onCancel={() => setConfirmDelete(null)}
-          onConfirm={() => hapusPaket(confirmDelete.id)}
-        />
-      )}
-    </div>
-  );
-}
-
-// ================== STAT CARD ==================
-
-function StatCard({ icon: Icon, label, value, color }) {
-  const colorMap = {
-    blue: "bg-blue-50 text-blue-600",
-    emerald: "bg-emerald-50 text-emerald-600",
-    purple: "bg-purple-50 text-purple-600",
-    orange: "bg-orange-50 text-orange-600",
-  };
-  return (
-    <div className="group bg-white rounded-xl border border-slate-200 p-3 md:p-4 lg:p-5 shadow-md hover:shadow-xl hover:-translate-y-0.5 transition-all duration-300">
-      <div className="flex items-center gap-3 md:gap-4">
-        <div className={`w-9 h-9 md:w-10 md:h-11 rounded-xl ${colorMap[color]} flex items-center justify-center shadow-sm group-hover:shadow transition-all`}>
-          <Icon size={16} className="md:size-[18px] lg:size-[20px]" />
-        </div>
-        <div>
-          <p className="text-[10px] md:text-xs font-medium text-slate-400 uppercase tracking-wider">{label}</p>
-          <p className="text-base md:text-xl lg:text-2xl font-semibold text-slate-800">{value}</p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ================== KARTU PAKET ==================
-
-function PaketCard({ paket, onEdit, onDelete, onDuplicate, onToggleStatus }) {
-  const [menuOpen, setMenuOpen] = useState(false);
-  const warna = WARNA_MAP[paket.warna] || WARNA_MAP.slate;
-  const Icon = paket.icon || Package;
-
-  return (
-    <div
-      className={`relative bg-white rounded-xl border p-4 md:p-5 shadow-md hover:shadow-xl transition-all duration-300 ${
-        paket.populer ? `${warna.border} ring-2 ${warna.ring}` : "border-slate-200"
-      }`}
-    >
-      {paket.populer && (
-        <span className="absolute -top-2.5 left-4 px-2 py-0.5 rounded-full text-[9px] md:text-[10px] font-semibold text-white bg-blue-600 shadow-sm">
-          Paling Populer
-        </span>
-      )}
-
-      <div className="flex items-start justify-between mb-3">
-        <div className={`w-9 h-9 rounded-xl ${warna.bg} ${warna.text} flex items-center justify-center shadow-sm`}>
-          <Icon size={18} />
-        </div>
-        <div className="relative">
-          <button
-            onClick={() => setMenuOpen((v) => !v)}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-colors"
-          >
-            <MoreHorizontal size={16} />
-          </button>
-          {menuOpen && (
-            <div
-              onMouseLeave={() => setMenuOpen(false)}
-              className="absolute right-0 mt-1 w-40 bg-white rounded-lg border border-slate-200 shadow-lg py-1 z-10"
-            >
-              <button onClick={() => { onEdit(); setMenuOpen(false); }} className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50">
-                <Pencil size={12} /> Edit
-              </button>
-              <button onClick={() => { onDuplicate(); setMenuOpen(false); }} className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50">
-                <Copy size={12} /> Duplikat
-              </button>
-              <button onClick={() => { onToggleStatus(); setMenuOpen(false); }} className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-slate-600 hover:bg-slate-50">
-                <ShieldCheck size={12} /> {paket.status === "aktif" ? "Nonaktifkan" : "Aktifkan"}
-              </button>
-              <button onClick={() => { onDelete(); setMenuOpen(false); }} className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-rose-500 hover:bg-rose-50">
-                <Trash2 size={12} /> Hapus
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-
-      <h3 className="text-sm md:text-base font-semibold text-slate-800">{paket.nama}</h3>
-      <p className="text-[11px] md:text-xs text-slate-400 mt-1 min-h-[2.2em]">{paket.deskripsi}</p>
-
-      <div className="mt-3 flex items-baseline gap-1">
-        <span className="text-lg md:text-xl font-semibold text-slate-800">{formatRupiah(paket.harga)}</span>
-        {paket.harga > 0 && <span className="text-[10px] md:text-xs text-slate-400">/ {paket.siklus}</span>}
-      </div>
-
-      <div className="mt-3 flex items-center gap-2">
-        <span
-          className={`px-2 py-0.5 rounded-full text-[9px] md:text-[10px] font-medium border ${
-            paket.status === "aktif" ? "bg-emerald-50 text-emerald-600 border-emerald-200" : "bg-slate-50 text-slate-500 border-slate-200"
-          }`}
-        >
-          {paket.status === "aktif" ? "Aktif" : "Nonaktif"}
-        </span>
-        <span className="flex items-center gap-1 text-[10px] md:text-xs text-slate-400">
-          <Users size={11} /> {paket.langganan} sekolah
-        </span>
-      </div>
-
-      <div className="mt-4 pt-3 border-t border-slate-100 space-y-1.5">
-        <p className="text-[10px] md:text-xs font-medium text-slate-400 uppercase tracking-wider mb-1">
-          {paket.modul.length} Modul termasuk
-        </p>
-        {paket.modul.slice(0, 4).map((modId) => {
-          const mod = MODUL_LIST.find((m) => m.id === modId);
-          if (!mod) return null;
-          return (
-            <div key={modId} className="flex items-center gap-1.5 text-[11px] md:text-xs text-slate-600">
-              <Check size={12} className="text-emerald-500 flex-shrink-0" />
-              {mod.nama}
-            </div>
-          );
-        })}
-        {paket.modul.length > 4 && (
-          <p className="text-[10px] md:text-xs text-slate-400 pl-[18px]">+{paket.modul.length - 4} modul lainnya</p>
-        )}
-      </div>
-
-      <button
-        onClick={onEdit}
-        className="mt-4 w-full text-center py-2 rounded-lg text-xs md:text-sm font-medium text-slate-600 border border-slate-200 hover:bg-slate-50 hover:text-slate-800 transition-colors"
-      >
-        Kelola Paket
-      </button>
-    </div>
-  );
-}
-
-// ================== MATRIKS MODUL PER PAKET ==================
-
-function ModulMatrix({ paketList }) {
-  return (
-    <div className="bg-white rounded-xl border border-slate-200 p-4 md:p-5 lg:p-6 shadow-md hover:shadow-xl transition-shadow duration-300">
-      <div className="flex items-center gap-2 md:gap-3 mb-4 md:mb-5">
-        <div className="p-1.5 md:p-2 rounded-lg bg-slate-50 border border-slate-200/60">
-          <Layers size={16} className="md:size-[18px] text-slate-500" />
-        </div>
-        <div>
-          <h3 className="text-sm md:text-base font-semibold text-slate-700">Matriks Modul per Paket</h3>
-          <p className="text-[10px] md:text-xs text-slate-400 mt-0.5">Perbandingan modul yang tersedia di setiap paket</p>
-        </div>
-      </div>
-      <div className="overflow-x-auto">
-        <table className="w-full text-xs md:text-sm min-w-[600px]">
-          <thead>
-            <tr className="text-left text-[10px] md:text-xs text-slate-400 border-b border-slate-200/60">
-              <th className="pb-2 font-medium sticky left-0 bg-white">Modul</th>
-              {paketList.map((p) => (
-                <th key={p.id} className="pb-2 font-medium text-center px-2">{p.nama}</th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {MODUL_LIST.map((mod) => (
-              <tr key={mod.id} className="border-b border-slate-100/80 last:border-0">
-                <td className="py-2 md:py-2.5 sticky left-0 bg-white">
-                  <div className="flex items-center gap-2">
-                    <mod.icon size={13} className="text-slate-400" />
-                    <span className="font-medium text-slate-700">{mod.nama}</span>
-                  </div>
-                </td>
-                {paketList.map((p) => (
-                  <td key={p.id} className="py-2 md:py-2.5 text-center">
-                    {p.modul.includes(mod.id) ? (
-                      <Check size={14} className="text-emerald-500 mx-auto" />
-                    ) : (
-                      <X size={14} className="text-slate-200 mx-auto" />
-                    )}
-                  </td>
-                ))}
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </div>
-  );
-}
-
-// ================== MODAL TAMBAH / EDIT PAKET ==================
-
-function PaketModal({ paket, onClose, onSave }) {
-  const [nama, setNama] = useState(paket?.nama || "");
-  const [deskripsi, setDeskripsi] = useState(paket?.deskripsi || "");
-  const [harga, setHarga] = useState(paket?.harga ?? 0);
-  const [siklus, setSiklus] = useState(paket?.siklus || "bulan");
-  const [status, setStatus] = useState(paket?.status || "aktif");
-  const [modulTerpilih, setModulTerpilih] = useState(paket?.modul || []);
-
-  function toggleModul(id) {
-    setModulTerpilih((list) => (list.includes(id) ? list.filter((m) => m !== id) : [...list, id]));
-  }
-
-  function handleSubmit(e) {
-    e.preventDefault();
-    if (!nama.trim()) return;
-    onSave({ nama, deskripsi, harga: Number(harga), siklus, status, modul: modulTerpilih });
-  }
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 sticky top-0 bg-white">
-          <h3 className="text-sm md:text-base font-semibold text-slate-800">
-            {paket ? "Edit Paket" : "Tambah Paket Baru"}
-          </h3>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 p-1 rounded-lg hover:bg-slate-50">
-            <X size={18} />
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="p-5 space-y-4">
-          <div>
-            <label className="text-xs font-medium text-slate-500">Nama Paket</label>
-            <input
-              value={nama}
-              onChange={(e) => setNama(e.target.value)}
-              required
-              placeholder="Contoh: Professional"
-              className="mt-1 w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-200 text-slate-700"
-            />
-          </div>
-
-          <div>
-            <label className="text-xs font-medium text-slate-500">Deskripsi</label>
-            <textarea
-              value={deskripsi}
-              onChange={(e) => setDeskripsi(e.target.value)}
-              rows={2}
-              placeholder="Deskripsi singkat paket ini"
-              className="mt-1 w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-200 text-slate-700 resize-none"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="text-xs font-medium text-slate-500">Harga (Rp)</label>
-              <input
-                type="number"
-                min="0"
-                value={harga}
-                onChange={(e) => setHarga(e.target.value)}
-                className="mt-1 w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-200 text-slate-700"
-              />
-            </div>
-            <div>
-              <label className="text-xs font-medium text-slate-500">Siklus</label>
-              <select
-                value={siklus}
-                onChange={(e) => setSiklus(e.target.value)}
-                className="mt-1 w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-200 text-slate-700 bg-white"
-              >
-                <option value="bulan">Per Bulan</option>
-                <option value="tahun">Per Tahun</option>
-                <option value="14 hari">14 Hari (Trial)</option>
-              </select>
-            </div>
-          </div>
-
-          <div>
-            <label className="text-xs font-medium text-slate-500">Status</label>
-            <div className="mt-1 flex gap-2">
-              <button
-                type="button"
-                onClick={() => setStatus("aktif")}
-                className={`flex-1 py-2 rounded-lg text-xs font-medium border transition-colors ${
-                  status === "aktif" ? "bg-emerald-50 text-emerald-600 border-emerald-200" : "bg-white text-slate-500 border-slate-200 hover:bg-slate-50"
-                }`}
-              >
-                Aktif
-              </button>
-              <button
-                type="button"
-                onClick={() => setStatus("nonaktif")}
-                className={`flex-1 py-2 rounded-lg text-xs font-medium border transition-colors ${
-                  status === "nonaktif" ? "bg-slate-100 text-slate-600 border-slate-300" : "bg-white text-slate-500 border-slate-200 hover:bg-slate-50"
-                }`}
-              >
-                Nonaktif
-              </button>
-            </div>
-          </div>
-
-          <div>
-            <label className="text-xs font-medium text-slate-500">Modul Termasuk</label>
-            <div className="mt-1.5 grid grid-cols-2 gap-2 max-h-52 overflow-y-auto pr-1">
-              {MODUL_LIST.map((mod) => {
-                const checked = modulTerpilih.includes(mod.id);
-                return (
-                  <button
-                    type="button"
-                    key={mod.id}
-                    onClick={() => toggleModul(mod.id)}
-                    className={`flex items-center gap-2 px-2.5 py-2 rounded-lg border text-left transition-colors ${
-                      checked ? "bg-slate-50 border-slate-300" : "bg-white border-slate-200 hover:bg-slate-50"
-                    }`}
-                  >
-                    <span
-                      className={`w-4 h-4 rounded flex items-center justify-center flex-shrink-0 border ${
-                        checked ? "bg-slate-800 border-slate-800" : "border-slate-300"
-                      }`}
-                    >
-                      {checked && <Check size={11} className="text-white" />}
-                    </span>
-                    <mod.icon size={13} className="text-slate-400 flex-shrink-0" />
-                    <span className="text-xs text-slate-600 truncate">{mod.nama}</span>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="flex items-center gap-2 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="flex-1 py-2 rounded-lg text-xs md:text-sm font-medium text-slate-600 border border-slate-200 hover:bg-slate-50 transition-colors"
-            >
-              Batal
-            </button>
-            <button
-              type="submit"
-              className="flex-1 py-2 rounded-lg text-xs md:text-sm font-medium text-white bg-slate-800 hover:bg-slate-900 shadow-sm hover:shadow-md transition-all"
-            >
-              {paket ? "Simpan Perubahan" : "Tambah Paket"}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-}
-
-// ================== MODAL KONFIRMASI HAPUS ==================
-
-function ConfirmDeleteModal({ paket, onCancel, onConfirm }) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-5">
-        <div className="w-10 h-10 rounded-full bg-rose-50 text-rose-500 flex items-center justify-center mb-3">
-          <Trash2 size={18} />
-        </div>
-        <h3 className="text-sm md:text-base font-semibold text-slate-800">Hapus paket &quot;{paket.nama}&quot;?</h3>
-        <p className="text-xs md:text-sm text-slate-500 mt-1.5">
-          Tindakan ini tidak dapat dibatalkan. {paket.langganan > 0 && `Paket ini masih memiliki ${paket.langganan} sekolah berlangganan.`}
-        </p>
-        <div className="flex items-center gap-2 mt-4">
-          <button
-            onClick={onCancel}
-            className="flex-1 py-2 rounded-lg text-xs md:text-sm font-medium text-slate-600 border border-slate-200 hover:bg-slate-50 transition-colors"
-          >
-            Batal
-          </button>
-          <button
-            onClick={onConfirm}
-            className="flex-1 py-2 rounded-lg text-xs md:text-sm font-medium text-white bg-rose-500 hover:bg-rose-600 shadow-sm hover:shadow-md transition-all"
-          >
-            Ya, Hapus
-          </button>
-        </div>
       </div>
     </div>
   );

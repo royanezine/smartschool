@@ -48,7 +48,7 @@ export default function Problems() {
   ];
 
   return (
-    <section className="py-24 bg-[#fafbff]">
+    <section className="py-24 bg-blue-50">
       <div className="max-w-7xl mx-auto px-6">
 
         {/* Badge */}

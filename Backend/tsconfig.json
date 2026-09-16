@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     /* File Layout */
-    "rootDir": "./src",
+    "rootDir": ".",
     "outDir": "./dist",
 
     /* Environment Settings */
@@ -22,5 +22,5 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true
   },
-  "include": ["src/**/*"]
+  "include": ["src/**/*", "prisma/**/*", "prisma.config.ts"]
 }

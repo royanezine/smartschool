@@ -18,34 +18,28 @@ export default function Home() {
   return (
     <main>
       <Navbar />
-
       <Hero />
-
       <Vision />
-
       <Problems />
-
       <Solutions />
-
-      <Features />
-
+      <section id="fitur">
+        <Features />
+      </section>
       <Testimonial />
-
       <EducationLevel />
-
       <Implementation />
-
-      <FeaturedModule />
-
-      <Pricing />
-
+      <section id="demo">
+        <FeaturedModule />
+      </section>
+      <section id="pricing">
+        <Pricing />
+      </section>
       <FAQ />
-
       <CTA />
-
       <Newsletter />
-
-      <Footer />
+      <section id="footer">
+        <Footer />
+      </section>
     </main>
   );
 }
