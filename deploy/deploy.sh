@@ -4,16 +4,18 @@
 # Dianggap menjalankan dari dalam folder deploy/ di server.
 #
 # Persiapan folder di server:
-#   /var/www/smartschool/
+#   <lokasi>/smartschool/
 #     ├── Backend/        (berisi package.json, prisma/, src/, .env)
 #     ├── Frontend/       (berisi package.json, app/, .env)
 #     └── deploy/         (folder ini: deploy.sh)
 #
-# Jalankan:  cd /var/www/smartschool/deploy && sudo bash deploy.sh
+# Jalankan:  cd deploy && sudo bash deploy.sh
 # ============================================================
 set -euo pipefail
 
-APP_DIR="/var/www/smartschool"
+# Deteksi lokasi otomatis (bisa langsung dipakai di /var/www, /var/www/html, ~/apps, dst)
+APP_DIR="$(CDPATH= cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/.."
+APP_DIR="$(cd "$APP_DIR" && pwd)"
 BACKEND_DIR="$APP_DIR/Backend"
 FRONTEND_DIR="$APP_DIR/Frontend"
 

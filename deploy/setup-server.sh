@@ -8,7 +8,9 @@
 set -euo pipefail
 
 DOMAIN="smartschool.citrasolusi.id"
-APP_DIR="/var/www/smartschool"
+# Deteksi lokasi otomatis (bisa langsung dipakai di /var/www, /var/www/html, ~/apps, dst)
+APP_DIR="$(CDPATH= cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/.."
+APP_DIR="$(cd "$APP_DIR" && pwd)"
 
 echo "=============================================="
 echo "  SmartSchool Server Setup"
