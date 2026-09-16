@@ -28,6 +28,7 @@ echo ""
 echo ">>> [1/4] Build & deploy Backend..."
 cd "$BACKEND_DIR"
 npm ci
+npx prisma generate
 npm run build
 
 echo ">>> Jalankan migrasi database..."
@@ -37,6 +38,7 @@ else
   echo ">>> Belum ada folder migrations, pakai prisma db push..."
   npx prisma db push
 fi
+npx prisma generate
 npx prisma db seed
 
 echo ">>> Restart PM2 (backend)..."
