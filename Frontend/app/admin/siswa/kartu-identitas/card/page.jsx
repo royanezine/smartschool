@@ -1,6 +1,6 @@
-"use client";
+﻿"use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
@@ -435,7 +435,7 @@ function InfoItem({ icon, label, value }) {
    MAIN
 ========================================================= */
 
-export default function IDCardPage() {
+function IDCardPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -820,5 +820,12 @@ export default function IDCardPage() {
         }
       `}</style>
     </div>
+  );
+}
+export default function IDCardPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-50" />}>
+      <IDCardPageContent />
+    </Suspense>
   );
 }

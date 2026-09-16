@@ -1,6 +1,6 @@
-"use client";
+﻿"use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 
 import {
@@ -200,7 +200,7 @@ function statusClass(status) {
    PAGE
 ========================================================= */
 
-export default function TugasSiswaPage() {
+function TugasSiswaPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -620,7 +620,7 @@ export default function TugasSiswaPage() {
       {/* =====================================================
           CONTENT
           
-          flex-1 + min-w-0 → otomatis mengisi sisa lebar
+          flex-1 + min-w-0 â†’ otomatis mengisi sisa lebar
           setelah sidebar. Tidak perlu ml-[270px] lagi.
       ===================================================== */}
 
@@ -1273,5 +1273,12 @@ export default function TugasSiswaPage() {
         </main>
       </div>
     </div>
+  );
+}
+export default function TugasSiswaPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-50" />}>
+      <TugasSiswaPageContent />
+    </Suspense>
   );
 }

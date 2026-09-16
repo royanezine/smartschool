@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Suspense, useState, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -109,7 +109,7 @@ const ujianList = [
   },
 ];
 
-export default function UjianPage() {
+function UjianPageContent() {
   return (
     <Suspense fallback={null}>
       <UjianPageInner />
@@ -298,5 +298,12 @@ function UjianPageInner() {
         </main>
       </div>
     </div>
+  );
+}
+export default function UjianPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-50" />}>
+      <UjianPageContent />
+    </Suspense>
   );
 }

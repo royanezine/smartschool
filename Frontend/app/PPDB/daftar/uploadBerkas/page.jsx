@@ -1,6 +1,6 @@
-"use client";
+﻿"use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import {
@@ -100,7 +100,7 @@ function formatFileSize(size) {
    MAIN
 ========================================================= */
 
-export default function UploadBerkasPage() {
+function UploadBerkasPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -779,7 +779,7 @@ export default function UploadBerkasPage() {
                                     {formatFileSize(
                                       selected.size
                                     )}{" "}
-                                    •{" "}
+                                    â€¢{" "}
                                     {selected.type ===
                                     "application/pdf"
                                       ? "PDF"
@@ -874,7 +874,7 @@ export default function UploadBerkasPage() {
                             </span>
 
                             <p className="mt-3 text-[11px] text-slate-400">
-                              JPG, PNG, atau PDF • Maks. 2MB
+                              JPG, PNG, atau PDF â€¢ Maks. 2MB
                             </p>
 
                             <input
@@ -1022,5 +1022,12 @@ export default function UploadBerkasPage() {
 
       <PpdbFooter />
     </div>
+  );
+}
+export default function UploadBerkasPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-50" />}>
+      <UploadBerkasPageContent />
+    </Suspense>
   );
 }

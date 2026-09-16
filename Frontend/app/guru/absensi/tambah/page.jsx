@@ -1,6 +1,6 @@
-"use client";
+﻿"use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
@@ -23,7 +23,7 @@ import {
   absenDenganFace,
 } from "../../../../services/absensi.service";
 
-export default function TambahAbsensiPage() {
+function TambahAbsensiPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -517,5 +517,12 @@ export default function TambahAbsensiPage() {
         </main>
       </div>
     </div>
+  );
+}
+export default function TambahAbsensiPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-50" />}>
+      <TambahAbsensiPageContent />
+    </Suspense>
   );
 }

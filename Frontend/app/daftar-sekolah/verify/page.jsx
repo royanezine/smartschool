@@ -1,6 +1,6 @@
-"use client";
+﻿"use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import {
@@ -19,7 +19,7 @@ import {
 
 import { verifyTenant } from "../../../services/tenant.service";
 
-export default function VerifyTenantPage() {
+function VerifyTenantPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -675,12 +675,19 @@ export default function VerifyTenantPage() {
 
           <footer className="mt-10 border-t border-slate-200 pt-6 text-center">
             <p className="text-xs text-slate-400">
-              © {new Date().getFullYear()} SmartSchool.
+              Â© {new Date().getFullYear()} SmartSchool.
               School Management System.
             </p>
           </footer>
         </div>
       </section>
     </main>
+  );
+}
+export default function VerifyTenantPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-50" />}>
+      <VerifyTenantPageContent />
+    </Suspense>
   );
 }

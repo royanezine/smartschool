@@ -1,6 +1,6 @@
-"use client";
+﻿"use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import {
   useRouter,
   useSearchParams,
@@ -22,7 +22,7 @@ import PpdbFooter from "../../components/ppdb/PpdbFooter";
 
 import { daftarPpdb } from "../../../services/ppdb.service";
 
-export default function DaftarPage() {
+function DaftarPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -1084,5 +1084,12 @@ function InfoBox({
         </div>
       </div>
     </div>
+  );
+}
+export default function DaftarPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-50" />}>
+      <DaftarPageContent />
+    </Suspense>
   );
 }

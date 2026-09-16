@@ -1,6 +1,6 @@
-"use client";
+﻿"use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import {
@@ -14,7 +14,7 @@ import PpdbHeader from "../../../components/ppdb/PpdbHeader";
 import PpdbFooter from "../../../components/ppdb/PpdbFooter";
 import PpdbStepper from "../../../components/ppdb/PpdbStepper";
 
-export default function KirimPendaftaranPage() {
+function KirimPendaftaranPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -183,5 +183,12 @@ export default function KirimPendaftaranPage() {
 
       <PpdbFooter />
     </div>
+  );
+}
+export default function KirimPendaftaranPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-50" />}>
+      <KirimPendaftaranPageContent />
+    </Suspense>
   );
 }

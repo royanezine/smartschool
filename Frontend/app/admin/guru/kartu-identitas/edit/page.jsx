@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Suspense, useState, useMemo, useRef, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -29,11 +29,11 @@ import {
 /**
  * app/admin/guru/kartu-identitas/edit/page.jsx
  *
- * Halaman Edit Pegawai — dibuka dari tombol "Edit" di halaman Detail
+ * Halaman Edit Pegawai â€” dibuka dari tombol "Edit" di halaman Detail
  * (kartu-identitas/[id]/page.jsx), yang mengarah ke
  * /admin/guru/kartu-identitas/edit?id={id}.
  *
- * PENTING — ROUTE STATIS, BUKAN DYNAMIC SEGMENT:
+ * PENTING â€” ROUTE STATIS, BUKAN DYNAMIC SEGMENT:
  * Sama seperti halaman card, id pegawai dikirim lewat QUERY STRING
  * (?id=...), bukan lewat path, jadi dibaca pakai useSearchParams() dan
  * karena itu logic utama ada di EditContent yang dibungkus <Suspense>.
@@ -48,7 +48,7 @@ import {
  *   - Informasi kepegawaian: unit/bidang, golongan, tanggal masuk kerja
  *   - Kontak & alamat: telepon, email, alamat
  *
- * Data masih dummy (MOCK_PEGAWAI) — submit form di sini hanya simulasi
+ * Data masih dummy (MOCK_PEGAWAI) â€” submit form di sini hanya simulasi
  * (console.log + redirect balik ke detail) sampai nanti disambungkan ke
  * API sungguhan.
  */
@@ -74,7 +74,7 @@ const MOCK_PEGAWAI = [
     jenisKelamin: "Perempuan",
     agama: "Islam",
     statusNikah: "Menikah",
-    pendidikanTerakhir: "S1 Pendidikan Matematika — Universitas Siliwangi",
+    pendidikanTerakhir: "S1 Pendidikan Matematika â€” Universitas Siliwangi",
   },
   {
     id: 2,
@@ -96,7 +96,7 @@ const MOCK_PEGAWAI = [
     jenisKelamin: "Laki-laki",
     agama: "Islam",
     statusNikah: "Menikah",
-    pendidikanTerakhir: "S1 Ekonomi — Universitas Galuh",
+    pendidikanTerakhir: "S1 Ekonomi â€” Universitas Galuh",
   },
   {
     id: 3,
@@ -118,7 +118,7 @@ const MOCK_PEGAWAI = [
     jenisKelamin: "Perempuan",
     agama: "Islam",
     statusNikah: "Belum Menikah",
-    pendidikanTerakhir: "S1 Biologi — Universitas Siliwangi",
+    pendidikanTerakhir: "S1 Biologi â€” Universitas Siliwangi",
   },
   {
     id: 4,
@@ -140,7 +140,7 @@ const MOCK_PEGAWAI = [
     jenisKelamin: "Laki-laki",
     agama: "Islam",
     statusNikah: "Menikah",
-    pendidikanTerakhir: "S1 Pendidikan Bahasa Indonesia — Universitas Galuh",
+    pendidikanTerakhir: "S1 Pendidikan Bahasa Indonesia â€” Universitas Galuh",
   },
   {
     id: 5,
@@ -162,7 +162,7 @@ const MOCK_PEGAWAI = [
     jenisKelamin: "Perempuan",
     agama: "Islam",
     statusNikah: "Belum Menikah",
-    pendidikanTerakhir: "S1 Seni Rupa — Institut Seni Budaya Indonesia",
+    pendidikanTerakhir: "S1 Seni Rupa â€” Institut Seni Budaya Indonesia",
   },
   {
     id: 6,
@@ -184,7 +184,7 @@ const MOCK_PEGAWAI = [
     jenisKelamin: "Laki-laki",
     agama: "Islam",
     statusNikah: "Menikah",
-    pendidikanTerakhir: "S1 Pendidikan Jasmani — Universitas Galuh",
+    pendidikanTerakhir: "S1 Pendidikan Jasmani â€” Universitas Galuh",
   },
 ];
 
@@ -436,7 +436,7 @@ function EditContent() {
             <div>
               <h1 className="text-2xl font-bold text-slate-800">Edit Data Pegawai</h1>
               <p className="text-sm text-slate-500">
-                {pegawaiAsli.nama} • <span className="font-mono">{pegawaiAsli.nip}</span>
+                {pegawaiAsli.nama} â€¢ <span className="font-mono">{pegawaiAsli.nip}</span>
               </p>
             </div>
 
@@ -605,7 +605,7 @@ function EditContent() {
                     value={form.pendidikanTerakhir}
                     onChange={updateField("pendidikanTerakhir")}
                     className={inputClass}
-                    placeholder="Contoh: S1 Pendidikan Matematika — Universitas Siliwangi"
+                    placeholder="Contoh: S1 Pendidikan Matematika â€” Universitas Siliwangi"
                   />
                 </FieldWrapper>
               </div>
@@ -686,7 +686,7 @@ function EditContent() {
           </form>
         </main>
 
-        {/* ACTION BAR — sticky di bawah supaya selalu terlihat saat mengisi form panjang */}
+        {/* ACTION BAR â€” sticky di bawah supaya selalu terlihat saat mengisi form panjang */}
         <div className="border-t border-slate-200 bg-white/90 backdrop-blur px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-end gap-2.5">
           <button
             type="button"
@@ -710,9 +710,16 @@ function EditContent() {
   );
 }
 
-export default function EditPegawaiPage() {
+function EditPegawaiPageContent() {
   return (
     <Suspense fallback={null}>
+      <EditContent />
+    </Suspense>
+  );
+}
+export default function Edit() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-50" />}>
       <EditContent />
     </Suspense>
   );

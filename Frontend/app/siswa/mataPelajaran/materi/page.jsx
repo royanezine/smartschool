@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -393,7 +393,7 @@ function getMapelSlug(nama) {
    PAGE
 ========================================================= */
 
-export default function MateriPage() {
+function MateriPageContent() {
   return (
     <Suspense
       fallback={
@@ -945,7 +945,7 @@ function MateriPageInner() {
 
                     <p className="text-2xl font-bold text-white mt-1">
                       {loading
-                        ? "—"
+                        ? "â€”"
                         : totalMateri}
                     </p>
                   </div>
@@ -957,7 +957,7 @@ function MateriPageInner() {
 
                     <p className="text-2xl font-bold text-white mt-1">
                       {loading
-                        ? "—"
+                        ? "â€”"
                         : totalFile}
                     </p>
                   </div>
@@ -1002,7 +1002,7 @@ function MateriPageInner() {
 
                     <p className="text-xl font-bold text-slate-800 mt-1">
                       {loading
-                        ? "—"
+                        ? "â€”"
                         : totalMateri}
                     </p>
                   </div>
@@ -1022,7 +1022,7 @@ function MateriPageInner() {
 
                     <p className="text-xl font-bold text-slate-800 mt-1">
                       {loading
-                        ? "—"
+                        ? "â€”"
                         : totalFile}
                     </p>
                   </div>
@@ -1042,7 +1042,7 @@ function MateriPageInner() {
 
                     <p className="text-xl font-bold text-slate-800 mt-1">
                       {loading
-                        ? "—"
+                        ? "â€”"
                         : totalLink}
                     </p>
                   </div>
@@ -1062,7 +1062,7 @@ function MateriPageInner() {
 
                     <p className="text-xl font-bold text-slate-800 mt-1">
                       {loading
-                        ? "—"
+                        ? "â€”"
                         : totalMapel}
                     </p>
                   </div>
@@ -1308,10 +1308,10 @@ function MateriPageInner() {
                     {activeMapel !==
                       "semua" &&
                       selectedMapel
-                      ? ` · ${selectedMapel.nama}`
+                      ? ` Â· ${selectedMapel.nama}`
                       : ""}
                     {query
-                      ? " · hasil pencarian"
+                      ? " Â· hasil pencarian"
                       : ""}
                   </p>
                 )}
@@ -1509,7 +1509,7 @@ function MateriPageInner() {
                                 </span>
 
                                 <span className="text-slate-300">
-                                  •
+                                  â€¢
                                 </span>
 
                                 <span>
@@ -1521,7 +1521,7 @@ function MateriPageInner() {
                                 {item?.ukuran && (
                                   <>
                                     <span className="text-slate-300">
-                                      •
+                                      â€¢
                                     </span>
 
                                     <span>
@@ -1676,5 +1676,12 @@ function MateriPageInner() {
         </main>
       </div>
     </div>
+  );
+}
+export default function MateriPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-50" />}>
+      <MateriPageContent />
+    </Suspense>
   );
 }

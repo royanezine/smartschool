@@ -1,6 +1,6 @@
-"use client";
+﻿"use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import {
@@ -12,7 +12,7 @@ import {
   Loader2,
 } from "lucide-react";
 
-export default function VerifyRegisterPage() {
+function VerifyRegisterPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -473,5 +473,12 @@ export default function VerifyRegisterPage() {
         </div>
       </div>
     </main>
+  );
+}
+export default function VerifyRegisterPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-50" />}>
+      <VerifyRegisterPageContent />
+    </Suspense>
   );
 }

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Suspense, useState, useMemo, useRef, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -991,7 +991,7 @@ function EditContent() {
 
                   <p className="text-sm text-slate-500">
                     {siswaAsli.nama}{" "}
-                    •{" "}
+                    â€¢{" "}
                     <span className="font-mono">
                       {siswaAsli.nis}
                     </span>
@@ -1707,7 +1707,7 @@ function BriefcaseIcon(props) {
 |--------------------------------------------------------------------------
 */
 
-export default function EditSiswaPage() {
+function EditSiswaPageContent() {
 
   return (
     <Suspense fallback={null}>
@@ -1715,4 +1715,11 @@ export default function EditSiswaPage() {
     </Suspense>
   );
 
+}
+export default function Edit() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-50" />}>
+      <EditContent />
+    </Suspense>
+  );
 }

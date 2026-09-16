@@ -1,6 +1,6 @@
-"use client";
+﻿"use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { Suspense, useState, useMemo, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Header from "../../../components/Header";
 import Sidebar from "../../../components/Sidebar";
@@ -20,20 +20,20 @@ import {
 /**
  * app/admin/guru/kartu-identitas/page.jsx
  *
- * Halaman Kartu Identitas — daftar guru & staff dengan aksi untuk melihat
+ * Halaman Kartu Identitas â€” daftar guru & staff dengan aksi untuk melihat
  * detail profil masing-masing. Tombol "Tambah Pegawai" membuka halaman
  * tambah terpisah; pegawai baru yang disimpan di sana otomatis muncul di
  * sini setelah kembali.
  *
  * CATATAN ROUTE DETAIL & ID CARD:
- * Detail pegawai TIDAK LAGI modal — sekarang halaman sendiri di
+ * Detail pegawai TIDAK LAGI modal â€” sekarang halaman sendiri di
  * app/admin/guru/kartu-identitas/[id]/page.jsx (dynamic segment). Tombol
  * "Detail" di tabel mengarah ke /admin/guru/kartu-identitas/{id}.
  *
- * Preview kartu identitas JUGA TIDAK LAGI modal — sekarang halaman sendiri
+ * Preview kartu identitas JUGA TIDAK LAGI modal â€” sekarang halaman sendiri
  * di app/admin/guru/kartu-identitas/card/page.jsx (route STATIS, bukan
  * dynamic segment). Karena itu id pegawai dikirim lewat QUERY STRING,
- * bukan lewat path — tombol "ID Card" di tabel mengarah ke
+ * bukan lewat path â€” tombol "ID Card" di tabel mengarah ke
  * /admin/guru/kartu-identitas/card?id={id}, dan halaman card membaca id
  * itu pakai useSearchParams().
  *
@@ -198,7 +198,7 @@ function Avatar({ nama, size = "md" }) {
   );
 }
 
-export default function KartuIdentitasPage() {
+function KartuIdentitasPageContent() {
   const router = useRouter();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [search, setSearch] = useState("");
@@ -451,5 +451,12 @@ export default function KartuIdentitasPage() {
         </main>
       </div>
     </div>
+  );
+}
+export default function KartuIdentitasPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-50" />}>
+      <KartuIdentitasPageContent />
+    </Suspense>
   );
 }

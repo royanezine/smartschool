@@ -1,6 +1,6 @@
-"use client";
+﻿"use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
@@ -524,7 +524,7 @@ function InfoItem({ icon, label, value }) {
    MAIN PAGE
 ========================================================= */
 
-export default function GuruCardPage() {
+function GuruCardPageContent() {
 
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -1122,5 +1122,12 @@ export default function GuruCardPage() {
       `}</style>
 
     </div>
+  );
+}
+export default function GuruCardPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-50" />}>
+      <GuruCardPageContent />
+    </Suspense>
   );
 }

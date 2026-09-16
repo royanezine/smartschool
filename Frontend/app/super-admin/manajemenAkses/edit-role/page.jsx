@@ -1,6 +1,6 @@
-"use client";
+﻿"use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { Suspense, useState, useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import Sidebar from "../../../components/Sidebar";
@@ -157,7 +157,7 @@ function StatCard({
   );
 }
 
-export default function EditRolePage() {
+function EditRolePageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -1221,7 +1221,7 @@ export default function EditRolePage() {
                                           className="px-3 py-3.5 text-center"
                                         >
                                           <span className="text-xs text-slate-200">
-                                            —
+                                            â€”
                                           </span>
                                         </td>
                                       );
@@ -1549,12 +1549,19 @@ export default function EditRolePage() {
 
             <div className="border-t border-slate-200/70 pt-4 text-center">
               <p className="text-[11px] text-slate-400">
-                © 2026 SmartSchool • Manajemen Akses
+                Â© 2026 SmartSchool â€¢ Manajemen Akses
               </p>
             </div>
           </div>
         </main>
       </div>
     </div>
+  );
+}
+export default function EditRolePage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-slate-50" />}>
+      <EditRolePageContent />
+    </Suspense>
   );
 }
