@@ -323,3 +323,64 @@ export async function verifyTenant(
 
   return result;
 }
+
+/**
+ * ============================================================
+ * GET TENANT STATUS
+ * ============================================================
+ *
+ * GET /api/v1/tenant/status
+ *
+ * Opsi response:
+ * {
+ *   success: true,
+ *   data: { status: "waiting" | "active" | "failed" }
+ * }
+ */
+export interface GetTenantStatusResponse {
+  success: boolean;
+  message?: string;
+  data?: {
+    status?: string;
+  };
+}
+
+export async function getTenantStatus(): Promise<GetTenantStatusResponse> {
+  try {
+    const response = await fetch(
+      `${getApiUrl()}/api/v1/tenant/status`,
+      {
+        method: "GET",
+        headers: {
+          Accept: "application/json",
+        },
+      }
+    );
+
+    if (!response.ok) {
+      return {
+        success: false,
+        message: `Status HTTP ${response.status}`,
+        data: { status: "waiting" },
+      };
+    }
+
+    const result = await parseResponse(response);
+
+    return result as GetTenantStatusResponse;
+  } catch (error) {
+    console.error(
+      "Gagal mengecek status tenant:",
+      error
+    );
+
+    return {
+      success: false,
+      message:
+        error instanceof Error
+          ? error.message
+          : "Gagal mengecek status tenant.",
+      data: { status: "waiting" },
+    };
+  }
+}

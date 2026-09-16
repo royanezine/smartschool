@@ -14,11 +14,75 @@ import {
   Plus,
 } from "lucide-react";
 
-import Header from "../../../components/Header";
-import Sidebar from "../../../components/Sidebar";
+import Header from "../../../../components/Header";
+import Sidebar from "../../../../components/Sidebar";
 
-// Import data dummy untuk ditambahkan
-import { DUMMY_DATA } from "../page"; // atau definisikan ulang
+// Data dummy (sama dengan data di halaman utama)
+const DUMMY_DATA = [
+  {
+    id: 1,
+    tanggal: "2026-09-01",
+    deskripsi: "Pembayaran SPP Siswa",
+    kategori: "Pemasukan",
+    jumlah: 12500000,
+    metode: "Transfer",
+    status: "Lunas",
+  },
+  {
+    id: 2,
+    tanggal: "2026-09-02",
+    deskripsi: "Pembelian Alat Tulis",
+    kategori: "Pengeluaran",
+    jumlah: 2350000,
+    metode: "Tunai",
+    status: "Lunas",
+  },
+  {
+    id: 3,
+    tanggal: "2026-09-03",
+    deskripsi: "Gaji Guru Bulan Agustus",
+    kategori: "Pengeluaran",
+    jumlah: 35000000,
+    metode: "Transfer",
+    status: "Lunas",
+  },
+  {
+    id: 4,
+    tanggal: "2026-09-05",
+    deskripsi: "Donasi BOS",
+    kategori: "Pemasukan",
+    jumlah: 5000000,
+    metode: "Transfer",
+    status: "Pending",
+  },
+  {
+    id: 5,
+    tanggal: "2026-09-06",
+    deskripsi: "Biaya Listrik",
+    kategori: "Pengeluaran",
+    jumlah: 1800000,
+    metode: "Tunai",
+    status: "Lunas",
+  },
+  {
+    id: 6,
+    tanggal: "2026-09-07",
+    deskripsi: "SPP Siswa",
+    kategori: "Pemasukan",
+    jumlah: 8000000,
+    metode: "Transfer",
+    status: "Lunas",
+  },
+  {
+    id: 7,
+    tanggal: "2026-09-08",
+    deskripsi: "Pembelian Komputer",
+    kategori: "Pengeluaran",
+    jumlah: 12000000,
+    metode: "Transfer",
+    status: "Pending",
+  },
+];
 
 export default function TambahLaporanPage() {
   const router = useRouter();
