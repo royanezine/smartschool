@@ -23,7 +23,7 @@ fi
 echo ""
 echo "[1/7] Update sistem & install dependencies..."
 apt-get update -y
-apt-get install -y curl git build-essential nginx ca-certificates gnupg
+apt-get install -y curl git build-essential apache2 ca-certificates gnupg
 
 echo ""
 echo "[2/7] Install Node.js 22 (LTS)..."
@@ -75,11 +75,15 @@ if [ ! -d "$APP_DIR/Backend" ] || [ ! -d "$APP_DIR/Frontend" ]; then
 fi
 
 echo ""
-echo "[7/7] Pasang config nginx..."
-cp ./nginx/smartschool.citrasolusi.id.conf /etc/nginx/sites-available/smartschool
-ln -sf /etc/nginx/sites-available/smartschool /etc/nginx/sites-enabled/smartschool
-rm -f /etc/nginx/sites-enabled/default || true
-nginx -t && systemctl reload nginx
+echo "[7/7] Pasang config Apache2..."
+# Aktifkan modul yang dibutuhkan
+a2enmod proxy proxy_http proxy_wstunnel rewrite alias ssl
+
+cp ./apache/smartschool.citrasolusi.id.conf /etc/apache2/sites-available/smartschool.conf
+a2ensite smartschool
+a2dissite 000-default || true
+
+apache2ctl configtest && systemctl reload apache2
 
 echo ""
 echo "=============================================="

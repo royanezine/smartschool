@@ -25,11 +25,16 @@ echo "=============================================="
 echo ""
 echo ">>> [1/4] Build & deploy Backend..."
 cd "$BACKEND_DIR"
-npm ci --omit=dev 2>/dev/null || npm install
+npm ci
 npm run build
 
-echo ">>> Jalankan migrasi database (prisma migrate + seed)..."
-npx prisma migrate deploy
+echo ">>> Jalankan migrasi database..."
+if [ -d "$BACKEND_DIR/prisma/migrations" ]; then
+  npx prisma migrate deploy
+else
+  echo ">>> Belum ada folder migrations, pakai prisma db push..."
+  npx prisma db push
+fi
 npx prisma db seed
 
 echo ">>> Restart PM2 (backend)..."
@@ -49,10 +54,10 @@ pm2 delete smartschool-frontend 2>/dev/null || true
 pm2 start ecosystem.config.js
 pm2 save
 
-# ---------- [3] NGINX ----------
+# ---------- [3] APACHE2 ----------
 echo ""
-echo ">>> [3/4] Reload nginx..."
-nginx -t && systemctl reload nginx
+echo ">>> [3/4] Reload apache2..."
+apache2ctl configtest && systemctl reload apache2
 
 # ---------- [4] VERIFIKASI ----------
 echo ""

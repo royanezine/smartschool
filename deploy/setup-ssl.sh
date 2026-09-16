@@ -22,18 +22,18 @@ echo "=============================================="
 # Pastikan certbot terinstal
 if ! command -v certbot &>/dev/null; then
   echo ">>> Install certbot..."
-  apt-get install -y certbot python3-certbot-nginx
+  apt-get install -y certbot python3-certbot-apache
 fi
 
-# Pastikan nginx sudah terpasang config (setup-server.sh)
-if [ ! -f /etc/nginx/sites-enabled/smartschool ]; then
-  echo "ERROR: Config nginx smartschool belum terpasang. Jalankan setup-server.sh dulu." >&2
+# Pastikan apache2 sudah terpasang config (setup-server.sh)
+if [ ! -f /etc/apache2/sites-enabled/smartschool.conf ]; then
+  echo "ERROR: Config apache2 smartschool belum terpasang. Jalankan setup-server.sh dulu." >&2
   exit 1
 fi
 
 echo ""
 echo ">>> Membuat sertifikat SSL..."
-certbot --nginx \
+certbot --apache \
   -d "$DOMAIN" \
   --non-interactive \
   --agree-tos \
