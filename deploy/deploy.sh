@@ -67,8 +67,8 @@ apache2ctl configtest && systemctl reload apache2
 echo ""
 echo ">>> [4/4] Verifikasi..."
 sleep 2
-echo "--- Local check frontend (3000) ---"
-curl -s -o /dev/null -w "HTTP %{http_code}\n" http://127.0.0.1:3000 || true
+echo "--- Local check frontend (3006) ---"
+curl -s -o /dev/null -w "HTTP %{http_code}\n" http://127.0.0.1:3006 || true
 echo "--- Local check backend (5000) ---"
 curl -s -o /dev/null -w "HTTP %{http_code}\n" http://127.0.0.1:5000/ || true
 echo "--- Status PM2 ---"
