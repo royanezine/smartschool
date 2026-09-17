@@ -65,15 +65,14 @@ export const register = async (req: Request, res: Response) => {
     });
   } catch (err) {
     throw new AppError(
-      "Registrasi berhasil, tapi gagal mengirim email OTP. Silakan coba lagi.",
-      502,
-    );
+  "Registrasi berhasil, tapi gagal mengirim email OTP. Silakan coba lagi.",
+  502,
+);
   }
 
   return res.status(200).json({
     success: true,
-    message:
-      "Registrasi berhasil. Silakan cek email Anda untuk kode OTP verifikasi.",
+    message: "Registrasi berhasil. Silakan cek email Anda untuk kode OTP verifikasi.",
   });
 };
 
@@ -85,6 +84,8 @@ export const verifyRegister = async (req: Request, res: Response) => {
   });
 
   if (!user || user.status !== "menunggu_verifikasi") {
+
+
     throw new AppError(
       "Pengguna tidak ditemukan atau sudah terverifikasi",
       400,

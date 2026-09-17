@@ -25,6 +25,7 @@ import infrastrukturRoutes from "./routes/infrastruktur.routes";
 import nilaiRoutes from "./routes/nilai.routes";
 import dashboardRoutes from "./routes/dashboard.routes";
 import roleRoutes from "./routes/peran.routes";
+import bkRoutes from "./routes/bk.routes";
 
 const app: Application = express();
 
@@ -70,6 +71,8 @@ app.use("/api/v1/infrastruktur", infrastrukturRoutes);
 app.use("/api/v1/nilai", nilaiRoutes);
 app.use("/api/v1/dashboard", dashboardRoutes);
 app.use("/api/v1/role", roleRoutes);
+
+app.use("/api/bk", bkRoutes);
 
 setInterval(
   () => {

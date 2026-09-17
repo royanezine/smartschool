@@ -2,22 +2,21 @@ import { z } from "zod";
 
 export const pendaftaranPpdbSchema = z.object({
   sekolahId: z.string().uuid(),
-
   jalurPpdbId: z.string().uuid(),
 
   namaLengkap: z
     .string()
-    .min(2)
+    .min(2, "Nama lengkap minimal 2 karakter")
     .max(100),
 
   nisn: z
     .string()
-    .min(10)
-    .max(20),
+    .min(10, "NISN minimal 10 karakter")
+    .max(20, "NISN maksimal 20 karakter"),
 
   tempatLahir: z
     .string()
-    .min(2)
+    .min(2, "Tempat lahir minimal 2 karakter")
     .max(50),
 
   tanggalLahir: z.coerce.date(),
@@ -29,7 +28,7 @@ export const pendaftaranPpdbSchema = z.object({
 
   alamat: z
     .string()
-    .min(5),
+    .min(5, "Alamat minimal 5 karakter"),
 
   telepon: z
     .string()
@@ -38,7 +37,7 @@ export const pendaftaranPpdbSchema = z.object({
 
   email: z
     .string()
-    .email()
+    .email("Format email tidak valid")
     .optional(),
 
   namaAyah: z
@@ -62,4 +61,3 @@ export const pendaftaranPpdbSchema = z.object({
     .max(100)
     .optional(),
 });
-

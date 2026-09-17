@@ -72,18 +72,29 @@ model Pengguna {
   yayasan Yayasan? @relation(fields: [yayasanId], references: [id])
   peran   Peran?   @relation(fields: [peranId], references: [id])
 
-  kelasWali             Kelas[]            @relation("WaliKelas")
-  kelasMapelDiajar      KelasMapel[]       @relation("GuruPengajar")
+  kelasWali             Kelas[]             @relation("WaliKelas")
+  kelasMapelDiajar      KelasMapel[]        @relation("GuruPengajar")
   nilaiSiswa            Nilai[]
   absensiSiswa          Absensi[]
   pengumpulanTugasSiswa PengumpulanTugas[]
   pendaftaranPpdb       PendaftaranPpdb[]
-  kelasSiswa            AnggotaKelas[]     @relation("SiswaKelas")
-  notifikasiDiterima    Notifikasi[]       @relation("PenerimaNotifikasi")
-  notifikasiDikirim     Notifikasi[]       @relation("PengirimNotifikasi")
+  kelasSiswa            AnggotaKelas[]      @relation("SiswaKelas")
+  notifikasiDiterima    Notifikasi[]        @relation("PenerimaNotifikasi")
+  notifikasiDikirim     Notifikasi[]        @relation("PengirimNotifikasi")
   auditLogs             AuditLog[]
   percobaanAsesmen      PercobaanAsesmen[]
   biometrikWajah        BiometrikWajah?
+  sesiKonselingSiswa    SesiKonseling[]     @relation("SiswaKonseling")
+  sesiKonselingKonselor SesiKonseling[]     @relation("KonselorKonseling")
+  pelanggaranSiswa      PelanggaranSiswa[]  @relation("SiswaPelanggaran")
+  asesmenMinatBakat     AsesmenMinatBakat[] @relation("SiswaAsesmenMinatBakat")
+
+  peminjamanDiajukan     PeminjamanAset[] @relation("PeminjamAset")
+  peminjamanDiverifikasi PeminjamanAset[] @relation("PetugasSarpras")
+  asetDiambil            PeminjamanAset[] @relation("SiswaPengambilAset")
+  asetDikembalikan       PeminjamanAset[] @relation("SiswaPengembaliAset")
+
+  peminjamanBuku PeminjamanBuku[]
 
   @@map("pengguna")
 }
@@ -194,6 +205,16 @@ model Sekolah {
   pengaturanSistem  PengaturanSistem[]
   menuKonfigurasi   MenuKonfigurasi[]
   peran             Peran[]
+
+  sesiKonseling       SesiKonseling[]
+  kategoriPelanggaran KategoriPelanggaran[]
+  pelanggaranSiswa    PelanggaranSiswa[]
+  asesmenMinatBakat   AsesmenMinatBakat[]
+
+  peminjamanAset PeminjamanAset[]
+
+  buku           Buku[]
+  peminjamanBuku PeminjamanBuku[]
 
   @@map("sekolah")
 }
@@ -988,14 +1009,30 @@ model PeminjamanAset {
   peminjamId String  @map("peminjam_id")
   petugasId  String? @map("petugas_id")
 
-  nomorPeminjaman       String    @map("nomor_peminjaman") @db.VarChar(30)
-  tanggalPinjam         DateTime  @map("tanggal_pinjam") @db.Date
+  siswaPengambilId    String? @map("siswa_pengambil_id")
+  namaSiswaPengambil  String? @map("nama_siswa_pengambil") @db.VarChar(100)
+  siswaPengembaliId   String? @map("siswa_pengembali_id")
+  namaSiswaPengembali String? @map("nama_siswa_pengembali") @db.VarChar(100)
+
+  nomorPeminjaman       String    @unique @map("nomor_peminjaman") @db.VarChar(50)
+  keperluan             String    @db.Text
+  tanggalPengajuan      DateTime  @default(now()) @map("tanggal_pengajuan") @db.Timestamp()
+  tanggalPinjam         DateTime? @map("tanggal_pinjam") @db.Date
   tanggalKembaliRencana DateTime  @map("tanggal_kembali_rencana") @db.Date
-  tanggalKembaliAktual  DateTime? @map("tanggal_kembali_aktual") @db.Date
-  status                String?   @db.VarChar(20)
+  tanggalKembaliAktual  DateTime? @map("tanggal_kembali_aktual") @db.Timestamp()
+  status                String    @default("menunggu_persetujuan") @db.VarChar(30)
+  catatanPenolakan      String?   @map("catatan_penolakan") @db.Text
   catatanPeminjaman     String?   @map("catatan_peminjaman") @db.Text
 
-  dibuatPada DateTime @default(now()) @map("dibuat_pada") @db.Timestamp()
+  dibuatPada     DateTime  @default(now()) @map("dibuat_pada") @db.Timestamp()
+  diperbaruiPada DateTime  @updatedAt @map("diperbarui_pada") @db.Timestamp()
+  dihapusPada    DateTime? @map("dihapus_pada") @db.Timestamp()
+
+  sekolah         Sekolah   @relation(fields: [sekolahId], references: [id])
+  peminjam        Pengguna  @relation("PeminjamAset", fields: [peminjamId], references: [id])
+  petugas         Pengguna? @relation("PetugasSarpras", fields: [petugasId], references: [id])
+  siswaPengambil  Pengguna? @relation("SiswaPengambilAset", fields: [siswaPengambilId], references: [id])
+  siswaPengembali Pengguna? @relation("SiswaPengembaliAset", fields: [siswaPengembaliId], references: [id])
 
   detailPeminjaman DetailPeminjamanAset[]
 
@@ -1007,11 +1044,11 @@ model DetailPeminjamanAset {
   peminjamanId       String  @map("peminjaman_id")
   asetId             String  @map("aset_id")
   jumlah             Int
-  kondisiSaatPinjam  String  @map("kondisi_saat_pinjam") @db.VarChar(20)
+  kondisiSaatPinjam  String? @default("baik") @map("kondisi_saat_pinjam") @db.VarChar(20)
   kondisiSaatKembali String? @map("kondisi_saat_kembali") @db.VarChar(20)
   catatanKembali     String? @map("catatan_kembali") @db.Text
 
-  peminjaman PeminjamanAset @relation(fields: [peminjamanId], references: [id])
+  peminjaman PeminjamanAset @relation(fields: [peminjamanId], references: [id], onDelete: Cascade)
   aset       Aset           @relation(fields: [asetId], references: [id])
 
   @@map("detail_peminjaman_aset")
@@ -1164,6 +1201,7 @@ model PendaftaranPpdb {
   id                     String    @id @default(uuid())
   sekolahId              String    @map("sekolah_id")
   jalurPpdbId            String    @map("jalur_ppdb_id")
+  gelombang              String?   @db.VarChar(50)
   dibuatOleh             String?   @map("dibuat_oleh")
   diperbaruiOleh         String?   @map("diperbarui_oleh")
   dihapusOleh            String?   @map("dihapus_oleh")
@@ -1233,4 +1271,174 @@ model HasilSeleksiPpdb {
   pendaftaranPpdb PendaftaranPpdb @relation(fields: [pendaftaranPpdbId], references: [id])
 
   @@map("hasil_seleksi_ppdb")
+}
+
+model SesiKonseling {
+  id             String  @id @default(uuid())
+  sekolahId      String  @map("sekolah_id")
+  siswaId        String  @map("siswa_id")
+  konselorId     String? @map("konselor_id")
+  dibuatOleh     String? @map("dibuat_oleh")
+  diperbaruiOleh String? @map("diperbarui_oleh")
+  dihapusOleh    String? @map("dihapus_oleh")
+
+  tanggal      DateTime @db.Date
+  waktuMulai   String?  @map("waktu_mulai") @db.VarChar(5)
+  waktuSelesai String?  @map("waktu_selesai") @db.VarChar(5)
+  topik        String   @db.VarChar(150)
+  masalah      String?  @db.Text
+  hasil        String?  @db.Text
+  tindakLanjut String?  @map("tindak_lanjut") @db.Text
+  status       String?  @default("dijadwalkan") @db.VarChar(20)
+  catatan      String?  @db.Text
+
+  dibuatPada     DateTime  @default(now()) @map("dibuat_pada") @db.Timestamp()
+  diperbaruiPada DateTime  @updatedAt @map("diperbarui_pada") @db.Timestamp()
+  dihapusPada    DateTime? @map("dihapus_pada") @db.Timestamp()
+
+  sekolah  Sekolah   @relation(fields: [sekolahId], references: [id])
+  siswa    Pengguna  @relation("SiswaKonseling", fields: [siswaId], references: [id])
+  konselor Pengguna? @relation("KonselorKonseling", fields: [konselorId], references: [id])
+
+  @@map("sesi_konseling")
+}
+
+model KategoriPelanggaran {
+  id             String  @id @default(uuid())
+  sekolahId      String  @map("sekolah_id")
+  dibuatOleh     String? @map("dibuat_oleh")
+  diperbaruiOleh String? @map("diperbarui_oleh")
+  dihapusOleh    String? @map("dihapus_oleh")
+
+  nama      String  @db.VarChar(100)
+  deskripsi String? @db.Text
+  poin      Int
+  status    String? @default("aktif") @db.VarChar(20)
+
+  dibuatPada     DateTime  @default(now()) @map("dibuat_pada") @db.Timestamp()
+  diperbaruiPada DateTime  @updatedAt @map("diperbarui_pada") @db.Timestamp()
+  dihapusPada    DateTime? @map("dihapus_pada") @db.Timestamp()
+
+  sekolah          Sekolah            @relation(fields: [sekolahId], references: [id])
+  pelanggaranSiswa PelanggaranSiswa[]
+
+  @@map("kategori_pelanggaran")
+}
+
+model PelanggaranSiswa {
+  id                    String  @id @default(uuid())
+  sekolahId             String  @map("sekolah_id")
+  siswaId               String  @map("siswa_id")
+  kategoriPelanggaranId String  @map("kategori_pelanggaran_id")
+  dibuatOleh            String? @map("dibuat_oleh")
+  diperbaruiOleh        String? @map("diperbarui_oleh")
+  dihapusOleh           String? @map("dihapus_oleh")
+
+  tanggal      DateTime @db.Date
+  kronologi    String?  @db.Text
+  poin         Int
+  status       String?  @default("tercatat") @db.VarChar(20)
+  tindakLanjut String?  @map("tindak_lanjut") @db.Text
+  catatan      String?  @db.Text
+
+  dibuatPada     DateTime  @default(now()) @map("dibuat_pada") @db.Timestamp()
+  diperbaruiPada DateTime  @updatedAt @map("diperbarui_pada") @db.Timestamp()
+  dihapusPada    DateTime? @map("dihapus_pada") @db.Timestamp()
+
+  sekolah             Sekolah             @relation(fields: [sekolahId], references: [id])
+  siswa               Pengguna            @relation("SiswaPelanggaran", fields: [siswaId], references: [id])
+  kategoriPelanggaran KategoriPelanggaran @relation(fields: [kategoriPelanggaranId], references: [id])
+
+  @@map("pelanggaran_siswa")
+}
+
+model AsesmenMinatBakat {
+  id             String  @id @default(uuid())
+  sekolahId      String  @map("sekolah_id")
+  siswaId        String  @map("siswa_id")
+  dibuatOleh     String? @map("dibuat_oleh")
+  diperbaruiOleh String? @map("diperbarui_oleh")
+  dihapusOleh    String? @map("dihapus_oleh")
+
+  tanggal     DateTime @db.Date
+  jenis       String   @db.VarChar(50)
+  minat       String?  @db.Text
+  bakat       String?  @db.Text
+  hasil       String?  @db.Text
+  rekomendasi String?  @db.Text
+  skor        Decimal? @db.Decimal(5, 2)
+  status      String?  @default("selesai") @db.VarChar(20)
+  catatan     String?  @db.Text
+
+  dibuatPada     DateTime  @default(now()) @map("dibuat_pada") @db.Timestamp()
+  diperbaruiPada DateTime  @updatedAt @map("diperbarui_pada") @db.Timestamp()
+  dihapusPada    DateTime? @map("dihapus_pada") @db.Timestamp()
+
+  sekolah Sekolah  @relation(fields: [sekolahId], references: [id])
+  siswa   Pengguna @relation("SiswaAsesmenMinatBakat", fields: [siswaId], references: [id])
+
+  @@map("asesmen_minat_bakat")
+}
+
+model Buku {
+  id             String  @id @default(uuid())
+  sekolahId      String  @map("sekolah_id")
+  dibuatOleh     String? @map("dibuat_oleh")
+  diperbaruiOleh String? @map("diperbarui_oleh")
+  dihapusOleh    String? @map("dihapus_oleh")
+
+  kodeBuku    String  @map("kode_buku") @db.VarChar(50)
+  judul       String  @db.VarChar(150)
+  penulis     String? @db.VarChar(100)
+  penerbit    String? @db.VarChar(100)
+  tahunTerbit Int?    @map("tahun_terbit")
+  isbn        String? @db.VarChar(30)
+
+  tipe      String  @db.VarChar(20)
+  kategori  String? @db.VarChar(50)
+  deskripsi String? @db.Text
+  coverUrl  String? @map("cover_url") @db.VarChar(255)
+  urlEbook  String? @map("url_ebook") @db.VarChar(255)
+
+  jumlah         Int     @default(0)
+  jumlahTersedia Int     @default(0) @map("jumlah_tersedia")
+  status         String? @default("aktif") @db.VarChar(20)
+
+  dibuatPada     DateTime  @default(now()) @map("dibuat_pada") @db.Timestamp()
+  diperbaruiPada DateTime  @updatedAt @map("diperbarui_pada") @db.Timestamp()
+  dihapusPada    DateTime? @map("dihapus_pada") @db.Timestamp()
+
+  sekolah        Sekolah          @relation(fields: [sekolahId], references: [id])
+  peminjamanBuku PeminjamanBuku[]
+
+  @@unique([sekolahId, kodeBuku])
+  @@map("buku")
+}
+
+model PeminjamanBuku {
+  id             String  @id @default(uuid())
+  sekolahId      String  @map("sekolah_id")
+  bukuId         String  @map("buku_id")
+  penggunaId     String  @map("pengguna_id")
+  dibuatOleh     String? @map("dibuat_oleh")
+  diperbaruiOleh String? @map("diperbarui_oleh")
+  dihapusOleh    String? @map("dihapus_oleh")
+
+  nomorPeminjaman   String    @unique @map("nomor_peminjaman") @db.VarChar(50)
+  tanggalPinjam     DateTime  @default(now()) @map("tanggal_pinjam") @db.Timestamp()
+  tanggalJatuhTempo DateTime  @map("tanggal_jatuh_tempo") @db.Date
+  tanggalKembali    DateTime? @map("tanggal_kembali") @db.Timestamp()
+
+  status  String  @default("dipinjam") @db.VarChar(20)
+  catatan String? @db.Text
+
+  dibuatPada     DateTime  @default(now()) @map("dibuat_pada") @db.Timestamp()
+  diperbaruiPada DateTime  @updatedAt @map("diperbarui_pada") @db.Timestamp()
+  dihapusPada    DateTime? @map("dihapus_pada") @db.Timestamp()
+
+  sekolah  Sekolah  @relation(fields: [sekolahId], references: [id])
+  buku     Buku     @relation(fields: [bukuId], references: [id])
+  pengguna Pengguna @relation(fields: [penggunaId], references: [id])
+
+  @@map("peminjaman_buku")
 }

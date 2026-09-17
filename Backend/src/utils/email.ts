@@ -2,26 +2,38 @@ import nodemailer from "nodemailer";
 import SMTPTransport from "nodemailer/lib/smtp-transport";
 import { google } from "googleapis";
 
-const CLIENT_ID = process.env.GOOGLE_CLIENT_ID as string;
-const CLIENT_SECRET = process.env.GOOGLE_CLIENT_SECRET as string;
-const REFRESH_TOKEN = process.env.GOOGLE_REFRESH_TOKEN as string;
-const SENDER_EMAIL = process.env.GOOGLE_SENDER_EMAIL as string;
-
-const oAuth2Client = new google.auth.OAuth2(
-  CLIENT_ID,
-  CLIENT_SECRET,
-  "https://developers.google.com/oauthplayground",
-);
-
-oAuth2Client.setCredentials({
-  refresh_token: REFRESH_TOKEN,
-});
-
 interface SendOtpParams {
   email: string;
   namaLengkap: string;
   kodeOtp: string;
 }
+
+const {
+  GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET,
+  GOOGLE_REFRESH_TOKEN,
+  GOOGLE_SENDER_EMAIL,
+} = process.env;
+
+if (
+  !GOOGLE_CLIENT_ID ||
+  !GOOGLE_CLIENT_SECRET ||
+  !GOOGLE_REFRESH_TOKEN ||
+  !GOOGLE_SENDER_EMAIL
+) {
+  throw new Error(
+    "Konfigurasi Gmail OAuth2 belum lengkap di environment variables",
+  );
+}
+
+const oauth2Client = new google.auth.OAuth2(
+  GOOGLE_CLIENT_ID,
+  GOOGLE_CLIENT_SECRET,
+);
+
+oauth2Client.setCredentials({
+  refresh_token: GOOGLE_REFRESH_TOKEN,
+});
 
 export const sendOtpEmail = async ({
   email,
@@ -29,37 +41,33 @@ export const sendOtpEmail = async ({
   kodeOtp,
 }: SendOtpParams) => {
   try {
-    // Ambil access token dari refresh token
-    const accessTokenResponse = await oAuth2Client.getAccessToken();
+    const accessTokenResponse = await oauth2Client.getAccessToken();
+
     const accessToken = accessTokenResponse.token;
 
     if (!accessToken) {
       throw new Error("Gagal mendapatkan Google OAuth2 access token");
     }
 
-    // Buat transporter Gmail
     const transporter = nodemailer.createTransport({
-      host: "smtp.gmail.com",
-      port: 465,
-      secure: true,
+      service: "gmail",
       family: 4,
       auth: {
         type: "OAuth2",
-        user: SENDER_EMAIL,
-        clientId: CLIENT_ID,
-        clientSecret: CLIENT_SECRET,
-        refreshToken: REFRESH_TOKEN,
+        user: GOOGLE_SENDER_EMAIL,
+        clientId: GOOGLE_CLIENT_ID,
+        clientSecret: GOOGLE_CLIENT_SECRET,
+        refreshToken: GOOGLE_REFRESH_TOKEN,
         accessToken,
       },
     } as SMTPTransport.Options);
 
-    // Cek koneksi SMTP sebelum mengirim
     await transporter.verify();
 
     console.log("Koneksi Gmail SMTP berhasil");
 
     const info = await transporter.sendMail({
-      from: `"SmartSchool" <${SENDER_EMAIL}>`,
+      from: `"SmartSchool" <${GOOGLE_SENDER_EMAIL}>`,
       to: email,
       subject: "Kode OTP Registrasi SmartSchool",
       html: `
@@ -103,8 +111,8 @@ export const sendOtpEmail = async ({
       `,
     });
 
-    console.log("✅ Email OTP berhasil dikirim");
-    console.log("📨 Message ID:", info.messageId);
+    console.log("Email OTP berhasil dikirim");
+    console.log("Message ID:", info.messageId);
 
     return info;
   } catch (error: any) {
@@ -114,6 +122,7 @@ export const sendOtpEmail = async ({
       response: error?.response,
       stack: error?.stack,
     });
+
     throw error;
   }
 };

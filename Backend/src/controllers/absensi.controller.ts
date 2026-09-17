@@ -114,7 +114,7 @@ if (data.metode === "face") {
   }
 
   const formData = new FormData();
-  const aiServiceUrl = process.env.AI_SERVICE_URL || "http://localhost:8032";
+  const aiServiceUrl = process.env.AI_SERVICE_URL || "http://localhost:8000";
 
   // Ambil foto referensi dari tabel biometrik_wajah
   const masterPath = process.cwd() + biometrik.urlFotoReferensi;
