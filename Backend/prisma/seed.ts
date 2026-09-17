@@ -8,9 +8,7 @@ const prisma = new PrismaClient({ adapter });
 async function main() {
   console.log("⏳ Memulai seeder database...");
 
-  // ==========================================
   // 1. PERAN (Role)
-  // ==========================================
 const daftarPeran = [
   {
     nama: "super_admin",
@@ -66,9 +64,7 @@ const daftarPeran = [
   if (!peranGuru) throw new Error("Peran guru tidak ditemukan");
   if (!peranSiswa) throw new Error("Peran siswa tidak ditemukan");
 
-  // ==========================================
   // 2. SUPER ADMIN
-  // ==========================================
   const hashedPasswordSuper = await bcrypt.hash("SuperAdmin123!", 10);
   const superAdmin = await prisma.pengguna.upsert({
     where: { email: "superadmin@smartschool.com" },
@@ -84,9 +80,7 @@ const daftarPeran = [
   });
   console.log("✅ Akun Super Admin berhasil dibuat!");
 
-  // ==========================================
   // 3. MODUL
-  // ==========================================
 const modulList = [
   {
     kode: "manajemen_pengguna",
@@ -166,9 +160,7 @@ const modulList = [
 
   const modulMap = Object.fromEntries(createdModuls.map((m) => [m.kode, m.id]));
 
-  // ==========================================
   // 4. IZIN
-  // ==========================================
   const aksiList = ["view", "create", "update", "delete"];
   const izinData = [];
   for (const mod of modulList) {
@@ -195,10 +187,7 @@ const modulList = [
 
   const izinMap = Object.fromEntries(createdIzin.map((i) => [i.nama, i.id]));
 
-  // ==========================================
   // 5. PERAN IZIN
-  // ==========================================
-  // Hapus semua peranIzin yang ada (agar bersih)
   await prisma.peranIzin.deleteMany({});
   console.log("🗑️ Data PeranIzin lama dihapus.");
 
@@ -268,9 +257,7 @@ const modulList = [
   });
   console.log(`✅ ${peranIzinEntries.length} data PeranIzin berhasil dibuat!`);
 
-  // ==========================================
   // 6. PAKET
-  // ==========================================
   const paketData = [
     {
       nama: "Basic",
@@ -316,9 +303,7 @@ const modulList = [
 
   const paketMap = Object.fromEntries(createdPaket.map((p) => [p.nama, p.id]));
 
-  // ==========================================
   // 7. PAKET MODUL
-  // ==========================================
   await prisma.paketModul.deleteMany({});
   console.log("🗑️ Data PaketModul lama dihapus.");
 
@@ -368,9 +353,7 @@ const modulList = [
     `✅ ${paketModulEntries.length} data PaketModul berhasil dibuat!`,
   );
 
-  // ==========================================
   // 8. DATA SEKOLAH DUMMY UNTUK TESTING
-  // ==========================================
   console.log("⏳ Membuat data sekolah dummy...");
 
   // 8.1 Yayasan
@@ -681,9 +664,7 @@ const modulList = [
   }
   console.log("✅ Siswa Kelas dummy dibuat");
 
-  // ==========================================
   // 8.11 PENGUNA KHUSUS UNTUK TESTING OTP
-  // ==========================================
   const otpTestUser = await prisma.pengguna.upsert({
     where: { email: "divaalhenaputri@gmail.com" },
     update: {},

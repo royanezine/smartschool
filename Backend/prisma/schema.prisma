@@ -6,9 +6,7 @@ datasource db {
   provider = "postgresql"
 }
 
-// ==========================================
 // 1. SHARED TABLES (Public Schema)
-// ==========================================
 model Pengguna {
   id             String  @id @default(uuid())
   sekolahId      String? @map("sekolah_id")
@@ -497,9 +495,7 @@ model MenuKonfigurasi {
   @@map("menu_konfigurasi")
 }
 
-// ==========================================
 // 2. TENANT TABLES (Per Sekolah)
-// ==========================================
 model TahunAjaran {
   id             String  @id @default(uuid())
   sekolahId      String  @map("sekolah_id")
@@ -715,9 +711,7 @@ model BiometrikWajah {
   @@map("biometrik_wajah")
 }
 
-// ==========================================
 // 3. LMS & ASESMEN TABLES
-// ==========================================
 model Asesmen {
   id             String  @id @default(uuid())
   kelasMapelId   String  @map("kelas_mapel_id")
@@ -905,9 +899,7 @@ model MateriPembelajaran {
   @@map("materi_pembelajaran")
 }
 
-// ==========================================
 // 4. INFRASTRUKTUR & ASET
-// ==========================================
 model Gedung {
   id         String  @id @default(uuid())
   sekolahId  String  @map("sekolah_id")
@@ -1111,10 +1103,8 @@ model LaporanKerusakan {
   @@map("laporan_kerusakan")
 }
 
-// ==========================================
 // 5. CMS & PPDB
-// ==========================================
-model HalamanCms {
+  model HalamanCms {
   id             String    @id @default(uuid())
   sekolahId      String    @map("sekolah_id")
   dibuatOleh     String?   @map("dibuat_oleh")
