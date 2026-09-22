@@ -1,7 +1,7 @@
 import { Response, NextFunction } from "express";
 import { AuthRequest } from "./auth.middleware";
+import { isSuperAdmin } from "../utils/rbac";
 
-// cek izin user
 export const requireIzin = (...izinWajib: string[]) => {
   return (req: AuthRequest, res: Response, next: NextFunction) => {
     const user = req.user;
@@ -13,7 +13,13 @@ export const requireIzin = (...izinWajib: string[]) => {
       });
     }
 
-    const lolos = izinWajib.some((izin) => user.izin.includes(izin));
+    if (isSuperAdmin(user.role)) {
+      return next();
+    }
+
+    const userPermissions = user.izin ?? [];
+
+    const lolos = izinWajib.some((izin) => userPermissions.includes(izin));
 
     if (!lolos) {
       return res.status(403).json({
@@ -26,7 +32,6 @@ export const requireIzin = (...izinWajib: string[]) => {
   };
 };
 
-// cek modul aktif di skeolah user
 export const requireModul = (kodeModul: string) => {
   return (req: AuthRequest, res: Response, next: NextFunction) => {
     const user = req.user;
@@ -38,7 +43,13 @@ export const requireModul = (kodeModul: string) => {
       });
     }
 
-    if (!user.modulAktif.includes(kodeModul)) {
+    if (isSuperAdmin(user.role)) {
+      return next();
+    }
+
+    const modulAktif = user.modulAktif ?? [];
+
+    if (!modulAktif.includes(kodeModul)) {
       return res.status(403).json({
         success: false,
         message: `Akses ditolak: modul "${kodeModul}" tidak aktif untuk sekolah ini`,

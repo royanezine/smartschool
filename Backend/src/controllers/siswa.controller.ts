@@ -3,6 +3,7 @@ import { prisma } from "../config/db";
 import { AppError } from "../utils/appError";
 import { siswaSchema } from "../validations/siswa.validation";
 import bcrypt from "bcrypt";
+import { AuthRequest } from "../middlewares/auth.middleware";
 
 export const createSiswa = async (
   req: Request,
@@ -48,7 +49,6 @@ export const createSiswa = async (
           peranId: peranSiswa.id,
           status: "aktif",
 
-          // Data detail baru
           nik: validatedData.nik,
           namaAyah: validatedData.namaAyah,
           pekerjaanAyah: validatedData.pekerjaanAyah,
@@ -93,6 +93,102 @@ export const createSiswa = async (
         namaLengkap: siswa.namaLengkap,
         email: siswa.email,
         nisn: siswa.nisn,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getMySiswa = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    if (!req.user) {
+      throw new AppError("Unauthorized", 401);
+    }
+
+    const userId = req.user.userId;
+
+    const siswa = await prisma.pengguna.findUnique({
+      where: {
+        id: userId,
+      },
+      select: {
+        id: true,
+        namaLengkap: true,
+        namaPengguna: true,
+        email: true,
+        nisn: true,
+        nis: true,
+        sekolahId: true,
+
+        peran: {
+          select: {
+            id: true,
+            nama: true,
+            namaTampilan: true,
+          },
+        },
+
+        kelasSiswa: {
+          where: {
+            dihapusPada: null,
+          },
+          orderBy: {
+            dibuatPada: "desc",
+          },
+          take: 1,
+          select: {
+            id: true,
+            kelasId: true,
+            tahunAjaranId: true,
+            status: true,
+
+            kelas: {
+              select: {
+                id: true,
+                nama: true,
+                tingkat: true,
+                ruangan: true,
+                status: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    if (!siswa) {
+      throw new AppError("Data siswa tidak ditemukan", 404);
+    }
+
+    if (siswa.peran?.nama !== "siswa") {
+      throw new AppError("Endpoint ini hanya untuk akun siswa", 403);
+    }
+
+    const anggotaKelas = siswa.kelasSiswa[0] ?? null;
+
+    return res.status(200).json({
+      success: true,
+      message: "Data siswa berhasil diambil",
+      data: {
+        id: siswa.id,
+        namaLengkap: siswa.namaLengkap,
+        namaPengguna: siswa.namaPengguna,
+        email: siswa.email,
+        nisn: siswa.nisn,
+        nis: siswa.nis,
+
+        kelasId: anggotaKelas?.kelasId ?? null,
+
+        kelas: anggotaKelas?.kelas ?? null,
+
+        tahunAjaranId: anggotaKelas?.tahunAjaranId ?? null,
+
+        statusKelas: anggotaKelas?.status ?? null,
       },
     });
   } catch (error) {

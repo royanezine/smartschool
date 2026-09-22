@@ -63,11 +63,20 @@ export const register = async (req: Request, res: Response) => {
       namaLengkap: data.namaLengkap,
       kodeOtp: otpCode,
     });
-  } catch (err) {
+  } catch (error: any) {
+    console.error("[REGISTER] Pengiriman OTP gagal", {
+      message: error?.message,
+      code: error?.code,
+      command: error?.command,
+      responseCode: error?.responseCode,
+      response: error?.response,
+      stack: error?.stack,
+    });
+
     throw new AppError(
-  "Registrasi berhasil, tapi gagal mengirim email OTP. Silakan coba lagi.",
-  502,
-);
+      "Registrasi berhasil, tetapi email OTP gagal dikirim.",
+      502,
+    );
   }
 
   return res.status(200).json({

@@ -3,54 +3,127 @@ import { AuthRequest } from "../middlewares/auth.middleware";
 import { prisma } from "../config/db";
 import bycrypt from "bcryptjs";
 import { paginatedResponse } from "../utils/responseFormatter";
+import { normalizeRole, canManageRole } from "../utils/rbac";
+import { Prisma } from "@prisma/client";
 
 export const getUsers = async (req: AuthRequest, res: Response) => {
   try {
-    const sekolahId = req.user?.sekolahId;
+    if (!req.user) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
 
-    // Ambil parameter dari query URL
+    const actorRole = normalizeRole(req.user.role);
+    const sekolahId = req.user.sekolahId;
+
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const search = req.query.search as string;
+    const requestedRole = req.query.role as string;
     const status = req.query.status as string;
-    const role = req.query.role as string;
     const sortBy = (req.query.sortBy as string) || "dibuatPada";
-    const sortOrder = (req.query.sortOrder as string) || "desc";
+    const sortOrder = (req.query.sortOrder as "asc" | "desc") || "desc";
 
     const skip = (page - 1) * limit;
 
-    // Build query filter
-    const whereClause: any = {
-      dihapusPada: null,
-    };
+    const AND: Prisma.PenggunaWhereInput[] = [
+      {
+        dihapusPada: null,
+      },
+    ];
 
-    // Batasi data per tenant jika login sebagai admin sekolah
-    if (sekolahId) {
-      whereClause.sekolahId = sekolahId;
+    if (actorRole !== "super_admin") {
+      if (!sekolahId) {
+        return res.status(403).json({
+          success: false,
+          message: "Anda tidak terhubung dengan sekolah",
+        });
+      }
+
+      AND.push({
+        sekolahId,
+      });
     }
 
-    if (status) whereClause.status = status;
+    if (status) {
+      AND.push({
+        status,
+      });
+    }
 
-    if (role) {
-      whereClause.peran = { nama: role };
+    if (requestedRole) {
+      AND.push({
+        peran: {
+          is: {
+            nama: normalizeRole(requestedRole),
+          },
+        },
+      });
+    }
+
+    if (actorRole === "admin_sekolah") {
+      AND.push({
+        peran: {
+          is: {
+            nama: {
+              notIn: ["super_admin", "admin_yayasan", "admin_sekolah"],
+            },
+          },
+        },
+      });
     }
 
     if (search) {
-      whereClause.OR = [
-        { namaLengkap: { contains: search, mode: "insensitive" } },
-        { email: { contains: search, mode: "insensitive" } },
-        { nip: { contains: search, mode: "insensitive" } },
-        { nisn: { contains: search, mode: "insensitive" } },
-        { namaPengguna: { contains: search, mode: "insensitive" } },
-      ];
+      AND.push({
+        OR: [
+          {
+            namaLengkap: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
+          {
+            email: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
+          {
+            nip: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
+          {
+            nisn: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
+          {
+            namaPengguna: {
+              contains: search,
+              mode: "insensitive",
+            },
+          },
+        ],
+      });
     }
+
+    const whereClause: Prisma.PenggunaWhereInput = {
+      AND,
+    };
 
     const [users, totalData] = await Promise.all([
       prisma.pengguna.findMany({
         where: whereClause,
         skip,
         take: limit,
-        orderBy: { [sortBy]: sortOrder },
+        orderBy: {
+          [sortBy]: sortOrder,
+        },
         select: {
           id: true,
           email: true,
@@ -65,15 +138,28 @@ export const getUsers = async (req: AuthRequest, res: Response) => {
           dibuatPada: true,
           jabatan: true,
           golongan: true,
+
           sekolah: {
-            select: { id: true, nama: true, kode: true },
+            select: {
+              id: true,
+              nama: true,
+              kode: true,
+            },
           },
+
           peran: {
-            select: { id: true, nama: true, namaTampilan: true },
+            select: {
+              id: true,
+              nama: true,
+              namaTampilan: true,
+            },
           },
         },
       }),
-      prisma.pengguna.count({ where: whereClause }),
+
+      prisma.pengguna.count({
+        where: whereClause,
+      }),
     ]);
 
     return paginatedResponse(
@@ -86,6 +172,7 @@ export const getUsers = async (req: AuthRequest, res: Response) => {
     );
   } catch (error) {
     console.error("Error getUsers:", error);
+
     return res.status(500).json({
       success: false,
       message: "Terjadi kesalahan server",
@@ -273,6 +360,45 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
       });
     }
 
+    const target = await prisma.pengguna.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        sekolahId: true,
+        peran: {
+          select: {
+            nama: true,
+          },
+        },
+      },
+    });
+
+    if (!target) {
+      return res.status(404).json({
+        success: false,
+        message: "Pengguna tidak ditemukan",
+      });
+    }
+
+    const actorRole = normalizeRole(req.user?.role);
+    const targetRole = normalizeRole(target.peran?.nama);
+
+    if (actorRole !== "super_admin") {
+      if (target.sekolahId !== req.user?.sekolahId) {
+        return res.status(403).json({
+          success: false,
+          message: "Anda tidak dapat mengakses pengguna dari sekolah lain",
+        });
+      }
+
+      if (!canManageRole(actorRole, targetRole)) {
+        return res.status(403).json({
+          success: false,
+          message: "Anda tidak dapat mengelola role dengan level tersebut",
+        });
+      }
+    }
+
     const data: any = {
       ...(namaPengguna !== undefined && { namaPengguna }),
       ...(email !== undefined && { email }),
@@ -347,15 +473,41 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
   try {
     const id = req.params.id as string;
 
-    const user = await prisma.pengguna.findUnique({
-      where: { id },
-    });
-
+   const user = await prisma.pengguna.findUnique({
+     where: { id },
+     select: {
+       id: true,
+       sekolahId: true,
+       peran: {
+         select: {
+           nama: true,
+         },
+       },
+     },
+   });
     if (!user) {
       return res.status(404).json({
         success: false,
         message: "Pengguna tidak ditemukan",
       });
+    }
+    const actorRole = normalizeRole(req.user?.role);
+    const targetRole = normalizeRole(user.peran?.nama);
+
+    if (actorRole !== "super_admin") {
+      if (user.sekolahId !== req.user?.sekolahId) {
+        return res.status(403).json({
+          success: false,
+          message: "Anda tidak dapat mengakses pengguna dari sekolah lain",
+        });
+      }
+
+      if (!canManageRole(actorRole, targetRole)) {
+        return res.status(403).json({
+          success: false,
+          message: "Anda tidak dapat mengelola role dengan level tersebut",
+        });
+      }
     }
 
     const updatedUser = await prisma.pengguna.update({
