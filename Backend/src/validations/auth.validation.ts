@@ -13,6 +13,7 @@ export const registerSchema = z.object({
   namaLengkap: z.string().min(3, "Nama lengkap minimal 3 karakter"),
   kataSandi: z
     .string()
+    
     .min(8, "Kata sandi minimal 8 karakter")
     .regex(/[A-Z]/, "Kata sandi harus mengandung minimal 1 huruf kapital")
     .regex(/[0-9]/, "Kata sandi harus mengandung minimal 1 angka"),
