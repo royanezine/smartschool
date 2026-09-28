@@ -2,9 +2,12 @@ import { Response } from "express";
 import { AuthRequest } from "../middlewares/auth.middleware";
 import { prisma } from "../config/db";
 import bycrypt from "bcryptjs";
-import { paginatedResponse } from "../utils/responseFormatter";
+import { paginatedResponse, successResponse } from "../utils/responseFormatter";
 import { normalizeRole, canManageRole } from "../utils/rbac";
 import { Prisma } from "@prisma/client";
+import { AppError } from "../utils/appError";
+import bcrypt from "bcryptjs";
+import { NextFunction } from "express";
 
 export const getUsers = async (req: AuthRequest, res: Response) => {
   try {
@@ -473,18 +476,18 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
   try {
     const id = req.params.id as string;
 
-   const user = await prisma.pengguna.findUnique({
-     where: { id },
-     select: {
-       id: true,
-       sekolahId: true,
-       peran: {
-         select: {
-           nama: true,
-         },
-       },
-     },
-   });
+    const user = await prisma.pengguna.findUnique({
+      where: { id },
+      select: {
+        id: true,
+        sekolahId: true,
+        peran: {
+          select: {
+            nama: true,
+          },
+        },
+      },
+    });
     if (!user) {
       return res.status(404).json({
         success: false,
@@ -724,30 +727,70 @@ export const getUserById = async (req: AuthRequest, res: Response) => {
         .json({ success: false, message: "Pengguna tidak ditemukan" });
     }
 
-    // Pengecekan cakupan sekolah jika bukan super_admin/admin_yayasan
     const userRole = await prisma.peran.findUnique({ where: { id: roleId } });
     if (
       userRole?.nama !== "super_admin" &&
       userRole?.nama !== "admin_yayasan" &&
       user.sekolah?.id !== sekolahId
     ) {
-      return res
-        .status(403)
-        .json({
-          success: false,
-          message: "Akses ditolak: Pengguna berada di luar sekolah Anda",
-        });
+      return res.status(403).json({
+        success: false,
+        message: "Akses ditolak: Pengguna berada di luar sekolah Anda",
+      });
     }
 
-    return res
-      .status(200)
-      .json({
-        success: true,
-        message: "Detail pengguna berhasil diambil",
-        data: user,
-      });
+    return res.status(200).json({
+      success: true,
+      message: "Detail pengguna berhasil diambil",
+      data: user,
+    });
   } catch (error) {
     console.error("Error getUserById:", error);
+    return res
+      .status(500)
+      .json({ success: false, message: "Terjadi kesalahan server" });
+  }
+};
+
+export const quickResetPassword = async (req: AuthRequest, res: Response) => {
+  try {
+    const targetUserId = Array.isArray(req.params.id)
+      ? req.params.id[0]
+      : req.params.id;
+
+    if (!targetUserId) {
+      throw new AppError("ID pengguna tidak valid", 400);
+    }
+
+    const adminSekolahId = req.user?.sekolahId;
+    const actorRole = req.user?.role;
+
+    const targetUser = await prisma.pengguna.findUnique({
+      where: { id: targetUserId },
+    });
+
+    if (!targetUser) throw new AppError("Pengguna tidak ditemukan", 404);
+
+    if (
+      actorRole !== "super_admin" &&
+      targetUser.sekolahId !== adminSekolahId
+    ) {
+      throw new AppError("Akses ditolak untuk mereset pengguna ini", 403);
+    }
+
+    const defaultPassword = await bcrypt.hash("12345678", 10);
+
+    await prisma.pengguna.update({
+      where: { id: targetUserId },
+      data: { kataSandi: defaultPassword, diperbaruiOleh: req.user?.userId },
+    });
+
+    return successResponse(
+      res,
+      "Kata sandi berhasil direset menjadi: 12345678",
+    );
+  } catch (error) {
+    console.error("Error quickResetPassword:", error);
     return res
       .status(500)
       .json({ success: false, message: "Terjadi kesalahan server" });

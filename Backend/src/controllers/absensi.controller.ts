@@ -10,6 +10,84 @@ import { AppError } from "../utils/appError";
 import { AuthRequest } from "../middlewares/auth.middleware";
 import { hitungJarakMeter } from "../utils/geo";
 import { successResponse } from "../utils/responseFormatter";
+import { NextFunction } from "express";
+
+export const registerFaceIdByAdmin = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { targetUserId } = req.body;
+    const file = req.file;
+
+    if (!targetUserId)
+      throw new AppError("ID Pengguna (targetUserId) wajib diisi", 400);
+    if (!file) throw new AppError("Foto wajah wajib diunggah", 400);
+
+    const targetUser = await prisma.pengguna.findUnique({
+      where: { id: targetUserId },
+    });
+    if (!targetUser) {
+      fs.unlinkSync(file.path);
+      throw new AppError("Pengguna tidak ditemukan", 404);
+    }
+
+    const formData = new FormData();
+    formData.append("image", fs.createReadStream(file.path));
+
+    const aiServiceUrl = process.env.AI_SERVICE_URL || "http://localhost:8000";
+
+    const aiResponse = await axios.post(
+      `${aiServiceUrl}/extract-embedding`,
+      formData,
+      {
+        headers: formData.getHeaders(),
+      },
+    );
+
+    if (!aiResponse.data.success || !aiResponse.data.embedding) {
+      fs.unlinkSync(file.path);
+      throw new AppError(
+        "Gagal mengekstrak wajah. Pastikan foto terang dan jelas.",
+        400,
+      );
+    }
+
+    const biometrik = await prisma.biometrikWajah.upsert({
+      where: { penggunaId: targetUserId },
+      update: {
+        urlFotoReferensi: `/uploads/biometrik/${file.filename}`,
+        embeddingVector: aiResponse.data.embedding, // Prisma akan otomatis menyimpan sebagai JSON
+        perangkat: "Didaftarkan Admin",
+        status: "aktif",
+        diperbaruiOleh: req.user?.userId,
+      },
+      create: {
+        penggunaId: targetUserId,
+        urlFotoReferensi: `/uploads/biometrik/${file.filename}`,
+        embeddingVector: aiResponse.data.embedding,
+        perangkat: "Didaftarkan Admin",
+        status: "aktif",
+        dibuatOleh: req.user?.userId,
+      },
+    });
+
+    return successResponse(res, "Face ID berhasil didaftarkan", biometrik, 201);
+  } catch (error: any) {
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path); // Hapus gambar jika proses gagal
+    }
+
+    if (error instanceof AppError) return next(error);
+    return next(
+      new AppError(
+        error.response?.data?.message || "Gagal menghubungi AI Face Server",
+        500,
+      ),
+    );
+  }
+};
 
 export const createAbsensi = async (
   req: AuthRequest,

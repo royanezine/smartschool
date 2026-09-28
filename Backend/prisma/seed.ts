@@ -9,25 +9,25 @@ async function main() {
   console.log("⏳ Memulai seeder database...");
 
   // 1. PERAN (Role)
-const daftarPeran = [
-  {
-    nama: "super_admin",
-    namaTampilan: "Super Admin",
-    deskripsi: "Administrator tertinggi platform global",
-  },
-  {
-    nama: "admin_yayasan",
-    namaTampilan: "Admin Yayasan",
-    deskripsi: "Administrator tingkat yayasan",
-  }, 
-  {
-    nama: "admin_sekolah",
-    namaTampilan: "Admin Sekolah",
-    deskripsi: "Administrator untuk satu tenant sekolah",
-  },
-  { nama: "guru", namaTampilan: "Guru", deskripsi: "Guru pengajar" },
-  { nama: "siswa", namaTampilan: "Siswa", deskripsi: "Peserta didik" },
-];
+  const daftarPeran = [
+    {
+      nama: "super_admin",
+      namaTampilan: "Super Admin",
+      deskripsi: "Administrator tertinggi platform global",
+    },
+    {
+      nama: "admin_yayasan",
+      namaTampilan: "Admin Yayasan",
+      deskripsi: "Administrator tingkat yayasan",
+    },
+    {
+      nama: "admin_sekolah",
+      namaTampilan: "Admin Sekolah",
+      deskripsi: "Administrator untuk satu tenant sekolah",
+    },
+    { nama: "guru", namaTampilan: "Guru", deskripsi: "Guru pengajar" },
+    { nama: "siswa", namaTampilan: "Siswa", deskripsi: "Peserta didik" },
+  ];
 
   for (const peran of daftarPeran) {
     const existing = await prisma.peran.findFirst({
@@ -61,6 +61,8 @@ const daftarPeran = [
   if (!peranSuperAdmin) throw new Error("Peran super_admin tidak ditemukan");
   if (!peranAdminSekolah)
     throw new Error("Peran admin_sekolah tidak ditemukan");
+  if (!peranAdminYayasan)
+    throw new Error("Peran admin_yayasan tidak ditemukan");
   if (!peranGuru) throw new Error("Peran guru tidak ditemukan");
   if (!peranSiswa) throw new Error("Peran siswa tidak ditemukan");
 
@@ -81,71 +83,71 @@ const daftarPeran = [
   console.log("✅ Akun Super Admin berhasil dibuat!");
 
   // 3. MODUL
-const modulList = [
-  {
-    kode: "manajemen_pengguna",
-    nama: "Manajemen Pengguna",
-    deskripsi: "Modul manajemen pengguna",
-    sistem: false,
-  },
-  {
-    kode: "manajemen_sekolah",
-    nama: "Manajemen Sekolah",
-    deskripsi: "Modul manajemen sekolah",
-    sistem: false,
-  },
-  {
-    kode: "paket",
-    nama: "Paket",
-    deskripsi: "Manajemen Paket Berlangganan",
-    sistem: true,
-  }, 
-  {
-    kode: "langganan",
-    nama: "Langganan",
-    deskripsi: "Manajemen Langganan Sekolah",
-    sistem: true,
-  }, 
-  {
-    kode: "yayasan",
-    nama: "Yayasan",
-    deskripsi: "Manajemen Yayasan",
-    sistem: true,
-  }, 
-  {
-    kode: "akademik",
-    nama: "Akademik",
-    deskripsi: "Modul akademik",
-    sistem: false,
-  },
-  { kode: "tugas", nama: "Tugas", deskripsi: "Modul tugas", sistem: false },
-  { kode: "ujian", nama: "Ujian", deskripsi: "Modul ujian", sistem: false },
-  {
-    kode: "manajemen_aset",
-    nama: "Manajemen Aset",
-    deskripsi: "Modul manajemen aset",
-    sistem: false,
-  },
-  {
-    kode: "cms",
-    nama: "CMS",
-    deskripsi: "Modul CMS (Halaman & Artikel)",
-    sistem: false,
-  },
-  { kode: "ppdb", nama: "PPDB", deskripsi: "Modul PPDB", sistem: false },
-  {
-    kode: "lms",
-    nama: "LMS",
-    deskripsi: "Modul Learning Management System",
-    sistem: false,
-  },
-  {
-    kode: "laporan",
-    nama: "Laporan",
-    deskripsi: "Modul laporan",
-    sistem: false,
-  },
-];
+  const modulList = [
+    {
+      kode: "manajemen_pengguna",
+      nama: "Manajemen Pengguna",
+      deskripsi: "Modul manajemen pengguna",
+      sistem: false,
+    },
+    {
+      kode: "manajemen_sekolah",
+      nama: "Manajemen Sekolah",
+      deskripsi: "Modul manajemen sekolah",
+      sistem: false,
+    },
+    {
+      kode: "paket",
+      nama: "Paket",
+      deskripsi: "Manajemen Paket Berlangganan",
+      sistem: true,
+    },
+    {
+      kode: "langganan",
+      nama: "Langganan",
+      deskripsi: "Manajemen Langganan Sekolah",
+      sistem: true,
+    },
+    {
+      kode: "yayasan",
+      nama: "Yayasan",
+      deskripsi: "Manajemen Yayasan",
+      sistem: true,
+    },
+    {
+      kode: "akademik",
+      nama: "Akademik",
+      deskripsi: "Modul akademik",
+      sistem: false,
+    },
+    { kode: "tugas", nama: "Tugas", deskripsi: "Modul tugas", sistem: false },
+    { kode: "ujian", nama: "Ujian", deskripsi: "Modul ujian", sistem: false },
+    {
+      kode: "manajemen_aset",
+      nama: "Manajemen Aset",
+      deskripsi: "Modul manajemen aset",
+      sistem: false,
+    },
+    {
+      kode: "cms",
+      nama: "CMS",
+      deskripsi: "Modul CMS (Halaman & Artikel)",
+      sistem: false,
+    },
+    { kode: "ppdb", nama: "PPDB", deskripsi: "Modul PPDB", sistem: false },
+    {
+      kode: "lms",
+      nama: "LMS",
+      deskripsi: "Modul Learning Management System",
+      sistem: false,
+    },
+    {
+      kode: "laporan",
+      nama: "Laporan",
+      deskripsi: "Modul laporan",
+      sistem: false,
+    },
+  ];
 
   const createdModuls = [];
   for (const m of modulList) {
@@ -197,8 +199,11 @@ const modulList = [
       modul: ["yayasan", "manajemen_sekolah", "laporan"],
       aksi: aksiList,
     },
-    admin_sekolah: { modul: modulList.filter(m => m.kode !== "paket" && m.kode !== "yayasan").map((m) => m.kode), 
-      aksi: aksiList 
+    admin_sekolah: {
+      modul: modulList
+        .filter((m) => m.kode !== "paket" && m.kode !== "yayasan")
+        .map((m) => m.kode),
+      aksi: aksiList,
     },
     guru: {
       modul: ["akademik", "tugas", "ujian", "lms", "laporan"],
@@ -212,6 +217,7 @@ const modulList = [
 
   const peranMap: Record<string, string> = {
     super_admin: peranSuperAdmin.id,
+    admin_yayasan: peranAdminYayasan.id, 
     admin_sekolah: peranAdminSekolah.id,
     guru: peranGuru.id,
     siswa: peranSiswa.id,
@@ -392,6 +398,39 @@ const modulList = [
     },
   });
   console.log("✅ Sekolah dummy dibuat");
+
+  //  UNTUK MENGAKTIFKAN LANGGANAN 
+  const paketEnterprise = await prisma.paket.findFirst({
+    where: { nama: "Enterprise" },
+  });
+
+  if (paketEnterprise) {
+    // Buat tanggal kedaluwarsa 1 tahun dari sekarang
+    const endDate = new Date();
+    endDate.setFullYear(endDate.getFullYear() + 1);
+
+    const langganan = await prisma.langgananSekolah.create({
+      data: {
+        sekolahId: sekolah.id,
+        paketId: paketEnterprise.id,
+        statusPembayaran: "success",
+        statusLangganan: "active",
+        tanggalMulai: new Date(),
+        tanggalBerakhir: endDate,
+        hargaSaatBerlangganan: paketEnterprise.harga,
+        siklusPenagihan: "annual",
+        dibuatOleh: superAdmin.id,
+      },
+    });
+
+    // Hubungkan ID langganan aktif ke tabel sekolah
+    await prisma.sekolah.update({
+      where: { id: sekolah.id },
+      data: { langgananAktifId: langganan.id },
+    });
+
+    console.log("✅ Langganan Enterprise untuk sekolah dummy diaktifkan");
+  }
 
   // 8.3 Tahun Ajaran
   let tahunAjaran = await prisma.tahunAjaran.findFirst({

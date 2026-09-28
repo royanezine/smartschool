@@ -11,15 +11,15 @@ import {
   createUser,
   updateUser,
   deleteUser,
+  quickResetPassword,
 } from "../controllers/user.controller";
 
 const router = Router();
 
 router.get("/profile", authenticate, profile);
-
 router.put("/profile", authenticate, updateProfile);
-
 router.get("/", authenticate, requireIzin("manajemen_pengguna.view"), getUsers);
+router.patch("/:id/reset-password", authenticate, quickResetPassword);
 
 router.get(
   "/:id",

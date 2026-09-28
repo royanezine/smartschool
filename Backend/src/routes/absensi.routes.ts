@@ -11,6 +11,8 @@ import {
 import { authenticate } from "../middlewares/auth.middleware";
 import { requireTenant } from "../middlewares/tenant.middleware";
 import { requireIzin } from "../middlewares/izin.middleware";
+import { uploadBiometrik } from "../middlewares/upload.middleware";
+import { registerFaceIdByAdmin } from "../controllers/absensi.controller";
 
 const router = Router();
 
@@ -39,5 +41,11 @@ router.post(
 router.get("/saya", requireIzin("lms.view"), getAbsensiSaya);
 router.get("/kelas/:kelasId", requireIzin("lms.view"), getAbsensiKelas);
 router.get("/export", requireIzin("laporan.view"), exportRekapAbsensi);
+router.post(
+  "/register-face",
+  authenticate,
+  uploadBiometrik.single("foto"),
+  registerFaceIdByAdmin,
+);
 
 export default router;

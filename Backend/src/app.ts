@@ -26,6 +26,12 @@ import nilaiRoutes from "./routes/nilai.routes";
 import dashboardRoutes from "./routes/dashboard.routes";
 import roleRoutes from "./routes/peran.routes";
 import bkRoutes from "./routes/bk.routes";
+import yayasanRoutes from "./routes/yayasan.routes";
+import ppdbRoutes from "./routes/ppdb.routes";
+import jalurPpdbRoutes from "./routes/jalurPpdb.routes";
+import perpustakaanRoutes from "./routes/perpustakaan.routes";
+import permohonanIzinRoutes from "./routes/permohonanIzin.routes";
+import peminjamanAsetRoutes from "./routes/peminjamanAset.routes";
 
 const app: Application = express();
 
@@ -37,6 +43,7 @@ import authRoutes from "./routes/auth.routes";
 import tenantRoutes from "./routes/tenant.routes";
 import webhookRoutes from "./routes/webhook.routes";
 import path from "path";
+import raportRoutes from "./routes/raport.routes";
 
 app.get("/", (req: Request, res: Response) => {
   res.status(200).json({
@@ -71,8 +78,15 @@ app.use("/api/v1/infrastruktur", infrastrukturRoutes);
 app.use("/api/v1/nilai", nilaiRoutes);
 app.use("/api/v1/dashboard", dashboardRoutes);
 app.use("/api/v1/role", roleRoutes);
-
 app.use("/api/bk", bkRoutes);
+app.use("/api/v1/raport", raportRoutes);
+app.use("/api/v1/yayasan", yayasanRoutes);
+app.use("/api/v1/ppdb", ppdbRoutes);
+app.use("/api/v1/jalur-ppdb", jalurPpdbRoutes);
+app.use("/api/v1/perpustakaan", perpustakaanRoutes);
+app.use("/api/v1/peminjaman-aset", peminjamanAsetRoutes);
+app.use("/api/v1/raport", raportRoutes);
+app.use("/api/v1/permohonan-izin", permohonanIzinRoutes);
 
 setInterval(
   () => {

@@ -93,6 +93,8 @@ model Pengguna {
   asetDikembalikan       PeminjamanAset[] @relation("SiswaPengembaliAset")
 
   peminjamanBuku PeminjamanBuku[]
+  izinDiajukan  PermohonanIzin[] @relation("PemohonIzin")
+  izinDisetujui PermohonanIzin[] @relation("PenyetujuIzin")
 
   @@map("pengguna")
 }
@@ -213,6 +215,7 @@ model Sekolah {
 
   buku           Buku[]
   peminjamanBuku PeminjamanBuku[]
+  permohonanIzin PermohonanIzin[]
 
   @@map("sekolah")
 }
@@ -689,6 +692,30 @@ model Absensi {
   biometrikWajah BiometrikWajah? @relation(fields: [biometrikWajahId], references: [id])
 
   @@map("absensi")
+}
+
+model PermohonanIzin {
+  id             String    @id @default(uuid())
+  sekolahId      String    @map("sekolah_id")
+  penggunaId     String    @map("pengguna_id")
+  penyetujuId    String?   @map("penyetuju_id") 
+  
+  jenis          String    @db.VarChar(20) 
+  tanggalMulai   DateTime  @map("tanggal_mulai") @db.Date
+  tanggalSelesai DateTime  @map("tanggal_selesai") @db.Date
+  alasan         String    @db.Text
+  urlBukti       String?   @map("url_bukti") @db.VarChar(255)
+  status         String    @default("menunggu") @db.VarChar(20) 
+  catatan        String?   @db.Text
+
+  dibuatPada     DateTime  @default(now()) @map("dibuat_pada") @db.Timestamp()
+  diperbaruiPada DateTime  @updatedAt @map("diperbarui_pada") @db.Timestamp()
+
+  sekolah   Sekolah  @relation(fields: [sekolahId], references: [id])
+  pengguna  Pengguna @relation("PemohonIzin", fields: [penggunaId], references: [id])
+  penyetuju Pengguna? @relation("PenyetujuIzin", fields: [penyetujuId], references: [id])
+
+  @@map("permohonan_izin")
 }
 
 model BiometrikWajah {
