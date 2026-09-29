@@ -1,19 +1,65 @@
 import { Request, Response } from "express";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, KategoriBuku } from "@prisma/client";
 import { generateNomorPeminjaman } from "../utils/nomorPeminjaman";
 
 const prisma = new PrismaClient();
+
+const parseKategori = (value: unknown) => {
+  if (value === undefined) return { valid: true, value: undefined };
+  if (value === null || value === "") return { valid: true, value: null };
+
+  const kategori = String(value).toUpperCase() as KategoriBuku;
+
+  if (!Object.values(KategoriBuku).includes(kategori)) {
+    return { valid: false, value: undefined };
+  }
+
+  return { valid: true, value: kategori };
+};
+
+const parseInteger = (value: unknown) => {
+  if (value === undefined) return { valid: true, value: undefined };
+  if (value === null || value === "") return { valid: true, value: null };
+
+  const angka = Number(value);
+
+  if (!Number.isInteger(angka)) {
+    return { valid: false, value: undefined };
+  }
+
+  return { valid: true, value: angka };
+};
+
+const mataPelajaranValid = async (
+  sekolahId: string,
+  mataPelajaranId: string
+) => {
+  const mapel = await prisma.mataPelajaran.findFirst({
+    where: {
+      id: mataPelajaranId,
+      sekolahId,
+      dihapusPada: null,
+    },
+    select: { id: true },
+  });
+
+  return !!mapel;
+};
 
 export const getBuku = async (req: Request, res: Response) => {
   try {
     const sekolahId = (req as any).user.sekolahId;
 
-    const {
-      search,
-      tipe,
-      kategori,
-      status,
-    } = req.query;
+    const { search, tipe, kategori, mataPelajaranId, status } = req.query;
+
+    const kategoriParsed = parseKategori(kategori);
+
+    if (!kategoriParsed.valid) {
+      return res.status(400).json({
+        success: false,
+        message: "Kategori buku tidak valid",
+      });
+    }
 
     const buku = await prisma.buku.findMany({
       where: {
@@ -46,8 +92,21 @@ export const getBuku = async (req: Request, res: Response) => {
           : {}),
 
         ...(tipe ? { tipe: String(tipe) } : {}),
-        ...(kategori ? { kategori: String(kategori) } : {}),
+        ...(kategoriParsed.value ? { kategori: kategoriParsed.value } : {}),
+        ...(mataPelajaranId
+          ? { mataPelajaranId: String(mataPelajaranId) }
+          : {}),
         ...(status ? { status: String(status) } : {}),
+      },
+
+      include: {
+        mataPelajaran: {
+          select: {
+            id: true,
+            nama: true,
+            kode: true,
+          },
+        },
       },
 
       orderBy: {
@@ -82,6 +141,7 @@ export const getBukuById = async (req: Request, res: Response) => {
       },
 
       include: {
+        mataPelajaran: true,
         peminjamanBuku: {
           where: {
             dihapusPada: null,
@@ -138,12 +198,52 @@ export const createBuku = async (req: Request, res: Response) => {
       isbn,
       tipe,
       kategori,
+      mataPelajaranId,
       deskripsi,
       coverUrl,
       urlEbook,
-      jumlah = 0,
+      jumlah,
       status = "aktif",
     } = req.body;
+
+    if (!kodeBuku || !judul || !tipe) {
+      return res.status(400).json({
+        success: false,
+        message: "Kode buku, judul, dan tipe wajib diisi",
+      });
+    }
+
+    const kategoriParsed = parseKategori(kategori);
+
+    if (!kategoriParsed.valid) {
+      return res.status(400).json({
+        success: false,
+        message: "Kategori buku tidak valid",
+      });
+    }
+
+    const tahunParsed = parseInteger(tahunTerbit);
+
+    if (!tahunParsed.valid) {
+      return res.status(400).json({
+        success: false,
+        message: "Tahun terbit harus berupa angka bulat",
+      });
+    }
+
+    const jumlahParsed = parseInteger(jumlah);
+
+    if (
+      !jumlahParsed.valid ||
+      (jumlahParsed.value !== undefined &&
+        jumlahParsed.value !== null &&
+        jumlahParsed.value < 0)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Jumlah buku harus berupa angka bulat tidak negatif",
+      });
+    }
 
     if (tipe === "EBOOK" && !urlEbook) {
       return res.status(400).json({
@@ -152,12 +252,23 @@ export const createBuku = async (req: Request, res: Response) => {
       });
     }
 
+    if (mataPelajaranId) {
+      const valid = await mataPelajaranValid(sekolahId, mataPelajaranId);
+
+      if (!valid) {
+        return res.status(400).json({
+          success: false,
+          message: "Mata pelajaran tidak ditemukan",
+        });
+      }
+    }
+
     const existing = await prisma.buku.findFirst({
       where: {
         sekolahId,
         kodeBuku,
-        dihapusPada: null,
       },
+      select: { id: true },
     });
 
     if (existing) {
@@ -166,6 +277,9 @@ export const createBuku = async (req: Request, res: Response) => {
         message: "Kode buku sudah digunakan",
       });
     }
+
+    const jumlahFinal =
+      tipe === "EBOOK" ? 0 : (jumlahParsed.value ?? 0);
 
     const buku = await prisma.buku.create({
       data: {
@@ -176,16 +290,17 @@ export const createBuku = async (req: Request, res: Response) => {
         judul,
         penulis,
         penerbit,
-        tahunTerbit,
+        tahunTerbit: tahunParsed.value,
         isbn,
         tipe,
-        kategori,
+        kategori: kategoriParsed.value,
+        mataPelajaranId: mataPelajaranId || null,
         deskripsi,
         coverUrl,
         urlEbook,
 
-        jumlah: tipe === "EBOOK" ? 0 : jumlah,
-        jumlahTersedia: tipe === "EBOOK" ? 0 : jumlah,
+        jumlah: jumlahFinal,
+        jumlahTersedia: jumlahFinal,
 
         status,
       },
@@ -196,7 +311,14 @@ export const createBuku = async (req: Request, res: Response) => {
       message: "Buku berhasil ditambahkan",
       data: buku,
     });
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.code === "P2002") {
+      return res.status(409).json({
+        success: false,
+        message: "Kode buku sudah digunakan",
+      });
+    }
+
     console.error(error);
 
     return res.status(500).json({
@@ -236,6 +358,7 @@ export const updateBuku = async (req: Request, res: Response) => {
       isbn,
       tipe,
       kategori,
+      mataPelajaranId,
       deskripsi,
       coverUrl,
       urlEbook,
@@ -243,33 +366,107 @@ export const updateBuku = async (req: Request, res: Response) => {
       status,
     } = req.body;
 
-    const tipeFinal = tipe ?? buku.tipe;
+    const kategoriParsed = parseKategori(kategori);
 
-    if (tipeFinal === "EBOOK" && urlEbook === undefined && !buku.urlEbook) {
+    if (!kategoriParsed.valid) {
+      return res.status(400).json({
+        success: false,
+        message: "Kategori buku tidak valid",
+      });
+    }
+
+    const tahunParsed = parseInteger(tahunTerbit);
+
+    if (!tahunParsed.valid) {
+      return res.status(400).json({
+        success: false,
+        message: "Tahun terbit harus berupa angka bulat",
+      });
+    }
+
+    const jumlahParsed = parseInteger(jumlah);
+
+    if (
+      !jumlahParsed.valid ||
+      jumlahParsed.value === null ||
+      (jumlahParsed.value !== undefined && jumlahParsed.value < 0)
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Jumlah buku harus berupa angka bulat tidak negatif",
+      });
+    }
+
+    if (kodeBuku && kodeBuku !== buku.kodeBuku) {
+      const existing = await prisma.buku.findFirst({
+        where: {
+          sekolahId,
+          kodeBuku,
+          NOT: { id },
+        },
+        select: { id: true },
+      });
+
+      if (existing) {
+        return res.status(409).json({
+          success: false,
+          message: "Kode buku sudah digunakan",
+        });
+      }
+    }
+
+    if (mataPelajaranId) {
+      const valid = await mataPelajaranValid(sekolahId, mataPelajaranId);
+
+      if (!valid) {
+        return res.status(400).json({
+          success: false,
+          message: "Mata pelajaran tidak ditemukan",
+        });
+      }
+    }
+
+    const tipeFinal = tipe ?? buku.tipe;
+    const urlEbookFinal = urlEbook === undefined ? buku.urlEbook : urlEbook;
+
+    if (tipeFinal === "EBOOK" && !urlEbookFinal) {
       return res.status(400).json({
         success: false,
         message: "URL e-book wajib diisi untuk buku digital",
       });
     }
 
+    const sedangDipinjam = await prisma.peminjamanBuku.count({
+      where: {
+        bukuId: id,
+        status: "dipinjam",
+        dihapusPada: null,
+      },
+    });
+
     let jumlahFinal = buku.jumlah;
     let jumlahTersediaFinal = buku.jumlahTersedia;
 
     if (tipeFinal === "EBOOK") {
+      if (sedangDipinjam > 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Buku tidak dapat diubah menjadi e-book karena masih ada peminjaman aktif",
+        });
+      }
+
       jumlahFinal = 0;
       jumlahTersediaFinal = 0;
-    } else if (jumlah !== undefined) {
-      const sedangDipinjam = buku.jumlah - buku.jumlahTersedia;
-
-      if (jumlah < sedangDipinjam) {
+    } else if (jumlahParsed.value !== undefined) {
+      if (jumlahParsed.value < sedangDipinjam) {
         return res.status(400).json({
           success: false,
           message: "Jumlah buku tidak boleh lebih kecil dari jumlah yang sedang dipinjam",
         });
       }
 
-      jumlahFinal = jumlah;
-      jumlahTersediaFinal = jumlah - sedangDipinjam;
+      jumlahFinal = jumlahParsed.value;
+      jumlahTersediaFinal = jumlahParsed.value - sedangDipinjam;
     }
 
     const updated = await prisma.buku.update({
@@ -283,10 +480,12 @@ export const updateBuku = async (req: Request, res: Response) => {
         judul,
         penulis,
         penerbit,
-        tahunTerbit,
+        tahunTerbit: tahunParsed.value,
         isbn,
         tipe,
-        kategori,
+        kategori: kategoriParsed.value,
+        mataPelajaranId:
+          mataPelajaranId === undefined ? undefined : mataPelajaranId || null,
         deskripsi,
         coverUrl,
         urlEbook,
@@ -302,7 +501,14 @@ export const updateBuku = async (req: Request, res: Response) => {
       message: "Buku berhasil diperbarui",
       data: updated,
     });
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.code === "P2002") {
+      return res.status(409).json({
+        success: false,
+        message: "Kode buku sudah digunakan",
+      });
+    }
+
     console.error(error);
 
     return res.status(500).json({
@@ -330,6 +536,21 @@ export const deleteBuku = async (req: Request, res: Response) => {
       return res.status(404).json({
         success: false,
         message: "Buku tidak ditemukan",
+      });
+    }
+
+    const sedangDipinjam = await prisma.peminjamanBuku.count({
+      where: {
+        bukuId: id,
+        status: "dipinjam",
+        dihapusPada: null,
+      },
+    });
+
+    if (sedangDipinjam > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Buku tidak dapat dihapus karena masih ada peminjaman aktif",
       });
     }
 
@@ -362,11 +583,30 @@ export const pinjamBuku = async (req: Request, res: Response) => {
     const sekolahId = (req as any).user.sekolahId;
     const penggunaId = (req as any).user.userId;
 
-    const {
-      bukuId,
-      tanggalJatuhTempo,
-      catatan,
-    } = req.body;
+    const { bukuId, tanggalJatuhTempo, catatan } = req.body;
+
+    if (!bukuId || !tanggalJatuhTempo) {
+      return res.status(400).json({
+        success: false,
+        message: "Buku dan tanggal jatuh tempo wajib diisi",
+      });
+    }
+
+    const jatuhTempo = new Date(tanggalJatuhTempo);
+
+    if (Number.isNaN(jatuhTempo.getTime())) {
+      return res.status(400).json({
+        success: false,
+        message: "Format tanggal jatuh tempo tidak valid",
+      });
+    }
+
+    if (jatuhTempo.getTime() < new Date().setHours(0, 0, 0, 0)) {
+      return res.status(400).json({
+        success: false,
+        message: "Tanggal jatuh tempo tidak boleh sebelum hari ini",
+      });
+    }
 
     const result = await prisma.$transaction(async (tx) => {
       const buku = await tx.buku.findFirst({
@@ -389,10 +629,6 @@ export const pinjamBuku = async (req: Request, res: Response) => {
         throw new Error("BUKU_NOT_ACTIVE");
       }
 
-      if (buku.jumlahTersedia <= 0) {
-        throw new Error("STOCK_EMPTY");
-      }
-
       const peminjamanAktif = await tx.peminjamanBuku.findFirst({
         where: {
           bukuId,
@@ -406,6 +642,24 @@ export const pinjamBuku = async (req: Request, res: Response) => {
         throw new Error("ALREADY_BORROWED");
       }
 
+      const stokUpdate = await tx.buku.updateMany({
+        where: {
+          id: bukuId,
+          jumlahTersedia: {
+            gt: 0,
+          },
+        },
+        data: {
+          jumlahTersedia: {
+            decrement: 1,
+          },
+        },
+      });
+
+      if (stokUpdate.count === 0) {
+        throw new Error("STOCK_EMPTY");
+      }
+
       const peminjaman = await tx.peminjamanBuku.create({
         data: {
           sekolahId,
@@ -415,7 +669,7 @@ export const pinjamBuku = async (req: Request, res: Response) => {
           dibuatOleh: penggunaId,
 
           nomorPeminjaman: generateNomorPeminjaman(),
-          tanggalJatuhTempo: new Date(tanggalJatuhTempo),
+          tanggalJatuhTempo: jatuhTempo,
           catatan,
 
           status: "dipinjam",
@@ -423,17 +677,6 @@ export const pinjamBuku = async (req: Request, res: Response) => {
 
         include: {
           buku: true,
-        },
-      });
-
-      await tx.buku.update({
-        where: {
-          id: bukuId,
-        },
-        data: {
-          jumlahTersedia: {
-            decrement: 1,
-          },
         },
       });
 
@@ -446,18 +689,26 @@ export const pinjamBuku = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (error: any) {
-    const messages: Record<string, string> = {
-      BUKU_NOT_FOUND: "Buku tidak ditemukan",
-      EBOOK_NOT_BORROWABLE: "E-book tidak memerlukan proses peminjaman",
-      BUKU_NOT_ACTIVE: "Buku sedang tidak aktif",
-      STOCK_EMPTY: "Stok buku sedang habis",
-      ALREADY_BORROWED: "Pengguna masih memiliki peminjaman aktif untuk buku ini",
+    const messages: Record<string, { status: number; message: string }> = {
+      BUKU_NOT_FOUND: { status: 404, message: "Buku tidak ditemukan" },
+      EBOOK_NOT_BORROWABLE: {
+        status: 400,
+        message: "E-book tidak memerlukan proses peminjaman",
+      },
+      BUKU_NOT_ACTIVE: { status: 400, message: "Buku sedang tidak aktif" },
+      STOCK_EMPTY: { status: 400, message: "Stok buku sedang habis" },
+      ALREADY_BORROWED: {
+        status: 400,
+        message: "Pengguna masih memiliki peminjaman aktif untuk buku ini",
+      },
     };
 
-    if (messages[error.message]) {
-      return res.status(400).json({
+    const mapped = messages[error?.message];
+
+    if (mapped) {
+      return res.status(mapped.status).json({
         success: false,
-        message: messages[error.message],
+        message: mapped.message,
       });
     }
 
@@ -534,14 +785,14 @@ export const kembalikanBuku = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (error: any) {
-    if (error.message === "PEMINJAMAN_NOT_FOUND") {
+    if (error?.message === "PEMINJAMAN_NOT_FOUND") {
       return res.status(404).json({
         success: false,
         message: "Data peminjaman tidak ditemukan",
       });
     }
 
-    if (error.message === "ALREADY_RETURNED") {
+    if (error?.message === "ALREADY_RETURNED") {
       return res.status(400).json({
         success: false,
         message: "Buku sudah dikembalikan",

@@ -29,6 +29,7 @@ model Pengguna {
   nis      String? @db.VarChar(20)
   jabatan  String? @db.VarChar(100)
   golongan String? @db.VarChar(50)
+  shiftKerja  String? @map("shift_kerja") @db.VarChar(20)
 
   nik           String?   @unique @db.VarChar(20)
   alamatKtp     String?   @map("alamat_ktp") @db.Text
@@ -93,8 +94,8 @@ model Pengguna {
   asetDikembalikan       PeminjamanAset[] @relation("SiswaPengembaliAset")
 
   peminjamanBuku PeminjamanBuku[]
-  izinDiajukan  PermohonanIzin[] @relation("PemohonIzin")
-  izinDisetujui PermohonanIzin[] @relation("PenyetujuIzin")
+  izinDiajukan   PermohonanIzin[] @relation("PemohonIzin")
+  izinDisetujui  PermohonanIzin[] @relation("PenyetujuIzin")
 
   @@map("pengguna")
 }
@@ -574,6 +575,7 @@ model MataPelajaran {
 
   sekolah    Sekolah      @relation(fields: [sekolahId], references: [id])
   kelasMapel KelasMapel[]
+  bukus      Buku[]
 
   @@map("mata_pelajaran")
 }
@@ -695,24 +697,24 @@ model Absensi {
 }
 
 model PermohonanIzin {
-  id             String    @id @default(uuid())
-  sekolahId      String    @map("sekolah_id")
-  penggunaId     String    @map("pengguna_id")
-  penyetujuId    String?   @map("penyetuju_id") 
-  
-  jenis          String    @db.VarChar(20) 
-  tanggalMulai   DateTime  @map("tanggal_mulai") @db.Date
-  tanggalSelesai DateTime  @map("tanggal_selesai") @db.Date
-  alasan         String    @db.Text
-  urlBukti       String?   @map("url_bukti") @db.VarChar(255)
-  status         String    @default("menunggu") @db.VarChar(20) 
-  catatan        String?   @db.Text
+  id          String  @id @default(uuid())
+  sekolahId   String  @map("sekolah_id")
+  penggunaId  String  @map("pengguna_id")
+  penyetujuId String? @map("penyetuju_id")
 
-  dibuatPada     DateTime  @default(now()) @map("dibuat_pada") @db.Timestamp()
-  diperbaruiPada DateTime  @updatedAt @map("diperbarui_pada") @db.Timestamp()
+  jenis          String   @db.VarChar(20)
+  tanggalMulai   DateTime @map("tanggal_mulai") @db.Date
+  tanggalSelesai DateTime @map("tanggal_selesai") @db.Date
+  alasan         String   @db.Text
+  urlBukti       String?  @map("url_bukti") @db.VarChar(255)
+  status         String   @default("menunggu") @db.VarChar(20)
+  catatan        String?  @db.Text
 
-  sekolah   Sekolah  @relation(fields: [sekolahId], references: [id])
-  pengguna  Pengguna @relation("PemohonIzin", fields: [penggunaId], references: [id])
+  dibuatPada     DateTime @default(now()) @map("dibuat_pada") @db.Timestamp()
+  diperbaruiPada DateTime @updatedAt @map("diperbarui_pada") @db.Timestamp()
+
+  sekolah   Sekolah   @relation(fields: [sekolahId], references: [id])
+  pengguna  Pengguna  @relation("PemohonIzin", fields: [penggunaId], references: [id])
   penyetuju Pengguna? @relation("PenyetujuIzin", fields: [penyetujuId], references: [id])
 
   @@map("permohonan_izin")
@@ -1131,7 +1133,7 @@ model LaporanKerusakan {
 }
 
 // 5. CMS & PPDB
-  model HalamanCms {
+model HalamanCms {
   id             String    @id @default(uuid())
   sekolahId      String    @map("sekolah_id")
   dibuatOleh     String?   @map("dibuat_oleh")
@@ -1397,6 +1399,25 @@ model AsesmenMinatBakat {
   @@map("asesmen_minat_bakat")
 }
 
+enum KategoriBuku {
+  PELAJARAN
+  NOVEL
+  KOMIK
+  ENSIKLOPEDIA
+  KAMUS
+  MAJALAH
+  JURNAL
+  BIOGRAFI
+  AGAMA
+  TEKNOLOGI
+  SAINS
+  SEJARAH
+  BAHASA
+  MATEMATIKA
+  FIKSI
+  NON_FIKSI
+}
+
 model Buku {
   id             String  @id @default(uuid())
   sekolahId      String  @map("sekolah_id")
@@ -1411,8 +1432,12 @@ model Buku {
   tahunTerbit Int?    @map("tahun_terbit")
   isbn        String? @db.VarChar(30)
 
-  tipe      String  @db.VarChar(20)
-  kategori  String? @db.VarChar(50)
+  tipe     String        @db.VarChar(20)
+  kategori KategoriBuku?
+
+  mataPelajaranId String?        @map("mata_pelajaran_id")
+  mataPelajaran   MataPelajaran? @relation(fields: [mataPelajaranId], references: [id])
+
   deskripsi String? @db.Text
   coverUrl  String? @map("cover_url") @db.VarChar(255)
   urlEbook  String? @map("url_ebook") @db.VarChar(255)

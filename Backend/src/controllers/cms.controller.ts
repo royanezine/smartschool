@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import { Prisma } from "@prisma/client";
 import { prisma } from "../config/db";
 import { AppError } from "../utils/appError";
 import { successResponse } from "../utils/responseFormatter";
@@ -7,6 +8,12 @@ import {
   artikelCmsSchema,
   halamanCmsSchema,
 } from "../validations/cms.validation";
+import { temaWarnaSchema } from "../validations/tema.validation";
+import {
+  KELOMPOK_TEMA,
+  bangunTema,
+  normalisasiHex,
+} from "../utils/temaDefault";
 
 // === KATEGORI ARTIKEL ===
 export const createKategoriArtikel = async (req: Request, res: Response, next: NextFunction) => {
@@ -211,6 +218,104 @@ export const deleteHalamanCms = async (req: Request, res: Response, next: NextFu
       data: { dihapusPada: new Date() },
     });
     return successResponse(res, "Halaman berhasil dihapus", null, 200);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// === TEMA WARNA (dikonsumsi FE) ===
+
+// GET /cms/tema -> default + override sekolah, format hex & rgb
+export const getTemaWarna = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const sekolahId = (req as any).user.sekolahId as string | undefined;
+
+    const overrides = sekolahId
+      ? await prisma.pengaturanSistem.findMany({
+          where: { sekolahId, kelompok: KELOMPOK_TEMA, dihapusPada: null },
+          select: { kunci: true, nilai: true },
+        })
+      : [];
+
+    return successResponse(res, "Berhasil mengambil tema warna", bangunTema(overrides), 200);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// PUT /cms/tema -> simpan/ubah warna (parsial, hanya yang dikirim)
+export const updateTemaWarna = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { sekolahId, userId } = (req as any).user;
+    if (!sekolahId) throw new AppError("Sekolah tidak ditemukan", 400);
+
+    const validated = temaWarnaSchema.parse(req.body);
+
+    const existing = await prisma.pengaturanSistem.findMany({
+      where: { sekolahId, kelompok: KELOMPOK_TEMA, dihapusPada: null },
+      select: { id: true, kunci: true },
+    });
+    const idByKunci = new Map(existing.map((e) => [e.kunci, e.id]));
+
+    const ops: Prisma.PrismaPromise<unknown>[] = [];
+
+    for (const [group, warna] of Object.entries(validated)) {
+      if (!warna) continue;
+      for (const [key, value] of Object.entries(warna)) {
+        const kunci = `warna.${group}.${key}`;
+        const hex = normalisasiHex(value);
+        const existingId = idByKunci.get(kunci);
+
+        if (existingId) {
+          ops.push(
+            prisma.pengaturanSistem.update({
+              where: { id: existingId },
+              data: { nilai: hex, diperbaruiOleh: userId },
+            }),
+          );
+        } else {
+          ops.push(
+            prisma.pengaturanSistem.create({
+              data: {
+                sekolahId,
+                kunci,
+                nilai: hex,
+                tipeData: "color",
+                kelompok: KELOMPOK_TEMA,
+                keterangan: `Warna ${group}.${key}`,
+                dibuatOleh: userId,
+              },
+            }),
+          );
+        }
+      }
+    }
+
+    await prisma.$transaction(ops);
+
+    const overrides = await prisma.pengaturanSistem.findMany({
+      where: { sekolahId, kelompok: KELOMPOK_TEMA, dihapusPada: null },
+      select: { kunci: true, nilai: true },
+    });
+
+    return successResponse(res, "Tema warna berhasil diperbarui", bangunTema(overrides), 200);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// DELETE /cms/tema -> reset ke warna default
+export const resetTemaWarna = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { sekolahId, userId } = (req as any).user;
+    if (!sekolahId) throw new AppError("Sekolah tidak ditemukan", 400);
+
+    await prisma.pengaturanSistem.updateMany({
+      where: { sekolahId, kelompok: KELOMPOK_TEMA, dihapusPada: null },
+      data: { dihapusPada: new Date(), dihapusOleh: userId },
+    });
+
+    return successResponse(res, "Tema warna dikembalikan ke default", bangunTema([]), 200);
   } catch (error) {
     next(error);
   }

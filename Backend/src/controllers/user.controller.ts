@@ -1,13 +1,14 @@
 import { Response } from "express";
 import { AuthRequest } from "../middlewares/auth.middleware";
 import { prisma } from "../config/db";
-import bycrypt from "bcryptjs";
+import bcrypt from "bcryptjs";
 import { paginatedResponse, successResponse } from "../utils/responseFormatter";
 import { normalizeRole, canManageRole } from "../utils/rbac";
 import { Prisma } from "@prisma/client";
 import { AppError } from "../utils/appError";
-import bcrypt from "bcryptjs";
-import { NextFunction } from "express";
+import { normalizeShiftKerja } from "../utils/shiftKerja";
+
+const isGuru = (roleName?: string | null) => normalizeRole(roleName) === "guru";
 
 export const getUsers = async (req: AuthRequest, res: Response) => {
   try {
@@ -26,6 +27,7 @@ export const getUsers = async (req: AuthRequest, res: Response) => {
     const search = req.query.search as string;
     const requestedRole = req.query.role as string;
     const status = req.query.status as string;
+    const shiftKerjaQuery = req.query.shiftKerja as string | undefined;
     const sortBy = (req.query.sortBy as string) || "dibuatPada";
     const sortOrder = (req.query.sortOrder as "asc" | "desc") || "desc";
 
@@ -54,6 +56,17 @@ export const getUsers = async (req: AuthRequest, res: Response) => {
       AND.push({
         status,
       });
+    }
+
+    if (shiftKerjaQuery) {
+      const shift = normalizeShiftKerja(shiftKerjaQuery);
+      if (!shift) {
+        return res.status(400).json({
+          success: false,
+          message: "Filter shiftKerja tidak valid (pagi / siang)",
+        });
+      }
+      AND.push({ shiftKerja: shift });
     }
 
     if (requestedRole) {
@@ -141,6 +154,7 @@ export const getUsers = async (req: AuthRequest, res: Response) => {
           dibuatPada: true,
           jabatan: true,
           golongan: true,
+          shiftKerja: true,
 
           sekolah: {
             select: {
@@ -215,6 +229,7 @@ export const createUser = async (req: AuthRequest, res: Response) => {
       kecamatan,
       kelurahan,
       kota,
+      shiftKerja,
     } = req.body;
 
     if (!namaPengguna || !email || !kataSandi || !namaLengkap || !peranId) {
@@ -248,7 +263,19 @@ export const createUser = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    const passwordHash = await bycrypt.hash(kataSandi, 10);
+    // Shift kerja hanya berlaku untuk Guru dan wajib diisi (pagi / siang)
+    let shiftValue: string | null = null;
+    if (isGuru(role.nama)) {
+      shiftValue = normalizeShiftKerja(shiftKerja);
+      if (!shiftValue) {
+        return res.status(400).json({
+          success: false,
+          message: "Shift kerja guru wajib diisi (pagi / siang)",
+        });
+      }
+    }
+
+    const passwordHash = await bcrypt.hash(kataSandi, 10);
 
     const user = await prisma.pengguna.create({
       data: {
@@ -273,6 +300,7 @@ export const createUser = async (req: AuthRequest, res: Response) => {
 
         jabatan: jabatan || null,
         golongan: golongan || null,
+        shiftKerja: shiftValue,
         nik: nik || null,
         namaAyah: namaAyah || null,
         pekerjaanAyah: pekerjaanAyah || null,
@@ -292,6 +320,7 @@ export const createUser = async (req: AuthRequest, res: Response) => {
         email: true,
         namaLengkap: true,
         status: true,
+        shiftKerja: true,
         sekolah: {
           select: { id: true, nama: true },
         },
@@ -350,24 +379,15 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
       kecamatan,
       kelurahan,
       kota,
+      shiftKerja,
     } = req.body;
-
-    const existingUser = await prisma.pengguna.findUnique({
-      where: { id },
-    });
-
-    if (!existingUser) {
-      return res.status(404).json({
-        success: false,
-        message: "Pengguna tidak ditemukan",
-      });
-    }
 
     const target = await prisma.pengguna.findUnique({
       where: { id },
       select: {
         id: true,
         sekolahId: true,
+        shiftKerja: true,
         peran: {
           select: {
             nama: true,
@@ -402,6 +422,23 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
       }
     }
 
+    // Tentukan role akhir (role lama atau role baru kalau peranId diubah)
+    const wasGuru = isGuru(target.peran?.nama);
+    let finalRoleName: string | null | undefined = target.peran?.nama;
+
+    if (peranId !== undefined && peranId !== null) {
+      const newRole = await prisma.peran.findUnique({ where: { id: peranId } });
+      if (!newRole) {
+        return res.status(400).json({
+          success: false,
+          message: "Role tidak ditemukan",
+        });
+      }
+      finalRoleName = newRole.nama;
+    }
+
+    const willBeGuru = isGuru(finalRoleName);
+
     const data: any = {
       ...(namaPengguna !== undefined && { namaPengguna }),
       ...(email !== undefined && { email }),
@@ -415,7 +452,7 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
       ...(jenisKelamin !== undefined && { jenisKelamin }),
       ...(tempatLahir !== undefined && { tempatLahir }),
       ...(tanggalLahir !== undefined && {
-        tanggalLahir: new Date(tanggalLahir),
+        tanggalLahir: tanggalLahir ? new Date(tanggalLahir) : null,
       }),
       ...(alamat !== undefined && { alamat }),
       ...(noTelepon !== undefined && { noTelepon }),
@@ -433,12 +470,34 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
       ...(alamatDomisili !== undefined && { alamatDomisili }),
       ...(kecamatan !== undefined && { kecamatan }),
       ...(kelurahan !== undefined && { kelurahan }),
-      ...(kota !== undefined && { kota }),
+      // FIX: field di schema bernama kotaKabupaten, bukan kota
+      ...(kota !== undefined && { kotaKabupaten: kota }),
     };
 
-    if (kataSandi) {
-      data.kataSandi = await bycrypt.hash(kataSandi, 10);
+    // Aturan shift kerja: hanya untuk Guru
+    if (willBeGuru) {
+      const roleBaruJadiGuru = !wasGuru;
+
+      if (shiftKerja !== undefined || roleBaruJadiGuru) {
+        const shiftValue = normalizeShiftKerja(shiftKerja);
+        if (!shiftValue) {
+          return res.status(400).json({
+            success: false,
+            message: "Shift kerja guru wajib diisi (pagi / siang)",
+          });
+        }
+        data.shiftKerja = shiftValue;
+      }
+    } else if (target.shiftKerja) {
+      // Bukan guru lagi -> bersihkan shift lama
+      data.shiftKerja = null;
     }
+
+    if (kataSandi) {
+      data.kataSandi = await bcrypt.hash(kataSandi, 10);
+    }
+
+    data.diperbaruiOleh = req.user?.userId;
 
     const user = await prisma.pengguna.update({
       where: { id },
@@ -449,6 +508,7 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
         email: true,
         namaLengkap: true,
         status: true,
+        shiftKerja: true,
         sekolah: {
           select: { id: true, nama: true },
         },
@@ -558,6 +618,7 @@ export const profile = async (req: AuthRequest, res: Response) => {
         nik: true,
         jabatan: true,
         golongan: true,
+        shiftKerja: true,
         jenisKelamin: true,
         tempatLahir: true,
         tanggalLahir: true,
@@ -637,6 +698,8 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
       tanggalLahir,
     } = req.body;
 
+    // shiftKerja sengaja tidak bisa diubah sendiri lewat profil;
+    // hanya admin lewat updateUser.
     const user = await prisma.pengguna.update({
       where: {
         id: req.user.userId,
@@ -649,7 +712,7 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
         ...(alamatDomisili !== undefined && { alamatDomisili }),
         ...(tempatLahir !== undefined && { tempatLahir }),
         ...(tanggalLahir !== undefined && {
-          tanggalLahir: new Date(tanggalLahir),
+          tanggalLahir: tanggalLahir ? new Date(tanggalLahir) : null,
         }),
       },
       select: {
@@ -661,6 +724,7 @@ export const updateProfile = async (req: AuthRequest, res: Response) => {
         noTelepon: true,
         alamat: true,
         alamatDomisili: true,
+        shiftKerja: true,
         status: true,
 
         sekolah: {
@@ -708,6 +772,7 @@ export const getUserById = async (req: AuthRequest, res: Response) => {
         nik: true,
         jabatan: true,
         golongan: true,
+        shiftKerja: true,
         jenisKelamin: true,
         tempatLahir: true,
         tanggalLahir: true,

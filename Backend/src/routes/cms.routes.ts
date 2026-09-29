@@ -15,11 +15,20 @@ import {
   getHalamanCms,
   updateHalamanCms,
   deleteHalamanCms,
+  getTemaWarna,
+  updateTemaWarna,
+  resetTemaWarna,
 } from "../controllers/cms.controller";
 
 const router = Router();
 
 router.use(authenticate, requireTenant);
+
+// Tema warna: GET terbuka untuk semua user login (guru/siswa juga butuh
+// warna badge), tanpa requireIzin. Ubah/reset butuh izin CMS.
+router.get("/tema", getTemaWarna);
+router.put("/tema", requireIzin("cms.update"), updateTemaWarna);
+router.delete("/tema", requireIzin("cms.delete"), resetTemaWarna);
 
 router.post(
   "/kategori-artikel",
