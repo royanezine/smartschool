@@ -1,12 +1,5 @@
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
-
-function getApiUrl() {
-  if (!API_URL) {
-    throw new Error("NEXT_PUBLIC_API_URL belum dikonfigurasi.");
-  }
-
-  return API_URL;
-}
+const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export async function apiFetch(endpoint, options = {}) {
   const token =
@@ -14,50 +7,77 @@ export async function apiFetch(endpoint, options = {}) {
       ? localStorage.getItem("token")
       : null;
 
-  const headers = new Headers(options.headers || {});
+  const isFormData =
+    typeof FormData !== "undefined" &&
+    options.body instanceof FormData;
 
-  headers.set("Content-Type", "application/json");
-  headers.set("Accept", "application/json");
+  const headers = {
+    ...(options.headers || {}),
+  };
 
-  if (token) {
-    headers.set("Authorization", `Bearer ${token}`);
+  // Jangan set Content-Type untuk FormData.
+  // Browser akan otomatis membuat:
+  // multipart/form-data; boundary=...
+  if (!isFormData) {
+    headers["Content-Type"] = "application/json";
   }
 
-  const response = await fetch(`${getApiUrl()}${endpoint}`, {
+  if (token) {
+    headers.Authorization = `Bearer ${token}`;
+  }
+
+  const response = await fetch(`${API_URL}${endpoint}`, {
     ...options,
     headers,
   });
 
+  /*
+   * Ambil response sesuai Content-Type.
+   *
+   * JSON:
+   * application/json
+   *
+   * File / text:
+   * text/plain, application/octet-stream, dll.
+   */
+  const contentType =
+    response.headers.get("content-type") || "";
+
   let data = null;
 
-  const contentType = response.headers.get("content-type");
-
-  if (contentType && contentType.includes("application/json")) {
+  if (contentType.includes("application/json")) {
     try {
       data = await response.json();
-    } catch {
+    } catch (error) {
+      console.error("Response JSON tidak valid:", error);
       data = null;
     }
+  } else {
+    const text = await response.text();
+
+    data = text || null;
   }
 
-  if (response.status === 401) {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
-
-    window.location.href = "/login";
-
-    throw new Error(
-      data?.message || "Sesi login telah berakhir."
-    );
-  }
-
+  /*
+   * HANDLE ERROR
+   */
   if (!response.ok) {
-    throw new Error(
-      data?.message ||
-        data?.error ||
-        `Request gagal. Status: ${response.status}`
-    );
+    let message = `Request gagal. Status: ${response.status}`;
+
+    if (data && typeof data === "object") {
+      message =
+        data.message ||
+        data.error ||
+        message;
+    } else if (typeof data === "string" && data.trim()) {
+      message = data;
+    }
+
+    throw new Error(message);
   }
 
+  /*
+   * HANDLE SUCCESS
+   */
   return data;
 }

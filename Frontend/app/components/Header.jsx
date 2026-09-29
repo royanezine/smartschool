@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { useTheme } from "next-themes";
 import {
   Bell,
   Search,
@@ -35,9 +36,10 @@ export default function Header({
   const router = useRouter();
   const pathname = usePathname();
 
+  const { theme, setTheme } = useTheme();
+
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
-  const [isDarkMode, setIsDarkMode] = useState(false);
 
   const [notifList, setNotifList] = useState(
     Array.isArray(notifications) ? notifications : []
@@ -223,6 +225,7 @@ export default function Header({
        * Jangan langsung menghapus notifikasi lama
        * ketika polling gagal.
        */
+
       setNotifError(
         error?.message ||
           "Gagal mengambil notifikasi."
@@ -286,6 +289,7 @@ export default function Header({
     }
 
     const now = new Date();
+
     const diff =
       now.getTime() - date.getTime();
 
@@ -455,21 +459,21 @@ export default function Header({
       label: "Profil Saya",
       icon: User,
       path: currentPathMap.profile,
-      iconBg: "bg-blue-50",
+      iconBg: "bg-blue-50 dark:bg-blue-950/40",
       iconColor: "text-blue-500",
     },
     {
       label: "Pengaturan",
       icon: Settings,
       path: currentPathMap.pengaturan,
-      iconBg: "bg-purple-50",
+      iconBg: "bg-purple-50 dark:bg-purple-950/40",
       iconColor: "text-purple-500",
     },
     {
       label: "Bantuan",
       icon: HelpCircle,
       path: currentPathMap.bantuan,
-      iconBg: "bg-emerald-50",
+      iconBg: "bg-emerald-50 dark:bg-emerald-950/40",
       iconColor: "text-emerald-500",
     },
   ];
@@ -479,7 +483,15 @@ export default function Header({
   // ============================================================
 
   return (
-    <header className="h-16 sticky top-0 z-30 bg-white/95 backdrop-blur-xl border-b border-slate-200/70">
+    <header
+      className="
+        h-16 sticky top-0 z-30
+        bg-white/95 dark:bg-slate-900/95
+        backdrop-blur-xl
+        border-b border-slate-200/70
+        dark:border-slate-700/70
+      "
+    >
       <div className="h-full flex items-center justify-between px-4 md:px-6 lg:px-8">
 
         {/* ======================================================
@@ -490,17 +502,52 @@ export default function Header({
           <div className="relative hidden lg:block">
             <Search
               size={16}
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+              className="
+                absolute left-3.5 top-1/2
+                -translate-y-1/2
+                text-slate-400
+              "
             />
 
             <input
               type="text"
               placeholder="Cari menu, fitur, atau halaman..."
-              className="pl-10 pr-16 py-2 bg-slate-50/80 border border-slate-200/60 rounded-xl text-sm placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 w-64 xl:w-80 transition-all duration-200 hover:bg-slate-50"
+              className="
+                pl-10 pr-16 py-2
+                bg-slate-50/80 dark:bg-slate-800/80
+                border border-slate-200/60 dark:border-slate-700
+                rounded-xl
+                text-sm
+                text-slate-900 dark:text-white
+                placeholder:text-slate-400
+                focus:outline-none
+                focus:ring-2 focus:ring-blue-500/20
+                focus:border-blue-500
+                w-64 xl:w-80
+                transition-all duration-200
+                hover:bg-slate-50
+                dark:hover:bg-slate-800
+              "
             />
 
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[10px] font-mono text-slate-400">
-              <kbd className="bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 flex items-center gap-0.5">
+            <div
+              className="
+                absolute right-3 top-1/2
+                -translate-y-1/2
+                flex items-center gap-1
+                text-[10px] font-mono
+                text-slate-400
+              "
+            >
+              <kbd
+                className="
+                  bg-slate-100 dark:bg-slate-700
+                  px-1.5 py-0.5
+                  rounded
+                  border border-slate-200 dark:border-slate-600
+                  flex items-center gap-0.5
+                "
+              >
                 <Command size={10} />
                 K
               </kbd>
@@ -509,7 +556,16 @@ export default function Header({
 
           <button
             type="button"
-            className="lg:hidden p-2 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-all"
+            className="
+              lg:hidden
+              p-2 rounded-xl
+              hover:bg-slate-100
+              dark:hover:bg-slate-800
+              text-slate-400
+              hover:text-slate-600
+              dark:hover:text-slate-200
+              transition-all
+            "
             aria-label="Cari"
           >
             <Search size={19} />
@@ -529,18 +585,30 @@ export default function Header({
           <button
             type="button"
             onClick={() =>
-              setIsDarkMode(
-                (current) => !current
+              setTheme(
+                theme === "dark"
+                  ? "light"
+                  : "dark"
               )
             }
-            className="p-2 rounded-xl hover:bg-slate-100 transition-all duration-200 text-slate-400 hover:text-slate-600 hover:scale-105 relative group"
+            className="
+              p-2 rounded-xl
+              hover:bg-slate-100
+              dark:hover:bg-slate-800
+              transition-all duration-200
+              text-slate-400
+              hover:text-slate-600
+              dark:hover:text-slate-200
+              hover:scale-105
+              relative group
+            "
             aria-label={
-              isDarkMode
+              theme === "dark"
                 ? "Mode terang"
                 : "Mode gelap"
             }
           >
-            {isDarkMode ? (
+            {theme === "dark" ? (
               <Sun
                 size={18}
                 className="text-yellow-500"
@@ -549,8 +617,25 @@ export default function Header({
               <Moon size={18} />
             )}
 
-            <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-slate-800 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
-              {isDarkMode
+            <span
+              className="
+                absolute -bottom-8
+                left-1/2
+                -translate-x-1/2
+                px-2 py-0.5
+                bg-slate-800
+                text-white
+                text-[10px]
+                rounded
+                opacity-0
+                group-hover:opacity-100
+                transition-opacity duration-200
+                whitespace-nowrap
+                pointer-events-none
+                z-50
+              "
+            >
+              {theme === "dark"
                 ? "Mode Terang"
                 : "Mode Gelap"}
             </span>
@@ -568,7 +653,17 @@ export default function Header({
                   (current) => !current
                 )
               }
-              className="p-2 rounded-xl hover:bg-slate-100 transition-all duration-200 text-slate-400 hover:text-slate-600 hover:scale-105 relative group"
+              className="
+                p-2 rounded-xl
+                hover:bg-slate-100
+                dark:hover:bg-slate-800
+                transition-all duration-200
+                text-slate-400
+                hover:text-slate-600
+                dark:hover:text-slate-200
+                hover:scale-105
+                relative group
+              "
               aria-label="Notifikasi"
             >
               <Bell size={19} />
@@ -591,13 +686,40 @@ export default function Header({
             </button>
 
             {isNotifOpen && (
-              <div className="absolute right-0 mt-2 w-[360px] max-w-[calc(100vw-24px)] bg-white rounded-2xl shadow-2xl border border-slate-200/60 py-1 z-40 overflow-hidden">
+              <div
+                className="
+                  absolute right-0 mt-2
+                  w-[360px]
+                  max-w-[calc(100vw-24px)]
+                  bg-white dark:bg-slate-900
+                  rounded-2xl
+                  shadow-2xl
+                  border border-slate-200/60
+                  dark:border-slate-700
+                  py-1
+                  z-40
+                  overflow-hidden
+                "
+              >
 
                 {/* HEADER */}
 
-                <div className="px-4 py-3 border-b border-slate-100 flex items-center justify-between">
+                <div
+                  className="
+                    px-4 py-3
+                    border-b border-slate-100
+                    dark:border-slate-700
+                    flex items-center justify-between
+                  "
+                >
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
+                    <div
+                      className="
+                        w-8 h-8 rounded-lg
+                        bg-blue-50 dark:bg-blue-950/40
+                        flex items-center justify-center
+                      "
+                    >
                       <Bell
                         size={15}
                         className="text-blue-500"
@@ -605,7 +727,7 @@ export default function Header({
                     </div>
 
                     <div>
-                      <p className="text-sm font-semibold text-slate-700">
+                      <p className="text-sm font-semibold text-slate-700 dark:text-slate-100">
                         Notifikasi
                       </p>
 
@@ -623,7 +745,14 @@ export default function Header({
                       onClick={
                         handleMarkAllAsRead
                       }
-                      className="flex items-center gap-1.5 text-[10px] text-blue-600 font-medium hover:text-blue-700 hover:underline"
+                      className="
+                        flex items-center gap-1.5
+                        text-[10px]
+                        text-blue-600
+                        font-medium
+                        hover:text-blue-700
+                        hover:underline
+                      "
                     >
                       <CheckCheck size={13} />
                       Tandai semua
@@ -647,7 +776,7 @@ export default function Header({
                     </div>
                   ) : notifError ? (
                     <div className="px-4 py-8 text-center">
-                      <div className="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center mx-auto mb-2">
+                      <div className="w-10 h-10 rounded-full bg-red-50 dark:bg-red-950/30 flex items-center justify-center mx-auto mb-2">
                         <Bell
                           size={18}
                           className="text-red-400"
@@ -686,9 +815,9 @@ export default function Header({
                               notif
                             )
                           }
-                          className={`w-full text-left px-4 py-3 hover:bg-slate-50 transition-all duration-150 border-l-4 ${
+                          className={`w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-150 border-l-4 ${
                             !notif.dibaca
-                              ? "border-l-blue-500 bg-blue-50/30"
+                              ? "border-l-blue-500 bg-blue-50/30 dark:bg-blue-950/20"
                               : "border-l-transparent"
                           }`}
                         >
@@ -696,8 +825,8 @@ export default function Header({
                             <div
                               className={`mt-0.5 w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
                                 !notif.dibaca
-                                  ? "bg-blue-100 text-blue-600"
-                                  : "bg-slate-100 text-slate-400"
+                                  ? "bg-blue-100 dark:bg-blue-950/50 text-blue-600"
+                                  : "bg-slate-100 dark:bg-slate-800 text-slate-400"
                               }`}
                             >
                               <Bell size={14} />
@@ -708,8 +837,8 @@ export default function Header({
                                 <p
                                   className={`text-sm leading-tight ${
                                     !notif.dibaca
-                                      ? "font-semibold text-slate-700"
-                                      : "font-medium text-slate-600"
+                                      ? "font-semibold text-slate-700 dark:text-slate-100"
+                                      : "font-medium text-slate-600 dark:text-slate-300"
                                   }`}
                                 >
                                   {notif.judul ||
@@ -727,12 +856,12 @@ export default function Header({
 
                               <div className="flex items-center gap-2 mt-1.5">
                                 {notif.kategori && (
-                                  <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-slate-100 text-slate-500">
+                                  <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
                                     {notif.kategori}
                                   </span>
                                 )}
 
-                                <span className="text-[10px] text-slate-300">
+                                <span className="text-[10px] text-slate-300 dark:text-slate-500">
                                   {formatNotificationTime(
                                     notif.dibuatPada
                                   )}
@@ -744,14 +873,14 @@ export default function Header({
                       ))
                   ) : (
                     <div className="px-4 py-10 text-center">
-                      <div className="w-12 h-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
+                      <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-3">
                         <Bell
                           size={22}
                           className="text-slate-300"
                         />
                       </div>
 
-                      <p className="text-sm font-medium text-slate-500">
+                      <p className="text-sm font-medium text-slate-500 dark:text-slate-300">
                         Tidak ada notifikasi
                       </p>
 
@@ -764,7 +893,7 @@ export default function Header({
 
                 {/* FOOTER */}
 
-                <div className="px-4 py-2.5 border-t border-slate-100 bg-slate-50/50">
+                <div className="px-4 py-2.5 border-t border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
                   <button
                     type="button"
                     onClick={() => {
@@ -799,7 +928,15 @@ export default function Header({
                   (current) => !current
                 )
               }
-              className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl hover:bg-slate-100 transition-all duration-200 group"
+              className="
+                flex items-center gap-2.5
+                px-2.5 py-1.5
+                rounded-xl
+                hover:bg-slate-100
+                dark:hover:bg-slate-800
+                transition-all duration-200
+                group
+              "
               aria-label="Menu profil"
             >
               <div className="relative">
@@ -809,11 +946,11 @@ export default function Header({
                     "U"}
                 </div>
 
-                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-white shadow-sm" />
+                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-white dark:border-slate-900 shadow-sm" />
               </div>
 
               <div className="hidden md:block text-left">
-                <p className="text-sm font-semibold text-slate-700 leading-tight">
+                <p className="text-sm font-semibold text-slate-700 dark:text-slate-100 leading-tight">
                   {user?.name || "User"}
                 </p>
 
@@ -824,7 +961,7 @@ export default function Header({
 
               <ChevronDown
                 size={16}
-                className={`text-slate-400 transition-all duration-200 group-hover:text-slate-600 ${
+                className={`text-slate-400 transition-all duration-200 group-hover:text-slate-600 dark:group-hover:text-slate-200 ${
                   isProfileOpen
                     ? "rotate-180"
                     : ""
@@ -833,11 +970,24 @@ export default function Header({
             </button>
 
             {isProfileOpen && (
-              <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl shadow-2xl border border-slate-200/60 py-1 z-40 overflow-hidden">
+              <div
+                className="
+                  absolute right-0 mt-2
+                  w-56
+                  bg-white dark:bg-slate-900
+                  rounded-2xl
+                  shadow-2xl
+                  border border-slate-200/60
+                  dark:border-slate-700
+                  py-1
+                  z-40
+                  overflow-hidden
+                "
+              >
 
                 {/* ROLE */}
 
-                <div className="px-4 py-2 border-b border-slate-100 flex items-center gap-1.5 text-[10px] font-medium text-slate-500">
+                <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-700 flex items-center gap-1.5 text-[10px] font-medium text-slate-500 dark:text-slate-400">
                   <Crown
                     size={11}
                     className="text-yellow-500"
@@ -865,7 +1015,17 @@ export default function Header({
                         onClick={() =>
                           navigateTo(item.path)
                         }
-                        className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-slate-600 hover:bg-slate-50 transition-all duration-150 group"
+                        className="
+                          flex items-center gap-3
+                          w-full px-4 py-2.5
+                          text-sm
+                          text-slate-600
+                          dark:text-slate-300
+                          hover:bg-slate-50
+                          dark:hover:bg-slate-800
+                          transition-all duration-150
+                          group
+                        "
                       >
                         <div
                           className={`w-8 h-8 rounded-lg ${item.iconBg} flex items-center justify-center ${item.iconColor} group-hover:scale-110 transition-transform`}
@@ -883,13 +1043,21 @@ export default function Header({
 
                 {/* LOGOUT */}
 
-                <div className="border-t border-slate-100 pt-1">
+                <div className="border-t border-slate-100 dark:border-slate-700 pt-1">
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 transition-all duration-150 group"
+                    className="
+                      flex items-center gap-3
+                      w-full px-4 py-2.5
+                      text-sm text-red-600
+                      hover:bg-red-50
+                      dark:hover:bg-red-950/30
+                      transition-all duration-150
+                      group
+                    "
                   >
-                    <div className="w-8 h-8 rounded-lg bg-red-50 flex items-center justify-center text-red-400 group-hover:bg-red-100 group-hover:scale-110 transition-all">
+                    <div className="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-950/30 flex items-center justify-center text-red-400 group-hover:bg-red-100 dark:group-hover:bg-red-950/50 group-hover:scale-110 transition-all">
                       <LogOut size={16} />
                     </div>
 
@@ -901,7 +1069,7 @@ export default function Header({
 
                 {/* VERSION */}
 
-                <div className="px-4 py-2 border-t border-slate-100 bg-slate-50/50">
+                <div className="px-4 py-2 border-t border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
                   <p className="text-[10px] text-slate-400 text-center tracking-widest">
                     v2.0.0 • 2026
                   </p>

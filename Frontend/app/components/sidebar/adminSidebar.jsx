@@ -7,11 +7,12 @@ import {
   GraduationCap,
   Split,
   Globe2,
+  PackageCheck,
   CalendarDays,
   CalendarClock,
   CalendarCheck,
   BookOpen,
-  BookMarked,
+  Clock3,
   BookOpenCheck,
   BookUp,
   BookDown,
@@ -56,6 +57,9 @@ export const adminSidebarConfig = {
   email: "admin@smartschool.com",
 
   menuSections: [
+    // =====================================================
+    // DASHBOARD
+    // =====================================================
     {
       type: "item",
       key: "dashboard",
@@ -64,6 +68,20 @@ export const adminSidebarConfig = {
       path: "/admin/dashboard",
     },
 
+    // =====================================================
+    // MASTER SHIFT
+    // =====================================================
+    {
+      type: "item",
+      key: "masterShift",
+      icon: Clock3,
+      label: "Master Shift",
+      path: "/admin/presensi/master-shift",
+    },
+
+    // =====================================================
+    // PRESENSI & KEHADIRAN
+    // =====================================================
     {
       type: "item",
       key: "presensi",
@@ -105,6 +123,9 @@ export const adminSidebarConfig = {
       ],
     },
 
+    // =====================================================
+    // KEUANGAN & KAS
+    // =====================================================
     {
       type: "item",
       key: "keuangan",
@@ -152,11 +173,17 @@ export const adminSidebarConfig = {
       ],
     },
 
+    // =====================================================
+    // MASTER DATA
+    // =====================================================
     {
       type: "header",
       label: "MASTER DATA",
     },
 
+    // =====================================================
+    // PENGGUNA
+    // =====================================================
     {
       type: "item",
       key: "pengguna",
@@ -192,6 +219,9 @@ export const adminSidebarConfig = {
       ],
     },
 
+    // =====================================================
+    // AKADEMIK
+    // =====================================================
     {
       type: "item",
       key: "akademik",
@@ -204,19 +234,19 @@ export const adminSidebarConfig = {
           key: "tahunAjaran",
           icon: CalendarDays,
           label: "Tahun Ajaran",
-          path: "/admin/tahun-ajaran",
+          path: "/admin/akademik/tahun-ajaran",
         },
         {
           key: "kelas",
           icon: School,
           label: "Kelas",
-          path: "/admin/kelas",
+          path: "/admin/akademik/kelas",
         },
         {
           key: "jurusan",
           icon: Split,
           label: "Jurusan",
-          path: "/admin/jurusan",
+          path: "/admin/akademik/jurusan",
         },
         {
           key: "mataPelajaran",
@@ -233,6 +263,9 @@ export const adminSidebarConfig = {
       ],
     },
 
+    // =====================================================
+    // LMS & CBT
+    // =====================================================
     {
       type: "item",
       key: "lmsCbt",
@@ -274,6 +307,9 @@ export const adminSidebarConfig = {
       ],
     },
 
+    // =====================================================
+    // E-RAPORT
+    // =====================================================
     {
       type: "item",
       key: "eraport",
@@ -303,6 +339,9 @@ export const adminSidebarConfig = {
       ],
     },
 
+    // =====================================================
+    // BIMBINGAN KONSELING
+    // =====================================================
     {
       type: "item",
       key: "bk",
@@ -339,11 +378,14 @@ export const adminSidebarConfig = {
           key: "asesmenMinatBakat",
           icon: Brain,
           label: "Asesmen & Minat Bakat Siswa",
-          path: "/admin/bk/asesmen-minat-bakat",
+          path: "/admin/bk/asesment-minat-bakat",
         },
       ],
     },
 
+    // =====================================================
+    // PERPUSTAKAAN
+    // =====================================================
     {
       type: "item",
       key: "perpustakaan",
@@ -379,6 +421,9 @@ export const adminSidebarConfig = {
       ],
     },
 
+    // =====================================================
+    // SARPRAS
+    // =====================================================
     {
       type: "item",
       key: "sarpras",
@@ -417,9 +462,18 @@ export const adminSidebarConfig = {
           label: "Daftar Aset",
           path: "/admin/sarpras/gudang",
         },
+         {
+          key: "peminjaman",
+          icon: PackageCheck,
+          label: "Peminjaman",
+          path: "/admin/sarpras/peminjaman",
+        },
       ],
     },
 
+    // =====================================================
+    // SPMB
+    // =====================================================
     {
       type: "item",
       key: "spmb",
@@ -449,35 +503,41 @@ export const adminSidebarConfig = {
       ],
     },
 
+    // =====================================================
+    // CMS
+    // =====================================================
     {
       type: "item",
       key: "cms",
       icon: Globe2,
       label: "CMS",
-      path: "/cmsAdmin",
+      path: "/admin/cms",
 
       children: [
         {
           key: "cmsPages",
           icon: FileText,
           label: "Halaman Website",
-          path: "/cmsAdmin/pages",
+          path: "/admin/cms/pages",
         },
         {
           key: "cmsMedia",
           icon: FileInput,
           label: "Media, Files, Banner & Slider",
-          path: "/cmsAdmin/media",
+          path: "/admin/cms/media",
         },
         {
           key: "cmsSettings",
           icon: Settings2,
           label: "Sistem & Pengaturan",
-          path: "/cmsAdmin/settings",
+          path: "/admin/cms/pengaturan",
         },
       ],
     },
 
+    // =====================================================
+    // LANGGANAN
+    // =====================================================
     {
       type: "item",
       key: "langganan",
