@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import Sidebar from "../../components/Sidebar";
-import Header from "../../components/Header";
+import Sidebar from "../../../components/Sidebar";
+import Header from "../../../components/Header";
 
 import {
   Shield,
@@ -48,7 +48,7 @@ import {
 import {
   getRoles,
   deleteRole,
-} from "../../../services/role.service";
+} from "../../../../services/role.service";
 
 /* ============================================================
    ICON MAP

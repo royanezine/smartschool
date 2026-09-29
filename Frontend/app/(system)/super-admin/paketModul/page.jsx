@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import Header from "../../components/Header";
-import Sidebar from "../../components/Sidebar";
+import Header from "../../../components/Header";
+import Sidebar from "../../../components/Sidebar";
 
 import {
   Package,
@@ -44,7 +44,7 @@ import {
   getFitur,
   deletePaket,
   updatePaket,
-} from "../../../services/paket.service";
+} from "../../../../services/paket.service";
 
 /* =========================================================
    ICON MODULE

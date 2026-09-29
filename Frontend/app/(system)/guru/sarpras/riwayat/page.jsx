@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
-import Sidebar from "../../../components/Sidebar";
-import Header from "../../../components/Header";
+import Sidebar from "../../../../components/Sidebar";
+import Header from "../../../../components/Header";
 
 import {
   FileText,

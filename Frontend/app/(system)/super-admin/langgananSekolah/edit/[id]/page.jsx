@@ -2,10 +2,10 @@
 
 import { useState } from "react";
 import { useParams } from "next/navigation";
-import Sidebar from "../../../../components/Sidebar";
-import Header from "../../../../components/Header";
-import LanggananForm from "../../../../components/LanggananForm";
-import { dummyLangganan } from "../../../../../lib/data";
+import Sidebar from "../../../../../components/Sidebar";
+import Header from "../../../../../components/Header";
+import LanggananForm from "../../../../../components/LanggananForm";
+import { dummyLangganan } from "../../../../../../lib/data";
 
 export default function EditLanggananPage() {
   const params = useParams();

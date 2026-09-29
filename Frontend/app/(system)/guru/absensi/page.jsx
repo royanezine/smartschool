@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import Sidebar from "../../components/Sidebar";
-import Header from "../../components/Header";
+import Sidebar from "../../../components/Sidebar";
+import Header from "../../../components/Header";
 
 import {
   ClipboardCheck,
@@ -26,8 +26,8 @@ import {
   ChevronDown,
 } from "lucide-react";
 
-import { getAbsensiKelas } from "../../../services/absensi.service";
-import { getKelas } from "../../../services/kelas.service";
+import { getAbsensiKelas } from "../../../../services/absensi.service";
+import { getKelas } from "../../../../services/kelas.service";
 
 const STATUS_CONFIG = {
   hadir: {

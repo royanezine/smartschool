@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 
-import Sidebar from "../../../../components/Sidebar";
-import Header from "../../../../components/Header";
+import Sidebar from "../../../../../components/Sidebar";
+import Header from "../../../../../components/Header";
 
 import {
   ClipboardList,
@@ -29,7 +29,7 @@ import {
   ArrowRightLeft,
 } from "lucide-react";
 
-import { getDetailPeminjaman } from "../../../../../services/sarpras.service";
+import { getDetailPeminjaman } from "../../../../../../services/sarpras.service";
 
 // =========================================================
 // STATUS CONFIG — pakai tone biru & netral

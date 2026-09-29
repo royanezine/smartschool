@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import { useRouter, useParams } from "next/navigation";
-import Sidebar from "../../../../components/Sidebar";
-import Header from "../../../../components/Header";
-import { sekolahData } from "../../../../../lib/data";
+import Sidebar from "../../../../../components/Sidebar";
+import Header from "../../../../../components/Header";
+import { sekolahData } from "../../../../../../lib/data";
 import {
     School,
     MapPin,

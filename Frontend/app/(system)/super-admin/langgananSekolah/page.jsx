@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import Header from "../../components/Header";
-import Sidebar from "../../components/Sidebar";
+import Header from "../../../components/Header";
+import Sidebar from "../../../components/Sidebar";
 
 import {
   CreditCard,
@@ -20,7 +20,7 @@ import {
 
 import {
   getAllLangganan,
-} from "../../../services/langganan.service";
+} from "../../../../services/langganan.service";
 
 // =========================================================
 // FORMAT RUPIAH

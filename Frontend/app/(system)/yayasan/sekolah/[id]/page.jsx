@@ -3,9 +3,9 @@
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import Sidebar from "../../../components/Sidebar";
-import Header from "../../../components/Header";
-import { apiFetch } from "../../../../lib/api"; // sesuaikan path kalau beda
+import Sidebar from "../../../../components/Sidebar";
+import Header from "../../../../components/Header";
+import { apiFetch } from "../../../../../lib/api"; // sesuaikan path kalau beda
 import {
   School,
   ArrowLeft,

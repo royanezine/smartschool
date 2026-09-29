@@ -16,10 +16,10 @@ import {
   GraduationCap,
 } from "lucide-react";
 
-import Sidebar from "../../components/Sidebar";
-import Header from "../../components/Header";
+import Sidebar from "../../../components/Sidebar";
+import Header from "../../../components/Header";
 
-import { getJadwalMengajar } from "../../../services/jadwalMengajar.service";
+import { getJadwalMengajar } from "../../../../services/jadwalMengajar.service";
 
 const hariList = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
 

@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Sidebar from "../../components/Sidebar";
-import Header from "../../components/Header";
-import { apiFetch } from "../../../lib/api";
+import Sidebar from "../../../components/Sidebar";
+import Header from "../../../components/Header";
+import { apiFetch } from "../../../../lib/api";
 import {
   User,
   Lock,

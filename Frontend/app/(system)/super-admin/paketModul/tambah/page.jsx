@@ -2,8 +2,8 @@
 
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Header from "../../../components/Header";
-import Sidebar from "../../../components/Sidebar";
+import Header from "../../../../components/Header";
+import Sidebar from "../../../../components/Sidebar";
 
 import {
   Package,
@@ -24,7 +24,7 @@ import {
 import {
   getFitur,
   createPaket,
-} from "../../../../services/paket.service";
+} from "../../../../../services/paket.service";
 
 /* =========================================================
    ICON MAP

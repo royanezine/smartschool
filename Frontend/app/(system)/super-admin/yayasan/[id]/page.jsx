@@ -20,8 +20,8 @@ import {
     AlertCircle,
     Loader2,
 } from "lucide-react";
-import Sidebar from "../../../components/Sidebar";
-import Header from "../../../components/Header";
+import Sidebar from "../../../../components/Sidebar";
+import Header from "../../../../components/Header";
 import { useEffect, useState } from "react";
 
 export default function DetailYayasanPage() {

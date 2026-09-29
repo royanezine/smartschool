@@ -4,8 +4,8 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-import Sidebar from "../../components/Sidebar";
-import Header from "../../components/Header";
+import Sidebar from "../../../components/Sidebar";
+import Header from "../../../components/Header";
 
 import {
   Users,
@@ -33,7 +33,7 @@ import {
   getUsers,
   deleteUser,
   updateUserStatus,
-} from "../../../services/user.service";
+} from "../../../../services/user.service";
 
 export default function KelolaUserPage() {
   const router = useRouter();

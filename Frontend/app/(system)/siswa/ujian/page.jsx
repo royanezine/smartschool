@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import Sidebar from "../../components/Sidebar";
-import Header from "../../components/Header";
+import Sidebar from "../../../components/Sidebar";
+import Header from "../../../components/Header";
 
 import {
   Calendar,
@@ -28,10 +28,10 @@ import {
 import {
   getKelas,
   getKelasById,
-} from "../../../services/kelas.service";
+} from "../../../../services/kelas.service";
 
-import { getKelasMapel } from "../../../services/kelasMapel.service";
-import { getUjianByKelasMapel } from "../../../services/ujian.service";
+import { getKelasMapel } from "../../../../services/kelasMapel.service";
+import { getUjianByKelasMapel } from "../../../../services/ujian.service";
 
 // =========================================================
 // COLOR MAP

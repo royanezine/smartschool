@@ -23,9 +23,9 @@ import {
     Loader2,
     AlertCircle,
 } from "lucide-react";
-import Sidebar from "../../../components/Sidebar";
-import Header from "../../../components/Header";
-import { getDetailSekolahBinaan } from "../../../../services/yayasan.service";
+import Sidebar from "../../../../components/Sidebar";
+import Header from "../../../../components/Header";
+import { getDetailSekolahBinaan } from "../../../../../services/yayasan.service";
 import { useState, useEffect } from "react";
 
 export default function DetailSekolahPage() {

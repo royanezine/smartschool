@@ -4,8 +4,8 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-import Sidebar from "../../../components/Sidebar";
-import Header from "../../../components/Header";
+import Sidebar from "../../../../components/Sidebar";
+import Header from "../../../../components/Header";
 
 import {
   ArrowLeft,
@@ -26,7 +26,7 @@ import {
   Sparkles,
 } from "lucide-react";
 
-import { createUser } from "../../../../services/user.service";
+import { createUser } from "../../../../../services/user.service";
 
 export default function TambahUserPage() {
   const router = useRouter();

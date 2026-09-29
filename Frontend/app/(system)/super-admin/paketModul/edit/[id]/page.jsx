@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
-import Header from "../../../../components/Header";
-import Sidebar from "../../../../components/Sidebar";
+import Header from "../../../../../components/Header";
+import Sidebar from "../../../../../components/Sidebar";
 
 import {
   Package,
@@ -25,7 +25,7 @@ import {
   getPaketById,
   getFitur,
   updatePaket,
-} from "../../../../../services/paket.service";
+} from "../../../../../../services/paket.service";
 
 /* ============================================================
    ICON MAP

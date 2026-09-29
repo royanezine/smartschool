@@ -23,15 +23,15 @@ import {
   FileQuestion,
 } from "lucide-react";
 
-import Header from "../../components/Header";
-import Sidebar from "../../components/Sidebar";
+import Header from "../../../components/Header";
+import Sidebar from "../../../components/Sidebar";
 
-import { getKelasMapel } from "../../../services/kelasMapel.service";
+import { getKelasMapel } from "../../../../services/kelasMapel.service";
 
 import {
   getUjianByKelasMapel,
   deleteUjian,
-} from "../../../services/ujian.service";
+} from "../../../../services/ujian.service";
 
 /* =========================================================
    HELPER

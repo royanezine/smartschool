@@ -28,16 +28,16 @@ import {
   History,
 } from "lucide-react";
 
-import Header from "../../components/Header";
-import Sidebar from "../../components/Sidebar";
+import Header from "../../../components/Header";
+import Sidebar from "../../../components/Sidebar";
 
 import {
   getAbsensiSaya,
   absenDenganFace,
   absenManual,
-} from "../../../services/absensi.service";
+} from "../../../../services/absensi.service";
 
-import { getKelasSaya } from "../../../services/siswa.service";
+import { getKelasSaya } from "../../../../services/siswa.service";
 
 /* =========================================================
    GPS

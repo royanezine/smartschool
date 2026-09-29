@@ -13,15 +13,15 @@ import {
   AlertCircle,
 } from "lucide-react";
 
-import Header from "../../../components/Header";
-import Sidebar from "../../../components/Sidebar";
+import Header from "../../../../components/Header";
+import Sidebar from "../../../../components/Sidebar";
 
 import {
   createAbsensi,
   absenDenganLokasi,
   absenDenganBarcode,
   absenDenganFace,
-} from "../../../../services/absensi.service";
+} from "../../../../../services/absensi.service";
 
 function TambahAbsensiPageContent() {
   const router = useRouter();

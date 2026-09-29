@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Sidebar from "../../components/Sidebar";
-import Header from "../../components/Header";
+import Sidebar from "../../../components/Sidebar";
+import Header from "../../../components/Header";
 import {
   Package,
   Sparkles,

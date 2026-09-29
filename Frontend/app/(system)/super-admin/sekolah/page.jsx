@@ -3,13 +3,13 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import Sidebar from "../../components/Sidebar";
-import Header from "../../components/Header";
+import Sidebar from "../../../components/Sidebar";
+import Header from "../../../components/Header";
 
 import {
   getSekolahBinaan,
   getYayasanSummary,
-} from "../../../services/yayasan.service";
+} from "../../../../services/yayasan.service";
 
 import {
   Building2,

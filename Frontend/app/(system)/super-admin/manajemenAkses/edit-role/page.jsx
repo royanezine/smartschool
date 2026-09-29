@@ -3,8 +3,8 @@
 import { Suspense, useState, useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import Sidebar from "../../../components/Sidebar";
-import Header from "../../../components/Header";
+import Sidebar from "../../../../components/Sidebar";
+import Header from "../../../../components/Header";
 
 import {
   Shield,
@@ -39,7 +39,7 @@ import {
   getRoleById,
   getPermissions,
   updateRole,
-} from "../../../../services/role.service";
+} from "../../../../../services/role.service";
 
 const AKSI_LIST = [
   {

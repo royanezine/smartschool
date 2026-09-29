@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import Sidebar from "../components/Sidebar";
-import Header from "../components/Header";
-import { apiFetch } from "../../lib/api"; // sesuaikan path kalau beda
+import Sidebar from "../../components/Sidebar";
+import Header from "../../components/Header";
+import { apiFetch } from "../../../lib/api"; // sesuaikan path kalau beda
 import {
   LayoutDashboard,
   Building2,

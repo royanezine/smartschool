@@ -2,25 +2,473 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* ============================================================
+   SMARTSCHOOL THEME SYSTEM
+   ============================================================ */
+
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* ----------------------------------------------------------
+     BASE
+     ---------------------------------------------------------- */
+
+  --background: #f8fafc;
+  --foreground: #0f172a;
+
+  /* ----------------------------------------------------------
+     PAGE
+     ---------------------------------------------------------- */
+
+  --color-page: #f8fafc;
+
+  /* ----------------------------------------------------------
+     CARD
+     ---------------------------------------------------------- */
+
+  --color-card: #ffffff;
+  --color-card-soft: #f8fafc;
+
+  /* ----------------------------------------------------------
+     TEXT
+     ---------------------------------------------------------- */
+
+  --color-text: #0f172a;
+  --color-text-secondary: #475569;
+  --color-text-muted: #64748b;
+  --color-text-placeholder: #94a3b8;
+
+  /* ----------------------------------------------------------
+     BORDER
+     ---------------------------------------------------------- */
+
+  --color-border: #e2e8f0;
+  --color-border-soft: #edf2f7;
+
+  /* ----------------------------------------------------------
+     INPUT
+     ---------------------------------------------------------- */
+
+  --color-input: #ffffff;
+  --color-input-hover: #f8fafc;
+
+  /* ----------------------------------------------------------
+     SIDEBAR
+     ---------------------------------------------------------- */
+
+  --color-sidebar: #ffffff;
+  --color-sidebar-hover: #f1f5f9;
+  --color-sidebar-active: #eff6ff;
+
+  --color-sidebar-text: #1e293b;
+  --color-sidebar-text-muted: #64748b;
+  --color-sidebar-text-active: #2563eb;
+
+  --color-sidebar-border: #e5e7eb;
+  --color-sidebar-section-label: #94a3b8;
+  --color-sidebar-divider: #e2e8f0;
+
+  /* ----------------------------------------------------------
+     BRAND
+     ---------------------------------------------------------- */
+
+  --color-brand-logo-bg: linear-gradient(
+    135deg,
+    #3b82f6 0%,
+    #2563eb 50%,
+    #1d4ed8 100%
+  );
+  --color-brand-text: #1e293b;
+  --color-brand-text-accent: #2563eb;
+
+  /* ----------------------------------------------------------
+     HEADER
+     ---------------------------------------------------------- */
+
+  --color-header: #ffffff;
+  --color-header-hover: #f8fafc;
+
+  /* ----------------------------------------------------------
+     TABLE
+     ---------------------------------------------------------- */
+
+  --color-table-header: #f8fafc;
+  --color-table-hover: #f8fafc;
+
+  /* ----------------------------------------------------------
+     PRIMARY
+     ---------------------------------------------------------- */
+
+  --color-primary: #2563eb;
+  --color-primary-hover: #1d4ed8;
+
+  /* ----------------------------------------------------------
+     STATUS
+     ---------------------------------------------------------- */
+
+  --color-success: #10b981;
+  --color-success-background: #ecfdf5;
+
+  --color-warning: #f59e0b;
+  --color-warning-background: #fffbeb;
+
+  --color-danger: #ef4444;
+  --color-danger-background: #fef2f2;
+
+  --color-info: #0ea5e9;
+  --color-info-background: #f0f9ff;
 }
 
+
+/* ============================================================
+   DARK MODE
+   ============================================================ */
+
 .dark {
-  --background: #0a0a0a;
-  --foreground: #ededed;
+  /* ----------------------------------------------------------
+     BASE
+     ---------------------------------------------------------- */
+
+  --background: #0b1220;
+  --foreground: #f8fafc;
+
+  /* ----------------------------------------------------------
+     PAGE
+     ---------------------------------------------------------- */
+
+  --color-page: #0b1220;
+
+  /* ----------------------------------------------------------
+     CARD
+     ---------------------------------------------------------- */
+
+  --color-card: #111c2e;
+  --color-card-soft: #172236;
+
+  /* ----------------------------------------------------------
+     TEXT
+     ---------------------------------------------------------- */
+
+  --color-text: #f8fafc;
+  --color-text-secondary: #cbd5e1;
+  --color-text-muted: #94a3b8;
+  --color-text-placeholder: #64748b;
+
+  /* ----------------------------------------------------------
+     BORDER
+     ---------------------------------------------------------- */
+
+  --color-border: #243247;
+  --color-border-soft: #1e2a3d;
+
+  /* ----------------------------------------------------------
+     INPUT
+     ---------------------------------------------------------- */
+
+  --color-input: #111c2e;
+  --color-input-hover: #172236;
+
+  /* ----------------------------------------------------------
+     SIDEBAR
+     ---------------------------------------------------------- */
+
+  --color-sidebar: #0f172a;
+  --color-sidebar-hover: #172236;
+  --color-sidebar-active: #172e5a;
+
+  --color-sidebar-text: #f8fafc;
+  --color-sidebar-text-muted: #94a3b8;
+  --color-sidebar-text-active: #60a5fa;
+
+  --color-sidebar-border: #1e2a3d;
+  --color-sidebar-section-label: #64748b;
+  --color-sidebar-divider: #1e2a3d;
+
+  /* ----------------------------------------------------------
+     BRAND
+     ---------------------------------------------------------- */
+
+  --color-brand-logo-bg: linear-gradient(
+    135deg,
+    #1e3a8a 0%,
+    #1d4ed8 100%
+  );
+  --color-brand-text: #f8fafc;
+  --color-brand-text-accent: #60a5fa;
+
+  /* ----------------------------------------------------------
+     HEADER
+     ---------------------------------------------------------- */
+
+  --color-header: #0f172a;
+  --color-header-hover: #172236;
+
+  /* ----------------------------------------------------------
+     TABLE
+     ---------------------------------------------------------- */
+
+  --color-table-header: #111c2e;
+  --color-table-hover: #172236;
+
+  /* ----------------------------------------------------------
+     PRIMARY
+     ---------------------------------------------------------- */
+
+  --color-primary: #3b82f6;
+  --color-primary-hover: #60a5fa;
+
+  /* ----------------------------------------------------------
+     STATUS
+     ---------------------------------------------------------- */
+
+  --color-success: #34d399;
+  --color-success-background: #064e3b;
+
+  --color-warning: #fbbf24;
+  --color-warning-background: #78350f;
+
+  --color-danger: #f87171;
+  --color-danger-background: #7f1d1d;
+
+  --color-info: #38bdf8;
+  --color-info-background: #0c4a6e;
 }
+
+
+/* ============================================================
+   TAILWIND THEME TOKENS
+   ============================================================ */
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+
+  --color-page: var(--color-page);
+  --color-card: var(--color-card);
+  --color-card-soft: var(--color-card-soft);
+
+  --color-theme-text: var(--color-text);
+  --color-theme-text-secondary: var(--color-text-secondary);
+  --color-theme-text-muted: var(--color-text-muted);
+  --color-theme-text-placeholder: var(--color-text-placeholder);
+
+  --color-theme-border: var(--color-border);
+  --color-theme-border-soft: var(--color-border-soft);
+
+  --color-theme-input: var(--color-input);
+
+  --color-theme-sidebar: var(--color-sidebar);
+  --color-theme-sidebar-hover: var(--color-sidebar-hover);
+  --color-theme-sidebar-active: var(--color-sidebar-active);
+
+  --color-theme-header: var(--color-header);
+  --color-theme-header-hover: var(--color-header-hover);
+
+  --color-theme-table-header: var(--color-table-header);
+  --color-theme-table-hover: var(--color-table-hover);
+
+  --color-theme-primary: var(--color-primary);
+  --color-theme-primary-hover: var(--color-primary-hover);
+
+  --color-theme-success: var(--color-success);
+  --color-theme-warning: var(--color-warning);
+  --color-theme-danger: var(--color-danger);
+  --color-theme-info: var(--color-info);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+}
+
+
+/* ============================================================
+   GLOBAL BASE
+   ============================================================ */
+
+html {
+  background: var(--background);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+
+  transition:
+    background-color 200ms ease,
+    color 200ms ease;
+}
+
+
+/* ============================================================
+   REUSABLE THEME CLASSES
+   ============================================================ */
+
+/* PAGE */
+
+.theme-page {
+  background: var(--color-page);
+  color: var(--color-text);
+}
+
+
+/* CARD */
+
+.theme-card {
+  background: var(--color-card);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+
+.theme-card-soft {
+  background: var(--color-card-soft);
+  color: var(--color-text);
+}
+
+
+/* TEXT */
+
+.theme-text {
+  color: var(--color-text);
+}
+
+.theme-text-secondary {
+  color: var(--color-text-secondary);
+}
+
+.theme-text-muted {
+  color: var(--color-text-muted);
+}
+
+.theme-text-placeholder {
+  color: var(--color-text-placeholder);
+}
+
+
+/* BORDER */
+
+.theme-border {
+  border-color: var(--color-border);
+}
+
+.theme-border-soft {
+  border-color: var(--color-border-soft);
+}
+
+
+/* INPUT */
+
+.theme-input {
+  background: var(--color-input);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+
+.theme-input::placeholder {
+  color: var(--color-text-placeholder);
+}
+
+.theme-input:hover {
+  background: var(--color-input-hover);
+}
+
+
+/* SIDEBAR */
+
+.theme-sidebar {
+  background: var(--color-sidebar);
+  color: var(--color-sidebar-text);
+  border-color: var(--color-sidebar-border);
+}
+
+.theme-sidebar-hover:hover {
+  background: var(--color-sidebar-hover);
+}
+
+.theme-sidebar-active {
+  background: var(--color-sidebar-active);
+  color: var(--color-sidebar-text-active);
+}
+
+.theme-sidebar-text {
+  color: var(--color-sidebar-text);
+}
+
+.theme-sidebar-text-muted {
+  color: var(--color-sidebar-text-muted);
+}
+
+.theme-sidebar-text-active {
+  color: var(--color-sidebar-text-active);
+}
+
+
+/* HEADER */
+
+.theme-header {
+  background: var(--color-header);
+  color: var(--color-text);
+  border-color: var(--color-border);
+}
+
+.theme-header-hover:hover {
+  background: var(--color-header-hover);
+}
+
+
+/* TABLE */
+
+.theme-table-header {
+  background: var(--color-table-header);
+  color: var(--color-text-secondary);
+}
+
+.theme-table-hover:hover {
+  background: var(--color-table-hover);
+}
+
+
+/* PRIMARY */
+
+.theme-primary {
+  background: var(--color-primary);
+  color: #ffffff;
+}
+
+.theme-primary:hover {
+  background: var(--color-primary-hover);
+}
+
+.theme-primary-outline {
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+}
+
+
+/* STATUS */
+
+.theme-success {
+  color: var(--color-success);
+  background: var(--color-success-background);
+}
+
+.theme-warning {
+  color: var(--color-warning);
+  background: var(--color-warning-background);
+}
+
+.theme-danger {
+  color: var(--color-danger);
+  background: var(--color-danger-background);
+}
+
+.theme-info {
+  color: var(--color-info);
+  background: var(--color-info-background);
+}
+
+
+/* ============================================================
+   SMOOTH THEME TRANSITION
+   ============================================================ */
+
+* {
+  border-color: var(--color-border);
 }

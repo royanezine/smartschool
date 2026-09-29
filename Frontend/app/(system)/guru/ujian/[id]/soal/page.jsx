@@ -20,10 +20,10 @@ import {
   Save,
 } from "lucide-react";
 
-import Header from "../../../../components/Header";
-import Sidebar from "../../../../components/Sidebar";
+import Header from "../../../../../components/Header";
+import Sidebar from "../../../../../components/Sidebar";
 
-import { getUjianById } from "../../../../../services/ujian.service";
+import { getUjianById } from "../../../../../../services/ujian.service";
 
 import {
   getSoalByUjian,

@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Sidebar from "../../components/Sidebar";
-import Header from "../../components/Header";
+import Sidebar from "../../../components/Sidebar";
+import Header from "../../../components/Header";
 
 import {
   ArrowRight,
@@ -23,7 +23,7 @@ import {
 import {
   exportRekapNilai,
   downloadRekapNilai,
-} from "../../../services/nilai.service";
+} from "../../../../services/nilai.service";
 
 /* =========================================================
    CONFIG

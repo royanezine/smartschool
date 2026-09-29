@@ -2,11 +2,11 @@
 
 import { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import Sidebar from "../../../components/Sidebar";
-import Header from "../../../components/Header";
+import Sidebar from "../../../../components/Sidebar";
+import Header from "../../../../components/Header";
 
 // dummyPermissions diimpor dari data dummy terpusat
-import { dummyPermissions } from "../../../../lib/dummyData";
+import { dummyPermissions } from "../../../../../lib/dummyData";
 
 import {
   Shield,

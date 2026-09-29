@@ -2,9 +2,9 @@
 
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
-import Sidebar from "../../components/Sidebar";
-import Header from "../../components/Header";
-import { apiFetch } from "../../../lib/api"; // sesuaikan path kalau beda
+import Sidebar from "../../../components/Sidebar";
+import Header from "../../../components/Header";
+import { apiFetch } from "../../../../lib/api"; // sesuaikan path kalau beda
 import {
   School,
   Search,

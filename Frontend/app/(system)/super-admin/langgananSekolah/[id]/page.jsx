@@ -26,9 +26,9 @@ import {
   User,
   MoreHorizontal,
 } from "lucide-react";
-import Sidebar from "../../../components/Sidebar";
-import Header from "../../../components/Header";
-import { dummyLangganan } from "../../../../lib/data";
+import Sidebar from "../../../../components/Sidebar";
+import Header from "../../../../components/Header";
+import { dummyLangganan } from "../../../../../lib/data";
 import { useState } from "react";
 
 export default function DetailLanggananPage() {

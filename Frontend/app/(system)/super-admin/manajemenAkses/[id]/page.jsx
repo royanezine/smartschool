@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
-import Sidebar from "../../../components/Sidebar";
-import Header from "../../../components/Header";
+import Sidebar from "../../../../components/Sidebar";
+import Header from "../../../../components/Header";
 
 import {
   AlertCircle,
@@ -33,7 +33,7 @@ import {
   getPermissions,
   getRoleById,
   getRoles,
-} from "../../../../services/role.service";
+} from "../../../../../services/role.service";
 
 /* ============================================================
    STATUS CONFIG

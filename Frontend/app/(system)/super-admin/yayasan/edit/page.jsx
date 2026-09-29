@@ -18,8 +18,8 @@ import {
   ChevronRight,
 } from "lucide-react";
 
-import Sidebar from "../../../components/Sidebar";
-import Header from "../../../components/Header";
+import Sidebar from "../../../../components/Sidebar";
+import Header from "../../../../components/Header";
 
 export default function EditYayasanPage() {
   const router = useRouter();

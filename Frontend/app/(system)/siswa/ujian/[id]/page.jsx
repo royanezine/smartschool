@@ -10,10 +10,10 @@ import {
 
 import { useParams, useRouter } from "next/navigation";
 
-import Sidebar from "../../../components/Sidebar";
-import Header from "../../../components/Header";
+import Sidebar from "../../../../components/Sidebar";
+import Header from "../../../../components/Header";
 
-import { apiFetch } from "../../../../lib/api";
+import { apiFetch } from "../../../../../lib/api";
 
 import {
   AlertCircle,

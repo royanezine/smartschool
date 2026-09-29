@@ -3,8 +3,8 @@
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import Sidebar from "../../../../components/Sidebar";
-import Header from "../../../../components/Header";
+import Sidebar from "../../../../../components/Sidebar";
+import Header from "../../../../../components/Header";
 
 import {
   Package,
@@ -24,7 +24,7 @@ import {
 import {
   getAset,
   ajukanPeminjaman,
-} from "../../../../../services/sarpras.service";
+} from "../../../../../../services/sarpras.service";
 
 /* =========================================================
    PAGE

@@ -22,11 +22,11 @@ import {
   CircleCheck,
 } from "lucide-react";
 
-import Header from "../../../components/Header";
-import Sidebar from "../../../components/Sidebar";
+import Header from "../../../../components/Header";
+import Sidebar from "../../../../components/Sidebar";
 
-import { getKelasMapel } from "../../../../services/kelasMapel.service";
-import { createUjian } from "../../../../services/ujian.service";
+import { getKelasMapel } from "../../../../../services/kelasMapel.service";
+import { createUjian } from "../../../../../services/ujian.service";
 
 /* =========================================================
    HELPER

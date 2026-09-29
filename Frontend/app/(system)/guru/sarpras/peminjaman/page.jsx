@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import Sidebar from "../../../components/Sidebar";
-import Header from "../../../components/Header";
+import Sidebar from "../../../../components/Sidebar";
+import Header from "../../../../components/Header";
 
 import {
   ClipboardList,
@@ -28,7 +28,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 
-import { getDaftarPeminjaman } from "../../../../services/sarpras.service";
+import { getDaftarPeminjaman } from "../../../../../services/sarpras.service";
 
 // =========================================================
 // STATUS FILTER
