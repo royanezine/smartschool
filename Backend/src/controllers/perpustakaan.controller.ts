@@ -1,8 +1,7 @@
 import { Request, Response } from "express";
-import { PrismaClient, KategoriBuku } from "@prisma/client";
+import { KategoriBuku } from "@prisma/client";
+import { prisma } from "../config/db";
 import { generateNomorPeminjaman } from "../utils/nomorPeminjaman";
-
-const prisma = new PrismaClient();
 
 const parseKategori = (value: unknown) => {
   if (value === undefined) return { valid: true, value: undefined };

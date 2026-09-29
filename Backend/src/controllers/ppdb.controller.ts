@@ -1,13 +1,11 @@
 import { Request, Response } from "express";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "../config/db";
 import bcrypt from "bcryptjs";
 
 import {
   validasiUmurPpdb,
   generateNomorPendaftaran,
 } from "../utils/ppdb.utils";
-
-const prisma = new PrismaClient();
 
 export const daftarPpdb = async (
   req: Request,
@@ -305,7 +303,8 @@ export const verifikasiPpdb = async (
     const { id } = req.params;
     const { status, kelasId } = req.body;
 
-    const adminId = (req as any).user?.id;
+    // FIX: payload token memakai userId, bukan id
+    const adminId = (req as any).user?.userId;
     const sekolahId = (req as any).user?.sekolahId;
 
     if (!sekolahId) {

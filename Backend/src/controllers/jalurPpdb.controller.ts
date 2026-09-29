@@ -1,7 +1,5 @@
 import { Request, Response } from "express";
-import { PrismaClient } from "@prisma/client";
-
-const prisma = new PrismaClient();
+import { prisma } from "../config/db";
 
 export const getJalurPpdb = async (req: Request, res: Response) => {
   try {
@@ -88,7 +86,8 @@ export const createJalurPpdb = async (
 ) => {
   try {
     const sekolahId = (req as any).user?.sekolahId;
-    const userId = (req as any).user?.id;
+    // FIX: payload token memakai userId, bukan id
+    const userId = (req as any).user?.userId;
 
     if (!sekolahId) {
       return res.status(400).json({
@@ -155,7 +154,8 @@ export const updateJalurPpdb = async (
   try {
     const { id } = req.params;
     const sekolahId = (req as any).user?.sekolahId;
-    const userId = (req as any).user?.id;
+    // FIX: payload token memakai userId, bukan id
+    const userId = (req as any).user?.userId;
 
     if (!sekolahId) {
       return res.status(400).json({
@@ -247,7 +247,8 @@ export const deleteJalurPpdb = async (
   try {
     const { id } = req.params;
     const sekolahId = (req as any).user?.sekolahId;
-    const userId = (req as any).user?.id;
+    // FIX: payload token memakai userId, bukan id
+    const userId = (req as any).user?.userId;
 
     if (!sekolahId) {
       return res.status(400).json({
