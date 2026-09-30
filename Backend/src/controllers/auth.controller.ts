@@ -286,3 +286,10 @@ export const resetPassword = async (req: Request, res: Response) => {
     message: "Reset password berhasil",
   });
 };
+
+export const logout = async (req: Request, res: Response) => {
+  return res.status(200).json({
+    success: true,
+    message: "Logout berhasil",
+  });
+};

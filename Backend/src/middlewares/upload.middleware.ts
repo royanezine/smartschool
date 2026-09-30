@@ -19,7 +19,7 @@ const storageIzin = multer.diskStorage({
 
 export const uploadBuktiIzin = multer({
   storage: storageIzin,
-  limits: { fileSize: 5 * 1024 * 1024 }, 
+  limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     const allowedExtensions = [".png", ".jpg", ".jpeg", ".pdf"];
     const ext = path.extname(file.originalname).toLowerCase();
@@ -53,7 +53,7 @@ const storageBiometrik = multer.diskStorage({
 
 export const uploadBiometrik = multer({
   storage: storageBiometrik,
-  limits: { fileSize: 5 * 1024 * 1024 }, 
+  limits: { fileSize: 5 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     const allowedExtensions = [".png", ".jpg", ".jpeg"];
     const ext = path.extname(file.originalname).toLowerCase();
@@ -65,3 +65,31 @@ export const uploadBiometrik = multer({
   },
 });
 
+const storageSiswa = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    const dir = path.join(process.cwd(), "uploads/siswa");
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    cb(null, dir);
+  },
+  filename: (_req, file, cb) => {
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(
+      null,
+      `siswa-${uniqueSuffix}${path.extname(file.originalname).toLowerCase()}`,
+    );
+  },
+});
+
+export const uploadSiswa = multer({
+  storage: storageSiswa,
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (path.extname(file.originalname).toLowerCase() === ".xlsx") {
+      cb(null, true);
+    } else {
+      cb(new Error("Format file tidak didukung. Hanya gunakan file .xlsx."));
+    }
+  },
+});

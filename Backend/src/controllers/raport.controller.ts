@@ -1,4 +1,4 @@
-import { Response } from "express";
+import { NextFunction, Response } from "express";
 import { prisma } from "../config/db";
 import { AuthRequest } from "../middlewares/auth.middleware";
 import { AppError } from "../utils/appError";
@@ -116,3 +116,25 @@ export const getDataRaportSiswa = async (req: AuthRequest, res: Response) => {
       .json({ success: false, message: "Gagal mengambil data raport" });
   }
 };
+
+export const createKomponenNilai = async (req: AuthRequest, res: Response, next: NextFunction) => {
+    try {
+        const { kelasMapelId, nama, jenis, bobot, nilaiMaksimum, kelompok } = req.body;
+        const userId = req.user?.userId;
+
+        const komponen = await prisma.komponenNilai.create({
+            data: {
+                kelasMapelId,
+                nama,
+                jenis,
+                bobot,
+                nilaiMaksimum,
+                kelompok,
+                dibuatOleh: userId
+            }
+        });
+        return successResponse(res, "Komponen nilai raport berhasil dibuat", komponen, 201);
+    } catch (error) {
+        next(error);
+    }
+}

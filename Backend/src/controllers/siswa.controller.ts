@@ -1,100 +1,119 @@
+// src/controllers/siswa.controller.ts
 import { Request, Response, NextFunction } from "express";
 import { prisma } from "../config/db";
 import { AppError } from "../utils/appError";
-import { siswaSchema } from "../validations/siswa.validation";
-import bcrypt from "bcrypt";
+import { successResponse, paginatedResponse } from "../utils/responseFormatter";
 import { AuthRequest } from "../middlewares/auth.middleware";
+import bcrypt from "bcryptjs";
+import ExcelJS from "exceljs";
 
-export const createSiswa = async (
-  req: Request,
+export const getSiswaList = async (
+  req: AuthRequest,
   res: Response,
   next: NextFunction,
 ) => {
   try {
-    const sekolahId = (req as any).user?.sekolahId;
-    if (!sekolahId)
-      throw new AppError("Akses ditolak. Sekolah ID tidak ditemukan.", 403);
+    const sekolahId = req.user?.sekolahId;
+    if (!sekolahId) throw new AppError("Sekolah tidak ditemukan", 400);
 
-    const validatedData = siswaSchema.parse(req.body);
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const search = req.query.search as string;
 
-    const existingEmail = await prisma.pengguna.findUnique({
-      where: { email: validatedData.email },
-    });
-    if (existingEmail) throw new AppError("Email sudah terdaftar", 400);
+    const skip = (page - 1) * limit;
 
-    const existingNisn = await prisma.pengguna.findFirst({
-      where: { nisn: validatedData.nisn, sekolahId },
-    });
-    if (existingNisn) throw new AppError("NISN sudah terdaftar", 400);
+    const where: any = {
+      sekolahId,
+      dihapusPada: null,
+      peran: { nama: "siswa" },
+    };
 
-    const peranSiswa = await prisma.peran.findFirst({
-      where: { nama: "siswa" },
-    });
-    if (!peranSiswa)
-      throw new AppError("Role siswa tidak ditemukan dalam sistem", 500);
+    if (search) {
+      where.OR = [
+        { namaLengkap: { contains: search, mode: "insensitive" } },
+        { nisn: { contains: search, mode: "insensitive" } },
+      ];
+    }
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(validatedData.nisn, salt);
-
-    const siswa = await prisma.$transaction(async (tx) => {
-      const newSiswa = await tx.pengguna.create({
-        data: {
-          namaLengkap: validatedData.namaLengkap,
-          email: validatedData.email,
-          namaPengguna: validatedData.nisn,
-          kataSandi: hashedPassword,
-          nisn: validatedData.nisn,
-          nis: validatedData.nis,
-          sekolahId,
-          peranId: peranSiswa.id,
-          status: "aktif",
-
-          nik: validatedData.nik,
-          namaAyah: validatedData.namaAyah,
-          pekerjaanAyah: validatedData.pekerjaanAyah,
-          namaIbu: validatedData.namaIbu,
-          pekerjaanIbu: validatedData.pekerjaanIbu,
-          alamatKtp: validatedData.alamatKtp,
-          alamatDomisili: validatedData.alamatDomisili,
-          kecamatan: validatedData.kecamatan,
-          kelurahan: validatedData.kelurahan,
-          kotaKabupaten: validatedData.kota,
+    const [data, totalData] = await Promise.all([
+      prisma.pengguna.findMany({
+        where,
+        skip,
+        take: limit,
+        select: {
+          id: true,
+          namaLengkap: true,
+          email: true,
+          nisn: true,
+          nis: true,
+          status: true,
         },
-      });
+        orderBy: { dibuatPada: "desc" },
+      }),
+      prisma.pengguna.count({ where }),
+    ]);
 
-      if (validatedData.kelasId) {
-        const kelasExists = await tx.kelas.findFirst({
-          where: { id: validatedData.kelasId, sekolahId },
-        });
-        if (!kelasExists) {
-          throw new AppError(
-            "Kelas tidak ditemukan atau bukan milik sekolah ini",
-            404,
-          );
-        }
+    return paginatedResponse(
+      res,
+      "Data siswa berhasil diambil",
+      data,
+      page,
+      limit,
+      totalData,
+    );
+  } catch (error) {
+    next(error);
+  }
+};
 
-        await tx.anggotaKelas.create({
-          data: {
-            kelasId: validatedData.kelasId,
-            penggunaId: newSiswa.id,
-            tahunAjaranId: kelasExists.tahunAjaranId,
-          },
-        });
-      }
+// === UPDATE SISWA ===
+export const updateSiswa = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const id = req.params.id as string;
+    const sekolahId = req.user?.sekolahId;
+    const { namaLengkap, email, nis, nisn, status } = req.body;
 
-      return newSiswa;
-    });
-
-    res.status(201).json({
-      success: true,
-      message: "Data Siswa berhasil dibuat",
+    const siswa = await prisma.pengguna.update({
+      where: { id, sekolahId },
       data: {
-        id: siswa.id,
-        namaLengkap: siswa.namaLengkap,
-        email: siswa.email,
-        nisn: siswa.nisn,
+        namaLengkap,
+        email,
+        nis,
+        nisn,
+        status,
+        diperbaruiOleh: req.user?.userId,
       },
     });
+
+    return successResponse(res, "Data siswa berhasil diperbarui", siswa);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteSiswa = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const id = req.params.id as string;
+    const sekolahId = req.user?.sekolahId;
+
+    await prisma.pengguna.update({
+      where: { id, sekolahId },
+      data: {
+        dihapusPada: new Date(),
+        dihapusOleh: req.user?.userId,
+        status: "nonaktif",
+      },
+    });
+
+    return successResponse(res, "Siswa berhasil dihapus");
   } catch (error) {
     next(error);
   }
@@ -106,91 +125,252 @@ export const getMySiswa = async (
   next: NextFunction,
 ) => {
   try {
-    if (!req.user) {
-      throw new AppError("Unauthorized", 401);
-    }
-
-    const userId = req.user.userId;
-
-    const siswa = await prisma.pengguna.findUnique({
+    const siswa = await prisma.pengguna.findFirst({
       where: {
-        id: userId,
+        id: req.user?.userId,
+        peran: { nama: "siswa" },
+        dihapusPada: null,
       },
       select: {
         id: true,
         namaLengkap: true,
-        namaPengguna: true,
         email: true,
         nisn: true,
         nis: true,
-        sekolahId: true,
-
-        peran: {
-          select: {
-            id: true,
-            nama: true,
-            namaTampilan: true,
-          },
-        },
-
-        kelasSiswa: {
-          where: {
-            dihapusPada: null,
-          },
-          orderBy: {
-            dibuatPada: "desc",
-          },
-          take: 1,
-          select: {
-            id: true,
-            kelasId: true,
-            tahunAjaranId: true,
-            status: true,
-
-            kelas: {
-              select: {
-                id: true,
-                nama: true,
-                tingkat: true,
-                ruangan: true,
-                status: true,
-              },
-            },
-          },
-        },
+        status: true,
+        jenisKelamin: true,
       },
     });
 
-    if (!siswa) {
-      throw new AppError("Data siswa tidak ditemukan", 404);
+    if (!siswa) throw new AppError("Data siswa tidak ditemukan", 404);
+    return successResponse(res, "Data siswa berhasil diambil", siswa);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const createSiswa = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const sekolahId = req.user?.sekolahId;
+    const {
+      namaPengguna,
+      email,
+      kataSandi,
+      namaLengkap,
+      nisn,
+      nis,
+      jenisKelamin,
+    } = req.body;
+
+    if (!sekolahId) throw new AppError("Sekolah tidak ditemukan", 400);
+    if (!namaPengguna || !email || !kataSandi || !namaLengkap) {
+      throw new AppError(
+        "Username, email, kata sandi, dan nama lengkap wajib diisi",
+        400,
+      );
     }
 
-    if (siswa.peran?.nama !== "siswa") {
-      throw new AppError("Endpoint ini hanya untuk akun siswa", 403);
-    }
+    const peranSiswa = await prisma.peran.findFirst({
+      where: { nama: "siswa", sekolahId },
+    });
+    if (!peranSiswa) throw new AppError("Role siswa tidak ditemukan", 500);
 
-    const anggotaKelas = siswa.kelasSiswa[0] ?? null;
-
-    return res.status(200).json({
-      success: true,
-      message: "Data siswa berhasil diambil",
+    const passwordHash = await bcrypt.hash(kataSandi, 10);
+    const siswa = await prisma.pengguna.create({
       data: {
-        id: siswa.id,
-        namaLengkap: siswa.namaLengkap,
-        namaPengguna: siswa.namaPengguna,
-        email: siswa.email,
-        nisn: siswa.nisn,
-        nis: siswa.nis,
-
-        kelasId: anggotaKelas?.kelasId ?? null,
-
-        kelas: anggotaKelas?.kelas ?? null,
-
-        tahunAjaranId: anggotaKelas?.tahunAjaranId ?? null,
-
-        statusKelas: anggotaKelas?.status ?? null,
+        sekolahId,
+        peranId: peranSiswa.id,
+        namaPengguna,
+        email,
+        kataSandi: passwordHash,
+        namaLengkap,
+        nisn: nisn || null,
+        nis: nis || null,
+        jenisKelamin: jenisKelamin || null,
+        status: "aktif",
+        dibuatOleh: req.user?.userId,
+      },
+      select: {
+        id: true,
+        namaPengguna: true,
+        email: true,
+        namaLengkap: true,
+        nisn: true,
+        nis: true,
+        status: true,
       },
     });
+
+    return successResponse(res, "Data siswa berhasil dibuat", siswa, 201);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getSemuaSiswaAdmin = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const sekolahId = req.user?.sekolahId;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 10;
+    const search = req.query.search as string;
+
+    const skip = (page - 1) * limit;
+    const where: any = {
+      sekolahId,
+      dihapusPada: null,
+      peran: { nama: "siswa" },
+    };
+
+    if (search) {
+      where.OR = [
+        { namaLengkap: { contains: search, mode: "insensitive" } },
+        { nisn: { contains: search, mode: "insensitive" } },
+        { nis: { contains: search, mode: "insensitive" } },
+      ];
+    }
+
+    const [data, totalData] = await Promise.all([
+      prisma.pengguna.findMany({
+        where,
+        skip,
+        take: limit,
+        select: {
+          id: true,
+          namaLengkap: true,
+          email: true,
+          nisn: true,
+          nis: true,
+          status: true,
+          jenisKelamin: true,
+        },
+        orderBy: { dibuatPada: "desc" },
+      }),
+      prisma.pengguna.count({ where }),
+    ]);
+
+    return paginatedResponse(
+      res,
+      "Data siswa berhasil diambil",
+      data,
+      page,
+      limit,
+      totalData,
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateSiswaAdmin = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const id = req.params.id as string;
+    const sekolahId = (req as AuthRequest).user?.sekolahId;
+    const { namaLengkap, email, nis, nisn, status, jenisKelamin, noTelepon } =
+      req.body;
+
+    const siswa = await prisma.pengguna.update({
+      where: { id, sekolahId },
+      data: {
+        namaLengkap,
+        email,
+        nis,
+        nisn,
+        status,
+        jenisKelamin,
+        noTelepon,
+        diperbaruiOleh: (req as AuthRequest).user?.userId,
+      },
+    });
+    return successResponse(res, "Data siswa berhasil diperbarui", siswa);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const bulkImportSiswa = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const sekolahId = req.user?.sekolahId;
+    const file = req.file;
+
+    if (!sekolahId) throw new AppError("Sekolah tidak ditemukan", 400);
+    if (!file) throw new AppError("File excel wajib diunggah", 400);
+
+    const peranSiswa = await prisma.peran.findFirst({
+      where: { nama: "siswa" },
+    });
+    if (!peranSiswa) throw new AppError("Role siswa tidak ditemukan", 500);
+
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.readFile(file.path);
+    const worksheet = workbook.worksheets[0];
+    if (!worksheet) throw new AppError("Sheet Excel tidak ditemukan", 400);
+
+    const siswaMentah: Array<{
+      namaLengkap: string;
+      nisn: string;
+      nis: string | null;
+      email: string;
+      jenisKelamin: string | null;
+    }> = [];
+
+    worksheet.eachRow((row, rowNumber) => {
+      if (rowNumber > 1) {
+        const nisnRaw = row.getCell(2).value?.toString() || "";
+        if (nisnRaw) {
+          siswaMentah.push({
+            namaLengkap: row.getCell(1).value?.toString() || "Tanpa Nama",
+            nisn: nisnRaw,
+            nis: row.getCell(3).value?.toString() || null,
+            email:
+              row.getCell(4).value?.toString() || `${nisnRaw}@student.local`,
+            jenisKelamin: row.getCell(5).value?.toString() || null,
+          });
+        }
+      }
+    });
+
+    const dataSiswaBaru = await Promise.all(
+      siswaMentah.map(async (siswa) => ({
+        sekolahId,
+        peranId: peranSiswa.id,
+        dibuatOleh: req.user?.userId,
+        namaPengguna: siswa.nisn,
+        kataSandi: await bcrypt.hash(siswa.nisn, 10),
+        status: "aktif",
+        ...siswa,
+      })),
+    );
+
+    await prisma.pengguna.createMany({
+      data: dataSiswaBaru,
+      skipDuplicates: true,
+    });
+
+    const fs = await import("fs/promises");
+    await fs.unlink(file.path);
+
+    return successResponse(
+      res,
+      `Berhasil memproses import ${dataSiswaBaru.length} siswa`,
+      null,
+      201,
+    );
   } catch (error) {
     next(error);
   }

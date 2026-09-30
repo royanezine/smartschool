@@ -15,7 +15,6 @@ import {
   normalisasiHex,
 } from "../utils/temaDefault";
 
-// === KATEGORI ARTIKEL ===
 export const createKategoriArtikel = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const sekolahId = (req as any).user.sekolahId;
@@ -84,7 +83,6 @@ export const deleteKategoriArtikel = async (req: Request, res: Response, next: N
   }
 };
 
-// === ARTIKEL CMS ===
 export const createArtikelCms = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const sekolahId = (req as any).user.sekolahId;
