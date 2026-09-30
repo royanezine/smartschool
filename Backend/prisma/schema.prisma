@@ -98,6 +98,7 @@ model Pengguna {
   izinDisetujui  PermohonanIzin[] @relation("PenyetujuIzin")
 
   @@map("pengguna")
+  permohonanIzins PermohonanIzin[] @relation("GuruPenggantiIzin")
 }
 
 model Peran {
@@ -701,6 +702,8 @@ model PermohonanIzin {
   sekolahId   String  @map("sekolah_id")
   penggunaId  String  @map("pengguna_id")
   penyetujuId String? @map("penyetuju_id")
+  guruPenggantiId  String?
+  guruPengganti    Pengguna? @relation("GuruPenggantiIzin", fields: [guruPenggantiId], references: [id])
 
   jenis          String   @db.VarChar(20)
   tanggalMulai   DateTime @map("tanggal_mulai") @db.Date

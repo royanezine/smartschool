@@ -269,7 +269,7 @@ async function main() {
       nama: "Basic",
       deskripsi: "Paket dasar untuk uji coba, durasi 2 minggu",
       harga: 500000,
-      durasi: 14, // hari
+      durasi: 14, 
       status: "aktif",
     },
     {

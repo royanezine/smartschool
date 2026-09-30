@@ -1,4 +1,4 @@
-import { Response, NextFunction } from "express";
+import { Request, Response, NextFunction } from "express";
 import { prisma } from "../config/db";
 import { AuthRequest } from "../middlewares/auth.middleware";
 import { AppError } from "../utils/appError";
@@ -126,5 +126,69 @@ export const verifikasiIzin = async (
     return successResponse(res, `Permohonan izin berhasil di-${status}`, izin);
   } catch (error) {
     next(error);
+  }
+};
+
+export const verifikasiPengajuan = async (req: Request, res: Response) => {
+  try {
+    const rawId = req.params.id;
+    const id = Array.isArray(rawId) ? rawId[0] : rawId;
+    const { status, catatan, guruPenggantiId } = req.body; // status: "disetujui" | "ditolak"
+
+    if (!id) {
+      return res.status(400).json({
+        success: false,
+        message: "ID permohonan izin tidak valid",
+      });
+    }
+
+    const izin = await prisma.permohonanIzin.findUnique({
+      where: { id },
+      include: {
+        pengguna: {
+          select: { namaLengkap: true },
+        },
+      },
+    });
+
+    if (!izin) {
+      return res.status(404).json({
+        success: false,
+        message: "Data permohonan izin tidak ditemukan",
+      });
+    }
+
+    const updatedIzin = await prisma.permohonanIzin.update({
+      where: { id },
+      data: {
+        status,
+        catatan,
+        guruPenggantiId:
+          status === "disetujui" && guruPenggantiId ? guruPenggantiId : null,
+      },
+    });
+
+    if (status === "disetujui" && guruPenggantiId) {
+      const guruIzinNama = izin.pengguna.namaLengkap;
+      const rentangTanggal = `${new Date(izin.tanggalMulai).toLocaleDateString("id-ID")} s/d ${new Date(izin.tanggalSelesai).toLocaleDateString("id-ID")}`;
+
+      await prisma.notifikasi.create({
+        data: {
+          penggunaId: guruPenggantiId,
+          judul: "Penugasan Guru Pengganti",
+          isi: `Anda ditugaskan sebagai guru pengganti untuk ${guruIzinNama} pada tanggal ${rentangTanggal}. Alasan: ${izin.alasan}`,
+          tipe: "PENUGASAN",  
+          targetUrl: "/jadwal-mengajar", 
+        },
+      });
+    }
+
+    return res.status(200).json({
+      success: true,
+      message: `Permohonan izin berhasil di-${status}`,
+      data: updatedIzin,
+    });
+  } catch (error: any) {
+    return res.status(500).json({ success: false, message: error.message });
   }
 };
