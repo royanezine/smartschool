@@ -48,7 +48,7 @@ const SIDEBAR_WIDTH = 280;
 
 function AppShell({ children }) {
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen theme-page">
       <aside
         className="fixed inset-y-0 left-0 z-50 hidden lg:block"
         style={{ width: SIDEBAR_WIDTH }}
@@ -61,13 +61,21 @@ function AppShell({ children }) {
       </div>
 
       <header
-        className="fixed left-0 right-0 top-0 z-40 border-b border-slate-200 bg-white lg:left-[280px]"
+        className="
+          fixed left-0 right-0 top-0 z-40
+          border-b theme-border
+          theme-header
+          lg:left-[280px]
+        "
         style={{ height: HEADER_HEIGHT }}
       >
         <Header />
       </header>
 
-      <main className="lg:ml-[280px]" style={{ paddingTop: HEADER_HEIGHT }}>
+      <main
+        className="lg:ml-[280px]"
+        style={{ paddingTop: HEADER_HEIGHT }}
+      >
         {children}
       </main>
     </div>
@@ -80,18 +88,23 @@ function AppShell({ children }) {
 function getKelasName(item) {
   return item?.kelas?.nama || "-";
 }
+
 function getMapelName(item) {
   return item?.mataPelajaran?.nama || "-";
 }
+
 function getMapelKode(item) {
   return item?.mataPelajaran?.kode || "";
 }
+
 function getGuruName(item) {
   return item?.guruPengajar?.namaLengkap || "-";
 }
+
 function getGuruNip(item) {
   return item?.guruPengajar?.nip || "";
 }
+
 function formatKelasMapel(item) {
   if (!item) return "";
   return `${getKelasName(item)} • ${getMapelName(item)} • ${getGuruName(item)}`;
@@ -118,6 +131,7 @@ function SearchableKelasMapelSelect({
 
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
+
     if (!q) return options;
 
     return options.filter((item) => {
@@ -125,6 +139,7 @@ function SearchableKelasMapelSelect({
       const mapel = getMapelName(item).toLowerCase();
       const kode = getMapelKode(item).toLowerCase();
       const guru = getGuruName(item).toLowerCase();
+
       return (
         kelas.includes(q) ||
         mapel.includes(q) ||
@@ -144,7 +159,9 @@ function SearchableKelasMapelSelect({
         setOpen(false);
       }
     }
+
     document.addEventListener("mousedown", handleClickOutside);
+
     return () =>
       document.removeEventListener("mousedown", handleClickOutside);
   }, []);
@@ -161,29 +178,51 @@ function SearchableKelasMapelSelect({
         type="button"
         disabled={disabled || loading}
         onClick={() => setOpen((prev) => !prev)}
-        className="flex w-full items-center justify-between gap-3 rounded-xl border border-slate-300 bg-white px-4 py-3 text-left text-sm text-slate-700 outline-none transition hover:border-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100"
+        className="
+          flex w-full items-center justify-between gap-3
+          rounded-xl border theme-border
+          theme-input
+          px-4 py-3
+          text-left text-sm
+          theme-text-secondary
+          outline-none transition
+          hover:border-[var(--color-primary)]
+          focus:border-[var(--color-primary)]
+          focus:ring-4
+          focus:ring-[var(--color-primary)]/10
+          disabled:cursor-not-allowed
+          disabled:opacity-60
+        "
       >
         <span className="flex min-w-0 items-center gap-3">
-          <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+          <span
+            className="
+              flex h-8 w-8 shrink-0
+              items-center justify-center
+              rounded-lg
+              theme-info
+            "
+          >
             <School size={16} />
           </span>
 
           <span className="min-w-0">
             {loading ? (
-              <span className="text-slate-400">
+              <span className="theme-text-muted">
                 Memuat data kelas mapel...
               </span>
             ) : selected ? (
               <>
-                <span className="block truncate font-semibold text-slate-800">
+                <span className="block truncate font-semibold theme-text">
                   {getKelasName(selected)} • {getMapelName(selected)}
                 </span>
-                <span className="block truncate text-xs text-slate-500">
+
+                <span className="block truncate text-xs theme-text-muted">
                   {getGuruName(selected)}
                 </span>
               </>
             ) : (
-              <span className="text-slate-400">
+              <span className="theme-text-muted">
                 Pilih kelas, mata pelajaran, dan guru
               </span>
             )}
@@ -192,27 +231,55 @@ function SearchableKelasMapelSelect({
 
         <ChevronDown
           size={18}
-          className={`shrink-0 text-slate-400 transition ${
-            open ? "rotate-180" : ""
-          }`}
+          className={`
+            shrink-0
+            theme-text-placeholder
+            transition
+            ${open ? "rotate-180" : ""}
+          `}
         />
       </button>
 
       {open && !loading && (
-        <div className="absolute left-0 right-0 z-30 mt-2 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl">
-          <div className="border-b border-slate-100 p-3">
+        <div
+          className="
+            absolute left-0 right-0 z-30 mt-2
+            overflow-hidden rounded-xl
+            border theme-border
+            theme-card
+            shadow-xl
+          "
+        >
+          <div className="border-b theme-border-soft p-3">
             <div className="relative">
               <Search
                 size={16}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                className="
+                  absolute left-3 top-1/2
+                  -translate-y-1/2
+                  theme-text-placeholder
+                "
               />
+
               <input
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="Cari kelas, mapel, atau guru..."
                 autoFocus
-                className="h-11 w-full rounded-lg border border-slate-200 bg-slate-50 pl-9 pr-3 text-sm outline-none transition focus:border-blue-500 focus:bg-white"
+                className="
+                  h-11 w-full
+                  rounded-lg
+                  theme-input
+                  border
+                  pl-9 pr-3
+                  text-sm
+                  outline-none
+                  transition
+                  focus:border-[var(--color-primary)]
+                  focus:ring-2
+                  focus:ring-[var(--color-primary)]/10
+                "
               />
             </div>
           </div>
@@ -220,8 +287,14 @@ function SearchableKelasMapelSelect({
           <div className="max-h-72 overflow-y-auto p-2">
             {filtered.length === 0 ? (
               <div className="px-4 py-8 text-center">
-                <School className="mx-auto mb-2 h-7 w-7 text-slate-300" />
-                <p className="text-sm font-medium text-slate-500">
+                <School
+                  className="
+                    mx-auto mb-2 h-7 w-7
+                    theme-text-placeholder
+                  "
+                />
+
+                <p className="text-sm font-medium theme-text-muted">
                   Data tidak ditemukan
                 </p>
               </div>
@@ -229,33 +302,55 @@ function SearchableKelasMapelSelect({
               filtered.map((item) => {
                 const isSelected =
                   String(item.id) === String(value);
+
                 return (
                   <button
                     key={item.id}
                     type="button"
                     onClick={() => handleSelect(item)}
-                    className={`flex w-full items-start gap-3 rounded-lg px-3 py-3 text-left transition ${
-                      isSelected ? "bg-blue-50" : "hover:bg-slate-50"
-                    }`}
+                    className={`
+                      flex w-full items-start gap-3
+                      rounded-lg px-3 py-3
+                      text-left transition
+                      ${
+                        isSelected
+                          ? "theme-sidebar-active"
+                          : "theme-table-hover"
+                      }
+                    `}
                   >
-                    <span className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
+                    <span
+                      className="
+                        mt-0.5 flex h-8 w-8 shrink-0
+                        items-center justify-center
+                        rounded-lg
+                        theme-card-soft
+                        theme-text-secondary
+                      "
+                    >
                       <School size={15} />
                     </span>
 
                     <span className="min-w-0 flex-1">
-                      <span className="block truncate text-sm font-semibold text-slate-800">
+                      <span className="block truncate text-sm font-semibold theme-text">
                         {getKelasName(item)} • {getMapelName(item)}
                       </span>
-                      <span className="block truncate text-xs text-slate-500">
+
+                      <span className="block truncate text-xs theme-text-muted">
                         {getGuruName(item)}
-                        {getGuruNip(item) ? ` • ${getGuruNip(item)}` : ""}
+                        {getGuruNip(item)
+                          ? ` • ${getGuruNip(item)}`
+                          : ""}
                       </span>
                     </span>
 
                     {isSelected && (
                       <CheckCircle2
                         size={18}
-                        className="mt-1 shrink-0 text-blue-600"
+                        className="
+                          mt-1 shrink-0
+                          text-[var(--color-primary)]
+                        "
                       />
                     )}
                   </button>
@@ -276,7 +371,9 @@ export default function EditJadwalMengajarPage() {
   const router = useRouter();
   const params = useParams();
 
-  const id = Array.isArray(params?.id) ? params.id[0] : params?.id;
+  const id = Array.isArray(params?.id)
+    ? params.id[0]
+    : params?.id;
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -297,7 +394,9 @@ export default function EditJadwalMengajarPage() {
 
   useEffect(() => {
     if (!id) return;
+
     loadData();
+
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
@@ -313,7 +412,9 @@ export default function EditJadwalMengajarPage() {
 
       setKelasMapelList(
         Array.isArray(kelasMapel)
-          ? kelasMapel.filter((item) => item.status !== "tidak_aktif")
+          ? kelasMapel.filter(
+              (item) => item.status !== "tidak_aktif"
+            )
           : []
       );
 
@@ -325,7 +426,11 @@ export default function EditJadwalMengajarPage() {
         ruangan: jadwal?.ruangan || "",
       });
     } catch (err) {
-      console.error("Gagal mengambil data edit jadwal:", err);
+      console.error(
+        "Gagal mengambil data edit jadwal:",
+        err
+      );
+
       setError(
         err?.message ||
           "Gagal mengambil data jadwal mengajar. Silakan coba lagi."
@@ -338,7 +443,12 @@ export default function EditJadwalMengajarPage() {
 
   function handleChange(e) {
     const { name, value } = e.target;
-    setForm((prev) => ({ ...prev, [name]: value }));
+
+    setForm((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
     setError("");
     setSuccess("");
   }
@@ -346,7 +456,8 @@ export default function EditJadwalMengajarPage() {
   const selectedKelasMapel = useMemo(
     () =>
       kelasMapelList.find(
-        (item) => String(item.id) === String(form.kelasMapelId)
+        (item) =>
+          String(item.id) === String(form.kelasMapelId)
       ),
     [kelasMapelList, form.kelasMapelId]
   );
@@ -354,20 +465,30 @@ export default function EditJadwalMengajarPage() {
   function validateForm() {
     if (!form.kelasMapelId)
       return "Silakan pilih kelas, mata pelajaran, dan guru.";
-    if (!form.hari) return "Silakan pilih hari.";
-    if (!form.jamMulai) return "Silakan isi jam mulai.";
-    if (!form.jamSelesai) return "Silakan isi jam selesai.";
+
+    if (!form.hari)
+      return "Silakan pilih hari.";
+
+    if (!form.jamMulai)
+      return "Silakan isi jam mulai.";
+
+    if (!form.jamSelesai)
+      return "Silakan isi jam selesai.";
+
     if (form.jamSelesai <= form.jamMulai)
       return "Jam selesai harus lebih besar dari jam mulai.";
+
     return "";
   }
 
   async function handleSubmit(e) {
     e.preventDefault();
+
     setError("");
     setSuccess("");
 
     const validationError = validateForm();
+
     if (validationError) {
       setError(validationError);
       return;
@@ -386,26 +507,39 @@ export default function EditJadwalMengajarPage() {
 
       await updateJadwalMengajar(id, payload);
 
-      setSuccess("Jadwal mengajar berhasil diperbarui.");
+      setSuccess(
+        "Jadwal mengajar berhasil diperbarui."
+      );
 
       setTimeout(() => {
         router.push("/admin/jadwal-mengajar");
       }, 800);
     } catch (err) {
-      console.error("Gagal update jadwal:", err);
+      console.error(
+        "Gagal update jadwal:",
+        err
+      );
 
       if (err?.status === 409) {
         setError(
-          err?.message || "Jadwal guru bentrok dengan jadwal lain."
+          err?.message ||
+            "Jadwal guru bentrok dengan jadwal lain."
         );
       } else if (err?.status === 404) {
         setError(
-          err?.message || "Jadwal atau kelas mapel tidak ditemukan."
+          err?.message ||
+            "Jadwal atau kelas mapel tidak ditemukan."
         );
       } else if (err?.status === 403) {
-        setError(err?.message || "Anda tidak memiliki akses ke jadwal ini.");
+        setError(
+          err?.message ||
+            "Anda tidak memiliki akses ke jadwal ini."
+        );
       } else {
-        setError(err?.message || "Gagal memperbarui jadwal mengajar.");
+        setError(
+          err?.message ||
+            "Gagal memperbarui jadwal mengajar."
+        );
       }
     } finally {
       setSaving(false);
@@ -422,8 +556,15 @@ export default function EditJadwalMengajarPage() {
       <AppShell>
         <div className="flex min-h-[calc(100vh-88px)] items-center justify-center p-6">
           <div className="text-center">
-            <Loader2 className="mx-auto mb-3 h-8 w-8 animate-spin text-blue-600" />
-            <p className="text-sm font-medium text-slate-600">
+            <Loader2
+              className="
+                mx-auto mb-3 h-8 w-8
+                animate-spin
+                text-[var(--color-primary)]
+              "
+            />
+
+            <p className="text-sm font-medium theme-text-secondary">
               Memuat data jadwal...
             </p>
           </div>
@@ -440,22 +581,37 @@ export default function EditJadwalMengajarPage() {
           <div className="mb-6">
             <Link
               href="/admin/guru/jadwal-mengajar"
-              className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-blue-600"
+              className="
+                mb-4 inline-flex items-center gap-2
+                text-sm font-medium
+                theme-text-muted
+                transition
+                hover:text-[var(--color-primary)]
+              "
             >
               <ArrowLeft size={17} />
               Kembali ke Jadwal Mengajar
             </Link>
 
             <div className="flex items-start gap-3">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm">
+              <div
+                className="
+                  flex h-11 w-11 shrink-0
+                  items-center justify-center
+                  rounded-xl
+                  theme-primary
+                  shadow-sm
+                "
+              >
                 <CalendarDays size={23} />
               </div>
 
               <div>
-                <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+                <h1 className="text-2xl font-bold tracking-tight theme-text">
                   Edit Jadwal Mengajar
                 </h1>
-                <p className="mt-1 text-sm text-slate-500">
+
+                <p className="mt-1 text-sm theme-text-muted">
                   Perbarui informasi jadwal mengajar sesuai kebutuhan.
                 </p>
               </div>
@@ -464,16 +620,38 @@ export default function EditJadwalMengajarPage() {
 
           {/* ERROR */}
           {error && (
-            <div className="mb-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-red-700">
-              <AlertCircle size={20} className="mt-0.5 shrink-0" />
+            <div
+              className="
+                mb-5 flex items-start gap-3
+                rounded-xl
+                border
+                theme-danger
+                px-4 py-3
+              "
+            >
+              <AlertCircle
+                size={20}
+                className="mt-0.5 shrink-0"
+              />
+
               <div className="min-w-0 flex-1">
-                <p className="font-semibold">Terjadi kesalahan</p>
-                <p className="mt-1 text-sm">{error}</p>
+                <p className="font-semibold">
+                  Terjadi kesalahan
+                </p>
+
+                <p className="mt-1 text-sm">
+                  {error}
+                </p>
               </div>
+
               <button
                 type="button"
                 onClick={() => setError("")}
-                className="rounded-lg p-1 transition hover:bg-red-100"
+                className="
+                  rounded-lg p-1
+                  transition
+                  hover:bg-[var(--color-danger-background)]
+                "
               >
                 <X size={17} />
               </button>
@@ -482,11 +660,28 @@ export default function EditJadwalMengajarPage() {
 
           {/* SUCCESS */}
           {success && (
-            <div className="mb-5 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-emerald-700">
-              <CheckCircle2 size={20} className="mt-0.5 shrink-0" />
+            <div
+              className="
+                mb-5 flex items-start gap-3
+                rounded-xl
+                border
+                theme-success
+                px-4 py-3
+              "
+            >
+              <CheckCircle2
+                size={20}
+                className="mt-0.5 shrink-0"
+              />
+
               <div>
-                <p className="font-semibold">Berhasil</p>
-                <p className="mt-1 text-sm">{success}</p>
+                <p className="font-semibold">
+                  Berhasil
+                </p>
+
+                <p className="mt-1 text-sm">
+                  {success}
+                </p>
               </div>
             </div>
           )}
@@ -494,17 +689,29 @@ export default function EditJadwalMengajarPage() {
           <form onSubmit={handleSubmit}>
             <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
               {/* FORM UTAMA */}
-              <div className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <div className="border-b border-slate-200 px-6 py-5">
+              <div className="theme-card rounded-2xl border theme-border shadow-sm">
+                <div className="border-b theme-border-soft px-6 py-5">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-                      <CalendarDays size={19} />
+                    <div
+                      className="
+                        flex h-9 w-9
+                        items-center justify-center
+                        rounded-lg
+                        theme-info
+                      "
+                    >
+                      <CalendarDays
+                        size={19}
+                        className="text-[var(--color-primary)]"
+                      />
                     </div>
+
                     <div>
-                      <h2 className="font-bold text-slate-900">
+                      <h2 className="font-bold theme-text">
                         Informasi Jadwal
                       </h2>
-                      <p className="text-xs text-slate-500">
+
+                      <p className="text-xs theme-text-muted">
                         Isi data jadwal yang ingin diperbarui.
                       </p>
                     </div>
@@ -514,9 +721,11 @@ export default function EditJadwalMengajarPage() {
                 <div className="space-y-6 p-6">
                   {/* KELAS MAPEL (searchable) */}
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-slate-700">
+                    <label className="mb-2 block text-sm font-semibold theme-text-secondary">
                       Kelas / Mata Pelajaran / Guru
-                      <span className="ml-1 text-red-500">*</span>
+                      <span className="ml-1 text-[var(--color-danger)]">
+                        *
+                      </span>
                     </label>
 
                     <SearchableKelasMapelSelect
@@ -526,6 +735,7 @@ export default function EditJadwalMengajarPage() {
                           ...prev,
                           kelasMapelId: val,
                         }));
+
                         setError("");
                         setSuccess("");
                       }}
@@ -534,56 +744,85 @@ export default function EditJadwalMengajarPage() {
                       disabled={saving}
                     />
 
-                    <p className="mt-2 text-xs text-slate-500">
-                      Data ini berasal dari Kelas Mapel yang sudah terdaftar
-                      pada sekolah. Ketik untuk mencari.
+                    <p className="mt-2 text-xs theme-text-muted">
+                      Data ini berasal dari Kelas Mapel yang sudah
+                      terdaftar pada sekolah. Ketik untuk mencari.
                     </p>
                   </div>
 
                   {/* DETAIL SELECTED */}
                   {selectedKelasMapel && (
                     <div className="grid gap-3 md:grid-cols-3">
-                      <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                        <div className="mb-2 flex items-center gap-2 text-slate-500">
+                      <div
+                        className="
+                          rounded-xl
+                          border theme-border
+                          theme-card-soft
+                          p-4
+                        "
+                      >
+                        <div className="mb-2 flex items-center gap-2 theme-text-muted">
                           <School size={17} />
+
                           <span className="text-xs font-semibold uppercase">
                             Kelas
                           </span>
                         </div>
-                        <p className="font-semibold text-slate-900">
+
+                        <p className="font-semibold theme-text">
                           {getKelasName(selectedKelasMapel)}
                         </p>
                       </div>
 
-                      <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                        <div className="mb-2 flex items-center gap-2 text-slate-500">
+                      <div
+                        className="
+                          rounded-xl
+                          border theme-border
+                          theme-card-soft
+                          p-4
+                        "
+                      >
+                        <div className="mb-2 flex items-center gap-2 theme-text-muted">
                           <BookOpen size={17} />
+
                           <span className="text-xs font-semibold uppercase">
                             Mata Pelajaran
                           </span>
                         </div>
-                        <p className="font-semibold text-slate-900">
+
+                        <p className="font-semibold theme-text">
                           {getMapelName(selectedKelasMapel)}
                         </p>
+
                         {getMapelKode(selectedKelasMapel) && (
-                          <p className="mt-1 text-xs text-slate-500">
+                          <p className="mt-1 text-xs theme-text-muted">
                             Kode: {getMapelKode(selectedKelasMapel)}
                           </p>
                         )}
                       </div>
 
-                      <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                        <div className="mb-2 flex items-center gap-2 text-slate-500">
+                      <div
+                        className="
+                          rounded-xl
+                          border theme-border
+                          theme-card-soft
+                          p-4
+                        "
+                      >
+                        <div className="mb-2 flex items-center gap-2 theme-text-muted">
                           <UserRound size={17} />
+
                           <span className="text-xs font-semibold uppercase">
                             Guru
                           </span>
                         </div>
-                        <p className="font-semibold text-slate-900">
+
+                        <p className="font-semibold theme-text">
                           {getGuruName(selectedKelasMapel)}
                         </p>
+
                         {getGuruNip(selectedKelasMapel) && (
-                          <p className="mt-1 text-xs text-slate-500">
+                          <p className="mt-1 text-xs theme-text-muted">
                             NIP: {getGuruNip(selectedKelasMapel)}
                           </p>
                         )}
@@ -595,10 +834,12 @@ export default function EditJadwalMengajarPage() {
                   <div>
                     <label
                       htmlFor="hari"
-                      className="mb-2 block text-sm font-semibold text-slate-700"
+                      className="mb-2 block text-sm font-semibold theme-text-secondary"
                     >
                       Hari
-                      <span className="ml-1 text-red-500">*</span>
+                      <span className="ml-1 text-[var(--color-danger)]">
+                        *
+                      </span>
                     </label>
 
                     <div className="relative">
@@ -608,18 +849,44 @@ export default function EditJadwalMengajarPage() {
                         value={form.hari}
                         onChange={handleChange}
                         disabled={saving}
-                        className="w-full appearance-none rounded-xl border border-slate-300 bg-white px-4 py-3 pr-10 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100"
+                        className="
+                          w-full appearance-none
+                          rounded-xl
+                          border theme-border
+                          theme-input
+                          px-4 py-3 pr-10
+                          text-sm
+                          outline-none
+                          transition
+                          focus:border-[var(--color-primary)]
+                          focus:ring-4
+                          focus:ring-[var(--color-primary)]/10
+                          disabled:cursor-not-allowed
+                          disabled:opacity-60
+                        "
                       >
-                        <option value="">Pilih hari</option>
+                        <option value="">
+                          Pilih hari
+                        </option>
+
                         {HARI.map((item) => (
-                          <option key={item.value} value={item.value}>
+                          <option
+                            key={item.value}
+                            value={item.value}
+                          >
                             {item.label}
                           </option>
                         ))}
                       </select>
+
                       <ChevronDown
                         size={18}
-                        className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"
+                        className="
+                          pointer-events-none
+                          absolute right-4 top-1/2
+                          -translate-y-1/2
+                          theme-text-placeholder
+                        "
                       />
                     </div>
                   </div>
@@ -629,16 +896,24 @@ export default function EditJadwalMengajarPage() {
                     <div>
                       <label
                         htmlFor="jamMulai"
-                        className="mb-2 block text-sm font-semibold text-slate-700"
+                        className="mb-2 block text-sm font-semibold theme-text-secondary"
                       >
                         Jam Mulai
-                        <span className="ml-1 text-red-500">*</span>
+                        <span className="ml-1 text-[var(--color-danger)]">
+                          *
+                        </span>
                       </label>
+
                       <div className="relative">
                         <Clock3
                           size={18}
-                          className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                          className="
+                            absolute left-4 top-1/2
+                            -translate-y-1/2
+                            theme-text-placeholder
+                          "
                         />
+
                         <input
                           id="jamMulai"
                           name="jamMulai"
@@ -646,7 +921,21 @@ export default function EditJadwalMengajarPage() {
                           value={form.jamMulai}
                           onChange={handleChange}
                           disabled={saving}
-                          className="w-full rounded-xl border border-slate-300 bg-white py-3 pl-11 pr-4 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100"
+                          className="
+                            w-full
+                            rounded-xl
+                            border theme-border
+                            theme-input
+                            py-3 pl-11 pr-4
+                            text-sm
+                            outline-none
+                            transition
+                            focus:border-[var(--color-primary)]
+                            focus:ring-4
+                            focus:ring-[var(--color-primary)]/10
+                            disabled:cursor-not-allowed
+                            disabled:opacity-60
+                          "
                         />
                       </div>
                     </div>
@@ -654,16 +943,24 @@ export default function EditJadwalMengajarPage() {
                     <div>
                       <label
                         htmlFor="jamSelesai"
-                        className="mb-2 block text-sm font-semibold text-slate-700"
+                        className="mb-2 block text-sm font-semibold theme-text-secondary"
                       >
                         Jam Selesai
-                        <span className="ml-1 text-red-500">*</span>
+                        <span className="ml-1 text-[var(--color-danger)]">
+                          *
+                        </span>
                       </label>
+
                       <div className="relative">
                         <Clock3
                           size={18}
-                          className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                          className="
+                            absolute left-4 top-1/2
+                            -translate-y-1/2
+                            theme-text-placeholder
+                          "
                         />
+
                         <input
                           id="jamSelesai"
                           name="jamSelesai"
@@ -671,7 +968,21 @@ export default function EditJadwalMengajarPage() {
                           value={form.jamSelesai}
                           onChange={handleChange}
                           disabled={saving}
-                          className="w-full rounded-xl border border-slate-300 bg-white py-3 pl-11 pr-4 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100"
+                          className="
+                            w-full
+                            rounded-xl
+                            border theme-border
+                            theme-input
+                            py-3 pl-11 pr-4
+                            text-sm
+                            outline-none
+                            transition
+                            focus:border-[var(--color-primary)]
+                            focus:ring-4
+                            focus:ring-[var(--color-primary)]/10
+                            disabled:cursor-not-allowed
+                            disabled:opacity-60
+                          "
                         />
                       </div>
                     </div>
@@ -681,18 +992,25 @@ export default function EditJadwalMengajarPage() {
                   <div>
                     <label
                       htmlFor="ruangan"
-                      className="mb-2 block text-sm font-semibold text-slate-700"
+                      className="mb-2 block text-sm font-semibold theme-text-secondary"
                     >
                       Ruangan
-                      <span className="ml-2 text-xs font-normal text-slate-400">
+
+                      <span className="ml-2 text-xs font-normal theme-text-placeholder">
                         (opsional)
                       </span>
                     </label>
+
                     <div className="relative">
                       <MapPin
                         size={18}
-                        className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                        className="
+                          absolute left-4 top-1/2
+                          -translate-y-1/2
+                          theme-text-placeholder
+                        "
                       />
+
                       <input
                         id="ruangan"
                         name="ruangan"
@@ -701,19 +1019,54 @@ export default function EditJadwalMengajarPage() {
                         onChange={handleChange}
                         disabled={saving}
                         placeholder="Contoh: Lab Fisika / Ruang XI IPA 1"
-                        className="w-full rounded-xl border border-slate-300 bg-white py-3 pl-11 pr-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100"
+                        className="
+                          w-full
+                          rounded-xl
+                          border theme-border
+                          theme-input
+                          py-3 pl-11 pr-4
+                          text-sm
+                          outline-none
+                          transition
+                          focus:border-[var(--color-primary)]
+                          focus:ring-4
+                          focus:ring-[var(--color-primary)]/10
+                          disabled:cursor-not-allowed
+                          disabled:opacity-60
+                        "
                       />
                     </div>
                   </div>
                 </div>
 
                 {/* FOOTER FORM */}
-                <div className="flex flex-col-reverse gap-3 border-t border-slate-200 bg-slate-50 px-6 py-5 sm:flex-row sm:justify-end">
+                <div
+                  className="
+                    flex flex-col-reverse gap-3
+                    border-t theme-border
+                    theme-card-soft
+                    px-6 py-5
+                    sm:flex-row
+                    sm:justify-end
+                  "
+                >
                   <button
                     type="button"
                     onClick={handleCancel}
                     disabled={saving}
-                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="
+                      inline-flex items-center justify-center gap-2
+                      rounded-xl
+                      border theme-border
+                      theme-card
+                      px-5 py-3
+                      text-sm font-semibold
+                      theme-text-secondary
+                      theme-sidebar-hover
+                      transition
+                      disabled:cursor-not-allowed
+                      disabled:opacity-60
+                    "
                   >
                     <X size={18} />
                     Batal
@@ -722,11 +1075,24 @@ export default function EditJadwalMengajarPage() {
                   <button
                     type="submit"
                     disabled={saving}
-                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="
+                      inline-flex items-center justify-center gap-2
+                      rounded-xl
+                      theme-primary
+                      px-5 py-3
+                      text-sm font-semibold
+                      shadow-sm
+                      transition
+                      disabled:cursor-not-allowed
+                      disabled:opacity-60
+                    "
                   >
                     {saving ? (
                       <>
-                        <Loader2 size={18} className="animate-spin" />
+                        <Loader2
+                          size={18}
+                          className="animate-spin"
+                        />
                         Menyimpan...
                       </>
                     ) : (
@@ -741,22 +1107,38 @@ export default function EditJadwalMengajarPage() {
 
               {/* SIDEBAR INFO */}
               <div className="space-y-5">
-                <div className="rounded-2xl border border-blue-100 bg-blue-50 p-5">
+                <div
+                  className="
+                    rounded-2xl
+                    border theme-border
+                    theme-info
+                    p-5
+                  "
+                >
                   <div className="mb-3 flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-600 text-white">
+                    <div
+                      className="
+                        flex h-9 w-9
+                        items-center justify-center
+                        rounded-lg
+                        theme-primary
+                      "
+                    >
                       <CalendarDays size={18} />
                     </div>
-                    <h3 className="font-bold text-slate-900">
+
+                    <h3 className="font-bold theme-text">
                       Data yang Diedit
                     </h3>
                   </div>
 
                   <div className="space-y-3 text-sm">
                     <div>
-                      <p className="text-xs font-medium text-slate-500">
+                      <p className="text-xs font-medium theme-text-muted">
                         Kelas
                       </p>
-                      <p className="mt-1 font-semibold text-slate-800">
+
+                      <p className="mt-1 font-semibold theme-text">
                         {selectedKelasMapel
                           ? getKelasName(selectedKelasMapel)
                           : "-"}
@@ -764,10 +1146,11 @@ export default function EditJadwalMengajarPage() {
                     </div>
 
                     <div>
-                      <p className="text-xs font-medium text-slate-500">
+                      <p className="text-xs font-medium theme-text-muted">
                         Mata Pelajaran
                       </p>
-                      <p className="mt-1 font-semibold text-slate-800">
+
+                      <p className="mt-1 font-semibold theme-text">
                         {selectedKelasMapel
                           ? getMapelName(selectedKelasMapel)
                           : "-"}
@@ -775,10 +1158,11 @@ export default function EditJadwalMengajarPage() {
                     </div>
 
                     <div>
-                      <p className="text-xs font-medium text-slate-500">
+                      <p className="text-xs font-medium theme-text-muted">
                         Guru
                       </p>
-                      <p className="mt-1 font-semibold text-slate-800">
+
+                      <p className="mt-1 font-semibold theme-text">
                         {selectedKelasMapel
                           ? getGuruName(selectedKelasMapel)
                           : "-"}
@@ -787,25 +1171,66 @@ export default function EditJadwalMengajarPage() {
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <div
+                  className="
+                    rounded-2xl
+                    border theme-border
+                    theme-card
+                    p-5
+                    shadow-sm
+                  "
+                >
                   <div className="mb-4 flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
+                    <div
+                      className="
+                        flex h-9 w-9
+                        items-center justify-center
+                        rounded-lg
+                        theme-warning
+                      "
+                    >
                       <AlertCircle size={18} />
                     </div>
-                    <h3 className="font-bold text-slate-900">Perhatian</h3>
+
+                    <h3 className="font-bold theme-text">
+                      Perhatian
+                    </h3>
                   </div>
 
-                  <ul className="space-y-3 text-sm leading-6 text-slate-600">
+                  <ul className="space-y-3 text-sm leading-6 theme-text-secondary">
                     <li className="flex gap-2">
-                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-slate-400" />
+                      <span
+                        className="
+                          mt-2 h-1.5 w-1.5
+                          shrink-0 rounded-full
+                          bg-[var(--color-text-muted)]
+                        "
+                      />
+
                       Pastikan jam selesai lebih besar dari jam mulai.
                     </li>
+
                     <li className="flex gap-2">
-                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-slate-400" />
+                      <span
+                        className="
+                          mt-2 h-1.5 w-1.5
+                          shrink-0 rounded-full
+                          bg-[var(--color-text-muted)]
+                        "
+                      />
+
                       Guru tidak boleh memiliki jadwal yang bentrok.
                     </li>
+
                     <li className="flex gap-2">
-                      <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-slate-400" />
+                      <span
+                        className="
+                          mt-2 h-1.5 w-1.5
+                          shrink-0 rounded-full
+                          bg-[var(--color-text-muted)]
+                        "
+                      />
+
                       Perubahan akan langsung disimpan ke server.
                     </li>
                   </ul>

@@ -19,7 +19,6 @@ import {
   Globe2,
   Eye,
   X,
-  RefreshCw,
 } from "lucide-react";
 
 export default function EditPageCms() {
@@ -162,7 +161,6 @@ export default function EditPageCms() {
 
       setSuccess("Perubahan halaman berhasil disimpan.");
 
-      // Beri sedikit waktu agar success message terlihat
       setTimeout(() => {
         router.push(`/cmsAdmin/pages/${id}`);
       }, 700);
@@ -184,7 +182,7 @@ export default function EditPageCms() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen w-full bg-[#f6f8fc]">
+      <div className="theme-page flex min-h-screen w-full">
         <Sidebar
           active={active}
           setActive={setActive}
@@ -204,15 +202,15 @@ export default function EditPageCms() {
 
           <main className="flex flex-1 items-center justify-center p-6">
             <div className="flex flex-col items-center text-center">
-              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 ring-1 ring-blue-100">
-                <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+              <div className="theme-info mb-4 flex h-14 w-14 items-center justify-center rounded-2xl">
+                <Loader2 className="h-6 w-6 animate-spin" />
               </div>
 
-              <h2 className="text-sm font-bold text-slate-800">
+              <h2 className="theme-text text-sm font-bold">
                 Memuat halaman...
               </h2>
 
-              <p className="mt-1 text-xs text-slate-400">
+              <p className="theme-text-muted mt-1 text-xs">
                 Mengambil data halaman dari server.
               </p>
             </div>
@@ -227,7 +225,7 @@ export default function EditPageCms() {
   // ============================================================
 
   return (
-    <div className="flex min-h-screen w-full bg-[#f6f8fc]">
+    <div className="theme-page flex min-h-screen w-full">
       {/* SIDEBAR */}
 
       <Sidebar
@@ -264,7 +262,7 @@ export default function EditPageCms() {
               <div className="mb-6">
                 <Link
                   href="/cmsAdmin/pages"
-                  className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-blue-600"
+                  className="theme-text-muted inline-flex items-center gap-2 text-sm font-semibold transition hover:text-[var(--color-primary)]"
                 >
                   <ArrowLeft className="h-4 w-4" />
                   Kembali ke Halaman
@@ -277,32 +275,32 @@ export default function EditPageCms() {
 
               <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex min-w-0 items-center gap-3">
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-600 ring-1 ring-blue-100">
+                  <div className="theme-info flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl">
                     <FileText className="h-5 w-5" />
                   </div>
 
                   <div className="min-w-0">
-                    <h1 className="truncate text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+                    <h1 className="theme-text truncate text-2xl font-bold tracking-tight sm:text-3xl">
                       Edit Halaman
                     </h1>
 
-                    <p className="mt-0.5 text-xs text-slate-500 sm:text-sm">
+                    <p className="theme-text-secondary mt-0.5 text-xs sm:text-sm">
                       Perbarui informasi dan konten halaman website sekolah.
                     </p>
                   </div>
                 </div>
 
-               {originalPage?.slug && (
-  <a
-    href={`/website/${originalPage.slug}`}
-    target="_blank"
-    rel="noreferrer"
-    className="inline-flex w-fit items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
-  >
-    <Eye className="h-4 w-4" />
-    Preview
-  </a>
-)}
+                {originalPage?.slug && (
+                  <a
+                    href={`/website/${originalPage.slug}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="theme-card theme-border theme-text-secondary inline-flex w-fit items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold shadow-sm transition hover:border-[var(--color-primary)] hover:bg-[var(--color-sidebar-hover)] hover:text-[var(--color-primary)]"
+                  >
+                    <Eye className="h-4 w-4" />
+                    Preview
+                  </a>
+                )}
               </div>
 
               {/* ==================================================
@@ -310,17 +308,17 @@ export default function EditPageCms() {
               ================================================== */}
 
               {error && (
-                <div className="mb-5 flex items-start gap-3 rounded-2xl border border-red-100 bg-red-50 p-4">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-red-100">
-                    <AlertCircle className="h-4 w-4 text-red-600" />
+                <div className="theme-danger mb-5 flex items-start gap-3 rounded-2xl border p-4">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-danger)_15%,transparent)]">
+                    <AlertCircle className="h-4 w-4" />
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    <h3 className="text-sm font-bold text-red-800">
+                    <h3 className="text-sm font-bold">
                       Terjadi kesalahan
                     </h3>
 
-                    <p className="mt-1 text-xs leading-5 text-red-600">
+                    <p className="mt-1 text-xs leading-5">
                       {error}
                     </p>
                   </div>
@@ -328,7 +326,7 @@ export default function EditPageCms() {
                   <button
                     type="button"
                     onClick={() => setError("")}
-                    className="text-red-400 transition hover:text-red-600"
+                    className="transition hover:opacity-70"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -340,17 +338,17 @@ export default function EditPageCms() {
               ================================================== */}
 
               {success && (
-                <div className="mb-5 flex items-start gap-3 rounded-2xl border border-emerald-100 bg-emerald-50 p-4">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-100">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                <div className="theme-success mb-5 flex items-start gap-3 rounded-2xl border p-4">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-success)_15%,transparent)]">
+                    <CheckCircle2 className="h-4 w-4" />
                   </div>
 
                   <div>
-                    <h3 className="text-sm font-bold text-emerald-800">
+                    <h3 className="text-sm font-bold">
                       Berhasil
                     </h3>
 
-                    <p className="mt-1 text-xs text-emerald-600">
+                    <p className="mt-1 text-xs">
                       {success}
                     </p>
                   </div>
@@ -372,19 +370,19 @@ export default function EditPageCms() {
 
                     {/* TITLE + CONTENT */}
 
-                    <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
-                      <div className="border-b border-slate-100 bg-gradient-to-r from-white to-slate-50/70 px-5 py-4 sm:px-6">
+                    <section className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
+                      <div className="theme-card-soft theme-border border-b px-5 py-4 sm:px-6">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                          <div className="theme-info flex h-9 w-9 items-center justify-center rounded-xl">
                             <FileText className="h-4 w-4" />
                           </div>
 
                           <div>
-                            <h2 className="text-sm font-bold text-slate-800">
+                            <h2 className="theme-text text-sm font-bold">
                               Informasi Halaman
                             </h2>
 
-                            <p className="mt-0.5 text-[11px] text-slate-400">
+                            <p className="theme-text-muted mt-0.5 text-[11px]">
                               Tentukan judul dan isi halaman.
                             </p>
                           </div>
@@ -398,10 +396,10 @@ export default function EditPageCms() {
                         <div>
                           <label
                             htmlFor="judul"
-                            className="mb-2 block text-sm font-semibold text-slate-700"
+                            className="theme-text-secondary mb-2 block text-sm font-semibold"
                           >
                             Judul Halaman
-                            <span className="ml-1 text-red-500">
+                            <span className="ml-1 text-[var(--color-danger)]">
                               *
                             </span>
                           </label>
@@ -417,10 +415,10 @@ export default function EditPageCms() {
                               )
                             }
                             placeholder="Contoh: Tentang Sekolah"
-                            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 outline-none shadow-sm transition placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10"
+                            className="theme-input w-full rounded-xl border px-4 py-3 text-sm outline-none shadow-sm transition focus:border-[var(--color-primary)]"
                           />
 
-                          <p className="mt-2 text-[11px] text-slate-400">
+                          <p className="theme-text-muted mt-2 text-[11px]">
                             Minimal 3 karakter.
                           </p>
                         </div>
@@ -429,16 +427,16 @@ export default function EditPageCms() {
 
                         <div>
                           <div className="mb-2 flex items-center justify-between gap-3">
-                            <label className="block text-sm font-semibold text-slate-700">
+                            <label className="theme-text-secondary block text-sm font-semibold">
                               Konten Halaman
                             </label>
 
-                            <span className="text-[10px] font-medium text-slate-400">
+                            <span className="theme-text-muted text-[10px] font-medium">
                               Rich Text
                             </span>
                           </div>
 
-                          <div className="overflow-hidden rounded-xl border border-slate-200 bg-white focus-within:border-blue-400 focus-within:ring-4 focus-within:ring-blue-500/10">
+                          <div className="theme-input overflow-hidden rounded-xl border focus-within:border-[var(--color-primary)]">
                             <RichTextEditor
                               value={form.konten}
                               onChange={(value) =>
@@ -450,7 +448,7 @@ export default function EditPageCms() {
                             />
                           </div>
 
-                          <p className="mt-2 text-[11px] leading-5 text-slate-400">
+                          <p className="theme-text-muted mt-2 text-[11px] leading-5">
                             Gunakan editor untuk membuat judul,
                             paragraf, daftar, link, dan format
                             konten lainnya.
@@ -461,27 +459,32 @@ export default function EditPageCms() {
 
                     {/* SLUG INFORMATION */}
 
-                    <section className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm sm:p-6">
+                    <section className="theme-card theme-border rounded-2xl border p-5 shadow-sm sm:p-6">
                       <div className="flex items-start gap-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500">
+                        <div className="theme-card-soft theme-text-muted flex h-9 w-9 shrink-0 items-center justify-center rounded-xl">
                           <Globe2 className="h-4 w-4" />
                         </div>
 
                         <div className="min-w-0 flex-1">
-                          <h3 className="text-sm font-bold text-slate-800">
+                          <h3 className="theme-text text-sm font-bold">
                             URL Halaman
                           </h3>
 
-                          <p className="mt-1 text-xs leading-5 text-slate-400">
+                          <p className="theme-text-muted mt-1 text-xs leading-5">
                             Slug dikelola oleh backend CMS dan
                             tidak perlu diubah secara manual.
                           </p>
 
-                          <div className="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+                          <div className="theme-card-soft theme-border mt-4 overflow-hidden rounded-xl border">
                             <div className="flex items-center gap-2 px-4 py-3">
-                              <Globe2 className="h-4 w-4 shrink-0 text-blue-500" />
+                              <Globe2
+                                className="h-4 w-4 shrink-0"
+                                style={{
+                                  color: "var(--color-primary)",
+                                }}
+                              />
 
-                              <span className="break-all text-sm font-medium text-slate-600">
+                              <span className="theme-text-secondary break-all text-sm font-medium">
                                 /{originalPage?.slug || "-"}
                               </span>
                             </div>
@@ -499,13 +502,13 @@ export default function EditPageCms() {
 
                     {/* STATUS */}
 
-                    <section className="rounded-2xl border border-slate-200/80 bg-white shadow-sm">
-                      <div className="border-b border-slate-100 px-5 py-4">
-                        <h2 className="text-sm font-bold text-slate-800">
+                    <section className="theme-card theme-border rounded-2xl border shadow-sm">
+                      <div className="theme-border border-b px-5 py-4">
+                        <h2 className="theme-text text-sm font-bold">
                           Status Publikasi
                         </h2>
 
-                        <p className="mt-0.5 text-[11px] text-slate-400">
+                        <p className="theme-text-muted mt-0.5 text-[11px]">
                           Tentukan status halaman website.
                         </p>
                       </div>
@@ -513,7 +516,7 @@ export default function EditPageCms() {
                       <div className="p-5">
                         <label
                           htmlFor="status"
-                          className="mb-2 block text-sm font-semibold text-slate-700"
+                          className="theme-text-secondary mb-2 block text-sm font-semibold"
                         >
                           Status
                         </label>
@@ -527,7 +530,7 @@ export default function EditPageCms() {
                               e.target.value
                             )
                           }
-                          className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none shadow-sm transition hover:border-slate-300 focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10"
+                          className="theme-input w-full rounded-xl border px-4 py-3 text-sm outline-none shadow-sm transition focus:border-[var(--color-primary)]"
                         >
                           <option value="draft">
                             Draft
@@ -546,9 +549,9 @@ export default function EditPageCms() {
 
                     {/* PAGE INFORMATION */}
 
-                    <section className="rounded-2xl border border-slate-200/80 bg-white shadow-sm">
-                      <div className="border-b border-slate-100 px-5 py-4">
-                        <h2 className="text-sm font-bold text-slate-800">
+                    <section className="theme-card theme-border rounded-2xl border shadow-sm">
+                      <div className="theme-border border-b px-5 py-4">
+                        <h2 className="theme-text text-sm font-bold">
                           Informasi
                         </h2>
                       </div>
@@ -556,32 +559,32 @@ export default function EditPageCms() {
                       <div className="space-y-4 p-5">
 
                         <div>
-                          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                          <p className="theme-text-muted text-[10px] font-bold uppercase tracking-wider">
                             ID Halaman
                           </p>
 
-                          <p className="mt-1 break-all text-xs text-slate-600">
+                          <p className="theme-text-secondary mt-1 break-all text-xs">
                             {originalPage?.id || "-"}
                           </p>
                         </div>
 
                         <div>
-                          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                          <p className="theme-text-muted text-[10px] font-bold uppercase tracking-wider">
                             Slug
                           </p>
 
-                          <p className="mt-1 break-all text-xs text-slate-600">
+                          <p className="theme-text-secondary mt-1 break-all text-xs">
                             {originalPage?.slug || "-"}
                           </p>
                         </div>
 
                         {originalPage?.dibuatPada && (
                           <div>
-                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            <p className="theme-text-muted text-[10px] font-bold uppercase tracking-wider">
                               Dibuat
                             </p>
 
-                            <p className="mt-1 text-xs text-slate-600">
+                            <p className="theme-text-secondary mt-1 text-xs">
                               {new Date(
                                 originalPage.dibuatPada
                               ).toLocaleString("id-ID", {
@@ -594,11 +597,11 @@ export default function EditPageCms() {
 
                         {originalPage?.diperbaruiPada && (
                           <div>
-                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            <p className="theme-text-muted text-[10px] font-bold uppercase tracking-wider">
                               Terakhir diperbarui
                             </p>
 
-                            <p className="mt-1 text-xs text-slate-600">
+                            <p className="theme-text-secondary mt-1 text-xs">
                               {new Date(
                                 originalPage.diperbaruiPada
                               ).toLocaleString("id-ID", {
@@ -613,18 +616,18 @@ export default function EditPageCms() {
 
                     {/* SAVE */}
 
-                    <section className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 to-white p-5">
+                    <section className="theme-card theme-border rounded-2xl border p-5 shadow-sm">
                       <div className="flex items-start gap-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
+                        <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-xl">
                           <Save className="h-4 w-4" />
                         </div>
 
                         <div>
-                          <h3 className="text-sm font-bold text-slate-800">
+                          <h3 className="theme-text text-sm font-bold">
                             Simpan Perubahan
                           </h3>
 
-                          <p className="mt-1 text-xs leading-5 text-slate-500">
+                          <p className="theme-text-muted mt-1 text-xs leading-5">
                             Pastikan judul, konten, dan status
                             halaman sudah sesuai.
                           </p>
@@ -634,7 +637,7 @@ export default function EditPageCms() {
                       <button
                         type="submit"
                         disabled={saving}
-                        className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 hover:shadow-xl hover:shadow-blue-600/25 disabled:cursor-not-allowed disabled:opacity-60"
+                        className="theme-primary mt-5 inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold shadow-lg transition hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-60"
                       >
                         {saving ? (
                           <>
@@ -651,7 +654,7 @@ export default function EditPageCms() {
 
                       <Link
                         href="/cmsAdmin/pages"
-                        className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+                        className="theme-card theme-border theme-text-secondary mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl border px-5 py-3 text-sm font-semibold transition theme-sidebar-hover"
                       >
                         <ArrowLeft className="h-4 w-4" />
                         Batal
@@ -664,7 +667,7 @@ export default function EditPageCms() {
               {/* FOOTER */}
 
               <footer className="py-7 text-center">
-                <p className="text-[11px] text-slate-400">
+                <p className="theme-text-muted text-[11px]">
                   © 2026 SmartSchool • CMS Management
                 </p>
               </footer>

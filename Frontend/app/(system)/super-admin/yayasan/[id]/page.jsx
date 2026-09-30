@@ -20,10 +20,65 @@ import {
     AlertCircle,
     Loader2,
 } from "lucide-react";
-import Sidebar from "../../../../components/Sidebar";
-import Header from "../../../../components/Header";
 import { useEffect, useState } from "react";
 
+// =============================================================
+// THEME HELPERS
+// =============================================================
+const themeCardShadow =
+    "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+    "shadow-[0_2px_10px_color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeFocus =
+    "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+
+const themePrimarySoft =
+    "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+    "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themeNeutralSurface =
+    "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+    "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+    "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+    "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeInfoSurface =
+    "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoBorder =
+    "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeSuccessSurface =
+    "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+    "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeWarningSurface =
+    "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+    "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeDangerSurface =
+    "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+    "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+// =============================================================
+// DETAIL YAYASAN
+// =============================================================
 export default function DetailYayasanPage() {
     const params = useParams();
     const router = useRouter();
@@ -31,7 +86,6 @@ export default function DetailYayasanPage() {
     // =========================================================
     // ID DARI URL
     // =========================================================
-    // ID database berupa UUID, jadi JANGAN menggunakan parseInt()
     const id = Array.isArray(params?.id)
         ? params.id[0]
         : params?.id;
@@ -42,33 +96,6 @@ export default function DetailYayasanPage() {
     const [yayasan, setYayasan] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState("");
-
-    const [sidebarOpen, setSidebarOpen] = useState(true);
-    const [activeMenu] = useState("yayasan");
-
-    // =========================================================
-    // NOTIFICATIONS
-    // =========================================================
-    const notifications = [
-        {
-            id: 1,
-            title: "Pembaruan Sistem v2.0",
-            desc: "Dikirim 2 jam lalu",
-            read: false,
-        },
-        {
-            id: 2,
-            title: "Pengingat: Backup Data",
-            desc: "Dikirim 1 hari lalu",
-            read: false,
-        },
-        {
-            id: 3,
-            title: "Yayasan baru mendaftar",
-            desc: "Dikirim 3 hari lalu",
-            read: true,
-        },
-    ];
 
     // =========================================================
     // LOAD DETAIL YAYASAN
@@ -379,47 +406,26 @@ export default function DetailYayasanPage() {
     // =========================================================
     if (loading) {
         return (
-            <div className="flex h-screen bg-slate-50 overflow-hidden">
-                <Sidebar
-                    active={activeMenu}
-                    setActive={() => {}}
-                    collapsed={!sidebarOpen}
-                    setCollapsed={() =>
-                        setSidebarOpen(!sidebarOpen)
-                    }
-                />
-
-                <div className="flex-1 flex flex-col min-w-0">
-                    <Header
-                        toggleSidebar={() =>
-                            setSidebarOpen(!sidebarOpen)
-                        }
-                        notifications={notifications}
-                        user={{
-                            name: "Sarah",
-                            email: "sarah@smartschool.com",
-                            avatar: "SA",
-                        }}
-                    />
-
-                    <main className="flex-1 flex items-center justify-center p-6">
-                        <div className="text-center">
-                            <div className="w-14 h-14 rounded-full bg-blue-50 flex items-center justify-center mx-auto mb-4">
-                                <Loader2
-                                    size={28}
-                                    className="text-blue-600 animate-spin"
-                                />
-                            </div>
-
-                            <h2 className="text-lg font-semibold text-slate-700">
-                                Memuat data yayasan...
-                            </h2>
-
-                            <p className="text-sm text-slate-400 mt-1">
-                                Sedang mengambil data dari server.
-                            </p>
+            <div className="theme-page theme-text min-h-full">
+                <div className="w-full min-h-[70vh] flex items-center justify-center px-4">
+                    <div className="text-center">
+                        <div
+                            className={`w-14 h-14 rounded-full ${themeInfoSurface} flex items-center justify-center mx-auto mb-4`}
+                        >
+                            <Loader2
+                                size={28}
+                                className="text-[var(--color-info)] animate-spin"
+                            />
                         </div>
-                    </main>
+
+                        <h2 className="text-lg font-semibold theme-text">
+                            Memuat data yayasan...
+                        </h2>
+
+                        <p className="text-sm theme-text-muted mt-1">
+                            Sedang mengambil data dari server.
+                        </p>
+                    </div>
                 </div>
             </div>
         );
@@ -430,57 +436,40 @@ export default function DetailYayasanPage() {
     // =========================================================
     if (!yayasan) {
         return (
-            <div className="flex h-screen bg-slate-50 overflow-hidden">
-                <Sidebar
-                    active={activeMenu}
-                    setActive={() => {}}
-                    collapsed={!sidebarOpen}
-                    setCollapsed={() =>
-                        setSidebarOpen(!sidebarOpen)
-                    }
-                />
-
-                <div className="flex-1 flex flex-col min-w-0">
-                    <Header
-                        toggleSidebar={() =>
-                            setSidebarOpen(!sidebarOpen)
-                        }
-                        notifications={notifications}
-                        user={{
-                            name: "Sarah",
-                            email: "sarah@smartschool.com",
-                            avatar: "SA",
-                        }}
-                    />
-
-                    <main className="flex-1 flex items-center justify-center p-6">
-                        <div className="text-center bg-white rounded-2xl p-8 shadow-sm border border-slate-200/80 max-w-md w-full">
+            <div className="theme-page theme-text min-h-full">
+                <div className="w-full min-h-[70vh] flex items-center justify-center px-4">
+                    <div
+                        className={`theme-card rounded-2xl p-8 ${themeCardShadow} border theme-border max-w-md w-full text-center`}
+                    >
+                        <div
+                            className={`w-16 h-16 rounded-full ${themeDangerSurface} flex items-center justify-center mx-auto mb-4`}
+                        >
                             <AlertCircle
                                 size={48}
-                                className="text-rose-300 mx-auto mb-4"
+                                className="theme-danger"
                             />
-
-                            <h2 className="text-2xl font-semibold text-slate-700">
-                                Yayasan tidak ditemukan
-                            </h2>
-
-                            <p className="text-slate-500 text-sm mt-2">
-                                {error ||
-                                    "Data yang Anda cari mungkin telah dihapus."}
-                            </p>
-
-                            <button
-                                onClick={() =>
-                                    router.push(
-                                        "/super-admin/yayasan"
-                                    )
-                                }
-                                className="mt-5 px-5 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm hover:shadow"
-                            >
-                                Kembali ke Daftar Yayasan
-                            </button>
                         </div>
-                    </main>
+
+                        <h2 className="text-2xl font-semibold theme-text">
+                            Yayasan tidak ditemukan
+                        </h2>
+
+                        <p className="theme-text-secondary text-sm mt-2">
+                            {error ||
+                                "Data yang Anda cari mungkin telah dihapus."}
+                        </p>
+
+                        <button
+                            onClick={() =>
+                                router.push(
+                                    "/super-admin/yayasan"
+                                )
+                            }
+                            className={`mt-5 px-5 py-2.5 text-sm font-medium rounded-lg transition-all ${themePrimarySoft} ${themePrimarySoftBorder} border text-[var(--color-primary)] hover:bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)] ${themeSmallShadow}`}
+                        >
+                            Kembali ke Daftar Yayasan
+                        </button>
+                    </div>
                 </div>
             </div>
         );
@@ -489,35 +478,35 @@ export default function DetailYayasanPage() {
     // =========================================================
     // STATUS
     // =========================================================
-    const statusColorMap = {
+    const statusThemeMap = {
         Aktif: {
-            bg: "bg-emerald-50",
-            text: "text-emerald-700",
-            border: "border-emerald-200",
-            dot: "bg-emerald-500",
+            bg: themeSuccessSurface,
+            text: "text-[var(--color-success)]",
+            border: themeSuccessBorder,
+            dot: "bg-[var(--color-success)]",
             icon: CheckCircle,
         },
 
         Trial: {
-            bg: "bg-amber-50",
-            text: "text-amber-700",
-            border: "border-amber-200",
-            dot: "bg-amber-500",
+            bg: themeWarningSurface,
+            text: "text-[var(--color-warning)]",
+            border: themeWarningBorder,
+            dot: "bg-[var(--color-warning)]",
             icon: Clock,
         },
 
         Nonaktif: {
-            bg: "bg-rose-50",
-            text: "text-rose-700",
-            border: "border-rose-200",
-            dot: "bg-rose-500",
+            bg: themeDangerSurface,
+            text: "theme-danger",
+            border: themeDangerBorder,
+            dot: "bg-[var(--color-text-muted)]",
             icon: XCircle,
         },
     };
 
     const statusStyle =
-        statusColorMap[yayasan.status] ||
-        statusColorMap.Nonaktif;
+        statusThemeMap[yayasan.status] ||
+        statusThemeMap.Nonaktif;
 
     const StatusIcon = statusStyle.icon;
 
@@ -533,396 +522,348 @@ export default function DetailYayasanPage() {
     // RENDER
     // =========================================================
     return (
-        <div className="flex h-screen bg-slate-50 overflow-hidden">
-            {/* =====================================================
-                SIDEBAR
-            ===================================================== */}
-            <Sidebar
-                active={activeMenu}
-                setActive={() => {}}
-                collapsed={!sidebarOpen}
-                setCollapsed={() =>
-                    setSidebarOpen(!sidebarOpen)
-                }
-            />
-
-            <div className="flex-1 flex flex-col min-w-0">
+        <div className="theme-page theme-text min-h-full">
+            <div className="w-full max-w-[1100px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
                 {/* =================================================
-                    HEADER
+                    KEMBALI
                 ================================================= */}
-                <Header
-                    toggleSidebar={() =>
-                        setSidebarOpen(!sidebarOpen)
-                    }
-                    notifications={notifications}
-                    user={{
-                        name: "Sarah",
-                        email: "sarah@smartschool.com",
-                        avatar: "SA",
-                    }}
-                />
+                <button
+                    onClick={() => router.back()}
+                    className="flex items-center gap-2 text-sm theme-text-secondary hover:text-[var(--color-primary)] transition-colors mb-5 group"
+                >
+                    <ArrowLeft
+                        size={16}
+                        className="group-hover:-translate-x-0.5 transition-transform"
+                    />
+
+                    Kembali
+                </button>
 
                 {/* =================================================
-                    MAIN
+                    HEADER DETAIL
                 ================================================= */}
-                <main className="flex-1 overflow-y-auto p-4 sm:p-6 md:p-8">
-                    <div className="max-w-4xl mx-auto">
-                        {/* =================================================
-                            KEMBALI
-                        ================================================= */}
-                        <button
-                            onClick={() => router.back()}
-                            className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 transition-colors mb-5 group"
-                        >
-                            <ArrowLeft
-                                size={16}
-                                className="group-hover:-translate-x-0.5 transition-transform"
-                            />
-
-                            Kembali
-                        </button>
-
-                        {/* =================================================
-                            HEADER DETAIL
-                        ================================================= */}
-                        <div className="bg-white rounded-xl border border-slate-200/80 p-5 sm:p-6 shadow-sm mb-6">
-                            <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                                <div className="flex items-center gap-4 min-w-0">
-                                    {/* LOGO */}
-                                    <div className="w-16 h-16 rounded-xl bg-gradient-to-br from-slate-100 to-slate-200/50 flex items-center justify-center shadow-sm flex-shrink-0 overflow-hidden">
-                                        {yayasan.logo ? (
-                                            <img
-                                                src={yayasan.logo}
-                                                alt={`Logo ${yayasan.nama}`}
-                                                className="w-full h-full object-contain"
-                                                onError={(event) => {
-                                                    event.currentTarget.style.display =
-                                                        "none";
-                                                }}
-                                            />
-                                        ) : (
-                                            <Building2
-                                                size={30}
-                                                className="text-slate-400"
-                                            />
-                                        )}
-                                    </div>
-
-                                    {/* NAMA */}
-                                    <div className="min-w-0">
-                                        <h1 className="text-xl sm:text-2xl font-semibold text-slate-800 truncate">
-                                            {yayasan.nama}
-                                        </h1>
-
-                                        <div className="flex flex-wrap items-center gap-2 mt-1">
-                                            <span className="text-sm text-slate-500 font-mono">
-                                                NPYP:{" "}
-                                                {yayasan.npyp ||
-                                                    "-"}
-                                            </span>
-
-                                            <span
-                                                className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border ${statusStyle.bg} ${statusStyle.text} ${statusStyle.border}`}
-                                            >
-                                                <StatusIcon
-                                                    size={12}
-                                                />
-
-                                                {
-                                                    yayasan.status
-                                                }
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* EDIT */}
-                                <div className="flex items-center gap-2 ml-auto sm:ml-0">
-                                    <button
-                                        onClick={() =>
-                                            router.push(
-                                                `/super-admin/yayasan/edit/${yayasan.id}`
-                                            )
-                                        }
-                                        className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm hover:shadow"
-                                    >
-                                        <Edit
-                                            size={15}
-                                        />
-
-                                        <span>
-                                            Edit
-                                        </span>
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* INFO */}
-                            <div className="flex flex-wrap items-center gap-3 mt-3 pt-3 border-t border-slate-200/60 text-sm text-slate-500">
-                                {yayasan.bergabung && (
-                                    <span className="flex items-center gap-1.5">
-                                        <Calendar
-                                            size={14}
-                                            className="text-slate-400"
-                                        />
-
-                                        Bergabung:{" "}
-                                        {formatDate(
-                                            yayasan.bergabung
-                                        )}
-                                    </span>
-                                )}
-
-                                <span className="flex items-center gap-1.5">
-                                    <Building2
-                                        size={14}
-                                        className="text-slate-400"
-                                    />
-
-                                    {
-                                        yayasan.jumlahSekolah
-                                    }{" "}
-                                    Sekolah
-                                </span>
-                            </div>
-                        </div>
-
-                        {/* =================================================
-                            GRID INFO UTAMA
-                        ================================================= */}
-                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                            {/* KETUA */}
-                            <InfoBox
-                                icon={User}
-                                color="blue"
-                                label="Ketua Yayasan"
-                                value={
-                                    yayasan.ketua
-                                }
-                            />
-
-                            {/* SEKOLAH */}
-                            <InfoBox
-                                icon={School}
-                                color="emerald"
-                                label="Jumlah Sekolah"
-                                value={`${yayasan.jumlahSekolah} Sekolah`}
-                            />
-
-                            {/* PENGGUNA */}
-                            <InfoBox
-                                icon={Users}
-                                color="violet"
-                                label="Total Pengguna"
-                                value={
-                                    totalPengguna
-                                }
-                            />
-                        </div>
-
-                        {/* =================================================
-                            DETAIL 2 KOLOM
-                        ================================================= */}
-                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                            {/* =================================================
-                                KONTAK
-                            ================================================= */}
-                            <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm">
-                                <h3 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
-                                    <MailIcon
-                                        size={16}
-                                        className="text-slate-400"
-                                    />
-
-                                    Kontak
-                                </h3>
-
-                                <div className="space-y-3">
-                                    <ContactRow
-                                        icon={MailIcon}
-                                        value={
-                                            yayasan.email
-                                        }
-                                    />
-
-                                    <ContactRow
-                                        icon={Phone}
-                                        value={
-                                            yayasan.telepon
-                                        }
-                                    />
-
-                                    <ContactRow
-                                        icon={GlobeIcon}
-                                        value={
-                                            yayasan.website
-                                        }
-                                    />
-                                </div>
-                            </div>
-
-                            {/* =================================================
-                                ALAMAT
-                            ================================================= */}
-                            <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm">
-                                <h3 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
-                                    <MapPin
-                                        size={16}
-                                        className="text-slate-400"
-                                    />
-
-                                    Alamat
-                                </h3>
-
-                                <div className="space-y-2 text-sm">
-                                    <p className="text-slate-600 bg-slate-50/80 px-3 py-2 rounded-lg border border-slate-200/40">
-                                        {yayasan.alamat ||
-                                            "-"}
-                                    </p>
-
-                                    <p className="text-slate-500 bg-slate-50/80 px-3 py-2 rounded-lg border border-slate-200/40">
-                                        {buildAddress(
-                                            yayasan
-                                        )}
-
-                                        <span className="block text-xs text-slate-400 mt-0.5">
-                                            Kode Pos:{" "}
-                                            {yayasan.kodePos ||
-                                                "-"}
-                                        </span>
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* =================================================
-                            STATISTIK
-                        ================================================= */}
-                        <div className="grid grid-cols-3 gap-4 mb-6">
-                            <StatCard
-                                icon={Users}
-                                value={
-                                    yayasan.totalGuru
-                                }
-                                label="Guru"
-                                color="blue"
-                            />
-
-                            <StatCard
-                                icon={UserCheck}
-                                value={
-                                    yayasan.totalSiswa
-                                }
-                                label="Siswa"
-                                color="emerald"
-                            />
-
-                            <StatCard
-                                icon={User}
-                                value={
-                                    yayasan.totalAdmin
-                                }
-                                label="Admin"
-                                color="violet"
-                            />
-                        </div>
-
-                        {/* =================================================
-                            SEKOLAH DI BAWAH NAUNGAN
-                        ================================================= */}
-                        <div className="bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm mb-6">
-                            <h3 className="text-sm font-semibold text-slate-700 mb-4 flex items-center gap-2">
-                                <School
-                                    size={16}
-                                    className="text-slate-400"
-                                />
-
-                                Sekolah Di Bawah Naungan
-                            </h3>
-
-                            {yayasan.sekolah.length >
-                            0 ? (
-                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                                    {yayasan.sekolah.map(
-                                        (
-                                            sekolah,
-                                            index
-                                        ) => {
-                                            const sekolahNama =
-                                                typeof sekolah ===
-                                                "string"
-                                                    ? sekolah
-                                                    : sekolah?.nama ||
-                                                      sekolah?.namaSekolah ||
-                                                      "-";
-
-                                            return (
-                                                <div
-                                                    key={
-                                                        sekolah?.id ||
-                                                        index
-                                                    }
-                                                    className="flex items-center gap-2 text-sm text-slate-600 bg-slate-50/80 px-3 py-2 rounded-lg border border-slate-200/40"
-                                                >
-                                                    <Building2
-                                                        size={
-                                                            14
-                                                        }
-                                                        className="text-slate-400 flex-shrink-0"
-                                                    />
-
-                                                    <span className="truncate">
-                                                        {
-                                                            sekolahNama
-                                                        }
-                                                    </span>
-                                                </div>
-                                            );
-                                        }
-                                    )}
-                                </div>
-                            ) : (
-                                <div className="text-center py-8">
-                                    <School
-                                        size={32}
-                                        className="mx-auto text-slate-300 mb-2"
-                                    />
-
-                                    <p className="text-sm text-slate-400">
-                                        Belum ada sekolah di bawah yayasan ini.
-                                    </p>
-                                </div>
-                            )}
-                        </div>
-
-                        {/* =================================================
-                            TOMBOL AKSI
-                        ================================================= */}
-                        <div className="flex flex-col-reverse sm:flex-row items-center justify-end gap-3 pt-4 border-t border-slate-200/80">
-                            <button
-                                onClick={() =>
-                                    router.back()
-                                }
-                                className="w-full sm:w-auto px-5 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-100 rounded-lg transition-colors"
+                <div
+                    className={`theme-card rounded-xl border theme-border p-5 sm:p-6 ${themeCardShadow} mb-6`}
+                >
+                    <div className="flex flex-col sm:flex-row sm:items-center gap-4">
+                        <div className="flex items-center gap-4 min-w-0">
+                            {/* LOGO */}
+                            <div
+                                className={`w-16 h-16 rounded-xl ${themeNeutralSurface} border ${themeNeutralBorder} flex items-center justify-center ${themeSmallShadow} flex-shrink-0 overflow-hidden`}
                             >
-                                Tutup
-                            </button>
+                                {yayasan.logo ? (
+                                    <img
+                                        src={yayasan.logo}
+                                        alt={`Logo ${yayasan.nama}`}
+                                        className="w-full h-full object-contain"
+                                        onError={(event) => {
+                                            event.currentTarget.style.display =
+                                                "none";
+                                        }}
+                                    />
+                                ) : (
+                                    <Building2
+                                        size={30}
+                                        className="theme-text-muted"
+                                    />
+                                )}
+                            </div>
 
+                            {/* NAMA */}
+                            <div className="min-w-0">
+                                <h1 className="text-xl sm:text-2xl font-semibold theme-text truncate">
+                                    {yayasan.nama}
+                                </h1>
+
+                                <div className="flex flex-wrap items-center gap-2 mt-1">
+                                    <span className="text-sm theme-text-secondary font-mono">
+                                        NPYP:{" "}
+                                        {yayasan.npyp ||
+                                            "-"}
+                                    </span>
+
+                                    <span
+                                        className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium border ${statusStyle.bg} ${statusStyle.text} ${statusStyle.border}`}
+                                    >
+                                        <StatusIcon
+                                            size={12}
+                                        />
+
+                                        {yayasan.status}
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* EDIT */}
+                        <div className="flex items-center gap-2 ml-auto sm:ml-0">
                             <button
                                 onClick={() =>
                                     router.push(
                                         `/super-admin/yayasan/edit/${yayasan.id}`
                                     )
                                 }
-                                className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm hover:shadow"
+                                className="flex items-center justify-center gap-1.5 px-4 py-2 text-sm font-medium rounded-lg transition-all bg-[var(--color-primary)] text-[var(--color-card)] hover:opacity-90 shadow-[0_6px_16px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]"
                             >
-                                <Edit size={16} />
+                                <Edit size={15} />
 
-                                Edit Yayasan
+                                <span>
+                                    Edit
+                                </span>
                             </button>
                         </div>
                     </div>
-                </main>
+
+                    {/* INFO */}
+                    <div
+                        className={`flex flex-wrap items-center gap-3 mt-3 pt-3 border-t ${themeDivider} text-sm theme-text-secondary`}
+                    >
+                        {yayasan.bergabung && (
+                            <span className="flex items-center gap-1.5">
+                                <Calendar
+                                    size={14}
+                                    className="theme-text-muted"
+                                />
+
+                                Bergabung:{" "}
+                                {formatDate(
+                                    yayasan.bergabung
+                                )}
+                            </span>
+                        )}
+
+                        <span className="flex items-center gap-1.5">
+                            <Building2
+                                size={14}
+                                className="theme-text-muted"
+                            />
+
+                            {
+                                yayasan.jumlahSekolah
+                            }{" "}
+                            Sekolah
+                        </span>
+                    </div>
+                </div>
+
+                {/* =================================================
+                    GRID INFO UTAMA
+                ================================================= */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                    <InfoBox
+                        icon={User}
+                        color="primary"
+                        label="Ketua Yayasan"
+                        value={yayasan.ketua}
+                    />
+
+                    <InfoBox
+                        icon={School}
+                        color="success"
+                        label="Jumlah Sekolah"
+                        value={`${yayasan.jumlahSekolah} Sekolah`}
+                    />
+
+                    <InfoBox
+                        icon={Users}
+                        color="info"
+                        label="Total Pengguna"
+                        value={totalPengguna}
+                    />
+                </div>
+
+                {/* =================================================
+                    DETAIL 2 KOLOM
+                ================================================= */}
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    {/* KONTAK */}
+                    <div
+                        className={`theme-card rounded-xl border theme-border p-5 ${themeCardShadow}`}
+                    >
+                        <h3 className="text-sm font-semibold theme-text mb-4 flex items-center gap-2">
+                            <MailIcon
+                                size={16}
+                                className="theme-text-muted"
+                            />
+
+                            Kontak
+                        </h3>
+
+                        <div className="space-y-3">
+                            <ContactRow
+                                icon={MailIcon}
+                                value={yayasan.email}
+                            />
+
+                            <ContactRow
+                                icon={Phone}
+                                value={yayasan.telepon}
+                            />
+
+                            <ContactRow
+                                icon={GlobeIcon}
+                                value={yayasan.website}
+                            />
+                        </div>
+                    </div>
+
+                    {/* ALAMAT */}
+                    <div
+                        className={`theme-card rounded-xl border theme-border p-5 ${themeCardShadow}`}
+                    >
+                        <h3 className="text-sm font-semibold theme-text mb-4 flex items-center gap-2">
+                            <MapPin
+                                size={16}
+                                className="theme-text-muted"
+                            />
+
+                            Alamat
+                        </h3>
+
+                        <div className="space-y-2 text-sm">
+                            <p
+                                className={`theme-text-secondary ${themeNeutralSurface} px-3 py-2 rounded-lg border ${themeNeutralBorder}`}
+                            >
+                                {yayasan.alamat ||
+                                    "-"}
+                            </p>
+
+                            <p
+                                className={`theme-text-secondary ${themeNeutralSurface} px-3 py-2 rounded-lg border ${themeNeutralBorder}`}
+                            >
+                                {buildAddress(
+                                    yayasan
+                                )}
+
+                                <span className="block text-xs theme-text-muted mt-0.5">
+                                    Kode Pos:{" "}
+                                    {yayasan.kodePos ||
+                                        "-"}
+                                </span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* =================================================
+                    STATISTIK
+                ================================================= */}
+                <div className="grid grid-cols-3 gap-4 mb-6">
+                    <StatCard
+                        icon={Users}
+                        value={yayasan.totalGuru}
+                        label="Guru"
+                        color="primary"
+                    />
+
+                    <StatCard
+                        icon={UserCheck}
+                        value={yayasan.totalSiswa}
+                        label="Siswa"
+                        color="success"
+                    />
+
+                    <StatCard
+                        icon={User}
+                        value={yayasan.totalAdmin}
+                        label="Admin"
+                        color="info"
+                    />
+                </div>
+
+                {/* =================================================
+                    SEKOLAH DI BAWAH NAUNGAN
+                ================================================= */}
+                <div
+                    className={`theme-card rounded-xl border theme-border p-5 ${themeCardShadow} mb-6`}
+                >
+                    <h3 className="text-sm font-semibold theme-text mb-4 flex items-center gap-2">
+                        <School
+                            size={16}
+                            className="theme-text-muted"
+                        />
+
+                        Sekolah Di Bawah Naungan
+                    </h3>
+
+                    {yayasan.sekolah.length > 0 ? (
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            {yayasan.sekolah.map(
+                                (
+                                    sekolah,
+                                    index
+                                ) => {
+                                    const sekolahNama =
+                                        typeof sekolah ===
+                                        "string"
+                                            ? sekolah
+                                            : sekolah?.nama ||
+                                              sekolah?.namaSekolah ||
+                                              "-";
+
+                                    return (
+                                        <div
+                                            key={
+                                                sekolah?.id ||
+                                                index
+                                            }
+                                            className={`flex items-center gap-2 text-sm theme-text-secondary ${themeNeutralSurface} px-3 py-2 rounded-lg border ${themeNeutralBorder}`}
+                                        >
+                                            <Building2
+                                                size={14}
+                                                className="theme-text-muted flex-shrink-0"
+                                            />
+
+                                            <span className="truncate">
+                                                {
+                                                    sekolahNama
+                                                }
+                                            </span>
+                                        </div>
+                                    );
+                                }
+                            )}
+                        </div>
+                    ) : (
+                        <div className="text-center py-8">
+                            <School
+                                size={32}
+                                className="mx-auto theme-text-muted mb-2"
+                            />
+
+                            <p className="text-sm theme-text-muted">
+                                Belum ada sekolah di bawah yayasan ini.
+                            </p>
+                        </div>
+                    )}
+                </div>
+
+                {/* =================================================
+                    TOMBOL AKSI
+                ================================================= */}
+                <div
+                    className={`flex flex-col-reverse sm:flex-row items-center justify-end gap-3 pt-4 border-t ${themeDivider}`}
+                >
+                    <button
+                        onClick={() => router.back()}
+                        className={`w-full sm:w-auto px-5 py-2.5 text-sm font-medium theme-text-secondary ${themeNeutralHover} rounded-lg transition-colors`}
+                    >
+                        Tutup
+                    </button>
+
+                    <button
+                        onClick={() =>
+                            router.push(
+                                `/super-admin/yayasan/edit/${yayasan.id}`
+                            )
+                        }
+                        className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-medium rounded-lg transition-all bg-[var(--color-primary)] text-[var(--color-card)] hover:opacity-90 shadow-[0_6px_16px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]"
+                    >
+                        <Edit size={16} />
+
+                        Edit Yayasan
+                    </button>
+                </div>
             </div>
         </div>
     );
@@ -936,12 +877,10 @@ function unwrapResponse(response) {
         return null;
     }
 
-    // response.data
     if (
         response.data !== undefined &&
         response.data !== null
     ) {
-        // Jika data langsung object profil/statistik
         if (
             response.data?.profil ||
             response.data?.yayasan ||
@@ -951,7 +890,6 @@ function unwrapResponse(response) {
             return response.data;
         }
 
-        // Jika nested lagi
         if (
             response.data?.data !== undefined
         ) {
@@ -1063,31 +1001,46 @@ function InfoBox({
     value,
 }) {
     const colorMap = {
-        blue: "bg-blue-50 text-blue-600",
-        emerald:
-            "bg-emerald-50 text-emerald-600",
-        violet:
-            "bg-violet-50 text-violet-600",
+        primary: {
+            bg: themePrimarySoft,
+            text: "text-[var(--color-primary)]",
+            border: themePrimarySoftBorder,
+        },
+
+        success: {
+            bg: themeSuccessSurface,
+            text: "text-[var(--color-success)]",
+            border: themeSuccessBorder,
+        },
+
+        info: {
+            bg: themeInfoSurface,
+            text: "text-[var(--color-info)]",
+            border: themeInfoBorder,
+        },
     };
 
+    const selected =
+        colorMap[color] ||
+        colorMap.primary;
+
     return (
-        <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm">
+        <div
+            className={`theme-card rounded-xl border theme-border p-4 ${themeCardShadow}`}
+        >
             <div className="flex items-center gap-3">
                 <div
-                    className={`p-2 rounded-lg ${
-                        colorMap[color] ||
-                        colorMap.blue
-                    }`}
+                    className={`p-2 rounded-lg ${selected.bg} ${selected.text} border ${selected.border}`}
                 >
                     <Icon size={16} />
                 </div>
 
                 <div className="min-w-0">
-                    <p className="text-xs text-slate-400 font-medium">
+                    <p className="text-xs theme-text-muted font-medium">
                         {label}
                     </p>
 
-                    <p className="text-sm font-semibold text-slate-700 truncate">
+                    <p className="text-sm font-semibold theme-text truncate">
                         {value || "-"}
                     </p>
                 </div>
@@ -1104,13 +1057,15 @@ function ContactRow({
     value,
 }) {
     return (
-        <div className="flex items-center gap-3 text-sm bg-slate-50/80 px-3 py-2 rounded-lg border border-slate-200/40">
+        <div
+            className={`flex items-center gap-3 text-sm ${themeNeutralSurface} px-3 py-2 rounded-lg border ${themeNeutralBorder}`}
+        >
             <Icon
                 size={15}
-                className="text-slate-400 flex-shrink-0"
+                className="theme-text-muted flex-shrink-0"
             />
 
-            <span className="text-slate-600 truncate">
+            <span className="theme-text-secondary truncate">
                 {value || "-"}
             </span>
         </div>
@@ -1127,29 +1082,44 @@ function StatCard({
     color,
 }) {
     const colorMap = {
-        blue: "bg-blue-50 text-blue-600",
-        emerald:
-            "bg-emerald-50 text-emerald-600",
-        violet:
-            "bg-violet-50 text-violet-600",
+        primary: {
+            bg: themePrimarySoft,
+            text: "text-[var(--color-primary)]",
+            border: themePrimarySoftBorder,
+        },
+
+        success: {
+            bg: themeSuccessSurface,
+            text: "text-[var(--color-success)]",
+            border: themeSuccessBorder,
+        },
+
+        info: {
+            bg: themeInfoSurface,
+            text: "text-[var(--color-info)]",
+            border: themeInfoBorder,
+        },
     };
 
+    const selected =
+        colorMap[color] ||
+        colorMap.primary;
+
     return (
-        <div className="bg-white rounded-xl border border-slate-200/80 p-4 text-center shadow-sm">
+        <div
+            className={`theme-card rounded-xl border theme-border p-4 text-center ${themeCardShadow}`}
+        >
             <div
-                className={`p-2 rounded-lg ${
-                    colorMap[color] ||
-                    colorMap.blue
-                } w-fit mx-auto mb-1.5`}
+                className={`p-2 rounded-lg ${selected.bg} ${selected.text} border ${selected.border} w-fit mx-auto mb-1.5`}
             >
                 <Icon size={18} />
             </div>
 
-            <p className="text-xl font-bold text-slate-800">
+            <p className="text-xl font-bold theme-text">
                 {Number(value) || 0}
             </p>
 
-            <p className="text-xs text-slate-400 font-medium">
+            <p className="text-xs theme-text-muted font-medium">
                 {label}
             </p>
         </div>

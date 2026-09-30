@@ -122,6 +122,43 @@ const MOCK_SISWA = [
 const KARTU_IDENTITAS_URL = "/admin/siswa/kartu-identitas";
 
 /* =========================================================
+   THEME HELPERS
+========================================================= */
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+/* =========================================================
    HELPER
 ========================================================= */
 
@@ -178,12 +215,16 @@ function QRCodePlaceholder() {
   ];
 
   return (
-    <div className="w-[82px] h-[82px] bg-white rounded-lg p-1.5 grid grid-cols-7 gap-[2px] border border-slate-200">
+    <div
+      className={`w-[82px] h-[82px] theme-card rounded-lg p-1.5 grid grid-cols-7 gap-[2px] border ${themeNeutralBorder}`}
+    >
       {Array.from({ length: 49 }).map((_, index) => (
         <div
           key={index}
           className={`rounded-[1px] ${
-            patterns.includes(index) ? "bg-slate-900" : "bg-white"
+            patterns.includes(index)
+              ? "bg-[var(--color-text)]"
+              : "bg-[var(--color-card)]"
           }`}
         />
       ))}
@@ -199,39 +240,70 @@ function StudentCard({ siswa }) {
   return (
     <div
       id="student-card"
-      className="relative w-[430px] max-w-full aspect-[1.586/1] rounded-2xl overflow-hidden bg-white shadow-2xl border border-slate-200 print:shadow-none print:border-0"
+      className={`relative w-[430px] max-w-full aspect-[1.586/1] rounded-2xl overflow-hidden theme-card ${themeCardShadow} border ${themeNeutralBorder} print:shadow-none print:border-0`}
     >
       {/* BACKGROUND */}
       <div className="absolute inset-0 overflow-hidden">
-        <div className="absolute -right-24 -top-28 w-72 h-72 rounded-full bg-[#155DFC]/10" />
+        <div
+          className="absolute -right-24 -top-28 w-72 h-72 rounded-full"
+          style={{
+            background:
+              "color-mix(in srgb, var(--color-primary) 10%, transparent)",
+          }}
+        />
 
-        <div className="absolute -left-24 -bottom-32 w-80 h-80 rounded-full bg-[#155DFC]/5" />
+        <div
+          className="absolute -left-24 -bottom-32 w-80 h-80 rounded-full"
+          style={{
+            background:
+              "color-mix(in srgb, var(--color-primary) 5%, transparent)",
+          }}
+        />
 
-        <div className="absolute right-0 top-0 w-[48%] h-full bg-gradient-to-br from-[#155DFC] to-[#0d47c9] clip-card" />
+        <div
+          className={`absolute right-0 top-0 w-[48%] h-full ${themePrimaryGradient} clip-card`}
+        />
 
-        <div className="absolute right-[25%] -top-20 w-44 h-44 rounded-full border-[22px] border-white/10" />
+        <div
+          className="absolute right-[25%] -top-20 w-44 h-44 rounded-full border-[22px]"
+          style={{
+            borderColor:
+              "color-mix(in srgb, var(--color-card) 10%, transparent)",
+          }}
+        />
 
-        <div className="absolute right-[5%] bottom-[-70px] w-48 h-48 rounded-full border-[28px] border-white/10" />
+        <div
+          className="absolute right-[5%] bottom-[-70px] w-48 h-48 rounded-full border-[28px]"
+          style={{
+            borderColor:
+              "color-mix(in srgb, var(--color-card) 10%, transparent)",
+          }}
+        />
       </div>
 
       {/* CONTENT */}
       <div className="relative z-10 h-full flex flex-col p-5">
         {/* HEADER */}
         <div className="flex items-center gap-3">
-          <div className="w-11 h-11 rounded-xl bg-white flex items-center justify-center shadow-sm">
-            <School size={24} className="text-[#155DFC]" />
+          <div
+            className={`w-11 h-11 rounded-xl theme-card flex items-center justify-center ${themeCardShadow}`}
+          >
+            <School
+              size={24}
+              className="text-[var(--color-primary)]"
+            />
           </div>
 
           <div>
-            <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-500">
+            <p className="text-[9px] font-bold uppercase tracking-[0.18em] theme-text-muted">
               SMARTSCHOOL
             </p>
 
-            <h3 className="text-sm font-extrabold text-slate-900">
+            <h3 className="text-sm font-extrabold theme-text">
               KARTU PELAJAR
             </h3>
 
-            <p className="text-[8px] text-slate-500">
+            <p className="text-[8px] theme-text-secondary">
               Student Identity Card
             </p>
           </div>
@@ -240,9 +312,11 @@ function StudentCard({ siswa }) {
         {/* MAIN */}
         <div className="flex-1 flex items-center gap-4 mt-2">
           {/* PHOTO */}
-          <div className="relative w-[92px] h-[115px] rounded-xl overflow-hidden border-4 border-white shadow-lg bg-gradient-to-br from-slate-100 to-slate-200 flex-shrink-0">
+          <div
+            className={`relative w-[92px] h-[115px] rounded-xl overflow-hidden border-4 theme-card ${themeCardShadow} ${themeNeutralSurface} flex-shrink-0`}
+          >
             <div className="absolute inset-0 flex items-center justify-center">
-              <span className="text-2xl font-bold text-slate-400">
+              <span className="text-2xl font-bold theme-text-muted">
                 {getInitials(siswa.nama)}
               </span>
             </div>
@@ -250,41 +324,41 @@ function StudentCard({ siswa }) {
 
           {/* INFO */}
           <div className="min-w-0">
-            <p className="text-[8px] uppercase tracking-wider text-slate-400 font-semibold">
+            <p className="text-[8px] uppercase tracking-wider theme-text-muted font-semibold">
               Nama Lengkap
             </p>
 
-            <h2 className="text-lg font-extrabold text-slate-900 leading-tight truncate max-w-[185px]">
+            <h2 className="text-lg font-extrabold theme-text leading-tight truncate max-w-[185px]">
               {siswa.nama}
             </h2>
 
             <div className="mt-2 space-y-1">
               <div className="flex items-center gap-2">
-                <span className="text-[8px] text-slate-400 w-12">
+                <span className="text-[8px] theme-text-muted w-12">
                   NISN
                 </span>
 
-                <span className="text-[9px] font-bold text-slate-700">
+                <span className="text-[9px] font-bold theme-text-secondary">
                   {siswa.nisn}
                 </span>
               </div>
 
               <div className="flex items-center gap-2">
-                <span className="text-[8px] text-slate-400 w-12">
+                <span className="text-[8px] theme-text-muted w-12">
                   KELAS
                 </span>
 
-                <span className="text-[9px] font-bold text-slate-700">
+                <span className="text-[9px] font-bold theme-text-secondary">
                   {siswa.kelas}
                 </span>
               </div>
 
               <div className="flex items-center gap-2">
-                <span className="text-[8px] text-slate-400 w-12">
+                <span className="text-[8px] theme-text-muted w-12">
                   LAHIR
                 </span>
 
-                <span className="text-[9px] font-semibold text-slate-700">
+                <span className="text-[9px] font-semibold theme-text-secondary">
                   {siswa.tempatLahir}, {siswa.tanggalLahir}
                 </span>
               </div>
@@ -295,9 +369,11 @@ function StudentCard({ siswa }) {
         {/* FOOTER */}
         <div className="flex items-end justify-between">
           <div>
-            <p className="text-[8px] text-slate-400">Tahun Ajaran</p>
+            <p className="text-[8px] theme-text-muted">
+              Tahun Ajaran
+            </p>
 
-            <p className="text-[10px] font-bold text-slate-700">
+            <p className="text-[10px] font-bold theme-text-secondary">
               {siswa.tahunMasuk} / {Number(siswa.tahunMasuk) + 1}
             </p>
           </div>
@@ -305,7 +381,7 @@ function StudentCard({ siswa }) {
           <div className="flex flex-col items-center">
             <QRCodePlaceholder />
 
-            <span className="text-[6px] text-slate-400 mt-1">
+            <span className="text-[6px] theme-text-muted mt-1">
               SCAN TO VERIFY
             </span>
           </div>
@@ -314,7 +390,16 @@ function StudentCard({ siswa }) {
 
       {/* CARD LABEL */}
       <div className="absolute right-4 top-4 z-20">
-        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 text-white text-[7px] font-bold uppercase tracking-wider">
+        <span
+          className="inline-flex items-center gap-1 px-2 py-1 rounded-full backdrop-blur-sm border text-[7px] font-bold uppercase tracking-wider"
+          style={{
+            background:
+              "color-mix(in srgb, var(--color-card) 15%, transparent)",
+            borderColor:
+              "color-mix(in srgb, var(--color-card) 20%, transparent)",
+            color: "var(--color-card)",
+          }}
+        >
           <ShieldCheck size={9} />
           Official
         </span>
@@ -329,77 +414,115 @@ function StudentCard({ siswa }) {
 
 function StudentCardBack({ siswa }) {
   return (
-    <div className="relative w-[430px] max-w-full aspect-[1.586/1] rounded-2xl overflow-hidden bg-white shadow-2xl border border-slate-200 print:shadow-none print:border-0">
+    <div
+      className={`relative w-[430px] max-w-full aspect-[1.586/1] rounded-2xl overflow-hidden theme-card ${themeCardShadow} border ${themeNeutralBorder} print:shadow-none print:border-0`}
+    >
       {/* TOP */}
-      <div className="h-[30%] bg-gradient-to-r from-[#155DFC] to-[#0d47c9] relative overflow-hidden">
-        <div className="absolute -right-10 -top-16 w-44 h-44 rounded-full border-[20px] border-white/10" />
+      <div
+        className={`h-[30%] ${themePrimaryGradient} relative overflow-hidden`}
+      >
+        <div
+          className="absolute -right-10 -top-16 w-44 h-44 rounded-full border-[20px]"
+          style={{
+            borderColor:
+              "color-mix(in srgb, var(--color-card) 10%, transparent)",
+          }}
+        />
 
-        <div className="relative z-10 p-5 text-white">
+        <div
+          className="relative z-10 p-5"
+          style={{ color: "var(--color-card)" }}
+        >
           <p className="text-[8px] uppercase tracking-[0.2em] opacity-70">
             SMARTSCHOOL
           </p>
 
-          <h3 className="text-sm font-bold mt-1">Kartu Pelajar</h3>
+          <h3 className="text-sm font-bold mt-1">
+            Kartu Pelajar
+          </h3>
         </div>
       </div>
 
-      {/* BLACK STRIPE */}
-      <div className="h-7 bg-slate-900 mt-3" />
+      {/* STRIPE */}
+      <div
+        className="h-7 mt-3"
+        style={{ background: "var(--color-text)" }}
+      />
 
       {/* CONTENT */}
       <div className="p-5">
         <div className="grid grid-cols-2 gap-x-6 gap-y-3">
           <div>
-            <p className="text-[7px] text-slate-400 uppercase">NISN</p>
+            <p className="text-[7px] theme-text-muted uppercase">
+              NISN
+            </p>
 
-            <p className="text-[9px] font-bold text-slate-700">
+            <p className="text-[9px] font-bold theme-text-secondary">
               {siswa.nisn}
             </p>
           </div>
 
           <div>
-            <p className="text-[7px] text-slate-400 uppercase">NIK</p>
+            <p className="text-[7px] theme-text-muted uppercase">
+              NIK
+            </p>
 
-            <p className="text-[9px] font-bold text-slate-700">
+            <p className="text-[9px] font-bold theme-text-secondary">
               {siswa.nik}
             </p>
           </div>
 
           <div className="col-span-2">
-            <p className="text-[7px] text-slate-400 uppercase">Alamat</p>
+            <p className="text-[7px] theme-text-muted uppercase">
+              Alamat
+            </p>
 
-            <p className="text-[9px] font-semibold text-slate-700">
+            <p className="text-[9px] font-semibold theme-text-secondary">
               {siswa.alamat}
             </p>
           </div>
 
           <div>
-            <p className="text-[7px] text-slate-400 uppercase">Telepon</p>
+            <p className="text-[7px] theme-text-muted uppercase">
+              Telepon
+            </p>
 
-            <p className="text-[9px] font-bold text-slate-700">
+            <p className="text-[9px] font-bold theme-text-secondary">
               {siswa.noTelepon}
             </p>
           </div>
 
           <div>
-            <p className="text-[7px] text-slate-400 uppercase">Agama</p>
+            <p className="text-[7px] theme-text-muted uppercase">
+              Agama
+            </p>
 
-            <p className="text-[9px] font-bold text-slate-700">
+            <p className="text-[9px] font-bold theme-text-secondary">
               {siswa.agama}
             </p>
           </div>
         </div>
 
-        <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
-          <p className="text-[7px] text-slate-400 max-w-[220px] leading-relaxed">
+        <div
+          className={`mt-4 pt-3 border-t ${themeDivider} flex items-center justify-between`}
+        >
+          <p className="text-[7px] theme-text-muted max-w-[220px] leading-relaxed">
             Kartu ini merupakan identitas resmi siswa. Jika ditemukan, harap
             dikembalikan kepada pihak sekolah.
           </p>
 
           <div className="text-right">
-            <p className="text-[7px] text-slate-400">STATUS</p>
+            <p className="text-[7px] theme-text-muted">
+              STATUS
+            </p>
 
-            <p className="text-[9px] font-bold text-emerald-600 uppercase">
+            <p
+              className={`text-[9px] font-bold uppercase ${
+                siswa.status === "aktif"
+                  ? "theme-success"
+                  : "theme-text-muted"
+              }`}
+            >
               {siswa.status}
             </p>
           </div>
@@ -416,14 +539,18 @@ function StudentCardBack({ siswa }) {
 function InfoItem({ icon, label, value }) {
   return (
     <div className="flex items-center gap-3">
-      <div className="w-9 h-9 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400">
+      <div
+        className={`w-9 h-9 rounded-lg ${themeNeutralSurface} border ${themeNeutralBorder} flex items-center justify-center theme-text-muted`}
+      >
         {icon}
       </div>
 
       <div>
-        <p className="text-[11px] text-slate-400">{label}</p>
+        <p className="text-[11px] theme-text-muted">
+          {label}
+        </p>
 
-        <p className="text-sm font-semibold text-slate-700">
+        <p className="text-sm font-semibold theme-text-secondary">
           {value || "-"}
         </p>
       </div>
@@ -455,14 +582,16 @@ function IDCardPageContent() {
       return;
     }
 
-    const found = MOCK_SISWA.find((item) => item.id === Number(id));
+    const found = MOCK_SISWA.find(
+      (item) => item.id === Number(id)
+    );
 
     setSiswa(found || null);
     setLoading(false);
   }, [id]);
 
   /* =======================================================
-     KEMBALI KE HALAMAN AWAL KARTU IDENTITAS
+     KEMBALI
   ======================================================= */
 
   const handleBackToKartuIdentitas = () => {
@@ -491,7 +620,7 @@ function IDCardPageContent() {
 
   if (loading) {
     return (
-      <div className="flex h-screen bg-slate-50">
+      <div className="flex h-screen theme-page">
         <Sidebar
           active="siswaKartuIdentitas"
           setActive={() => {}}
@@ -512,7 +641,14 @@ function IDCardPageContent() {
           />
 
           <main className="flex-1 flex items-center justify-center">
-            <div className="w-9 h-9 rounded-full border-4 border-slate-200 border-t-[#155DFC] animate-spin" />
+            <div
+              className="w-9 h-9 rounded-full border-4 animate-spin"
+              style={{
+                borderColor:
+                  "color-mix(in srgb, var(--color-text) 12%, transparent)",
+                borderTopColor: "var(--color-primary)",
+              }}
+            />
           </main>
         </div>
       </div>
@@ -525,7 +661,7 @@ function IDCardPageContent() {
 
   if (!siswa) {
     return (
-      <div className="flex h-screen bg-slate-50">
+      <div className="flex h-screen theme-page">
         <Sidebar
           active="siswaKartuIdentitas"
           setActive={() => {}}
@@ -547,21 +683,26 @@ function IDCardPageContent() {
 
           <main className="flex-1 flex items-center justify-center p-6">
             <div className="text-center">
-              <div className="w-16 h-16 mx-auto rounded-full bg-slate-100 flex items-center justify-center mb-4">
-                <CreditCard size={28} className="text-slate-400" />
+              <div
+                className={`w-16 h-16 mx-auto rounded-full ${themeNeutralSurface} flex items-center justify-center mb-4`}
+              >
+                <CreditCard
+                  size={28}
+                  className="theme-text-muted"
+                />
               </div>
 
-              <h1 className="text-lg font-bold text-slate-800">
+              <h1 className="text-lg font-bold theme-text">
                 ID Card tidak ditemukan
               </h1>
 
-              <p className="text-sm text-slate-500 mt-1 mb-5">
+              <p className="text-sm theme-text-secondary mt-1 mb-5">
                 Data siswa yang dipilih tidak tersedia.
               </p>
 
               <button
                 onClick={handleBackToKartuIdentitas}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#155DFC] text-white text-sm font-semibold hover:bg-[#0d47c9] transition"
+                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg ${themePrimaryGradient} text-[var(--color-card)] text-sm font-semibold ${themePrimaryShadow} hover:brightness-105 transition`}
               >
                 <ArrowLeft size={16} />
                 Kembali ke Kartu Identitas
@@ -578,7 +719,7 @@ function IDCardPageContent() {
   ======================================================= */
 
   return (
-    <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
+    <div className="flex h-screen w-full theme-page overflow-hidden">
       {/* SIDEBAR */}
       <Sidebar
         active="siswaKartuIdentitas"
@@ -609,21 +750,20 @@ function IDCardPageContent() {
             {/* PAGE HEADER */}
             <div className="print:hidden flex items-center justify-between gap-4 flex-wrap mb-7">
               <div className="flex items-center gap-3">
-                {/* KEMBALI KE HALAMAN AWAL KARTU IDENTITAS */}
                 <button
                   onClick={handleBackToKartuIdentitas}
                   aria-label="Kembali ke Kartu Identitas"
-                  className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:text-[#155DFC] hover:bg-slate-50 transition"
+                  className={`w-10 h-10 rounded-xl theme-card border ${themeNeutralBorder} flex items-center justify-center theme-text-secondary ${themeNeutralHover} hover:text-[var(--color-primary)] transition`}
                 >
                   <ArrowLeft size={18} />
                 </button>
 
                 <div>
-                  <h1 className="text-2xl font-bold text-slate-800">
+                  <h1 className="text-2xl font-bold theme-text">
                     ID Card Siswa
                   </h1>
 
-                  <p className="text-sm text-slate-500 mt-0.5">
+                  <p className="text-sm theme-text-secondary mt-0.5">
                     Preview kartu identitas siswa.
                   </p>
                 </div>
@@ -632,7 +772,7 @@ function IDCardPageContent() {
               <div className="flex items-center gap-2">
                 <button
                   onClick={handlePrint}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-600 text-sm font-semibold hover:bg-slate-50 transition"
+                  className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border ${themeNeutralBorder} theme-card theme-text-secondary text-sm font-semibold ${themeNeutralHover} transition`}
                 >
                   <Printer size={16} />
                   Cetak
@@ -640,7 +780,7 @@ function IDCardPageContent() {
 
                 <button
                   onClick={handlePrint}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-[#155DFC] to-[#0d47c9] text-white text-sm font-semibold shadow-lg shadow-[#155DFC]/20 hover:brightness-105 transition"
+                  className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg ${themePrimaryGradient} text-[var(--color-card)] text-sm font-semibold ${themePrimaryShadow} hover:brightness-105 transition`}
                 >
                   <Download size={16} />
                   Cetak / Simpan
@@ -649,17 +789,24 @@ function IDCardPageContent() {
             </div>
 
             {/* PREVIEW */}
-            <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-              <div className="print:hidden px-5 py-4 border-b border-slate-100">
+            <div
+              className={`theme-card rounded-2xl border ${themeNeutralBorder} ${themeCardShadow} overflow-hidden`}
+            >
+              <div
+                className={`print:hidden px-5 py-4 border-b ${themeDivider}`}
+              >
                 <div className="flex items-center gap-2">
-                  <CreditCard size={17} className="text-[#155DFC]" />
+                  <CreditCard
+                    size={17}
+                    className="text-[var(--color-primary)]"
+                  />
 
-                  <h2 className="text-sm font-bold text-slate-800">
+                  <h2 className="text-sm font-bold theme-text">
                     Preview Kartu
                   </h2>
                 </div>
 
-                <p className="text-xs text-slate-500 mt-1">
+                <p className="text-xs theme-text-secondary mt-1">
                   Tampilan kartu depan dan belakang sebelum dicetak.
                 </p>
               </div>
@@ -670,11 +817,13 @@ function IDCardPageContent() {
                   {/* FRONT */}
                   <div className="w-full flex flex-col items-center gap-3">
                     <div className="print:hidden flex items-center gap-2">
-                      <span className="w-6 h-6 rounded-full bg-[#eaf1ff] text-[#155DFC] flex items-center justify-center text-[10px] font-bold">
+                      <span
+                        className={`w-6 h-6 rounded-full ${themePrimarySoft} ${themePrimaryText} flex items-center justify-center text-[10px] font-bold`}
+                      >
                         01
                       </span>
 
-                      <span className="text-xs font-bold text-slate-600">
+                      <span className="text-xs font-bold theme-text-secondary">
                         Bagian Depan
                       </span>
                     </div>
@@ -685,11 +834,13 @@ function IDCardPageContent() {
                   {/* BACK */}
                   <div className="w-full flex flex-col items-center gap-3">
                     <div className="print:hidden flex items-center gap-2">
-                      <span className="w-6 h-6 rounded-full bg-[#eaf1ff] text-[#155DFC] flex items-center justify-center text-[10px] font-bold">
+                      <span
+                        className={`w-6 h-6 rounded-full ${themePrimarySoft} ${themePrimaryText} flex items-center justify-center text-[10px] font-bold`}
+                      >
                         02
                       </span>
 
-                      <span className="text-xs font-bold text-slate-600">
+                      <span className="text-xs font-bold theme-text-secondary">
                         Bagian Belakang
                       </span>
                     </div>
@@ -701,13 +852,17 @@ function IDCardPageContent() {
             </div>
 
             {/* DATA SISWA */}
-            <div className="print:hidden mt-5 bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden">
-              <div className="px-5 py-4 border-b border-slate-100">
-                <h2 className="text-sm font-bold text-slate-800">
+            <div
+              className={`print:hidden mt-5 theme-card rounded-xl border ${themeNeutralBorder} ${themeCardShadow} overflow-hidden`}
+            >
+              <div
+                className={`px-5 py-4 border-b ${themeDivider}`}
+              >
+                <h2 className="text-sm font-bold theme-text">
                   Informasi Siswa
                 </h2>
 
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className="text-xs theme-text-secondary mt-0.5">
                   Data yang digunakan pada kartu identitas.
                 </p>
               </div>
@@ -773,10 +928,9 @@ function IDCardPageContent() {
 
             {/* FOOTER */}
             <div className="print:hidden flex items-center justify-between mt-5 pb-4">
-              {/* KEMBALI KE HALAMAN AWAL KARTU IDENTITAS */}
               <button
                 onClick={handleBackToKartuIdentitas}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-600 text-sm font-semibold hover:bg-slate-50 transition"
+                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border ${themeNeutralBorder} theme-card theme-text-secondary text-sm font-semibold ${themeNeutralHover} transition`}
               >
                 <ArrowLeft size={16} />
                 Kembali ke Kartu Identitas
@@ -784,7 +938,7 @@ function IDCardPageContent() {
 
               <button
                 onClick={handlePrint}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-[#155DFC] to-[#0d47c9] text-white text-sm font-semibold shadow-lg shadow-[#155DFC]/20"
+                className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-lg ${themePrimaryGradient} text-[var(--color-card)] text-sm font-semibold ${themePrimaryShadow}`}
               >
                 <Printer size={16} />
                 Cetak ID Card
@@ -822,9 +976,14 @@ function IDCardPageContent() {
     </div>
   );
 }
+
 export default function IDCardPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-slate-50" />}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen theme-page" />
+      }
+    >
       <IDCardPageContent />
     </Suspense>
   );

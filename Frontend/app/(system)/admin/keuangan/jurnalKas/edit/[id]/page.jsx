@@ -246,10 +246,6 @@ export default function EditJurnalKasPage() {
         };
       });
 
-      /*
-       * Hitung ulang saldo berjalan berdasarkan
-       * urutan tanggal transaksi.
-       */
       const sorted = [...updated].sort(
         (a, b) =>
           new Date(a.tanggal) - new Date(b.tanggal)
@@ -290,7 +286,7 @@ export default function EditJurnalKasPage() {
         setIsCollapsed={setIsCollapsed}
       >
         <div className="flex min-h-[500px] items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-[#1E3A8A]" />
+          <div className="h-8 w-8 animate-spin rounded-full border-2 theme-border border-t-[var(--color-primary)]" />
         </div>
       </PageShell>
     );
@@ -306,23 +302,23 @@ export default function EditJurnalKasPage() {
         <div className="mb-5 flex flex-wrap items-center gap-2 text-sm">
           <Link
             href="/admin/keuangan/jurnalKas"
-            className="text-slate-400 transition hover:text-[#1E3A8A]"
+            className="theme-text-muted transition hover:text-[var(--color-primary)]"
           >
             Jurnal & Kas
           </Link>
 
-          <span className="text-slate-300">/</span>
+          <span className="theme-text-placeholder">/</span>
 
           <Link
             href={`/admin/keuangan/jurnalKas/detail/${params.id}`}
-            className="text-slate-400 transition hover:text-[#1E3A8A]"
+            className="theme-text-muted transition hover:text-[var(--color-primary)]"
           >
             Detail
           </Link>
 
-          <span className="text-slate-300">/</span>
+          <span className="theme-text-placeholder">/</span>
 
-          <span className="font-medium text-slate-600">
+          <span className="font-medium theme-text-secondary">
             Edit
           </span>
         </div>
@@ -330,20 +326,20 @@ export default function EditJurnalKasPage() {
         {/* HEADER */}
         <div className="mb-6 flex flex-col gap-5 md:flex-row md:items-center md:justify-between">
           <div className="flex items-center gap-4">
-            <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#0F172A] text-white shadow-sm">
+            <div className="theme-primary flex h-12 w-12 items-center justify-center rounded-xl shadow-sm">
               <Wallet size={22} />
             </div>
 
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#2563EB]">
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--color-primary)]">
                 KEUANGAN SEKOLAH
               </p>
 
-              <h1 className="mt-1 text-2xl font-bold tracking-tight text-[#0F172A] sm:text-3xl">
+              <h1 className="mt-1 text-2xl font-bold tracking-tight theme-text sm:text-3xl">
                 Edit Transaksi
               </h1>
 
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="mt-1 text-sm theme-text-muted">
                 Perbarui informasi transaksi kas sekolah.
               </p>
             </div>
@@ -351,7 +347,7 @@ export default function EditJurnalKasPage() {
 
           <Link
             href={`/admin/keuangan/jurnalKas/detail/${params.id}`}
-            className="inline-flex w-fit items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50"
+            className="theme-card theme-border theme-text-secondary theme-header-hover inline-flex w-fit items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold shadow-sm transition"
           >
             <ArrowLeft size={16} />
             Kembali
@@ -362,19 +358,19 @@ export default function EditJurnalKasPage() {
         <form onSubmit={handleSubmit}>
           <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_320px]">
             {/* LEFT */}
-            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-              <div className="border-b border-slate-200 px-6 py-5">
+            <div className="theme-card overflow-hidden rounded-2xl border shadow-sm">
+              <div className="theme-border border-b px-6 py-5">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-[#1E3A8A]">
+                  <div className="theme-info flex h-9 w-9 items-center justify-center rounded-lg">
                     <FileText size={18} />
                   </div>
 
                   <div>
-                    <h2 className="text-sm font-bold text-[#0F172A]">
+                    <h2 className="text-sm font-bold theme-text">
                       Informasi Transaksi
                     </h2>
 
-                    <p className="mt-0.5 text-xs text-slate-400">
+                    <p className="mt-0.5 text-xs theme-text-muted">
                       Lengkapi data transaksi dengan benar.
                     </p>
                   </div>
@@ -390,7 +386,7 @@ export default function EditJurnalKasPage() {
                   <div className="relative">
                     <CalendarDays
                       size={17}
-                      className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                      className="theme-text-muted absolute left-3.5 top-1/2 -translate-y-1/2"
                     />
 
                     <input
@@ -402,7 +398,7 @@ export default function EditJurnalKasPage() {
                           e.target.value
                         )
                       }
-                      className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm text-slate-700 outline-none transition focus:border-[#2563EB] focus:ring-4 focus:ring-blue-500/10"
+                      className="theme-input h-11 w-full rounded-xl border pl-10 pr-4 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-primary)]/10"
                     />
                   </div>
                 </FormField>
@@ -423,7 +419,7 @@ export default function EditJurnalKasPage() {
                       )
                     }
                     placeholder="Contoh: Pembayaran listrik sekolah"
-                    className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#2563EB] focus:ring-4 focus:ring-blue-500/10"
+                    className="theme-input h-11 w-full rounded-xl border px-4 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-primary)]/10"
                   />
                 </FormField>
 
@@ -491,30 +487,32 @@ export default function EditJurnalKasPage() {
                   hint="Masukkan nominal tanpa titik atau simbol."
                 >
                   <div className="relative">
-                    <span className="absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold text-slate-400">
+                    <span className="theme-text-muted absolute left-4 top-1/2 -translate-y-1/2 text-sm font-semibold">
                       Rp
                     </span>
 
                     <input
                       type="text"
                       inputMode="numeric"
-                      value={form.nominal
-                        ? new Intl.NumberFormat(
-                            "id-ID"
-                          ).format(
-                            Number(form.nominal)
-                          )
-                        : ""}
+                      value={
+                        form.nominal
+                          ? new Intl.NumberFormat(
+                              "id-ID"
+                            ).format(
+                              Number(form.nominal)
+                            )
+                          : ""
+                      }
                       onChange={(e) =>
                         handleNominalChange(
                           e.target.value
                         )
                       }
                       placeholder="0"
-                      className={`h-12 w-full rounded-xl border bg-white pl-12 pr-4 text-lg font-bold outline-none transition ${
+                      className={`theme-input h-12 w-full rounded-xl border pl-12 pr-4 text-lg font-bold outline-none transition ${
                         form.jenis === "Pemasukan"
-                          ? "border-emerald-200 text-emerald-700 focus:border-emerald-500 focus:ring-4 focus:ring-emerald-500/10"
-                          : "border-rose-200 text-rose-700 focus:border-rose-500 focus:ring-4 focus:ring-rose-500/10"
+                          ? "text-[var(--color-success)] focus:border-[var(--color-success)] focus:ring-4 focus:ring-[var(--color-success)]/10"
+                          : "text-[var(--color-danger)] focus:border-[var(--color-danger)] focus:ring-4 focus:ring-[var(--color-danger)]/10"
                       }`}
                     />
                   </div>
@@ -535,7 +533,7 @@ export default function EditJurnalKasPage() {
                       )
                     }
                     placeholder="Contoh: Pembayaran dilakukan melalui rekening sekolah..."
-                    className="w-full resize-none rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm leading-6 text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#2563EB] focus:ring-4 focus:ring-blue-500/10"
+                    className="theme-input w-full resize-none rounded-xl border px-4 py-3 text-sm leading-6 outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-primary)]/10"
                   />
                 </FormField>
               </div>
@@ -544,13 +542,13 @@ export default function EditJurnalKasPage() {
             {/* RIGHT */}
             <div className="space-y-5">
               {/* PREVIEW */}
-              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <div className="border-b border-slate-200 px-5 py-4">
-                  <h2 className="text-sm font-bold text-[#0F172A]">
+              <div className="theme-card overflow-hidden rounded-2xl border shadow-sm">
+                <div className="theme-border border-b px-5 py-4">
+                  <h2 className="text-sm font-bold theme-text">
                     Ringkasan Perubahan
                   </h2>
 
-                  <p className="mt-1 text-xs text-slate-400">
+                  <p className="mt-1 text-xs theme-text-muted">
                     Preview transaksi sebelum disimpan.
                   </p>
                 </div>
@@ -559,16 +557,16 @@ export default function EditJurnalKasPage() {
                   <div
                     className={`rounded-xl border p-4 ${
                       form.jenis === "Pemasukan"
-                        ? "border-emerald-100 bg-emerald-50/60"
-                        : "border-rose-100 bg-rose-50/60"
+                        ? "theme-success"
+                        : "theme-danger"
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <span
                         className={`inline-flex items-center gap-1.5 text-xs font-bold ${
                           form.jenis === "Pemasukan"
-                            ? "text-emerald-600"
-                            : "text-rose-600"
+                            ? "text-[var(--color-success)]"
+                            : "text-[var(--color-danger)]"
                         }`}
                       >
                         {form.jenis === "Pemasukan" ? (
@@ -583,17 +581,17 @@ export default function EditJurnalKasPage() {
                       {form.metode === "Transfer" ? (
                         <CreditCard
                           size={17}
-                          className="text-slate-400"
+                          className="theme-text-muted"
                         />
                       ) : (
                         <Banknote
                           size={17}
-                          className="text-slate-400"
+                          className="theme-text-muted"
                         />
                       )}
                     </div>
 
-                    <p className="mt-4 truncate text-sm font-bold text-[#0F172A]">
+                    <p className="theme-text mt-4 truncate text-sm font-bold">
                       {form.keterangan ||
                         "Nama transaksi"}
                     </p>
@@ -601,14 +599,14 @@ export default function EditJurnalKasPage() {
                     <p
                       className={`mt-2 text-xl font-bold ${
                         form.jenis === "Pemasukan"
-                          ? "text-emerald-600"
-                          : "text-rose-600"
+                          ? "text-[var(--color-success)]"
+                          : "text-[var(--color-danger)]"
                       }`}
                     >
                       {formatCurrency(form.nominal)}
                     </p>
 
-                    <div className="mt-4 flex items-center gap-2 text-xs text-slate-400">
+                    <div className="theme-text-muted mt-4 flex items-center gap-2 text-xs">
                       <CalendarDays size={13} />
 
                       {form.tanggal
@@ -629,18 +627,18 @@ export default function EditJurnalKasPage() {
               </div>
 
               {/* NOTICE */}
-              <div className="rounded-2xl border border-blue-100 bg-blue-50/60 p-5">
+              <div className="theme-info rounded-2xl border p-5">
                 <div className="flex items-start gap-3">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-[#1E3A8A]">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[var(--color-info-background)]">
                     <AlertCircle size={16} />
                   </div>
 
                   <div>
-                    <p className="text-sm font-bold text-[#1E3A8A]">
+                    <p className="text-sm font-bold text-[var(--color-info)]">
                       Perhatian
                     </p>
 
-                    <p className="mt-1 text-xs leading-5 text-blue-800/70">
+                    <p className="mt-1 text-xs leading-5 text-[var(--color-info)] opacity-80">
                       Perubahan nominal atau jenis transaksi
                       akan memengaruhi saldo berjalan pada
                       jurnal kas.
@@ -650,11 +648,11 @@ export default function EditJurnalKasPage() {
               </div>
 
               {/* ACTION */}
-              <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="theme-card rounded-2xl border p-5 shadow-sm">
                 <button
                   type="submit"
                   disabled={saving}
-                  className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#1E3A8A] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#172F70] disabled:cursor-not-allowed disabled:opacity-60"
+                  className="theme-primary flex h-11 w-full items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {saving ? (
                     <>
@@ -671,14 +669,14 @@ export default function EditJurnalKasPage() {
 
                 <Link
                   href={`/admin/keuangan/jurnalKas/detail/${params.id}`}
-                  className="mt-2 flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+                  className="theme-input theme-header-hover mt-2 flex h-11 w-full items-center justify-center gap-2 rounded-xl border px-4 text-sm font-semibold transition"
                 >
                   <RotateCcw size={16} />
                   Batalkan
                 </Link>
 
                 {error && (
-                  <div className="mt-3 flex items-start gap-2 rounded-xl border border-rose-100 bg-rose-50 p-3 text-xs text-rose-600">
+                  <div className="theme-danger mt-3 flex items-start gap-2 rounded-xl border p-3 text-xs">
                     <AlertCircle
                       size={15}
                       className="mt-0.5 shrink-0"
@@ -689,7 +687,7 @@ export default function EditJurnalKasPage() {
                 )}
               </div>
 
-              <div className="flex items-center gap-2 px-1 text-[11px] text-slate-400">
+              <div className="theme-text-muted flex items-center gap-2 px-1 text-[11px]">
                 <CircleCheck size={13} />
                 Perubahan akan tersimpan pada data jurnal kas.
               </div>
@@ -709,7 +707,7 @@ function PageShell({
   setIsCollapsed,
 }) {
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[#F4F6F8]">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar
         active="jurnalKas"
         setActive={() => {}}
@@ -730,7 +728,7 @@ function PageShell({
           }}
         />
 
-        <main className="min-h-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8">
+        <main className="theme-page min-h-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8">
           {children}
         </main>
       </div>
@@ -747,18 +745,18 @@ function FormField({
   return (
     <div>
       <div className="mb-2 flex items-center justify-between gap-3">
-        <label className="text-sm font-semibold text-slate-700">
+        <label className="theme-text-secondary text-sm font-semibold">
           {label}
 
           {required && (
-            <span className="ml-1 text-rose-500">
+            <span className="ml-1 text-[var(--color-danger)]">
               *
             </span>
           )}
         </label>
 
         {hint && (
-          <span className="hidden text-[11px] text-slate-400 sm:block">
+          <span className="theme-text-muted hidden text-[11px] sm:block">
             {hint}
           </span>
         )}
@@ -767,7 +765,7 @@ function FormField({
       {children}
 
       {hint && (
-        <p className="mt-1.5 text-[11px] text-slate-400 sm:hidden">
+        <p className="theme-text-muted mt-1.5 text-[11px] sm:hidden">
           {hint}
         </p>
       )}
@@ -790,18 +788,18 @@ function TypeButton({
       className={`flex items-center gap-3 rounded-xl border p-4 text-left transition ${
         active
           ? isIncome
-            ? "border-emerald-400 bg-emerald-50 ring-2 ring-emerald-500/10"
-            : "border-rose-400 bg-rose-50 ring-2 ring-rose-500/10"
-          : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+            ? "border-[var(--color-success)] bg-[var(--color-success-background)]"
+            : "border-[var(--color-danger)] bg-[var(--color-danger-background)]"
+          : "theme-card theme-border theme-header-hover"
       }`}
     >
       <div
         className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${
           active
             ? isIncome
-              ? "bg-emerald-500 text-white"
-              : "bg-rose-500 text-white"
-            : "bg-slate-100 text-slate-400"
+              ? "bg-[var(--color-success)] text-white"
+              : "bg-[var(--color-danger)] text-white"
+            : "theme-card-soft theme-text-muted"
         }`}
       >
         {icon}
@@ -812,15 +810,15 @@ function TypeButton({
           className={`text-sm font-bold ${
             active
               ? isIncome
-                ? "text-emerald-700"
-                : "text-rose-700"
-              : "text-slate-700"
+                ? "text-[var(--color-success)]"
+                : "text-[var(--color-danger)]"
+              : "theme-text-secondary"
           }`}
         >
           {type}
         </p>
 
-        <p className="mt-0.5 text-[11px] text-slate-400">
+        <p className="theme-text-muted mt-0.5 text-[11px]">
           {isIncome
             ? "Dana masuk ke kas"
             : "Dana keluar dari kas"}
@@ -832,8 +830,8 @@ function TypeButton({
           size={17}
           className={`ml-auto ${
             isIncome
-              ? "text-emerald-500"
-              : "text-rose-500"
+              ? "text-[var(--color-success)]"
+              : "text-[var(--color-danger)]"
           }`}
         />
       )}
@@ -854,15 +852,15 @@ function MethodButton({
       onClick={onClick}
       className={`flex items-center gap-3 rounded-xl border p-4 text-left transition ${
         active
-          ? "border-[#2563EB] bg-blue-50 ring-2 ring-blue-500/10"
-          : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+          ? "border-[var(--color-primary)] bg-[var(--color-sidebar-active)]"
+          : "theme-card theme-border theme-header-hover"
       }`}
     >
       <div
         className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${
           active
-            ? "bg-[#1E3A8A] text-white"
-            : "bg-slate-100 text-slate-400"
+            ? "theme-primary"
+            : "theme-card-soft theme-text-muted"
         }`}
       >
         {icon}
@@ -872,14 +870,14 @@ function MethodButton({
         <p
           className={`text-sm font-bold ${
             active
-              ? "text-[#1E3A8A]"
-              : "text-slate-700"
+              ? "text-[var(--color-primary)]"
+              : "theme-text-secondary"
           }`}
         >
           {label}
         </p>
 
-        <p className="mt-0.5 text-[11px] text-slate-400">
+        <p className="theme-text-muted mt-0.5 text-[11px]">
           {description}
         </p>
       </div>
@@ -887,9 +885,10 @@ function MethodButton({
       {active && (
         <CircleCheck
           size={17}
-          className="ml-auto text-[#2563EB]"
+          className="ml-auto text-[var(--color-primary)]"
         />
       )}
     </button>
   );
 }
+

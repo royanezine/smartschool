@@ -1,1499 +1,1267 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
-
+import Header from "../../../../components/Header";
+import Sidebar from "../../../../components/Sidebar";
 import {
-  ArrowLeft,
-  Check,
-  CheckCircle2,
   ChevronRight,
-  Eye,
-  FileText,
-  GraduationCap,
-  Loader2,
-  ShieldCheck,
-  Upload,
-  User,
-  X,
+  Users,
+  CheckCircle2,
   XCircle,
+  ClipboardCheck,
+  FileSpreadsheet,
+  FileText,
+  School,
+  Layers,
+  BookOpen,
 } from "lucide-react";
-
-import Header from "../../../../../components/Header";
-import Sidebar from "../../../../../components/Sidebar";
-
 import {
-  uploadBerkasPpdb,
-  verifikasiPpdb,
-} from "../../../../../../services/ppdb.service";
+  ResponsiveContainer,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+} from "recharts";
 
+// ============================================================
+// THEME HELPERS
+// ============================================================
 
-/* =========================================================
-   DATA DUMMY LAMA
-   =========================================================
-   Karena BE saat ini belum mempunyai GET /ppdb/:id,
-   data detail belum bisa diambil dari database.
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
 
-   Struktur ini sengaja dipertahankan supaya desain halaman
-   kamu tidak berubah.
-========================================================= */
+const themePrimaryBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
 
-const initialPendaftar = [
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+// ============================================================
+// DATA PENDAFTAR
+// ============================================================
+
+const dataPendaftar = [
   {
     id: 1,
-
     noPendaftaran: "PPDB001",
+    nama: "Andi Saputra",
+    asalSekolah: "SMP Negeri 1",
+    jurusan: "RPL",
+    gelombang: "1",
     status: "Menunggu",
-
-    jalur: "Zonasi",
-    gelombang: "Gelombang 1",
-    tanggalDaftar: "2026-07-01",
-
-    pribadi: {
-      nama: "Ahmad Fauzan",
-      nik: "3273010101010001",
-      nisn: "0087654321",
-      tempatLahir: "Tasikmalaya",
-      tanggalLahir: "2012-05-12",
-      jenisKelamin: "Laki-laki",
-      alamat:
-        "Jl. Raya Tasikmalaya No. 10, Tasikmalaya",
-      telepon: "081234567890",
-      email: "ahmad@example.com",
-    },
-
-    ortu: {
-      namaAyah: "Budi Santoso",
-      namaIbu: "Siti Aminah",
-      telepon: "081234567891",
-      pekerjaanAyah: "Wiraswasta",
-      pekerjaanIbu: "Ibu Rumah Tangga",
-    },
-
-    sekolah: {
-      asalSekolah: "SD Negeri 01 Tasikmalaya",
-      npsn: "20212345",
-      tahunLulus: "2026",
-      nilaiRapor: "87.50",
-    },
-
-    jurusan: {
-      pilihan1: "IPA",
-      pilihan2: "IPS",
-      pilihan3: "-",
-    },
-
-    berkas: [
-      {
-        id: "KK",
-        nama: "Kartu Keluarga",
-        file: "kk-ahmad.pdf",
-        url: "#",
-        status: "Menunggu",
-      },
-      {
-        id: "AKTE",
-        nama: "Akta Kelahiran",
-        file: "akte-ahmad.pdf",
-        url: "#",
-        status: "Menunggu",
-      },
-      {
-        id: "IJAZAH",
-        nama: "Ijazah / Surat Keterangan Lulus",
-        file: "ijazah-ahmad.pdf",
-        url: "#",
-        status: "Menunggu",
-      },
-    ],
+    tanggalDaftar: "2026-01-08",
+  },
+  {
+    id: 2,
+    noPendaftaran: "PPDB002",
+    nama: "Budi Hartono",
+    asalSekolah: "SMP Negeri 2",
+    jurusan: "TKJ",
+    gelombang: "1",
+    status: "Terverifikasi",
+    tanggalDaftar: "2026-01-08",
+  },
+  {
+    id: 3,
+    noPendaftaran: "PPDB003",
+    nama: "Citra Ayu Lestari",
+    asalSekolah: "SMP Negeri 3",
+    jurusan: "Multimedia",
+    gelombang: "1",
+    status: "Lulus",
+    tanggalDaftar: "2026-01-09",
+  },
+  {
+    id: 4,
+    noPendaftaran: "PPDB004",
+    nama: "Deni Firmansyah",
+    asalSekolah: "SMP Islam Al-Amin",
+    jurusan: "Akuntansi",
+    gelombang: "2",
+    status: "Daftar Ulang",
+    tanggalDaftar: "2026-02-02",
+  },
+  {
+    id: 5,
+    noPendaftaran: "PPDB005",
+    nama: "Eka Putri Wulandari",
+    asalSekolah: "SMP Negeri 4",
+    jurusan: "RPL",
+    gelombang: "2",
+    status: "Tidak Lulus",
+    tanggalDaftar: "2026-02-03",
+  },
+  {
+    id: 6,
+    noPendaftaran: "PPDB006",
+    nama: "Fajar Nugroho",
+    asalSekolah: "SMP Negeri 1",
+    jurusan: "TKJ",
+    gelombang: "1",
+    status: "Terverifikasi",
+    tanggalDaftar: "2026-01-10",
+  },
+  {
+    id: 7,
+    noPendaftaran: "PPDB007",
+    nama: "Gita Lestari",
+    asalSekolah: "SMP Kristen Harapan",
+    jurusan: "Multimedia",
+    gelombang: "1",
+    status: "Lulus",
+    tanggalDaftar: "2026-01-11",
+  },
+  {
+    id: 8,
+    noPendaftaran: "PPDB008",
+    nama: "Hendra Wijaya",
+    asalSekolah: "SMP Negeri 5",
+    jurusan: "Akuntansi",
+    gelombang: "2",
+    status: "Lulus",
+    tanggalDaftar: "2026-02-04",
+  },
+  {
+    id: 9,
+    noPendaftaran: "PPDB009",
+    nama: "Indah Permatasari",
+    asalSekolah: "SMP Negeri 2",
+    jurusan: "RPL",
+    gelombang: "3",
+    status: "Menunggu",
+    tanggalDaftar: "2026-03-01",
+  },
+  {
+    id: 10,
+    noPendaftaran: "PPDB010",
+    nama: "Joko Prasetyo",
+    asalSekolah: "SMP Negeri 3",
+    jurusan: "TKJ",
+    gelombang: "2",
+    status: "Daftar Ulang",
+    tanggalDaftar: "2026-02-05",
+  },
+  {
+    id: 11,
+    noPendaftaran: "PPDB011",
+    nama: "Kartika Sari",
+    asalSekolah: "SMP Negeri 4",
+    jurusan: "Multimedia",
+    gelombang: "1",
+    status: "Daftar Ulang",
+    tanggalDaftar: "2026-01-12",
+  },
+  {
+    id: 12,
+    noPendaftaran: "PPDB012",
+    nama: "Luthfi Rahman",
+    asalSekolah: "SMP Islam Al-Amin",
+    jurusan: "Akuntansi",
+    gelombang: "1",
+    status: "Tidak Lulus",
+    tanggalDaftar: "2026-01-13",
+  },
+  {
+    id: 13,
+    noPendaftaran: "PPDB013",
+    nama: "Maya Anggraini",
+    asalSekolah: "SMP Negeri 1",
+    jurusan: "RPL",
+    gelombang: "2",
+    status: "Lulus",
+    tanggalDaftar: "2026-02-06",
+  },
+  {
+    id: 14,
+    noPendaftaran: "PPDB014",
+    nama: "Naufal Ardiansyah",
+    asalSekolah: "SMP Negeri 5",
+    jurusan: "TKJ",
+    gelombang: "3",
+    status: "Tidak Lulus",
+    tanggalDaftar: "2026-03-02",
+  },
+  {
+    id: 15,
+    noPendaftaran: "PPDB015",
+    nama: "Olivia Zahra",
+    asalSekolah: "SMP Kristen Harapan",
+    jurusan: "Multimedia",
+    gelombang: "2",
+    status: "Daftar Ulang",
+    tanggalDaftar: "2026-02-07",
+  },
+  {
+    id: 16,
+    noPendaftaran: "PPDB016",
+    nama: "Putra Wibowo",
+    asalSekolah: "SMP Negeri 2",
+    jurusan: "Akuntansi",
+    gelombang: "1",
+    status: "Daftar Ulang",
+    tanggalDaftar: "2026-01-14",
+  },
+  {
+    id: 17,
+    noPendaftaran: "PPDB017",
+    nama: "Qonita Rahmawati",
+    asalSekolah: "SMP Negeri 1",
+    jurusan: "RPL",
+    gelombang: "1",
+    status: "Tidak Lulus",
+    tanggalDaftar: "2026-01-15",
+  },
+  {
+    id: 18,
+    noPendaftaran: "PPDB018",
+    nama: "Rizky Ramadhan",
+    asalSekolah: "SMP Negeri 3",
+    jurusan: "TKJ",
+    gelombang: "2",
+    status: "Lulus",
+    tanggalDaftar: "2026-02-08",
+  },
+  {
+    id: 19,
+    noPendaftaran: "PPDB019",
+    nama: "Sinta Dewi",
+    asalSekolah: "SMP Kristen Harapan",
+    jurusan: "Multimedia",
+    gelombang: "3",
+    status: "Menunggu",
+    tanggalDaftar: "2026-03-03",
+  },
+  {
+    id: 20,
+    noPendaftaran: "PPDB020",
+    nama: "Taufik Hidayat",
+    asalSekolah: "SMP Negeri 4",
+    jurusan: "Akuntansi",
+    gelombang: "2",
+    status: "Tidak Lulus",
+    tanggalDaftar: "2026-02-09",
   },
 ];
 
+const JURUSAN_LIST = [
+  "RPL",
+  "TKJ",
+  "Multimedia",
+  "Akuntansi",
+];
 
-/* =========================================================
-   STYLE STATUS
-========================================================= */
+const GELOMBANG_LIST = ["1", "2", "3"];
 
-const STATUS_STYLES = {
-  Menunggu:
-    "bg-amber-50 text-amber-600 border-amber-100",
+// ============================================================
+// THEME CHART COLORS
+// ============================================================
 
-  Lulus:
-    "bg-emerald-50 text-emerald-600 border-emerald-100",
-
-  Ditolak:
-    "bg-rose-50 text-rose-600 border-rose-100",
-
-  "Perlu Perbaikan":
-    "bg-blue-50 text-blue-600 border-blue-100",
-
-  Terverifikasi:
-    "bg-emerald-50 text-emerald-600 border-emerald-100",
+const JURUSAN_COLORS = {
+  RPL: "var(--color-primary)",
+  TKJ: "var(--color-info)",
+  Multimedia: "var(--color-success)",
+  Akuntansi: "var(--color-warning)",
 };
 
+const STATUS_COLORS = {
+  Diterima: "var(--color-success)",
+  Ditolak: "var(--color-text)",
+  "Proses Seleksi": "var(--color-warning)",
+};
 
-/* =========================================================
-   HELPER
-========================================================= */
+const GELOMBANG_OPTIONS = [
+  "Semua Gelombang",
+  ...GELOMBANG_LIST,
+];
 
-function formatTanggal(value) {
-  if (!value) return "-";
+// ============================================================
+// HELPERS
+// ============================================================
 
-  const date = new Date(value);
+function formatTanggal(iso) {
+  const d = new Date(iso);
 
-  if (Number.isNaN(date.getTime())) {
-    return value;
-  }
-
-  return date.toLocaleDateString("id-ID", {
+  return d.toLocaleDateString("id-ID", {
     day: "2-digit",
-    month: "long",
+    month: "short",
     year: "numeric",
   });
 }
 
+// ============================================================
+// EXPORT EXCEL
+// ============================================================
 
-/* =========================================================
-   SECTION CARD
-========================================================= */
+async function exportExcel(rows, filename) {
+  const XLSX = await import("xlsx");
 
-function SectionCard({
-  title,
-  icon: Icon,
-  children,
-}) {
-  return (
-    <section className="bg-white rounded-xl overflow-hidden">
-      <div className="flex items-center gap-2 px-5 py-4 border-b border-slate-100">
-        <div className="w-8 h-8 rounded-lg bg-blue-50 text-blue-600 flex items-center justify-center">
-          <Icon size={15} />
-        </div>
+  const ws = XLSX.utils.json_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
 
-        <h2 className="text-sm font-semibold text-slate-700">
-          {title}
-        </h2>
-      </div>
-
-      <div className="p-5">
-        {children}
-      </div>
-    </section>
+  XLSX.utils.book_append_sheet(
+    wb,
+    ws,
+    "Laporan PPDB"
   );
+
+  XLSX.writeFile(wb, filename);
 }
 
+// ============================================================
+// EXPORT PDF
+// ============================================================
 
-/* =========================================================
-   FIELD
-========================================================= */
+function exportPDF() {
+  window.print();
+}
 
-function Field({
-  label,
-  value,
-}) {
+// ============================================================
+// MAIN PAGE
+// ============================================================
+
+export default function LaporanPPDBPage() {
+  const [isCollapsed, setIsCollapsed] =
+    useState(false);
+
+  const [filterGelombang, setFilterGelombang] =
+    useState("Semua Gelombang");
+
+  const toggleSidebar = () =>
+    setIsCollapsed(!isCollapsed);
+
+  // ==========================================================
+  // FILTER DATA
+  // ==========================================================
+
+  const dataFiltered = useMemo(() => {
+    if (
+      filterGelombang ===
+      "Semua Gelombang"
+    ) {
+      return dataPendaftar;
+    }
+
+    return dataPendaftar.filter(
+      (p) =>
+        p.gelombang === filterGelombang
+    );
+  }, [filterGelombang]);
+
+  // ==========================================================
+  // RINGKASAN
+  // ==========================================================
+
+  const ringkasan = useMemo(() => {
+    const total = dataFiltered.length;
+
+    const diterima = dataFiltered.filter(
+      (p) =>
+        p.status === "Lulus" ||
+        p.status === "Daftar Ulang"
+    ).length;
+
+    const ditolak = dataFiltered.filter(
+      (p) =>
+        p.status === "Tidak Lulus"
+    ).length;
+
+    const daftarUlang = dataFiltered.filter(
+      (p) =>
+        p.status === "Daftar Ulang"
+    ).length;
+
+    return {
+      total,
+      diterima,
+      ditolak,
+      daftarUlang,
+    };
+  }, [dataFiltered]);
+
+  // ==========================================================
+  // PER JURUSAN
+  // ==========================================================
+
+  const perJurusan = useMemo(
+    () =>
+      JURUSAN_LIST.map((j) => ({
+        jurusan: j,
+        jumlah: dataFiltered.filter(
+          (p) =>
+            p.jurusan === j
+        ).length,
+      })),
+    [dataFiltered]
+  );
+
+  // ==========================================================
+  // PER GELOMBANG
+  // ==========================================================
+
+  const perGelombang = useMemo(
+    () =>
+      GELOMBANG_LIST.map((g) => ({
+        gelombang: `Gelombang ${g}`,
+        jumlah: dataFiltered.filter(
+          (p) =>
+            p.gelombang === g
+        ).length,
+      })),
+    [dataFiltered]
+  );
+
+  // ==========================================================
+  // DISTRIBUSI STATUS
+  // ==========================================================
+
+  const distribusiStatus = useMemo(() => {
+    const menunggu = dataFiltered.filter(
+      (p) =>
+        p.status === "Menunggu" ||
+        p.status === "Terverifikasi"
+    ).length;
+
+    return [
+      {
+        name: "Diterima",
+        value: ringkasan.diterima,
+      },
+      {
+        name: "Ditolak",
+        value: ringkasan.ditolak,
+      },
+      {
+        name: "Proses Seleksi",
+        value: menunggu,
+      },
+    ].filter(
+      (d) => d.value > 0
+    );
+  }, [dataFiltered, ringkasan]);
+
+  // ==========================================================
+  // REKAP ASAL SEKOLAH
+  // ==========================================================
+
+  const rekapAsalSekolah = useMemo(() => {
+    const map = {};
+
+    dataFiltered.forEach((p) => {
+      if (!map[p.asalSekolah]) {
+        map[p.asalSekolah] = {
+          asalSekolah:
+            p.asalSekolah,
+          jumlah: 0,
+          diterima: 0,
+        };
+      }
+
+      map[p.asalSekolah].jumlah += 1;
+
+      if (
+        p.status === "Lulus" ||
+        p.status === "Daftar Ulang"
+      ) {
+        map[
+          p.asalSekolah
+        ].diterima += 1;
+      }
+    });
+
+    return Object.values(map).sort(
+      (a, b) =>
+        b.jumlah - a.jumlah
+    );
+  }, [dataFiltered]);
+
+  // ==========================================================
+  // EXPORT EXCEL HANDLER
+  // ==========================================================
+
+  const handleExportExcel = () => {
+    const rows =
+      dataFiltered.map((p) => ({
+        "No. Pendaftaran":
+          p.noPendaftaran,
+        Nama: p.nama,
+        "Asal Sekolah":
+          p.asalSekolah,
+        Jurusan: p.jurusan,
+        Gelombang:
+          p.gelombang,
+        Status: p.status,
+        "Tanggal Daftar":
+          formatTanggal(
+            p.tanggalDaftar
+          ),
+      }));
+
+    exportExcel(
+      rows,
+      `Laporan-PPDB-${filterGelombang.replace(
+        /\s/g,
+        "-"
+      )}.xlsx`
+    );
+  };
+
+  // ==========================================================
+  // RENDER
+  // ==========================================================
+
   return (
-    <div>
-      <p className="text-[11px] text-slate-400 mb-1">
-        {label}
-      </p>
+    <div className="theme-page flex h-screen w-full overflow-hidden">
+      {/* ======================================================
+          SIDEBAR
+      ====================================================== */}
 
-      <p className="text-sm text-slate-700 font-medium break-words">
-        {value || "-"}
-      </p>
+      <div className="print:hidden">
+        <Sidebar
+          role="adminPPDB"
+          active="laporan"
+          setActive={() => {}}
+          collapsed={isCollapsed}
+          setCollapsed={setIsCollapsed}
+        />
+      </div>
+
+      {/* ======================================================
+          CONTENT
+      ====================================================== */}
+
+      <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
+        {/* ====================================================
+            HEADER
+        ==================================================== */}
+
+        <div className="print:hidden">
+          <Header
+            toggleSidebar={
+              toggleSidebar
+            }
+            notifications={[]}
+            user={{
+              name: "Admin PPDB",
+              email:
+                "adminppdb@smartschool.com",
+              avatar: "PP",
+            }}
+          />
+        </div>
+
+        <main className="flex-1 overflow-y-auto">
+          <div
+            id="area-laporan"
+            className="theme-page w-full p-4 md:p-6 lg:p-8"
+          >
+            <div className="mx-auto w-full max-w-[1320px] space-y-5">
+              {/* ==================================================
+                  TOP BAR
+              ================================================== */}
+
+              <div className="flex flex-wrap items-center justify-between gap-3 print:hidden">
+                {/* Breadcrumb */}
+
+                <div className="flex items-center gap-1.5 text-xs">
+                  <span className="theme-text-muted">
+                    PPDB
+                  </span>
+
+                  <ChevronRight
+                    size={12}
+                    className="theme-text-muted"
+                  />
+
+                  <span className="font-medium theme-text">
+                    Laporan
+                  </span>
+                </div>
+
+                {/* Actions */}
+
+                <div className="flex flex-wrap items-center gap-2.5">
+                  {/* Filter */}
+
+                  <select
+                    value={
+                      filterGelombang
+                    }
+                    onChange={(e) =>
+                      setFilterGelombang(
+                        e.target.value
+                      )
+                    }
+                    className={`theme-input rounded-md px-3 py-2 text-xs outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]`}
+                  >
+                    {GELOMBANG_OPTIONS.map(
+                      (g) => (
+                        <option
+                          key={g}
+                          value={g}
+                        >
+                          {g}
+                        </option>
+                      )
+                    )}
+                  </select>
+
+                  {/* Export Excel */}
+
+                  <button
+                    type="button"
+                    onClick={
+                      handleExportExcel
+                    }
+                    className={`flex items-center gap-1.5 rounded-md px-3.5 py-2 text-xs font-medium text-[var(--color-card)] transition hover:opacity-90 ${themeSuccessSurface}`}
+                    style={{
+                      background:
+                        "var(--color-success)",
+                    }}
+                  >
+                    <FileSpreadsheet
+                      size={14}
+                    />
+
+                    Export Excel
+                  </button>
+
+                  {/* Export PDF */}
+
+                  <button
+                    type="button"
+                    onClick={exportPDF}
+                    className={`flex items-center gap-1.5 rounded-md px-3.5 py-2 text-xs font-medium text-[var(--color-card)] transition hover:opacity-90`}
+                    style={{
+                      background:
+                        "var(--color-text)",
+                    }}
+                  >
+                    <FileText
+                      size={14}
+                    />
+
+                    Export PDF
+                  </button>
+                </div>
+              </div>
+
+              {/* ==================================================
+                  PRINT TITLE
+              ================================================== */}
+
+              <div className="mb-2 hidden text-center print:block">
+                <h1 className="text-lg font-bold theme-text">
+                  Laporan PPDB —
+                  SmartSchool
+                </h1>
+
+                <p className="text-xs theme-text-secondary">
+                  {filterGelombang ===
+                  "Semua Gelombang"
+                    ? "Seluruh Gelombang"
+                    : filterGelombang}{" "}
+                  &middot;{" "}
+                  {new Date().toLocaleDateString(
+                    "id-ID",
+                    {
+                      day: "2-digit",
+                      month: "long",
+                      year: "numeric",
+                    }
+                  )}
+                </p>
+              </div>
+
+              {/* ==================================================
+                  SUMMARY
+              ================================================== */}
+
+              <section className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+                <SummaryCard
+                  icon={Users}
+                  title="Total Pendaftar"
+                  value={
+                    ringkasan.total
+                  }
+                  iconClass={`${themePrimarySoft} ${themePrimaryText}`}
+                  valueClass="theme-text"
+                />
+
+                <SummaryCard
+                  icon={CheckCircle2}
+                  title="Jumlah Diterima"
+                  value={
+                    ringkasan.diterima
+                  }
+                  iconClass={`${themeSuccessSurface} text-[var(--color-success)]`}
+                  valueClass="text-[var(--color-success)]"
+                />
+
+                <SummaryCard
+                  icon={XCircle}
+                  title="Jumlah Ditolak"
+                  value={
+                    ringkasan.ditolak
+                  }
+                  iconClass={`${themeDangerSurface} theme-danger`}
+                  valueClass="theme-danger"
+                />
+
+                <SummaryCard
+                  icon={
+                    ClipboardCheck
+                  }
+                  title="Sudah Daftar Ulang"
+                  value={
+                    ringkasan.daftarUlang
+                  }
+                  iconClass={`${themePrimarySoft} ${themePrimaryText}`}
+                  valueClass={
+                    themePrimaryText
+                  }
+                />
+              </section>
+
+              {/* ==================================================
+                  CHART JURUSAN + GELOMBANG
+              ================================================== */}
+
+              <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                {/* JURUSAN */}
+
+                <div
+                  className={`theme-card rounded-xl p-5 ${themeCardShadow}`}
+                >
+                  <div className="mb-4 flex items-center gap-2">
+                    <BookOpen
+                      size={14}
+                      className="theme-text-muted"
+                    />
+
+                    <p className="text-sm font-semibold theme-text">
+                      Pendaftar per
+                      Jurusan
+                    </p>
+                  </div>
+
+                  <ResponsiveContainer
+                    width="100%"
+                    height={240}
+                  >
+                    <BarChart
+                      data={
+                        perJurusan
+                      }
+                      margin={{
+                        top: 4,
+                        right: 8,
+                        left: -20,
+                        bottom: 0,
+                      }}
+                    >
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        vertical={false}
+                        stroke="var(--color-border-soft)"
+                      />
+
+                      <XAxis
+                        dataKey="jurusan"
+                        tick={{
+                          fontSize: 11,
+                          fill: "var(--color-text-muted)",
+                        }}
+                        axisLine={false}
+                        tickLine={false}
+                      />
+
+                      <YAxis
+                        tick={{
+                          fontSize: 11,
+                          fill: "var(--color-text-muted)",
+                        }}
+                        axisLine={false}
+                        tickLine={false}
+                        allowDecimals={
+                          false
+                        }
+                      />
+
+                      <Tooltip
+                        cursor={{
+                          fill: "var(--color-border-soft)",
+                        }}
+                        contentStyle={{
+                          fontSize: 12,
+                          borderRadius: 8,
+                          border:
+                            "1px solid var(--color-border)",
+                          backgroundColor:
+                            "var(--color-card)",
+                          color:
+                            "var(--color-text)",
+                          boxShadow:
+                            "0 4px 18px color-mix(in srgb, var(--color-text) 8%, transparent)",
+                        }}
+                        labelStyle={{
+                          color:
+                            "var(--color-text)",
+                          fontWeight: 600,
+                        }}
+                        itemStyle={{
+                          color:
+                            "var(--color-text-secondary, var(--color-text-muted))",
+                        }}
+                      />
+
+                      <Bar
+                        dataKey="jumlah"
+                        radius={[
+                          6,
+                          6,
+                          0,
+                          0,
+                        ]}
+                      >
+                        {perJurusan.map(
+                          (entry) => (
+                            <Cell
+                              key={
+                                entry.jurusan
+                              }
+                              fill={
+                                JURUSAN_COLORS[
+                                  entry.jurusan
+                                ]
+                              }
+                            />
+                          )
+                        )}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* GELOMBANG */}
+
+                <div
+                  className={`theme-card rounded-xl p-5 ${themeCardShadow}`}
+                >
+                  <div className="mb-4 flex items-center gap-2">
+                    <Layers
+                      size={14}
+                      className="theme-text-muted"
+                    />
+
+                    <p className="text-sm font-semibold theme-text">
+                      Pendaftar per
+                      Gelombang
+                    </p>
+                  </div>
+
+                  <ResponsiveContainer
+                    width="100%"
+                    height={240}
+                  >
+                    <BarChart
+                      data={
+                        perGelombang
+                      }
+                      margin={{
+                        top: 4,
+                        right: 8,
+                        left: -20,
+                        bottom: 0,
+                      }}
+                    >
+                      <CartesianGrid
+                        strokeDasharray="3 3"
+                        vertical={false}
+                        stroke="var(--color-border-soft)"
+                      />
+
+                      <XAxis
+                        dataKey="gelombang"
+                        tick={{
+                          fontSize: 11,
+                          fill: "var(--color-text-muted)",
+                        }}
+                        axisLine={false}
+                        tickLine={false}
+                      />
+
+                      <YAxis
+                        tick={{
+                          fontSize: 11,
+                          fill: "var(--color-text-muted)",
+                        }}
+                        axisLine={false}
+                        tickLine={false}
+                        allowDecimals={
+                          false
+                        }
+                      />
+
+                      <Tooltip
+                        cursor={{
+                          fill: "var(--color-border-soft)",
+                        }}
+                        contentStyle={{
+                          fontSize: 12,
+                          borderRadius: 8,
+                          border:
+                            "1px solid var(--color-border)",
+                          backgroundColor:
+                            "var(--color-card)",
+                          color:
+                            "var(--color-text)",
+                          boxShadow:
+                            "0 4px 18px color-mix(in srgb, var(--color-text) 8%, transparent)",
+                        }}
+                        labelStyle={{
+                          color:
+                            "var(--color-text)",
+                          fontWeight: 600,
+                        }}
+                        itemStyle={{
+                          color:
+                            "var(--color-text-muted)",
+                        }}
+                      />
+
+                      <Bar
+                        dataKey="jumlah"
+                        fill="var(--color-primary)"
+                        radius={[
+                          6,
+                          6,
+                          0,
+                          0,
+                        ]}
+                      />
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              </section>
+
+              {/* ==================================================
+                  STATUS + ASAL SEKOLAH
+              ================================================== */}
+
+              <section className="grid grid-cols-1 gap-4 lg:grid-cols-5">
+                {/* DISTRIBUSI STATUS */}
+
+                <div
+                  className={`theme-card rounded-xl p-5 lg:col-span-2 ${themeCardShadow}`}
+                >
+                  <div className="mb-2 flex items-center gap-2">
+                    <CheckCircle2
+                      size={14}
+                      className="theme-text-muted"
+                    />
+
+                    <p className="text-sm font-semibold theme-text">
+                      Distribusi Status
+                      Akhir
+                    </p>
+                  </div>
+
+                  <ResponsiveContainer
+                    width="100%"
+                    height={240}
+                  >
+                    <PieChart>
+                      <Pie
+                        data={
+                          distribusiStatus
+                        }
+                        dataKey="value"
+                        nameKey="name"
+                        innerRadius={
+                          55
+                        }
+                        outerRadius={
+                          85
+                        }
+                        paddingAngle={
+                          2
+                        }
+                      >
+                        {distribusiStatus.map(
+                          (entry) => (
+                            <Cell
+                              key={
+                                entry.name
+                              }
+                              fill={
+                                STATUS_COLORS[
+                                  entry.name
+                                ]
+                              }
+                            />
+                          )
+                        )}
+                      </Pie>
+
+                      <Tooltip
+                        contentStyle={{
+                          fontSize: 12,
+                          borderRadius: 8,
+                          border:
+                            "1px solid var(--color-border)",
+                          backgroundColor:
+                            "var(--color-card)",
+                          color:
+                            "var(--color-text)",
+                          boxShadow:
+                            "0 4px 18px color-mix(in srgb, var(--color-text) 8%, transparent)",
+                        }}
+                        labelStyle={{
+                          color:
+                            "var(--color-text)",
+                          fontWeight: 600,
+                        }}
+                        itemStyle={{
+                          color:
+                            "var(--color-text-muted)",
+                        }}
+                      />
+
+                      <Legend
+                        iconType="circle"
+                        iconSize={8}
+                        formatter={(
+                          value
+                        ) => (
+                          <span className="text-xs theme-text-secondary">
+                            {value}
+                          </span>
+                        )}
+                      />
+                    </PieChart>
+                  </ResponsiveContainer>
+                </div>
+
+                {/* REKAP ASAL SEKOLAH */}
+
+                <div
+                  className={`theme-card rounded-xl p-5 lg:col-span-3 ${themeCardShadow}`}
+                >
+                  <div className="mb-4 flex items-center gap-2">
+                    <School
+                      size={14}
+                      className="theme-text-muted"
+                    />
+
+                    <p className="text-sm font-semibold theme-text">
+                      Rekap Asal
+                      Sekolah
+                    </p>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm">
+                      <thead>
+                        <tr
+                          className={`border-b ${themeDivider} text-left text-xs theme-text-muted`}
+                        >
+                          <th className="py-2 pr-3 font-medium">
+                            Asal Sekolah
+                          </th>
+
+                          <th className="py-2 pr-3 text-center font-medium">
+                            Jumlah
+                            Pendaftar
+                          </th>
+
+                          <th className="py-2 pr-3 text-center font-medium">
+                            Diterima
+                          </th>
+
+                          <th className="py-2 font-medium">
+                            Proporsi
+                          </th>
+                        </tr>
+                      </thead>
+
+                      <tbody>
+                        {rekapAsalSekolah.map(
+                          (r) => (
+                            <tr
+                              key={
+                                r.asalSekolah
+                              }
+                              className={`border-b ${themeDivider}`}
+                            >
+                              <td className="py-2.5 pr-3 theme-text">
+                                {
+                                  r.asalSekolah
+                                }
+                              </td>
+
+                              <td className="py-2.5 pr-3 text-center font-medium theme-text-secondary">
+                                {
+                                  r.jumlah
+                                }
+                              </td>
+
+                              <td className="py-2.5 pr-3 text-center font-medium text-[var(--color-success)]">
+                                {
+                                  r.diterima
+                                }
+                              </td>
+
+                              <td className="py-2.5">
+                                <div
+                                  className={`h-1.5 w-full overflow-hidden rounded-full ${themeNeutralSurface}`}
+                                >
+                                  <div
+                                    className="h-full rounded-full"
+                                    style={{
+                                      width: `${
+                                        ringkasan.total >
+                                        0
+                                          ? (r.jumlah /
+                                              ringkasan.total) *
+                                            100
+                                          : 0
+                                      }%`,
+                                      background:
+                                        "var(--color-primary)",
+                                    }}
+                                  />
+                                </div>
+                              </td>
+                            </tr>
+                          )
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </section>
+
+              {/* ==================================================
+                  FOOTER
+              ================================================== */}
+
+              <footer className="py-3 text-center text-[11px] theme-text-muted print:hidden">
+                © 2026 SmartSchool
+                &middot; Dashboard
+                Admin PPDB &middot; All
+                rights reserved
+              </footer>
+            </div>
+          </div>
+        </main>
+      </div>
+
+      {/* ======================================================
+          PRINT
+      ====================================================== */}
+
+      <style jsx global>{`
+        @media print {
+          html,
+          body {
+            background: var(--color-card) !important;
+          }
+
+          .theme-page {
+            background: var(--color-card) !important;
+          }
+
+          #area-laporan {
+            background: var(--color-card) !important;
+          }
+
+          * {
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+        }
+      `}</style>
     </div>
   );
 }
 
-
-/* =========================================================
-   PAGE
-========================================================= */
-
-export default function PendaftarDetailPage() {
-  const params = useParams();
-  const router = useRouter();
-
-  const [isCollapsed, setIsCollapsed] =
-    useState(false);
-
-  const [status, setStatus] =
-    useState("Menunggu");
-
-  const [loading, setLoading] =
-    useState(false);
-
-  const [error, setError] =
-    useState("");
-
-  const [success, setSuccess] =
-    useState("");
-
-  /**
-   * Modal konfirmasi.
-   *
-   * Hanya:
-   * - lulus
-   * - ditolak
-   */
-  const [confirmAction, setConfirmAction] =
-    useState(null);
-
-  /**
-   * Untuk BE:
-   *
-   * lulus membutuhkan kelasId.
-   */
-  const [kelasId, setKelasId] =
-    useState("");
-
-  /**
-   * Upload
-   */
-  const [uploadLoading, setUploadLoading] =
-    useState(false);
-
-  const [uploadTarget, setUploadTarget] =
-    useState(null);
-
-  /**
-   * Preview
-   */
-  const [previewFile, setPreviewFile] =
-    useState(null);
-
-
-  /* =======================================================
-     DATA
-  ======================================================= */
-
-  const data = useMemo(() => {
-    const found =
-      initialPendaftar.find(
-        (p) =>
-          String(p.id) ===
-          String(params?.id)
-      );
-
-    return (
-      found ||
-      initialPendaftar[0]
-    );
-  }, [params?.id]);
-
-
-  /* =======================================================
-     SIDEBAR
-  ======================================================= */
-
-  const toggleSidebar = () => {
-    setIsCollapsed((prev) => !prev);
-  };
-
-
-  /* =======================================================
-     STATUS
-  ======================================================= */
-
-  const currentStatus =
-    status || data.status;
-
-
-  /* =======================================================
-     CONFIRM ACTION
-  ======================================================= */
-
-  const openConfirm = (action) => {
-    setError("");
-    setSuccess("");
-    setKelasId("");
-    setConfirmAction(action);
-  };
-
-
-  /* =======================================================
-     VERIFIKASI / TOLAK
-     ======================================================= */
-
-  const handleConfirm = async () => {
-    if (!confirmAction) return;
-
-    setError("");
-    setSuccess("");
-
-    /**
-     * =====================================================
-     * TOLAK
-     * =====================================================
-     */
-
-    if (confirmAction === "ditolak") {
-      try {
-        setLoading(true);
-
-        const response =
-          await verifikasiPpdb(
-            String(data.id),
-            {
-              status: "ditolak",
-            }
-          );
-
-        if (!response?.success) {
-          throw new Error(
-            response?.message ||
-              "Gagal menolak pendaftar."
-          );
-        }
-
-        setStatus("Ditolak");
-
-        setSuccess(
-          "Pendaftar berhasil ditolak."
-        );
-
-        setConfirmAction(null);
-      } catch (err) {
-        console.error(
-          "Gagal menolak pendaftar:",
-          err
-        );
-
-        setError(
-          err?.message ||
-            "Gagal menolak pendaftar."
-        );
-      } finally {
-        setLoading(false);
-      }
-
-      return;
-    }
-
-
-    /**
-     * =====================================================
-     * LULUS
-     * =====================================================
-     *
-     * BE membutuhkan kelasId.
-     */
-
-    if (confirmAction === "lulus") {
-      if (!kelasId.trim()) {
-        setError(
-          "Kelas ID wajib diisi untuk pendaftar yang lulus."
-        );
-
-        return;
-      }
-
-      try {
-        setLoading(true);
-
-        const response =
-          await verifikasiPpdb(
-            String(data.id),
-            {
-              status: "lulus",
-              kelasId: kelasId.trim(),
-            }
-          );
-
-        if (!response?.success) {
-          throw new Error(
-            response?.message ||
-              "Gagal meluluskan pendaftar."
-          );
-        }
-
-        setStatus("Lulus");
-
-        setSuccess(
-          "Pendaftar berhasil dinyatakan lulus dan dikonversi menjadi siswa."
-        );
-
-        setConfirmAction(null);
-        setKelasId("");
-      } catch (err) {
-        console.error(
-          "Gagal meluluskan pendaftar:",
-          err
-        );
-
-        setError(
-          err?.message ||
-            "Gagal meluluskan pendaftar."
-        );
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
-
-
-  /* =======================================================
-     UPLOAD BERKAS
-  ======================================================= */
-
-  const handleUpload = async (
-    event,
-    berkas
-  ) => {
-    const file =
-      event.target.files?.[0];
-
-    if (!file) return;
-
-    setError("");
-    setSuccess("");
-
-    /**
-     * Validasi sederhana FE.
-     */
-    const allowedTypes = [
-      "application/pdf",
-      "image/jpeg",
-      "image/png",
-    ];
-
-    if (
-      !allowedTypes.includes(
-        file.type
-      )
-    ) {
-      setError(
-        "Format file harus PDF, JPG, JPEG, atau PNG."
-      );
-
-      event.target.value = "";
-      return;
-    }
-
-    try {
-      setUploadLoading(true);
-
-      setUploadTarget(
-        berkas.id
-      );
-
-      const response =
-        await uploadBerkasPpdb(
-          String(data.id),
-          file,
-          berkas.id
-        );
-
-      if (!response?.success) {
-        throw new Error(
-          response?.message ||
-            "Gagal mengupload berkas."
-        );
-      }
-
-      setSuccess(
-        `${berkas.nama} berhasil diupload.`
-      );
-    } catch (err) {
-      console.error(
-        "Upload berkas PPDB:",
-        err
-      );
-
-      setError(
-        err?.message ||
-          "Gagal mengupload berkas."
-      );
-    } finally {
-      setUploadLoading(false);
-      setUploadTarget(null);
-
-      event.target.value = "";
-    }
-  };
-
-
-  /* =======================================================
-     PREVIEW
-  ======================================================= */
-
-  const handlePreview = (berkas) => {
-    setPreviewFile(berkas);
-  };
-
-
-  /* =======================================================
-     BACK
-  ======================================================= */
-
-  const handleBack = () => {
-    router.push(
-      "/adminPPDB/pendaftar"
-    );
-  };
-
-
+// ============================================================
+// SUMMARY CARD
+// ============================================================
+
+function SummaryCard({
+  icon: Icon,
+  title,
+  value,
+  iconClass,
+  valueClass = "theme-text",
+}) {
   return (
-    <div className="flex h-screen w-full bg-[#EEF0F2] overflow-hidden">
-
-      {/* ===================================================
-          SIDEBAR
-      =================================================== */}
-
-      <Sidebar
-        role="adminPPDB"
-        active="pendaftar"
-        setActive={() => {}}
-        collapsed={isCollapsed}
-        setCollapsed={setIsCollapsed}
-      />
-
-
-      {/* ===================================================
-          CONTENT
-      =================================================== */}
-
-      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-
-        <Header
-          toggleSidebar={toggleSidebar}
-          notifications={[]}
-          user={{
-            name: "Admin PPDB",
-            email:
-              "adminppdb@smartschool.com",
-            avatar: "PP",
-          }}
-        />
-
-
-        <main className="flex-1 overflow-y-auto">
-
-          <div className="w-full p-4 md:p-6 lg:p-8">
-
-            <div className="w-full max-w-[1320px] mx-auto space-y-5">
-
-
-              {/* =================================================
-                  BREADCRUMB
-              ================================================= */}
-
-              <div className="flex items-center gap-1 text-xs text-slate-400">
-
-                <button
-                  type="button"
-                  onClick={handleBack}
-                  className="hover:text-blue-600 transition-colors"
-                >
-                  PPDB
-                </button>
-
-                <ChevronRight size={12} />
-
-                <button
-                  type="button"
-                  onClick={handleBack}
-                  className="hover:text-blue-600 transition-colors"
-                >
-                  Pendaftar
-                </button>
-
-                <ChevronRight size={12} />
-
-                <span className="text-slate-600 font-medium">
-                  Detail Pendaftar
-                </span>
-
-              </div>
-
-
-              {/* =================================================
-                  ALERT ERROR
-              ================================================= */}
-
-              {error && (
-                <div className="bg-rose-50 border border-rose-100 rounded-xl px-4 py-3 flex items-start gap-3">
-
-                  <XCircle
-                    size={18}
-                    className="text-rose-500 mt-0.5 flex-shrink-0"
-                  />
-
-                  <div className="min-w-0">
-
-                    <p className="text-sm font-medium text-rose-700">
-                      Terjadi kesalahan
-                    </p>
-
-                    <p className="text-xs text-rose-600 mt-0.5">
-                      {error}
-                    </p>
-
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setError("")
-                    }
-                    className="ml-auto text-rose-400 hover:text-rose-600"
-                  >
-                    <X size={15} />
-                  </button>
-
-                </div>
-              )}
-
-
-              {/* =================================================
-                  ALERT SUCCESS
-              ================================================= */}
-
-              {success && (
-                <div className="bg-emerald-50 border border-emerald-100 rounded-xl px-4 py-3 flex items-start gap-3">
-
-                  <CheckCircle2
-                    size={18}
-                    className="text-emerald-500 mt-0.5 flex-shrink-0"
-                  />
-
-                  <div className="min-w-0">
-
-                    <p className="text-sm font-medium text-emerald-700">
-                      Berhasil
-                    </p>
-
-                    <p className="text-xs text-emerald-600 mt-0.5">
-                      {success}
-                    </p>
-
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setSuccess("")
-                    }
-                    className="ml-auto text-emerald-400 hover:text-emerald-600"
-                  >
-                    <X size={15} />
-                  </button>
-
-                </div>
-              )}
-
-
-              {/* =================================================
-                  HEADER DETAIL
-              ================================================= */}
-
-              <section className="bg-white rounded-xl p-5">
-
-                <div className="flex flex-col md:flex-row md:items-center justify-between gap-5">
-
-                  <div className="flex items-center gap-4">
-
-                    <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
-                      <User size={22} />
-                    </div>
-
-                    <div>
-
-                      <div className="flex flex-wrap items-center gap-2">
-
-                        <h1 className="text-lg font-semibold text-slate-800">
-                          {data.pribadi?.nama ||
-                            "-"}
-                        </h1>
-
-                        <span
-                          className={`text-[11px] font-medium px-2.5 py-1 rounded-full border ${
-                            STATUS_STYLES[
-                              currentStatus
-                            ] ||
-                            STATUS_STYLES.Menunggu
-                          }`}
-                        >
-                          {currentStatus}
-                        </span>
-
-                      </div>
-
-                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1.5">
-
-                        <p className="text-xs text-slate-400">
-                          No. Pendaftaran{" "}
-                          <span className="font-medium text-slate-600">
-                            {data.noPendaftaran ||
-                              "-"}
-                          </span>
-                        </p>
-
-                        <p className="text-xs text-slate-400">
-                          Jalur{" "}
-                          <span className="font-medium text-slate-600">
-                            {data.jalur ||
-                              "-"}
-                          </span>
-                        </p>
-
-                        <p className="text-xs text-slate-400">
-                          Daftar{" "}
-                          <span className="font-medium text-slate-600">
-                            {formatTanggal(
-                              data.tanggalDaftar
-                            )}
-                          </span>
-                        </p>
-
-                      </div>
-
-                    </div>
-
-                  </div>
-
-
-                  {/* ACTION */}
-
-                  <div className="flex items-center gap-2">
-
-                    <button
-                      type="button"
-                      onClick={handleBack}
-                      className="flex items-center gap-1.5 text-xs font-medium text-slate-500 hover:text-slate-700 px-3 py-2 border border-slate-200 rounded-md transition-colors"
-                    >
-                      <ArrowLeft size={14} />
-                      Kembali
-                    </button>
-
-
-                    {/* TOLAK */}
-
-                    {currentStatus !==
-                      "Ditolak" &&
-                      currentStatus !==
-                        "Lulus" && (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            openConfirm(
-                              "ditolak"
-                            )
-                          }
-                          disabled={loading}
-                          className="flex items-center gap-1.5 text-xs font-medium text-rose-600 hover:text-rose-700 hover:bg-rose-50 px-3 py-2 border border-rose-200 rounded-md transition-colors disabled:opacity-50"
-                        >
-                          <XCircle size={14} />
-                          Tolak
-                        </button>
-                      )}
-
-
-                    {/* LULUS */}
-
-                    {currentStatus !==
-                      "Ditolak" &&
-                      currentStatus !==
-                        "Lulus" && (
-                        <button
-                          type="button"
-                          onClick={() =>
-                            openConfirm(
-                              "lulus"
-                            )
-                          }
-                          disabled={loading}
-                          className="flex items-center gap-1.5 text-xs font-medium bg-blue-600 hover:bg-blue-700 text-white px-3 py-2 rounded-md transition-colors disabled:opacity-50"
-                        >
-                          <ShieldCheck
-                            size={14}
-                          />
-                          Verifikasi
-                        </button>
-                      )}
-
-                  </div>
-
-                </div>
-
-              </section>
-
-
-              {/* =================================================
-                  DATA PRIBADI
-              ================================================= */}
-
-              <SectionCard
-                title="Data Pribadi"
-                icon={User}
-              >
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-5">
-
-                  <Field
-                    label="Nama Lengkap"
-                    value={
-                      data.pribadi?.nama
-                    }
-                  />
-
-                  <Field
-                    label="NIK"
-                    value={
-                      data.pribadi?.nik
-                    }
-                  />
-
-                  <Field
-                    label="NISN"
-                    value={
-                      data.pribadi?.nisn
-                    }
-                  />
-
-                  <Field
-                    label="Tempat Lahir"
-                    value={
-                      data.pribadi
-                        ?.tempatLahir
-                    }
-                  />
-
-                  <Field
-                    label="Tanggal Lahir"
-                    value={formatTanggal(
-                      data.pribadi
-                        ?.tanggalLahir
-                    )}
-                  />
-
-                  <Field
-                    label="Jenis Kelamin"
-                    value={
-                      data.pribadi
-                        ?.jenisKelamin
-                    }
-                  />
-
-                  <Field
-                    label="Nomor Telepon"
-                    value={
-                      data.pribadi?.telepon
-                    }
-                  />
-
-                  <Field
-                    label="Email"
-                    value={
-                      data.pribadi?.email
-                    }
-                  />
-
-                  <div className="sm:col-span-2 lg:col-span-3">
-
-                    <Field
-                      label="Alamat"
-                      value={
-                        data.pribadi?.alamat
-                      }
-                    />
-
-                  </div>
-
-                </div>
-
-              </SectionCard>
-
-
-              {/* =================================================
-                  DATA ORANG TUA
-              ================================================= */}
-
-              <SectionCard
-                title="Data Orang Tua / Wali"
-                icon={User}
-              >
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-5">
-
-                  <Field
-                    label="Nama Ayah"
-                    value={
-                      data.ortu?.namaAyah
-                    }
-                  />
-
-                  <Field
-                    label="Nama Ibu"
-                    value={
-                      data.ortu?.namaIbu
-                    }
-                  />
-
-                  <Field
-                    label="Nomor Telepon"
-                    value={
-                      data.ortu?.telepon
-                    }
-                  />
-
-                  <Field
-                    label="Pekerjaan Ayah"
-                    value={
-                      data.ortu
-                        ?.pekerjaanAyah
-                    }
-                  />
-
-                  <Field
-                    label="Pekerjaan Ibu"
-                    value={
-                      data.ortu
-                        ?.pekerjaanIbu
-                    }
-                  />
-
-                </div>
-
-              </SectionCard>
-
-
-              {/* =================================================
-                  DATA SEKOLAH
-              ================================================= */}
-
-              <SectionCard
-                title="Data Sekolah Asal"
-                icon={GraduationCap}
-              >
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-5">
-
-                  <Field
-                    label="Asal Sekolah"
-                    value={
-                      data.sekolah
-                        ?.asalSekolah
-                    }
-                  />
-
-                  <Field
-                    label="NPSN"
-                    value={
-                      data.sekolah?.npsn
-                    }
-                  />
-
-                  <Field
-                    label="Tahun Lulus"
-                    value={
-                      data.sekolah
-                        ?.tahunLulus
-                    }
-                  />
-
-                  <Field
-                    label="Nilai Rapor"
-                    value={
-                      data.sekolah
-                        ?.nilaiRapor
-                    }
-                  />
-
-                </div>
-
-              </SectionCard>
-
-
-              {/* =================================================
-                  PILIHAN JURUSAN
-              ================================================= */}
-
-              <SectionCard
-                title="Pilihan Jurusan"
-                icon={GraduationCap}
-              >
-
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-                  <div className="border border-slate-100 rounded-lg p-4">
-
-                    <p className="text-[11px] text-slate-400">
-                      Pilihan 1
-                    </p>
-
-                    <p className="text-sm font-medium text-slate-700 mt-1">
-                      {data.jurusan
-                        ?.pilihan1 ||
-                        "-"}
-                    </p>
-
-                  </div>
-
-
-                  <div className="border border-slate-100 rounded-lg p-4">
-
-                    <p className="text-[11px] text-slate-400">
-                      Pilihan 2
-                    </p>
-
-                    <p className="text-sm font-medium text-slate-700 mt-1">
-                      {data.jurusan
-                        ?.pilihan2 ||
-                        "-"}
-                    </p>
-
-                  </div>
-
-
-                  <div className="border border-slate-100 rounded-lg p-4">
-
-                    <p className="text-[11px] text-slate-400">
-                      Pilihan 3
-                    </p>
-
-                    <p className="text-sm font-medium text-slate-700 mt-1">
-                      {data.jurusan
-                        ?.pilihan3 ||
-                        "-"}
-                    </p>
-
-                  </div>
-
-                </div>
-
-              </SectionCard>
-
-
-              {/* =================================================
-                  BERKAS
-              ================================================= */}
-
-              <SectionCard
-                title="Berkas Pendaftaran"
-                icon={FileText}
-              >
-
-                <div className="space-y-3">
-
-                  {(data.berkas || [])
-                    .map((berkas) => {
-
-                      const isUploading =
-                        uploadLoading &&
-                        uploadTarget ===
-                          berkas.id;
-
-                      return (
-                        <div
-                          key={berkas.id}
-                          className="border border-slate-100 rounded-lg p-4 flex flex-col md:flex-row md:items-center justify-between gap-4"
-                        >
-
-                          <div className="flex items-center gap-3 min-w-0">
-
-                            <div className="w-10 h-10 rounded-lg bg-slate-50 text-slate-500 flex items-center justify-center flex-shrink-0">
-                              <FileText
-                                size={17}
-                              />
-                            </div>
-
-                            <div className="min-w-0">
-
-                              <p className="text-sm font-medium text-slate-700">
-                                {berkas.nama}
-                              </p>
-
-                              <p className="text-xs text-slate-400 truncate mt-0.5">
-                                {berkas.file ||
-                                  "Belum ada file"}
-                              </p>
-
-                            </div>
-
-                          </div>
-
-
-                          <div className="flex items-center gap-2 flex-shrink-0">
-
-                            <span
-                              className={`text-[10px] font-medium px-2 py-1 rounded-full border ${
-                                STATUS_STYLES[
-                                  berkas.status
-                                ] ||
-                                STATUS_STYLES.Menunggu
-                              }`}
-                            >
-                              {berkas.status ||
-                                "Menunggu"}
-                            </span>
-
-
-                            {/* PREVIEW */}
-
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handlePreview(
-                                  berkas
-                                )
-                              }
-                              className="flex items-center gap-1 text-xs font-medium text-slate-500 hover:text-blue-600 hover:bg-blue-50 px-2.5 py-1.5 rounded-md transition-colors"
-                            >
-                              <Eye size={13} />
-                              Lihat
-                            </button>
-
-
-                            {/* UPLOAD */}
-
-                            <label
-                              className={`flex items-center gap-1 text-xs font-medium text-blue-600 hover:bg-blue-50 px-2.5 py-1.5 rounded-md transition-colors cursor-pointer ${
-                                isUploading
-                                  ? "opacity-50 pointer-events-none"
-                                  : ""
-                              }`}
-                            >
-
-                              {isUploading ? (
-                                <Loader2
-                                  size={13}
-                                  className="animate-spin"
-                                />
-                              ) : (
-                                <Upload
-                                  size={13}
-                                />
-                              )}
-
-                              {isUploading
-                                ? "Mengunggah..."
-                                : "Unggah"}
-
-                              <input
-                                type="file"
-                                accept=".pdf,.jpg,.jpeg,.png"
-                                className="hidden"
-                                disabled={
-                                  isUploading
-                                }
-                                onChange={(
-                                  event
-                                ) =>
-                                  handleUpload(
-                                    event,
-                                    berkas
-                                  )
-                                }
-                              />
-
-                            </label>
-
-                          </div>
-
-                        </div>
-                      );
-                    })}
-
-                </div>
-
-              </SectionCard>
-
-
-              {/* =================================================
-                  INFO INTEGRASI BE
-              ================================================= */}
-
-              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
-
-                <div className="flex items-start gap-3">
-
-                  <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center flex-shrink-0">
-                    <Check
-                      size={15}
-                      className="text-emerald-500"
-                    />
-                  </div>
-
-                  <div>
-
-                    <p className="text-xs font-medium text-slate-700">
-                      Integrasi PPDB
-                    </p>
-
-                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-                      Upload berkas dan proses
-                      verifikasi menggunakan
-                      endpoint PPDB yang sudah
-                      tersedia di backend.
-                      Data detail halaman ini
-                      masih mengikuti data
-                      halaman sebelumnya karena
-                      backend saat ini belum
-                      menyediakan endpoint GET
-                      detail pendaftar.
-                    </p>
-
-                  </div>
-
-                </div>
-
-              </div>
-
-            </div>
-
-          </div>
-
-        </main>
-
+    <div
+      className={`theme-card flex items-start gap-3 rounded-xl p-5 ${themeCardShadow}`}
+    >
+      <div
+        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${iconClass}`}
+      >
+        <Icon size={16} />
       </div>
 
-
-      {/* =====================================================
-          MODAL KONFIRMASI
-      ===================================================== */}
-
-      {confirmAction && (
-        <div className="fixed inset-0 bg-black/30 flex items-center justify-center z-50 p-4">
-
-          <div className="bg-white rounded-xl w-full max-w-md p-6">
-
-            <div className="flex items-start justify-between gap-4">
-
-              <div>
-
-                <h3 className="text-sm font-semibold text-slate-800">
-
-                  {confirmAction ===
-                  "lulus"
-                    ? "Verifikasi Pendaftar"
-                    : "Tolak Pendaftar"}
-
-                </h3>
-
-                <p className="text-xs text-slate-500 mt-1 leading-relaxed">
-
-                  {confirmAction ===
-                  "lulus"
-                    ? "Pendaftar akan dinyatakan lulus dan dibuatkan akun siswa."
-                    : "Pendaftar akan dinyatakan ditolak."}
-
-                </p>
-
-              </div>
-
-              <button
-                type="button"
-                onClick={() => {
-                  if (!loading) {
-                    setConfirmAction(
-                      null
-                    );
-                    setKelasId("");
-                    setError("");
-                  }
-                }}
-                disabled={loading}
-                className="text-slate-400 hover:text-slate-600 disabled:opacity-50"
-              >
-                <X size={17} />
-              </button>
-
-            </div>
-
-
-            {/* =================================================
-                KELAS ID — HANYA LULUS
-            ================================================= */}
-
-            {confirmAction ===
-              "lulus" && (
-              <div className="mt-5">
-
-                <label className="block">
-
-                  <span className="text-xs font-medium text-slate-600">
-                    ID Kelas
-                  </span>
-
-                  <input
-                    type="text"
-                    value={kelasId}
-                    onChange={(e) =>
-                      setKelasId(
-                        e.target.value
-                      )
-                    }
-                    placeholder="Masukkan UUID kelas"
-                    disabled={loading}
-                    className="w-full mt-1.5 border border-slate-200 rounded-md px-3 py-2 text-sm text-slate-700 outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-50 disabled:bg-slate-50"
-                  />
-
-                </label>
-
-                <p className="text-[11px] text-slate-400 mt-1.5">
-                  Backend saat ini membutuhkan
-                  <span className="font-medium">
-                    {" "}
-                    kelasId
-                  </span>{" "}
-                  ketika pendaftar dinyatakan
-                  lulus.
-                </p>
-
-              </div>
-            )}
-
-
-            {/* ERROR */}
-
-            {error && (
-              <div className="mt-4 bg-rose-50 border border-rose-100 rounded-lg px-3 py-2">
-
-                <p className="text-xs text-rose-600">
-                  {error}
-                </p>
-
-              </div>
-            )}
-
-
-            {/* BUTTON */}
-
-            <div className="flex items-center justify-end gap-2 mt-6">
-
-              <button
-                type="button"
-                onClick={() => {
-                  if (!loading) {
-                    setConfirmAction(
-                      null
-                    );
-                    setKelasId("");
-                    setError("");
-                  }
-                }}
-                disabled={loading}
-                className="text-xs font-medium text-slate-500 hover:text-slate-700 px-4 py-2 disabled:opacity-50"
-              >
-                Batal
-              </button>
-
-
-              <button
-                type="button"
-                onClick={handleConfirm}
-                disabled={loading}
-                className={`flex items-center gap-1.5 text-xs font-medium text-white px-4 py-2 rounded-md transition-colors disabled:opacity-50 ${
-                  confirmAction ===
-                  "lulus"
-                    ? "bg-blue-600 hover:bg-blue-700"
-                    : "bg-rose-600 hover:bg-rose-700"
-                }`}
-              >
-
-                {loading && (
-                  <Loader2
-                    size={13}
-                    className="animate-spin"
-                  />
-                )}
-
-                {confirmAction ===
-                "lulus"
-                  ? "Ya, Verifikasi"
-                  : "Ya, Tolak"}
-
-              </button>
-
-            </div>
-
-          </div>
-
-        </div>
-      )}
-
-
-      {/* =====================================================
-          MODAL PREVIEW BERKAS
-      ===================================================== */}
-
-      {previewFile && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4">
-
-          <div className="bg-white rounded-xl w-full max-w-3xl overflow-hidden">
-
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-
-              <div>
-
-                <h3 className="text-sm font-semibold text-slate-800">
-                  {previewFile.nama}
-                </h3>
-
-                <p className="text-xs text-slate-400 mt-0.5">
-                  {previewFile.file ||
-                    "Dokumen pendaftaran"}
-                </p>
-
-              </div>
-
-              <button
-                type="button"
-                onClick={() =>
-                  setPreviewFile(null)
-                }
-                className="text-slate-400 hover:text-slate-600"
-              >
-                <X size={18} />
-              </button>
-
-            </div>
-
-
-            <div className="p-5">
-
-              <div className="h-[420px] bg-slate-50 border border-slate-100 rounded-lg flex flex-col items-center justify-center text-center">
-
-                <div className="w-14 h-14 rounded-xl bg-white border border-slate-200 text-slate-400 flex items-center justify-center">
-
-                  <FileText size={25} />
-
-                </div>
-
-                <p className="text-sm font-medium text-slate-700 mt-4">
-                  {previewFile.file ||
-                    "Dokumen"}
-                </p>
-
-                <p className="text-xs text-slate-400 mt-1 max-w-sm">
-                  Preview dokumen akan
-                  menggunakan URL file yang
-                  dikembalikan oleh backend.
-                </p>
-
-              </div>
-
-            </div>
-
-
-            <div className="flex justify-end px-5 py-4 border-t border-slate-100">
-
-              <button
-                type="button"
-                onClick={() =>
-                  setPreviewFile(null)
-                }
-                className="text-xs font-medium text-slate-500 hover:text-slate-700 px-4 py-2"
-              >
-                Tutup
-              </button>
-
-            </div>
-
-          </div>
-
-        </div>
-      )}
-
+      <div className="min-w-0">
+        <p className="text-xs theme-text-muted">
+          {title}
+        </p>
+
+        <p
+          className={`mt-1 text-2xl font-bold ${valueClass}`}
+        >
+          {value}
+        </p>
+      </div>
     </div>
   );
 }

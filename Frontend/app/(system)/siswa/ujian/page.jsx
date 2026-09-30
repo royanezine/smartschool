@@ -2,8 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-import Sidebar from "../../../components/Sidebar";
-import Header from "../../../components/Header";
 
 import {
   Calendar,
@@ -34,92 +32,69 @@ import { getKelasMapel } from "../../../../services/kelasMapel.service";
 import { getUjianByKelasMapel } from "../../../../services/ujian.service";
 
 // =========================================================
-// COLOR MAP
+// THEME HELPERS
 // =========================================================
 
-const colorMap = {
-  blue: {
-    bg: "bg-blue-50",
-    border: "border-blue-200",
-    text: "text-blue-600",
-    grad: "from-blue-500 to-blue-700",
-    soft: "bg-blue-50",
-    badge: "border-blue-200 bg-blue-50 text-blue-700",
-    icon: "bg-blue-100 text-blue-600",
-    line: "bg-blue-500",
-  },
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
 
-  rose: {
-    bg: "bg-rose-50",
-    border: "border-rose-200",
-    text: "text-rose-600",
-    grad: "from-rose-500 to-rose-700",
-    soft: "bg-rose-50",
-    badge: "border-rose-200 bg-rose-50 text-rose-700",
-    icon: "bg-rose-100 text-rose-600",
-    line: "bg-rose-500",
-  },
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
 
-  emerald: {
-    bg: "bg-emerald-50",
-    border: "border-emerald-200",
-    text: "text-emerald-600",
-    grad: "from-emerald-500 to-emerald-700",
-    soft: "bg-emerald-50",
-    badge: "border-emerald-200 bg-emerald-50 text-emerald-700",
-    icon: "bg-emerald-100 text-emerald-600",
-    line: "bg-emerald-500",
-  },
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
 
-  amber: {
-    bg: "bg-amber-50",
-    border: "border-amber-200",
-    text: "text-amber-600",
-    grad: "from-amber-500 to-amber-700",
-    soft: "bg-amber-50",
-    badge: "border-amber-200 bg-amber-50 text-amber-700",
-    icon: "bg-amber-100 text-amber-600",
-    line: "bg-amber-500",
-  },
+const themePrimaryText =
+  "text-[var(--color-primary)]";
 
-  indigo: {
-    bg: "bg-indigo-50",
-    border: "border-indigo-200",
-    text: "text-indigo-600",
-    grad: "from-indigo-500 to-indigo-700",
-    soft: "bg-indigo-50",
-    badge: "border-indigo-200 bg-indigo-50 text-indigo-700",
-    icon: "bg-indigo-100 text-indigo-600",
-    line: "bg-indigo-500",
-  },
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
 
-  orange: {
-    bg: "bg-orange-50",
-    border: "border-orange-200",
-    text: "text-orange-600",
-    grad: "from-orange-500 to-orange-700",
-    soft: "bg-orange-50",
-    badge: "border-orange-200 bg-orange-50 text-orange-700",
-    icon: "bg-orange-100 text-orange-600",
-    line: "bg-orange-500",
-  },
-};
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
 // =========================================================
-// HELPER
+// JENIS UJIAN
 // =========================================================
-
-function getColorByJenis(jenis) {
-  const map = {
-    UTS: "blue",
-    UAS: "rose",
-    Kuis: "amber",
-    Harian: "emerald",
-    Lainnya: "indigo",
-  };
-
-  return map[jenis] || "indigo";
-}
 
 function getIconByJenis(jenis) {
   const map = {
@@ -131,6 +106,42 @@ function getIconByJenis(jenis) {
   };
 
   return map[jenis] || Layers;
+}
+
+function getThemeByJenis(jenis) {
+  const map = {
+    UTS: {
+      surface: themePrimarySoft,
+      border: themePrimarySoftBorder,
+      text: themePrimaryText,
+    },
+
+    UAS: {
+      surface: themeDangerSurface,
+      border: themeDangerBorder,
+      text: "text-[var(--color-text)]",
+    },
+
+    Kuis: {
+      surface: themeWarningSurface,
+      border: themeWarningBorder,
+      text: "text-[var(--color-warning)]",
+    },
+
+    Harian: {
+      surface: themeSuccessSurface,
+      border: themeSuccessBorder,
+      text: "text-[var(--color-success)]",
+    },
+
+    Lainnya: {
+      surface: themeNeutralSurface,
+      border: themeNeutralBorder,
+      text: "theme-text-secondary",
+    },
+  };
+
+  return map[jenis] || map.Lainnya;
 }
 
 function getStatusUjian(ujian) {
@@ -272,15 +283,6 @@ function isStudentMemberOfClass(anggota, userId) {
     return false;
   }
 
-  /*
-   * Struktur BE:
-   *
-   * anggota[].siswa.id
-   *
-   * berdasarkan:
-   * AnggotaKelas -> siswa Pengguna
-   */
-
   const anggotaUserId =
     anggota?.siswa?.id ||
     anggota?.penggunaId ||
@@ -310,19 +312,6 @@ async function findStudentClass() {
     );
   }
 
-  /*
-   * JANGAN menggunakan kelasId dari localStorage
-   * sebagai sumber utama.
-   *
-   * Sumber kelas siswa berasal dari BE:
-   *
-   * GET /api/kelas
-   *      ↓
-   * GET /api/kelas/:id
-   *      ↓
-   * detail.anggota[].siswa.id
-   */
-
   const kelasResponse = await getKelas({
     page: 1,
     limit: 100,
@@ -342,24 +331,6 @@ async function findStudentClass() {
       "Belum ada data kelas pada sekolah akun siswa."
     );
   }
-
-  /*
-   * Ambil detail setiap kelas.
-   *
-   * BE getDetailKelas() mengembalikan:
-   *
-   * anggota: [
-   *   {
-   *     siswa: {
-   *       id,
-   *       namaLengkap,
-   *       nisn,
-   *       nis,
-   *       ...
-   *     }
-   *   }
-   * ]
-   */
 
   const hasilPencarian = await Promise.allSettled(
     daftarKelas.map(async (kelas) => {
@@ -481,7 +452,7 @@ export default function DaftarUjianPage() {
       setError("");
 
       // ====================================================
-      // 1. CARI KELAS SISWA DARI BACKEND
+      // 1. CARI KELAS SISWA
       // ====================================================
 
       const kelasSiswa = await findStudentClass();
@@ -522,7 +493,7 @@ export default function DaftarUjianPage() {
       );
 
       // ====================================================
-      // 3. FILTER KELAS MAPEL BERDASARKAN KELAS SISWA
+      // 3. FILTER KELAS MAPEL
       // ====================================================
 
       let kelasMapelData =
@@ -539,16 +510,9 @@ export default function DaftarUjianPage() {
           );
         });
 
-      /*
-       * FALLBACK:
-       *
-       * getDetailKelas() BE juga include kelasMapel.
-       *
-       * Jadi kalau endpoint getKelasMapel
-       * tidak mengembalikan data yang diperlukan,
-       * gunakan data dari detail kelas yang
-       * memang sudah diberikan oleh BE.
-       */
+      // ====================================================
+      // FALLBACK KELAS MAPEL
+      // ====================================================
 
       if (
         kelasMapelData.length === 0 &&
@@ -592,7 +556,7 @@ export default function DaftarUjianPage() {
       }
 
       // ====================================================
-      // 4. AMBIL UJIAN DARI SETIAP KELAS MAPEL
+      // 4. AMBIL UJIAN
       // ====================================================
 
       const hasilRequest =
@@ -699,7 +663,7 @@ export default function DaftarUjianPage() {
       );
 
       // ====================================================
-      // 6. FILTER BERDASARKAN KELAS SISWA
+      // 6. FILTER KELAS SISWA
       // ====================================================
 
       const ujianKelasSiswa =
@@ -741,7 +705,7 @@ export default function DaftarUjianPage() {
         );
 
       // ====================================================
-      // 8. MAPPING UNTUK UI
+      // 8. MAPPING UI
       // ====================================================
 
       const mapped =
@@ -811,9 +775,8 @@ export default function DaftarUjianPage() {
               status,
 
               warna:
-                getColorByJenis(
-                  ujian?.jenis
-                ),
+                ujian?.jenis ||
+                "Lainnya",
 
               icon:
                 getIconByJenis(
@@ -969,9 +932,7 @@ export default function DaftarUjianPage() {
   // FORMAT DATE
   // =======================================================
 
-  const formatDate = (
-    dateStr
-  ) => {
+  const formatDate = (dateStr) => {
     if (!dateStr) {
       return "-";
     }
@@ -998,9 +959,7 @@ export default function DaftarUjianPage() {
     );
   };
 
-  const formatTime = (
-    dateStr
-  ) => {
+  const formatTime = (dateStr) => {
     if (!dateStr) {
       return "-";
     }
@@ -1029,9 +988,7 @@ export default function DaftarUjianPage() {
   // CARD CLICK
   // =======================================================
 
-  const handleCardClick = (
-    ujianId
-  ) => {
+  const handleCardClick = (ujianId) => {
     if (!ujianId) {
       return;
     }
@@ -1042,535 +999,513 @@ export default function DaftarUjianPage() {
   };
 
   // =======================================================
-  // STATUS
-  // =======================================================
-
-  const getStatusBadge = (
-    status
-  ) => {
-    const map = {
-      belum: {
-        label:
-          "Belum Dimulai",
-        color:
-          "border-slate-200 bg-slate-50 text-slate-600",
-        dot: "bg-slate-400",
-        icon: Clock,
-      },
-
-      sedang: {
-        label:
-          "Berlangsung",
-        color:
-          "border-amber-200 bg-amber-50 text-amber-700",
-        dot: "bg-amber-500",
-        icon: AlertCircle,
-      },
-
-      selesai: {
-        label: "Selesai",
-        color:
-          "border-emerald-200 bg-emerald-50 text-emerald-700",
-        dot: "bg-emerald-500",
-        icon: CheckCircle,
-      },
-    };
-
-    return (
-      map[status] ||
-      map.belum
-    );
-  };
-
-  // =======================================================
   // RENDER
   // =======================================================
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[#F6F8FC]">
-      <Sidebar
-        role="siswa"
-        active="ujian"
-        setActive={() => {}}
-        collapsed={false}
-        setCollapsed={() => {}}
-      />
+    <div className="theme-page theme-text min-h-full">
+      <div className="mx-auto w-full max-w-[1600px] space-y-6 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 xl:px-10">
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <div className="shrink-0">
-          <Header />
-        </div>
+        {/* =================================================
+            PREMIUM HERO
+        ================================================= */}
 
-        <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
-          <div className="w-full px-4 py-5 sm:px-6 lg:px-8 xl:px-10">
-            <div className="mx-auto w-full max-w-[1600px] space-y-6">
+        <section
+          className={`relative overflow-hidden rounded-[24px] ${themePrimaryGradient} ${themePrimaryShadow}`}
+        >
+          <div className="absolute -right-24 -top-28 h-72 w-72 rounded-full bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)] blur-2xl" />
 
-              {/* =================================================
-                  PREMIUM HERO
-              ================================================= */}
+          <div className="absolute -bottom-32 right-32 h-64 w-64 rounded-full bg-[color-mix(in_srgb,var(--color-card)_9%,transparent)] blur-3xl" />
 
-              <section className="relative overflow-hidden rounded-[24px] bg-[#0D47C9] shadow-[0_18px_45px_rgba(15,70,200,0.18)]">
+          <div className="absolute left-1/3 top-0 h-full w-px bg-[color-mix(in_srgb,var(--color-card)_5%,transparent)]" />
 
-                <div className="absolute -right-24 -top-28 h-72 w-72 rounded-full bg-white/10 blur-2xl" />
+          <div className="absolute right-1/4 top-0 h-full w-px bg-[color-mix(in_srgb,var(--color-card)_5%,transparent)]" />
 
-                <div className="absolute -bottom-32 right-32 h-64 w-64 rounded-full bg-blue-300/10 blur-3xl" />
+          <div className="relative p-6 sm:p-8 lg:p-9">
+            <div className="flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between">
 
-                <div className="absolute left-1/3 top-0 h-full w-px bg-white/[0.04]" />
+              <div className="min-w-0 max-w-2xl">
+                <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-[color-mix(in_srgb,var(--color-card)_18%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)] px-3 py-1.5 text-xs font-medium text-[var(--color-card)] backdrop-blur-sm">
+                  <GraduationCap size={14} />
 
-                <div className="absolute right-1/4 top-0 h-full w-px bg-white/[0.04]" />
-
-                <div className="relative p-6 sm:p-8 lg:p-9">
-                  <div className="flex flex-col gap-7 lg:flex-row lg:items-end lg:justify-between">
-
-                    <div className="min-w-0 max-w-2xl">
-                      <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1.5 text-xs font-medium text-blue-50 backdrop-blur-sm">
-                        <GraduationCap size={14} />
-                        <span>
-                          AKADEMIK SISWA
-                        </span>
-                      </div>
-
-                      <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl lg:text-[34px]">
-                        Daftar Ujian
-                      </h1>
-
-                      <p className="mt-2 max-w-xl text-sm leading-6 text-blue-100 sm:text-[15px]">
-                        Kelola dan ikuti seluruh ujian yang
-                        tersedia untuk kelas kamu dalam satu
-                        tempat.
-                      </p>
-                    </div>
-
-                    <div className="grid grid-cols-3 gap-2 sm:gap-3">
-                      <HeroStat
-                        value={
-                          stats.total
-                        }
-                        label="Total"
-                      />
-
-                      <HeroStat
-                        value={
-                          stats.sedang
-                        }
-                        label="Berlangsung"
-                        highlight
-                      />
-
-                      <HeroStat
-                        value={
-                          stats.selesai
-                        }
-                        label="Selesai"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </section>
-
-              {/* =================================================
-                  TOOLBAR
-              ================================================= */}
-
-              <section className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_4px_20px_rgba(15,23,42,0.04)] sm:p-5">
-                <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-
-                  <div className="relative w-full xl:max-w-md">
-                    <Search
-                      size={18}
-                      className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
-                    />
-
-                    <input
-                      type="text"
-                      value={search}
-                      onChange={(e) =>
-                        setSearch(
-                          e.target.value
-                        )
-                      }
-                      placeholder="Cari ujian, mata pelajaran, atau guru..."
-                      className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50/70 pl-10 pr-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
-                    />
-                  </div>
-
-                  <div className="flex min-w-0 overflow-x-auto rounded-xl bg-slate-100 p-1">
-                    {Object.entries(
-                      STATUS_CONFIG
-                    ).map(
-                      ([
-                        key,
-                        config,
-                      ]) => {
-                        const Icon =
-                          config.icon;
-
-                        const count =
-                          key ===
-                          "semua"
-                            ? stats.total
-                            : stats[key];
-
-                        const active =
-                          filterStatus ===
-                          key;
-
-                        return (
-                          <button
-                            key={key}
-                            onClick={() =>
-                              setFilterStatus(
-                                key
-                              )
-                            }
-                            className={`flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all sm:px-3.5 ${
-                              active
-                                ? "bg-white text-blue-600 shadow-sm"
-                                : "text-slate-500 hover:text-slate-700"
-                            }`}
-                          >
-                            <Icon
-                              size={14}
-                            />
-
-                            <span>
-                              {
-                                config.label
-                              }
-                            </span>
-
-                            <span
-                              className={`ml-0.5 rounded-md px-1.5 py-0.5 text-[10px] ${
-                                active
-                                  ? "bg-blue-50 text-blue-600"
-                                  : "bg-slate-200 text-slate-500"
-                              }`}
-                            >
-                              {
-                                count
-                              }
-                            </span>
-                          </button>
-                        );
-                      }
-                    )}
-                  </div>
-
-                  <button
-                    onClick={
-                      loadUjian
-                    }
-                    disabled={loading}
-                    className="flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 disabled:cursor-not-allowed disabled:opacity-60"
-                  >
-                    <RefreshCw
-                      size={16}
-                      className={
-                        loading
-                          ? "animate-spin"
-                          : ""
-                      }
-                    />
-
-                    <span className="hidden sm:inline">
-                      Refresh
-                    </span>
-                  </button>
+                  <span>
+                    AKADEMIK SISWA
+                  </span>
                 </div>
 
-                <div className="mt-4 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-4">
-                  <p className="text-xs text-slate-500">
-                    Menampilkan{" "}
-                    <span className="font-semibold text-slate-700">
-                      {
-                        filtered.length
-                      }
-                    </span>{" "}
-                    dari{" "}
-                    <span className="font-semibold text-slate-700">
-                      {
-                        daftarUjian.length
-                      }
-                    </span>{" "}
-                    ujian
-                  </p>
+                <h1 className="text-2xl font-bold tracking-tight text-[var(--color-card)] sm:text-3xl lg:text-[34px]">
+                  Daftar Ujian
+                </h1>
 
-                  {search && (
-                    <button
-                      onClick={() =>
-                        setSearch("")
-                      }
-                      className="text-xs font-medium text-blue-600 hover:text-blue-700"
-                    >
-                      Reset pencarian
-                    </button>
-                  )}
-                </div>
-              </section>
+                <p className="mt-2 max-w-xl text-sm leading-6 text-[color-mix(in_srgb,var(--color-card)_78%,transparent)] sm:text-[15px]">
+                  Kelola dan ikuti seluruh ujian yang
+                  tersedia untuk kelas kamu dalam satu
+                  tempat.
+                </p>
+              </div>
 
-              {/* =================================================
-                  CONTENT
-              ================================================= */}
-
-              {loading ? (
-                <LoadingState />
-              ) : error ? (
-                <ErrorState
-                  error={error}
-                  onRetry={
-                    loadUjian
-                  }
+              <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                <HeroStat
+                  value={stats.total}
+                  label="Total"
                 />
-              ) : filtered.length ===
-                0 ? (
-                <EmptyState
-                  search={search}
-                  onReset={() => {
-                    setSearch("");
-                    setFilterStatus(
-                      "semua"
-                    );
-                  }}
+
+                <HeroStat
+                  value={stats.sedang}
+                  label="Berlangsung"
+                  highlight
                 />
-              ) : (
-                <section>
-                  <div className="mb-4 flex items-center justify-between">
-                    <div>
-                      <h2 className="text-base font-bold text-slate-800">
-                        Ujian Tersedia
-                      </h2>
 
-                      <p className="mt-0.5 text-xs text-slate-500">
-                        Pilih ujian untuk melihat
-                        detail dan instruksi.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
-                    {filtered.map(
-                      (ujian) => {
-                        const c =
-                          colorMap[
-                            ujian.warna
-                          ] ||
-                          colorMap.indigo;
-
-                        const statusBadge =
-                          getStatusBadge(
-                            ujian.status
-                          );
-
-                        const IconComponent =
-                          ujian.icon;
-
-                        const isSelesai =
-                          ujian.status ===
-                          "selesai";
-
-                        const isSedang =
-                          ujian.status ===
-                          "sedang";
-
-                        return (
-                          <article
-                            key={
-                              ujian.id
-                            }
-                            onClick={() =>
-                              handleCardClick(
-                                ujian.id
-                              )
-                            }
-                            className="group relative flex min-w-0 cursor-pointer flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_4px_18px_rgba(15,23,42,0.045)] transition-all duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-[0_14px_32px_rgba(15,23,42,0.09)]"
-                          >
-                            <div
-                              className={`h-1 w-full bg-gradient-to-r ${c.grad}`}
-                            />
-
-                            <div className="p-5 pb-4">
-                              <div className="flex items-start justify-between gap-3">
-                                <div
-                                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${c.icon}`}
-                                >
-                                  <IconComponent
-                                    size={21}
-                                  />
-                                </div>
-
-                                <span
-                                  className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-[10px] font-semibold ${statusBadge.color}`}
-                                >
-                                  <span
-                                    className={`h-1.5 w-1.5 rounded-full ${statusBadge.dot}`}
-                                  />
-
-                                  {
-                                    statusBadge.label
-                                  }
-                                </span>
-                              </div>
-
-                              <div className="mt-4">
-                                <p
-                                  className={`text-[11px] font-bold uppercase tracking-[0.08em] ${c.text}`}
-                                >
-                                  {
-                                    ujian.jenis
-                                  }
-                                </p>
-
-                                <h3 className="mt-1.5 line-clamp-2 min-h-[42px] text-[15px] font-bold leading-5 text-slate-800 transition-colors group-hover:text-blue-700">
-                                  {
-                                    ujian.judul
-                                  }
-                                </h3>
-                              </div>
-
-                              <div className="mt-3 flex min-w-0 items-center gap-2">
-                                <BookOpen
-                                  size={14}
-                                  className="shrink-0 text-slate-400"
-                                />
-
-                                <span className="truncate text-xs font-semibold text-slate-600">
-                                  {
-                                    ujian.mapel
-                                  }
-                                </span>
-                              </div>
-
-                              <p className="mt-1 truncate pl-5 text-[11px] text-slate-400">
-                                {
-                                  ujian.guru
-                                }
-                              </p>
-                            </div>
-
-                            <div className="mx-5 border-t border-slate-100" />
-
-                            <div className="grid grid-cols-2 gap-2 p-5">
-                              <InfoItem
-                                icon={
-                                  Calendar
-                                }
-                                label="Tanggal"
-                                value={formatDate(
-                                  ujian.tanggal
-                                )}
-                              />
-
-                              <InfoItem
-                                icon={
-                                  Clock
-                                }
-                                label="Waktu"
-                                value={formatTime(
-                                  ujian.waktuMulai
-                                )}
-                              />
-
-                              <InfoItem
-                                icon={
-                                  Timer
-                                }
-                                label="Durasi"
-                                value={
-                                  ujian.durasi
-                                }
-                              />
-
-                              <InfoItem
-                                icon={
-                                  FileText
-                                }
-                                label="Soal"
-                                value={`${ujian.soal} soal`}
-                              />
-                            </div>
-
-                            <div className="mx-5 rounded-xl bg-slate-50 px-3.5 py-3">
-                              <div className="flex items-center justify-between gap-3">
-                                <div className="min-w-0">
-                                  <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
-                                    Kelas
-                                  </p>
-
-                                  <p className="mt-0.5 truncate text-xs font-semibold text-slate-700">
-                                    {
-                                      ujian.kelas
-                                    }
-                                  </p>
-                                </div>
-
-                                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-slate-400 shadow-sm">
-                                  <GraduationCap
-                                    size={15}
-                                  />
-                                </div>
-                              </div>
-                            </div>
-
-                            <div className="mt-auto p-5 pt-4">
-                              <button
-                                onClick={(
-                                  e
-                                ) => {
-                                  e.stopPropagation();
-
-                                  handleCardClick(
-                                    ujian.id
-                                  );
-                                }}
-                                className={`flex w-full items-center justify-between rounded-xl border px-3.5 py-2.5 text-xs font-bold transition-all active:scale-[0.98] ${
-                                  isSelesai
-                                    ? "border-emerald-200 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
-                                    : isSedang
-                                    ? "border-amber-200 bg-amber-50 text-amber-700 hover:bg-amber-100"
-                                    : "border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100"
-                                }`}
-                              >
-                                <span>
-                                  {isSelesai
-                                    ? "Lihat Hasil"
-                                    : isSedang
-                                    ? "Mulai Ujian"
-                                    : "Lihat Detail"}
-                                </span>
-
-                                <span className="flex h-6 w-6 items-center justify-center rounded-lg bg-white/70">
-                                  <ArrowUpRight
-                                    size={14}
-                                  />
-                                </span>
-                              </button>
-                            </div>
-
-                            <div
-                              className={`absolute bottom-0 left-0 h-0.5 w-0 bg-gradient-to-r ${c.grad} transition-all duration-300 group-hover:w-full`}
-                            />
-                          </article>
-                        );
-                      }
-                    )}
-                  </div>
-                </section>
-              )}
-
-              <footer className="border-t border-slate-200/70 py-5">
-                <div className="flex flex-col items-center justify-between gap-2 text-center sm:flex-row sm:text-left">
-                  <p className="text-[11px] text-slate-400">
-                    © 2026 SmartSchool. Daftar Ujian Siswa.
-                  </p>
-
-                  <p className="text-[11px] text-slate-400">
-                    Sistem Informasi Akademik
-                  </p>
-                </div>
-              </footer>
+                <HeroStat
+                  value={stats.selesai}
+                  label="Selesai"
+                />
+              </div>
             </div>
           </div>
-        </main>
+        </section>
+
+        {/* =================================================
+            TOOLBAR
+        ================================================= */}
+
+        <section
+          className={`theme-card theme-border ${themeCardShadow} rounded-2xl p-4 sm:p-5`}
+        >
+          <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+
+            {/* SEARCH */}
+
+            <div className="relative w-full xl:max-w-md">
+              <Search
+                size={18}
+                className="theme-text-placeholder absolute left-3.5 top-1/2 -translate-y-1/2"
+              />
+
+              <input
+                type="text"
+                value={search}
+                onChange={(e) =>
+                  setSearch(
+                    e.target.value
+                  )
+                }
+                placeholder="Cari ujian, mata pelajaran, atau guru..."
+                className={`theme-input ${themeFocus} h-11 w-full rounded-xl pl-10 pr-4 text-sm outline-none transition`}
+              />
+            </div>
+
+            {/* STATUS FILTER */}
+
+            <div
+              className={`flex min-w-0 overflow-x-auto rounded-xl ${themeNeutralSurface} p-1`}
+            >
+              {Object.entries(
+                STATUS_CONFIG
+              ).map(
+                ([
+                  key,
+                  config,
+                ]) => {
+                  const Icon =
+                    config.icon;
+
+                  const count =
+                    key ===
+                    "semua"
+                      ? stats.total
+                      : stats[key];
+
+                  const active =
+                    filterStatus ===
+                    key;
+
+                  return (
+                    <button
+                      key={key}
+                      onClick={() =>
+                        setFilterStatus(
+                          key
+                        )
+                      }
+                      className={`flex shrink-0 items-center gap-1.5 rounded-lg px-3 py-2 text-xs font-semibold transition-all sm:px-3.5 ${
+                        active
+                          ? "bg-[var(--color-card)] text-[var(--color-primary)] shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_8%,transparent)]"
+                          : "theme-text-muted hover:text-[var(--color-text)]"
+                      }`}
+                    >
+                      <Icon size={14} />
+
+                      <span>
+                        {
+                          config.label
+                        }
+                      </span>
+
+                      <span
+                        className={`ml-0.5 rounded-md px-1.5 py-0.5 text-[10px] ${
+                          active
+                            ? themePrimarySoft +
+                              " " +
+                              themePrimaryText
+                            : themeNeutralSurface +
+                              " theme-text-muted"
+                        }`}
+                      >
+                        {
+                          count
+                        }
+                      </span>
+                    </button>
+                  );
+                }
+              )}
+            </div>
+
+            {/* REFRESH */}
+
+            <button
+              onClick={
+                loadUjian
+              }
+              disabled={loading}
+              className={`theme-card theme-border theme-text-secondary ${themeNeutralHover} flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold transition hover:border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)] hover:text-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-60`}
+            >
+              <RefreshCw
+                size={16}
+                className={
+                  loading
+                    ? "animate-spin"
+                    : ""
+                }
+              />
+
+              <span className="hidden sm:inline">
+                Refresh
+              </span>
+            </button>
+          </div>
+
+          <div
+            className={`mt-4 flex flex-wrap items-center justify-between gap-2 border-t ${themeDivider} pt-4`}
+          >
+            <p className="theme-text-muted text-xs">
+              Menampilkan{" "}
+              <span className="theme-text font-semibold">
+                {
+                  filtered.length
+                }
+              </span>{" "}
+              dari{" "}
+              <span className="theme-text font-semibold">
+                {
+                  daftarUjian.length
+                }
+              </span>{" "}
+              ujian
+            </p>
+
+            {search && (
+              <button
+                onClick={() =>
+                  setSearch("")
+                }
+                className="theme-primary-text text-xs font-medium hover:opacity-80"
+              >
+                Reset pencarian
+              </button>
+            )}
+          </div>
+        </section>
+
+        {/* =================================================
+            CONTENT
+        ================================================= */}
+
+        {loading ? (
+          <LoadingState />
+        ) : error ? (
+          <ErrorState
+            error={error}
+            onRetry={loadUjian}
+          />
+        ) : filtered.length ===
+          0 ? (
+          <EmptyState
+            search={search}
+            onReset={() => {
+              setSearch("");
+              setFilterStatus(
+                "semua"
+              );
+            }}
+          />
+        ) : (
+          <section>
+            <div className="mb-4 flex items-center justify-between">
+              <div>
+                <h2 className="theme-text text-base font-bold">
+                  Ujian Tersedia
+                </h2>
+
+                <p className="theme-text-muted mt-0.5 text-xs">
+                  Pilih ujian untuk melihat
+                  detail dan instruksi.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+              {filtered.map(
+                (ujian) => {
+                  const jenisTheme =
+                    getThemeByJenis(
+                      ujian.jenis
+                    );
+
+                  const statusBadge =
+                    getStatusBadge(
+                      ujian.status
+                    );
+
+                  const IconComponent =
+                    ujian.icon;
+
+                  const isSelesai =
+                    ujian.status ===
+                    "selesai";
+
+                  const isSedang =
+                    ujian.status ===
+                    "sedang";
+
+                  return (
+                    <article
+                      key={
+                        ujian.id
+                      }
+                      onClick={() =>
+                        handleCardClick(
+                          ujian.id
+                        )
+                      }
+                      className={`group relative flex min-w-0 cursor-pointer flex-col overflow-hidden rounded-2xl border ${themeNeutralBorder} theme-card ${themeCardShadow} transition-all duration-300 hover:-translate-y-1 hover:border-[color-mix(in_srgb,var(--color-primary)_24%,transparent)] hover:shadow-[0_14px_32px_color-mix(in_srgb,var(--color-text)_10%,transparent)]`}
+                    >
+                      {/* TOP ACCENT */}
+
+                      <div
+                        className={`h-1 w-full ${themePrimaryGradient}`}
+                      />
+
+                      <div className="p-5 pb-4">
+                        <div className="flex items-start justify-between gap-3">
+
+                          {/* ICON */}
+
+                          <div
+                            className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${jenisTheme.surface} ${jenisTheme.text}`}
+                          >
+                            <IconComponent
+                              size={21}
+                            />
+                          </div>
+
+                          {/* STATUS */}
+
+                          <span
+                            className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1.5 text-[10px] font-semibold ${statusBadge.surface} ${statusBadge.border} ${statusBadge.text}`}
+                          >
+                            <span
+                              className={`h-1.5 w-1.5 rounded-full ${statusBadge.dot}`}
+                            />
+
+                            {
+                              statusBadge.label
+                            }
+                          </span>
+                        </div>
+
+                        <div className="mt-4">
+                          <p
+                            className={`text-[11px] font-bold uppercase tracking-[0.08em] ${jenisTheme.text}`}
+                          >
+                            {
+                              ujian.jenis
+                            }
+                          </p>
+
+                          <h3 className="theme-text mt-1.5 line-clamp-2 min-h-[42px] text-[15px] font-bold leading-5 transition-colors group-hover:text-[var(--color-primary)]">
+                            {
+                              ujian.judul
+                            }
+                          </h3>
+                        </div>
+
+                        <div className="mt-3 flex min-w-0 items-center gap-2">
+                          <BookOpen
+                            size={14}
+                            className="theme-text-placeholder shrink-0"
+                          />
+
+                          <span className="theme-text-secondary truncate text-xs font-semibold">
+                            {
+                              ujian.mapel
+                            }
+                          </span>
+                        </div>
+
+                        <p className="theme-text-muted mt-1 truncate pl-5 text-[11px]">
+                          {
+                            ujian.guru
+                          }
+                        </p>
+                      </div>
+
+                      {/* DIVIDER */}
+
+                      <div
+                        className={`mx-5 border-t ${themeDivider}`}
+                      />
+
+                      {/* INFO */}
+
+                      <div className="grid grid-cols-2 gap-2 p-5">
+                        <InfoItem
+                          icon={
+                            Calendar
+                          }
+                          label="Tanggal"
+                          value={formatDate(
+                            ujian.tanggal
+                          )}
+                        />
+
+                        <InfoItem
+                          icon={
+                            Clock
+                          }
+                          label="Waktu"
+                          value={formatTime(
+                            ujian.waktuMulai
+                          )}
+                        />
+
+                        <InfoItem
+                          icon={
+                            Timer
+                          }
+                          label="Durasi"
+                          value={
+                            ujian.durasi
+                          }
+                        />
+
+                        <InfoItem
+                          icon={
+                            FileText
+                          }
+                          label="Soal"
+                          value={`${ujian.soal} soal`}
+                        />
+                      </div>
+
+                      {/* KELAS */}
+
+                      <div
+                        className={`mx-5 rounded-xl ${themeNeutralSurface} px-3.5 py-3`}
+                      >
+                        <div className="flex items-center justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="theme-text-muted text-[10px] font-medium uppercase tracking-wide">
+                              Kelas
+                            </p>
+
+                            <p className="theme-text-secondary mt-0.5 truncate text-xs font-semibold">
+                              {
+                                ujian.kelas
+                              }
+                            </p>
+                          </div>
+
+                          <div
+                            className={`theme-card theme-text-muted flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${themeCardShadow}`}
+                          >
+                            <GraduationCap
+                              size={15}
+                            />
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* ACTION */}
+
+                      <div className="mt-auto p-5 pt-4">
+                        <button
+                          onClick={(
+                            e
+                          ) => {
+                            e.stopPropagation();
+
+                            handleCardClick(
+                              ujian.id
+                            );
+                          }}
+                          className={`flex w-full items-center justify-between rounded-xl border px-3.5 py-2.5 text-xs font-bold transition-all active:scale-[0.98] ${
+                            isSelesai
+                              ? `${themeSuccessBorder} ${themeSuccessSurface} text-[var(--color-success)] hover:brightness-95`
+                              : isSedang
+                              ? `${themeWarningBorder} ${themeWarningSurface} text-[var(--color-warning)] hover:brightness-95`
+                              : `${themePrimarySoftBorder} ${themePrimarySoft} ${themePrimaryText} hover:brightness-95`
+                          }`}
+                        >
+                          <span>
+                            {isSelesai
+                              ? "Lihat Hasil"
+                              : isSedang
+                              ? "Mulai Ujian"
+                              : "Lihat Detail"}
+                          </span>
+
+                          <span
+                            className={`flex h-6 w-6 items-center justify-center rounded-lg ${themeNeutralSurface}`}
+                          >
+                            <ArrowUpRight
+                              size={14}
+                            />
+                          </span>
+                        </button>
+                      </div>
+
+                      {/* BOTTOM ACCENT */}
+
+                      <div
+                        className={`absolute bottom-0 left-0 h-0.5 w-0 ${themePrimaryGradient} transition-all duration-300 group-hover:w-full`}
+                      />
+                    </article>
+                  );
+                }
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* =================================================
+            FOOTER
+        ================================================= */}
+
+        <footer
+          className={`border-t ${themeDivider} py-5`}
+        >
+          <div className="flex flex-col items-center justify-between gap-2 text-center sm:flex-row sm:text-left">
+            <p className="theme-text-muted text-[11px]">
+              © 2026 SmartSchool. Daftar Ujian Siswa.
+            </p>
+
+            <p className="theme-text-muted text-[11px]">
+              Sistem Informasi Akademik
+            </p>
+          </div>
+        </footer>
       </div>
     </div>
   );
@@ -1586,18 +1521,18 @@ function HeroStat({
   highlight = false,
 }) {
   return (
-    <div className="min-w-[92px] rounded-xl border border-white/10 bg-white/10 px-4 py-3 backdrop-blur-md">
+    <div className="min-w-[92px] rounded-xl border border-[color-mix(in_srgb,var(--color-card)_14%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)] px-4 py-3 backdrop-blur-md">
       <div
         className={`text-xl font-bold ${
           highlight
-            ? "text-amber-300"
-            : "text-white"
+            ? "text-[var(--color-warning)]"
+            : "text-[var(--color-card)]"
         }`}
       >
         {value}
       </div>
 
-      <div className="mt-0.5 text-[10px] font-medium text-blue-100">
+      <div className="mt-0.5 text-[10px] font-medium text-[color-mix(in_srgb,var(--color-card)_75%,transparent)]">
         {label}
       </div>
     </div>
@@ -1614,22 +1549,64 @@ function InfoItem({
   value,
 }) {
   return (
-    <div className="min-w-0 rounded-xl border border-slate-100 bg-slate-50/60 p-2.5">
+    <div
+      className={`min-w-0 rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} p-2.5`}
+    >
       <div className="flex items-center gap-1.5">
         <Icon
           size={12}
-          className="shrink-0 text-slate-400"
+          className="theme-text-placeholder shrink-0"
         />
 
-        <span className="text-[9px] font-semibold uppercase tracking-wide text-slate-400">
+        <span className="theme-text-muted text-[9px] font-semibold uppercase tracking-wide">
           {label}
         </span>
       </div>
 
-      <p className="mt-1 truncate text-[11px] font-semibold text-slate-700">
+      <p className="theme-text-secondary mt-1 truncate text-[11px] font-semibold">
         {value}
       </p>
     </div>
+  );
+}
+
+// =========================================================
+// STATUS BADGE
+// =========================================================
+
+function getStatusBadge(status) {
+  const map = {
+    belum: {
+      label: "Belum Dimulai",
+      surface: themeNeutralSurface,
+      border: themeNeutralBorder,
+      text: "theme-text-secondary",
+      dot: "bg-[var(--color-text-muted)]",
+      icon: Clock,
+    },
+
+    sedang: {
+      label: "Berlangsung",
+      surface: themeWarningSurface,
+      border: themeWarningBorder,
+      text: "text-[var(--color-warning)]",
+      dot: "bg-[var(--color-warning)]",
+      icon: AlertCircle,
+    },
+
+    selesai: {
+      label: "Selesai",
+      surface: themeSuccessSurface,
+      border: themeSuccessBorder,
+      text: "text-[var(--color-success)]",
+      dot: "bg-[var(--color-success)]",
+      icon: CheckCircle,
+    },
+  };
+
+  return (
+    map[status] ||
+    map.belum
   );
 }
 
@@ -1645,33 +1622,60 @@ function LoadingState() {
       }).map((_, index) => (
         <div
           key={index}
-          className="overflow-hidden rounded-2xl border border-slate-200 bg-white"
+          className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder}`}
         >
-          <div className="h-1 bg-slate-100" />
+          <div
+            className={`h-1 ${themeNeutralSurface}`}
+          />
 
           <div className="animate-pulse p-5">
             <div className="flex justify-between">
-              <div className="h-11 w-11 rounded-xl bg-slate-100" />
+              <div
+                className={`h-11 w-11 rounded-xl ${themeNeutralSurface}`}
+              />
 
-              <div className="h-7 w-24 rounded-full bg-slate-100" />
+              <div
+                className={`h-7 w-24 rounded-full ${themeNeutralSurface}`}
+              />
             </div>
 
-            <div className="mt-5 h-3 w-16 rounded bg-slate-100" />
+            <div
+              className={`mt-5 h-3 w-16 rounded ${themeNeutralSurface}`}
+            />
 
-            <div className="mt-2 h-4 w-4/5 rounded bg-slate-100" />
+            <div
+              className={`mt-2 h-4 w-4/5 rounded ${themeNeutralSurface}`}
+            />
 
-            <div className="mt-2 h-4 w-3/5 rounded bg-slate-100" />
+            <div
+              className={`mt-2 h-4 w-3/5 rounded ${themeNeutralSurface}`}
+            />
 
             <div className="mt-5 grid grid-cols-2 gap-2">
-              <div className="h-12 rounded-xl bg-slate-50" />
-              <div className="h-12 rounded-xl bg-slate-50" />
-              <div className="h-12 rounded-xl bg-slate-50" />
-              <div className="h-12 rounded-xl bg-slate-50" />
+              <div
+                className={`h-12 rounded-xl ${themeNeutralSurface}`}
+              />
+
+              <div
+                className={`h-12 rounded-xl ${themeNeutralSurface}`}
+              />
+
+              <div
+                className={`h-12 rounded-xl ${themeNeutralSurface}`}
+              />
+
+              <div
+                className={`h-12 rounded-xl ${themeNeutralSurface}`}
+              />
             </div>
 
-            <div className="mt-3 h-12 rounded-xl bg-slate-50" />
+            <div
+              className={`mt-3 h-12 rounded-xl ${themeNeutralSurface}`}
+            />
 
-            <div className="mt-4 h-10 rounded-xl bg-slate-100" />
+            <div
+              className={`mt-4 h-10 rounded-xl ${themeNeutralSurface}`}
+            />
           </div>
         </div>
       ))}
@@ -1688,23 +1692,27 @@ function ErrorState({
   onRetry,
 }) {
   return (
-    <section className="rounded-2xl border border-red-200 bg-white p-8 shadow-sm sm:p-12">
+    <section
+      className={`theme-card rounded-2xl border ${themeDangerBorder} p-8 ${themeCardShadow} sm:p-12`}
+    >
       <div className="mx-auto max-w-lg text-center">
-        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-red-50 text-red-500">
+        <div
+          className={`mx-auto flex h-16 w-16 items-center justify-center rounded-2xl ${themeDangerSurface} theme-text`}
+        >
           <AlertCircle size={28} />
         </div>
 
-        <h3 className="mt-5 text-base font-bold text-slate-800">
+        <h3 className="theme-text mt-5 text-base font-bold">
           Data ujian belum dapat dimuat
         </h3>
 
-        <p className="mt-2 text-sm leading-6 text-slate-500">
+        <p className="theme-text-muted mt-2 text-sm leading-6">
           {error}
         </p>
 
         <button
           onClick={onRetry}
-          className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#155DFC] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0D47C9] active:scale-[0.98]"
+          className={`mt-6 inline-flex items-center gap-2 rounded-xl bg-[var(--color-primary)] px-5 py-2.5 text-sm font-semibold text-[var(--color-card)] ${themePrimaryShadow} transition hover:brightness-95 active:scale-[0.98]`}
         >
           <RefreshCw size={15} />
           Coba Lagi
@@ -1723,8 +1731,12 @@ function EmptyState({
   onReset,
 }) {
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center shadow-sm">
-      <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50 text-blue-500">
+    <section
+      className={`theme-card rounded-2xl border ${themeNeutralBorder} px-6 py-16 text-center ${themeCardShadow}`}
+    >
+      <div
+        className={`mx-auto flex h-16 w-16 items-center justify-center rounded-2xl ${themePrimarySoft} ${themePrimaryText}`}
+      >
         {search ? (
           <Search size={27} />
         ) : (
@@ -1732,13 +1744,13 @@ function EmptyState({
         )}
       </div>
 
-      <h3 className="mt-5 text-base font-bold text-slate-800">
+      <h3 className="theme-text mt-5 text-base font-bold">
         {search
           ? "Ujian tidak ditemukan"
           : "Belum ada ujian tersedia"}
       </h3>
 
-      <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
+      <p className="theme-text-muted mx-auto mt-2 max-w-md text-sm leading-6">
         {search
           ? "Tidak ada ujian yang sesuai dengan pencarian atau filter yang dipilih."
           : "Belum terdapat ujian yang tersedia untuk kelas kamu saat ini."}
@@ -1747,7 +1759,7 @@ function EmptyState({
       {search && (
         <button
           onClick={onReset}
-          className="mt-5 rounded-xl border border-blue-200 bg-blue-50 px-4 py-2.5 text-xs font-semibold text-blue-700 transition hover:bg-blue-100"
+          className={`mt-5 rounded-xl border ${themePrimarySoftBorder} ${themePrimarySoft} ${themePrimaryText} px-4 py-2.5 text-xs font-semibold transition hover:brightness-95`}
         >
           Reset Filter
         </button>

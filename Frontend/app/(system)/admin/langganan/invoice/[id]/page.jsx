@@ -121,6 +121,28 @@ const formatRupiah = (value) =>
   }).format(value);
 
 // ============================================================
+// THEME HELPERS
+// ============================================================
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]";
+
+const themePrimaryHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
+
+const themePrimaryShadow =
+  "shadow-[0_10px_25px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]";
+
+const themeHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
+
+// ============================================================
 // STATUS
 // ============================================================
 
@@ -128,27 +150,23 @@ function InvoiceStatus({ status }) {
   const config = {
     Lunas: {
       icon: CheckCircle2,
-      className:
-        "bg-emerald-50 text-emerald-600 border-emerald-200",
+      className: "theme-success",
     },
 
     "Belum Dibayar": {
       icon: Clock3,
-      className:
-        "bg-amber-50 text-amber-600 border-amber-200",
+      className: "theme-warning",
     },
 
     "Jatuh Tempo": {
       icon: AlertCircle,
-      className:
-        "bg-red-50 text-red-600 border-red-200",
+      className: "theme-danger",
     },
   };
 
   const current = config[status] || {
     icon: FileText,
-    className:
-      "bg-slate-100 text-slate-500 border-slate-200",
+    className: "theme-text-muted theme-card-soft theme-border",
   };
 
   const Icon = current.icon;
@@ -182,20 +200,20 @@ function DetailItem({
   };
 
   return (
-    <div className="p-4 rounded-xl border border-slate-200 bg-white">
+    <div className="p-4 rounded-xl border theme-border theme-card-soft">
       <div className="flex items-center gap-2">
         <Icon
           size={15}
-          className="text-[#155DFC]"
+          className="text-[var(--color-primary)]"
         />
 
-        <span className="text-[11px] uppercase tracking-wide font-medium text-slate-400">
+        <span className="text-[11px] uppercase tracking-wide font-medium theme-text-muted">
           {label}
         </span>
       </div>
 
       <div className="flex items-center justify-between gap-3 mt-2">
-        <p className="text-sm font-semibold text-slate-800 break-words">
+        <p className="text-sm font-semibold theme-text break-words">
           {value}
         </p>
 
@@ -203,7 +221,14 @@ function DetailItem({
           <button
             type="button"
             onClick={handleCopy}
-            className="w-8 h-8 rounded-lg border border-slate-200 flex items-center justify-center shrink-0 text-slate-400 hover:text-[#155DFC] hover:bg-[#eaf1ff] transition"
+            className={`
+              w-8 h-8 rounded-lg border theme-border
+              flex items-center justify-center shrink-0
+              theme-text-muted
+              ${themePrimaryHover}
+              hover:text-[var(--color-primary)]
+              transition
+            `}
             title="Salin"
           >
             <Copy size={14} />
@@ -236,7 +261,7 @@ export default function DetailInvoicePage() {
     invoice.tax;
 
   return (
-    <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
+    <div className="flex h-screen w-full theme-page overflow-hidden">
 
       {/* =====================================================
           SIDEBAR
@@ -262,7 +287,7 @@ export default function DetailInvoicePage() {
           }}
         />
 
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto theme-page">
           <div className="p-4 sm:p-6 lg:p-8 space-y-6">
 
             {/* =================================================
@@ -277,7 +302,14 @@ export default function DetailInvoicePage() {
                     "/admin/langganan/invoice"
                   )
                 }
-                className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-[#155DFC] transition w-fit"
+                className="
+                  inline-flex items-center gap-2
+                  text-sm font-medium
+                  theme-text-secondary
+                  hover:text-[var(--color-primary)]
+                  transition
+                  w-fit
+                "
               >
                 <ArrowLeft size={16} />
                 Kembali ke Tagihan / Invoice
@@ -287,23 +319,32 @@ export default function DetailInvoicePage() {
 
                 <div className="flex items-center gap-3">
 
-                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-[#155DFC] to-[#0d47c9] text-white shadow-lg shadow-[#155DFC]/20">
+                  <div
+                    className={`
+                      p-2.5 rounded-xl
+                      ${themePrimarySoft}
+                      text-[var(--color-primary)]
+                      border ${themePrimarySoftBorder}
+                    `}
+                  >
                     <FileText size={20} />
                   </div>
 
                   <div>
 
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h1 className="text-2xl font-bold text-slate-800">
+
+                      <h1 className="text-2xl font-bold theme-text">
                         Detail Invoice
                       </h1>
 
                       <InvoiceStatus
                         status={invoice.status}
                       />
+
                     </div>
 
-                    <p className="text-sm text-slate-500 mt-1">
+                    <p className="text-sm theme-text-secondary mt-1">
                       Informasi lengkap tagihan langganan sekolah.
                     </p>
 
@@ -317,7 +358,16 @@ export default function DetailInvoicePage() {
                     onClick={() =>
                       window.location.reload()
                     }
-                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-600 text-sm font-semibold hover:bg-slate-50"
+                    className="
+                      inline-flex items-center justify-center gap-2
+                      px-4 py-2.5 rounded-xl
+                      border theme-border
+                      theme-card
+                      theme-text-secondary
+                      text-sm font-semibold
+                      hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
+                      transition
+                    "
                   >
                     <RefreshCw size={15} />
                     Refresh
@@ -325,7 +375,16 @@ export default function DetailInvoicePage() {
 
                   <button
                     type="button"
-                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 text-sm font-semibold hover:bg-slate-50"
+                    className="
+                      inline-flex items-center justify-center gap-2
+                      px-4 py-2.5 rounded-xl
+                      border theme-border
+                      theme-card
+                      theme-text-secondary
+                      text-sm font-semibold
+                      hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
+                      transition
+                    "
                   >
                     <Printer size={15} />
                     Cetak
@@ -333,7 +392,15 @@ export default function DetailInvoicePage() {
 
                   <button
                     type="button"
-                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#155DFC] text-white text-sm font-semibold hover:bg-[#0d47c9]"
+                    className={`
+                      inline-flex items-center justify-center gap-2
+                      px-4 py-2.5 rounded-xl
+                      theme-primary
+                      text-sm font-semibold
+                      ${themePrimaryShadow}
+                      hover:brightness-110
+                      transition
+                    `}
                   >
                     <Download size={15} />
                     Download
@@ -346,27 +413,35 @@ export default function DetailInvoicePage() {
             {/* =================================================
                 HERO
             ================================================== */}
-            <section className="bg-white rounded-xl border border-slate-200/80 shadow-sm">
+            <section className="theme-card rounded-xl border theme-border shadow-sm">
+
               <div className="p-5 sm:p-6">
 
                 <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-6">
 
                   <div>
 
-                    <div className="w-12 h-12 rounded-xl bg-[#eaf1ff] flex items-center justify-center">
+                    <div
+                      className={`
+                        w-12 h-12 rounded-xl
+                        ${themePrimarySoft}
+                        flex items-center justify-center
+                        border ${themePrimarySoftBorder}
+                      `}
+                    >
                       <Receipt
                         size={22}
-                        className="text-[#155DFC]"
+                        className="text-[var(--color-primary)]"
                       />
                     </div>
 
-                    <p className="text-xs font-medium uppercase tracking-wide text-slate-400 mt-5">
+                    <p className="text-xs font-medium uppercase tracking-wide theme-text-muted mt-5">
                       Nomor Invoice
                     </p>
 
                     <div className="flex items-center gap-2 mt-1">
 
-                      <h2 className="text-2xl font-bold text-slate-900">
+                      <h2 className="text-2xl font-bold theme-text">
                         {invoice.id}
                       </h2>
 
@@ -377,7 +452,15 @@ export default function DetailInvoicePage() {
                             invoice.id
                           )
                         }
-                        className="w-8 h-8 rounded-lg border border-slate-200 flex items-center justify-center text-slate-400 hover:text-[#155DFC] hover:bg-[#eaf1ff]"
+                        className={`
+                          w-8 h-8 rounded-lg
+                          border theme-border
+                          flex items-center justify-center
+                          theme-text-muted
+                          ${themePrimaryHover}
+                          hover:text-[var(--color-primary)]
+                          transition
+                        `}
                         title="Salin nomor invoice"
                       >
                         <Copy size={14} />
@@ -385,7 +468,7 @@ export default function DetailInvoicePage() {
 
                     </div>
 
-                    <p className="text-sm text-slate-500 mt-2">
+                    <p className="text-sm theme-text-secondary mt-2">
                       Paket {invoice.package} ·{" "}
                       {invoice.period}
                     </p>
@@ -394,15 +477,15 @@ export default function DetailInvoicePage() {
 
                   <div className="lg:text-right">
 
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs theme-text-muted">
                       Total Tagihan
                     </p>
 
-                    <p className="text-3xl font-bold text-[#155DFC] mt-1">
+                    <p className="text-3xl font-bold text-[var(--color-primary)] mt-1">
                       {formatRupiah(total)}
                     </p>
 
-                    <p className="text-xs text-slate-400 mt-2">
+                    <p className="text-xs theme-text-muted mt-2">
                       Jatuh tempo {invoice.dueDate}
                     </p>
 
@@ -417,36 +500,59 @@ export default function DetailInvoicePage() {
                 WARNING
             ================================================== */}
             {invoice.status === "Belum Dibayar" && (
-              <section className="bg-white rounded-xl border border-[#c7dbff] shadow-sm p-5">
+              <section
+                className={`
+                  theme-card rounded-xl border
+                  ${themePrimarySoftBorder}
+                  shadow-sm p-5
+                `}
+              >
 
                 <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
 
                   <div className="flex items-start gap-3">
 
-                    <div className="w-10 h-10 rounded-lg bg-[#eaf1ff] flex items-center justify-center shrink-0">
+                    <div
+                      className={`
+                        w-10 h-10 rounded-lg
+                        ${themePrimarySoft}
+                        flex items-center justify-center
+                        shrink-0
+                      `}
+                    >
                       <Clock3
                         size={18}
-                        className="text-[#155DFC]"
+                        className="text-[var(--color-primary)]"
                       />
                     </div>
 
                     <div>
-                      <p className="text-sm font-bold text-slate-800">
+
+                      <p className="text-sm font-bold theme-text">
                         Tagihan belum dibayar
                       </p>
 
-                      <p className="text-xs text-slate-500 mt-1 leading-5">
+                      <p className="text-xs theme-text-secondary mt-1 leading-5">
                         Lakukan pembayaran sebelum{" "}
                         {invoice.dueDate} untuk menjaga
                         layanan tetap aktif.
                       </p>
+
                     </div>
 
                   </div>
 
                   <button
                     type="button"
-                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#155DFC] to-[#0d47c9] text-white text-sm font-semibold hover:brightness-110"
+                    className={`
+                      inline-flex items-center justify-center gap-2
+                      px-5 py-2.5 rounded-xl
+                      theme-primary
+                      text-sm font-semibold
+                      ${themePrimaryShadow}
+                      hover:brightness-110
+                      transition
+                    `}
                   >
                     <Wallet size={16} />
                     Bayar Sekarang
@@ -460,26 +566,38 @@ export default function DetailInvoicePage() {
                 OVERDUE
             ================================================== */}
             {invoice.status === "Jatuh Tempo" && (
-              <section className="bg-red-50 rounded-xl border border-red-200 shadow-sm p-5">
+              <section
+                className="
+                  rounded-xl border
+                  theme-danger
+                  shadow-sm p-5
+                "
+              >
 
                 <div className="flex items-start gap-3">
 
-                  <div className="w-10 h-10 rounded-lg bg-red-100 flex items-center justify-center shrink-0">
-                    <AlertCircle
-                      size={18}
-                      className="text-red-600"
-                    />
+                  <div
+                    className="
+                      w-10 h-10 rounded-lg
+                      bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)]
+                      flex items-center justify-center
+                      shrink-0
+                    "
+                  >
+                    <AlertCircle size={18} />
                   </div>
 
                   <div>
-                    <p className="text-sm font-bold text-red-700">
+
+                    <p className="text-sm font-bold">
                       Invoice telah melewati jatuh tempo
                     </p>
 
-                    <p className="text-xs text-red-600 mt-1 leading-5">
+                    <p className="text-xs mt-1 leading-5 opacity-90">
                       Segera selesaikan pembayaran untuk
                       menghindari penghentian layanan.
                     </p>
+
                   </div>
 
                 </div>
@@ -493,25 +611,33 @@ export default function DetailInvoicePage() {
             <section className="grid grid-cols-1 xl:grid-cols-2 gap-5">
 
               {/* INVOICE INFO */}
-              <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm p-5 sm:p-6">
+              <div className="theme-card rounded-xl border theme-border shadow-sm p-5 sm:p-6">
 
                 <div className="flex items-center gap-3 mb-5">
 
-                  <div className="w-9 h-9 rounded-lg bg-[#eaf1ff] flex items-center justify-center">
+                  <div
+                    className={`
+                      w-9 h-9 rounded-lg
+                      ${themePrimarySoft}
+                      flex items-center justify-center
+                    `}
+                  >
                     <FileText
                       size={17}
-                      className="text-[#155DFC]"
+                      className="text-[var(--color-primary)]"
                     />
                   </div>
 
                   <div>
-                    <h2 className="font-bold text-slate-800">
+
+                    <h2 className="font-bold theme-text">
                       Informasi Invoice
                     </h2>
 
-                    <p className="text-xs text-slate-400 mt-1">
+                    <p className="text-xs theme-text-muted mt-1">
                       Detail penerbitan tagihan.
                     </p>
+
                   </div>
 
                 </div>
@@ -559,25 +685,33 @@ export default function DetailInvoicePage() {
               </div>
 
               {/* SCHOOL INFO */}
-              <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm p-5 sm:p-6">
+              <div className="theme-card rounded-xl border theme-border shadow-sm p-5 sm:p-6">
 
                 <div className="flex items-center gap-3 mb-5">
 
-                  <div className="w-9 h-9 rounded-lg bg-[#eaf1ff] flex items-center justify-center">
+                  <div
+                    className={`
+                      w-9 h-9 rounded-lg
+                      ${themePrimarySoft}
+                      flex items-center justify-center
+                    `}
+                  >
                     <ShieldCheck
                       size={17}
-                      className="text-[#155DFC]"
+                      className="text-[var(--color-primary)]"
                     />
                   </div>
 
                   <div>
-                    <h2 className="font-bold text-slate-800">
+
+                    <h2 className="font-bold theme-text">
                       Informasi Sekolah
                     </h2>
 
-                    <p className="text-xs text-slate-400 mt-1">
+                    <p className="text-xs theme-text-muted mt-1">
                       Data penerima tagihan.
                     </p>
+
                   </div>
 
                 </div>
@@ -619,70 +753,80 @@ export default function DetailInvoicePage() {
             {/* =================================================
                 BILLING DETAIL
             ================================================== */}
-            <section className="bg-white rounded-xl border border-slate-200/80 shadow-sm">
+            <section className="theme-card rounded-xl border theme-border shadow-sm">
 
               <div className="p-5 sm:p-6">
 
                 <div className="flex items-center gap-3 mb-6">
 
-                  <div className="w-9 h-9 rounded-lg bg-[#eaf1ff] flex items-center justify-center">
+                  <div
+                    className={`
+                      w-9 h-9 rounded-lg
+                      ${themePrimarySoft}
+                      flex items-center justify-center
+                    `}
+                  >
                     <Wallet
                       size={17}
-                      className="text-[#155DFC]"
+                      className="text-[var(--color-primary)]"
                     />
                   </div>
 
                   <div>
-                    <h2 className="font-bold text-slate-800">
+
+                    <h2 className="font-bold theme-text">
                       Rincian Tagihan
                     </h2>
 
-                    <p className="text-xs text-slate-400 mt-1">
+                    <p className="text-xs theme-text-muted mt-1">
                       Detail perhitungan invoice.
                     </p>
+
                   </div>
 
                 </div>
 
                 <div className="space-y-1">
 
-                  <div className="flex items-center justify-between gap-4 py-4 border-b border-slate-100">
+                  <div className="flex items-center justify-between gap-4 py-4 border-b theme-border-soft">
 
                     <div>
-                      <p className="text-sm font-semibold text-slate-700">
+
+                      <p className="text-sm font-semibold theme-text-secondary">
                         Paket {invoice.package}
                       </p>
 
-                      <p className="text-xs text-slate-400 mt-1">
+                      <p className="text-xs theme-text-muted mt-1">
                         {invoice.period}
                       </p>
+
                     </div>
 
-                    <p className="text-sm font-semibold text-slate-800">
+                    <p className="text-sm font-semibold theme-text">
                       {formatRupiah(invoice.amount)}
                     </p>
 
                   </div>
 
-                  <div className="flex items-center justify-between gap-4 py-4 border-b border-slate-100">
+                  <div className="flex items-center justify-between gap-4 py-4 border-b theme-border-soft">
 
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm theme-text-secondary">
                       Diskon
                     </p>
 
-                    <p className="text-sm font-semibold text-slate-800">
+                    <p className="text-sm font-semibold theme-text">
                       - {formatRupiah(invoice.discount)}
                     </p>
 
                   </div>
 
-                  <div className="flex items-center justify-between gap-4 py-4 border-b border-slate-100">
+                  <div className="flex items-center justify-between gap-4 py-4 border-b theme-border-soft">
 
-                    <p className="text-sm text-slate-500">
+                    <p className="text-sm theme-text-secondary">
                       Pajak
                     </p>
 
-                    <p className="text-sm font-semibold text-slate-800">
+                    <p className="text-sm font-semibold theme-text">
                       {formatRupiah(invoice.tax)}
                     </p>
 
@@ -690,11 +834,11 @@ export default function DetailInvoicePage() {
 
                   <div className="flex items-center justify-between gap-4 pt-5">
 
-                    <p className="text-base font-bold text-slate-900">
+                    <p className="text-base font-bold theme-text">
                       Total Tagihan
                     </p>
 
-                    <p className="text-2xl font-bold text-[#155DFC]">
+                    <p className="text-2xl font-bold text-[var(--color-primary)]">
                       {formatRupiah(total)}
                     </p>
 
@@ -707,12 +851,13 @@ export default function DetailInvoicePage() {
             {/* =================================================
                 STATUS
             ================================================== */}
-            <section className="bg-white rounded-xl border border-slate-200/80 shadow-sm p-5 sm:p-6">
+            <section className="theme-card rounded-xl border theme-border shadow-sm p-5 sm:p-6">
 
               <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
 
                 <div>
-                  <p className="text-xs font-medium text-slate-400 uppercase tracking-wide">
+
+                  <p className="text-xs font-medium theme-text-muted uppercase tracking-wide">
                     Status Invoice
                   </p>
 
@@ -721,21 +866,23 @@ export default function DetailInvoicePage() {
                       status={invoice.status}
                     />
                   </div>
+
                 </div>
 
                 <div className="lg:text-right">
 
-                  <p className="text-xs text-slate-400">
+                  <p className="text-xs theme-text-muted">
                     Nilai Invoice
                   </p>
 
-                  <p className="text-xl font-bold text-slate-900 mt-1">
+                  <p className="text-xl font-bold theme-text mt-1">
                     {formatRupiah(total)}
                   </p>
 
                 </div>
 
               </div>
+
             </section>
 
             {/* =================================================
@@ -750,7 +897,16 @@ export default function DetailInvoicePage() {
                     "/admin/langganan/invoice"
                   )
                 }
-                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-slate-200 bg-white text-slate-700 text-sm font-semibold hover:bg-slate-50"
+                className="
+                  inline-flex items-center justify-center gap-2
+                  px-5 py-3 rounded-xl
+                  border theme-border
+                  theme-card
+                  theme-text-secondary
+                  text-sm font-semibold
+                  hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
+                  transition
+                "
               >
                 <ArrowLeft size={15} />
                 Kembali
@@ -759,7 +915,15 @@ export default function DetailInvoicePage() {
               {invoice.status !== "Lunas" && (
                 <button
                   type="button"
-                  className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-gradient-to-r from-[#155DFC] to-[#0d47c9] text-white text-sm font-semibold hover:brightness-110"
+                  className={`
+                    inline-flex items-center justify-center gap-2
+                    px-5 py-3 rounded-xl
+                    theme-primary
+                    text-sm font-semibold
+                    ${themePrimaryShadow}
+                    hover:brightness-110
+                    transition
+                  `}
                 >
                   <Wallet size={16} />
                   Bayar Invoice
@@ -768,7 +932,16 @@ export default function DetailInvoicePage() {
 
               <button
                 type="button"
-                className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-slate-200 bg-white text-slate-700 text-sm font-semibold hover:bg-slate-50"
+                className="
+                  inline-flex items-center justify-center gap-2
+                  px-5 py-3 rounded-xl
+                  border theme-border
+                  theme-card
+                  theme-text-secondary
+                  text-sm font-semibold
+                  hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
+                  transition
+                "
               >
                 <Download size={15} />
                 Download Invoice

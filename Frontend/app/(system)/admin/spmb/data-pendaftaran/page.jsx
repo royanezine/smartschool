@@ -24,6 +24,47 @@ import {
 
 import { getPendaftarPpdb } from "../../../../../services/ppdb.service";
 
+// ============================================================
+// THEME HELPERS
+// ============================================================
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+
+// ============================================================
+// HELPERS
+// ============================================================
+
 function normalizeStatus(status) {
   const value = String(status || "").toLowerCase();
 
@@ -58,25 +99,37 @@ function formatTanggal(value) {
 
 function StatusBadge({ status }) {
   const config = {
-    Terverifikasi:
-      "bg-emerald-50 text-emerald-700 border-emerald-100",
-    "Menunggu Verifikasi":
-      "bg-amber-50 text-amber-700 border-amber-100",
-    Ditolak:
-      "bg-red-50 text-red-700 border-red-100",
+    Terverifikasi: {
+      className:
+        "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)] text-[var(--color-success)] border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]",
+    },
+
+    "Menunggu Verifikasi": {
+      className:
+        "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)] text-[var(--color-warning)] border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]",
+    },
+
+    Ditolak: {
+      className:
+        "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] text-[var(--color-danger)] border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]",
+    },
   };
 
   return (
     <span
       className={`inline-flex rounded-md border px-2.5 py-1 text-[10px] font-semibold ${
-        config[status] ||
-        config["Menunggu Verifikasi"]
+        config[status]?.className ||
+        config["Menunggu Verifikasi"].className
       }`}
     >
       {status}
     </span>
   );
 }
+
+// ============================================================
+// PAGE
+// ============================================================
 
 export default function PendaftaranPage() {
   const router = useRouter();
@@ -90,6 +143,10 @@ export default function PendaftaranPage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
+
+  // ============================================================
+  // LOAD DATA
+  // ============================================================
 
   async function loadData(isRefresh = false) {
     try {
@@ -136,6 +193,10 @@ export default function PendaftaranPage() {
     loadData();
   }, []);
 
+  // ============================================================
+  // NORMALIZE DATA
+  // ============================================================
+
   const normalizedData = useMemo(() => {
     return data.map((item) => ({
       ...item,
@@ -152,6 +213,10 @@ export default function PendaftaranPage() {
     }));
   }, [data]);
 
+  // ============================================================
+  // JALUR
+  // ============================================================
+
   const daftarJalur = useMemo(() => {
     const values = normalizedData
       .map((item) => item.jalurNama)
@@ -161,6 +226,10 @@ export default function PendaftaranPage() {
 
     return [...new Set(values)];
   }, [normalizedData]);
+
+  // ============================================================
+  // FILTER
+  // ============================================================
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -202,6 +271,10 @@ export default function PendaftaranPage() {
     jalur,
   ]);
 
+  // ============================================================
+  // STATISTICS
+  // ============================================================
+
   const totalPendaftar = data.length;
 
   const totalTerverifikasi = data.filter(
@@ -222,6 +295,10 @@ export default function PendaftaranPage() {
       String(item?.status || "")
         .toLowerCase() === "ditolak"
   ).length;
+
+  // ============================================================
+  // EXPORT CSV
+  // ============================================================
 
   const exportData = () => {
     if (!filtered.length) {
@@ -286,6 +363,10 @@ export default function PendaftaranPage() {
     URL.revokeObjectURL(url);
   };
 
+  // ============================================================
+  // DETAIL
+  // ============================================================
+
   const handleDetail = (id) => {
     if (!id) {
       return;
@@ -298,8 +379,12 @@ export default function PendaftaranPage() {
     );
   };
 
+  // ============================================================
+  // RENDER
+  // ============================================================
+
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-slate-50">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar
         active="spmb"
         setActive={() => {}}
@@ -325,21 +410,28 @@ export default function PendaftaranPage() {
 
         <main className="min-h-0 flex-1 overflow-hidden">
           <div className="flex h-full min-h-0 flex-col p-4 sm:p-5 lg:p-6">
+
+            {/* ==================================================
+                HEADER
+            ================================================== */}
+
             <div className="mb-4 flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#eaf1ff]">
+                <div
+                  className={`flex h-10 w-10 items-center justify-center rounded-xl ${themePrimarySoft}`}
+                >
                   <Users
                     size={20}
-                    className="text-[#155DFC]"
+                    className={themePrimaryText}
                   />
                 </div>
 
                 <div>
-                  <h1 className="text-xl font-bold text-slate-800">
+                  <h1 className="theme-text text-xl font-bold">
                     Data Pendaftaran
                   </h1>
 
-                  <p className="text-xs text-slate-500">
+                  <p className="theme-text-muted text-xs">
                     Kelola seluruh data calon siswa SPMB
                   </p>
                 </div>
@@ -350,7 +442,7 @@ export default function PendaftaranPage() {
                   type="button"
                   onClick={exportData}
                   disabled={!filtered.length}
-                  className="inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className={`theme-neutral-border theme-card theme-text-secondary inline-flex items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-xs font-semibold transition ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-50`}
                 >
                   <Download size={15} />
                   Export
@@ -363,7 +455,7 @@ export default function PendaftaranPage() {
                       "/admin/spmb/data-pendaftaran/tambah"
                     )
                   }
-                  className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#155DFC] px-4 py-2.5 text-xs font-semibold text-white shadow-sm hover:bg-[#0d47c9]"
+                  className={`${themePrimaryGradient} inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-xs font-semibold text-[var(--color-card)] ${themeSmallShadow} transition hover:brightness-95`}
                 >
                   <Plus size={16} />
                   Tambah Pendaftar
@@ -371,24 +463,32 @@ export default function PendaftaranPage() {
               </div>
             </div>
 
+            {/* ==================================================
+                ERROR
+            ================================================== */}
+
             {error && (
-              <div className="mb-4 flex shrink-0 items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              <div className="mb-4 flex shrink-0 items-start gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-danger)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-danger)_9%,transparent)] px-4 py-3 text-sm">
                 <AlertCircle
                   size={18}
-                  className="mt-0.5 shrink-0"
+                  className="theme-danger mt-0.5 shrink-0"
                 />
 
                 <div>
-                  <p className="font-semibold">
+                  <p className="theme-danger font-semibold">
                     Gagal memuat data
                   </p>
 
-                  <p className="mt-0.5 text-xs">
+                  <p className="theme-text-secondary mt-0.5 text-xs">
                     {error}
                   </p>
                 </div>
               </div>
             )}
+
+            {/* ==================================================
+                STATISTICS
+            ================================================== */}
 
             <div className="mb-4 grid shrink-0 grid-cols-2 gap-3 lg:grid-cols-4">
               <Stat
@@ -401,27 +501,43 @@ export default function PendaftaranPage() {
                 title="Terverifikasi"
                 value={totalTerverifikasi}
                 icon={CheckCircle2}
+                tone="success"
               />
 
               <Stat
                 title="Menunggu"
                 value={totalMenunggu}
                 icon={Clock3}
+                tone="warning"
               />
 
               <Stat
                 title="Ditolak"
                 value={totalDitolak}
                 icon={XCircle}
+                tone="danger"
               />
             </div>
 
-            <div className="flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border border-slate-200/80 bg-white shadow-sm">
-              <div className="flex shrink-0 flex-col gap-3 border-b border-slate-100 p-4 xl:flex-row">
+            {/* ==================================================
+                MAIN CARD
+            ================================================== */}
+
+            <div
+              className={`theme-card ${themeNeutralBorder} flex min-h-0 flex-1 flex-col overflow-hidden rounded-xl border ${themeCardShadow}`}
+            >
+
+              {/* ==================================================
+                  FILTER BAR
+              ================================================== */}
+
+              <div
+                className={`flex shrink-0 flex-col gap-3 border-b ${themeDivider} p-4 xl:flex-row`}
+              >
                 <div className="relative flex-1">
                   <Search
                     size={16}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                    className="theme-text-muted absolute left-3 top-1/2 -translate-y-1/2"
                   />
 
                   <input
@@ -430,7 +546,7 @@ export default function PendaftaranPage() {
                       setSearch(e.target.value)
                     }
                     placeholder="Cari nama, NISN, nomor pendaftaran..."
-                    className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 pl-9 pr-3 text-xs outline-none focus:border-[#8bb4ff] focus:bg-white focus:ring-2 focus:ring-[#155DFC]/10"
+                    className={`theme-input theme-text theme-neutral-border h-10 w-full rounded-lg border ${themeNeutralSurface} pl-9 pr-3 text-xs outline-none transition ${themeFocus}`}
                   />
                 </div>
 
@@ -439,7 +555,7 @@ export default function PendaftaranPage() {
                   onChange={(e) =>
                     setJalur(e.target.value)
                   }
-                  className="h-10 rounded-lg border border-slate-200 px-3 text-xs text-slate-600 outline-none"
+                  className={`theme-input theme-text theme-neutral-border h-10 rounded-lg border ${themeNeutralSurface} px-3 text-xs outline-none transition ${themeFocus}`}
                 >
                   <option value="Semua">
                     Semua Jalur
@@ -462,7 +578,7 @@ export default function PendaftaranPage() {
                   onChange={(e) =>
                     setStatus(e.target.value)
                   }
-                  className="h-10 rounded-lg border border-slate-200 px-3 text-xs text-slate-600 outline-none"
+                  className={`theme-input theme-text theme-neutral-border h-10 rounded-lg border ${themeNeutralSurface} px-3 text-xs outline-none transition ${themeFocus}`}
                 >
                   <option value="Semua">
                     Semua Status
@@ -488,7 +604,7 @@ export default function PendaftaranPage() {
                     setStatus("Semua");
                     setJalur("Semua");
                   }}
-                  className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 px-3 text-xs text-slate-500 hover:bg-slate-50"
+                  className={`theme-neutral-border theme-text-secondary inline-flex h-10 items-center justify-center gap-2 rounded-lg border px-3 text-xs transition ${themeNeutralHover}`}
                 >
                   <RefreshCw size={14} />
                   Reset
@@ -498,7 +614,7 @@ export default function PendaftaranPage() {
                   type="button"
                   onClick={() => loadData(true)}
                   disabled={refreshing}
-                  className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 px-3 text-xs text-slate-500 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className={`theme-neutral-border theme-text-secondary inline-flex h-10 items-center justify-center gap-2 rounded-lg border px-3 text-xs transition ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-50`}
                 >
                   {refreshing ? (
                     <Loader2
@@ -513,16 +629,20 @@ export default function PendaftaranPage() {
                 </button>
               </div>
 
+              {/* ==================================================
+                  TABLE / STATES
+              ================================================== */}
+
               <div className="min-h-0 flex-1 overflow-auto">
                 {loading ? (
                   <div className="flex min-h-[400px] items-center justify-center">
                     <div className="text-center">
                       <Loader2
                         size={28}
-                        className="mx-auto animate-spin text-[#155DFC]"
+                        className={`${themePrimaryText} mx-auto animate-spin`}
                       />
 
-                      <p className="mt-3 text-xs font-medium text-slate-500">
+                      <p className="theme-text-muted mt-3 text-xs font-medium">
                         Memuat data pendaftar...
                       </p>
                     </div>
@@ -530,15 +650,17 @@ export default function PendaftaranPage() {
                 ) : filtered.length === 0 ? (
                   <div className="flex min-h-[400px] items-center justify-center px-6">
                     <div className="text-center">
-                      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+                      <div
+                        className={`theme-text-muted mx-auto flex h-14 w-14 items-center justify-center rounded-2xl ${themeNeutralSurface}`}
+                      >
                         <Users size={25} />
                       </div>
 
-                      <h3 className="mt-4 text-sm font-bold text-slate-700">
+                      <h3 className="theme-text mt-4 text-sm font-bold">
                         Data pendaftar tidak ditemukan
                       </h3>
 
-                      <p className="mt-1 text-xs text-slate-400">
+                      <p className="theme-text-muted mt-1 text-xs">
                         Belum ada pendaftar atau
                         tidak ada data yang sesuai
                         dengan filter.
@@ -550,7 +672,7 @@ export default function PendaftaranPage() {
                           onClick={() =>
                             loadData(true)
                           }
-                          className="mt-4 inline-flex items-center gap-2 rounded-lg bg-[#155DFC] px-4 py-2 text-xs font-semibold text-white hover:bg-[#0d47c9]"
+                          className={`${themePrimaryGradient} mt-4 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-xs font-semibold text-[var(--color-card)] transition hover:brightness-95`}
                         >
                           <RefreshCw size={14} />
                           Muat Ulang
@@ -560,8 +682,12 @@ export default function PendaftaranPage() {
                   </div>
                 ) : (
                   <table className="w-full min-w-[1050px]">
-                    <thead className="sticky top-0 z-10 bg-slate-50">
-                      <tr className="border-b border-slate-200">
+                    <thead
+                      className={`theme-card sticky top-0 z-10`}
+                    >
+                      <tr
+                        className={`border-b ${themeDivider}`}
+                      >
                         <Th>Pendaftar</Th>
                         <Th>Asal Sekolah</Th>
                         <Th>Jalur</Th>
@@ -571,15 +697,18 @@ export default function PendaftaranPage() {
                       </tr>
                     </thead>
 
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody>
                       {filtered.map((item) => (
                         <tr
                           key={item.id}
-                          className="hover:bg-slate-50/70"
+                          className={`border-b ${themeDivider} transition ${themeNeutralHover}`}
                         >
+                          {/* PENDAFTAR */}
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-3">
-                              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#eaf1ff] text-xs font-bold text-[#155DFC]">
+                              <div
+                                className={`flex h-9 w-9 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText} text-xs font-bold`}
+                              >
                                 {item.nama
                                   .split(" ")
                                   .map(
@@ -592,44 +721,48 @@ export default function PendaftaranPage() {
                               </div>
 
                               <div>
-                                <p className="text-xs font-semibold text-slate-700">
+                                <p className="theme-text text-xs font-semibold">
                                   {item.nama}
                                 </p>
 
-                                <p className="text-[10px] text-slate-400">
+                                <p className="theme-text-muted text-[10px]">
                                   {item.nomor}
                                 </p>
                               </div>
                             </div>
                           </td>
 
+                          {/* ASAL SEKOLAH */}
                           <td className="px-4 py-3">
-                            <p className="max-w-[200px] truncate text-xs font-medium text-slate-600">
+                            <p className="theme-text-secondary max-w-[200px] truncate text-xs font-medium">
                               {item.asalSekolah ||
                                 "-"}
                             </p>
 
-                            <p className="text-[10px] text-slate-400">
+                            <p className="theme-text-muted text-[10px]">
                               NISN{" "}
                               {item.nisn ||
                                 "-"}
                             </p>
                           </td>
 
+                          {/* JALUR */}
                           <td className="px-4 py-3">
-                            <span className="inline-flex items-center gap-1.5 rounded-md bg-blue-50 px-2.5 py-1 text-[10px] font-semibold text-blue-700">
-                              <Route
-                                size={11}
-                              />
+                            <span
+                              className={`inline-flex items-center gap-1.5 rounded-md border ${themePrimarySoftBorder} ${themePrimarySoft} ${themePrimaryText} px-2.5 py-1 text-[10px] font-semibold`}
+                            >
+                              <Route size={11} />
 
                               {item.jalurNama}
                             </span>
                           </td>
 
-                          <td className="px-4 py-3 text-xs text-slate-500">
+                          {/* TANGGAL */}
+                          <td className="theme-text-secondary px-4 py-3 text-xs">
                             {item.tanggal}
                           </td>
 
+                          {/* STATUS */}
                           <td className="px-4 py-3">
                             <StatusBadge
                               status={
@@ -638,6 +771,7 @@ export default function PendaftaranPage() {
                             />
                           </td>
 
+                          {/* AKSI */}
                           <td className="px-4 py-3">
                             <div className="flex justify-end">
                               <button
@@ -648,7 +782,7 @@ export default function PendaftaranPage() {
                                   )
                                 }
                                 disabled={!item.id}
-                                className="rounded-lg border border-slate-200 px-3 py-1.5 text-[10px] font-semibold text-slate-600 transition hover:border-[#155DFC] hover:bg-[#eaf1ff] hover:text-[#155DFC] disabled:cursor-not-allowed disabled:opacity-50"
+                                className={`theme-neutral-border theme-text-secondary rounded-lg border px-3 py-1.5 text-[10px] font-semibold transition hover:border-[var(--color-primary)] hover:bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)] hover:text-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-50`}
                               >
                                 Detail
                               </button>
@@ -661,8 +795,14 @@ export default function PendaftaranPage() {
                 )}
               </div>
 
-              <div className="flex shrink-0 items-center justify-between border-t border-slate-100 px-4 py-3">
-                <p className="text-xs text-slate-400">
+              {/* ==================================================
+                  FOOTER / PAGINATION
+              ================================================== */}
+
+              <div
+                className={`flex shrink-0 items-center justify-between border-t ${themeDivider} px-4 py-3`}
+              >
+                <p className="theme-text-muted text-xs">
                   Menampilkan{" "}
                   {filtered.length} dari{" "}
                   {totalPendaftar} data
@@ -672,16 +812,14 @@ export default function PendaftaranPage() {
                   <button
                     type="button"
                     disabled
-                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-300"
+                    className={`theme-neutral-border theme-text-muted flex h-8 w-8 items-center justify-center rounded-lg border opacity-50`}
                   >
-                    <ChevronLeft
-                      size={15}
-                    />
+                    <ChevronLeft size={15} />
                   </button>
 
                   <button
                     type="button"
-                    className="h-8 min-w-8 rounded-lg bg-[#155DFC] px-2 text-xs font-semibold text-white"
+                    className={`${themePrimaryGradient} h-8 min-w-8 rounded-lg px-2 text-xs font-semibold text-[var(--color-card)]`}
                   >
                     1
                   </button>
@@ -689,11 +827,9 @@ export default function PendaftaranPage() {
                   <button
                     type="button"
                     disabled
-                    className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-300"
+                    className={`theme-neutral-border theme-text-muted flex h-8 w-8 items-center justify-center rounded-lg border opacity-50`}
                   >
-                    <ChevronRight
-                      size={15}
-                    />
+                    <ChevronRight size={15} />
                   </button>
                 </div>
               </div>
@@ -705,30 +841,73 @@ export default function PendaftaranPage() {
   );
 }
 
+// ============================================================
+// STAT
+// ============================================================
+
 function Stat({
   title,
   value,
   icon: Icon,
+  tone = "primary",
 }) {
+  const toneConfig = {
+    primary: {
+      surface:
+        "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]",
+      text:
+        "text-[var(--color-primary)]",
+    },
+
+    success: {
+      surface:
+        "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]",
+      text:
+        "text-[var(--color-success)]",
+    },
+
+    warning: {
+      surface:
+        "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]",
+      text:
+        "text-[var(--color-warning)]",
+    },
+
+    danger: {
+      surface:
+        "bg-[color-mix(in_srgb,var(--color-danger)_9%,transparent)]",
+      text:
+        "text-[var(--color-danger)]",
+    },
+  };
+
+  const current =
+    toneConfig[tone] ||
+    toneConfig.primary;
+
   return (
-    <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-sm">
+    <div
+      className={`theme-card ${themeNeutralBorder} rounded-xl border p-4 ${themeSmallShadow}`}
+    >
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs text-slate-500">
+          <p className="theme-text-muted text-xs">
             {title}
           </p>
 
-          <p className="mt-1 text-2xl font-bold text-slate-800">
+          <p className="theme-text mt-1 text-2xl font-bold">
             {Number(
               value || 0
             ).toLocaleString("id-ID")}
           </p>
         </div>
 
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#eaf1ff]">
+        <div
+          className={`flex h-10 w-10 items-center justify-center rounded-lg ${current.surface}`}
+        >
           <Icon
             size={18}
-            className="text-[#155DFC]"
+            className={current.text}
           />
         </div>
       </div>
@@ -736,9 +915,13 @@ function Stat({
   );
 }
 
+// ============================================================
+// TABLE HEADER
+// ============================================================
+
 function Th({ children }) {
   return (
-    <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+    <th className="theme-text-muted px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-wider">
       {children}
     </th>
   );

@@ -10,8 +10,6 @@ import {
   Clock3,
   CheckCircle2,
   Sparkles,
-  Crown,
-  Zap,
   Users,
   HardDrive,
   Boxes,
@@ -25,7 +23,6 @@ import {
 
 // ============================================================
 // MOCK DATA - PAKET SEKOLAH
-// Nanti bisa diganti hasil fetch dari backend
 // ============================================================
 
 const SCHOOL_PACKAGE = {
@@ -72,6 +69,28 @@ const SCHOOL_PACKAGE = {
 };
 
 // ============================================================
+// THEME HELPERS
+// ============================================================
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]";
+
+const themePrimaryHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
+
+const themeTextHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themePrimaryShadow =
+  "shadow-[0_10px_25px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
+
+// ============================================================
 // FORMATTERS
 // ============================================================
 
@@ -99,24 +118,24 @@ const formatDate = (dateStr) => {
 function StatusBadge({ status }) {
   const config = {
     Aktif: {
-      className: "bg-emerald-50 text-emerald-600 border-emerald-200",
-      dot: "bg-emerald-500",
+      className: "theme-success",
+      dot: "bg-[var(--color-success)]",
     },
 
     TidakAktif: {
-      className: "bg-red-50 text-red-600 border-red-200",
-      dot: "bg-red-500",
+      className: "theme-danger",
+      dot: "bg-[var(--color-danger)]",
     },
 
     Expired: {
-      className: "bg-red-50 text-red-600 border-red-200",
-      dot: "bg-red-500",
+      className: "theme-danger",
+      dot: "bg-[var(--color-danger)]",
     },
   };
 
   const current = config[status] || {
-    className: "bg-slate-100 text-slate-500 border-slate-200",
-    dot: "bg-slate-400",
+    className: "theme-text-muted theme-border",
+    dot: "bg-[var(--color-text-muted)]",
   };
 
   return (
@@ -138,28 +157,30 @@ function StatCard({
   value,
   description,
   icon: Icon,
-  iconClass = "text-[#155DFC]",
+  iconClass = "text-[var(--color-primary)]",
 }) {
   return (
-    <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm">
+    <div className="theme-card theme-border rounded-xl border p-4 shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)]">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[11px] font-medium text-slate-500 tracking-wide">
+          <p className="text-[11px] font-medium theme-text-muted tracking-wide">
             {title}
           </p>
 
-          <p className="mt-1.5 text-xl sm:text-2xl font-bold text-slate-900 truncate">
+          <p className="mt-1.5 text-xl sm:text-2xl font-bold theme-text truncate">
             {value}
           </p>
 
           {description && (
-            <p className="mt-1 text-[10px] sm:text-xs text-slate-400">
+            <p className="mt-1 text-[10px] sm:text-xs theme-text-placeholder">
               {description}
             </p>
           )}
         </div>
 
-        <div className="w-9 h-9 shrink-0 rounded-lg bg-slate-50 flex items-center justify-center">
+        <div
+          className={`w-9 h-9 shrink-0 rounded-lg ${themePrimarySoft} flex items-center justify-center`}
+        >
           <Icon size={17} className={iconClass} />
         </div>
       </div>
@@ -180,31 +201,40 @@ function UsageCard({
   percentage,
 }) {
   return (
-    <div className="border border-slate-200 rounded-xl p-4 bg-white">
+    <div className="theme-card theme-border rounded-xl border p-4">
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-lg bg-[#eaf1ff] flex items-center justify-center">
-            <Icon size={15} className="text-[#155DFC]" />
+          <div
+            className={`w-8 h-8 rounded-lg ${themePrimarySoft} flex items-center justify-center`}
+          >
+            <Icon
+              size={15}
+              className="text-[var(--color-primary)]"
+            />
           </div>
 
           <div>
-            <p className="text-xs font-semibold text-slate-700">{label}</p>
+            <p className="text-xs font-semibold theme-text-secondary">
+              {label}
+            </p>
 
-            <p className="text-[10px] text-slate-400 mt-0.5">
+            <p className="text-[10px] theme-text-placeholder mt-0.5">
               {used} / {limit} {unit}
             </p>
           </div>
         </div>
 
-        <span className="text-xs font-bold text-slate-700">
+        <span className="text-xs font-bold theme-text-secondary">
           {percentage}%
         </span>
       </div>
 
-      <div className="mt-4 h-2 rounded-full bg-slate-100 overflow-hidden">
+      <div className="mt-4 h-2 rounded-full theme-card-soft overflow-hidden">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-[#155DFC] to-[#0d47c9]"
-          style={{ width: `${Math.min(percentage, 100)}%` }}
+          className="h-full rounded-full bg-[var(--color-primary)] transition-all duration-300"
+          style={{
+            width: `${Math.min(percentage, 100)}%`,
+          }}
         />
       </div>
     </div>
@@ -257,7 +287,7 @@ export default function PaketSayaPage() {
   };
 
   return (
-    <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
+    <div className="flex h-screen w-full theme-page overflow-hidden">
       {/* SIDEBAR */}
       <Sidebar
         active="paketLangganan"
@@ -280,21 +310,25 @@ export default function PaketSayaPage() {
           }}
         />
 
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto theme-page">
           <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-            {/* PAGE HEADER */}
+            {/* ==================================================
+                PAGE HEADER
+            ================================================== */}
             <div className="flex items-center justify-between gap-4 flex-wrap">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-gradient-to-br from-[#155DFC] to-[#0d47c9] text-white shadow-lg shadow-[#155DFC]/20">
+                <div
+                  className={`p-2.5 rounded-xl ${themePrimarySoft} ${themePrimarySoftBorder} border text-[var(--color-primary)] ${themePrimaryShadow}`}
+                >
                   <Package size={20} />
                 </div>
 
                 <div>
-                  <h1 className="text-2xl font-bold text-slate-800">
+                  <h1 className="text-2xl font-bold theme-text">
                     Paket Saya
                   </h1>
 
-                  <p className="text-sm text-slate-500">
+                  <p className="text-sm theme-text-secondary">
                     Informasi lengkap mengenai paket langganan sekolah Anda.
                   </p>
                 </div>
@@ -303,14 +337,16 @@ export default function PaketSayaPage() {
               <button
                 type="button"
                 onClick={handleRefresh}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-600 text-sm font-semibold hover:bg-slate-50 transition-colors"
+                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border theme-border theme-card theme-text-secondary text-sm font-semibold ${themeTextHover} transition-colors`}
               >
                 <RefreshCw size={15} />
                 Refresh
               </button>
             </div>
 
-            {/* SUMMARY */}
+            {/* ==================================================
+                SUMMARY
+            ================================================== */}
             <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
               <StatCard
                 title="Paket Aktif"
@@ -324,7 +360,7 @@ export default function PaketSayaPage() {
                 value={SCHOOL_PACKAGE.status}
                 description="Langganan sekolah"
                 icon={CheckCircle2}
-                iconClass="text-emerald-500"
+                iconClass="text-[var(--color-success)]"
               />
 
               <StatCard
@@ -342,59 +378,76 @@ export default function PaketSayaPage() {
               />
             </div>
 
-            {/* PACKAGE DETAIL */}
-            <section className="bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden">
+            {/* ==================================================
+                PACKAGE DETAIL
+            ================================================== */}
+            <section className="theme-card theme-border rounded-xl border shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)] overflow-hidden">
               <div className="p-5 sm:p-6">
                 {/* HEADER PACKAGE */}
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
                   <div className="flex items-start gap-4">
-                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-[#155DFC] to-[#0d47c9] text-white flex items-center justify-center shadow-lg shadow-[#155DFC]/20 shrink-0">
+                    <div
+                      className={`w-14 h-14 rounded-xl ${themePrimarySoft} ${themePrimarySoftBorder} border text-[var(--color-primary)] flex items-center justify-center ${themePrimaryShadow} shrink-0`}
+                    >
                       <IconPaket size={27} />
                     </div>
 
                     <div>
                       <div className="flex items-center gap-2 flex-wrap">
-                        <h2 className="text-xl font-bold text-slate-900">
+                        <h2 className="text-xl font-bold theme-text">
                           {SCHOOL_PACKAGE.name}
                         </h2>
 
                         <StatusBadge status={SCHOOL_PACKAGE.status} />
                       </div>
 
-                      <p className="text-sm text-slate-500 mt-1.5 max-w-2xl">
+                      <p className="text-sm theme-text-secondary mt-1.5 max-w-2xl">
                         {SCHOOL_PACKAGE.description}
                       </p>
                     </div>
                   </div>
 
                   <div className="flex flex-col sm:flex-row gap-2">
-                    <button className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#155DFC] text-white text-sm font-semibold hover:bg-[#0d47c9] transition">
+                    <button
+                      type="button"
+                      className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--color-primary)] text-white text-sm font-semibold hover:opacity-90 transition"
+                    >
                       <Wallet size={15} />
                       Perpanjang
                     </button>
 
-                    <button className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 text-sm font-semibold hover:bg-slate-50 transition">
+                    <button
+                      type="button"
+                      className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border theme-border theme-card theme-text-secondary text-sm font-semibold ${themeTextHover} transition`}
+                    >
                       <ArrowUpRight size={15} />
                       Upgrade
                     </button>
                   </div>
                 </div>
 
-                {/* BILLING */}
+                {/* ==================================================
+                    BILLING
+                ================================================== */}
                 <div className="mt-6 grid grid-cols-1 lg:grid-cols-3 gap-4">
-                  <div className="border border-slate-200 rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-slate-500">
-                      <Wallet size={15} className="text-[#155DFC]" />
+                  {/* PRICE */}
+                  <div className="theme-card-soft theme-border rounded-xl border p-4">
+                    <div className="flex items-center gap-2 theme-text-secondary">
+                      <Wallet
+                        size={15}
+                        className="text-[var(--color-primary)]"
+                      />
+
                       <span className="text-xs font-medium">
                         Harga Langganan
                       </span>
                     </div>
 
-                    <p className="text-xl font-bold text-slate-900 mt-2">
+                    <p className="text-xl font-bold theme-text mt-2">
                       {formatRupiah(price)}
                     </p>
 
-                    <div className="mt-3 inline-flex items-center gap-1 border border-slate-200 rounded-lg p-1 bg-slate-50">
+                    <div className="mt-3 inline-flex items-center gap-1 theme-card-soft theme-border border rounded-lg p-1">
                       {["Bulanan", "Tahunan"].map((item) => (
                         <button
                           key={item}
@@ -402,8 +455,8 @@ export default function PaketSayaPage() {
                           onClick={() => setBillingCycle(item)}
                           className={`px-3 py-1.5 rounded-md text-xs font-semibold transition ${
                             billingCycle === item
-                              ? "bg-white text-[#155DFC] shadow-sm"
-                              : "text-slate-500 hover:text-slate-800"
+                              ? `${themePrimarySoft} text-[var(--color-primary)] ${themePrimarySoftBorder} border shadow-sm`
+                              : `theme-text-muted ${themeTextHover}`
                           }`}
                         >
                           {item}
@@ -412,45 +465,52 @@ export default function PaketSayaPage() {
                     </div>
                   </div>
 
-                  <div className="border border-slate-200 rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-slate-500">
+                  {/* ACTIVE PERIOD */}
+                  <div className="theme-card-soft theme-border rounded-xl border p-4">
+                    <div className="flex items-center gap-2 theme-text-secondary">
                       <CalendarDays
                         size={15}
-                        className="text-[#155DFC]"
+                        className="text-[var(--color-primary)]"
                       />
+
                       <span className="text-xs font-medium">
                         Periode Aktif
                       </span>
                     </div>
 
-                    <p className="text-sm font-bold text-slate-900 mt-2">
+                    <p className="text-sm font-bold theme-text mt-2">
                       {formatDate(SCHOOL_PACKAGE.startDate)}
                     </p>
 
-                    <p className="text-xs text-slate-400 mt-1">
+                    <p className="text-xs theme-text-placeholder mt-1">
                       sampai
                     </p>
 
-                    <p className="text-sm font-bold text-slate-900">
+                    <p className="text-sm font-bold theme-text">
                       {formatDate(SCHOOL_PACKAGE.endDate)}
                     </p>
                   </div>
 
-                  <div className="border border-slate-200 rounded-xl p-4">
-                    <div className="flex items-center gap-2 text-slate-500">
-                      <Clock3 size={15} className="text-[#155DFC]" />
+                  {/* ACTIVE DAYS */}
+                  <div className="theme-card-soft theme-border rounded-xl border p-4">
+                    <div className="flex items-center gap-2 theme-text-secondary">
+                      <Clock3
+                        size={15}
+                        className="text-[var(--color-primary)]"
+                      />
+
                       <span className="text-xs font-medium">
                         Masa Aktif
                       </span>
                     </div>
 
-                    <p className="text-xl font-bold text-slate-900 mt-2">
+                    <p className="text-xl font-bold theme-text mt-2">
                       {SCHOOL_PACKAGE.daysLeft} Hari
                     </p>
 
-                    <div className="mt-3 h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="mt-3 h-2 theme-card rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-gradient-to-r from-[#155DFC] to-[#0d47c9] rounded-full"
+                        className="h-full bg-[var(--color-primary)] rounded-full transition-all duration-300"
                         style={{
                           width: `${Math.max(
                             10,
@@ -465,20 +525,25 @@ export default function PaketSayaPage() {
                   </div>
                 </div>
 
-                {/* USAGE */}
+                {/* ==================================================
+                    USAGE
+                ================================================== */}
                 <div className="mt-7">
                   <div className="flex items-center justify-between gap-3">
                     <div>
-                      <h3 className="text-sm font-bold text-slate-800">
+                      <h3 className="text-sm font-bold theme-text">
                         Penggunaan Paket
                       </h3>
 
-                      <p className="text-xs text-slate-400 mt-1">
+                      <p className="text-xs theme-text-placeholder mt-1">
                         Pantau pemakaian resource sekolah.
                       </p>
                     </div>
 
-                    <ShieldCheck size={18} className="text-[#155DFC]" />
+                    <ShieldCheck
+                      size={18}
+                      className="text-[var(--color-primary)]"
+                    />
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mt-4">
@@ -509,9 +574,11 @@ export default function PaketSayaPage() {
                   </div>
                 </div>
 
-                {/* FEATURES */}
-                <div className="mt-7 border-t border-slate-100 pt-6">
-                  <h3 className="text-sm font-bold text-slate-800">
+                {/* ==================================================
+                    FEATURES
+                ================================================== */}
+                <div className="mt-7 theme-border-soft border-t pt-6">
+                  <h3 className="text-sm font-bold theme-text">
                     Fitur yang Tersedia
                   </h3>
 
@@ -519,16 +586,18 @@ export default function PaketSayaPage() {
                     {SCHOOL_PACKAGE.features.map((feature) => (
                       <div
                         key={feature}
-                        className="flex items-start gap-3 p-3 rounded-xl bg-[#f7f9ff] border border-[#eaf1ff]"
+                        className={`flex items-start gap-3 p-3 rounded-xl ${themePrimarySoft} ${themePrimarySoftBorder} border`}
                       >
-                        <div className="w-5 h-5 rounded-full bg-emerald-50 flex items-center justify-center shrink-0 mt-0.5">
+                        <div
+                          className={`w-5 h-5 rounded-full theme-success flex items-center justify-center shrink-0 mt-0.5`}
+                        >
                           <CheckCircle2
                             size={12}
-                            className="text-emerald-600"
+                            className="text-[var(--color-success)]"
                           />
                         </div>
 
-                        <span className="text-sm text-slate-600">
+                        <span className="text-sm theme-text-secondary">
                           {feature}
                         </span>
                       </div>
@@ -538,22 +607,24 @@ export default function PaketSayaPage() {
               </div>
             </section>
 
-            {/* NOTICE */}
-            <section className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm">
+            {/* ==================================================
+                NOTICE
+            ================================================== */}
+            <section className="theme-card theme-border rounded-xl border p-4 shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)]">
               <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 rounded-lg theme-warning flex items-center justify-center shrink-0">
                   <AlertCircle
                     size={17}
-                    className="text-amber-500"
+                    className="text-[var(--color-warning)]"
                   />
                 </div>
 
                 <div>
-                  <p className="text-sm font-semibold text-slate-800">
+                  <p className="text-sm font-semibold theme-text">
                     Informasi langganan
                   </p>
 
-                  <p className="text-xs text-slate-500 mt-1 leading-5">
+                  <p className="text-xs theme-text-secondary mt-1 leading-5">
                     Pastikan perpanjangan dilakukan sebelum masa aktif
                     berakhir agar layanan SmartSchool tetap dapat digunakan
                     tanpa gangguan.

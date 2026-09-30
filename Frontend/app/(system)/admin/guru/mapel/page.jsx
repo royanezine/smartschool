@@ -45,13 +45,15 @@ function StatusBadge({ status }) {
     <span
       className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full text-[11px] font-semibold border ${
         isActive
-          ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-          : "bg-slate-100 text-slate-500 border-slate-200"
+          ? "theme-success"
+          : "theme-card-soft theme-text-muted theme-border"
       }`}
     >
       <span
         className={`w-1.5 h-1.5 rounded-full ${
-          isActive ? "bg-emerald-500" : "bg-slate-400"
+          isActive
+            ? "bg-[var(--color-success)]"
+            : "bg-[var(--color-text-muted)]"
         }`}
       />
 
@@ -72,18 +74,18 @@ function StatCard({
   iconWrapper,
 }) {
   return (
-    <div className="relative overflow-hidden bg-white border border-slate-200/80 rounded-2xl p-4 sm:p-5 shadow-[0_2px_10px_rgba(15,23,42,0.03)] hover:shadow-[0_8px_24px_rgba(15,23,42,0.06)] transition-all duration-200">
+    <div className="relative overflow-hidden theme-card border rounded-2xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-all duration-200">
       <div className="flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-xs font-medium text-slate-500">
+          <p className="text-xs font-medium theme-text-muted">
             {label}
           </p>
 
-          <p className="mt-2 text-2xl sm:text-[28px] leading-none font-bold tracking-tight text-slate-900">
+          <p className="mt-2 text-2xl sm:text-[28px] leading-none font-bold tracking-tight theme-text">
             {value}
           </p>
 
-          <p className="mt-2 text-[11px] text-slate-400">
+          <p className="mt-2 text-[11px] theme-text-muted">
             {description}
           </p>
         </div>
@@ -105,17 +107,17 @@ function StatCard({
 function EmptyState({ search, onReset }) {
   return (
     <div className="py-16 px-5 flex flex-col items-center justify-center text-center">
-      <div className="w-14 h-14 rounded-2xl bg-[#EAF1FF] text-[#155DFC] flex items-center justify-center">
+      <div className="w-14 h-14 rounded-2xl theme-info flex items-center justify-center">
         <BookOpen size={25} />
       </div>
 
-      <h3 className="mt-4 text-sm sm:text-base font-semibold text-slate-800">
+      <h3 className="mt-4 text-sm sm:text-base font-semibold theme-text">
         {search
           ? "Data tidak ditemukan"
           : "Belum ada mata pelajaran"}
       </h3>
 
-      <p className="mt-1.5 max-w-md text-xs sm:text-sm leading-relaxed text-slate-500">
+      <p className="mt-1.5 max-w-md text-xs sm:text-sm leading-relaxed theme-text-secondary">
         {search
           ? "Tidak ada mata pelajaran, guru, atau kelas yang sesuai dengan pencarian."
           : "Belum terdapat data mata pelajaran yang tersimpan pada sistem."}
@@ -125,7 +127,7 @@ function EmptyState({ search, onReset }) {
         <button
           type="button"
           onClick={onReset}
-          className="mt-4 px-4 py-2 rounded-lg bg-[#EAF1FF] text-[#155DFC] hover:bg-[#DCE8FF] text-xs font-semibold transition-colors"
+          className="mt-4 px-4 py-2 rounded-lg theme-info hover:opacity-80 text-xs font-semibold transition-colors"
         >
           Reset pencarian
         </button>
@@ -155,7 +157,7 @@ function GuruList({ assignments = [] }) {
 
   if (guruList.length === 0) {
     return (
-      <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-[11px] text-slate-400">
+      <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg theme-card-soft theme-border border text-[11px] theme-text-muted">
         <UserRound size={12} />
         Belum ada guru
       </span>
@@ -169,17 +171,17 @@ function GuruList({ assignments = [] }) {
           key={guru.id}
           className="flex items-center gap-2.5 min-w-0"
         >
-          <div className="w-8 h-8 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center shrink-0">
+          <div className="w-8 h-8 rounded-lg theme-info flex items-center justify-center shrink-0">
             <UserRound size={14} />
           </div>
 
           <div className="min-w-0">
-            <p className="text-xs font-semibold text-slate-700 truncate">
+            <p className="text-xs font-semibold theme-text-secondary truncate">
               {guru.namaLengkap || "Nama guru tidak tersedia"}
             </p>
 
             {(guru.nip || guru.nuptk || guru.email) && (
-              <p className="mt-0.5 text-[10px] text-slate-400 truncate">
+              <p className="mt-0.5 text-[10px] theme-text-muted truncate">
                 {guru.nip ||
                   guru.nuptk ||
                   guru.email ||
@@ -552,7 +554,7 @@ export default function MapelPage() {
   ========================================================= */
 
   return (
-    <div className="flex h-screen w-full bg-[#F8FAFC] overflow-hidden">
+    <div className="flex h-screen w-full theme-page overflow-hidden">
 
       {/* =====================================================
           SIDEBAR
@@ -598,12 +600,18 @@ export default function MapelPage() {
 
                   <div className="relative shrink-0">
 
-                    <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-[#155DFC] to-[#0D47C9] text-white flex items-center justify-center shadow-lg shadow-blue-900/15">
+                    <div
+                      className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl text-white flex items-center justify-center shadow-lg"
+                      style={{
+                        background:
+                          "var(--color-brand-logo-bg)",
+                      }}
+                    >
                       <BookMarked size={21} />
                     </div>
 
-                    <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full bg-white flex items-center justify-center">
-                      <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                    <div className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full theme-card flex items-center justify-center">
+                      <span className="w-2 h-2 rounded-full bg-[var(--color-success)]" />
                     </div>
 
                   </div>
@@ -612,17 +620,17 @@ export default function MapelPage() {
 
                     <div className="flex flex-wrap items-center gap-2">
 
-                      <h1 className="text-xl sm:text-2xl lg:text-[27px] font-bold tracking-tight text-slate-900">
+                      <h1 className="text-xl sm:text-2xl lg:text-[27px] font-bold tracking-tight theme-text">
                         Kelola Mata Pelajaran
                       </h1>
 
-                      <span className="hidden sm:inline-flex items-center px-2 py-1 rounded-md bg-[#EAF1FF] text-[#155DFC] text-[9px] font-bold tracking-wide">
+                      <span className="hidden sm:inline-flex items-center px-2 py-1 rounded-md theme-info text-[9px] font-bold tracking-wide">
                         AKADEMIK
                       </span>
 
                     </div>
 
-                    <p className="mt-1.5 text-xs sm:text-sm text-slate-500 max-w-2xl">
+                    <p className="mt-1.5 text-xs sm:text-sm theme-text-secondary max-w-2xl">
                       Kelola mata pelajaran, guru pengajar,
                       dan distribusi kelas yang menggunakan
                       mata pelajaran.
@@ -638,7 +646,7 @@ export default function MapelPage() {
                     type="button"
                     onClick={handleRefresh}
                     disabled={loading}
-                    className="h-10 px-3 rounded-xl border border-slate-200 bg-white text-slate-600 hover:text-[#155DFC] hover:border-blue-200 hover:bg-[#F4F7FF] disabled:opacity-50 transition-all flex items-center justify-center gap-2 text-xs sm:text-sm font-medium shadow-sm"
+                    className="h-10 px-3 rounded-xl theme-card theme-border border theme-text-secondary hover:theme-sidebar-hover disabled:opacity-50 transition-all flex items-center justify-center gap-2 text-xs sm:text-sm font-medium shadow-sm"
                   >
                     <RefreshCw
                       size={15}
@@ -657,7 +665,7 @@ export default function MapelPage() {
                   <button
                     type="button"
                     onClick={handleTambah}
-                    className="h-10 px-3.5 sm:px-4 rounded-xl bg-[#155DFC] hover:bg-[#0D47C9] text-white transition-all flex items-center justify-center gap-2 text-xs sm:text-sm font-semibold shadow-sm hover:shadow-md"
+                    className="h-10 px-3.5 sm:px-4 rounded-xl theme-primary transition-all flex items-center justify-center gap-2 text-xs sm:text-sm font-semibold shadow-sm hover:shadow-md"
                   >
                     <Plus size={16} />
                     Tambah Mapel
@@ -674,22 +682,21 @@ export default function MapelPage() {
             ================================================= */}
 
             {error && (
-              <div className="mb-6 flex items-start gap-3 p-4 rounded-2xl border border-rose-200 bg-rose-50">
+              <div className="mb-6 flex items-start gap-3 p-4 rounded-2xl theme-danger border">
 
-                <div className="w-9 h-9 rounded-xl bg-white flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 rounded-xl theme-card flex items-center justify-center shrink-0">
                   <AlertCircle
                     size={18}
-                    className="text-rose-600"
                   />
                 </div>
 
                 <div className="flex-1 min-w-0">
 
-                  <p className="text-sm font-semibold text-rose-800">
+                  <p className="text-sm font-semibold">
                     Gagal memuat data
                   </p>
 
-                  <p className="mt-1 text-xs sm:text-sm text-rose-700 break-words">
+                  <p className="mt-1 text-xs sm:text-sm break-words">
                     {error}
                   </p>
 
@@ -698,7 +705,7 @@ export default function MapelPage() {
                 <button
                   type="button"
                   onClick={handleRefresh}
-                  className="text-xs font-semibold text-rose-700 hover:text-rose-900 whitespace-nowrap"
+                  className="text-xs font-semibold hover:opacity-70 whitespace-nowrap"
                 >
                   Coba lagi
                 </button>
@@ -721,7 +728,7 @@ export default function MapelPage() {
                     : totalMapel
                 }
                 description="Seluruh data mata pelajaran"
-                iconWrapper="bg-[#EAF1FF] text-[#155DFC]"
+                iconWrapper="theme-info"
               />
 
               <StatCard
@@ -733,7 +740,7 @@ export default function MapelPage() {
                     : totalAktif
                 }
                 description="Aktif digunakan sekolah"
-                iconWrapper="bg-emerald-50 text-emerald-600"
+                iconWrapper="theme-success"
               />
 
               <StatCard
@@ -745,7 +752,7 @@ export default function MapelPage() {
                     : totalNonaktif
                 }
                 description="Tidak aktif digunakan"
-                iconWrapper="bg-slate-100 text-slate-500"
+                iconWrapper="theme-card-soft theme-text-muted"
               />
 
               <StatCard
@@ -757,7 +764,7 @@ export default function MapelPage() {
                     : totalGuru
                 }
                 description="Guru yang memiliki penempatan"
-                iconWrapper="bg-violet-50 text-violet-600"
+                iconWrapper="theme-info"
               />
 
               <StatCard
@@ -769,7 +776,7 @@ export default function MapelPage() {
                     : totalAssignment
                 }
                 description="Relasi mapel dengan kelas"
-                iconWrapper="bg-indigo-50 text-indigo-600"
+                iconWrapper="theme-info"
               />
 
             </section>
@@ -778,13 +785,13 @@ export default function MapelPage() {
                 MAIN CONTENT
             ================================================= */}
 
-            <section className="bg-white rounded-2xl border border-slate-200/80 shadow-[0_2px_12px_rgba(15,23,42,0.035)] overflow-hidden">
+            <section className="theme-card rounded-2xl border shadow-sm overflow-hidden">
 
               {/* =================================================
                   CARD HEADER
               ================================================= */}
 
-              <div className="px-4 sm:px-5 lg:px-6 py-4 sm:py-5 border-b border-slate-100">
+              <div className="px-4 sm:px-5 lg:px-6 py-4 sm:py-5 theme-border border-b">
 
                 <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-4">
 
@@ -792,17 +799,17 @@ export default function MapelPage() {
 
                     <div className="flex items-center gap-2">
 
-                      <div className="w-8 h-8 rounded-lg bg-[#EAF1FF] text-[#155DFC] flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-lg theme-info flex items-center justify-center">
                         <BookOpen size={15} />
                       </div>
 
-                      <h2 className="text-sm sm:text-base font-bold text-slate-900">
+                      <h2 className="text-sm sm:text-base font-bold theme-text">
                         Daftar Mata Pelajaran
                       </h2>
 
                     </div>
 
-                    <p className="mt-1.5 ml-0 sm:ml-10 text-[11px] sm:text-xs text-slate-500">
+                    <p className="mt-1.5 ml-0 sm:ml-10 text-[11px] sm:text-xs theme-text-secondary">
                       Menampilkan informasi lengkap
                       mata pelajaran, guru pengajar,
                       dan kelas.
@@ -818,7 +825,7 @@ export default function MapelPage() {
 
                       <Search
                         size={15}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                        className="absolute left-3 top-1/2 -translate-y-1/2 theme-text-muted"
                       />
 
                       <input
@@ -830,7 +837,7 @@ export default function MapelPage() {
                           )
                         }
                         placeholder="Cari mapel, guru, atau kelas..."
-                        className="w-full h-10 pl-9 pr-3 rounded-xl border border-slate-200 bg-slate-50/70 text-xs sm:text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:bg-white focus:border-[#155DFC]/50 focus:ring-2 focus:ring-[#155DFC]/10 transition-all"
+                        className="w-full h-10 pl-9 pr-3 rounded-xl theme-input border text-xs sm:text-sm outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/10 transition-all"
                       />
 
                     </div>
@@ -839,7 +846,7 @@ export default function MapelPage() {
 
                       <Filter
                         size={14}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+                        className="absolute left-3 top-1/2 -translate-y-1/2 theme-text-muted pointer-events-none"
                       />
 
                       <select
@@ -849,7 +856,7 @@ export default function MapelPage() {
                             e.target.value
                           )
                         }
-                        className="appearance-none w-full sm:w-[145px] h-10 pl-8 pr-8 rounded-xl border border-slate-200 bg-white text-xs sm:text-sm text-slate-700 outline-none focus:border-[#155DFC]/50 focus:ring-2 focus:ring-[#155DFC]/10 cursor-pointer"
+                        className="appearance-none w-full sm:w-[145px] h-10 pl-8 pr-8 rounded-xl theme-input border text-xs sm:text-sm outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/10 cursor-pointer"
                       >
                         <option value="semua">
                           Semua Status
@@ -877,11 +884,11 @@ export default function MapelPage() {
               ================================================= */}
 
               {!loading && !error && (
-                <div className="px-4 sm:px-5 lg:px-6 py-2.5 bg-slate-50/60 border-b border-slate-100 flex items-center justify-between gap-3">
+                <div className="px-4 sm:px-5 lg:px-6 py-2.5 theme-card-soft theme-border border-b flex items-center justify-between gap-3">
 
-                  <p className="text-[11px] sm:text-xs text-slate-500">
+                  <p className="text-[11px] sm:text-xs theme-text-secondary">
                     Menampilkan{" "}
-                    <span className="font-bold text-slate-700">
+                    <span className="font-bold theme-text">
                       {filteredMapel.length}
                     </span>{" "}
                     mata pelajaran
@@ -893,7 +900,7 @@ export default function MapelPage() {
                     <button
                       type="button"
                       onClick={resetFilter}
-                      className="text-[11px] sm:text-xs font-semibold text-[#155DFC] hover:text-[#0D47C9]"
+                      className="text-[11px] sm:text-xs font-semibold text-[var(--color-primary)] hover:text-[var(--color-primary-hover)]"
                     >
                       Reset filter
                     </button>
@@ -909,18 +916,18 @@ export default function MapelPage() {
               {loading ? (
                 <div className="py-20 flex flex-col items-center justify-center">
 
-                  <div className="w-12 h-12 rounded-2xl bg-[#EAF1FF] flex items-center justify-center">
+                  <div className="w-12 h-12 rounded-2xl theme-info flex items-center justify-center">
                     <Loader2
                       size={22}
-                      className="animate-spin text-[#155DFC]"
+                      className="animate-spin"
                     />
                   </div>
 
-                  <p className="mt-4 text-sm font-semibold text-slate-700">
+                  <p className="mt-4 text-sm font-semibold theme-text-secondary">
                     Memuat data mata pelajaran
                   </p>
 
-                  <p className="mt-1 text-xs text-slate-400">
+                  <p className="mt-1 text-xs theme-text-muted">
                     Mengambil mapel, guru,
                     dan kelas...
                   </p>
@@ -948,29 +955,29 @@ export default function MapelPage() {
 
                       <thead>
 
-                        <tr className="bg-[#F8FAFC] border-b border-slate-200">
+                        <tr className="theme-table-header border-b">
 
-                          <th className="px-5 lg:px-6 py-3.5 text-left text-[10px] font-bold uppercase tracking-[0.08em] text-slate-500 w-[120px]">
+                          <th className="px-5 lg:px-6 py-3.5 text-left text-[10px] font-bold uppercase tracking-[0.08em] w-[120px]">
                             Kode
                           </th>
 
-                          <th className="px-5 lg:px-6 py-3.5 text-left text-[10px] font-bold uppercase tracking-[0.08em] text-slate-500 min-w-[220px]">
+                          <th className="px-5 lg:px-6 py-3.5 text-left text-[10px] font-bold uppercase tracking-[0.08em] min-w-[220px]">
                             Mata Pelajaran
                           </th>
 
-                          <th className="px-5 lg:px-6 py-3.5 text-left text-[10px] font-bold uppercase tracking-[0.08em] text-slate-500 min-w-[230px]">
+                          <th className="px-5 lg:px-6 py-3.5 text-left text-[10px] font-bold uppercase tracking-[0.08em] min-w-[230px]">
                             Guru Pengajar
                           </th>
 
-                          <th className="px-5 lg:px-6 py-3.5 text-left text-[10px] font-bold uppercase tracking-[0.08em] text-slate-500 min-w-[300px]">
+                          <th className="px-5 lg:px-6 py-3.5 text-left text-[10px] font-bold uppercase tracking-[0.08em] min-w-[300px]">
                             Kelas
                           </th>
 
-                          <th className="px-5 lg:px-6 py-3.5 text-center text-[10px] font-bold uppercase tracking-[0.08em] text-slate-500 w-[130px]">
+                          <th className="px-5 lg:px-6 py-3.5 text-center text-[10px] font-bold uppercase tracking-[0.08em] w-[130px]">
                             Status
                           </th>
 
-                          <th className="px-5 lg:px-6 py-3.5 text-right text-[10px] font-bold uppercase tracking-[0.08em] text-slate-500 w-[120px]">
+                          <th className="px-5 lg:px-6 py-3.5 text-right text-[10px] font-bold uppercase tracking-[0.08em] w-[120px]">
                             Aksi
                           </th>
 
@@ -984,14 +991,14 @@ export default function MapelPage() {
                           (m) => (
                             <tr
                               key={m.id}
-                              className="group border-b border-slate-100 last:border-0 hover:bg-[#F8FAFF] transition-colors"
+                              className="group border-b last:border-0 theme-table-hover transition-colors"
                             >
 
                               {/* KODE */}
 
                               <td className="px-5 lg:px-6 py-5 align-top">
 
-                                <span className="inline-flex items-center px-2.5 py-1.5 rounded-lg bg-[#EAF1FF] border border-blue-100 text-[#155DFC] font-mono text-[11px] font-bold">
+                                <span className="inline-flex items-center px-2.5 py-1.5 rounded-lg theme-info border font-mono text-[11px] font-bold">
                                   {m.kode || "-"}
                                 </span>
 
@@ -1003,7 +1010,7 @@ export default function MapelPage() {
 
                                 <div className="flex items-start gap-3">
 
-                                  <div className="w-9 h-9 rounded-xl bg-[#EAF1FF] text-[#155DFC] flex items-center justify-center shrink-0 group-hover:bg-[#155DFC] group-hover:text-white transition-all">
+                                  <div className="w-9 h-9 rounded-xl theme-info flex items-center justify-center shrink-0 group-hover:theme-primary transition-all">
                                     <BookMarked
                                       size={16}
                                     />
@@ -1011,12 +1018,12 @@ export default function MapelPage() {
 
                                   <div className="min-w-0">
 
-                                    <p className="text-sm font-semibold text-slate-800">
+                                    <p className="text-sm font-semibold theme-text-secondary">
                                       {m.nama ||
                                         "-"}
                                     </p>
 
-                                    <p className="mt-1 text-[11px] text-slate-400">
+                                    <p className="mt-1 text-[11px] theme-text-muted">
                                       {m.assignments
                                         ?.length ||
                                         0}{" "}
@@ -1038,7 +1045,6 @@ export default function MapelPage() {
                                   assignments={
                                     m.assignments
                                   }
-
                                 />
 
                               </td>
@@ -1060,13 +1066,13 @@ export default function MapelPage() {
                                             key={
                                               kelas.id
                                             }
-                                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-white border border-slate-200 text-[11px] font-medium text-slate-600"
+                                            className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg theme-card border text-[11px] font-medium theme-text-secondary"
                                           >
                                             <GraduationCap
                                               size={
                                                 12
                                               }
-                                              className="text-[#155DFC]"
+                                              className="text-[var(--color-primary)]"
                                             />
 
                                             {
@@ -1078,7 +1084,7 @@ export default function MapelPage() {
 
                                   </div>
                                 ) : (
-                                  <span className="inline-flex items-center px-2.5 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-[11px] text-slate-400">
+                                  <span className="inline-flex items-center px-2.5 py-1.5 rounded-lg theme-card-soft border text-[11px] theme-text-muted">
                                     Belum diassign
                                   </span>
                                 )}
@@ -1111,7 +1117,7 @@ export default function MapelPage() {
                                       )
                                     }
                                     title="Ubah mata pelajaran"
-                                    className="w-8 h-8 rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-[#155DFC] hover:bg-[#EAF1FF] hover:border-blue-200 flex items-center justify-center transition-all"
+                                    className="w-8 h-8 rounded-lg theme-card border theme-text-muted hover:text-[var(--color-primary)] hover:theme-info flex items-center justify-center transition-all"
                                   >
                                     <Pencil
                                       size={14}
@@ -1130,7 +1136,7 @@ export default function MapelPage() {
                                       m.id
                                     }
                                     title="Hapus mata pelajaran"
-                                    className="w-8 h-8 rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-rose-600 hover:bg-rose-50 hover:border-rose-200 disabled:opacity-40 flex items-center justify-center transition-all"
+                                    className="w-8 h-8 rounded-lg theme-card border theme-text-muted hover:theme-danger disabled:opacity-40 flex items-center justify-center transition-all"
                                   >
                                     {deletingId ===
                                     m.id ? (
@@ -1173,25 +1179,25 @@ export default function MapelPage() {
 
                       <thead>
 
-                        <tr className="bg-[#F8FAFC] border-b border-slate-200">
+                        <tr className="theme-table-header border-b">
 
-                          <th className="px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-500">
+                          <th className="px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-wide">
                             Mata Pelajaran
                           </th>
 
-                          <th className="px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-500">
+                          <th className="px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-wide">
                             Guru
                           </th>
 
-                          <th className="px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-wide text-slate-500">
+                          <th className="px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-wide">
                             Kelas
                           </th>
 
-                          <th className="px-5 py-3.5 text-center text-[10px] font-bold uppercase tracking-wide text-slate-500">
+                          <th className="px-5 py-3.5 text-center text-[10px] font-bold uppercase tracking-wide">
                             Status
                           </th>
 
-                          <th className="px-5 py-3.5 text-right text-[10px] font-bold uppercase tracking-wide text-slate-500">
+                          <th className="px-5 py-3.5 text-right text-[10px] font-bold uppercase tracking-wide">
                             Aksi
                           </th>
 
@@ -1205,14 +1211,14 @@ export default function MapelPage() {
                           (m) => (
                             <tr
                               key={m.id}
-                              className="border-b border-slate-100 hover:bg-[#F8FAFF]"
+                              className="border-b theme-table-hover"
                             >
 
                               <td className="px-5 py-4 align-top">
 
                                 <div className="flex items-start gap-3">
 
-                                  <div className="w-9 h-9 rounded-xl bg-[#EAF1FF] text-[#155DFC] flex items-center justify-center shrink-0">
+                                  <div className="w-9 h-9 rounded-xl theme-info flex items-center justify-center shrink-0">
                                     <BookMarked
                                       size={16}
                                     />
@@ -1220,11 +1226,11 @@ export default function MapelPage() {
 
                                   <div>
 
-                                    <p className="text-sm font-semibold text-slate-800">
+                                    <p className="text-sm font-semibold theme-text-secondary">
                                       {m.nama}
                                     </p>
 
-                                    <span className="inline-flex mt-1.5 px-2 py-1 rounded-md bg-[#EAF1FF] text-[#155DFC] font-mono text-[10px] font-bold">
+                                    <span className="inline-flex mt-1.5 px-2 py-1 rounded-md theme-info font-mono text-[10px] font-bold">
                                       {m.kode ||
                                         "-"}
                                     </span>
@@ -1257,13 +1263,13 @@ export default function MapelPage() {
                                         key={
                                           kelas.id
                                         }
-                                        className="inline-flex items-center gap-1 px-2 py-1 rounded-lg bg-white border border-slate-200 text-[10px] text-slate-600"
+                                        className="inline-flex items-center gap-1 px-2 py-1 rounded-lg theme-card border text-[10px] theme-text-secondary"
                                       >
                                         <GraduationCap
                                           size={
                                             11
                                           }
-                                          className="text-[#155DFC]"
+                                          className="text-[var(--color-primary)]"
                                         />
 
                                         {
@@ -1298,7 +1304,7 @@ export default function MapelPage() {
                                         m
                                       )
                                     }
-                                    className="w-8 h-8 rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-[#155DFC] hover:bg-[#EAF1FF] flex items-center justify-center"
+                                    className="w-8 h-8 rounded-lg theme-card border theme-text-muted hover:text-[var(--color-primary)] hover:theme-info flex items-center justify-center"
                                   >
                                     <Pencil
                                       size={14}
@@ -1316,7 +1322,7 @@ export default function MapelPage() {
                                       deletingId ===
                                       m.id
                                     }
-                                    className="w-8 h-8 rounded-lg border border-slate-200 bg-white text-slate-500 hover:text-rose-600 hover:bg-rose-50 flex items-center justify-center"
+                                    className="w-8 h-8 rounded-lg theme-card border theme-text-muted hover:theme-danger flex items-center justify-center"
                                   >
                                     {deletingId ===
                                     m.id ? (
@@ -1353,7 +1359,7 @@ export default function MapelPage() {
                       MOBILE
                   ================================================= */}
 
-                  <div className="md:hidden divide-y divide-slate-100">
+                  <div className="md:hidden divide-y theme-border">
 
                     {filteredMapel.map(
                       (m) => (
@@ -1364,7 +1370,7 @@ export default function MapelPage() {
 
                           <div className="flex items-start gap-3">
 
-                            <div className="w-10 h-10 rounded-xl bg-[#EAF1FF] text-[#155DFC] flex items-center justify-center shrink-0">
+                            <div className="w-10 h-10 rounded-xl theme-info flex items-center justify-center shrink-0">
                               <BookMarked
                                 size={17}
                               />
@@ -1376,12 +1382,12 @@ export default function MapelPage() {
 
                                 <div className="min-w-0">
 
-                                  <h3 className="text-sm font-semibold text-slate-900">
+                                  <h3 className="text-sm font-semibold theme-text">
                                     {m.nama ||
                                       "-"}
                                   </h3>
 
-                                  <span className="inline-flex mt-1.5 px-2 py-1 rounded-md bg-slate-100 text-slate-600 font-mono text-[10px] font-bold">
+                                  <span className="inline-flex mt-1.5 px-2 py-1 rounded-md theme-card-soft theme-text-secondary font-mono text-[10px] font-bold">
                                     {m.kode ||
                                       "-"}
                                   </span>
@@ -1400,7 +1406,7 @@ export default function MapelPage() {
 
                               <div className="mt-4">
 
-                                <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400 mb-2">
+                                <p className="text-[10px] font-bold uppercase tracking-wide theme-text-muted mb-2">
                                   Guru Pengajar
                                 </p>
 
@@ -1418,11 +1424,11 @@ export default function MapelPage() {
 
                                 <div className="flex items-center justify-between mb-2">
 
-                                  <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                                  <p className="text-[10px] font-bold uppercase tracking-wide theme-text-muted">
                                     Kelas
                                   </p>
 
-                                  <span className="text-[10px] text-slate-400">
+                                  <span className="text-[10px] theme-text-muted">
                                     {m.kelas?.length ||
                                       0}{" "}
                                     kelas
@@ -1442,13 +1448,13 @@ export default function MapelPage() {
                                           key={
                                             kelas.id
                                           }
-                                          className="inline-flex items-center gap-1 px-2 py-1 rounded-lg border border-slate-200 bg-white text-[10px] font-medium text-slate-600"
+                                          className="inline-flex items-center gap-1 px-2 py-1 rounded-lg border theme-card text-[10px] font-medium theme-text-secondary"
                                         >
                                           <GraduationCap
                                             size={
                                               11
                                             }
-                                            className="text-[#155DFC]"
+                                            className="text-[var(--color-primary)]"
                                           />
 
                                           {
@@ -1460,7 +1466,7 @@ export default function MapelPage() {
 
                                   </div>
                                 ) : (
-                                  <span className="text-[11px] text-slate-400">
+                                  <span className="text-[11px] theme-text-muted">
                                     Belum diassign ke kelas
                                   </span>
                                 )}
@@ -1469,17 +1475,17 @@ export default function MapelPage() {
 
                               {/* SUMMARY */}
 
-                              <div className="mt-4 p-3 rounded-xl bg-slate-50 border border-slate-100">
+                              <div className="mt-4 p-3 rounded-xl theme-card-soft border">
 
                                 <div className="grid grid-cols-2 gap-3">
 
                                   <div>
 
-                                    <p className="text-[9px] uppercase tracking-wide font-bold text-slate-400">
+                                    <p className="text-[9px] uppercase tracking-wide font-bold theme-text-muted">
                                       Kode
                                     </p>
 
-                                    <p className="mt-1 text-xs font-semibold text-slate-700">
+                                    <p className="mt-1 text-xs font-semibold theme-text-secondary">
                                       {m.kode ||
                                         "-"}
                                     </p>
@@ -1488,11 +1494,11 @@ export default function MapelPage() {
 
                                   <div>
 
-                                    <p className="text-[9px] uppercase tracking-wide font-bold text-slate-400">
+                                    <p className="text-[9px] uppercase tracking-wide font-bold theme-text-muted">
                                       Penempatan
                                     </p>
 
-                                    <p className="mt-1 text-xs font-semibold text-slate-700">
+                                    <p className="mt-1 text-xs font-semibold theme-text-secondary">
                                       {m.assignments
                                         ?.length ||
                                         0}{" "}
@@ -1516,7 +1522,7 @@ export default function MapelPage() {
                                       m
                                     )
                                   }
-                                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 text-[11px] font-semibold text-slate-600 hover:text-[#155DFC] hover:bg-[#EAF1FF] transition-all"
+                                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg theme-card border text-[11px] font-semibold theme-text-secondary hover:text-[var(--color-primary)] hover:theme-info transition-all"
                                 >
                                   <Pencil
                                     size={13}
@@ -1535,7 +1541,7 @@ export default function MapelPage() {
                                     deletingId ===
                                     m.id
                                   }
-                                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg border border-slate-200 text-[11px] font-semibold text-slate-600 hover:text-rose-600 hover:bg-rose-50 transition-all disabled:opacity-40"
+                                  className="flex items-center gap-1.5 px-3 py-2 rounded-lg theme-card border text-[11px] font-semibold theme-text-secondary hover:theme-danger transition-all disabled:opacity-40"
                                 >
                                   {deletingId ===
                                   m.id ? (
@@ -1578,17 +1584,17 @@ export default function MapelPage() {
               {!loading &&
                 filteredMapel.length >
                   0 && (
-                  <div className="px-4 sm:px-5 lg:px-6 py-3.5 border-t border-slate-100 bg-slate-50/50 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                  <div className="px-4 sm:px-5 lg:px-6 py-3.5 border-t theme-card-soft flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
 
                     <div className="flex items-center gap-2">
 
-                      <div className="w-6 h-6 rounded-md bg-[#EAF1FF] text-[#155DFC] flex items-center justify-center">
+                      <div className="w-6 h-6 rounded-md theme-info flex items-center justify-center">
                         <Layers size={12} />
                       </div>
 
-                      <p className="text-[11px] text-slate-500">
+                      <p className="text-[11px] theme-text-secondary">
                         Total{" "}
-                        <span className="font-semibold text-slate-700">
+                        <span className="font-semibold theme-text">
                           {filteredMapel.length}
                         </span>{" "}
                         mata pelajaran ditampilkan
@@ -1599,7 +1605,7 @@ export default function MapelPage() {
                     <button
                       type="button"
                       onClick={handleTambah}
-                      className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[#155DFC] hover:text-[#0D47C9] transition-colors"
+                      className="inline-flex items-center gap-1.5 text-[11px] font-semibold text-[var(--color-primary)] hover:text-[var(--color-primary-hover)] transition-colors"
                     >
                       Tambah mata pelajaran
                       <ChevronRight size={13} />
@@ -1616,11 +1622,11 @@ export default function MapelPage() {
 
             <div className="flex items-center justify-between px-1 mt-4">
 
-              <p className="text-[10px] sm:text-[11px] text-slate-400">
+              <p className="text-[10px] sm:text-[11px] theme-text-muted">
                 SmartSchool • Manajemen Akademik
               </p>
 
-              <p className="hidden sm:block text-[10px] text-slate-400">
+              <p className="hidden sm:block text-[10px] theme-text-muted">
                 Admin Sekolah
               </p>
 

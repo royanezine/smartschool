@@ -11,13 +11,11 @@ import {
   X,
   CheckCircle2,
 } from "lucide-react";
-
 import Sidebar from "../../../components/Sidebar";
 import Header from "../../../components/Header";
 
 const API_URL = (
-  process.env.NEXT_PUBLIC_API_URL ||
-  "http://localhost:5000"
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
 ).replace(/\/$/, "");
 
 const getToken = () => {
@@ -25,9 +23,28 @@ const getToken = () => {
   return localStorage.getItem("token");
 };
 
-/* =========================================================
-   FORM INPUT
-========================================================= */
+// ============================================================
+// THEME HELPERS
+// ============================================================
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]";
+
+const themePrimaryFocus =
+  "focus:border-[color-mix(in_srgb,var(--color-primary)_50%,transparent)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]";
+
+const themeTextHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_24px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+// ============================================================
+// FORM INPUT
+// ============================================================
 
 function FormInput({
   label,
@@ -40,10 +57,10 @@ function FormInput({
 }) {
   return (
     <div>
-      <label className="mb-2 block text-xs font-semibold text-slate-600">
+      <label className="mb-2 block text-xs font-semibold theme-text-secondary">
         {label}
         {required && (
-          <span className="ml-1 text-red-500">*</span>
+          <span className="ml-1 theme-danger">*</span>
         )}
       </label>
 
@@ -54,31 +71,29 @@ function FormInput({
         onChange={onChange}
         required={required}
         placeholder={placeholder}
-        className="
+        className={`
           h-11
           w-full
           rounded-xl
           border
-          border-slate-200
-          bg-white
+          theme-border
+          theme-input
           px-4
           text-sm
-          text-slate-800
+          theme-text
           outline-none
           transition
-          placeholder:text-slate-400
-          focus:border-[#155DFC]/50
-          focus:ring-2
-          focus:ring-[#155DFC]/20
-        "
+          placeholder:text-[var(--color-text-placeholder)]
+          ${themePrimaryFocus}
+        `}
       />
     </div>
   );
 }
 
-/* =========================================================
-   FORM SELECT
-========================================================= */
+// ============================================================
+// FORM SELECT
+// ============================================================
 
 function FormSelect({
   label,
@@ -91,10 +106,10 @@ function FormSelect({
 }) {
   return (
     <div>
-      <label className="mb-2 block text-xs font-semibold text-slate-600">
+      <label className="mb-2 block text-xs font-semibold theme-text-secondary">
         {label}
         {required && (
-          <span className="ml-1 text-red-500">*</span>
+          <span className="ml-1 theme-danger">*</span>
         )}
       </label>
 
@@ -104,25 +119,22 @@ function FormSelect({
         onChange={onChange}
         required={required}
         disabled={disabled}
-        className="
+        className={`
           h-11
           w-full
           rounded-xl
           border
-          border-slate-200
-          bg-white
+          theme-border
+          theme-input
           px-4
           text-sm
-          text-slate-800
+          theme-text
           outline-none
           transition
           disabled:cursor-not-allowed
-          disabled:bg-slate-50
-          disabled:text-slate-400
-          focus:border-[#155DFC]/50
-          focus:ring-2
-          focus:ring-[#155DFC]/20
-        "
+          disabled:opacity-60
+          ${themePrimaryFocus}
+        `}
       >
         <option value="">
           {disabled ? "Memuat..." : `Pilih ${label}`}
@@ -141,30 +153,19 @@ function FormSelect({
   );
 }
 
-/* =========================================================
-   PAGE
-========================================================= */
+// ============================================================
+// PAGE
+// ============================================================
 
 export default function TambahPenggunaPage() {
   const router = useRouter();
 
-  const [sidebarOpen, setSidebarOpen] =
-    useState(true);
-
-  const [loading, setLoading] =
-    useState(false);
-
-  const [loadingData, setLoadingData] =
-    useState(true);
-
-  const [error, setError] =
-    useState("");
-
-  const [roles, setRoles] =
-    useState([]);
-
-  const [sekolahId, setSekolahId] =
-    useState("");
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [loadingData, setLoadingData] = useState(true);
+  const [error, setError] = useState("");
+  const [roles, setRoles] = useState([]);
+  const [sekolahId, setSekolahId] = useState("");
 
   const [form, setForm] = useState({
     namaLengkap: "",
@@ -181,9 +182,9 @@ export default function TambahPenggunaPage() {
     peran: "",
   });
 
-  /* =========================================================
-     LOAD DATA ROLE + SEKOLAH
-  ========================================================= */
+  // ==========================================================
+  // LOAD DATA ROLE + SEKOLAH
+  // ==========================================================
 
   useEffect(() => {
     const loadInitialData = async () => {
@@ -204,19 +205,17 @@ export default function TambahPenggunaPage() {
           Authorization: `Bearer ${token}`,
         };
 
-        /* =====================================================
-           AMBIL PROFILE ADMIN
-           Untuk mendapatkan sekolahId
-        ===================================================== */
+        // ====================================================
+        // AMBIL PROFILE ADMIN
+        // ====================================================
 
-        const profileResponse =
-          await fetch(
-            `${API_URL}/api/users/profile`,
-            {
-              method: "GET",
-              headers,
-            }
-          );
+        const profileResponse = await fetch(
+          `${API_URL}/api/users/profile`,
+          {
+            method: "GET",
+            headers,
+          }
+        );
 
         const profileResult =
           await profileResponse.json();
@@ -240,28 +239,20 @@ export default function TambahPenggunaPage() {
           profile?.sekolah?.id || "";
 
         if (currentSekolahId) {
-          setSekolahId(
-            currentSekolahId
-          );
+          setSekolahId(currentSekolahId);
         }
 
-        /* =====================================================
-           AMBIL USERS UNTUK MENDAPATKAN ROLE + ROLE ID
+        // ====================================================
+        // AMBIL USERS UNTUK MENDAPATKAN ROLE
+        // ====================================================
 
-           Backend GET /api/users mengembalikan:
-           peran.id
-           peran.nama
-           peran.namaTampilan
-        ===================================================== */
-
-        const usersResponse =
-          await fetch(
-            `${API_URL}/api/users?page=1&limit=1000`,
-            {
-              method: "GET",
-              headers,
-            }
-          );
+        const usersResponse = await fetch(
+          `${API_URL}/api/users?page=1&limit=1000`,
+          {
+            method: "GET",
+            headers,
+          }
+        );
 
         const usersResult =
           await usersResponse.json();
@@ -278,15 +269,9 @@ export default function TambahPenggunaPage() {
           );
         }
 
-        /* =====================================================
-           NORMALISASI DATA USERS
-
-           paginatedResponse bisa memakai data:
-           - array langsung
-           - atau object tertentu
-
-           Kita handle beberapa kemungkinan.
-        ===================================================== */
+        // ====================================================
+        // NORMALISASI DATA USERS
+        // ====================================================
 
         let users = [];
 
@@ -312,23 +297,20 @@ export default function TambahPenggunaPage() {
             usersResult.items;
         }
 
-        /* =====================================================
-           AMBIL ROLE UNIK
-        ===================================================== */
+        // ====================================================
+        // AMBIL ROLE UNIK
+        // ====================================================
 
-        const roleMap =
-          new Map();
+        const roleMap = new Map();
 
         users.forEach((user) => {
-          const role =
-            user?.peran;
+          const role = user?.peran;
 
           if (!role?.id) return;
 
-          const roleName =
-            String(
-              role.nama || ""
-            ).toLowerCase();
+          const roleName = String(
+            role.nama || ""
+          ).toLowerCase();
 
           const displayName =
             role.namaTampilan ||
@@ -336,21 +318,18 @@ export default function TambahPenggunaPage() {
             "";
 
           if (!roleMap.has(role.id)) {
-            roleMap.set(
-              role.id,
-              {
-                id: role.id,
-                nama: roleName,
-                namaTampilan:
-                  displayName,
-              }
-            );
+            roleMap.set(role.id, {
+              id: role.id,
+              nama: roleName,
+              namaTampilan:
+                displayName,
+            });
           }
         });
 
-        /* =====================================================
-           SUSUN ROLE SESUAI URUTAN FORM LAMA
-        ===================================================== */
+        // ====================================================
+        // SUSUN ROLE
+        // ====================================================
 
         const preferredRoles = [
           "guru",
@@ -381,16 +360,14 @@ export default function TambahPenggunaPage() {
                   found.id
               )
             ) {
-              foundRoles.push(
-                found
-              );
+              foundRoles.push(found);
             }
           }
         );
 
-        /* =====================================================
-           TAMBAHKAN ROLE LAIN JIKA ADA
-        ===================================================== */
+        // ====================================================
+        // TAMBAHKAN ROLE LAIN
+        // ====================================================
 
         Array.from(
           roleMap.values()
@@ -398,23 +375,14 @@ export default function TambahPenggunaPage() {
           if (
             !foundRoles.some(
               (item) =>
-                item.id ===
-                role.id
+                item.id === role.id
             )
           ) {
-            foundRoles.push(
-              role
-            );
+            foundRoles.push(role);
           }
         });
 
-        setRoles(
-          foundRoles
-        );
-
-        /* =====================================================
-           DEBUG
-        ===================================================== */
+        setRoles(foundRoles);
 
         console.log(
           "ROLE YANG TERSEDIA:",
@@ -426,9 +394,7 @@ export default function TambahPenggunaPage() {
           currentSekolahId
         );
 
-        if (
-          foundRoles.length === 0
-        ) {
+        if (foundRoles.length === 0) {
           console.warn(
             "Tidak ditemukan role dari GET /api/users."
           );
@@ -451,9 +417,9 @@ export default function TambahPenggunaPage() {
     loadInitialData();
   }, []);
 
-  /* =========================================================
-     HANDLE CHANGE
-  ========================================================= */
+  // ==========================================================
+  // HANDLE CHANGE
+  // ==========================================================
 
   const handleChange = (e) => {
     const {
@@ -471,61 +437,50 @@ export default function TambahPenggunaPage() {
     }
   };
 
-  /* =========================================================
-     ROLE OPTIONS
-  ========================================================= */
+  // ==========================================================
+  // ROLE OPTIONS
+  // ==========================================================
 
-  const roleOptions =
-    roles.map((role) => {
-      let label =
-        role.namaTampilan ||
-        role.nama;
+  const roleOptions = roles.map((role) => {
+    let label =
+      role.namaTampilan ||
+      role.nama;
 
-      const normalized =
-        String(
-          role.nama || ""
-        ).toLowerCase();
+    const normalized = String(
+      role.nama || ""
+    ).toLowerCase();
 
-      if (
-        normalized ===
-        "guru"
-      ) {
-        label = "Guru";
-      }
+    if (normalized === "guru") {
+      label = "Guru";
+    }
 
-      if (
-        normalized ===
-          "staff" ||
-        normalized ===
-          "staf"
-      ) {
-        label = "Staff";
-      }
+    if (
+      normalized === "staff" ||
+      normalized === "staf"
+    ) {
+      label = "Staff";
+    }
 
-      if (
-        normalized ===
-        "siswa"
-      ) {
-        label = "Siswa";
-      }
+    if (normalized === "siswa") {
+      label = "Siswa";
+    }
 
-      if (
-        normalized ===
-        "admin_sekolah"
-      ) {
-        label =
-          "Admin Sekolah";
-      }
+    if (
+      normalized ===
+      "admin_sekolah"
+    ) {
+      label = "Admin Sekolah";
+    }
 
-      return {
-        value: role.id,
-        label,
-      };
-    });
+    return {
+      value: role.id,
+      label,
+    };
+  });
 
-  /* =========================================================
-     HANDLE SUBMIT
-  ========================================================= */
+  // ==========================================================
+  // HANDLE SUBMIT
+  // ==========================================================
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -542,9 +497,9 @@ export default function TambahPenggunaPage() {
         );
       }
 
-      /* =====================================================
-         VALIDASI
-      ===================================================== */
+      // ======================================================
+      // VALIDASI
+      // ======================================================
 
       if (
         !form.namaLengkap.trim()
@@ -562,9 +517,7 @@ export default function TambahPenggunaPage() {
         );
       }
 
-      if (
-        !form.email.trim()
-      ) {
+      if (!form.email.trim()) {
         throw new Error(
           "Email wajib diisi."
         );
@@ -596,20 +549,9 @@ export default function TambahPenggunaPage() {
         );
       }
 
-      /* =====================================================
-         PAYLOAD
-
-         PENTING:
-         Backend createUser meminta:
-
-         kataSandi
-         peranId
-
-         BUKAN:
-
-         password
-         peran
-      ===================================================== */
+      // ======================================================
+      // PAYLOAD
+      // ======================================================
 
       const payload = {
         namaLengkap:
@@ -659,42 +601,33 @@ export default function TambahPenggunaPage() {
           undefined,
       };
 
-      /* =====================================================
-         DEBUG PAYLOAD
-      ===================================================== */
-
       console.log(
         "PAYLOAD CREATE USER:",
         payload
       );
 
-      /* =====================================================
-         POST CREATE USER
-      ===================================================== */
+      // ======================================================
+      // POST CREATE USER
+      // ======================================================
 
-      const response =
-        await fetch(
-          `${API_URL}/api/users`,
-          {
-            method: "POST",
-
-            headers: {
-              "Content-Type":
-                "application/json",
-
-              Accept:
-                "application/json",
-
-              Authorization:
-                `Bearer ${token}`,
-            },
-
-            body:
-              JSON.stringify(
-                payload
-              ),
-          }
-        );
+      const response = await fetch(
+        `${API_URL}/api/users`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type":
+              "application/json",
+            Accept:
+              "application/json",
+            Authorization:
+              `Bearer ${token}`,
+          },
+          body:
+            JSON.stringify(
+              payload
+            ),
+        }
+      );
 
       const result =
         await response.json();
@@ -704,9 +637,9 @@ export default function TambahPenggunaPage() {
         result
       );
 
-      /* =====================================================
-         ERROR BACKEND
-      ===================================================== */
+      // ======================================================
+      // ERROR BACKEND
+      // ======================================================
 
       if (!response.ok) {
         throw new Error(
@@ -715,9 +648,9 @@ export default function TambahPenggunaPage() {
         );
       }
 
-      /* =====================================================
-         BERHASIL
-      ===================================================== */
+      // ======================================================
+      // BERHASIL
+      // ======================================================
 
       router.push(
         "/admin/pengguna"
@@ -739,15 +672,15 @@ export default function TambahPenggunaPage() {
     }
   };
 
-  /* =======================================================
-     RENDER
-  ======================================================= */
+  // ==========================================================
+  // RENDER
+  // ==========================================================
 
   return (
-    <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
+    <div className="flex h-screen w-full theme-page overflow-hidden">
       {/* =====================================================
           SIDEBAR
-      ===================================================== */}
+      ====================================================== */}
 
       <Sidebar
         role="admin"
@@ -762,9 +695,9 @@ export default function TambahPenggunaPage() {
 
       {/* =====================================================
           MAIN CONTENT
-      ===================================================== */}
+      ====================================================== */}
 
-      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+      <div className="flex flex-1 min-w-0 h-full flex-col overflow-hidden">
         {/* HEADER */}
 
         <Header
@@ -776,63 +709,43 @@ export default function TambahPenggunaPage() {
           }
         />
 
-        {/* =====================================================
+        {/* ===================================================
             PAGE
-        ===================================================== */}
+        ==================================================== */}
 
         <main className="flex-1 overflow-y-auto">
-          <div className="p-4 sm:p-6 lg:p-8 space-y-5 sm:space-y-6">
+          <div className="space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8">
             {/* =================================================
                 PAGE HEADER
             ================================================== */}
 
-            <div
-              className="
-                flex
-                flex-col
-                lg:flex-row
-                lg:items-center
-                lg:justify-between
-                gap-4
-              "
-            >
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               {/* TITLE */}
 
               <div className="flex items-center gap-3">
                 <div
-                  className="
-                    w-11
-                    h-11
-                    rounded-xl
-                    bg-gradient-to-br
-                    from-[#155DFC]
-                    to-[#0d47c9]
-                    text-white
+                  className={`
                     flex
+                    h-11
+                    w-11
+                    shrink-0
                     items-center
                     justify-center
-                    shadow-lg
-                    shadow-[#155DFC]/20
-                    shrink-0
-                  "
+                    rounded-xl
+                    bg-[var(--color-primary)]
+                    text-white
+                    ${themePrimaryShadow}
+                  `}
                 >
                   <UserPlus size={20} />
                 </div>
 
                 <div className="min-w-0">
-                  <h1
-                    className="
-                      text-xl
-                      sm:text-2xl
-                      font-bold
-                      text-slate-800
-                      truncate
-                    "
-                  >
+                  <h1 className="truncate text-xl font-bold theme-text sm:text-2xl">
                     Tambah Pengguna
                   </h1>
 
-                  <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                  <p className="mt-1 text-xs theme-text-secondary sm:text-sm">
                     Tambahkan pengguna baru ke dalam sekolah.
                   </p>
                 </div>
@@ -840,30 +753,29 @@ export default function TambahPenggunaPage() {
 
               {/* ACTION */}
 
-              <div className="flex flex-col sm:flex-row gap-2">
+              <div className="flex flex-col gap-2 sm:flex-row">
                 <button
                   type="button"
                   onClick={() =>
                     router.back()
                   }
-                  className="
+                  className={`
                     inline-flex
                     items-center
                     justify-center
                     gap-2
-                    px-4
-                    py-2.5
                     rounded-xl
                     border
-                    border-slate-200
-                    bg-white
-                    text-slate-600
+                    theme-border
+                    theme-card
+                    px-4
+                    py-2.5
                     text-sm
                     font-semibold
-                    hover:bg-slate-50
-                    hover:border-slate-300
+                    theme-text-secondary
                     transition
-                  "
+                    ${themeTextHover}
+                  `}
                 >
                   <ArrowLeft size={15} />
                   Kembali
@@ -871,32 +783,33 @@ export default function TambahPenggunaPage() {
               </div>
             </div>
 
-            {/* ERROR */}
+            {/* =================================================
+                ERROR
+            ================================================== */}
 
             {error && (
               <div
                 className="
+                  theme-danger
                   flex
                   items-start
                   gap-3
                   rounded-xl
                   border
-                  border-red-200
-                  bg-red-50
                   p-4
                 "
               >
                 <AlertCircle
                   size={19}
-                  className="mt-0.5 shrink-0 text-red-600"
+                  className="mt-0.5 shrink-0"
                 />
 
                 <div className="flex-1">
-                  <p className="text-sm font-semibold text-red-800">
+                  <p className="text-sm font-semibold">
                     Terjadi kesalahan
                   </p>
 
-                  <p className="mt-0.5 text-sm text-red-700">
+                  <p className="mt-0.5 text-sm opacity-90">
                     {error}
                   </p>
                 </div>
@@ -906,7 +819,7 @@ export default function TambahPenggunaPage() {
                   onClick={() =>
                     setError("")
                   }
-                  className="text-red-500 hover:text-red-700"
+                  className="opacity-70 transition hover:opacity-100"
                 >
                   <X size={18} />
                 </button>
@@ -919,59 +832,59 @@ export default function TambahPenggunaPage() {
 
             <section
               className="
-                bg-white
+                theme-card
+                theme-border
+                overflow-hidden
                 rounded-2xl
                 border
-                border-slate-200/80
-                shadow-sm
-                overflow-hidden
+                shadow-[0_6px_24px_color-mix(in_srgb,var(--color-text)_6%,transparent)]
               "
             >
               {/* FORM HEADER */}
 
               <div
                 className="
-                  px-4
-                  sm:px-5
-                  lg:px-6
-                  py-4
-                  border-b
-                  border-slate-100
                   flex
                   flex-col
+                  gap-3
+                  border-b
+                  theme-border-soft
+                  px-4
+                  py-4
                   sm:flex-row
                   sm:items-center
                   sm:justify-between
-                  gap-3
+                  sm:px-5
+                  lg:px-6
                 "
               >
                 <div>
                   <div className="flex items-center gap-2">
                     <div
-                      className="
-                        w-8
-                        h-8
-                        rounded-lg
-                        bg-[#eaf1ff]
-                        border
-                        border-[#c7dbff]
+                      className={`
                         flex
+                        h-8
+                        w-8
                         items-center
                         justify-center
-                      "
+                        rounded-lg
+                        border
+                        ${themePrimarySoft}
+                        ${themePrimarySoftBorder}
+                      `}
                     >
                       <UserPlus
                         size={15}
-                        className="text-[#155DFC]"
+                        className="text-[var(--color-primary)]"
                       />
                     </div>
 
-                    <h2 className="text-sm font-bold text-slate-800">
+                    <h2 className="text-sm font-bold theme-text">
                       Informasi Pengguna
                     </h2>
                   </div>
 
-                  <p className="text-xs text-slate-400 mt-1">
+                  <p className="mt-1 text-xs theme-text-muted">
                     Isi informasi dasar pengguna dengan lengkap.
                   </p>
                 </div>
@@ -1012,9 +925,7 @@ export default function TambahPenggunaPage() {
                       label="Email"
                       name="email"
                       type="email"
-                      value={
-                        form.email
-                      }
+                      value={form.email}
                       onChange={
                         handleChange
                       }
@@ -1051,9 +962,7 @@ export default function TambahPenggunaPage() {
                     <FormSelect
                       label="Peran"
                       name="peran"
-                      value={
-                        form.peran
-                      }
+                      value={form.peran}
                       onChange={
                         handleChange
                       }
@@ -1082,9 +991,7 @@ export default function TambahPenggunaPage() {
                     <FormInput
                       label="NIP"
                       name="nip"
-                      value={
-                        form.nip
-                      }
+                      value={form.nip}
                       onChange={
                         handleChange
                       }
@@ -1094,9 +1001,7 @@ export default function TambahPenggunaPage() {
                     <FormInput
                       label="NIPD"
                       name="nipd"
-                      value={
-                        form.nipd
-                      }
+                      value={form.nipd}
                       onChange={
                         handleChange
                       }
@@ -1106,9 +1011,7 @@ export default function TambahPenggunaPage() {
                     <FormInput
                       label="NISN"
                       name="nisn"
-                      value={
-                        form.nisn
-                      }
+                      value={form.nisn}
                       onChange={
                         handleChange
                       }
@@ -1154,18 +1057,18 @@ export default function TambahPenggunaPage() {
 
                 <div
                   className="
-                    px-4
-                    sm:px-5
-                    lg:px-6
-                    py-4
-                    border-t
-                    border-slate-100
-                    bg-slate-50/70
                     flex
                     flex-col
+                    gap-2
+                    border-t
+                    theme-border-soft
+                    theme-card-soft
+                    px-4
+                    py-4
                     sm:flex-row
                     sm:justify-end
-                    gap-2
+                    sm:px-5
+                    lg:px-6
                   "
                 >
                   <button
@@ -1173,28 +1076,26 @@ export default function TambahPenggunaPage() {
                     onClick={() =>
                       router.back()
                     }
-                    disabled={
-                      loading
-                    }
-                    className="
+                    disabled={loading}
+                    className={`
                       inline-flex
                       items-center
                       justify-center
                       gap-2
-                      px-4
-                      py-2.5
                       rounded-xl
                       border
-                      border-slate-200
-                      bg-white
-                      text-slate-600
+                      theme-border
+                      theme-card
+                      px-4
+                      py-2.5
                       text-sm
                       font-semibold
-                      hover:bg-slate-50
+                      theme-text-secondary
                       transition
-                      disabled:opacity-50
                       disabled:cursor-not-allowed
-                    "
+                      disabled:opacity-50
+                      ${themeTextHover}
+                    `}
                   >
                     <X size={15} />
                     Batal
@@ -1212,18 +1113,16 @@ export default function TambahPenggunaPage() {
                       items-center
                       justify-center
                       gap-2
+                      rounded-xl
+                      bg-[var(--color-primary)]
                       px-4
                       py-2.5
-                      rounded-xl
-                      bg-gradient-to-r
-                      from-[#155DFC]
-                      to-[#0d47c9]
-                      text-white
                       text-sm
                       font-semibold
+                      text-white
                       shadow-sm
-                      hover:brightness-110
                       transition
+                      hover:brightness-110
                       disabled:cursor-not-allowed
                       disabled:opacity-60
                     "
@@ -1261,48 +1160,57 @@ export default function TambahPenggunaPage() {
 
             <section
               className="
-                bg-white
+                theme-card
+                theme-border
+                overflow-hidden
                 rounded-2xl
                 border
-                border-slate-200/80
-                shadow-sm
-                overflow-hidden
+                shadow-[0_6px_24px_color-mix(in_srgb,var(--color-text)_6%,transparent)]
               "
             >
               <div className="p-4 sm:p-5 lg:p-6">
                 <div className="flex items-start gap-3">
                   <div
-                    className="
-                      w-8
-                      h-8
-                      rounded-lg
-                      bg-[#eaf1ff]
-                      border
-                      border-[#c7dbff]
+                    className={`
                       flex
+                      h-8
+                      w-8
+                      shrink-0
                       items-center
                       justify-center
-                      shrink-0
-                    "
+                      rounded-lg
+                      border
+                      ${themePrimarySoft}
+                      ${themePrimarySoftBorder}
+                    `}
                   >
                     <CheckCircle2
                       size={15}
-                      className="text-[#155DFC]"
+                      className="text-[var(--color-primary)]"
                     />
                   </div>
 
                   <div className="min-w-0">
-                    <h3 className="text-sm font-bold text-slate-800">
+                    <h3 className="text-sm font-bold theme-text">
                       Petunjuk Pengisian
                     </h3>
 
-                    <ul className="mt-2 space-y-1.5 text-xs text-slate-500">
+                    <ul className="mt-2 space-y-1.5 text-xs theme-text-secondary">
                       <li className="flex items-start gap-2">
-                        <span className="mt-1.5 w-1 h-1 rounded-full bg-slate-400 shrink-0" />
+                        <span
+                          className="
+                            mt-1.5
+                            h-1
+                            w-1
+                            shrink-0
+                            rounded-full
+                            bg-[var(--color-text-muted)]
+                          "
+                        />
 
                         <span>
                           Field bertanda{" "}
-                          <span className="text-red-500 font-semibold">
+                          <span className="font-semibold theme-danger">
                             *
                           </span>{" "}
                           wajib diisi.
@@ -1310,7 +1218,16 @@ export default function TambahPenggunaPage() {
                       </li>
 
                       <li className="flex items-start gap-2">
-                        <span className="mt-1.5 w-1 h-1 rounded-full bg-slate-400 shrink-0" />
+                        <span
+                          className="
+                            mt-1.5
+                            h-1
+                            w-1
+                            shrink-0
+                            rounded-full
+                            bg-[var(--color-text-muted)]
+                          "
+                        />
 
                         <span>
                           Password minimal 8 karakter dengan kombinasi huruf dan angka.
@@ -1318,10 +1235,19 @@ export default function TambahPenggunaPage() {
                       </li>
 
                       <li className="flex items-start gap-2">
-                        <span className="mt-1.5 w-1 h-1 rounded-full bg-slate-400 shrink-0" />
+                        <span
+                          className="
+                            mt-1.5
+                            h-1
+                            w-1
+                            shrink-0
+                            rounded-full
+                            bg-[var(--color-text-muted)]
+                          "
+                        />
 
                         <span>
-                          NIP untuk Guru/Staff, NIPD & NISN untuk Siswa.
+                          NIP untuk Guru/Staff, NIPD &amp; NISN untuk Siswa.
                         </span>
                       </li>
                     </ul>

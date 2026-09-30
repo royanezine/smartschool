@@ -53,15 +53,15 @@ function StatusBadge({ status }) {
     <span
       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border ${
         aktif
-          ? "bg-emerald-50 text-emerald-600 border-emerald-200"
-          : "bg-slate-100 text-slate-500 border-slate-200"
+          ? "theme-success"
+          : "theme-card-soft theme-text-muted theme-border"
       }`}
     >
       <span
         className={`w-1.5 h-1.5 rounded-full ${
           aktif
-            ? "bg-emerald-500"
-            : "bg-slate-400"
+            ? "bg-[var(--color-success)]"
+            : "bg-[var(--color-text-muted)]"
         }`}
       />
 
@@ -446,8 +446,6 @@ export default function TambahMapelPage() {
     const kode =
       form.kode.trim().toUpperCase();
 
-    /* VALIDASI */
-
     if (!nama) {
       setError(
         "Nama mata pelajaran wajib diisi."
@@ -558,8 +556,6 @@ export default function TambahMapelPage() {
         );
       }
 
-      /* SEMUA BERHASIL */
-
       setSuccess(true);
 
       setTimeout(() => {
@@ -602,11 +598,7 @@ export default function TambahMapelPage() {
   ========================================================= */
 
   return (
-    <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
-
-      {/* =====================================================
-          SIDEBAR
-      ====================================================== */}
+    <div className="flex h-screen w-full theme-page overflow-hidden">
 
       <Sidebar
         active="guruMapel"
@@ -617,10 +609,6 @@ export default function TambahMapelPage() {
         }
         role="admin"
       />
-
-      {/* =====================================================
-          MAIN
-      ====================================================== */}
 
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
 
@@ -643,9 +631,7 @@ export default function TambahMapelPage() {
 
             <div className="max-w-7xl mx-auto space-y-6">
 
-              {/* ==================================================
-                  PAGE HEADER
-              ================================================== */}
+              {/* PAGE HEADER */}
 
               <div className="flex items-center gap-3">
 
@@ -655,7 +641,19 @@ export default function TambahMapelPage() {
                     handleBack
                   }
                   disabled={saving}
-                  className="p-2.5 rounded-xl border border-slate-200 bg-white text-slate-500 hover:bg-slate-100 hover:text-slate-700 transition-colors shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="
+                    p-2.5
+                    rounded-xl
+                    border
+                    theme-border
+                    theme-card
+                    theme-text-muted
+                    theme-table-hover
+                    transition-colors
+                    shrink-0
+                    disabled:opacity-50
+                    disabled:cursor-not-allowed
+                  "
                   title="Kembali"
                 >
                   <ArrowLeft
@@ -663,7 +661,7 @@ export default function TambahMapelPage() {
                   />
                 </button>
 
-                <div className="p-2.5 rounded-xl bg-gradient-to-br from-[#155DFC] to-[#0d47c9] text-white shadow-lg shadow-blue-900/10 shrink-0">
+                <div className="p-2.5 rounded-xl theme-primary shadow-lg shrink-0">
                   <BookMarked
                     size={20}
                   />
@@ -671,12 +669,12 @@ export default function TambahMapelPage() {
 
                 <div className="min-w-0">
 
-                  <h1 className="text-2xl font-bold text-slate-800">
+                  <h1 className="text-2xl font-bold theme-text">
                     Tambah Mata
                     Pelajaran
                   </h1>
 
-                  <p className="text-sm text-slate-500 mt-1">
+                  <p className="text-sm theme-text-muted mt-1">
                     Tambahkan mata
                     pelajaran,
                     guru pengajar,
@@ -689,29 +687,27 @@ export default function TambahMapelPage() {
 
               </div>
 
-              {/* ==================================================
-                  SUCCESS
-              ================================================== */}
+              {/* SUCCESS */}
 
               {success && (
-                <div className="flex items-center gap-3 p-4 rounded-xl border border-emerald-200 bg-emerald-50">
+                <div className="flex items-center gap-3 p-4 rounded-xl border theme-success">
 
-                  <div className="w-9 h-9 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-[var(--color-success-background)]">
                     <CheckCircle2
                       size={20}
-                      className="text-emerald-600"
+                      className="text-[var(--color-success)]"
                     />
                   </div>
 
                   <div>
 
-                    <p className="text-sm font-semibold text-emerald-800">
+                    <p className="text-sm font-semibold text-[var(--color-success)]">
                       Mata pelajaran
                       berhasil
                       ditambahkan
                     </p>
 
-                    <p className="text-xs text-emerald-700 mt-0.5">
+                    <p className="text-xs text-[var(--color-success)] mt-0.5">
                       Relasi guru dan
                       kelas berhasil
                       disimpan.
@@ -725,28 +721,26 @@ export default function TambahMapelPage() {
                 </div>
               )}
 
-              {/* ==================================================
-                  ERROR
-              ================================================== */}
+              {/* ERROR */}
 
               {error && (
-                <div className="flex items-start gap-3 p-4 rounded-xl border border-rose-200 bg-rose-50">
+                <div className="flex items-start gap-3 p-4 rounded-xl border theme-danger">
 
-                  <div className="w-9 h-9 rounded-lg bg-rose-100 flex items-center justify-center shrink-0">
+                  <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-[var(--color-danger-background)]">
                     <AlertCircle
                       size={20}
-                      className="text-rose-600"
+                      className="text-[var(--color-danger)]"
                     />
                   </div>
 
                   <div className="flex-1 min-w-0">
 
-                    <p className="text-sm font-semibold text-rose-800">
+                    <p className="text-sm font-semibold text-[var(--color-danger)]">
                       Gagal menyimpan
                       data
                     </p>
 
-                    <p className="text-sm text-rose-700 mt-1">
+                    <p className="text-sm text-[var(--color-danger)] mt-1">
                       {error}
                     </p>
 
@@ -755,25 +749,23 @@ export default function TambahMapelPage() {
                 </div>
               )}
 
-              {/* ==================================================
-                  LOADING DATA
-              ================================================== */}
+              {/* LOADING DATA */}
 
               {loadingData && (
-                <div className="flex items-center gap-3 p-4 rounded-xl border border-blue-100 bg-blue-50">
+                <div className="flex items-center gap-3 p-4 rounded-xl border theme-info">
 
                   <Loader2
                     size={19}
-                    className="text-[#155DFC] animate-spin"
+                    className="text-[var(--color-primary)] animate-spin"
                   />
 
                   <div>
 
-                    <p className="text-sm font-semibold text-blue-800">
+                    <p className="text-sm font-semibold text-[var(--color-primary)]">
                       Menyiapkan data
                     </p>
 
-                    <p className="text-xs text-blue-700 mt-0.5">
+                    <p className="text-xs theme-text-muted mt-0.5">
                       Mengambil daftar
                       kelas dan guru
                       dari server...
@@ -784,46 +776,50 @@ export default function TambahMapelPage() {
                 </div>
               )}
 
-              {/* ==================================================
-                  CONTENT GRID
-              ================================================== */}
+              {/* CONTENT GRID */}
 
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
 
-                {/* =================================================
-                    LEFT FORM
-                ================================================= */}
+                {/* LEFT FORM */}
 
                 <form
                   onSubmit={
                     handleSubmit
                   }
-                  className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden"
+                  className="
+                    lg:col-span-2
+                    theme-card
+                    rounded-2xl
+                    border
+                    theme-border
+                    shadow-sm
+                    overflow-hidden
+                  "
                 >
 
                   {/* FORM HEADER */}
 
-                  <div className="px-6 py-5 border-b border-slate-100 bg-slate-50/60">
+                  <div className="px-6 py-5 border-b theme-border-soft theme-card-soft">
 
                     <div className="flex items-center gap-3">
 
-                      <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center">
+                      <div className="w-9 h-9 rounded-lg theme-info flex items-center justify-center">
 
                         <BookMarked
                           size={18}
-                          className="text-[#155DFC]"
+                          className="text-[var(--color-primary)]"
                         />
 
                       </div>
 
                       <div>
 
-                        <h2 className="text-sm font-semibold text-slate-700">
+                        <h2 className="text-sm font-semibold theme-text-secondary">
                           Detail Mata
                           Pelajaran
                         </h2>
 
-                        <p className="text-xs text-slate-500 mt-0.5">
+                        <p className="text-xs theme-text-muted mt-0.5">
                           Isi informasi
                           dasar mata
                           pelajaran.
@@ -845,17 +841,17 @@ export default function TambahMapelPage() {
 
                       <label
                         htmlFor="nama"
-                        className="flex items-center gap-1.5 text-sm font-medium text-slate-700 mb-2"
+                        className="flex items-center gap-1.5 text-sm font-medium theme-text-secondary mb-2"
                       >
                         <Type
                           size={14}
-                          className="text-slate-400"
+                          className="theme-text-muted"
                         />
 
                         Nama Mata
                         Pelajaran
 
-                        <span className="text-rose-500">
+                        <span className="text-[var(--color-danger)]">
                           *
                         </span>
                       </label>
@@ -875,10 +871,25 @@ export default function TambahMapelPage() {
                         placeholder="Contoh: Matematika"
                         disabled={saving}
                         autoComplete="off"
-                        className="w-full px-3.5 py-3 text-sm rounded-xl border border-slate-200 bg-white text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#155DFC]/20 focus:border-[#155DFC]/50 transition-all disabled:bg-slate-50 disabled:text-slate-400"
+                        className="
+                          theme-input
+                          w-full
+                          px-3.5
+                          py-3
+                          text-sm
+                          rounded-xl
+                          border
+                          focus:outline-none
+                          focus:ring-2
+                          focus:ring-[var(--color-primary)]/20
+                          focus:border-[var(--color-primary)]
+                          transition-all
+                          disabled:opacity-60
+                          disabled:cursor-not-allowed
+                        "
                       />
 
-                      <p className="text-xs text-slate-400 mt-1.5">
+                      <p className="text-xs theme-text-muted mt-1.5">
                         Masukkan nama
                         mata pelajaran
                         sesuai kurikulum
@@ -893,17 +904,17 @@ export default function TambahMapelPage() {
 
                       <label
                         htmlFor="kode"
-                        className="flex items-center gap-1.5 text-sm font-medium text-slate-700 mb-2"
+                        className="flex items-center gap-1.5 text-sm font-medium theme-text-secondary mb-2"
                       >
                         <Hash
                           size={14}
-                          className="text-slate-400"
+                          className="theme-text-muted"
                         />
 
                         Kode Mata
                         Pelajaran
 
-                        <span className="text-rose-500">
+                        <span className="text-[var(--color-danger)]">
                           *
                         </span>
                       </label>
@@ -923,10 +934,27 @@ export default function TambahMapelPage() {
                         placeholder="Contoh: MTK-01"
                         disabled={saving}
                         autoComplete="off"
-                        className="w-full px-3.5 py-3 text-sm rounded-xl border border-slate-200 bg-white text-slate-800 placeholder:text-slate-400 font-mono uppercase focus:outline-none focus:ring-2 focus:ring-[#155DFC]/20 focus:border-[#155DFC]/50 transition-all disabled:bg-slate-50 disabled:text-slate-400"
+                        className="
+                          theme-input
+                          w-full
+                          px-3.5
+                          py-3
+                          text-sm
+                          rounded-xl
+                          border
+                          font-mono
+                          uppercase
+                          focus:outline-none
+                          focus:ring-2
+                          focus:ring-[var(--color-primary)]/20
+                          focus:border-[var(--color-primary)]
+                          transition-all
+                          disabled:opacity-60
+                          disabled:cursor-not-allowed
+                        "
                       />
 
-                      <p className="text-xs text-slate-400 mt-1.5">
+                      <p className="text-xs theme-text-muted mt-1.5">
                         Kode harus unik
                         untuk sekolah
                         ini.
@@ -940,11 +968,11 @@ export default function TambahMapelPage() {
 
                       <label
                         htmlFor="status"
-                        className="flex items-center gap-1.5 text-sm font-medium text-slate-700 mb-2"
+                        className="flex items-center gap-1.5 text-sm font-medium theme-text-secondary mb-2"
                       >
                         <ToggleLeft
                           size={15}
-                          className="text-slate-400"
+                          className="theme-text-muted"
                         />
 
                         Status
@@ -962,8 +990,24 @@ export default function TambahMapelPage() {
                           )
                         }
                         disabled={saving}
-                        className="w-full px-3.5 py-3 text-sm rounded-xl border border-slate-200 bg-white text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#155DFC]/20 focus:border-[#155DFC]/50 transition-all disabled:bg-slate-50 disabled:text-slate-400"
+                        className="
+                          theme-input
+                          w-full
+                          px-3.5
+                          py-3
+                          text-sm
+                          rounded-xl
+                          border
+                          focus:outline-none
+                          focus:ring-2
+                          focus:ring-[var(--color-primary)]/20
+                          focus:border-[var(--color-primary)]
+                          transition-all
+                          disabled:opacity-60
+                          disabled:cursor-not-allowed
+                        "
                       >
+
                         <option value="aktif">
                           Aktif
                         </option>
@@ -971,6 +1015,7 @@ export default function TambahMapelPage() {
                         <option value="nonaktif">
                           Nonaktif
                         </option>
+
                       </select>
 
                     </div>
@@ -979,16 +1024,16 @@ export default function TambahMapelPage() {
 
                     <div>
 
-                      <label className="flex items-center gap-1.5 text-sm font-medium text-slate-700 mb-2">
+                      <label className="flex items-center gap-1.5 text-sm font-medium theme-text-secondary mb-2">
 
                         <UserRound
                           size={14}
-                          className="text-slate-400"
+                          className="theme-text-muted"
                         />
 
                         Guru Pengajar
 
-                        <span className="text-rose-500">
+                        <span className="text-[var(--color-danger)]">
                           *
                         </span>
 
@@ -1008,23 +1053,45 @@ export default function TambahMapelPage() {
                                 !prev
                             )
                           }
-                          className="w-full flex items-center justify-between gap-3 px-3.5 py-3 text-sm rounded-xl border border-slate-200 bg-white text-left hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-[#155DFC]/20 focus:border-[#155DFC]/50 transition-all disabled:bg-slate-50 disabled:text-slate-400"
+                          className="
+                            w-full
+                            flex
+                            items-center
+                            justify-between
+                            gap-3
+                            px-3.5
+                            py-3
+                            text-sm
+                            rounded-xl
+                            border
+                            theme-border
+                            theme-input
+                            text-left
+                            theme-table-hover
+                            focus:outline-none
+                            focus:ring-2
+                            focus:ring-[var(--color-primary)]/20
+                            focus:border-[var(--color-primary)]
+                            transition-all
+                            disabled:opacity-60
+                            disabled:cursor-not-allowed
+                          "
                         >
 
                           <div className="flex items-center gap-3 min-w-0">
 
-                            <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center shrink-0">
+                            <div className="w-8 h-8 rounded-lg theme-info flex items-center justify-center shrink-0">
 
                               <UserRound
                                 size={15}
-                                className="text-[#155DFC]"
+                                className="text-[var(--color-primary)]"
                               />
 
                             </div>
 
                             <div className="min-w-0">
 
-                              <p className="text-sm font-medium text-slate-700 truncate">
+                              <p className="text-sm font-medium theme-text-secondary truncate">
 
                                 {selectedGuru
                                   ?.namaLengkap ||
@@ -1033,7 +1100,7 @@ export default function TambahMapelPage() {
                               </p>
 
                               {selectedGuru && (
-                                <p className="text-[11px] text-slate-400 truncate">
+                                <p className="text-[11px] theme-text-muted truncate">
                                   {selectedGuru.email ||
                                     selectedGuru.nip ||
                                     "Guru"}
@@ -1046,7 +1113,7 @@ export default function TambahMapelPage() {
 
                           <ChevronDown
                             size={17}
-                            className={`text-slate-400 shrink-0 transition-transform ${
+                            className={`theme-text-muted shrink-0 transition-transform ${
                               showGuruDropdown
                                 ? "rotate-180"
                                 : ""
@@ -1056,15 +1123,15 @@ export default function TambahMapelPage() {
                         </button>
 
                         {showGuruDropdown && (
-                          <div className="absolute z-30 left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden">
+                          <div className="absolute z-30 left-0 right-0 mt-2 theme-card border theme-border rounded-xl shadow-xl overflow-hidden">
 
-                            <div className="p-3 border-b border-slate-100">
+                            <div className="p-3 border-b theme-border-soft">
 
                               <div className="relative">
 
                                 <Search
                                   size={15}
-                                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                                  className="absolute left-3 top-1/2 -translate-y-1/2 theme-text-muted"
                                 />
 
                                 <input
@@ -1078,7 +1145,20 @@ export default function TambahMapelPage() {
                                     )
                                   }
                                   placeholder="Cari nama, email, atau NIP..."
-                                  className="w-full pl-9 pr-3 py-2.5 text-xs rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#155DFC]/20 focus:border-[#155DFC]/50"
+                                  className="
+                                    theme-input
+                                    w-full
+                                    pl-9
+                                    pr-3
+                                    py-2.5
+                                    text-xs
+                                    rounded-lg
+                                    border
+                                    focus:outline-none
+                                    focus:ring-2
+                                    focus:ring-[var(--color-primary)]/20
+                                    focus:border-[var(--color-primary)]
+                                  "
                                 />
 
                               </div>
@@ -1093,10 +1173,10 @@ export default function TambahMapelPage() {
 
                                   <UserRound
                                     size={24}
-                                    className="mx-auto text-slate-300"
+                                    className="mx-auto theme-text-muted"
                                   />
 
-                                  <p className="text-xs text-slate-500 mt-2">
+                                  <p className="text-xs theme-text-muted mt-2">
                                     Guru tidak
                                     ditemukan.
                                   </p>
@@ -1124,29 +1204,39 @@ export default function TambahMapelPage() {
                                           ""
                                         );
                                       }}
-                                      className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-slate-50 transition-colors"
+                                      className="
+                                        w-full
+                                        flex
+                                        items-center
+                                        gap-3
+                                        px-4
+                                        py-3
+                                        text-left
+                                        theme-table-hover
+                                        transition-colors
+                                      "
                                     >
 
-                                      <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
+                                      <div className="w-9 h-9 rounded-lg theme-card-soft flex items-center justify-center shrink-0">
 
                                         <UserRound
                                           size={
                                             16
                                           }
-                                          className="text-slate-500"
+                                          className="theme-text-muted"
                                         />
 
                                       </div>
 
                                       <div className="flex-1 min-w-0">
 
-                                        <p className="text-sm font-medium text-slate-700 truncate">
+                                        <p className="text-sm font-medium theme-text-secondary truncate">
                                           {
                                             guru.namaLengkap
                                           }
                                         </p>
 
-                                        <p className="text-[11px] text-slate-400 truncate">
+                                        <p className="text-[11px] theme-text-muted truncate">
                                           {guru.nip
                                             ? `NIP ${guru.nip}`
                                             : guru.email}
@@ -1160,7 +1250,7 @@ export default function TambahMapelPage() {
                                           size={
                                             17
                                           }
-                                          className="text-[#155DFC] shrink-0"
+                                          className="text-[var(--color-primary)] shrink-0"
                                         />
                                       )}
 
@@ -1177,7 +1267,7 @@ export default function TambahMapelPage() {
                       </div>
 
                       {selectedGuru && (
-                        <div className="mt-2 flex items-center gap-2 text-xs text-emerald-600">
+                        <div className="mt-2 flex items-center gap-2 text-xs text-[var(--color-success)]">
 
                           <CheckCircle2
                             size={13}
@@ -1201,17 +1291,17 @@ export default function TambahMapelPage() {
 
                       <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2 mb-2">
 
-                        <label className="flex items-center gap-1.5 text-sm font-medium text-slate-700">
+                        <label className="flex items-center gap-1.5 text-sm font-medium theme-text-secondary">
 
                           <School
                             size={14}
-                            className="text-slate-400"
+                            className="theme-text-muted"
                           />
 
                           Kelas yang
                           Menggunakan Mapel
 
-                          <span className="text-rose-500">
+                          <span className="text-[var(--color-danger)]">
                             *
                           </span>
 
@@ -1230,12 +1320,18 @@ export default function TambahMapelPage() {
                               filteredKelas.length ===
                                 0
                             }
-                            className="text-xs font-medium text-[#155DFC] hover:text-[#0d47c9] disabled:text-slate-300"
+                            className="
+                              text-xs
+                              font-medium
+                              text-[var(--color-primary)]
+                              hover:opacity-80
+                              disabled:opacity-40
+                            "
                           >
                             Pilih semua
                           </button>
 
-                          <span className="text-slate-300">
+                          <span className="theme-text-muted">
                             |
                           </span>
 
@@ -1249,7 +1345,13 @@ export default function TambahMapelPage() {
                               selectedKelasIds.length ===
                                 0
                             }
-                            className="text-xs font-medium text-slate-500 hover:text-slate-700 disabled:text-slate-300"
+                            className="
+                              text-xs
+                              font-medium
+                              theme-text-muted
+                              hover:opacity-80
+                              disabled:opacity-40
+                            "
                           >
                             Bersihkan
                           </button>
@@ -1262,7 +1364,7 @@ export default function TambahMapelPage() {
 
                         <Search
                           size={16}
-                          className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                          className="absolute left-3 top-1/2 -translate-y-1/2 theme-text-muted"
                         />
 
                         <input
@@ -1280,19 +1382,34 @@ export default function TambahMapelPage() {
                             loadingData
                           }
                           placeholder="Cari nama kelas..."
-                          className="w-full pl-9 pr-3.5 py-3 text-sm rounded-xl border border-slate-200 bg-white text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#155DFC]/20 focus:border-[#155DFC]/50 transition-all disabled:bg-slate-50"
+                          className="
+                            theme-input
+                            w-full
+                            pl-9
+                            pr-3.5
+                            py-3
+                            text-sm
+                            rounded-xl
+                            border
+                            focus:outline-none
+                            focus:ring-2
+                            focus:ring-[var(--color-primary)]/20
+                            focus:border-[var(--color-primary)]
+                            transition-all
+                            disabled:opacity-60
+                          "
                         />
 
                       </div>
 
                       <div className="flex items-center justify-between mb-3">
 
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs theme-text-muted">
 
                           {selectedKelasIds.length >
                           0 ? (
                             <>
-                              <span className="font-semibold text-[#155DFC]">
+                              <span className="font-semibold text-[var(--color-primary)]">
                                 {
                                   selectedKelasIds.length
                                 }
@@ -1305,23 +1422,23 @@ export default function TambahMapelPage() {
 
                         </p>
 
-                        <p className="text-[11px] text-slate-400">
+                        <p className="text-[11px] theme-text-muted">
                           Total {kelasList.length} kelas
                         </p>
 
                       </div>
 
-                      <div className="border border-slate-200 rounded-xl overflow-hidden">
+                      <div className="border theme-border rounded-xl overflow-hidden">
 
                         {loadingData ? (
                           <div className="p-8 text-center">
 
                             <Loader2
                               size={22}
-                              className="mx-auto text-[#155DFC] animate-spin"
+                              className="mx-auto text-[var(--color-primary)] animate-spin"
                             />
 
-                            <p className="text-xs text-slate-500 mt-2">
+                            <p className="text-xs theme-text-muted mt-2">
                               Memuat kelas...
                             </p>
 
@@ -1332,22 +1449,22 @@ export default function TambahMapelPage() {
 
                             <School
                               size={28}
-                              className="mx-auto text-slate-300"
+                              className="mx-auto theme-text-muted"
                             />
 
-                            <p className="text-sm font-medium text-slate-500 mt-2">
+                            <p className="text-sm font-medium theme-text-muted mt-2">
                               Kelas tidak
                               ditemukan
                             </p>
 
-                            <p className="text-xs text-slate-400 mt-1">
+                            <p className="text-xs theme-text-muted mt-1">
                               Coba gunakan kata
                               pencarian lain.
                             </p>
 
                           </div>
                         ) : (
-                          <div className="max-h-80 overflow-y-auto divide-y divide-slate-100">
+                          <div className="max-h-80 overflow-y-auto divide-y theme-border-soft">
 
                             {filteredKelas.map(
                               (kelas) => {
@@ -1370,46 +1487,66 @@ export default function TambahMapelPage() {
                                     disabled={
                                       saving
                                     }
-                                    className={`w-full flex items-center gap-3 px-4 py-3 text-left transition-colors ${
-                                      isSelected
-                                        ? "bg-blue-50/70"
-                                        : "bg-white hover:bg-slate-50"
-                                    }`}
+                                    className={`
+                                      w-full
+                                      flex
+                                      items-center
+                                      gap-3
+                                      px-4
+                                      py-3
+                                      text-left
+                                      transition-colors
+                                      ${
+                                        isSelected
+                                          ? "theme-sidebar-active"
+                                          : "theme-card theme-table-hover"
+                                      }
+                                    `}
                                   >
 
                                     <div
-                                      className={`w-5 h-5 rounded-md border flex items-center justify-center shrink-0 transition-all ${
-                                        isSelected
-                                          ? "bg-[#155DFC] border-[#155DFC]"
-                                          : "bg-white border-slate-300"
-                                      }`}
+                                      className={`
+                                        w-5
+                                        h-5
+                                        rounded-md
+                                        border
+                                        flex
+                                        items-center
+                                        justify-center
+                                        shrink-0
+                                        transition-all
+                                        ${
+                                          isSelected
+                                            ? "theme-primary"
+                                            : "theme-card theme-border"
+                                        }
+                                      `}
                                     >
 
                                       {isSelected && (
                                         <Check
                                           size={14}
-                                          className="text-white"
                                         />
                                       )}
 
                                     </div>
 
-                                    <div className="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
+                                    <div className="w-9 h-9 rounded-lg theme-card-soft flex items-center justify-center shrink-0">
 
                                       <School
                                         size={16}
-                                        className="text-slate-500"
+                                        className="theme-text-muted"
                                       />
 
                                     </div>
 
                                     <div className="flex-1 min-w-0">
 
-                                      <p className="text-sm font-semibold text-slate-700 truncate">
+                                      <p className="text-sm font-semibold theme-text-secondary truncate">
                                         {kelas.nama}
                                       </p>
 
-                                      <p className="text-[11px] text-slate-400 mt-0.5">
+                                      <p className="text-[11px] theme-text-muted mt-0.5">
 
                                         {kelas.tingkat
                                           ? `Tingkat ${kelas.tingkat}`
@@ -1426,7 +1563,7 @@ export default function TambahMapelPage() {
                                     {isSelected && (
                                       <CheckCircle2
                                         size={17}
-                                        className="text-[#155DFC] shrink-0"
+                                        className="text-[var(--color-primary)] shrink-0"
                                       />
                                     )}
 
@@ -1450,7 +1587,19 @@ export default function TambahMapelPage() {
                                 key={
                                   kelas.id
                                 }
-                                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-blue-50 border border-blue-100 text-xs font-medium text-[#155DFC]"
+                                className="
+                                  inline-flex
+                                  items-center
+                                  gap-1.5
+                                  px-2.5
+                                  py-1.5
+                                  rounded-lg
+                                  theme-info
+                                  border
+                                  theme-border
+                                  text-xs
+                                  font-medium
+                                "
                               >
 
                                 {
@@ -1467,7 +1616,7 @@ export default function TambahMapelPage() {
                                   disabled={
                                     saving
                                   }
-                                  className="hover:bg-blue-100 rounded-full p-0.5 transition-colors"
+                                  className="hover:opacity-70 rounded-full p-0.5 transition-colors"
                                   title={`Hapus ${kelas.nama}`}
                                 >
 
@@ -1490,11 +1639,9 @@ export default function TambahMapelPage() {
 
                   </div>
 
-                  {/* =================================================
-                      FORM FOOTER
-                  ================================================= */}
+                  {/* FORM FOOTER */}
 
-                  <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 px-6 py-5 border-t border-slate-100 bg-slate-50/60">
+                  <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 px-6 py-5 border-t theme-border-soft theme-card-soft">
 
                     <button
                       type="button"
@@ -1502,7 +1649,23 @@ export default function TambahMapelPage() {
                         handleBack
                       }
                       disabled={saving}
-                      className="w-full sm:w-auto px-5 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 transition-all font-medium text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                      className="
+                        w-full
+                        sm:w-auto
+                        px-5
+                        py-2.5
+                        rounded-xl
+                        border
+                        theme-border
+                        theme-card
+                        theme-text-secondary
+                        theme-table-hover
+                        transition-all
+                        font-medium
+                        text-sm
+                        disabled:opacity-60
+                        disabled:cursor-not-allowed
+                      "
                     >
                       Batal
                     </button>
@@ -1514,7 +1677,24 @@ export default function TambahMapelPage() {
                         success ||
                         loadingData
                       }
-                      className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 bg-[#155DFC] hover:bg-[#0d47c9] text-white rounded-xl transition-all shadow-sm font-medium text-sm disabled:opacity-60 disabled:cursor-not-allowed"
+                      className="
+                        w-full
+                        sm:w-auto
+                        flex
+                        items-center
+                        justify-center
+                        gap-2
+                        px-5
+                        py-2.5
+                        theme-primary
+                        rounded-xl
+                        transition-all
+                        shadow-sm
+                        font-medium
+                        text-sm
+                        disabled:opacity-60
+                        disabled:cursor-not-allowed
+                      "
                     >
 
                       {saving ? (
@@ -1544,23 +1724,21 @@ export default function TambahMapelPage() {
 
                 </form>
 
-                {/* =================================================
-                    RIGHT SIDE
-                ================================================= */}
+                {/* RIGHT SIDE */}
 
                 <div className="space-y-6">
 
                   {/* PREVIEW */}
 
-                  <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+                  <div className="theme-card rounded-2xl border theme-border shadow-sm overflow-hidden">
 
-                    <div className="px-5 py-4 border-b border-slate-100 bg-slate-50/60">
+                    <div className="px-5 py-4 border-b theme-border-soft theme-card-soft">
 
-                      <h2 className="text-sm font-semibold text-slate-700">
+                      <h2 className="text-sm font-semibold theme-text-secondary">
                         Pratinjau
                       </h2>
 
-                      <p className="text-xs text-slate-500 mt-0.5">
+                      <p className="text-xs theme-text-muted mt-0.5">
                         Data yang akan
                         disimpan ke
                         SmartSchool.
@@ -1570,11 +1748,11 @@ export default function TambahMapelPage() {
 
                     <div className="p-5">
 
-                      <div className="p-4 rounded-xl border border-slate-200 bg-slate-50">
+                      <div className="p-4 rounded-xl border theme-border theme-card-soft">
 
                         <div className="flex flex-wrap items-center gap-2">
 
-                          <span className="font-mono text-xs font-semibold text-[#155DFC] bg-blue-50 border border-blue-100 px-2.5 py-1 rounded-lg">
+                          <span className="font-mono text-xs font-semibold theme-info border theme-border px-2.5 py-1 rounded-lg">
 
                             {form.kode.trim()
                               ? form.kode
@@ -1592,34 +1770,34 @@ export default function TambahMapelPage() {
 
                         </div>
 
-                        <h3 className="text-base font-bold text-slate-900 mt-3">
+                        <h3 className="text-base font-bold theme-text mt-3">
 
                           {form.nama.trim() ||
                             "Nama mata pelajaran"}
 
                         </h3>
 
-                        <p className="text-xs text-slate-400 mt-1">
+                        <p className="text-xs theme-text-muted mt-1">
                           Mata Pelajaran
                         </p>
 
                         {selectedGuru && (
-                          <div className="mt-4 pt-3 border-t border-slate-200">
+                          <div className="mt-4 pt-3 border-t theme-border">
 
                             <div className="flex items-center gap-2">
 
                               <UserRound
                                 size={14}
-                                className="text-slate-400"
+                                className="theme-text-muted"
                               />
 
                               <div className="min-w-0">
 
-                                <p className="text-[11px] text-slate-400">
+                                <p className="text-[11px] theme-text-muted">
                                   Guru Pengajar
                                 </p>
 
-                                <p className="text-xs font-semibold text-slate-700 truncate">
+                                <p className="text-xs font-semibold theme-text-secondary truncate">
                                   {
                                     selectedGuru.namaLengkap
                                   }
@@ -1640,10 +1818,10 @@ export default function TambahMapelPage() {
 
                               <School
                                 size={14}
-                                className="text-slate-400"
+                                className="theme-text-muted"
                               />
 
-                              <p className="text-[11px] text-slate-400">
+                              <p className="text-[11px] theme-text-muted">
                                 Kelas
                               </p>
 
@@ -1662,7 +1840,7 @@ export default function TambahMapelPage() {
                                       key={
                                         kelas.id
                                       }
-                                      className="text-[10px] px-2 py-1 rounded-md bg-white border border-slate-200 text-slate-600"
+                                      className="text-[10px] px-2 py-1 rounded-md theme-card border theme-border theme-text-secondary"
                                     >
                                       {
                                         kelas.nama
@@ -1673,7 +1851,7 @@ export default function TambahMapelPage() {
 
                               {selectedKelas.length >
                                 6 && (
-                                <span className="text-[10px] px-2 py-1 rounded-md bg-slate-100 text-slate-500">
+                                <span className="text-[10px] px-2 py-1 rounded-md theme-card-soft theme-text-muted">
                                   +
                                   {selectedKelas.length -
                                     6}{" "}
@@ -1694,26 +1872,26 @@ export default function TambahMapelPage() {
 
                   {/* RELATION INFO */}
 
-                  <div className="bg-blue-50 rounded-2xl border border-blue-100 p-5">
+                  <div className="theme-info rounded-2xl border theme-border p-5">
 
                     <div className="flex items-center gap-2 mb-3">
 
-                      <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center">
+                      <div className="w-8 h-8 rounded-lg theme-card flex items-center justify-center">
 
                         <BookOpen
                           size={16}
-                          className="text-[#155DFC]"
+                          className="text-[var(--color-primary)]"
                         />
 
                       </div>
 
                       <div>
 
-                        <h2 className="text-sm font-semibold text-[#0d47c9]">
+                        <h2 className="text-sm font-semibold text-[var(--color-primary)]">
                           Relasi Pengajaran
                         </h2>
 
-                        <p className="text-[11px] text-blue-700/70">
+                        <p className="text-[11px] theme-text-muted">
                           Kelas Mapel
                         </p>
 
@@ -1725,11 +1903,11 @@ export default function TambahMapelPage() {
 
                       <div className="flex items-center justify-between gap-3">
 
-                        <span className="text-xs text-slate-500">
+                        <span className="text-xs theme-text-muted">
                           Guru
                         </span>
 
-                        <span className="text-xs font-semibold text-slate-700 text-right">
+                        <span className="text-xs font-semibold theme-text-secondary text-right">
                           {selectedGuru?.namaLengkap ||
                             "-"}
                         </span>
@@ -1738,11 +1916,11 @@ export default function TambahMapelPage() {
 
                       <div className="flex items-center justify-between gap-3">
 
-                        <span className="text-xs text-slate-500">
+                        <span className="text-xs theme-text-muted">
                           Jumlah kelas
                         </span>
 
-                        <span className="text-xs font-semibold text-[#155DFC]">
+                        <span className="text-xs font-semibold text-[var(--color-primary)]">
                           {
                             selectedKelasIds.length
                           }
@@ -1750,9 +1928,9 @@ export default function TambahMapelPage() {
 
                       </div>
 
-                      <div className="pt-3 border-t border-blue-100">
+                      <div className="pt-3 border-t theme-border">
 
-                        <p className="text-[11px] text-blue-700/70 leading-relaxed">
+                        <p className="text-[11px] theme-text-muted leading-relaxed">
                           Setelah mata
                           pelajaran
                           berhasil dibuat,
@@ -1773,27 +1951,27 @@ export default function TambahMapelPage() {
 
                   {/* BACKEND INFO */}
 
-                  <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+                  <div className="theme-card rounded-2xl border theme-border shadow-sm p-5">
 
                     <div className="flex items-start gap-3">
 
-                      <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
+                      <div className="w-9 h-9 rounded-lg theme-success flex items-center justify-center shrink-0">
 
                         <Info
                           size={18}
-                          className="text-emerald-600"
+                          className="text-[var(--color-success)]"
                         />
 
                       </div>
 
                       <div>
 
-                        <p className="text-sm font-semibold text-slate-700">
+                        <p className="text-sm font-semibold theme-text-secondary">
                           Sinkronisasi
                           Backend
                         </p>
 
-                        <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+                        <p className="text-xs theme-text-muted mt-1 leading-relaxed">
                           Data sekolah
                           otomatis mengikuti
                           akun Admin Sekolah

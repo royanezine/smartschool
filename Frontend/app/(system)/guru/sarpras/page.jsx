@@ -15,8 +15,73 @@ import {
   Clock,
 } from "lucide-react";
 
-// ===== DUMMY DATA =====
-// Ringkasan peminjaman sarana-prasarana untuk ditampilkan di halaman index Sarpras.
+// =========================================================
+// THEME HELPERS
+// =========================================================
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+// =========================================================
+// DUMMY DATA
+// =========================================================
+
+// Ringkasan peminjaman sarana-prasarana untuk ditampilkan
+// di halaman index Sarpras.
 // Ganti dengan data asli dari API/DB begitu tersedia.
 
 const subHalaman = [
@@ -24,48 +89,86 @@ const subHalaman = [
     key: "pinjam",
     href: "/guru/sarpras/pinjam",
     icon: Package,
-    color: "blue",
+    color: "primary",
     label: "Pinjam",
-    deskripsi: "Ajukan peminjaman alat, ruangan, atau fasilitas sekolah untuk kebutuhan mengajar.",
+    deskripsi:
+      "Ajukan peminjaman alat, ruangan, atau fasilitas sekolah untuk kebutuhan mengajar.",
     info: "12 item tersedia",
   },
   {
     key: "peminjaman",
     href: "/guru/sarpras/peminjaman",
     icon: ClipboardList,
-    color: "amber",
+    color: "warning",
     label: "Peminjaman",
-    deskripsi: "Pantau status pengajuan peminjaman yang sedang berjalan atau menunggu persetujuan.",
+    deskripsi:
+      "Pantau status pengajuan peminjaman yang sedang berjalan atau menunggu persetujuan.",
     info: "3 pengajuan aktif",
   },
   {
     key: "riwayat",
     href: "/guru/sarpras/riwayat",
     icon: FileText,
-    color: "emerald",
+    color: "success",
     label: "Riwayat",
-    deskripsi: "Lihat catatan lengkap seluruh peminjaman yang telah selesai atau dikembalikan.",
+    deskripsi:
+      "Lihat catatan lengkap seluruh peminjaman yang telah selesai atau dikembalikan.",
     info: "28 riwayat bulan ini",
   },
 ];
 
 const colorClasses = {
-  blue: { badge: "bg-blue-50 text-blue-600 border-blue-200", iconBg: "bg-blue-600" },
-  amber: { badge: "bg-amber-50 text-amber-600 border-amber-200", iconBg: "bg-amber-500" },
-  emerald: { badge: "bg-emerald-50 text-emerald-600 border-emerald-200", iconBg: "bg-emerald-500" },
+  primary: {
+    badge: `${themePrimarySoft} ${themePrimaryText} ${themePrimarySoftBorder}`,
+    iconBg: themePrimaryGradient,
+  },
+
+  warning: {
+    badge: `${themeWarningSurface} text-[var(--color-warning)] ${themeWarningBorder}`,
+    iconBg:
+      "bg-[linear-gradient(135deg,var(--color-warning),color-mix(in_srgb,var(--color-warning)_72%,var(--color-primary)))]",
+  },
+
+  success: {
+    badge: `${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder}`,
+    iconBg:
+      "bg-[linear-gradient(135deg,var(--color-success),color-mix(in_srgb,var(--color-success)_72%,var(--color-primary)))]",
+  },
 };
 
 const ringkasanPeminjaman = [
-  { item: "Proyektor Epson EB-X05", kategori: "Elektronik", status: "dipinjam", batasWaktu: "Kembali hari ini" },
-  { item: "Ruang Lab Komputer 2", kategori: "Ruangan", status: "menunggu", batasWaktu: "Menunggu persetujuan" },
-  { item: "Sound System Portable", kategori: "Elektronik", status: "dipinjam", batasWaktu: "Kembali 2 hari lagi" },
-  { item: "Matras Olahraga (10 pcs)", kategori: "Olahraga", status: "terlambat", batasWaktu: "Terlambat 1 hari" },
+  {
+    item: "Proyektor Epson EB-X05",
+    kategori: "Elektronik",
+    status: "dipinjam",
+    batasWaktu: "Kembali hari ini",
+  },
+  {
+    item: "Ruang Lab Komputer 2",
+    kategori: "Ruangan",
+    status: "menunggu",
+    batasWaktu: "Menunggu persetujuan",
+  },
+  {
+    item: "Sound System Portable",
+    kategori: "Elektronik",
+    status: "dipinjam",
+    batasWaktu: "Kembali 2 hari lagi",
+  },
+  {
+    item: "Matras Olahraga (10 pcs)",
+    kategori: "Olahraga",
+    status: "terlambat",
+    batasWaktu: "Terlambat 1 hari",
+  },
 ];
 
 const statusClasses = {
-  dipinjam: "text-blue-600 bg-blue-50 border-blue-200",
-  menunggu: "text-amber-600 bg-amber-50 border-amber-200",
-  terlambat: "text-red-600 bg-red-50 border-red-200",
+  dipinjam: `${themeInfoSurface} text-[var(--color-info)] ${themeInfoBorder}`,
+
+  menunggu: `${themeWarningSurface} text-[var(--color-warning)] ${themeWarningBorder}`,
+
+  terlambat: `${themeDangerSurface} theme-danger ${themeDangerBorder}`,
 };
 
 const statusLabel = {
@@ -74,103 +177,211 @@ const statusLabel = {
   terlambat: "Terlambat",
 };
 
+// =========================================================
+// PAGE
+// =========================================================
+
 export default function GuruSarprasIndexPage() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const notifications = [
-    { id: 1, title: "Pengajuan Disetujui", desc: "Dikirim 1 jam lalu", read: false },
-    { id: 2, title: "Batas Pengembalian Alat", desc: "Dikirim 4 jam lalu", read: false },
+    {
+      id: 1,
+      title: "Pengajuan Disetujui",
+      desc: "Dikirim 1 jam lalu",
+      read: false,
+    },
+    {
+      id: 2,
+      title: "Batas Pengembalian Alat",
+      desc: "Dikirim 4 jam lalu",
+      read: false,
+    },
   ];
 
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden">
+    <div className="theme-page flex h-screen overflow-hidden">
+      {/* SIDEBAR */}
       <Sidebar
         active="sarpras"
         setActive={() => {}}
         collapsed={!sidebarOpen}
         setCollapsed={() => setSidebarOpen(!sidebarOpen)}
       />
-      <div className="flex-1 flex flex-col min-w-0">
+
+      <div className="flex min-w-0 flex-1 flex-col">
+        {/* HEADER */}
         <Header
           toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
           notifications={notifications}
-          user={{ name: "Bu Sari", email: "guru@smartschool.com", avatar: "AS" }}
+          user={{
+            name: "Bu Sari",
+            email: "guru@smartschool.com",
+            avatar: "AS",
+          }}
         />
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+
+        {/* MAIN */}
+        <main className="theme-page flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="w-full space-y-6">
 
-            {/* PAGE HEADER */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            {/* =====================================================
+                PAGE HEADER
+            ===================================================== */}
+
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0">
                 <div className="flex items-center gap-2.5">
-                  <div className="p-2 rounded-lg bg-blue-600 text-white shadow-sm flex-shrink-0">
+                  <div
+                    className={`flex flex-shrink-0 items-center justify-center rounded-lg p-2 text-[var(--color-card)] ${themePrimaryGradient} ${themePrimaryShadow}`}
+                  >
                     <Package size={18} />
                   </div>
-                  <h1 className="text-xl sm:text-2xl font-semibold text-slate-800 truncate">
+
+                  <h1 className="theme-text truncate text-xl font-semibold sm:text-2xl">
                     Sarana Prasarana
                   </h1>
                 </div>
-                <p className="text-sm text-slate-500 mt-1 ml-[42px] flex items-center gap-1.5">
-                  <Sparkles size={14} className="text-slate-400 flex-shrink-0" />
-                  <span className="truncate">Kelola peminjaman alat, ruangan, dan fasilitas sekolah — pilih menu di bawah.</span>
+
+                <p className="theme-text-secondary mt-1 ml-[42px] flex items-center gap-1.5 text-sm">
+                  <Sparkles
+                    size={14}
+                    className="theme-text-muted flex-shrink-0"
+                  />
+
+                  <span className="truncate">
+                    Kelola peminjaman alat, ruangan, dan fasilitas sekolah —
+                    pilih menu di bawah.
+                  </span>
                 </p>
               </div>
             </div>
 
-            {/* SUB-HALAMAN CARDS */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              {subHalaman.map((s) => (
-                <Link
-                  key={s.key}
-                  href={s.href}
-                  className="group bg-white rounded-xl border border-slate-200/80 p-5 shadow-sm hover:border-blue-300 hover:shadow-md transition-all flex flex-col gap-3"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className={`p-2.5 rounded-lg text-white shadow-sm flex-shrink-0 ${colorClasses[s.color].iconBg}`}>
-                      <s.icon size={18} />
-                    </div>
-                    <ArrowRight size={16} className="text-slate-300 group-hover:text-blue-500 group-hover:translate-x-0.5 transition-all" />
-                  </div>
-                  <div>
-                    <h2 className="text-sm font-semibold text-slate-800">{s.label}</h2>
-                    <p className="text-xs text-slate-500 mt-1 leading-relaxed">{s.deskripsi}</p>
-                  </div>
-                  <span className={`text-[11px] font-medium px-2.5 py-1 rounded-full border w-fit ${colorClasses[s.color].badge}`}>
-                    {s.info}
-                  </span>
-                </Link>
-              ))}
-            </div>
+            {/* =====================================================
+                SUB-HALAMAN CARDS
+            ===================================================== */}
 
-            {/* RINGKASAN PEMINJAMAN AKTIF */}
-            <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden">
-              <div className="flex items-center gap-2 p-4 sm:p-5 border-b border-slate-100">
-                <Boxes size={16} className="text-slate-400" />
-                <h2 className="text-sm font-semibold text-slate-800">Peminjaman Aktif</h2>
-              </div>
-              <div className="divide-y divide-slate-100">
-                {ringkasanPeminjaman.map((p, idx) => (
-                  <div key={idx} className="flex items-center gap-4 p-4 sm:px-5 sm:py-3.5">
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-slate-700 truncate">{p.item}</p>
-                      <p className="text-xs text-slate-400 mt-0.5">{p.kategori}</p>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              {subHalaman.map((s) => {
+                const theme = colorClasses[s.color];
+
+                return (
+                  <Link
+                    key={s.key}
+                    href={s.href}
+                    className={`theme-card group flex flex-col gap-3 rounded-xl border p-5 ${themeNeutralBorder} ${themeCardShadow} transition-all hover:border-[color-mix(in_srgb,var(--color-primary)_30%,transparent)] hover:shadow-[0_10px_30px_color-mix(in_srgb,var(--color-text)_9%,transparent)]`}
+                  >
+                    {/* ICON + ARROW */}
+                    <div className="flex items-center justify-between">
+                      <div
+                        className={`flex flex-shrink-0 items-center justify-center rounded-lg p-2.5 text-[var(--color-card)] ${theme.iconBg} ${themeSmallShadow}`}
+                      >
+                        <s.icon size={18} />
+                      </div>
+
+                      <ArrowRight
+                        size={16}
+                        className="theme-text-muted flex-shrink-0 transition-all group-hover:translate-x-0.5 group-hover:text-[var(--color-primary)]"
+                      />
                     </div>
-                    <div className="flex items-center gap-1.5 text-xs text-slate-500 flex-shrink-0">
-                      {p.status === "terlambat" ? (
-                        <AlertTriangle size={12} className="text-red-500" />
-                      ) : (
-                        <Clock size={12} className="text-slate-400" />
-                      )}
-                      <span className="hidden sm:inline">{p.batasWaktu}</span>
+
+                    {/* CONTENT */}
+                    <div>
+                      <h2 className="theme-text text-sm font-semibold">
+                        {s.label}
+                      </h2>
+
+                      <p className="theme-text-secondary mt-1 text-xs leading-relaxed">
+                        {s.deskripsi}
+                      </p>
                     </div>
-                    <span className={`text-[11px] font-medium px-2.5 py-1 rounded-full border flex-shrink-0 ${statusClasses[p.status]}`}>
-                      {statusLabel[p.status]}
+
+                    {/* INFO BADGE */}
+                    <span
+                      className={`w-fit rounded-full border px-2.5 py-1 text-[11px] font-medium ${theme.badge}`}
+                    >
+                      {s.info}
                     </span>
-                  </div>
-                ))}
-              </div>
+                  </Link>
+                );
+              })}
             </div>
 
+            {/* =====================================================
+                RINGKASAN PEMINJAMAN AKTIF
+            ===================================================== */}
+
+            <div
+              className={`theme-card overflow-hidden rounded-xl border ${themeNeutralBorder} ${themeCardShadow}`}
+            >
+              {/* HEADER */}
+              <div
+                className={`flex items-center gap-2 border-b p-4 sm:p-5 ${themeDivider}`}
+              >
+                <div
+                  className={`flex h-8 w-8 items-center justify-center rounded-lg border ${themeNeutralSurface} ${themeNeutralBorder}`}
+                >
+                  <Boxes size={16} className="theme-text-secondary" />
+                </div>
+
+                <h2 className="theme-text text-sm font-semibold">
+                  Peminjaman Aktif
+                </h2>
+              </div>
+
+              {/* LIST */}
+              <div>
+                {ringkasanPeminjaman.map((p, idx) => {
+                  const isLast = idx === ringkasanPeminjaman.length - 1;
+
+                  return (
+                    <div
+                      key={idx}
+                      className={`flex items-center gap-4 p-4 sm:px-5 sm:py-3.5 ${
+                        !isLast ? `border-b ${themeDivider}` : ""
+                      } ${themeNeutralHover} transition-colors`}
+                    >
+                      {/* ITEM */}
+                      <div className="min-w-0 flex-1">
+                        <p className="theme-text truncate text-sm font-medium">
+                          {p.item}
+                        </p>
+
+                        <p className="theme-text-muted mt-0.5 text-xs">
+                          {p.kategori}
+                        </p>
+                      </div>
+
+                      {/* DEADLINE */}
+                      <div className="theme-text-secondary flex flex-shrink-0 items-center gap-1.5 text-xs">
+                        {p.status === "terlambat" ? (
+                          <AlertTriangle
+                            size={12}
+                            className="theme-danger"
+                          />
+                        ) : (
+                          <Clock
+                            size={12}
+                            className="theme-text-muted"
+                          />
+                        )}
+
+                        <span className="hidden sm:inline">
+                          {p.batasWaktu}
+                        </span>
+                      </div>
+
+                      {/* STATUS */}
+                      <span
+                        className={`flex-shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-medium ${statusClasses[p.status]}`}
+                      >
+                        {statusLabel[p.status]}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
           </div>
         </main>
       </div>

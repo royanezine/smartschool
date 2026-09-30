@@ -23,9 +23,58 @@ import {
   updateUser,
 } from "../../../../../../services/user.service";
 
-// =========================================================
-// DEFAULT FORM
-// =========================================================
+/* ============================================================
+   THEME HELPERS
+   ============================================================ */
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_16%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+
+/* ============================================================
+   DEFAULT FORM
+   ============================================================ */
 
 const DEFAULT_FORM = {
   nama: "",
@@ -55,9 +104,9 @@ const DEFAULT_FORM = {
   domisiliSama: true,
 };
 
-// =========================================================
-// HELPER
-// =========================================================
+/* ============================================================
+   HELPER
+   ============================================================ */
 
 function formatDateForInput(value) {
   if (!value) return "";
@@ -124,9 +173,9 @@ function getErrorMessage(error) {
   );
 }
 
-// =========================================================
-// PAGE
-// =========================================================
+/* ============================================================
+   PAGE
+   ============================================================ */
 
 export default function EditSiswaPage() {
   const router = useRouter();
@@ -134,9 +183,9 @@ export default function EditSiswaPage() {
 
   const id = params?.id ? String(params.id) : "";
 
-  // =======================================================
-  // STATE
-  // =======================================================
+  /* ==========================================================
+     STATE
+     ========================================================== */
 
   const [form, setForm] = useState(DEFAULT_FORM);
 
@@ -146,9 +195,9 @@ export default function EditSiswaPage() {
   const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] = useState("");
 
-  // =======================================================
-  // LOAD DATA FROM BACKEND
-  // =======================================================
+  /* ==========================================================
+     LOAD DATA
+     ========================================================== */
 
   useEffect(() => {
     if (!id) {
@@ -175,42 +224,13 @@ export default function EditSiswaPage() {
           throw new Error("Data siswa tidak ditemukan.");
         }
 
-        /*
-         * Data backend:
-         *
-         * namaLengkap
-         * nipd
-         * nisn
-         * jenisKelamin
-         * tanggalLahir
-         * email
-         * noTelepon
-         * alamat
-         * nik
-         * namaAyah
-         * pekerjaanAyah
-         * alamatKtp
-         * alamatDomisili
-         * kecamatan
-         * kelurahan
-         * kotaKabupaten
-         */
-
         setForm({
           nama: user.namaLengkap || "",
 
-          // NIS di FE menggunakan nipd dari BE
           nis: user.nipd || "",
 
           nisn: user.nisn || "",
 
-          /*
-           * Backend user.controller yang diberikan belum
-           * mengembalikan relasi kelas.
-           *
-           * Kalau nanti BE mengembalikan user.kelas / user.kelasId,
-           * bagian ini bisa langsung digunakan.
-           */
           kelas:
             user.kelas?.nama ||
             user.kelasNama ||
@@ -221,9 +241,13 @@ export default function EditSiswaPage() {
 
           gender: normalizeGender(user.jenisKelamin),
 
-          tglLahir: formatDateForInput(user.tanggalLahir),
+          tglLahir: formatDateForInput(
+            user.tanggalLahir
+          ),
 
-          joinDate: formatDateForInput(user.dibuatPada),
+          joinDate: formatDateForInput(
+            user.dibuatPada
+          ),
 
           tempatLahir: user.tempatLahir || "",
 
@@ -236,10 +260,6 @@ export default function EditSiswaPage() {
 
           kelurahan: user.kelurahan || "",
 
-          /*
-           * Controller BE yang kamu kirim belum mempunyai
-           * field provinsi.
-           */
           provinsi: user.provinsi || "",
 
           email: user.email || "",
@@ -248,11 +268,6 @@ export default function EditSiswaPage() {
 
           alamat: user.alamat || "",
 
-          /*
-           * Untuk saat ini menggunakan data ayah sebagai
-           * data orang tua utama karena form lama hanya
-           * memiliki satu field orang tua.
-           */
           nikOrtu: user.nik || "",
 
           namaOrtu:
@@ -265,9 +280,11 @@ export default function EditSiswaPage() {
             user.pekerjaanIbu ||
             "",
 
-          alamatKtpOrtu: user.alamatKtp || "",
+          alamatKtpOrtu:
+            user.alamatKtp || "",
 
-          alamatDomisiliOrtu: user.alamatDomisili || "",
+          alamatDomisiliOrtu:
+            user.alamatDomisili || "",
 
           domisiliSama:
             !user.alamatDomisili ||
@@ -293,16 +310,20 @@ export default function EditSiswaPage() {
     };
   }, [id]);
 
-  // =======================================================
-  // HANDLE INPUT
-  // =======================================================
+  /* ==========================================================
+     HANDLE INPUT
+     ========================================================== */
 
   const handleChange = (event) => {
-    const { name, value, type, checked } = event.target;
+    const { name, value, type, checked } =
+      event.target;
 
     setForm((prev) => ({
       ...prev,
-      [name]: type === "checkbox" ? checked : value,
+      [name]:
+        type === "checkbox"
+          ? checked
+          : value,
     }));
 
     if (error) {
@@ -314,9 +335,9 @@ export default function EditSiswaPage() {
     }
   };
 
-  // =======================================================
-  // HANDLE DOMISILI SAMA
-  // =======================================================
+  /* ==========================================================
+     HANDLE DOMISILI
+     ========================================================== */
 
   const handleDomisiliSamaChange = (event) => {
     const checked = event.target.checked;
@@ -330,9 +351,9 @@ export default function EditSiswaPage() {
     }));
   };
 
-  // =======================================================
-  // VALIDATION
-  // =======================================================
+  /* ==========================================================
+     VALIDATION
+     ========================================================== */
 
   const validateForm = () => {
     if (!form.nama.trim()) {
@@ -354,9 +375,9 @@ export default function EditSiswaPage() {
     return "";
   };
 
-  // =======================================================
-  // SUBMIT
-  // =======================================================
+  /* ==========================================================
+     SUBMIT
+     ========================================================== */
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -365,10 +386,12 @@ export default function EditSiswaPage() {
 
     if (validationError) {
       setError(validationError);
+
       window.scrollTo({
         top: 0,
         behavior: "smooth",
       });
+
       return;
     }
 
@@ -382,13 +405,9 @@ export default function EditSiswaPage() {
       setError("");
       setSuccessMessage("");
 
-      /*
-       * Mapping FE -> BE
-       */
       const payload = {
         namaLengkap: form.nama.trim(),
 
-        // NIS FE -> nipd BE
         nipd: form.nis.trim(),
 
         nisn: form.nisn.trim(),
@@ -397,75 +416,82 @@ export default function EditSiswaPage() {
 
         jenisKelamin: form.gender,
 
-        tempatLahir: form.tempatLahir.trim() || null,
+        tempatLahir:
+          form.tempatLahir.trim() || null,
 
-        tanggalLahir: form.tglLahir || null,
+        tanggalLahir:
+          form.tglLahir || null,
 
-        alamat: form.alamat.trim() || null,
+        alamat:
+          form.alamat.trim() || null,
 
-        noTelepon: form.phone.trim() || null,
+        noTelepon:
+          form.phone.trim() || null,
 
         status: form.status,
 
-        nik: form.nikOrtu.trim() || null,
+        nik:
+          form.nikOrtu.trim() || null,
 
-        /*
-         * Karena form lama hanya menyediakan satu
-         * data orang tua, kita simpan ke Ayah.
-         */
-        namaAyah: form.namaOrtu.trim() || null,
+        namaAyah:
+          form.namaOrtu.trim() || null,
 
-        pekerjaanAyah: form.pekerjaanOrtu.trim() || null,
+        pekerjaanAyah:
+          form.pekerjaanOrtu.trim() || null,
 
-        alamatKtp: form.alamatKtpOrtu.trim() || null,
+        alamatKtp:
+          form.alamatKtpOrtu.trim() || null,
 
         alamatDomisili: form.domisiliSama
           ? form.alamatKtpOrtu.trim() || null
-          : form.alamatDomisiliOrtu.trim() || null,
+          : form.alamatDomisiliOrtu.trim() ||
+            null,
 
-        kecamatan: form.kecamatan.trim() || null,
+        kecamatan:
+          form.kecamatan.trim() || null,
 
-        kelurahan: form.kelurahan.trim() || null,
+        kelurahan:
+          form.kelurahan.trim() || null,
 
-        /*
-         * Backend updateUser saat ini masih perlu
-         * diperbaiki agar kota menggunakan:
-         *
-         * kotaKabupaten: kota
-         *
-         * BUKAN:
-         * kota: kota
-         *
-         * Jadi sementara field ini dikirim dengan
-         * nama yang sekarang dibaca controller.
-         */
-        kota: form.kota.trim() || null,
+        kota:
+          form.kota.trim() || null,
       };
 
-      console.log("========== UPDATE SISWA ==========");
+      console.log(
+        "========== UPDATE SISWA =========="
+      );
       console.log("ID:", id);
       console.log("PAYLOAD:", payload);
-      console.log("==================================");
-
-      const response = await updateUser(id, payload);
-
-      console.log("========== RESPONSE UPDATE ==========");
-      console.log(response);
-      console.log("=====================================");
-
-      setSuccessMessage(
-        response?.message || "Data siswa berhasil diperbarui."
+      console.log(
+        "=================================="
       );
 
-      /*
-       * Tunggu sebentar supaya user bisa melihat
-       * notifikasi berhasil.
-       */
+      const response = await updateUser(
+        id,
+        payload
+      );
+
+      console.log(
+        "========== RESPONSE UPDATE =========="
+      );
+      console.log(response);
+      console.log(
+        "====================================="
+      );
+
+      setSuccessMessage(
+        response?.message ||
+          "Data siswa berhasil diperbarui."
+      );
+
       setTimeout(() => {
         router.push("/admin/siswa");
       }, 700);
     } catch (err) {
-      console.error("Error update siswa:", err);
+      console.error(
+        "Error update siswa:",
+        err
+      );
 
       setError(getErrorMessage(err));
 
@@ -478,23 +504,30 @@ export default function EditSiswaPage() {
     }
   };
 
-  // =======================================================
-  // LOADING
-  // =======================================================
+  /* ==========================================================
+     LOADING
+     ========================================================== */
 
   if (loading) {
     return (
-      <div className="flex h-screen overflow-hidden bg-slate-50">
-        <Sidebar role="admin" active="siswa" />
+      <div className="theme-page flex h-screen overflow-hidden">
+        <Sidebar
+          role="admin"
+          active="siswa"
+        />
 
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
           <Header />
 
           <main className="flex flex-1 items-center justify-center overflow-y-auto p-6">
-            <div className="flex flex-col items-center gap-3 text-slate-500">
-              <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            <div className="flex flex-col items-center gap-3">
+              <div
+                className={`flex h-12 w-12 items-center justify-center rounded-full ${themePrimarySoft} ${themePrimaryText}`}
+              >
+                <Loader2 className="h-6 w-6 animate-spin" />
+              </div>
 
-              <p className="text-sm font-medium">
+              <p className="theme-text-secondary text-sm font-medium">
                 Mengambil data siswa...
               </p>
             </div>
@@ -504,28 +537,34 @@ export default function EditSiswaPage() {
     );
   }
 
-  // =======================================================
-  // UI
-  // =======================================================
+  /* ==========================================================
+     UI
+     ========================================================== */
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50">
-      <Sidebar role="admin" active="siswa" />
+    <div className="theme-page flex h-screen overflow-hidden">
+      <Sidebar
+        role="admin"
+        active="siswa"
+      />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <Header />
 
         <main className="flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
-            {/* =================================================
-                HEADER
-            ================================================= */}
+          <div className="mx-auto w-full max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+
+            {/* ==================================================
+                PAGE HEADER
+                ================================================== */}
 
             <div className="mb-6">
               <button
                 type="button"
-                onClick={() => router.push("/admin/siswa")}
-                className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-slate-600 transition hover:text-blue-600"
+                onClick={() =>
+                  router.push("/admin/siswa")
+                }
+                className="theme-text-muted mb-4 inline-flex items-center gap-2 text-sm font-medium transition hover:text-[var(--color-primary)]"
               >
                 <ArrowLeft className="h-4 w-4" />
 
@@ -533,547 +572,415 @@ export default function EditSiswaPage() {
               </button>
 
               <div>
-                <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+                <h1 className="theme-text text-2xl font-bold tracking-tight">
                   Edit Data Siswa
                 </h1>
 
-                <p className="mt-1 text-sm text-slate-500">
-                  Perbarui informasi data siswa melalui sistem.
+                <p className="theme-text-muted mt-1 text-sm">
+                  Perbarui informasi data siswa melalui
+                  sistem.
                 </p>
               </div>
             </div>
 
-            {/* =================================================
-                ERROR
-            ================================================= */}
+            {/* ==================================================
+                ERROR MESSAGE
+                ================================================== */}
 
             {error && (
-              <div className="mb-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
-                <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
+              <div
+                className={`theme-danger ${themeDangerSurface} ${themeDangerBorder} mb-5 flex items-start gap-3 rounded-xl border px-4 py-3`}
+              >
+                <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
 
                 <div>
-                  <p className="text-sm font-semibold text-red-800">
+                  <p className="text-sm font-semibold">
                     Gagal
                   </p>
 
-                  <p className="mt-0.5 text-sm text-red-700">
+                  <p className="mt-0.5 text-sm opacity-90">
                     {error}
                   </p>
                 </div>
               </div>
             )}
 
-            {/* =================================================
-                SUCCESS
-            ================================================= */}
+            {/* ==================================================
+                SUCCESS MESSAGE
+                ================================================== */}
 
             {successMessage && (
-              <div className="mb-5 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3">
-                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
+              <div
+                className={`theme-success ${themeSuccessSurface} ${themeSuccessBorder} mb-5 flex items-start gap-3 rounded-xl border px-4 py-3`}
+              >
+                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" />
 
                 <div>
-                  <p className="text-sm font-semibold text-emerald-800">
+                  <p className="text-sm font-semibold">
                     Berhasil
                   </p>
 
-                  <p className="mt-0.5 text-sm text-emerald-700">
+                  <p className="mt-0.5 text-sm opacity-90">
                     {successMessage}
                   </p>
                 </div>
               </div>
             )}
 
-            {/* =================================================
+            {/* ==================================================
                 FORM
-            ================================================= */}
+                ================================================== */}
 
             <form onSubmit={handleSubmit}>
-              {/* =================================================
+
+              {/* ==================================================
                   DATA UTAMA
-              ================================================= */}
+                  ================================================== */}
 
-              <section className="mb-6 rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <div className="border-b border-slate-200 px-6 py-5">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50">
-                      <User className="h-5 w-5 text-blue-600" />
-                    </div>
-
-                    <div>
-                      <h2 className="text-base font-semibold text-slate-900">
-                        Data Utama Siswa
-                      </h2>
-
-                      <p className="mt-0.5 text-sm text-slate-500">
-                        Informasi dasar siswa.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
+              <FormSection
+                icon={<User className="h-5 w-5" />}
+                title="Data Utama Siswa"
+                description="Informasi dasar siswa."
+              >
                 <div className="grid gap-5 p-6 md:grid-cols-2">
-                  {/* NAMA */}
-                  <div className="md:col-span-2">
-                    <label className="mb-2 block text-sm font-medium text-slate-700">
-                      Nama Lengkap
-                      <span className="ml-1 text-red-500">*</span>
-                    </label>
 
-                    <input
+                  <FormField
+                    label="Nama Lengkap"
+                    required
+                    className="md:col-span-2"
+                  >
+                    <ThemeInput
                       type="text"
                       name="nama"
                       value={form.nama}
                       onChange={handleChange}
                       placeholder="Masukkan nama lengkap siswa"
-                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                     />
-                  </div>
+                  </FormField>
 
-                  {/* NIS */}
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-700">
-                      NIS
-                      <span className="ml-1 text-red-500">*</span>
-                    </label>
-
-                    <input
+                  <FormField
+                    label="NIS"
+                    required
+                  >
+                    <ThemeInput
                       type="text"
                       name="nis"
                       value={form.nis}
                       onChange={handleChange}
                       placeholder="Masukkan NIS"
-                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                     />
-                  </div>
+                  </FormField>
 
-                  {/* NISN */}
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-700">
-                      NISN
-                      <span className="ml-1 text-red-500">*</span>
-                    </label>
-
-                    <input
+                  <FormField
+                    label="NISN"
+                    required
+                  >
+                    <ThemeInput
                       type="text"
                       name="nisn"
                       value={form.nisn}
                       onChange={handleChange}
                       placeholder="Masukkan NISN"
-                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                     />
-                  </div>
+                  </FormField>
 
-                  {/* KELAS */}
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-700">
-                      Kelas
-                    </label>
-
-                    <input
+                  <FormField label="Kelas">
+                    <ThemeInput
                       type="text"
                       name="kelas"
                       value={form.kelas}
                       readOnly
+                      disabled
                       placeholder="Kelas belum tersedia dari backend"
-                      className="w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-100 px-4 py-3 text-sm text-slate-500 outline-none"
                     />
 
-                    <p className="mt-1.5 text-xs text-slate-400">
-                      Data kelas belum dapat diubah melalui endpoint
-                      pengguna saat ini.
-                    </p>
-                  </div>
+                    <FieldHint>
+                      Data kelas belum dapat diubah melalui
+                      endpoint pengguna saat ini.
+                    </FieldHint>
+                  </FormField>
 
-                  {/* STATUS */}
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-700">
-                      Status
-                    </label>
-
-                    <select
+                  <FormField label="Status">
+                    <ThemeSelect
                       name="status"
                       value={form.status}
                       onChange={handleChange}
-                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                     >
-                      <option value="aktif">Aktif</option>
-                      <option value="nonaktif">Nonaktif</option>
-                    </select>
-                  </div>
+                      <option value="aktif">
+                        Aktif
+                      </option>
 
-                  {/* GENDER */}
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-700">
-                      Jenis Kelamin
-                    </label>
+                      <option value="nonaktif">
+                        Nonaktif
+                      </option>
+                    </ThemeSelect>
+                  </FormField>
 
-                    <select
+                  <FormField label="Jenis Kelamin">
+                    <ThemeSelect
                       name="gender"
                       value={form.gender}
                       onChange={handleChange}
-                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                     >
-                      <option value="L">Laki-laki</option>
-                      <option value="P">Perempuan</option>
-                    </select>
-                  </div>
+                      <option value="L">
+                        Laki-laki
+                      </option>
 
-                  {/* TEMPAT LAHIR */}
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-700">
-                      Tempat Lahir
-                    </label>
+                      <option value="P">
+                        Perempuan
+                      </option>
+                    </ThemeSelect>
+                  </FormField>
 
-                    <input
+                  <FormField label="Tempat Lahir">
+                    <ThemeInput
                       type="text"
                       name="tempatLahir"
                       value={form.tempatLahir}
                       onChange={handleChange}
                       placeholder="Masukkan tempat lahir"
-                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                     />
-                  </div>
+                  </FormField>
 
-                  {/* TANGGAL LAHIR */}
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-700">
-                      Tanggal Lahir
-                    </label>
-
-                    <input
+                  <FormField label="Tanggal Lahir">
+                    <ThemeInput
                       type="date"
                       name="tglLahir"
                       value={form.tglLahir}
                       onChange={handleChange}
-                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                     />
-                  </div>
+                  </FormField>
 
-                  {/* JOIN DATE */}
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-700">
-                      Tanggal Bergabung
-                    </label>
-
-                    <input
+                  <FormField label="Tanggal Bergabung">
+                    <ThemeInput
                       type="date"
                       name="joinDate"
                       value={form.joinDate}
                       readOnly
-                      className="w-full cursor-not-allowed rounded-xl border border-slate-200 bg-slate-100 px-4 py-3 text-sm text-slate-500 outline-none"
+                      disabled
                     />
 
-                    <p className="mt-1.5 text-xs text-slate-400">
-                      Diambil dari tanggal data dibuat di backend.
-                    </p>
-                  </div>
+                    <FieldHint>
+                      Diambil dari tanggal data dibuat di
+                      backend.
+                    </FieldHint>
+                  </FormField>
                 </div>
-              </section>
+              </FormSection>
 
-              {/* =================================================
+              {/* ==================================================
                   ALAMAT
-              ================================================= */}
+                  ================================================== */}
 
-              <section className="mb-6 rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <div className="border-b border-slate-200 px-6 py-5">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50">
-                      <MapPin className="h-5 w-5 text-blue-600" />
-                    </div>
-
-                    <div>
-                      <h2 className="text-base font-semibold text-slate-900">
-                        Alamat Siswa
-                      </h2>
-
-                      <p className="mt-0.5 text-sm text-slate-500">
-                        Informasi alamat tempat tinggal siswa.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
+              <FormSection
+                icon={<MapPin className="h-5 w-5" />}
+                title="Alamat Siswa"
+                description="Informasi alamat tempat tinggal siswa."
+              >
                 <div className="grid gap-5 p-6 md:grid-cols-2">
-                  {/* ALAMAT */}
-                  <div className="md:col-span-2">
-                    <label className="mb-2 block text-sm font-medium text-slate-700">
-                      Alamat Lengkap
-                    </label>
 
-                    <textarea
+                  <FormField
+                    label="Alamat Lengkap"
+                    className="md:col-span-2"
+                  >
+                    <ThemeTextarea
                       name="alamat"
                       value={form.alamat}
                       onChange={handleChange}
                       rows={3}
                       placeholder="Masukkan alamat lengkap siswa"
-                      className="w-full resize-none rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                     />
-                  </div>
+                  </FormField>
 
-                  {/* PROVINSI */}
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-700">
-                      Provinsi
-                    </label>
-
-                    <input
+                  <FormField label="Provinsi">
+                    <ThemeInput
                       type="text"
                       name="provinsi"
                       value={form.provinsi}
                       onChange={handleChange}
                       placeholder="Masukkan provinsi"
-                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                     />
 
-                    <p className="mt-1.5 text-xs text-slate-400">
-                      Field ini belum dikirim ke backend karena belum ada
-                      pada controller.
-                    </p>
-                  </div>
+                    <FieldHint>
+                      Field ini belum dikirim ke backend karena
+                      belum ada pada controller.
+                    </FieldHint>
+                  </FormField>
 
-                  {/* KOTA */}
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-700">
-                      Kota / Kabupaten
-                    </label>
-
-                    <input
+                  <FormField label="Kota / Kabupaten">
+                    <ThemeInput
                       type="text"
                       name="kota"
                       value={form.kota}
                       onChange={handleChange}
                       placeholder="Masukkan kota/kabupaten"
-                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                     />
-                  </div>
+                  </FormField>
 
-                  {/* KECAMATAN */}
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-700">
-                      Kecamatan
-                    </label>
-
-                    <input
+                  <FormField label="Kecamatan">
+                    <ThemeInput
                       type="text"
                       name="kecamatan"
                       value={form.kecamatan}
                       onChange={handleChange}
                       placeholder="Masukkan kecamatan"
-                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                     />
-                  </div>
+                  </FormField>
 
-                  {/* KELURAHAN */}
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-700">
-                      Kelurahan
-                    </label>
-
-                    <input
+                  <FormField label="Kelurahan">
+                    <ThemeInput
                       type="text"
                       name="kelurahan"
                       value={form.kelurahan}
                       onChange={handleChange}
                       placeholder="Masukkan kelurahan"
-                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                     />
-                  </div>
+                  </FormField>
                 </div>
-              </section>
+              </FormSection>
 
-              {/* =================================================
+              {/* ==================================================
                   KONTAK
-              ================================================= */}
+                  ================================================== */}
 
-              <section className="mb-6 rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <div className="border-b border-slate-200 px-6 py-5">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50">
-                      <UserRound className="h-5 w-5 text-blue-600" />
-                    </div>
-
-                    <div>
-                      <h2 className="text-base font-semibold text-slate-900">
-                        Informasi Kontak
-                      </h2>
-
-                      <p className="mt-0.5 text-sm text-slate-500">
-                        Email dan nomor telepon siswa.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
+              <FormSection
+                icon={<UserRound className="h-5 w-5" />}
+                title="Informasi Kontak"
+                description="Email dan nomor telepon siswa."
+              >
                 <div className="grid gap-5 p-6 md:grid-cols-2">
-                  {/* EMAIL */}
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-700">
-                      Email
-                      <span className="ml-1 text-red-500">*</span>
-                    </label>
 
-                    <input
+                  <FormField
+                    label="Email"
+                    required
+                  >
+                    <ThemeInput
                       type="email"
                       name="email"
                       value={form.email}
                       onChange={handleChange}
                       placeholder="contoh@email.com"
-                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                     />
-                  </div>
+                  </FormField>
 
-                  {/* PHONE */}
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-700">
-                      Nomor Telepon
-                    </label>
-
-                    <input
+                  <FormField label="Nomor Telepon">
+                    <ThemeInput
                       type="tel"
                       name="phone"
                       value={form.phone}
                       onChange={handleChange}
                       placeholder="08xxxxxxxxxx"
-                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                     />
-                  </div>
+                  </FormField>
                 </div>
-              </section>
+              </FormSection>
 
-              {/* =================================================
+              {/* ==================================================
                   ORANG TUA / WALI
-              ================================================= */}
+                  ================================================== */}
 
-              <section className="mb-6 rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <div className="border-b border-slate-200 px-6 py-5">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50">
-                      <Users className="h-5 w-5 text-blue-600" />
-                    </div>
-
-                    <div>
-                      <h2 className="text-base font-semibold text-slate-900">
-                        Data Orang Tua / Wali
-                      </h2>
-
-                      <p className="mt-0.5 text-sm text-slate-500">
-                        Informasi orang tua atau wali siswa.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
+              <FormSection
+                icon={<Users className="h-5 w-5" />}
+                title="Data Orang Tua / Wali"
+                description="Informasi orang tua atau wali siswa."
+              >
                 <div className="grid gap-5 p-6 md:grid-cols-2">
-                  {/* NIK */}
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-700">
-                      NIK Orang Tua / Wali
-                    </label>
 
-                    <input
+                  <FormField label="NIK Orang Tua / Wali">
+                    <ThemeInput
                       type="text"
                       name="nikOrtu"
                       value={form.nikOrtu}
                       onChange={handleChange}
                       placeholder="Masukkan NIK"
-                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                     />
-                  </div>
+                  </FormField>
 
-                  {/* NAMA ORTU */}
-                  <div>
-                    <label className="mb-2 block text-sm font-medium text-slate-700">
-                      Nama Orang Tua / Wali
-                    </label>
-
-                    <input
+                  <FormField label="Nama Orang Tua / Wali">
+                    <ThemeInput
                       type="text"
                       name="namaOrtu"
                       value={form.namaOrtu}
                       onChange={handleChange}
                       placeholder="Masukkan nama orang tua / wali"
-                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                     />
-                  </div>
+                  </FormField>
 
-                  {/* PEKERJAAN */}
-                  <div className="md:col-span-2">
-                    <label className="mb-2 block text-sm font-medium text-slate-700">
-                      Pekerjaan Orang Tua / Wali
-                    </label>
-
-                    <input
+                  <FormField
+                    label="Pekerjaan Orang Tua / Wali"
+                    className="md:col-span-2"
+                  >
+                    <ThemeInput
                       type="text"
                       name="pekerjaanOrtu"
                       value={form.pekerjaanOrtu}
                       onChange={handleChange}
                       placeholder="Masukkan pekerjaan"
-                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                     />
-                  </div>
+                  </FormField>
 
-                  {/* ALAMAT KTP */}
-                  <div className="md:col-span-2">
-                    <label className="mb-2 block text-sm font-medium text-slate-700">
-                      Alamat KTP Orang Tua / Wali
-                    </label>
-
-                    <textarea
+                  <FormField
+                    label="Alamat KTP Orang Tua / Wali"
+                    className="md:col-span-2"
+                  >
+                    <ThemeTextarea
                       name="alamatKtpOrtu"
                       value={form.alamatKtpOrtu}
                       onChange={handleChange}
                       rows={3}
                       placeholder="Masukkan alamat sesuai KTP"
-                      className="w-full resize-none rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                     />
-                  </div>
+                  </FormField>
 
-                  {/* CHECKBOX */}
+                  {/* DOMISILI CHECKBOX */}
                   <div className="md:col-span-2">
-                    <label className="flex cursor-pointer items-center gap-3">
+                    <label className="theme-text-secondary flex cursor-pointer items-center gap-3 text-sm font-medium">
                       <input
                         type="checkbox"
                         checked={form.domisiliSama}
-                        onChange={handleDomisiliSamaChange}
-                        className="h-4 w-4 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                        onChange={
+                          handleDomisiliSamaChange
+                        }
+                        className={`h-4 w-4 rounded ${themePrimaryText} ${themePrimarySoftBorder} focus:ring-[var(--color-primary)]`}
                       />
 
-                      <span className="text-sm font-medium text-slate-700">
+                      <span>
                         Alamat domisili sama dengan alamat KTP
                       </span>
                     </label>
                   </div>
 
-                  {/* ALAMAT DOMISILI */}
                   {!form.domisiliSama && (
-                    <div className="md:col-span-2">
-                      <label className="mb-2 block text-sm font-medium text-slate-700">
-                        Alamat Domisili Orang Tua / Wali
-                      </label>
-
-                      <textarea
+                    <FormField
+                      label="Alamat Domisili Orang Tua / Wali"
+                      className="md:col-span-2"
+                    >
+                      <ThemeTextarea
                         name="alamatDomisiliOrtu"
                         value={form.alamatDomisiliOrtu}
                         onChange={handleChange}
                         rows={3}
                         placeholder="Masukkan alamat domisili"
-                        className="w-full resize-none rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
                       />
-                    </div>
+                    </FormField>
                   )}
                 </div>
-              </section>
+              </FormSection>
 
-              {/* =================================================
+              {/* ==================================================
                   ACTION
-              ================================================= */}
+                  ================================================== */}
 
-              <div className="flex flex-col-reverse gap-3 border-t border-slate-200 pt-6 sm:flex-row sm:justify-end">
+              <div
+                className={`flex flex-col-reverse gap-3 border-t ${themeDivider} pt-6 sm:flex-row sm:justify-end`}
+              >
                 <button
                   type="button"
-                  onClick={() => router.push("/admin/siswa")}
+                  onClick={() =>
+                    router.push("/admin/siswa")
+                  }
                   disabled={saving}
-                  className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  className={`theme-card theme-text-secondary ${themeNeutralBorder} ${themeSmallShadow} inline-flex items-center justify-center rounded-xl border px-5 py-3 text-sm font-semibold transition ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-60`}
                 >
                   Batal
                 </button>
@@ -1081,7 +988,7 @@ export default function EditSiswaPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  className={`theme-primary ${themePrimaryShadow} inline-flex items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-[var(--color-card)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60`}
                 >
                   {saving ? (
                     <>
@@ -1101,5 +1008,134 @@ export default function EditSiswaPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+/* ============================================================
+   FORM SECTION
+   ============================================================ */
+
+function FormSection({
+  icon,
+  title,
+  description,
+  children,
+}) {
+  return (
+    <section
+      className={`theme-card mb-6 overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+    >
+      <div
+        className={`border-b ${themeDivider} px-6 py-5`}
+      >
+        <div className="flex items-center gap-3">
+          <div
+            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${themePrimarySoftBorder} ${themePrimarySoft} ${themePrimaryText}`}
+          >
+            {icon}
+          </div>
+
+          <div className="min-w-0">
+            <h2 className="theme-text text-base font-semibold">
+              {title}
+            </h2>
+
+            <p className="theme-text-muted mt-0.5 text-sm">
+              {description}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      {children}
+    </section>
+  );
+}
+
+/* ============================================================
+   FORM FIELD
+   ============================================================ */
+
+function FormField({
+  label,
+  required = false,
+  children,
+  className = "",
+}) {
+  return (
+    <div className={className}>
+      <label className="theme-text-secondary mb-2 block text-sm font-medium">
+        {label}
+
+        {required && (
+          <span className="theme-danger ml-1">
+            *
+          </span>
+        )}
+      </label>
+
+      {children}
+    </div>
+  );
+}
+
+/* ============================================================
+   INPUT
+   ============================================================ */
+
+function ThemeInput({
+  disabled = false,
+  ...props
+}) {
+  return (
+    <input
+      {...props}
+      disabled={disabled}
+      className={`theme-input w-full rounded-xl border px-4 py-3 text-sm outline-none transition ${themeFocus} ${
+        disabled
+          ? "cursor-not-allowed opacity-70"
+          : ""
+      }`}
+    />
+  );
+}
+
+/* ============================================================
+   SELECT
+   ============================================================ */
+
+function ThemeSelect(props) {
+  return (
+    <select
+      {...props}
+      className={`theme-input w-full rounded-xl border px-4 py-3 text-sm outline-none transition ${themeFocus}`}
+    />
+  );
+}
+
+/* ============================================================
+   TEXTAREA
+   ============================================================ */
+
+function ThemeTextarea({
+  ...props
+}) {
+  return (
+    <textarea
+      {...props}
+      className={`theme-input w-full resize-none rounded-xl border px-4 py-3 text-sm outline-none transition ${themeFocus}`}
+    />
+  );
+}
+
+/* ============================================================
+   FIELD HINT
+   ============================================================ */
+
+function FieldHint({ children }) {
+  return (
+    <p className="theme-text-muted mt-1.5 text-xs leading-5">
+      {children}
+    </p>
   );
 }

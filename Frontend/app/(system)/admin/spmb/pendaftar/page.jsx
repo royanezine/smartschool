@@ -12,9 +12,6 @@ import {
   X,
   User,
   Phone,
-  Mail,
-  MapPin,
-  CalendarDays,
   GraduationCap,
   RefreshCw,
   AlertCircle,
@@ -29,11 +26,68 @@ import {
 } from "../../../../../services/ppdb.service";
 
 // =========================================================
-// DATA SEMENTARA UNTUK UI
+// THEME HELPERS
 // =========================================================
-// BE saat ini belum menyediakan GET daftar pendaftar.
-// Karena itu data list tetap dari data yang sudah ada.
-// Aksi verifikasi & upload sudah terhubung ke BE.
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+const themeInputFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+
+// =========================================================
+// DATA SEMENTARA UNTUK UI
 // =========================================================
 
 const initialPendaftar = [
@@ -158,15 +212,6 @@ const STATUS_FILTERS = [
   },
 ];
 
-const STATUS_STYLES = {
-  menunggu:
-    "bg-amber-50 text-amber-600 border-amber-100",
-  lulus:
-    "bg-emerald-50 text-emerald-600 border-emerald-100",
-  ditolak:
-    "bg-rose-50 text-rose-600 border-rose-100",
-};
-
 const STATUS_LABELS = {
   menunggu: "Menunggu",
   lulus: "Lulus",
@@ -189,6 +234,42 @@ const BERKAS_LIST = [
 ];
 
 // =========================================================
+// STATUS THEME
+// =========================================================
+
+function getStatusTheme(status) {
+  switch (status) {
+    case "menunggu":
+      return {
+        surface: themeWarningSurface,
+        border: themeWarningBorder,
+        text: "text-[var(--color-warning)]",
+      };
+
+    case "lulus":
+      return {
+        surface: themeSuccessSurface,
+        border: themeSuccessBorder,
+        text: "text-[var(--color-success)]",
+      };
+
+    case "ditolak":
+      return {
+        surface: themeDangerSurface,
+        border: themeDangerBorder,
+        text: "theme-danger",
+      };
+
+    default:
+      return {
+        surface: themeNeutralSurface,
+        border: themeNeutralBorder,
+        text: "theme-text-secondary",
+      };
+  }
+}
+
+// =========================================================
 // HELPERS
 // =========================================================
 
@@ -196,14 +277,11 @@ function formatTanggal(value) {
   if (!value) return "-";
 
   try {
-    return new Date(value).toLocaleDateString(
-      "id-ID",
-      {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      }
-    );
+    return new Date(value).toLocaleDateString("id-ID", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
   } catch {
     return "-";
   }
@@ -213,14 +291,11 @@ function formatTanggalPanjang(value) {
   if (!value) return "-";
 
   try {
-    return new Date(value).toLocaleDateString(
-      "id-ID",
-      {
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      }
-    );
+    return new Date(value).toLocaleDateString("id-ID", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    });
   } catch {
     return "-";
   }
@@ -230,17 +305,11 @@ function formatJenisKelamin(value) {
   if (value === "L") return "Laki-laki";
   if (value === "P") return "Perempuan";
 
-  if (
-    String(value).toLowerCase() ===
-    "laki-laki"
-  ) {
+  if (String(value).toLowerCase() === "laki-laki") {
     return "Laki-laki";
   }
 
-  if (
-    String(value).toLowerCase() ===
-    "perempuan"
-  ) {
+  if (String(value).toLowerCase() === "perempuan") {
     return "Perempuan";
   }
 
@@ -262,8 +331,7 @@ function getInitials(name = "") {
 // =========================================================
 
 export default function PendaftarPPDBPage() {
-  const [isCollapsed, setIsCollapsed] =
-    useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const [pendaftarList, setPendaftarList] =
     useState(initialPendaftar);
@@ -276,8 +344,7 @@ export default function PendaftarPPDBPage() {
   const [selectedPendaftar, setSelectedPendaftar] =
     useState(null);
 
-  const [showDetail, setShowDetail] =
-    useState(false);
+  const [showDetail, setShowDetail] = useState(false);
 
   const [showLulusModal, setShowLulusModal] =
     useState(false);
@@ -306,9 +373,7 @@ export default function PendaftarPPDBPage() {
   // =========================================================
 
   const filteredPendaftar = useMemo(() => {
-    const keyword = search
-      .toLowerCase()
-      .trim();
+    const keyword = search.toLowerCase().trim();
 
     return pendaftarList.filter((item) => {
       const matchStatus =
@@ -332,33 +397,25 @@ export default function PendaftarPPDBPage() {
 
       return matchStatus && matchSearch;
     });
-  }, [
-    pendaftarList,
-    activeStatus,
-    search,
-  ]);
+  }, [pendaftarList, activeStatus, search]);
 
   // =========================================================
   // SUMMARY
   // =========================================================
 
-  const totalPendaftar =
-    pendaftarList.length;
+  const totalPendaftar = pendaftarList.length;
 
-  const totalMenunggu =
-    pendaftarList.filter(
-      (item) => item.status === "menunggu"
-    ).length;
+  const totalMenunggu = pendaftarList.filter(
+    (item) => item.status === "menunggu"
+  ).length;
 
-  const totalLulus =
-    pendaftarList.filter(
-      (item) => item.status === "lulus"
-    ).length;
+  const totalLulus = pendaftarList.filter(
+    (item) => item.status === "lulus"
+  ).length;
 
-  const totalDitolak =
-    pendaftarList.filter(
-      (item) => item.status === "ditolak"
-    ).length;
+  const totalDitolak = pendaftarList.filter(
+    (item) => item.status === "ditolak"
+  ).length;
 
   // =========================================================
   // SIDEBAR
@@ -393,9 +450,7 @@ export default function PendaftarPPDBPage() {
 
   const openLulusModal = (pendaftar) => {
     setSelectedPendaftar(pendaftar);
-    setKelasId(
-      pendaftar?.kelasId || ""
-    );
+    setKelasId(pendaftar?.kelasId || "");
     setActionError("");
     setSuccessMessage("");
     setShowLulusModal(true);
@@ -415,9 +470,7 @@ export default function PendaftarPPDBPage() {
 
   const handleLulus = async () => {
     if (!selectedPendaftar?.id) {
-      setActionError(
-        "ID pendaftar tidak ditemukan."
-      );
+      setActionError("ID pendaftar tidak ditemukan.");
       return;
     }
 
@@ -433,14 +486,13 @@ export default function PendaftarPPDBPage() {
       setActionError("");
       setSuccessMessage("");
 
-      const response =
-        await verifikasiPpdb(
-          selectedPendaftar.id,
-          {
-            status: "lulus",
-            kelasId: kelasId.trim(),
-          }
-        );
+      const response = await verifikasiPpdb(
+        selectedPendaftar.id,
+        {
+          status: "lulus",
+          kelasId: kelasId.trim(),
+        }
+      );
 
       console.log(
         "Response verifikasi lulus:",
@@ -512,13 +564,12 @@ export default function PendaftarPPDBPage() {
       setActionError("");
       setSuccessMessage("");
 
-      const response =
-        await verifikasiPpdb(
-          pendaftar.id,
-          {
-            status: "ditolak",
-          }
-        );
+      const response = await verifikasiPpdb(
+        pendaftar.id,
+        {
+          status: "ditolak",
+        }
+      );
 
       console.log(
         "Response verifikasi ditolak:",
@@ -587,11 +638,8 @@ export default function PendaftarPPDBPage() {
     setActionError("");
   };
 
-  const handleFileChange = async (
-    event
-  ) => {
-    const file =
-      event.target.files?.[0];
+  const handleFileChange = async (event) => {
+    const file = event.target.files?.[0];
 
     if (!file) return;
 
@@ -694,9 +742,6 @@ export default function PendaftarPPDBPage() {
   // =========================================================
   // REFRESH UI
   // =========================================================
-  // Belum melakukan GET karena BE belum menyediakan endpoint
-  // list pendaftar.
-  // =========================================================
 
   const handleRefresh = () => {
     setActionError("");
@@ -714,7 +759,7 @@ export default function PendaftarPPDBPage() {
   // =========================================================
 
   return (
-    <div className="flex h-screen w-full bg-[#EEF0F2] overflow-hidden">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar
         role="adminPPDB"
         active="pendaftar"
@@ -723,7 +768,7 @@ export default function PendaftarPPDBPage() {
         setCollapsed={setIsCollapsed}
       />
 
-      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+      <div className="flex flex-1 flex-col min-w-0 h-full overflow-hidden">
         <Header
           toggleSidebar={toggleSidebar}
           notifications={[]}
@@ -739,31 +784,28 @@ export default function PendaftarPPDBPage() {
           <div className="w-full p-4 md:p-6 lg:p-8">
             <div className="w-full max-w-[1320px] mx-auto space-y-5">
 
-              {/* ================================================= */}
               {/* BREADCRUMB */}
-              {/* ================================================= */}
-
-              <div className="flex items-center gap-1.5 text-xs text-slate-400">
+              <div className="flex items-center gap-1.5 text-xs theme-text-secondary">
                 <span>PPDB</span>
 
                 <ChevronRight size={12} />
 
-                <span className="text-slate-600 font-medium">
+                <span className={`font-medium ${themePrimaryText}`}>
                   Pendaftar
                 </span>
               </div>
 
-              {/* ================================================= */}
               {/* SUCCESS */}
-              {/* ================================================= */}
-
               {successMessage && (
-                <div className="flex items-center gap-2 bg-emerald-50 border border-emerald-100 text-emerald-700 rounded-xl px-4 py-3 text-sm">
+                <div
+                  className={`flex items-center gap-2 ${themeSuccessSurface} ${themeSuccessBorder} border rounded-xl px-4 py-3 text-sm`}
+                >
                   <CheckCircle2
                     size={17}
+                    className="text-[var(--color-success)]"
                   />
 
-                  <span>
+                  <span className="theme-text">
                     {successMessage}
                   </span>
 
@@ -771,24 +813,24 @@ export default function PendaftarPPDBPage() {
                     onClick={() =>
                       setSuccessMessage("")
                     }
-                    className="ml-auto"
+                    className="ml-auto theme-text-secondary hover:text-[var(--color-success)] transition-colors"
                   >
                     <X size={16} />
                   </button>
                 </div>
               )}
 
-              {/* ================================================= */}
               {/* ERROR */}
-              {/* ================================================= */}
-
               {actionError && (
-                <div className="flex items-center gap-2 bg-rose-50 border border-rose-100 text-rose-700 rounded-xl px-4 py-3 text-sm">
+                <div
+                  className={`flex items-center gap-2 ${themeDangerSurface} ${themeDangerBorder} border rounded-xl px-4 py-3 text-sm`}
+                >
                   <AlertCircle
                     size={17}
+                    className="theme-danger"
                   />
 
-                  <span>
+                  <span className="theme-text">
                     {actionError}
                   </span>
 
@@ -796,70 +838,50 @@ export default function PendaftarPPDBPage() {
                     onClick={() =>
                       setActionError("")
                     }
-                    className="ml-auto"
+                    className="ml-auto theme-text-secondary hover:theme-danger transition-colors"
                   >
                     <X size={16} />
                   </button>
                 </div>
               )}
 
-              {/* ================================================= */}
               {/* SUMMARY */}
-              {/* ================================================= */}
-
               <section className="grid grid-cols-2 lg:grid-cols-4 gap-4">
 
-                <div className="bg-white rounded-xl p-5">
-                  <p className="text-xs text-slate-400">
-                    Total Pendaftar
-                  </p>
+                <SummaryCard
+                  label="Total Pendaftar"
+                  value={totalPendaftar}
+                />
 
-                  <p className="text-2xl font-bold text-slate-800 mt-2">
-                    {totalPendaftar}
-                  </p>
-                </div>
+                <SummaryCard
+                  label="Menunggu Verifikasi"
+                  value={totalMenunggu}
+                  valueClass="text-[var(--color-warning)]"
+                />
 
-                <div className="bg-white rounded-xl p-5">
-                  <p className="text-xs text-slate-400">
-                    Menunggu Verifikasi
-                  </p>
+                <SummaryCard
+                  label="Lulus"
+                  value={totalLulus}
+                  valueClass="text-[var(--color-success)]"
+                />
 
-                  <p className="text-2xl font-bold text-amber-500 mt-2">
-                    {totalMenunggu}
-                  </p>
-                </div>
-
-                <div className="bg-white rounded-xl p-5">
-                  <p className="text-xs text-slate-400">
-                    Lulus
-                  </p>
-
-                  <p className="text-2xl font-bold text-emerald-500 mt-2">
-                    {totalLulus}
-                  </p>
-                </div>
-
-                <div className="bg-white rounded-xl p-5">
-                  <p className="text-xs text-slate-400">
-                    Ditolak
-                  </p>
-
-                  <p className="text-2xl font-bold text-rose-500 mt-2">
-                    {totalDitolak}
-                  </p>
-                </div>
+                <SummaryCard
+                  label="Ditolak"
+                  value={totalDitolak}
+                  valueClass="theme-danger"
+                />
 
               </section>
 
-              {/* ================================================= */}
               {/* MAIN PANEL */}
-              {/* ================================================= */}
-
-              <section className="bg-white rounded-xl overflow-hidden">
+              <section
+                className={`theme-card rounded-xl overflow-hidden ${themeCardShadow}`}
+              >
 
                 {/* HEADER */}
-                <div className="flex flex-wrap items-center justify-between gap-3 px-5 pt-4 pb-4 border-b border-slate-100">
-
+                <div
+                  className={`flex flex-wrap items-center justify-between gap-3 px-5 pt-4 pb-4 border-b ${themeDivider}`}
+                >
                   <div className="flex items-center gap-5 overflow-x-auto">
 
                     {STATUS_FILTERS.map(
@@ -874,15 +896,17 @@ export default function PendaftarPPDBPage() {
                           className={`relative pb-2.5 text-sm font-medium whitespace-nowrap transition-colors ${
                             activeStatus ===
                             filter.key
-                              ? "text-blue-600"
-                              : "text-slate-400 hover:text-slate-600"
+                              ? themePrimaryText
+                              : "theme-text-secondary hover:text-[var(--color-primary)]"
                           }`}
                         >
                           {filter.label}
 
                           {activeStatus ===
                             filter.key && (
-                            <span className="absolute left-0 right-0 -bottom-px h-0.5 bg-blue-600 rounded-full" />
+                            <span
+                              className="absolute left-0 right-0 -bottom-px h-0.5 rounded-full bg-[var(--color-primary)]"
+                            />
                           )}
                         </button>
                       )
@@ -892,11 +916,12 @@ export default function PendaftarPPDBPage() {
 
                   <div className="flex items-center gap-2">
 
-                    <div className="flex items-center gap-2 text-xs text-slate-500 border border-slate-200 rounded-md px-3 py-2">
-
+                    <div
+                      className={`flex items-center gap-2 text-xs ${themeInputFocus} theme-input rounded-md px-3 py-2`}
+                    >
                       <Search
                         size={14}
-                        className="text-slate-400"
+                        className="theme-text-muted"
                       />
 
                       <input
@@ -907,62 +932,55 @@ export default function PendaftarPPDBPage() {
                           )
                         }
                         placeholder="Cari pendaftar..."
-                        className="outline-none bg-transparent placeholder:text-slate-400 w-44"
+                        className="outline-none bg-transparent theme-text w-44 placeholder:text-[var(--color-text-placeholder)]"
                       />
                     </div>
 
                     <button
                       onClick={handleRefresh}
-                      className="flex items-center justify-center border border-slate-200 hover:bg-slate-50 text-slate-500 rounded-md w-9 h-9 transition-colors"
+                      className={`flex items-center justify-center ${theme-card} ${themeNeutralBorder} border ${themeNeutralHover} theme-text-secondary rounded-md w-9 h-9 transition-colors`}
                       title="Refresh"
                     >
-                      <RefreshCw
-                        size={15}
-                      />
+                      <RefreshCw size={15} />
                     </button>
 
                   </div>
                 </div>
 
-                {/* ================================================= */}
                 {/* TABLE */}
-                {/* ================================================= */}
-
                 <div className="overflow-x-auto">
 
                   <table className="w-full min-w-[1050px]">
 
                     <thead>
-                      <tr className="border-b border-slate-100 bg-slate-50/60">
+                      <tr
+                        className={`border-b ${themeDivider} ${themeNeutralSurface}`}
+                      >
+                        {[
+                          "Pendaftar",
+                          "NISN",
+                          "Asal Sekolah",
+                          "Jalur",
+                          "Tanggal",
+                          "Status",
+                        ].map((label, index) => (
+                          <th
+                            key={label}
+                            className={`text-left px-4 py-3 text-[11px] font-semibold theme-text-muted uppercase tracking-wide ${
+                              index === 0
+                                ? "pl-5"
+                                : ""
+                            }`}
+                          >
+                            {label}
+                          </th>
+                        ))}
 
-                        <th className="text-left px-5 py-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wide">
-                          Pendaftar
-                        </th>
-
-                        <th className="text-left px-4 py-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wide">
-                          NISN
-                        </th>
-
-                        <th className="text-left px-4 py-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wide">
-                          Asal Sekolah
-                        </th>
-
-                        <th className="text-left px-4 py-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wide">
-                          Jalur
-                        </th>
-
-                        <th className="text-left px-4 py-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wide">
-                          Tanggal
-                        </th>
-
-                        <th className="text-left px-4 py-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wide">
-                          Status
-                        </th>
-
-                        <th className="text-right px-5 py-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wide">
+                        <th
+                          className="text-right px-5 py-3 text-[11px] font-semibold theme-text-muted uppercase tracking-wide"
+                        >
                           Aksi
                         </th>
-
                       </tr>
                     </thead>
 
@@ -973,7 +991,7 @@ export default function PendaftarPPDBPage() {
                         <tr>
                           <td
                             colSpan={7}
-                            className="text-center py-14 text-sm text-slate-400"
+                            className="text-center py-14 text-sm theme-text-muted"
                           >
                             Tidak ada pendaftar
                             ditemukan.
@@ -982,168 +1000,170 @@ export default function PendaftarPPDBPage() {
                       )}
 
                       {filteredPendaftar.map(
-                        (pendaftar) => (
-                          <tr
-                            key={
-                              pendaftar.id
-                            }
-                            className="border-b border-slate-50 hover:bg-slate-50/50 transition-colors"
-                          >
+                        (pendaftar) => {
+                          const statusTheme =
+                            getStatusTheme(
+                              pendaftar.status
+                            );
 
-                            {/* Pendaftar */}
-                            <td className="px-5 py-4">
+                          return (
+                            <tr
+                              key={
+                                pendaftar.id
+                              }
+                              className={`border-b ${themeDivider} hover:${themeNeutralSurface} transition-colors`}
+                            >
 
-                              <div className="flex items-center gap-3">
+                              {/* PENDAFTAR */}
+                              <td className="px-5 py-4">
 
-                                <div className="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center text-xs font-semibold flex-shrink-0">
-                                  {getInitials(
-                                    pendaftar.namaLengkap
-                                  )}
-                                </div>
+                                <div className="flex items-center gap-3">
 
-                                <div className="min-w-0">
-
-                                  <p className="text-sm font-semibold text-slate-700 truncate">
-                                    {
+                                  <div
+                                    className={`w-9 h-9 rounded-full ${themePrimarySoft} ${themePrimaryText} flex items-center justify-center text-xs font-semibold flex-shrink-0`}
+                                  >
+                                    {getInitials(
                                       pendaftar.namaLengkap
-                                    }
-                                  </p>
+                                    )}
+                                  </div>
 
-                                  <p className="text-[11px] text-slate-400 mt-0.5">
-                                    {
-                                      pendaftar.nomorPendaftaran
-                                    }
-                                  </p>
+                                  <div className="min-w-0">
+
+                                    <p className="text-sm font-semibold theme-text truncate">
+                                      {
+                                        pendaftar.namaLengkap
+                                      }
+                                    </p>
+
+                                    <p className="text-[11px] theme-text-muted mt-0.5">
+                                      {
+                                        pendaftar.nomorPendaftaran
+                                      }
+                                    </p>
+
+                                  </div>
 
                                 </div>
 
-                              </div>
+                              </td>
 
-                            </td>
-
-                            {/* NISN */}
-                            <td className="px-4 py-4">
-                              <span className="text-xs text-slate-600 font-mono">
-                                {
-                                  pendaftar.nisn
-                                }
-                              </span>
-                            </td>
-
-                            {/* Sekolah */}
-                            <td className="px-4 py-4">
-                              <span className="text-xs text-slate-600">
-                                {
-                                  pendaftar.asalSekolah ||
-                                  "-"
-                                }
-                              </span>
-                            </td>
-
-                            {/* Jalur */}
-                            <td className="px-4 py-4">
-                              <span className="text-xs text-slate-600">
-                                {
-                                  pendaftar.jalur ||
-                                  "-"
-                                }
-                              </span>
-                            </td>
-
-                            {/* Tanggal */}
-                            <td className="px-4 py-4">
-                              <span className="text-xs text-slate-500">
-                                {formatTanggal(
-                                  pendaftar.tanggalDaftar
-                                )}
-                              </span>
-                            </td>
-
-                            {/* Status */}
-                            <td className="px-4 py-4">
-
-                              <span
-                                className={`inline-flex items-center text-[11px] font-medium px-2.5 py-1 rounded-full border ${
-                                  STATUS_STYLES[
-                                    pendaftar.status
-                                  ] ||
-                                  "bg-slate-50 text-slate-500 border-slate-100"
-                                }`}
-                              >
-                                {
-                                  STATUS_LABELS[
-                                    pendaftar.status
-                                  ] ||
-                                  pendaftar.status
-                                }
-                              </span>
-
-                            </td>
-
-                            {/* Aksi */}
-                            <td className="px-5 py-4">
-
-                              <div className="flex items-center justify-end gap-1.5">
-
-                                <button
-                                  onClick={() =>
-                                    openDetail(
-                                      pendaftar
-                                    )
+                              {/* NISN */}
+                              <td className="px-4 py-4">
+                                <span className="text-xs theme-text-secondary font-mono">
+                                  {
+                                    pendaftar.nisn
                                   }
-                                  className="flex items-center gap-1.5 text-xs text-slate-500 hover:text-blue-600 hover:bg-blue-50 px-2.5 py-1.5 rounded-md transition-colors"
+                                </span>
+                              </td>
+
+                              {/* SEKOLAH */}
+                              <td className="px-4 py-4">
+                                <span className="text-xs theme-text-secondary">
+                                  {
+                                    pendaftar.asalSekolah ||
+                                    "-"
+                                  }
+                                </span>
+                              </td>
+
+                              {/* JALUR */}
+                              <td className="px-4 py-4">
+                                <span className="text-xs theme-text-secondary">
+                                  {
+                                    pendaftar.jalur ||
+                                    "-"
+                                  }
+                                </span>
+                              </td>
+
+                              {/* TANGGAL */}
+                              <td className="px-4 py-4">
+                                <span className="text-xs theme-text-secondary">
+                                  {formatTanggal(
+                                    pendaftar.tanggalDaftar
+                                  )}
+                                </span>
+                              </td>
+
+                              {/* STATUS */}
+                              <td className="px-4 py-4">
+
+                                <span
+                                  className={`inline-flex items-center text-[11px] font-medium px-2.5 py-1 rounded-full border ${statusTheme.surface} ${statusTheme.border} ${statusTheme.text}`}
                                 >
-                                  <Eye
-                                    size={14}
-                                  />
-                                  Detail
-                                </button>
+                                  {
+                                    STATUS_LABELS[
+                                      pendaftar.status
+                                    ] ||
+                                    pendaftar.status
+                                  }
+                                </span>
 
-                                {pendaftar.status ===
-                                  "menunggu" && (
-                                  <>
-                                    <button
-                                      onClick={() =>
-                                        openLulusModal(
-                                          pendaftar
-                                        )
-                                      }
-                                      disabled={
-                                        actionLoading
-                                      }
-                                      className="flex items-center gap-1.5 text-xs text-emerald-600 hover:bg-emerald-50 px-2.5 py-1.5 rounded-md transition-colors disabled:opacity-50"
-                                    >
-                                      <CheckCircle2
-                                        size={14}
-                                      />
-                                      Lulus
-                                    </button>
+                              </td>
 
-                                    <button
-                                      onClick={() =>
-                                        handleTolak(
-                                          pendaftar
-                                        )
-                                      }
-                                      disabled={
-                                        actionLoading
-                                      }
-                                      className="flex items-center gap-1.5 text-xs text-rose-500 hover:bg-rose-50 px-2.5 py-1.5 rounded-md transition-colors disabled:opacity-50"
-                                    >
-                                      <XCircle
-                                        size={14}
-                                      />
-                                      Tolak
-                                    </button>
-                                  </>
-                                )}
+                              {/* AKSI */}
+                              <td className="px-5 py-4">
 
-                              </div>
+                                <div className="flex items-center justify-end gap-1.5">
 
-                            </td>
+                                  <button
+                                    onClick={() =>
+                                      openDetail(
+                                        pendaftar
+                                      )
+                                    }
+                                    className={`flex items-center gap-1.5 text-xs theme-text-secondary hover:${themePrimaryText} ${themePrimarySoft} px-2.5 py-1.5 rounded-md transition-colors`}
+                                  >
+                                    <Eye size={14} />
+                                    Detail
+                                  </button>
 
-                          </tr>
-                        )
+                                  {pendaftar.status ===
+                                    "menunggu" && (
+                                    <>
+                                      <button
+                                        onClick={() =>
+                                          openLulusModal(
+                                            pendaftar
+                                          )
+                                        }
+                                        disabled={
+                                          actionLoading
+                                        }
+                                        className={`flex items-center gap-1.5 text-xs text-[var(--color-success)] ${themeSuccessSurface} px-2.5 py-1.5 rounded-md transition-colors disabled:opacity-50`}
+                                      >
+                                        <CheckCircle2
+                                          size={14}
+                                        />
+                                        Lulus
+                                      </button>
+
+                                      <button
+                                        onClick={() =>
+                                          handleTolak(
+                                            pendaftar
+                                          )
+                                        }
+                                        disabled={
+                                          actionLoading
+                                        }
+                                        className={`flex items-center gap-1.5 text-xs theme-danger ${themeDangerSurface} px-2.5 py-1.5 rounded-md transition-colors disabled:opacity-50`}
+                                      >
+                                        <XCircle
+                                          size={14}
+                                        />
+                                        Tolak
+                                      </button>
+                                    </>
+                                  )}
+
+                                </div>
+
+                              </td>
+
+                            </tr>
+                          );
+                        }
                       )}
 
                     </tbody>
@@ -1168,21 +1188,24 @@ export default function PendaftarPPDBPage() {
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
 
             <div
-              className="absolute inset-0 bg-slate-900/40 backdrop-blur-[1px]"
+              className="absolute inset-0 bg-[color-mix(in_srgb,var(--color-text)_42%,transparent)] backdrop-blur-[1px]"
               onClick={closeDetail}
             />
 
-            <div className="relative bg-white w-full max-w-3xl max-h-[90vh] rounded-2xl shadow-xl overflow-hidden">
+            <div
+              className={`relative theme-card w-full max-w-3xl max-h-[90vh] rounded-2xl ${themeCardShadow} overflow-hidden`}
+            >
 
               {/* HEADER */}
-              <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-
+              <div
+                className={`flex items-center justify-between px-6 py-4 border-b ${themeDivider}`}
+              >
                 <div>
-                  <h3 className="text-base font-semibold text-slate-800">
+                  <h3 className="text-base font-semibold theme-text">
                     Detail Pendaftar
                   </h3>
 
-                  <p className="text-xs text-slate-400 mt-0.5">
+                  <p className="text-xs theme-text-muted mt-0.5">
                     {
                       selectedPendaftar.nomorPendaftaran
                     }
@@ -1191,7 +1214,7 @@ export default function PendaftarPPDBPage() {
 
                 <button
                   onClick={closeDetail}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400"
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg ${themeNeutralHover} theme-text-muted hover:${themePrimaryText}`}
                 >
                   <X size={18} />
                 </button>
@@ -1204,7 +1227,9 @@ export default function PendaftarPPDBPage() {
                 {/* PROFILE */}
                 <div className="flex items-center gap-4">
 
-                  <div className="w-14 h-14 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center font-bold">
+                  <div
+                    className={`w-14 h-14 rounded-full ${themePrimarySoft} ${themePrimaryText} flex items-center justify-center font-bold`}
+                  >
                     {getInitials(
                       selectedPendaftar.namaLengkap
                     )}
@@ -1212,49 +1237,51 @@ export default function PendaftarPPDBPage() {
 
                   <div className="flex-1">
 
-                    <h4 className="text-lg font-semibold text-slate-800">
+                    <h4 className="text-lg font-semibold theme-text">
                       {
                         selectedPendaftar.namaLengkap
                       }
                     </h4>
 
-                    <p className="text-xs text-slate-400 mt-1">
+                    <p className="text-xs theme-text-muted mt-1">
                       NISN{" "}
                       {selectedPendaftar.nisn}
                     </p>
 
                   </div>
 
-                  <span
-                    className={`text-[11px] font-medium px-2.5 py-1 rounded-full border ${
-                      STATUS_STYLES[
+                  {(() => {
+                    const statusTheme =
+                      getStatusTheme(
                         selectedPendaftar.status
-                      ]
-                    }`}
-                  >
-                    {
-                      STATUS_LABELS[
-                        selectedPendaftar.status
-                      ]
-                    }
-                  </span>
+                      );
+
+                    return (
+                      <span
+                        className={`text-[11px] font-medium px-2.5 py-1 rounded-full border ${statusTheme.surface} ${statusTheme.border} ${statusTheme.text}`}
+                      >
+                        {
+                          STATUS_LABELS[
+                            selectedPendaftar
+                              .status
+                          ]
+                        }
+                      </span>
+                    );
+                  })()}
 
                 </div>
 
                 {/* DATA PRIBADI */}
-                <div>
-
-                  <div className="flex items-center gap-2 mb-3">
+                <DetailSection
+                  icon={
                     <User
                       size={15}
-                      className="text-blue-600"
+                      className={themePrimaryText}
                     />
-
-                    <h4 className="text-sm font-semibold text-slate-700">
-                      Data Pribadi
-                    </h4>
-                  </div>
-
+                  }
+                  title="Data Pribadi"
+                >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
 
                     <InfoItem
@@ -1300,23 +1327,18 @@ export default function PendaftarPPDBPage() {
                     />
 
                   </div>
-
-                </div>
+                </DetailSection>
 
                 {/* KONTAK */}
-                <div>
-
-                  <div className="flex items-center gap-2 mb-3">
+                <DetailSection
+                  icon={
                     <Phone
                       size={15}
-                      className="text-blue-600"
+                      className={themePrimaryText}
                     />
-
-                    <h4 className="text-sm font-semibold text-slate-700">
-                      Kontak
-                    </h4>
-                  </div>
-
+                  }
+                  title="Kontak"
+                >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
 
                     <InfoItem
@@ -1342,23 +1364,18 @@ export default function PendaftarPPDBPage() {
                     />
 
                   </div>
-
-                </div>
+                </DetailSection>
 
                 {/* ORANG TUA */}
-                <div>
-
-                  <div className="flex items-center gap-2 mb-3">
+                <DetailSection
+                  icon={
                     <User
                       size={15}
-                      className="text-blue-600"
+                      className={themePrimaryText}
                     />
-
-                    <h4 className="text-sm font-semibold text-slate-700">
-                      Data Orang Tua
-                    </h4>
-                  </div>
-
+                  }
+                  title="Data Orang Tua"
+                >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
 
                     <InfoItem
@@ -1376,23 +1393,18 @@ export default function PendaftarPPDBPage() {
                     />
 
                   </div>
+                </DetailSection>
 
-                </div>
-
-                {/* NILAI */}
-                <div>
-
-                  <div className="flex items-center gap-2 mb-3">
+                {/* AKADEMIK */}
+                <DetailSection
+                  icon={
                     <GraduationCap
                       size={15}
-                      className="text-blue-600"
+                      className={themePrimaryText}
                     />
-
-                    <h4 className="text-sm font-semibold text-slate-700">
-                      Data Akademik
-                    </h4>
-                  </div>
-
+                  }
+                  title="Data Akademik"
+                >
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
 
                     <InfoItem
@@ -1412,23 +1424,18 @@ export default function PendaftarPPDBPage() {
                     />
 
                   </div>
-
-                </div>
+                </DetailSection>
 
                 {/* BERKAS */}
-                <div>
-
-                  <div className="flex items-center gap-2 mb-3">
+                <DetailSection
+                  icon={
                     <FileText
                       size={15}
-                      className="text-blue-600"
+                      className={themePrimaryText}
                     />
-
-                    <h4 className="text-sm font-semibold text-slate-700">
-                      Berkas Pendaftaran
-                    </h4>
-                  </div>
-
+                  }
+                  title="Berkas Pendaftaran"
+                >
                   <div className="space-y-2">
 
                     {BERKAS_LIST.map(
@@ -1444,27 +1451,29 @@ export default function PendaftarPPDBPage() {
                             key={
                               berkas.key
                             }
-                            className="flex items-center justify-between gap-3 border border-slate-100 rounded-xl p-3"
+                            className={`flex items-center justify-between gap-3 border ${themeDivider} rounded-xl p-3`}
                           >
 
                             <div className="flex items-center gap-3">
 
-                              <div className="w-9 h-9 rounded-lg bg-slate-50 flex items-center justify-center">
+                              <div
+                                className={`w-9 h-9 rounded-lg ${themeNeutralSurface} flex items-center justify-center`}
+                              >
                                 <FileText
                                   size={16}
-                                  className="text-slate-400"
+                                  className="theme-text-muted"
                                 />
                               </div>
 
                               <div>
 
-                                <p className="text-xs font-medium text-slate-700">
+                                <p className="text-xs font-medium theme-text">
                                   {
                                     berkas.label
                                   }
                                 </p>
 
-                                <p className="text-[10px] text-slate-400 mt-0.5">
+                                <p className="text-[10px] theme-text-muted mt-0.5">
                                   {file
                                     ? file.namaFile ||
                                       file.urlFile ||
@@ -1479,7 +1488,9 @@ export default function PendaftarPPDBPage() {
                             <div className="flex items-center gap-2">
 
                               {file && (
-                                <span className="text-[10px] text-emerald-600 bg-emerald-50 border border-emerald-100 px-2 py-1 rounded-full">
+                                <span
+                                  className={`text-[10px] text-[var(--color-success)] ${themeSuccessSurface} ${themeSuccessBorder} border px-2 py-1 rounded-full`}
+                                >
                                   Tersedia
                                 </span>
                               )}
@@ -1494,11 +1505,9 @@ export default function PendaftarPPDBPage() {
                                 disabled={
                                   actionLoading
                                 }
-                                className="flex items-center gap-1.5 text-xs text-blue-600 hover:bg-blue-50 px-2.5 py-1.5 rounded-md disabled:opacity-50"
+                                className={`flex items-center gap-1.5 text-xs ${themePrimaryText} ${themePrimarySoft} px-2.5 py-1.5 rounded-md disabled:opacity-50`}
                               >
-                                <Upload
-                                  size={13}
-                                />
+                                <Upload size={13} />
                                 Upload
                               </button>
 
@@ -1510,18 +1519,19 @@ export default function PendaftarPPDBPage() {
                     )}
 
                   </div>
-
-                </div>
+                </DetailSection>
 
               </div>
 
               {/* FOOTER */}
-              <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100">
+              <div
+                className={`flex items-center justify-between px-6 py-4 border-t ${themeDivider}`}
+              >
 
                 <button
                   onClick={closeDetail}
                   disabled={actionLoading}
-                  className="text-xs text-slate-500 hover:text-slate-700 px-3 py-2"
+                  className={`text-xs theme-text-secondary hover:${themePrimaryText} px-3 py-2`}
                 >
                   Tutup
                 </button>
@@ -1539,11 +1549,9 @@ export default function PendaftarPPDBPage() {
                       disabled={
                         actionLoading
                       }
-                      className="flex items-center gap-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-medium px-3.5 py-2 rounded-lg disabled:opacity-50"
+                      className={`flex items-center gap-1.5 ${themeDangerSurface} theme-danger text-xs font-medium px-3.5 py-2 rounded-lg disabled:opacity-50`}
                     >
-                      <XCircle
-                        size={14}
-                      />
+                      <XCircle size={14} />
                       Tolak
                     </button>
 
@@ -1556,11 +1564,9 @@ export default function PendaftarPPDBPage() {
                       disabled={
                         actionLoading
                       }
-                      className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium px-3.5 py-2 rounded-lg disabled:opacity-50"
+                      className={`flex items-center gap-1.5 ${themePrimaryGradient} text-[var(--color-card)] text-xs font-medium px-3.5 py-2 rounded-lg ${themePrimaryShadow} disabled:opacity-50`}
                     >
-                      <CheckCircle2
-                        size={14}
-                      />
+                      <CheckCircle2 size={14} />
                       Luluskan
                     </button>
 
@@ -1582,7 +1588,7 @@ export default function PendaftarPPDBPage() {
           <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
 
             <div
-              className="absolute inset-0 bg-slate-900/40"
+              className="absolute inset-0 bg-[color-mix(in_srgb,var(--color-text)_42%,transparent)]"
               onClick={
                 actionLoading
                   ? undefined
@@ -1590,16 +1596,20 @@ export default function PendaftarPPDBPage() {
               }
             />
 
-            <div className="relative bg-white w-full max-w-md rounded-2xl shadow-xl">
+            <div
+              className={`relative theme-card w-full max-w-md rounded-2xl ${themeCardShadow}`}
+            >
 
-              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+              <div
+                className={`flex items-center justify-between px-5 py-4 border-b ${themeDivider}`}
+              >
 
                 <div>
-                  <h3 className="text-sm font-semibold text-slate-800">
+                  <h3 className="text-sm font-semibold theme-text">
                     Luluskan Pendaftar
                   </h3>
 
-                  <p className="text-[11px] text-slate-400 mt-1">
+                  <p className="text-[11px] theme-text-muted mt-1">
                     {
                       selectedPendaftar.namaLengkap
                     }
@@ -1613,7 +1623,7 @@ export default function PendaftarPPDBPage() {
                   disabled={
                     actionLoading
                   }
-                  className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400"
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg ${themeNeutralHover} theme-text-muted hover:${themePrimaryText}`}
                 >
                   <X size={17} />
                 </button>
@@ -1622,8 +1632,10 @@ export default function PendaftarPPDBPage() {
 
               <div className="p-5">
 
-                <div className="bg-amber-50 border border-amber-100 rounded-xl p-3 mb-4">
-                  <p className="text-xs text-amber-700 leading-relaxed">
+                <div
+                  className={`${themeWarningSurface} ${themeWarningBorder} border rounded-xl p-3 mb-4`}
+                >
+                  <p className="text-xs text-[var(--color-warning)] leading-relaxed">
                     Pendaftar yang dinyatakan
                     lulus akan dikonversi oleh
                     BE menjadi akun siswa dan
@@ -1632,7 +1644,7 @@ export default function PendaftarPPDBPage() {
                   </p>
                 </div>
 
-                <label className="block text-xs font-medium text-slate-600 mb-2">
+                <label className="block text-xs font-medium theme-text-secondary mb-2">
                   ID Kelas
                 </label>
 
@@ -1647,18 +1659,20 @@ export default function PendaftarPPDBPage() {
                   disabled={
                     actionLoading
                   }
-                  className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:bg-slate-50"
+                  className={`w-full theme-input rounded-lg px-3 py-2.5 text-sm outline-none theme-text ${themeInputFocus} disabled:opacity-60`}
                 />
 
                 {actionError && (
-                  <p className="text-xs text-rose-600 mt-2">
+                  <p className="text-xs theme-danger mt-2">
                     {actionError}
                   </p>
                 )}
 
               </div>
 
-              <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-slate-100">
+              <div
+                className={`flex items-center justify-end gap-2 px-5 py-4 border-t ${themeDivider}`}
+              >
 
                 <button
                   onClick={
@@ -1667,7 +1681,7 @@ export default function PendaftarPPDBPage() {
                   disabled={
                     actionLoading
                   }
-                  className="text-xs text-slate-500 px-3 py-2"
+                  className={`text-xs theme-text-secondary hover:${themePrimaryText} px-3 py-2`}
                 >
                   Batal
                 </button>
@@ -1677,7 +1691,7 @@ export default function PendaftarPPDBPage() {
                   disabled={
                     actionLoading
                   }
-                  className="flex items-center gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium px-4 py-2.5 rounded-lg disabled:opacity-50"
+                  className={`flex items-center gap-1.5 ${themePrimaryGradient} text-[var(--color-card)] text-xs font-medium px-4 py-2.5 rounded-lg ${themePrimaryShadow} disabled:opacity-50`}
                 >
                   {actionLoading ? (
                     <>
@@ -1713,7 +1727,7 @@ export default function PendaftarPPDBPage() {
           <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
 
             <div
-              className="absolute inset-0 bg-slate-900/40"
+              className="absolute inset-0 bg-[color-mix(in_srgb,var(--color-text)_42%,transparent)]"
               onClick={
                 actionLoading
                   ? undefined
@@ -1721,16 +1735,20 @@ export default function PendaftarPPDBPage() {
               }
             />
 
-            <div className="relative bg-white w-full max-w-md rounded-2xl shadow-xl">
+            <div
+              className={`relative theme-card w-full max-w-md rounded-2xl ${themeCardShadow}`}
+            >
 
-              <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100">
+              <div
+                className={`flex items-center justify-between px-5 py-4 border-b ${themeDivider}`}
+              >
 
                 <div>
-                  <h3 className="text-sm font-semibold text-slate-800">
+                  <h3 className="text-sm font-semibold theme-text">
                     Upload Berkas
                   </h3>
 
-                  <p className="text-[11px] text-slate-400 mt-1">
+                  <p className="text-[11px] theme-text-muted mt-1">
                     {
                       selectedBerkas.label
                     }
@@ -1744,7 +1762,7 @@ export default function PendaftarPPDBPage() {
                   disabled={
                     actionLoading
                   }
-                  className="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400"
+                  className={`w-8 h-8 flex items-center justify-center rounded-lg ${themeNeutralHover} theme-text-muted hover:${themePrimaryText}`}
                 >
                   <X size={17} />
                 </button>
@@ -1753,26 +1771,26 @@ export default function PendaftarPPDBPage() {
 
               <div className="p-5">
 
-                <div className="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center hover:border-blue-300 transition-colors">
+                <div
+                  className={`border-2 border-dashed ${themeNeutralBorder} rounded-xl p-8 text-center hover:border-[color-mix(in_srgb,var(--color-primary)_35%,transparent)] transition-colors`}
+                >
 
-                  <div className="w-12 h-12 mx-auto rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center mb-3">
-                    <Upload
-                      size={21}
-                    />
+                  <div
+                    className={`w-12 h-12 mx-auto rounded-xl ${themePrimarySoft} ${themePrimaryText} flex items-center justify-center mb-3`}
+                  >
+                    <Upload size={21} />
                   </div>
 
-                  <p className="text-sm font-medium text-slate-700">
+                  <p className="text-sm font-medium theme-text">
                     Pilih file berkas
                   </p>
 
-                  <p className="text-[11px] text-slate-400 mt-1 mb-4">
+                  <p className="text-[11px] theme-text-muted mt-1 mb-4">
                     PDF, JPG, JPEG, atau PNG
                   </p>
 
                   <input
-                    ref={
-                      fileInputRef
-                    }
+                    ref={fileInputRef}
                     type="file"
                     accept=".pdf,.jpg,.jpeg,.png"
                     onChange={
@@ -1787,7 +1805,7 @@ export default function PendaftarPPDBPage() {
 
                   <label
                     htmlFor="ppdb-file-upload"
-                    className={`inline-flex items-center gap-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium px-4 py-2.5 rounded-lg cursor-pointer ${
+                    className={`inline-flex items-center gap-1.5 ${themePrimaryGradient} text-[var(--color-card)] text-xs font-medium px-4 py-2.5 rounded-lg cursor-pointer ${themePrimaryShadow} ${
                       actionLoading
                         ? "opacity-50 pointer-events-none"
                         : ""
@@ -1803,9 +1821,7 @@ export default function PendaftarPPDBPage() {
                       </>
                     ) : (
                       <>
-                        <Upload
-                          size={13}
-                        />
+                        <Upload size={13} />
                         Pilih File
                       </>
                     )}
@@ -1814,7 +1830,7 @@ export default function PendaftarPPDBPage() {
                 </div>
 
                 {actionError && (
-                  <p className="text-xs text-rose-600 mt-3">
+                  <p className="text-xs theme-danger mt-3">
                     {actionError}
                   </p>
                 )}
@@ -1824,6 +1840,57 @@ export default function PendaftarPPDBPage() {
             </div>
           </div>
         )}
+
+    </div>
+  );
+}
+
+// =========================================================
+// SUMMARY CARD
+// =========================================================
+
+function SummaryCard({
+  label,
+  value,
+  valueClass = "theme-text",
+}) {
+  return (
+    <div
+      className={`theme-card rounded-xl p-5 ${themeNeutralBorder} border ${themeCardShadow}`}
+    >
+      <p className="text-xs theme-text-muted">
+        {label}
+      </p>
+
+      <p
+        className={`text-2xl font-bold mt-2 ${valueClass}`}
+      >
+        {value}
+      </p>
+    </div>
+  );
+}
+
+// =========================================================
+// DETAIL SECTION
+// =========================================================
+
+function DetailSection({
+  icon,
+  title,
+  children,
+}) {
+  return (
+    <div>
+      <div className="flex items-center gap-2 mb-3">
+        {icon}
+
+        <h4 className="text-sm font-semibold theme-text">
+          {title}
+        </h4>
+      </div>
+
+      {children}
     </div>
   );
 }
@@ -1839,15 +1906,15 @@ function InfoItem({
 }) {
   return (
     <div
-      className={`bg-slate-50 rounded-lg px-3 py-2.5 ${
+      className={`theme-card-soft rounded-lg px-3 py-2.5 ${
         full ? "md:col-span-2" : ""
       }`}
     >
-      <p className="text-[10px] text-slate-400 mb-1">
+      <p className="text-[10px] theme-text-muted mb-1">
         {label}
       </p>
 
-      <p className="text-xs text-slate-700 break-words">
+      <p className="text-xs theme-text break-words">
         {value || "-"}
       </p>
     </div>

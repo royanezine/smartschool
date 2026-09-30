@@ -10,17 +10,54 @@ import {
   ArrowLeft,
   UserRound,
   School,
-  MapPin,
   Phone,
-  Mail,
   FileText,
   GraduationCap,
-  CalendarDays,
   Save,
   CheckCircle2,
   Upload,
-  X,
 } from "lucide-react";
+
+// =========================================================
+// THEME HELPERS
+// =========================================================
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+
+// =========================================================
+// PAGE
+// =========================================================
 
 export default function TambahPendaftarPage() {
   const router = useRouter();
@@ -54,6 +91,10 @@ export default function TambahPendaftarPage() {
     noTeleponOrangTua: "",
   });
 
+  // =======================================================
+  // HANDLERS
+  // =======================================================
+
   const handleChange = (field, value) => {
     setForm((prev) => ({
       ...prev,
@@ -72,8 +113,16 @@ export default function TambahPendaftarPage() {
     }, 800);
   };
 
+  // =======================================================
+  // RENDER
+  // =======================================================
+
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-slate-50">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
+      {/* =================================================
+          SIDEBAR
+      ================================================= */}
+
       <Sidebar
         active="spmb"
         setActive={() => {}}
@@ -81,6 +130,10 @@ export default function TambahPendaftarPage() {
         setCollapsed={setCollapsed}
         role="admin"
       />
+
+      {/* =================================================
+          MAIN
+      ================================================= */}
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <div className="shrink-0">
@@ -99,42 +152,82 @@ export default function TambahPendaftarPage() {
 
         <main className="min-h-0 flex-1 overflow-hidden">
           <div className="flex h-full min-h-0 flex-col">
-            {/* HEADER */}
 
-            <div className="shrink-0 border-b border-slate-200/80 bg-white">
+            {/* =================================================
+                HEADER
+            ================================================= */}
+
+            <div
+              className={`
+                shrink-0
+                border-b ${themeDivider}
+                theme-card
+              `}
+            >
               <div className="flex flex-col gap-3 px-4 py-4 sm:px-5 lg:px-6">
+                {/* BACK */}
+
                 <button
+                  type="button"
                   onClick={() =>
-                    router.push("/admin/spmb/data-pendaftaran")
+                    router.push(
+                      "/admin/spmb/data-pendaftaran"
+                    )
                   }
-                  className="flex w-fit items-center gap-2 text-xs font-semibold text-slate-500 transition hover:text-[#155DFC]"
+                  className="
+                    flex w-fit
+                    items-center gap-2
+                    text-xs font-semibold
+                    theme-text-secondary
+                    transition
+                    hover:text-[var(--color-primary)]
+                  "
                 >
                   <ArrowLeft size={15} />
                   Kembali ke Data Pendaftaran
                 </button>
 
+                {/* TITLE */}
+
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#eaf1ff]">
-                      <UserRound
-                        size={20}
-                        className="text-[#155DFC]"
-                      />
+                    <div
+                      className={`
+                        flex h-10 w-10
+                        items-center justify-center
+                        rounded-xl
+                        ${themePrimarySoft}
+                        ${themePrimaryText}
+                      `}
+                    >
+                      <UserRound size={20} />
                     </div>
 
                     <div>
-                      <h1 className="text-xl font-bold text-slate-800">
+                      <h1 className="text-xl font-bold theme-text">
                         Tambah Pendaftar
                       </h1>
 
-                      <p className="text-xs text-slate-500">
+                      <p className="text-xs theme-text-secondary">
                         Tambahkan data calon siswa baru ke sistem SPMB
                       </p>
                     </div>
                   </div>
 
+                  {/* BADGE */}
+
                   <div className="flex items-center gap-2">
-                    <span className="rounded-md border border-slate-200 bg-slate-50 px-3 py-2 text-[10px] font-semibold text-slate-500">
+                    <span
+                      className={`
+                        rounded-md
+                        border ${themeNeutralBorder}
+                        ${themeNeutralSurface}
+                        px-3 py-2
+                        text-[10px]
+                        font-semibold
+                        theme-text-secondary
+                      `}
+                    >
                       Data Baru
                     </span>
                   </div>
@@ -142,7 +235,9 @@ export default function TambahPendaftarPage() {
               </div>
             </div>
 
-            {/* CONTENT */}
+            {/* =================================================
+                CONTENT
+            ================================================= */}
 
             <div className="min-h-0 flex-1 overflow-auto">
               <form
@@ -150,9 +245,13 @@ export default function TambahPendaftarPage() {
                 className="mx-auto w-full max-w-[1400px] p-4 sm:p-5 lg:p-6"
               >
                 <div className="grid gap-5 xl:grid-cols-3">
-                  {/* LEFT */}
+
+                  {/* =================================================
+                      LEFT
+                  ================================================= */}
 
                   <div className="space-y-5 xl:col-span-2">
+
                     {/* DATA PRIBADI */}
 
                     <FormSection
@@ -179,7 +278,10 @@ export default function TambahPendaftarPage() {
                           required
                           value={form.nisn}
                           onChange={(value) =>
-                            handleChange("nisn", value)
+                            handleChange(
+                              "nisn",
+                              value
+                            )
                           }
                           placeholder="Masukkan NISN"
                         />
@@ -188,7 +290,10 @@ export default function TambahPendaftarPage() {
                           label="NIK"
                           value={form.nik}
                           onChange={(value) =>
-                            handleChange("nik", value)
+                            handleChange(
+                              "nik",
+                              value
+                            )
                           }
                           placeholder="Masukkan NIK"
                         />
@@ -237,7 +342,10 @@ export default function TambahPendaftarPage() {
                           label="Agama"
                           value={form.agama}
                           onChange={(value) =>
-                            handleChange("agama", value)
+                            handleChange(
+                              "agama",
+                              value
+                            )
                           }
                           options={[
                             "Islam",
@@ -276,7 +384,10 @@ export default function TambahPendaftarPage() {
                           type="email"
                           value={form.email}
                           onChange={(value) =>
-                            handleChange("email", value)
+                            handleChange(
+                              "email",
+                              value
+                            )
                           }
                           placeholder="email@example.com"
                         />
@@ -311,7 +422,10 @@ export default function TambahPendaftarPage() {
                           label="Kota / Kabupaten"
                           value={form.kota}
                           onChange={(value) =>
-                            handleChange("kota", value)
+                            handleChange(
+                              "kota",
+                              value
+                            )
                           }
                           placeholder="Masukkan kota"
                         />
@@ -439,9 +553,7 @@ export default function TambahPendaftarPage() {
 
                         <Input
                           label="Nomor Telepon Orang Tua / Wali"
-                          value={
-                            form.noTeleponOrangTua
-                          }
+                          value={form.noTeleponOrangTua}
                           onChange={(value) =>
                             handleChange(
                               "noTeleponOrangTua",
@@ -454,9 +566,12 @@ export default function TambahPendaftarPage() {
                     </FormSection>
                   </div>
 
-                  {/* RIGHT */}
+                  {/* =================================================
+                      RIGHT
+                  ================================================= */}
 
                   <div className="space-y-5">
+
                     {/* PENERIMAAN */}
 
                     <FormSection
@@ -517,24 +632,51 @@ export default function TambahPendaftarPage() {
                         ].map((item) => (
                           <div
                             key={item}
-                            className="flex items-center justify-between rounded-lg border border-slate-200 bg-slate-50 p-3"
+                            className={`
+                              flex items-center
+                              justify-between
+                              rounded-lg
+                              border ${themeNeutralBorder}
+                              ${themeNeutralSurface}
+                              p-3
+                            `}
                           >
                             <div className="flex min-w-0 items-center gap-3">
-                              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white">
+                              <div
+                                className={`
+                                  flex h-8 w-8
+                                  shrink-0
+                                  items-center justify-center
+                                  rounded-lg
+                                  theme-card
+                                  ${themeSmallShadow}
+                                `}
+                              >
                                 <FileText
                                   size={15}
-                                  className="text-slate-400"
+                                  className="theme-text-muted"
                                 />
                               </div>
 
-                              <span className="truncate text-xs font-medium text-slate-600">
+                              <span className="truncate text-xs font-medium theme-text-secondary">
                                 {item}
                               </span>
                             </div>
 
                             <button
                               type="button"
-                              className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-400 hover:border-[#c7dbff] hover:text-[#155DFC]"
+                              className={`
+                                flex h-8 w-8
+                                shrink-0
+                                items-center justify-center
+                                rounded-lg
+                                border ${themeNeutralBorder}
+                                theme-card
+                                theme-text-muted
+                                transition
+                                hover:border-[color-mix(in_srgb,var(--color-primary)_28%,transparent)]
+                                hover:text-[var(--color-primary)]
+                              `}
                             >
                               <Upload size={14} />
                             </button>
@@ -545,21 +687,37 @@ export default function TambahPendaftarPage() {
 
                     {/* INFORMASI */}
 
-                    <div className="rounded-xl border border-[#c7dbff] bg-[#f5f8ff] p-4">
+                    <div
+                      className={`
+                        rounded-xl
+                        border ${themePrimarySoftBorder}
+                        ${themePrimarySoft}
+                        p-4
+                      `}
+                    >
                       <div className="flex gap-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white">
+                        <div
+                          className={`
+                            flex h-9 w-9
+                            shrink-0
+                            items-center justify-center
+                            rounded-lg
+                            theme-card
+                            ${themeSmallShadow}
+                          `}
+                        >
                           <CheckCircle2
                             size={17}
-                            className="text-[#155DFC]"
+                            className={themePrimaryText}
                           />
                         </div>
 
                         <div>
-                          <p className="text-xs font-bold text-slate-700">
+                          <p className="text-xs font-bold theme-text">
                             Periksa data sebelum menyimpan
                           </p>
 
-                          <p className="mt-1 text-[10px] leading-5 text-slate-500">
+                          <p className="mt-1 text-[10px] leading-5 theme-text-secondary">
                             Pastikan seluruh data calon siswa
                             sudah sesuai dengan dokumen
                             pendaftaran.
@@ -570,9 +728,21 @@ export default function TambahPendaftarPage() {
                   </div>
                 </div>
 
-                {/* ACTION */}
+                {/* =================================================
+                    ACTION
+                ================================================= */}
 
-                <div className="mt-5 flex flex-col-reverse gap-2 border-t border-slate-200 pt-5 sm:flex-row sm:justify-end">
+                <div
+                  className={`
+                    mt-5
+                    flex flex-col-reverse
+                    gap-2
+                    border-t ${themeDivider}
+                    pt-5
+                    sm:flex-row
+                    sm:justify-end
+                  `}
+                >
                   <button
                     type="button"
                     onClick={() =>
@@ -580,7 +750,16 @@ export default function TambahPendaftarPage() {
                         "/admin/spmb/pendaftaran"
                       )
                     }
-                    className="rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-xs font-semibold text-slate-600 hover:bg-slate-50"
+                    className={`
+                      rounded-lg
+                      border ${themeNeutralBorder}
+                      theme-card
+                      px-5 py-2.5
+                      text-xs font-semibold
+                      theme-text-secondary
+                      transition
+                      ${themeNeutralHover}
+                    `}
                   >
                     Batal
                   </button>
@@ -588,7 +767,22 @@ export default function TambahPendaftarPage() {
                   <button
                     type="submit"
                     disabled={saving}
-                    className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#155DFC] px-5 py-2.5 text-xs font-semibold text-white shadow-sm hover:bg-[#0d47c9] disabled:cursor-not-allowed disabled:opacity-60"
+                    className={`
+                      inline-flex
+                      items-center
+                      justify-center
+                      gap-2
+                      rounded-lg
+                      ${themePrimaryGradient}
+                      px-5 py-2.5
+                      text-xs font-semibold
+                      text-[var(--color-card)]
+                      shadow-[0_4px_12px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]
+                      transition
+                      hover:opacity-90
+                      disabled:cursor-not-allowed
+                      disabled:opacity-60
+                    `}
                   >
                     <Save size={15} />
 
@@ -606,6 +800,10 @@ export default function TambahPendaftarPage() {
   );
 }
 
+// =========================================================
+// FORM SECTION
+// =========================================================
+
 function FormSection({
   icon: Icon,
   title,
@@ -613,21 +811,35 @@ function FormSection({
   children,
 }) {
   return (
-    <section className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-sm">
+    <section
+      className={`
+        rounded-xl
+        border ${themeNeutralBorder}
+        theme-card
+        p-5
+        ${themeCardShadow}
+      `}
+    >
       <div className="mb-5 flex items-center gap-3">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#eaf1ff]">
-          <Icon
-            size={17}
-            className="text-[#155DFC]"
-          />
+        <div
+          className={`
+            flex h-9 w-9
+            shrink-0
+            items-center justify-center
+            rounded-lg
+            ${themePrimarySoft}
+            ${themePrimaryText}
+          `}
+        >
+          <Icon size={17} />
         </div>
 
         <div>
-          <h2 className="text-sm font-bold text-slate-800">
+          <h2 className="text-sm font-bold theme-text">
             {title}
           </h2>
 
-          <p className="mt-0.5 text-[10px] text-slate-400">
+          <p className="mt-0.5 text-[10px] theme-text-muted">
             {description}
           </p>
         </div>
@@ -637,6 +849,10 @@ function FormSection({
     </section>
   );
 }
+
+// =========================================================
+// INPUT
+// =========================================================
 
 function Input({
   label,
@@ -648,11 +864,18 @@ function Input({
 }) {
   return (
     <div>
-      <label className="mb-1.5 block text-[10px] font-semibold text-slate-500">
+      <label className="mb-1.5 block text-[10px] font-semibold theme-text-secondary">
         {label}
 
         {required && (
-          <span className="ml-1 text-red-500">*</span>
+          <span
+            className="
+              ml-1
+              theme-danger
+            "
+          >
+            *
+          </span>
         )}
       </label>
 
@@ -663,11 +886,27 @@ function Input({
           onChange(e.target.value)
         }
         placeholder={placeholder}
-        className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-xs text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#8bb4ff] focus:bg-white focus:ring-2 focus:ring-[#155DFC]/10"
+        className={`
+          h-10 w-full
+          rounded-lg
+          border ${themeNeutralBorder}
+          ${themeNeutralSurface}
+          px-3
+          text-xs
+          theme-text
+          outline-none
+          transition
+          placeholder:text-[var(--color-text-placeholder)]
+          ${themeFocus}
+        `}
       />
     </div>
   );
 }
+
+// =========================================================
+// SELECT
+// =========================================================
 
 function Select({
   label,
@@ -678,11 +917,13 @@ function Select({
 }) {
   return (
     <div>
-      <label className="mb-1.5 block text-[10px] font-semibold text-slate-500">
+      <label className="mb-1.5 block text-[10px] font-semibold theme-text-secondary">
         {label}
 
         {required && (
-          <span className="ml-1 text-red-500">*</span>
+          <span className="ml-1 theme-danger">
+            *
+          </span>
         )}
       </label>
 
@@ -691,12 +932,28 @@ function Select({
         onChange={(e) =>
           onChange(e.target.value)
         }
-        className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 px-3 text-xs text-slate-700 outline-none focus:border-[#8bb4ff] focus:bg-white focus:ring-2 focus:ring-[#155DFC]/10"
+        className={`
+          h-10 w-full
+          rounded-lg
+          border ${themeNeutralBorder}
+          ${themeNeutralSurface}
+          px-3
+          text-xs
+          theme-text
+          outline-none
+          transition
+          ${themeFocus}
+        `}
       >
-        <option value="">Pilih {label}</option>
+        <option value="">
+          Pilih {label}
+        </option>
 
         {options.map((option) => (
-          <option key={option} value={option}>
+          <option
+            key={option}
+            value={option}
+          >
             {option}
           </option>
         ))}
@@ -704,6 +961,10 @@ function Select({
     </div>
   );
 }
+
+// =========================================================
+// TEXT AREA
+// =========================================================
 
 function TextArea({
   label,
@@ -713,7 +974,7 @@ function TextArea({
 }) {
   return (
     <div>
-      <label className="mb-1.5 block text-[10px] font-semibold text-slate-500">
+      <label className="mb-1.5 block text-[10px] font-semibold theme-text-secondary">
         {label}
       </label>
 
@@ -724,11 +985,28 @@ function TextArea({
         }
         placeholder={placeholder}
         rows={3}
-        className="w-full resize-none rounded-lg border border-slate-200 bg-slate-50 px-3 py-2.5 text-xs text-slate-700 outline-none placeholder:text-slate-400 focus:border-[#8bb4ff] focus:bg-white focus:ring-2 focus:ring-[#155DFC]/10"
+        className={`
+          w-full
+          resize-none
+          rounded-lg
+          border ${themeNeutralBorder}
+          ${themeNeutralSurface}
+          px-3 py-2.5
+          text-xs
+          theme-text
+          outline-none
+          transition
+          placeholder:text-[var(--color-text-placeholder)]
+          ${themeFocus}
+        `}
       />
     </div>
   );
 }
+
+// =========================================================
+// USERS ICON
+// =========================================================
 
 function UsersIcon(props) {
   return <UserRound {...props} />;

@@ -11,6 +11,48 @@ import {
   X,
 } from "lucide-react";
 
+/*
+|--------------------------------------------------------------------------
+| THEME HELPERS
+|--------------------------------------------------------------------------
+*/
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+
+/*
+|--------------------------------------------------------------------------
+| CONFIG
+|--------------------------------------------------------------------------
+*/
+
 /**
  * app/admin/siswa/kartu-identitas/tambah/page.jsx
  *
@@ -88,14 +130,24 @@ const REQUIRED_FIELDS = [
   "namaOrtu",
 ];
 
-function Field({ label, children, required = false }) {
+/*
+|--------------------------------------------------------------------------
+| FIELD
+|--------------------------------------------------------------------------
+*/
+
+function Field({
+  label,
+  children,
+  required = false,
+}) {
   return (
     <label className="block">
-      <span className="text-xs font-medium text-slate-500">
+      <span className="text-xs font-medium theme-text-muted">
         {label}
 
         {required && (
-          <span className="text-red-500 ml-1">
+          <span className="theme-danger ml-1">
             *
           </span>
         )}
@@ -106,25 +158,52 @@ function Field({ label, children, required = false }) {
   );
 }
 
-const inputClass =
-  "mt-1 w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#155DFC]/25 focus:border-[#155DFC]/50 text-slate-800";
+/*
+|--------------------------------------------------------------------------
+| INPUT STYLE
+|--------------------------------------------------------------------------
+*/
+
+const inputClass = `
+  mt-1 w-full
+  px-3 py-2
+  text-sm rounded-lg
+  border ${themeNeutralBorder}
+  ${themeNeutralSurface}
+  theme-text
+  placeholder:text-[var(--color-text-placeholder)]
+  focus:outline-none
+  ${themeFocus}
+  transition-colors
+`;
+
+/*
+|--------------------------------------------------------------------------
+| PAGE
+|--------------------------------------------------------------------------
+*/
 
 export default function TambahSiswaPage() {
   const router = useRouter();
 
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] =
+    useState(false);
 
-  const [form, setForm] = useState(EMPTY_FORM);
+  const [form, setForm] =
+    useState(EMPTY_FORM);
 
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] =
+    useState({});
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
   };
 
-  /* =========================================================
-     HANDLE CHANGE
-  ========================================================= */
+  /*
+  |--------------------------------------------------------------------------
+  | HANDLE CHANGE
+  |--------------------------------------------------------------------------
+  */
 
   const handleChange = (field) => (e) => {
     const value = e.target.value;
@@ -142,9 +221,11 @@ export default function TambahSiswaPage() {
     }
   };
 
-  /* =========================================================
-     SUBMIT
-  ========================================================= */
+  /*
+  |--------------------------------------------------------------------------
+  | SUBMIT
+  |--------------------------------------------------------------------------
+  */
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -152,19 +233,28 @@ export default function TambahSiswaPage() {
     const nextErrors = {};
 
     REQUIRED_FIELDS.forEach((field) => {
-      if (!String(form[field] || "").trim()) {
-        nextErrors[field] = "Wajib diisi";
+      if (
+        !String(
+          form[field] || ""
+        ).trim()
+      ) {
+        nextErrors[field] =
+          "Wajib diisi";
       }
     });
 
-    if (Object.keys(nextErrors).length > 0) {
+    if (
+      Object.keys(nextErrors).length > 0
+    ) {
       setErrors(nextErrors);
       return;
     }
 
     try {
       const raw =
-        window.localStorage.getItem(QUEUE_KEY);
+        window.localStorage.getItem(
+          QUEUE_KEY
+        );
 
       const queue = raw
         ? JSON.parse(raw)
@@ -177,7 +267,8 @@ export default function TambahSiswaPage() {
         id: `siswa-${Date.now()}`,
 
         // Waktu dibuat
-        createdAt: new Date().toISOString(),
+        createdAt:
+          new Date().toISOString(),
       };
 
       queue.push(newSiswa);
@@ -199,8 +290,7 @@ export default function TambahSiswaPage() {
   };
 
   return (
-    <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
-
+    <div className="flex h-screen w-full theme-page overflow-hidden">
       {/* =====================================================
           SIDEBAR
       ===================================================== */}
@@ -218,7 +308,6 @@ export default function TambahSiswaPage() {
       ===================================================== */}
 
       <div className="flex-1 flex flex-col min-w-0 w-full h-full overflow-hidden">
-
         {/* HEADER */}
 
         <Header
@@ -236,97 +325,111 @@ export default function TambahSiswaPage() {
         =================================================== */}
 
         <main className="flex-1 w-full overflow-y-auto">
-
           <div className="w-full max-w-none p-4 sm:p-6 lg:p-8 space-y-6">
-
             {/* =================================================
                 HEADER
             ================================================= */}
 
             <div className="flex items-center gap-3">
-
               <button
+                type="button"
                 onClick={() =>
                   router.push(
                     "/admin/siswa/kartu-identitas"
                   )
                 }
-                className="w-9 h-9 rounded-lg border border-slate-200 bg-white flex items-center justify-center text-slate-500 hover:bg-slate-50 flex-shrink-0"
+                className={`
+                  w-9 h-9 rounded-lg
+                  border ${themeNeutralBorder}
+                  theme-card
+                  flex items-center justify-center
+                  theme-text-secondary
+                  ${themeNeutralHover}
+                  hover:text-[var(--color-primary)]
+                  flex-shrink-0
+                  transition-colors
+                `}
                 title="Kembali ke daftar"
               >
                 <ArrowLeft size={16} />
               </button>
 
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-[#155DFC] to-[#0d47c9] text-white shadow-lg shadow-slate-900/10">
+              <div
+                className={`
+                  p-2.5 rounded-xl
+                  ${themePrimaryGradient}
+                  text-[var(--color-card)]
+                  ${themePrimaryShadow}
+                `}
+              >
                 <IdCard size={20} />
               </div>
 
               <div>
-
-                <h1 className="text-2xl font-bold text-slate-800">
+                <h1 className="text-2xl font-bold theme-text">
                   Tambah Siswa
                 </h1>
 
-                <p className="text-sm text-slate-500">
+                <p className="text-sm theme-text-secondary">
                   Isi data identitas siswa baru.
                 </p>
-
               </div>
-
             </div>
 
             {/* =================================================
                 FORM
             ================================================= */}
 
-            <div className="w-full bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6">
-
+            <div
+              className={`
+                w-full theme-card
+                rounded-2xl
+                border ${themeNeutralBorder}
+                ${themeCardShadow}
+                p-6
+              `}
+            >
               <form
                 onSubmit={handleSubmit}
                 className="space-y-6"
               >
-
                 {/* =================================================
                     DATA IDENTITAS
                 ================================================= */}
 
                 <div>
-
                   <div className="mb-4">
-
-                    <h2 className="text-sm font-bold text-slate-800">
+                    <h2 className="text-sm font-bold theme-text">
                       Data Identitas Siswa
                     </h2>
 
-                    <p className="text-xs text-slate-400 mt-1">
+                    <p className="text-xs theme-text-muted mt-1">
                       Informasi dasar dan identitas siswa.
                     </p>
-
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-
                     {/* NAMA */}
 
                     <Field
                       label="Nama lengkap"
                       required
                     >
-
                       <input
                         type="text"
                         value={form.nama}
-                        onChange={handleChange("nama")}
+                        onChange={handleChange(
+                          "nama"
+                        )}
                         placeholder="cth. Alya Ramadhani"
                         className={inputClass}
                       />
 
                       {errors.nama && (
-                        <p className="text-[11px] text-red-500 mt-1">
+                        <p className="text-[11px] theme-danger mt-1">
                           {errors.nama}
                         </p>
                       )}
-
                     </Field>
 
                     {/* NISN */}
@@ -335,35 +438,35 @@ export default function TambahSiswaPage() {
                       label="NISN"
                       required
                     >
-
                       <input
                         type="text"
                         value={form.nisn}
-                        onChange={handleChange("nisn")}
+                        onChange={handleChange(
+                          "nisn"
+                        )}
                         placeholder="cth. 0051234567"
                         className={`${inputClass} font-mono`}
                       />
 
                       {errors.nisn && (
-                        <p className="text-[11px] text-red-500 mt-1">
+                        <p className="text-[11px] theme-danger mt-1">
                           {errors.nisn}
                         </p>
                       )}
-
                     </Field>
 
                     {/* NIK */}
 
                     <Field label="NIK">
-
                       <input
                         type="text"
                         value={form.nik}
-                        onChange={handleChange("nik")}
+                        onChange={handleChange(
+                          "nik"
+                        )}
                         placeholder="cth. 3278123456780001"
                         className={`${inputClass} font-mono`}
                       />
-
                     </Field>
 
                     {/* JENIS KELAMIN */}
@@ -372,15 +475,15 @@ export default function TambahSiswaPage() {
                       label="Jenis kelamin"
                       required
                     >
-
                       <select
-                        value={form.jenisKelamin}
+                        value={
+                          form.jenisKelamin
+                        }
                         onChange={handleChange(
                           "jenisKelamin"
                         )}
-                        className={`${inputClass} bg-white`}
+                        className={inputClass}
                       >
-
                         <option value="">
                           Pilih jenis kelamin
                         </option>
@@ -395,58 +498,58 @@ export default function TambahSiswaPage() {
                             </option>
                           )
                         )}
-
                       </select>
 
                       {errors.jenisKelamin && (
-                        <p className="text-[11px] text-red-500 mt-1">
-                          {errors.jenisKelamin}
+                        <p className="text-[11px] theme-danger mt-1">
+                          {
+                            errors.jenisKelamin
+                          }
                         </p>
                       )}
-
                     </Field>
 
                     {/* TEMPAT LAHIR */}
 
                     <Field label="Tempat lahir">
-
                       <input
                         type="text"
-                        value={form.tempatLahir}
+                        value={
+                          form.tempatLahir
+                        }
                         onChange={handleChange(
                           "tempatLahir"
                         )}
                         placeholder="cth. Tasikmalaya"
                         className={inputClass}
                       />
-
                     </Field>
 
                     {/* TANGGAL LAHIR */}
 
                     <Field label="Tanggal lahir">
-
                       <input
                         type="date"
-                        value={form.tanggalLahir}
+                        value={
+                          form.tanggalLahir
+                        }
                         onChange={handleChange(
                           "tanggalLahir"
                         )}
                         className={inputClass}
                       />
-
                     </Field>
 
                     {/* AGAMA */}
 
                     <Field label="Agama">
-
                       <select
                         value={form.agama}
-                        onChange={handleChange("agama")}
-                        className={`${inputClass} bg-white`}
+                        onChange={handleChange(
+                          "agama"
+                        )}
+                        className={inputClass}
                       >
-
                         <option value="">
                           Pilih agama
                         </option>
@@ -461,47 +564,43 @@ export default function TambahSiswaPage() {
                             </option>
                           )
                         )}
-
                       </select>
-
                     </Field>
 
                     {/* TELEPON */}
 
                     <Field label="Nomor telepon">
-
                       <input
                         type="text"
-                        value={form.noTelepon}
+                        value={
+                          form.noTelepon
+                        }
                         onChange={handleChange(
                           "noTelepon"
                         )}
                         placeholder="cth. 0812-3456-7890"
                         className={inputClass}
                       />
-
                     </Field>
 
                     {/* EMAIL */}
 
                     <Field label="Email">
-
                       <input
                         type="email"
                         value={form.email}
-                        onChange={handleChange("email")}
+                        onChange={handleChange(
+                          "email"
+                        )}
                         placeholder="cth. siswa@smartschool.sch.id"
                         className={inputClass}
                       />
-
                     </Field>
 
                     {/* ALAMAT */}
 
                     <div className="sm:col-span-2 xl:col-span-3">
-
                       <Field label="Alamat">
-
                         <textarea
                           value={form.alamat}
                           onChange={handleChange(
@@ -511,49 +610,45 @@ export default function TambahSiswaPage() {
                           rows={2}
                           className={`${inputClass} resize-none`}
                         />
-
                       </Field>
-
                     </div>
-
                   </div>
-
                 </div>
-
 
                 {/* =================================================
                     DATA AKADEMIK
                 ================================================= */}
 
-                <div className="border-t border-slate-100 pt-5">
-
+                <div
+                  className={`
+                    border-t ${themeDivider}
+                    pt-5
+                  `}
+                >
                   <div className="mb-4">
-
-                    <h2 className="text-sm font-bold text-slate-800">
+                    <h2 className="text-sm font-bold theme-text">
                       Data Akademik
                     </h2>
 
-                    <p className="text-xs text-slate-400 mt-1">
+                    <p className="text-xs theme-text-muted mt-1">
                       Informasi kelas dan status siswa.
                     </p>
-
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-
                     {/* KELAS */}
 
                     <Field
                       label="Kelas"
                       required
                     >
-
                       <select
                         value={form.kelas}
-                        onChange={handleChange("kelas")}
-                        className={`${inputClass} bg-white`}
+                        onChange={handleChange(
+                          "kelas"
+                        )}
+                        className={inputClass}
                       >
-
                         <option value="">
                           Pilih kelas
                         </option>
@@ -568,95 +663,91 @@ export default function TambahSiswaPage() {
                             </option>
                           )
                         )}
-
                       </select>
 
                       {errors.kelas && (
-                        <p className="text-[11px] text-red-500 mt-1">
+                        <p className="text-[11px] theme-danger mt-1">
                           {errors.kelas}
                         </p>
                       )}
-
                     </Field>
 
                     {/* TAHUN MASUK */}
 
                     <Field label="Tahun masuk">
-
                       <input
                         type="text"
-                        value={form.tahunMasuk}
+                        value={
+                          form.tahunMasuk
+                        }
                         onChange={handleChange(
                           "tahunMasuk"
                         )}
                         placeholder="cth. 2025"
                         className={inputClass}
                       />
-
                     </Field>
 
                     {/* STATUS */}
 
                     <Field label="Status">
-
                       <select
                         value={form.status}
-                        onChange={handleChange("status")}
-                        className={`${inputClass} bg-white`}
+                        onChange={handleChange(
+                          "status"
+                        )}
+                        className={inputClass}
                       >
-
                         {STATUS_OPTIONS.map(
                           (status) => (
                             <option
                               key={status}
                               value={status}
                             >
-                              {status === "aktif"
+                              {status ===
+                              "aktif"
                                 ? "Aktif"
                                 : "Nonaktif"}
                             </option>
                           )
                         )}
-
                       </select>
-
                     </Field>
-
                   </div>
-
                 </div>
-
 
                 {/* =================================================
                     DATA ORANG TUA
                 ================================================= */}
 
-                <div className="border-t border-slate-100 pt-5">
-
+                <div
+                  className={`
+                    border-t ${themeDivider}
+                    pt-5
+                  `}
+                >
                   <div className="mb-4">
-
-                    <h2 className="text-sm font-bold text-slate-800">
+                    <h2 className="text-sm font-bold theme-text">
                       Data Orang Tua / Wali
                     </h2>
 
-                    <p className="text-xs text-slate-400 mt-1">
+                    <p className="text-xs theme-text-muted mt-1">
                       Informasi orang tua atau wali siswa.
                     </p>
-
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
-
                     {/* NAMA ORTU */}
 
                     <Field
                       label="Nama orang tua / wali"
                       required
                     >
-
                       <input
                         type="text"
-                        value={form.namaOrtu}
+                        value={
+                          form.namaOrtu
+                        }
                         onChange={handleChange(
                           "namaOrtu"
                         )}
@@ -665,25 +756,24 @@ export default function TambahSiswaPage() {
                       />
 
                       {errors.namaOrtu && (
-                        <p className="text-[11px] text-red-500 mt-1">
+                        <p className="text-[11px] theme-danger mt-1">
                           {errors.namaOrtu}
                         </p>
                       )}
-
                     </Field>
 
                     {/* HUBUNGAN */}
 
                     <Field label="Hubungan">
-
                       <select
-                        value={form.hubunganOrtu}
+                        value={
+                          form.hubunganOrtu
+                        }
                         onChange={handleChange(
                           "hubunganOrtu"
                         )}
-                        className={`${inputClass} bg-white`}
+                        className={inputClass}
                       >
-
                         <option value="">
                           Pilih hubungan
                         </option>
@@ -698,35 +788,33 @@ export default function TambahSiswaPage() {
                             </option>
                           )
                         )}
-
                       </select>
-
                     </Field>
 
                     {/* TELEPON ORTU */}
 
                     <Field label="Nomor telepon orang tua / wali">
-
                       <input
                         type="text"
-                        value={form.teleponOrtu}
+                        value={
+                          form.teleponOrtu
+                        }
                         onChange={handleChange(
                           "teleponOrtu"
                         )}
                         placeholder="cth. 0812-9988-7766"
                         className={inputClass}
                       />
-
                     </Field>
 
                     {/* ALAMAT ORTU */}
 
                     <div className="sm:col-span-2 xl:col-span-3">
-
                       <Field label="Alamat orang tua / wali">
-
                         <textarea
-                          value={form.alamatOrtu}
+                          value={
+                            form.alamatOrtu
+                          }
                           onChange={handleChange(
                             "alamatOrtu"
                           )}
@@ -734,22 +822,16 @@ export default function TambahSiswaPage() {
                           rows={2}
                           className={`${inputClass} resize-none`}
                         />
-
                       </Field>
-
                     </div>
-
                   </div>
-
                 </div>
-
 
                 {/* =================================================
                     BUTTON
                 ================================================= */}
 
                 <div className="flex items-center gap-2 pt-2 max-w-md ml-auto">
-
                   <button
                     type="button"
                     onClick={() =>
@@ -757,38 +839,46 @@ export default function TambahSiswaPage() {
                         "/admin/siswa/kartu-identitas"
                       )
                     }
-                    className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 transition-colors"
+                    className={`
+                      flex-1
+                      inline-flex items-center justify-center gap-2
+                      px-4 py-2.5 rounded-xl
+                      border ${themeNeutralBorder}
+                      theme-card
+                      theme-text-secondary
+                      text-sm font-medium
+                      ${themeNeutralHover}
+                      hover:text-[var(--color-primary)]
+                      transition-colors
+                    `}
                   >
-
                     <X size={15} />
-
                     Batal
-
                   </button>
 
                   <button
                     type="submit"
-                    className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#155DFC] to-[#0d47c9] text-white text-sm font-semibold hover:brightness-110 transition-all"
+                    className={`
+                      flex-1
+                      inline-flex items-center justify-center gap-2
+                      px-4 py-2.5 rounded-xl
+                      ${themePrimaryGradient}
+                      text-[var(--color-card)]
+                      text-sm font-semibold
+                      ${themePrimaryShadow}
+                      hover:brightness-110
+                      transition-all
+                    `}
                   >
-
                     <Save size={15} />
-
                     Simpan Siswa
-
                   </button>
-
                 </div>
-
               </form>
-
             </div>
-
           </div>
-
         </main>
-
       </div>
-
     </div>
   );
 }

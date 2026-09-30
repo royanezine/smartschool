@@ -13,7 +13,6 @@ import {
   XCircle,
   Loader2,
   AlertCircle,
-  ArrowLeft,
   Layers3,
   ChevronRight,
 } from "lucide-react";
@@ -25,6 +24,10 @@ import {
   getKategoriAset,
   deleteKategoriAset,
 } from "../../../../../services/sarpras.service";
+
+// ============================================================
+// HELPERS
+// ============================================================
 
 function extractArray(response) {
   if (Array.isArray(response)) return response;
@@ -48,6 +51,59 @@ function extractArray(response) {
   return [];
 }
 
+// ============================================================
+// GLOBAL THEME HELPERS
+// ============================================================
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_6%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
+
+// ============================================================
+// PAGE
+// ============================================================
+
 export default function KategoriPage() {
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -59,6 +115,10 @@ export default function KategoriPage() {
   const [filterStatus, setFilterStatus] = useState("semua");
 
   const [error, setError] = useState("");
+
+  // ==========================================================
+  // LOAD DATA
+  // ==========================================================
 
   useEffect(() => {
     loadKategori();
@@ -85,6 +145,10 @@ export default function KategoriPage() {
       setLoading(false);
     }
   }
+
+  // ==========================================================
+  // DELETE
+  // ==========================================================
 
   async function handleDelete(id, nama) {
     const confirmed = window.confirm(
@@ -113,6 +177,10 @@ export default function KategoriPage() {
     }
   }
 
+  // ==========================================================
+  // FILTER
+  // ==========================================================
+
   const filteredKategori = useMemo(() => {
     const keyword = search.toLowerCase().trim();
 
@@ -131,6 +199,10 @@ export default function KategoriPage() {
     });
   }, [kategoriList, search, filterStatus]);
 
+  // ==========================================================
+  // STATISTICS
+  // ==========================================================
+
   const totalKategori = kategoriList.length;
 
   const kategoriAktif = kategoriList.filter(
@@ -140,15 +212,18 @@ export default function KategoriPage() {
 
   const kategoriNonaktif = kategoriList.filter(
     (item) =>
-      String(item?.status || "").toLowerCase() ===
-      "nonaktif"
+      String(item?.status || "").toLowerCase() === "nonaktif"
   ).length;
 
+  // ==========================================================
+  // MAIN
+  // ==========================================================
+
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[#f8fafc]">
-      {/* =====================================================
+    <div className="theme-page flex h-screen w-full overflow-hidden">
+      {/* ======================================================
           SIDEBAR
-      ===================================================== */}
+      ====================================================== */}
 
       <div className="fixed inset-y-0 left-0 z-50">
         <Sidebar
@@ -159,9 +234,9 @@ export default function KategoriPage() {
         />
       </div>
 
-      {/* =====================================================
+      {/* ======================================================
           CONTENT
-      ===================================================== */}
+      ====================================================== */}
 
       <div
         className={`flex h-screen min-w-0 flex-1 flex-col overflow-hidden transition-[margin] duration-300 ${
@@ -170,6 +245,8 @@ export default function KategoriPage() {
             : "lg:ml-[260px]"
         }`}
       >
+        {/* HEADER */}
+
         <div className="shrink-0">
           <Header
             toggleSidebar={() =>
@@ -184,48 +261,55 @@ export default function KategoriPage() {
           />
         </div>
 
-        {/* ===================================================
+        {/* ====================================================
             MAIN
-        =================================================== */}
+        ==================================================== */}
 
         <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="w-full px-4 pb-10 pt-5 sm:px-6 sm:pt-6 lg:px-8 lg:pt-7">
             <div className="mx-auto w-full max-w-[1380px]">
 
-              {/* =================================================
+              {/* ==================================================
                   PAGE HEADER
-              ================================================= */}
+              ================================================== */}
 
               <div className="mb-7">
-                
-
                 <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
                   <div className="flex min-w-0 items-start gap-4">
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-[0_8px_22px_rgba(37,99,235,0.18)]">
+
+                    {/* ICON */}
+
+                    <div
+                      className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
+                    >
                       <Tag
                         size={26}
                         strokeWidth={1.9}
                       />
                     </div>
 
+                    {/* TITLE */}
+
                     <div className="min-w-0">
                       <div className="mb-1.5 flex items-center gap-2">
-                        <span className="text-[10px] font-bold uppercase tracking-[0.16em] text-blue-600">
+                        <span className="theme-primary text-[10px] font-bold uppercase tracking-[0.16em]">
                           Sarana & Prasarana
                         </span>
 
-                        <span className="hidden h-1 w-1 rounded-full bg-slate-300 sm:block" />
+                        <span
+                          className={`hidden h-1 w-1 rounded-full bg-[var(--color-text-placeholder)] sm:block`}
+                        />
 
-                        <span className="hidden text-[10px] font-medium uppercase tracking-wider text-slate-400 sm:block">
+                        <span className="theme-text-muted hidden text-[10px] font-medium uppercase tracking-wider sm:block">
                           Master Data
                         </span>
                       </div>
 
-                      <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+                      <h1 className="theme-text text-2xl font-bold tracking-tight sm:text-3xl">
                         Kategori Aset
                       </h1>
 
-                      <p className="mt-1.5 max-w-2xl text-sm leading-6 text-slate-500">
+                      <p className="theme-text-secondary mt-1.5 max-w-2xl text-sm leading-6">
                         Kelola kategori untuk mengelompokkan
                         barang inventaris sekolah dengan lebih
                         terstruktur.
@@ -233,9 +317,11 @@ export default function KategoriPage() {
                     </div>
                   </div>
 
+                  {/* TAMBAH */}
+
                   <Link
                     href="/admin/sarpras/kategori/tambah"
-                    className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white shadow-[0_6px_16px_rgba(37,99,235,0.18)] transition hover:bg-blue-700 hover:shadow-[0_8px_20px_rgba(37,99,235,0.24)] active:scale-[0.98]"
+                    className={`inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold text-[var(--color-card)] transition-all ${themePrimaryGradient} ${themePrimaryShadow} hover:brightness-[1.04] active:scale-[0.98]`}
                   >
                     <Plus size={18} />
                     Tambah Kategori
@@ -243,22 +329,26 @@ export default function KategoriPage() {
                 </div>
               </div>
 
-              {/* =================================================
+              {/* ==================================================
                   ERROR
-              ================================================= */}
+              ================================================== */}
 
               {error && (
-                <div className="mb-6 flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-rose-600 shadow-sm">
+                <div
+                  className={`mb-6 flex items-start gap-3 rounded-2xl border ${themeNeutralBorder} ${themeNeutralSurface} p-4`}
+                >
+                  <div
+                    className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${themeNeutralSurface} theme-danger ${themeSmallShadow}`}
+                  >
                     <AlertCircle size={18} />
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-bold text-rose-800">
+                    <p className="theme-text text-sm font-bold">
                       Terjadi Kesalahan
                     </p>
 
-                    <p className="mt-1 text-sm leading-5 text-rose-700">
+                    <p className="theme-text-secondary mt-1 text-sm leading-5">
                       {error}
                     </p>
                   </div>
@@ -266,37 +356,42 @@ export default function KategoriPage() {
                   <button
                     type="button"
                     onClick={loadKategori}
-                    className="rounded-lg px-2 py-1 text-xs font-semibold text-rose-700 transition hover:bg-rose-100"
+                    className={`theme-text-secondary rounded-lg px-2 py-1 text-xs font-semibold transition ${themeNeutralHover} hover:text-[var(--color-text)]`}
                   >
                     Coba lagi
                   </button>
                 </div>
               )}
 
-              {/* =================================================
+              {/* ==================================================
                   STATISTICS
-              ================================================= */}
+              ================================================== */}
 
               <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
+
                 {/* TOTAL */}
 
-                <div className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_3px_14px_rgba(15,23,42,0.035)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_22px_rgba(15,23,42,0.06)]">
+                <div
+                  className={`theme-card ${themeDivider} ${themeCardShadow} group rounded-2xl border p-5 transition duration-200 hover:-translate-y-0.5`}
+                >
                   <div className="flex items-center justify-between gap-4">
                     <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                      <p className="theme-text-muted text-[11px] font-semibold uppercase tracking-wider">
                         Total Kategori
                       </p>
 
-                      <p className="mt-2 text-2xl font-bold tracking-tight text-slate-900">
+                      <p className="theme-text mt-2 text-2xl font-bold tracking-tight">
                         {totalKategori}
                       </p>
 
-                      <p className="mt-1 text-xs text-slate-400">
+                      <p className="theme-text-muted mt-1 text-xs">
                         Seluruh kategori aset
                       </p>
                     </div>
 
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                    <div
+                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} theme-primary`}
+                    >
                       <Layers3 size={21} />
                     </div>
                   </div>
@@ -304,23 +399,27 @@ export default function KategoriPage() {
 
                 {/* AKTIF */}
 
-                <div className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_3px_14px_rgba(15,23,42,0.035)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_22px_rgba(15,23,42,0.06)]">
+                <div
+                  className={`theme-card ${themeDivider} ${themeCardShadow} group rounded-2xl border p-5 transition duration-200 hover:-translate-y-0.5`}
+                >
                   <div className="flex items-center justify-between gap-4">
                     <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                      <p className="theme-text-muted text-[11px] font-semibold uppercase tracking-wider">
                         Kategori Aktif
                       </p>
 
-                      <p className="mt-2 text-2xl font-bold tracking-tight text-emerald-600">
+                      <p className="theme-success mt-2 text-2xl font-bold tracking-tight">
                         {kategoriAktif}
                       </p>
 
-                      <p className="mt-1 text-xs text-slate-400">
+                      <p className="theme-text-muted mt-1 text-xs">
                         Siap digunakan pada aset
                       </p>
                     </div>
 
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                    <div
+                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themeSuccessSurface} theme-success`}
+                    >
                       <CheckCircle2 size={21} />
                     </div>
                   </div>
@@ -328,51 +427,62 @@ export default function KategoriPage() {
 
                 {/* NONAKTIF */}
 
-                <div className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_3px_14px_rgba(15,23,42,0.035)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_22px_rgba(15,23,42,0.06)]">
+                <div
+                  className={`theme-card ${themeDivider} ${themeCardShadow} group rounded-2xl border p-5 transition duration-200 hover:-translate-y-0.5`}
+                >
                   <div className="flex items-center justify-between gap-4">
                     <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                      <p className="theme-text-muted text-[11px] font-semibold uppercase tracking-wider">
                         Kategori Nonaktif
                       </p>
 
-                      <p className="mt-2 text-2xl font-bold tracking-tight text-slate-600">
+                      <p className="theme-text-secondary mt-2 text-2xl font-bold tracking-tight">
                         {kategoriNonaktif}
                       </p>
 
-                      <p className="mt-1 text-xs text-slate-400">
+                      <p className="theme-text-muted mt-1 text-xs">
                         Tidak digunakan sementara
                       </p>
                     </div>
 
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-500">
+                    <div
+                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themeNeutralSurface} theme-text-muted`}
+                    >
                       <XCircle size={21} />
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* =================================================
+              {/* ==================================================
                   MAIN CARD
-              ================================================= */}
+              ================================================== */}
 
-              <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_4px_18px_rgba(15,23,42,0.045)]">
-
+              <div
+                className={`theme-card ${themeDivider} ${themeCardShadow} overflow-hidden rounded-3xl border`}
+              >
                 {/* CARD HEADER */}
 
-                <div className="border-b border-slate-100 px-5 py-5 sm:px-6">
+                <div
+                  className={`border-b ${themeDivider} px-5 py-5 sm:px-6`}
+                >
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
 
+                    {/* TITLE */}
+
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white">
+                      <div
+                        className={`flex h-10 w-10 items-center justify-center rounded-xl ${themePrimaryGradient} text-[var(--color-card)]`}
+                      >
                         <Tag size={18} />
                       </div>
 
                       <div>
-                        <h2 className="text-sm font-bold text-slate-900">
+                        <h2 className="theme-text text-sm font-bold">
                           Daftar Kategori
                         </h2>
 
-                        <p className="mt-0.5 text-xs text-slate-400">
+                        <p className="theme-text-muted mt-0.5 text-xs">
                           {filteredKategori.length} dari{" "}
                           {totalKategori} kategori ditampilkan
                         </p>
@@ -382,10 +492,13 @@ export default function KategoriPage() {
                     {/* FILTER */}
 
                     <div className="flex w-full flex-col gap-3 sm:flex-row lg:w-auto">
+
+                      {/* SEARCH */}
+
                       <div className="relative min-w-0 flex-1 sm:min-w-[260px] lg:w-[300px] lg:flex-none">
                         <Search
                           size={17}
-                          className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                          className="theme-text-muted pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2"
                         />
 
                         <input
@@ -395,16 +508,18 @@ export default function KategoriPage() {
                             setSearch(e.target.value)
                           }
                           placeholder="Cari kategori..."
-                          className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 text-sm font-medium text-slate-800 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
+                          className={`theme-input h-10 w-full rounded-xl border pl-10 pr-4 text-sm font-medium outline-none transition ${themeNeutralBorder} ${themeFocus}`}
                         />
                       </div>
+
+                      {/* STATUS */}
 
                       <select
                         value={filterStatus}
                         onChange={(e) =>
                           setFilterStatus(e.target.value)
                         }
-                        className="h-10 rounded-xl border border-slate-200 bg-slate-50 px-3.5 text-sm font-medium text-slate-700 outline-none transition hover:border-slate-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
+                        className={`theme-input h-10 rounded-xl border px-3.5 text-sm font-medium outline-none transition ${themeNeutralBorder} ${themeFocus}`}
                       >
                         <option value="semua">
                           Semua Status
@@ -419,11 +534,13 @@ export default function KategoriPage() {
                         </option>
                       </select>
 
+                      {/* REFRESH */}
+
                       <button
                         type="button"
                         onClick={loadKategori}
                         disabled={loading}
-                        className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 text-sm font-semibold text-slate-600 transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-50"
+                        className={`theme-text-secondary inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl border ${themeNeutralBorder} theme-card px-3.5 text-sm font-semibold transition ${themeNeutralHover} hover:text-[var(--color-text)] disabled:cursor-not-allowed disabled:opacity-50`}
                       >
                         <RefreshCw
                           size={16}
@@ -449,18 +566,20 @@ export default function KategoriPage() {
                 {loading ? (
                   <div className="flex min-h-[360px] items-center justify-center">
                     <div className="flex flex-col items-center text-center">
-                      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+                      <div
+                        className={`flex h-14 w-14 items-center justify-center rounded-2xl ${themePrimarySoft} theme-primary`}
+                      >
                         <Loader2
                           size={25}
                           className="animate-spin"
                         />
                       </div>
 
-                      <p className="mt-4 text-sm font-semibold text-slate-700">
+                      <p className="theme-text mt-4 text-sm font-semibold">
                         Memuat kategori
                       </p>
 
-                      <p className="mt-1 text-xs text-slate-400">
+                      <p className="theme-text-muted mt-1 text-xs">
                         Mengambil data dari sistem...
                       </p>
                     </div>
@@ -471,17 +590,19 @@ export default function KategoriPage() {
                   ================================================= */
 
                   <div className="flex min-h-[360px] flex-col items-center justify-center px-6 text-center">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+                    <div
+                      className={`flex h-16 w-16 items-center justify-center rounded-2xl ${themeNeutralSurface} theme-text-muted`}
+                    >
                       <Tag size={27} />
                     </div>
 
-                    <h3 className="mt-5 text-base font-bold text-slate-800">
+                    <h3 className="theme-text mt-5 text-base font-bold">
                       {kategoriList.length === 0
                         ? "Belum ada kategori"
                         : "Kategori tidak ditemukan"}
                     </h3>
 
-                    <p className="mt-1.5 max-w-md text-sm leading-6 text-slate-500">
+                    <p className="theme-text-secondary mt-1.5 max-w-md text-sm leading-6">
                       {kategoriList.length === 0
                         ? "Tambahkan kategori aset terlebih dahulu agar dapat digunakan pada inventaris."
                         : "Tidak ada kategori yang sesuai dengan pencarian atau filter yang dipilih."}
@@ -490,7 +611,7 @@ export default function KategoriPage() {
                     {kategoriList.length === 0 && (
                       <Link
                         href="/admin/sarpras/kategori/tambah"
-                        className="mt-5 inline-flex h-10 items-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-semibold text-white transition hover:bg-blue-700"
+                        className={`mt-5 inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-semibold text-[var(--color-card)] transition ${themePrimaryGradient} ${themePrimaryShadow}`}
                       >
                         <Plus size={17} />
                         Tambah Kategori
@@ -513,20 +634,22 @@ export default function KategoriPage() {
                         </colgroup>
 
                         <thead>
-                          <tr className="border-b border-slate-200 bg-slate-50/80">
-                            <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                          <tr
+                            className={`border-b ${themeDivider} ${themeNeutralSurface}`}
+                          >
+                            <th className="theme-text-muted px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.12em]">
                               No
                             </th>
 
-                            <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                            <th className="theme-text-muted px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.12em]">
                               Nama Kategori
                             </th>
 
-                            <th className="px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                            <th className="theme-text-muted px-6 py-4 text-left text-[10px] font-bold uppercase tracking-[0.12em]">
                               Status
                             </th>
 
-                            <th className="px-6 py-4 text-right text-[10px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                            <th className="theme-text-muted px-6 py-4 text-right text-[10px] font-bold uppercase tracking-[0.12em]">
                               Aksi
                             </th>
                           </tr>
@@ -544,12 +667,12 @@ export default function KategoriPage() {
                               return (
                                 <tr
                                   key={item.id}
-                                  className="group border-b border-slate-100 last:border-0 transition hover:bg-slate-50/70"
+                                  className={`group border-b ${themeDivider} last:border-0 transition hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]`}
                                 >
                                   {/* NO */}
 
                                   <td className="px-6 py-4">
-                                    <span className="text-xs font-semibold text-slate-400">
+                                    <span className="theme-text-muted text-xs font-semibold">
                                       {String(
                                         index + 1
                                       ).padStart(2, "0")}
@@ -560,16 +683,18 @@ export default function KategoriPage() {
 
                                   <td className="px-6 py-4">
                                     <div className="flex min-w-0 items-center gap-3">
-                                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 transition group-hover:bg-blue-100">
+                                      <div
+                                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} theme-primary transition group-hover:brightness-95`}
+                                      >
                                         <Tag size={17} />
                                       </div>
 
                                       <div className="min-w-0">
-                                        <p className="truncate text-sm font-bold text-slate-800">
+                                        <p className="theme-text truncate text-sm font-bold">
                                           {item.nama}
                                         </p>
 
-                                        <p className="mt-0.5 text-xs text-slate-400">
+                                        <p className="theme-text-muted mt-0.5 text-xs">
                                           Kategori inventaris
                                         </p>
                                       </div>
@@ -580,13 +705,17 @@ export default function KategoriPage() {
 
                                   <td className="px-6 py-4">
                                     {aktif ? (
-                                      <span className="inline-flex items-center gap-2 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">
-                                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                                      <span
+                                        className={`theme-success inline-flex items-center gap-2 rounded-full border ${themeSuccessBorder} ${themeSuccessSurface} px-3 py-1.5 text-xs font-semibold`}
+                                      >
+                                        <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-success)]" />
                                         Aktif
                                       </span>
                                     ) : (
-                                      <span className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-100 px-3 py-1.5 text-xs font-semibold text-slate-600">
-                                        <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
+                                      <span
+                                        className={`theme-text-secondary inline-flex items-center gap-2 rounded-full border ${themeNeutralBorder} ${themeNeutralSurface} px-3 py-1.5 text-xs font-semibold`}
+                                      >
+                                        <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-text-muted)]" />
                                         Nonaktif
                                       </span>
                                     )}
@@ -596,13 +725,18 @@ export default function KategoriPage() {
 
                                   <td className="px-6 py-4">
                                     <div className="flex justify-end gap-2">
+
+                                      {/* EDIT */}
+
                                       <Link
                                         href={`/admin/sarpras/kategori/edit/${item.id}`}
-                                        className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600"
+                                        className={`theme-text-secondary inline-flex h-9 w-9 items-center justify-center rounded-xl border ${themeNeutralBorder} theme-card transition hover:border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)] hover:bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] hover:text-[var(--color-primary)]`}
                                         title="Edit kategori"
                                       >
                                         <Edit size={16} />
                                       </Link>
+
+                                      {/* DELETE */}
 
                                       <button
                                         type="button"
@@ -616,7 +750,7 @@ export default function KategoriPage() {
                                           deleting ===
                                           item.id
                                         }
-                                        className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-400 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-50"
+                                        className={`theme-text-muted inline-flex h-9 w-9 items-center justify-center rounded-xl border ${themeNeutralBorder} theme-card transition hover:border-[color-mix(in_srgb,var(--color-text)_22%,transparent)] hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)] hover:text-[var(--color-text)] disabled:cursor-not-allowed disabled:opacity-50`}
                                         title="Hapus kategori"
                                       >
                                         {deleting ===
@@ -645,7 +779,9 @@ export default function KategoriPage() {
                         MOBILE LIST
                     ================================================= */}
 
-                    <div className="divide-y divide-slate-100 md:hidden">
+                    <div
+                      className={`divide-y ${themeDivider} md:hidden`}
+                    >
                       {filteredKategori.map(
                         (item, index) => {
                           const aktif =
@@ -657,45 +793,56 @@ export default function KategoriPage() {
                           return (
                             <div
                               key={item.id}
-                              className="p-4 transition hover:bg-slate-50/70"
+                              className={`p-4 transition hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]`}
                             >
                               <div className="flex items-start gap-3">
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                                <div
+                                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} theme-primary`}
+                                >
                                   <Tag size={17} />
                                 </div>
 
                                 <div className="min-w-0 flex-1">
                                   <div className="flex items-start justify-between gap-3">
                                     <div className="min-w-0">
-                                      <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                                      <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wider">
                                         Kategori #
                                         {index + 1}
                                       </p>
 
-                                      <p className="mt-1 truncate text-sm font-bold text-slate-800">
+                                      <p className="theme-text mt-1 truncate text-sm font-bold">
                                         {item.nama}
                                       </p>
                                     </div>
 
                                     {aktif ? (
-                                      <span className="shrink-0 rounded-full border border-emerald-100 bg-emerald-50 px-2.5 py-1 text-[10px] font-bold text-emerald-700">
+                                      <span
+                                        className={`theme-success shrink-0 rounded-full border ${themeSuccessBorder} ${themeSuccessSurface} px-2.5 py-1 text-[10px] font-bold`}
+                                      >
                                         Aktif
                                       </span>
                                     ) : (
-                                      <span className="shrink-0 rounded-full border border-slate-200 bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-600">
+                                      <span
+                                        className={`theme-text-secondary shrink-0 rounded-full border ${themeNeutralBorder} ${themeNeutralSurface} px-2.5 py-1 text-[10px] font-bold`}
+                                      >
                                         Nonaktif
                                       </span>
                                     )}
                                   </div>
 
                                   <div className="mt-4 flex justify-end gap-2">
+
+                                    {/* EDIT */}
+
                                     <Link
                                       href={`/admin/sarpras/kategori/edit/${item.id}`}
-                                      className="inline-flex h-9 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600"
+                                      className={`theme-text-secondary inline-flex h-9 items-center gap-2 rounded-xl border ${themeNeutralBorder} theme-card px-3 text-xs font-semibold transition hover:border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)] hover:bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)] hover:text-[var(--color-primary)]`}
                                     >
                                       <Edit size={14} />
                                       Edit
                                     </Link>
+
+                                    {/* DELETE */}
 
                                     <button
                                       type="button"
@@ -709,7 +856,7 @@ export default function KategoriPage() {
                                         deleting ===
                                         item.id
                                       }
-                                      className="inline-flex h-9 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 text-xs font-semibold text-slate-500 transition hover:border-rose-200 hover:bg-rose-50 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-50"
+                                      className={`theme-text-secondary inline-flex h-9 items-center gap-2 rounded-xl border ${themeNeutralBorder} theme-card px-3 text-xs font-semibold transition hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)] hover:text-[var(--color-text)] disabled:cursor-not-allowed disabled:opacity-50`}
                                     >
                                       {deleting ===
                                       item.id ? (
@@ -742,10 +889,12 @@ export default function KategoriPage() {
 
                 {!loading &&
                   filteredKategori.length > 0 && (
-                    <div className="flex flex-col gap-2 border-t border-slate-100 bg-slate-50/50 px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-                      <p className="text-xs text-slate-400">
+                    <div
+                      className={`flex flex-col gap-2 border-t ${themeDivider} ${themeNeutralSurface} px-5 py-3.5 sm:flex-row sm:items-center sm:justify-between sm:px-6`}
+                    >
+                      <p className="theme-text-muted text-xs">
                         Menampilkan{" "}
-                        <span className="font-semibold text-slate-600">
+                        <span className="theme-text-secondary font-semibold">
                           {filteredKategori.length}
                         </span>{" "}
                         kategori
@@ -753,7 +902,7 @@ export default function KategoriPage() {
 
                       <Link
                         href="/admin/sarpras/kategori/tambah"
-                        className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 transition hover:text-blue-700"
+                        className="theme-primary inline-flex items-center gap-1.5 text-xs font-semibold transition hover:brightness-90"
                       >
                         Tambah kategori
                         <ChevronRight size={14} />
@@ -762,18 +911,18 @@ export default function KategoriPage() {
                   )}
               </div>
 
-              {/* =================================================
+              {/* ==================================================
                   BOTTOM INFO
-              ================================================= */}
+              ================================================== */}
 
               <div className="mt-6 flex items-center justify-center gap-2 text-center">
-                <div className="h-1 w-1 rounded-full bg-slate-300" />
+                <div className="h-1 w-1 rounded-full bg-[var(--color-text-placeholder)]" />
 
-                <p className="text-[11px] text-slate-400">
+                <p className="theme-text-muted text-[11px]">
                   SmartSchool • Modul Sarana & Prasarana
                 </p>
 
-                <div className="h-1 w-1 rounded-full bg-slate-300" />
+                <div className="h-1 w-1 rounded-full bg-[var(--color-text-placeholder)]" />
               </div>
             </div>
           </div>

@@ -111,11 +111,9 @@ export default function CreateBannerPage() {
   // =========================================================
 
   return (
-    <div className="flex min-h-screen w-full bg-slate-50">
-
+    <div className="flex min-h-screen w-full theme-page">
       {/* =====================================================
           SIDEBAR
-          TIDAK DIUBAH
       ====================================================== */}
 
       <Sidebar
@@ -129,13 +127,7 @@ export default function CreateBannerPage() {
           MAIN
       ====================================================== */}
 
-      <main
-        className="
-          min-w-0
-          flex-1
-          bg-slate-50
-        "
-      >
+      <main className="min-w-0 flex-1 theme-page">
         <div
           className="
             w-full
@@ -150,7 +142,6 @@ export default function CreateBannerPage() {
           "
         >
           <div className="w-full">
-
             {/* =================================================
                 BREADCRUMB
             ================================================= */}
@@ -158,23 +149,23 @@ export default function CreateBannerPage() {
             <div className="mb-5 flex flex-wrap items-center gap-2 text-xs sm:text-sm">
               <Link
                 href="/cmsAdmin"
-                className="text-slate-400 transition hover:text-blue-600"
+                className="theme-text-muted transition hover:opacity-80"
               >
                 Dashboard
               </Link>
 
-              <span className="text-slate-300">/</span>
+              <span className="theme-text-placeholder">/</span>
 
               <Link
                 href="/cmsAdmin/banners"
-                className="text-slate-400 transition hover:text-blue-600"
+                className="theme-text-muted transition hover:opacity-80"
               >
                 Banner
               </Link>
 
-              <span className="text-slate-300">/</span>
+              <span className="theme-text-placeholder">/</span>
 
-              <span className="font-medium text-slate-700">
+              <span className="font-medium theme-text">
                 Tambah Banner
               </span>
             </div>
@@ -208,13 +199,13 @@ export default function CreateBannerPage() {
                     justify-center
                     rounded-2xl
                     border
-                    border-blue-100
-                    bg-blue-50
+                    theme-border
+                    theme-info
                     sm:h-12
                     sm:w-12
                   "
                 >
-                  <LayoutPanelTop className="h-5 w-5 text-blue-600 sm:h-6 sm:w-6" />
+                  <LayoutPanelTop className="h-5 w-5 sm:h-6 sm:w-6" />
                 </div>
 
                 <div className="min-w-0">
@@ -224,7 +215,7 @@ export default function CreateBannerPage() {
                         text-xl
                         font-bold
                         tracking-tight
-                        text-slate-900
+                        theme-text
                         sm:text-2xl
                         lg:text-3xl
                       "
@@ -238,12 +229,13 @@ export default function CreateBannerPage() {
                         items-center
                         gap-1
                         rounded-full
-                        bg-blue-50
+                        border
+                        theme-border
+                        theme-info
                         px-2.5
                         py-1
                         text-[10px]
                         font-semibold
-                        text-blue-600
                         sm:flex
                       "
                     >
@@ -252,7 +244,7 @@ export default function CreateBannerPage() {
                     </span>
                   </div>
 
-                  <p className="mt-1 text-xs text-slate-500 sm:text-sm">
+                  <p className="mt-1 text-xs theme-text-secondary sm:text-sm">
                     Buat dan kelola banner website Anda.
                   </p>
                 </div>
@@ -270,18 +262,16 @@ export default function CreateBannerPage() {
                   gap-2
                   rounded-xl
                   border
-                  border-slate-200
-                  bg-white
+                  theme-border
+                  theme-card
                   px-4
                   py-2.5
                   text-sm
                   font-medium
-                  text-slate-700
+                  theme-text-secondary
                   shadow-sm
                   transition
-                  hover:border-blue-200
-                  hover:bg-blue-50
-                  hover:text-blue-600
+                  theme-table-hover
                   sm:w-fit
                 "
               >
@@ -292,10 +282,6 @@ export default function CreateBannerPage() {
 
             {/* =================================================
                 CONTENT GRID
-
-                PENTING:
-                Tidak menggunakan max-w yang mengunci lebar.
-                Jadi ketika zoom out, content ikut melebar.
             ================================================= */}
 
             <div
@@ -308,7 +294,6 @@ export default function CreateBannerPage() {
                 2xl:grid-cols-[minmax(0,1fr)_320px]
               "
             >
-
               {/* =================================================
                   FORM
               ================================================= */}
@@ -318,12 +303,11 @@ export default function CreateBannerPage() {
                   min-w-0
                   rounded-2xl
                   border
-                  border-slate-200
-                  bg-white
+                  theme-border
+                  theme-card
                   shadow-sm
                 "
               >
-
                 {/* FORM HEADER */}
 
                 <div
@@ -332,8 +316,8 @@ export default function CreateBannerPage() {
                     flex-col
                     gap-2
                     border-b
-                    border-slate-100
-                    bg-slate-50/60
+                    theme-border-soft
+                    theme-card-soft
                     px-5
                     py-4
                     sm:flex-row
@@ -351,25 +335,32 @@ export default function CreateBannerPage() {
                         items-center
                         justify-center
                         rounded-xl
-                        bg-blue-100
+                        theme-info
                       "
                     >
-                      <LayoutPanelTop className="h-4 w-4 text-blue-600" />
+                      <LayoutPanelTop className="h-4 w-4" />
                     </div>
 
                     <div>
-                      <h2 className="text-sm font-semibold text-slate-800">
+                      <h2 className="text-sm font-semibold theme-text">
                         Informasi Banner
                       </h2>
 
-                      <p className="text-xs text-slate-400">
+                      <p className="text-xs theme-text-muted">
                         Isi informasi banner dengan lengkap
                       </p>
                     </div>
                   </div>
 
-                  <span className="text-xs text-slate-400">
-                    <span className="text-red-500">*</span> wajib diisi
+                  <span className="text-xs theme-text-muted">
+                    <span
+                      style={{
+                        color: "var(--color-danger)",
+                      }}
+                    >
+                      *
+                    </span>{" "}
+                    wajib diisi
                   </span>
                 </div>
 
@@ -380,7 +371,6 @@ export default function CreateBannerPage() {
                     onSubmit={handleSubmit}
                     className="space-y-6"
                   >
-
                     {/* =================================================
                         TITLE
                     ================================================= */}
@@ -388,10 +378,16 @@ export default function CreateBannerPage() {
                     <div>
                       <label
                         htmlFor="title"
-                        className="mb-2 block text-sm font-semibold text-slate-800"
+                        className="mb-2 block text-sm font-semibold theme-text"
                       >
                         Judul Banner{" "}
-                        <span className="text-red-500">*</span>
+                        <span
+                          style={{
+                            color: "var(--color-danger)",
+                          }}
+                        >
+                          *
+                        </span>
                       </label>
 
                       <input
@@ -402,27 +398,40 @@ export default function CreateBannerPage() {
                         onChange={handleChange}
                         placeholder="Contoh: Pendaftaran Siswa Baru"
                         className={`
+                          theme-input
                           w-full
                           rounded-xl
                           border
-                          bg-white
                           px-4
                           py-3
                           text-sm
-                          text-slate-800
                           outline-none
                           transition
-                          placeholder:text-slate-400
+                          placeholder:theme-text-placeholder
                           ${
                             errors.title
-                              ? "border-red-300 focus:border-red-500 focus:ring-4 focus:ring-red-50"
-                              : "border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
+                              ? "border-[var(--color-danger)]"
+                              : ""
                           }
                         `}
+                        style={
+                          errors.title
+                            ? {
+                                borderColor:
+                                  "var(--color-danger)",
+                              }
+                            : undefined
+                        }
                       />
 
                       {errors.title && (
-                        <p className="mt-2 flex items-center gap-1.5 text-xs text-red-500">
+                        <p
+                          className="mt-2 flex items-center gap-1.5 text-xs"
+                          style={{
+                            color:
+                              "var(--color-danger)",
+                          }}
+                        >
                           <AlertCircle className="h-3.5 w-3.5" />
                           {errors.title}
                         </p>
@@ -436,10 +445,16 @@ export default function CreateBannerPage() {
                     <div>
                       <label
                         htmlFor="image"
-                        className="mb-2 block text-sm font-semibold text-slate-800"
+                        className="mb-2 block text-sm font-semibold theme-text"
                       >
                         URL Gambar{" "}
-                        <span className="text-red-500">*</span>
+                        <span
+                          style={{
+                            color: "var(--color-danger)",
+                          }}
+                        >
+                          *
+                        </span>
                       </label>
 
                       <div className="relative">
@@ -451,7 +466,7 @@ export default function CreateBannerPage() {
                             h-4
                             w-4
                             -translate-y-1/2
-                            text-slate-400
+                            theme-text-muted
                           "
                         />
 
@@ -463,34 +478,42 @@ export default function CreateBannerPage() {
                           onChange={handleChange}
                           placeholder="https://example.com/banner.jpg"
                           className={`
+                            theme-input
                             w-full
                             rounded-xl
                             border
-                            bg-white
                             py-3
                             pl-11
                             pr-4
                             text-sm
-                            text-slate-800
                             outline-none
                             transition
-                            placeholder:text-slate-400
-                            ${
-                              errors.image
-                                ? "border-red-300 focus:border-red-500 focus:ring-4 focus:ring-red-50"
-                                : "border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
-                            }
+                            placeholder:theme-text-placeholder
                           `}
+                          style={
+                            errors.image
+                              ? {
+                                  borderColor:
+                                    "var(--color-danger)",
+                                }
+                              : undefined
+                          }
                         />
                       </div>
 
                       {errors.image ? (
-                        <p className="mt-2 flex items-center gap-1.5 text-xs text-red-500">
+                        <p
+                          className="mt-2 flex items-center gap-1.5 text-xs"
+                          style={{
+                            color:
+                              "var(--color-danger)",
+                          }}
+                        >
                           <AlertCircle className="h-3.5 w-3.5" />
                           {errors.image}
                         </p>
                       ) : (
-                        <p className="mt-2 text-xs text-slate-400">
+                        <p className="mt-2 text-xs theme-text-muted">
                           Masukkan URL gambar banner yang valid.
                         </p>
                       )}
@@ -503,10 +526,16 @@ export default function CreateBannerPage() {
                     <div>
                       <label
                         htmlFor="link"
-                        className="mb-2 block text-sm font-semibold text-slate-800"
+                        className="mb-2 block text-sm font-semibold theme-text"
                       >
                         Link Tujuan{" "}
-                        <span className="text-red-500">*</span>
+                        <span
+                          style={{
+                            color: "var(--color-danger)",
+                          }}
+                        >
+                          *
+                        </span>
                       </label>
 
                       <div className="relative">
@@ -518,7 +547,7 @@ export default function CreateBannerPage() {
                             h-4
                             w-4
                             -translate-y-1/2
-                            text-slate-400
+                            theme-text-muted
                           "
                         />
 
@@ -529,35 +558,43 @@ export default function CreateBannerPage() {
                           value={bannerData.link}
                           onChange={handleChange}
                           placeholder="/halaman-tujuan"
-                          className={`
+                          className="
+                            theme-input
                             w-full
                             rounded-xl
                             border
-                            bg-white
                             py-3
                             pl-11
                             pr-4
                             text-sm
-                            text-slate-800
                             outline-none
                             transition
-                            placeholder:text-slate-400
-                            ${
-                              errors.link
-                                ? "border-red-300 focus:border-red-500 focus:ring-4 focus:ring-red-50"
-                                : "border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
-                            }
-                          `}
+                            placeholder:theme-text-placeholder
+                          "
+                          style={
+                            errors.link
+                              ? {
+                                  borderColor:
+                                    "var(--color-danger)",
+                                }
+                              : undefined
+                          }
                         />
                       </div>
 
                       {errors.link ? (
-                        <p className="mt-2 flex items-center gap-1.5 text-xs text-red-500">
+                        <p
+                          className="mt-2 flex items-center gap-1.5 text-xs"
+                          style={{
+                            color:
+                              "var(--color-danger)",
+                          }}
+                        >
                           <AlertCircle className="h-3.5 w-3.5" />
                           {errors.link}
                         </p>
                       ) : (
-                        <p className="mt-2 text-xs text-slate-400">
+                        <p className="mt-2 text-xs theme-text-muted">
                           Contoh: /ppdb atau https://website.com/ppdb
                         </p>
                       )}
@@ -568,11 +605,10 @@ export default function CreateBannerPage() {
                     ================================================= */}
 
                     <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
-
                       <div>
                         <label
                           htmlFor="position"
-                          className="mb-2 block text-sm font-semibold text-slate-800"
+                          className="mb-2 block text-sm font-semibold theme-text"
                         >
                           Posisi Banner
                         </label>
@@ -583,33 +619,39 @@ export default function CreateBannerPage() {
                           value={bannerData.position}
                           onChange={handleChange}
                           className="
+                            theme-input
                             w-full
                             rounded-xl
                             border
-                            border-slate-200
-                            bg-white
                             px-4
                             py-3
                             text-sm
-                            text-slate-800
                             outline-none
                             transition
-                            focus:border-blue-500
-                            focus:ring-4
-                            focus:ring-blue-50
                           "
                         >
-                          <option value="hero">Hero</option>
-                          <option value="promo">Promo</option>
-                          <option value="sidebar">Sidebar</option>
-                          <option value="bottom">Bottom</option>
+                          <option value="hero">
+                            Hero
+                          </option>
+
+                          <option value="promo">
+                            Promo
+                          </option>
+
+                          <option value="sidebar">
+                            Sidebar
+                          </option>
+
+                          <option value="bottom">
+                            Bottom
+                          </option>
                         </select>
                       </div>
 
                       <div>
                         <label
                           htmlFor="status"
-                          className="mb-2 block text-sm font-semibold text-slate-800"
+                          className="mb-2 block text-sm font-semibold theme-text"
                         >
                           Status
                         </label>
@@ -620,20 +662,15 @@ export default function CreateBannerPage() {
                           value={bannerData.status}
                           onChange={handleChange}
                           className="
+                            theme-input
                             w-full
                             rounded-xl
                             border
-                            border-slate-200
-                            bg-white
                             px-4
                             py-3
                             text-sm
-                            text-slate-800
                             outline-none
                             transition
-                            focus:border-blue-500
-                            focus:ring-4
-                            focus:ring-blue-50
                           "
                         >
                           <option value="active">
@@ -655,16 +692,16 @@ export default function CreateBannerPage() {
                       <div>
                         <div className="mb-3 flex items-center justify-between">
                           <div>
-                            <h3 className="text-sm font-semibold text-slate-800">
+                            <h3 className="text-sm font-semibold theme-text">
                               Preview Banner
                             </h3>
 
-                            <p className="mt-0.5 text-xs text-slate-400">
+                            <p className="mt-0.5 text-xs theme-text-muted">
                               Preview akan mengikuti gambar yang kamu masukkan
                             </p>
                           </div>
 
-                          <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                          <div className="flex items-center gap-1.5 text-xs theme-text-muted">
                             <Eye className="h-4 w-4" />
                             Preview
                           </div>
@@ -678,8 +715,8 @@ export default function CreateBannerPage() {
                             overflow-hidden
                             rounded-2xl
                             border
-                            border-slate-200
-                            bg-slate-100
+                            theme-border
+                            theme-card-soft
                           "
                         >
                           <img
@@ -725,7 +762,7 @@ export default function CreateBannerPage() {
                         flex-col-reverse
                         gap-3
                         border-t
-                        border-slate-100
+                        theme-border-soft
                         pt-6
                         sm:flex-row
                         sm:justify-end
@@ -741,15 +778,15 @@ export default function CreateBannerPage() {
                           gap-2
                           rounded-xl
                           border
-                          border-slate-200
-                          bg-white
+                          theme-border
+                          theme-card
                           px-5
                           py-3
                           text-sm
                           font-medium
-                          text-slate-700
+                          theme-text-secondary
                           transition
-                          hover:bg-slate-50
+                          theme-table-hover
                         "
                       >
                         <X className="h-4 w-4" />
@@ -760,21 +797,18 @@ export default function CreateBannerPage() {
                         type="submit"
                         disabled={loading}
                         className="
+                          theme-primary
                           inline-flex
                           items-center
                           justify-center
                           gap-2
                           rounded-xl
-                          bg-blue-600
                           px-6
                           py-3
                           text-sm
                           font-semibold
-                          text-white
                           shadow-sm
                           transition
-                          hover:bg-blue-700
-                          hover:shadow-md
                           disabled:cursor-not-allowed
                           disabled:opacity-50
                         "
@@ -822,15 +856,14 @@ export default function CreateBannerPage() {
               ================================================= */}
 
               <div className="min-w-0 space-y-5">
-
                 {/* TIPS */}
 
                 <div
                   className="
                     rounded-2xl
                     border
-                    border-blue-100
-                    bg-blue-50
+                    theme-border
+                    theme-info
                     p-5
                   "
                 >
@@ -844,18 +877,18 @@ export default function CreateBannerPage() {
                         items-center
                         justify-center
                         rounded-xl
-                        bg-blue-100
+                        theme-card
                       "
                     >
                       <span>💡</span>
                     </div>
 
                     <div>
-                      <h3 className="text-sm font-semibold text-slate-800">
+                      <h3 className="text-sm font-semibold">
                         Tips Banner
                       </h3>
 
-                      <ul className="mt-3 space-y-2 text-xs leading-5 text-slate-600">
+                      <ul className="mt-3 space-y-2 text-xs leading-5">
                         <li>
                           • Gunakan gambar beresolusi tinggi.
                         </li>
@@ -886,8 +919,8 @@ export default function CreateBannerPage() {
                   className="
                     rounded-2xl
                     border
-                    border-slate-200
-                    bg-white
+                    theme-border
+                    theme-card
                     p-5
                     shadow-sm
                   "
@@ -901,50 +934,80 @@ export default function CreateBannerPage() {
                         items-center
                         justify-center
                         rounded-xl
-                        bg-slate-100
+                        theme-card-soft
                       "
                     >
-                      <Image className="h-4 w-4 text-slate-500" />
+                      <Image className="h-4 w-4 theme-text-muted" />
                     </div>
 
                     <div>
-                      <h3 className="text-sm font-semibold text-slate-800">
+                      <h3 className="text-sm font-semibold theme-text">
                         Rekomendasi
                       </h3>
 
-                      <p className="text-xs text-slate-400">
+                      <p className="text-xs theme-text-muted">
                         Ukuran banner
                       </p>
                     </div>
                   </div>
 
                   <div className="space-y-2">
-                    <div className="flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2.5">
-                      <span className="text-xs text-slate-500">
+                    <div
+                      className="
+                        flex
+                        items-center
+                        justify-between
+                        rounded-xl
+                        theme-card-soft
+                        px-3
+                        py-2.5
+                      "
+                    >
+                      <span className="text-xs theme-text-muted">
                         Hero
                       </span>
 
-                      <span className="text-xs font-semibold text-slate-700">
+                      <span className="text-xs font-semibold theme-text-secondary">
                         1200 × 600
                       </span>
                     </div>
 
-                    <div className="flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2.5">
-                      <span className="text-xs text-slate-500">
+                    <div
+                      className="
+                        flex
+                        items-center
+                        justify-between
+                        rounded-xl
+                        theme-card-soft
+                        px-3
+                        py-2.5
+                      "
+                    >
+                      <span className="text-xs theme-text-muted">
                         Promo
                       </span>
 
-                      <span className="text-xs font-semibold text-slate-700">
+                      <span className="text-xs font-semibold theme-text-secondary">
                         1000 × 500
                       </span>
                     </div>
 
-                    <div className="flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2.5">
-                      <span className="text-xs text-slate-500">
+                    <div
+                      className="
+                        flex
+                        items-center
+                        justify-between
+                        rounded-xl
+                        theme-card-soft
+                        px-3
+                        py-2.5
+                      "
+                    >
+                      <span className="text-xs theme-text-muted">
                         Format
                       </span>
 
-                      <span className="text-xs font-semibold text-slate-700">
+                      <span className="text-xs font-semibold theme-text-secondary">
                         JPG / PNG / WebP
                       </span>
                     </div>
@@ -957,38 +1020,35 @@ export default function CreateBannerPage() {
                   className="
                     rounded-2xl
                     border
-                    border-slate-200
-                    bg-white
+                    theme-border
+                    theme-card
                     p-5
                     shadow-sm
                   "
                 >
-                  <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+                  <p className="text-[11px] font-semibold uppercase tracking-wider theme-text-muted">
                     Status Banner
                   </p>
 
                   <div className="mt-3 flex items-center gap-3">
                     <span
-                      className={`
-                        h-2.5
-                        w-2.5
-                        rounded-full
-                        ${
+                      className="h-2.5 w-2.5 rounded-full"
+                      style={{
+                        backgroundColor:
                           bannerData.status === "active"
-                            ? "bg-emerald-500"
-                            : "bg-slate-400"
-                        }
-                      `}
+                            ? "var(--color-success)"
+                            : "var(--color-text-placeholder)",
+                      }}
                     />
 
                     <div>
-                      <p className="text-sm font-semibold text-slate-800">
+                      <p className="text-sm font-semibold theme-text">
                         {bannerData.status === "active"
                           ? "Aktif"
                           : "Draft"}
                       </p>
 
-                      <p className="text-xs text-slate-400">
+                      <p className="text-xs theme-text-muted">
                         {bannerData.status === "active"
                           ? "Banner siap ditampilkan"
                           : "Banner belum ditampilkan"}
@@ -1002,7 +1062,7 @@ export default function CreateBannerPage() {
             {/* FOOTER */}
 
             <div className="py-6 text-center">
-              <p className="text-[11px] text-slate-400">
+              <p className="text-[11px] theme-text-muted">
                 CMS SmartSchool • Manajemen Banner
               </p>
             </div>

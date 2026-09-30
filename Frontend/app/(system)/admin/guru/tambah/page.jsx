@@ -65,12 +65,9 @@ export default function TambahGuruPage() {
 
   const [loading, setLoading] = useState(false);
   const [loadingRole, setLoadingRole] = useState(true);
-
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-
   const [guruRoleId, setGuruRoleId] = useState("");
-
   const [showPassword, setShowPassword] = useState(false);
 
   const [form, setForm] = useState({
@@ -78,20 +75,15 @@ export default function TambahGuruPage() {
     namaPengguna: "",
     email: "",
     kataSandi: "",
-
     nip: "",
     nuptk: "",
-
     jenisKelamin: "L",
     tempatLahir: "",
     tanggalLahir: "",
-
     noTelepon: "",
     alamat: "",
-
     jabatan: "Guru",
     golongan: "",
-
     nik: "",
     alamatKtp: "",
     alamatDomisili: "",
@@ -101,7 +93,6 @@ export default function TambahGuruPage() {
   });
 
   const [touched, setTouched] = useState({});
-
   const namaInputRef = useRef(null);
 
   useEffect(() => {
@@ -139,10 +130,7 @@ export default function TambahGuruPage() {
       } catch (err) {
         if (!mounted) return;
 
-        console.error(
-          "Gagal mengambil role guru:",
-          err
-        );
+        console.error("Gagal mengambil role guru:", err);
 
         setError(
           err?.message ||
@@ -268,7 +256,9 @@ export default function TambahGuruPage() {
     if (!form.email.trim()) {
       result.email = "Email wajib diisi.";
     } else if (
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email.trim())
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
+        form.email.trim()
+      )
     ) {
       result.email = "Format email tidak valid.";
     }
@@ -276,7 +266,8 @@ export default function TambahGuruPage() {
     if (!form.kataSandi.trim()) {
       result.kataSandi = "Kata sandi wajib diisi.";
     } else if (form.kataSandi.length < 6) {
-      result.kataSandi = "Kata sandi minimal 6 karakter.";
+      result.kataSandi =
+        "Kata sandi minimal 6 karakter.";
     }
 
     if (!guruRoleId) {
@@ -303,7 +294,6 @@ export default function TambahGuruPage() {
 
     if (!isValid) {
       const firstError = Object.values(validation)[0];
-
       setError(firstError);
       return;
     }
@@ -317,7 +307,6 @@ export default function TambahGuruPage() {
         namaLengkap: form.namaLengkap.trim(),
         kataSandi: form.kataSandi,
         peranId: guruRoleId,
-
         nip: form.nip.trim() || null,
         nuptk: form.nuptk.trim() || null,
         jenisKelamin: form.jenisKelamin || null,
@@ -329,7 +318,8 @@ export default function TambahGuruPage() {
         golongan: form.golongan.trim() || null,
         nik: form.nik.trim() || null,
         alamatKtp: form.alamatKtp.trim() || null,
-        alamatDomisili: form.alamatDomisili.trim() || null,
+        alamatDomisili:
+          form.alamatDomisili.trim() || null,
         kecamatan: form.kecamatan.trim() || null,
         kelurahan: form.kelurahan.trim() || null,
         kota: form.kota.trim() || null,
@@ -339,12 +329,14 @@ export default function TambahGuruPage() {
 
       if (!response?.success) {
         throw new Error(
-          response?.message || "Gagal menambahkan guru."
+          response?.message ||
+            "Gagal menambahkan guru."
         );
       }
 
       setSuccess(
-        response?.message || "Guru berhasil ditambahkan."
+        response?.message ||
+          "Guru berhasil ditambahkan."
       );
 
       setTimeout(() => {
@@ -368,20 +360,15 @@ export default function TambahGuruPage() {
       namaPengguna: "",
       email: "",
       kataSandi: "",
-
       nip: "",
       nuptk: "",
-
       jenisKelamin: "L",
       tempatLahir: "",
       tanggalLahir: "",
-
       noTelepon: "",
       alamat: "",
-
       jabatan: "Guru",
       golongan: "",
-
       nik: "",
       alamatKtp: "",
       alamatDomisili: "",
@@ -406,27 +393,31 @@ export default function TambahGuruPage() {
     }
 
     return (
-      <p className="mt-1.5 flex items-center gap-1 text-xs text-red-600">
+      <p className="mt-1.5 flex items-center gap-1 text-xs text-[var(--color-danger)]">
         <AlertCircle size={13} />
         {validation[name]}
       </p>
     );
   }
 
-  function SectionTitle({ icon: Icon, title, description }) {
+  function SectionTitle({
+    icon: Icon,
+    title,
+    description,
+  }) {
     return (
       <div className="mb-6 flex items-start gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+        <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
           <Icon size={20} />
         </div>
 
         <div>
-          <h2 className="text-base font-bold text-slate-900">
+          <h2 className="text-base font-bold theme-text">
             {title}
           </h2>
 
           {description && (
-            <p className="mt-0.5 text-sm text-slate-500">
+            <p className="mt-0.5 text-sm theme-text-muted">
               {description}
             </p>
           )}
@@ -436,7 +427,7 @@ export default function TambahGuruPage() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#F8FAFC]">
+    <div className="theme-page flex h-screen overflow-hidden">
       <Sidebar role="admin" />
 
       <div className="flex h-screen flex-1 flex-col overflow-hidden">
@@ -444,29 +435,34 @@ export default function TambahGuruPage() {
 
         <main className="flex-1 overflow-y-auto px-6 py-6 lg:px-8">
           <div className="mx-auto max-w-7xl">
+
+            {/* HEADER */}
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <button
                   type="button"
-                  onClick={() => router.push("/admin/guru")}
-                  className="mb-3 inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-blue-600"
+                  onClick={() =>
+                    router.push("/admin/guru")
+                  }
+                  className="mb-3 inline-flex items-center gap-2 text-sm font-medium theme-text-muted transition hover:text-[var(--color-primary)]"
                 >
                   <ArrowLeft size={17} />
                   Kembali ke Data Guru
                 </button>
 
                 <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-200">
+                  <div className="theme-primary flex h-12 w-12 items-center justify-center rounded-2xl shadow-lg">
                     <UserPlus size={24} />
                   </div>
 
                   <div>
-                    <h1 className="text-2xl font-bold tracking-tight text-slate-900">
+                    <h1 className="text-2xl font-bold tracking-tight theme-text">
                       Tambah Guru
                     </h1>
 
-                    <p className="mt-1 text-sm text-slate-500">
-                      Tambahkan data guru baru ke sistem SmartSchool.
+                    <p className="mt-1 text-sm theme-text-muted">
+                      Tambahkan data guru baru ke sistem
+                      SmartSchool.
                     </p>
                   </div>
                 </div>
@@ -477,7 +473,7 @@ export default function TambahGuruPage() {
                   type="button"
                   onClick={handleReset}
                   disabled={loading}
-                  className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="theme-card theme-border theme-text-secondary theme-header-hover inline-flex h-11 items-center justify-center gap-2 rounded-xl border px-4 text-sm font-semibold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <X size={17} />
                   Reset
@@ -487,13 +483,18 @@ export default function TambahGuruPage() {
                   type="submit"
                   form="form-tambah-guru"
                   disabled={
-                    loading || loadingRole || !guruRoleId
+                    loading ||
+                    loadingRole ||
+                    !guruRoleId
                   }
-                  className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white shadow-lg shadow-blue-200 transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
+                  className="theme-primary inline-flex h-11 items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold shadow-lg transition disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
                 >
                   {loading ? (
                     <>
-                      <Loader2 size={17} className="animate-spin" />
+                      <Loader2
+                        size={17}
+                        className="animate-spin"
+                      />
                       Menyimpan...
                     </>
                   ) : (
@@ -506,48 +507,66 @@ export default function TambahGuruPage() {
               </div>
             </div>
 
+            {/* ERROR */}
             {error && (
-              <div className="mb-5 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3.5 text-red-700">
-                <AlertCircle size={20} className="mt-0.5 shrink-0" />
+              <div className="theme-danger theme-border mb-5 flex items-start gap-3 rounded-2xl border px-4 py-3.5">
+                <AlertCircle
+                  size={20}
+                  className="mt-0.5 shrink-0"
+                />
 
                 <div>
                   <p className="text-sm font-semibold">
                     Terjadi kesalahan
                   </p>
 
-                  <p className="mt-0.5 text-sm">{error}</p>
+                  <p className="mt-0.5 text-sm">
+                    {error}
+                  </p>
                 </div>
               </div>
             )}
 
+            {/* SUCCESS */}
             {success && (
-              <div className="mb-5 flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3.5 text-emerald-700">
-                <CheckCircle2 size={20} className="mt-0.5 shrink-0" />
+              <div className="theme-success theme-border mb-5 flex items-start gap-3 rounded-2xl border px-4 py-3.5">
+                <CheckCircle2
+                  size={20}
+                  className="mt-0.5 shrink-0"
+                />
 
                 <div>
-                  <p className="text-sm font-semibold">Berhasil</p>
+                  <p className="text-sm font-semibold">
+                    Berhasil
+                  </p>
 
-                  <p className="mt-0.5 text-sm">{success}</p>
+                  <p className="mt-0.5 text-sm">
+                    {success}
+                  </p>
                 </div>
               </div>
             )}
 
-            <div className="mb-5 rounded-2xl border border-blue-100 bg-blue-50/70 p-4">
+            {/* ROLE INFO */}
+            <div className="theme-info theme-border mb-5 rounded-2xl border p-4">
               <div className="flex items-start gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-600 text-white">
+                <div className="theme-primary flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
                   {loadingRole ? (
-                    <Loader2 size={18} className="animate-spin" />
+                    <Loader2
+                      size={18}
+                      className="animate-spin"
+                    />
                   ) : (
                     <ShieldCheck size={18} />
                   )}
                 </div>
 
                 <div>
-                  <p className="text-sm font-semibold text-blue-900">
+                  <p className="text-sm font-semibold text-[var(--color-info)]">
                     Role pengguna
                   </p>
 
-                  <p className="mt-0.5 text-xs leading-5 text-blue-700">
+                  <p className="mt-0.5 text-xs leading-5 text-[var(--color-info)]">
                     {loadingRole
                       ? "Sedang mengambil role Guru dari backend..."
                       : guruRoleId
@@ -563,7 +582,9 @@ export default function TambahGuruPage() {
               onSubmit={handleSubmit}
               className="space-y-5"
             >
-              <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+
+              {/* AKUN PENGGUNA */}
+              <section className="theme-card theme-border rounded-2xl border p-6 shadow-sm">
                 <SectionTitle
                   icon={Lock}
                   title="Akun Pengguna"
@@ -571,16 +592,20 @@ export default function TambahGuruPage() {
                 />
 
                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+
+                  {/* NAMA */}
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-slate-700">
+                    <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                       Nama Lengkap{" "}
-                      <span className="text-red-500">*</span>
+                      <span className="text-[var(--color-danger)]">
+                        *
+                      </span>
                     </label>
 
                     <div className="relative">
                       <User
                         size={18}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                        className="theme-text-placeholder absolute left-3 top-1/2 -translate-y-1/2"
                       />
 
                       <input
@@ -590,11 +615,11 @@ export default function TambahGuruPage() {
                         value={form.namaLengkap}
                         onChange={handleNamaChange}
                         placeholder="Contoh: Budi Santoso"
-                        className={`h-11 w-full rounded-xl border bg-white pl-10 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:ring-4 ${
+                        className={`theme-input h-11 w-full rounded-xl border pl-10 pr-4 text-sm outline-none transition focus:ring-4 ${
                           touched.namaLengkap &&
                           validation.namaLengkap
-                            ? "border-red-300 focus:border-red-400 focus:ring-red-50"
-                            : "border-slate-200 focus:border-blue-500 focus:ring-blue-50"
+                            ? "border-[var(--color-danger)] focus:border-[var(--color-danger)] focus:ring-[var(--color-danger)]/10"
+                            : "focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)]/10"
                         }`}
                       />
                     </div>
@@ -602,16 +627,19 @@ export default function TambahGuruPage() {
                     <FieldError name="namaLengkap" />
                   </div>
 
+                  {/* USERNAME */}
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-slate-700">
+                    <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                       Username{" "}
-                      <span className="text-red-500">*</span>
+                      <span className="text-[var(--color-danger)]">
+                        *
+                      </span>
                     </label>
 
                     <div className="relative">
                       <User
                         size={18}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                        className="theme-text-placeholder absolute left-3 top-1/2 -translate-y-1/2"
                       />
 
                       <input
@@ -620,32 +648,35 @@ export default function TambahGuruPage() {
                         value={form.namaPengguna}
                         onChange={handleUsernameChange}
                         placeholder="Contoh: budi.santoso"
-                        className={`h-11 w-full rounded-xl border bg-white pl-10 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:ring-4 ${
+                        className={`theme-input h-11 w-full rounded-xl border pl-10 pr-4 text-sm outline-none transition focus:ring-4 ${
                           touched.namaPengguna &&
                           validation.namaPengguna
-                            ? "border-red-300 focus:border-red-400 focus:ring-red-50"
-                            : "border-slate-200 focus:border-blue-500 focus:ring-blue-50"
+                            ? "border-[var(--color-danger)] focus:border-[var(--color-danger)] focus:ring-[var(--color-danger)]/10"
+                            : "focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)]/10"
                         }`}
                       />
                     </div>
 
-                    <p className="mt-1.5 text-xs text-slate-400">
+                    <p className="theme-text-placeholder mt-1.5 text-xs">
                       Username digunakan saat login.
                     </p>
 
                     <FieldError name="namaPengguna" />
                   </div>
 
+                  {/* EMAIL */}
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-slate-700">
+                    <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                       Email{" "}
-                      <span className="text-red-500">*</span>
+                      <span className="text-[var(--color-danger)]">
+                        *
+                      </span>
                     </label>
 
                     <div className="relative">
                       <Mail
                         size={18}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                        className="theme-text-placeholder absolute left-3 top-1/2 -translate-y-1/2"
                       />
 
                       <input
@@ -654,10 +685,11 @@ export default function TambahGuruPage() {
                         value={form.email}
                         onChange={handleChange}
                         placeholder="guru@smartschool.com"
-                        className={`h-11 w-full rounded-xl border bg-white pl-10 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:ring-4 ${
-                          touched.email && validation.email
-                            ? "border-red-300 focus:border-red-400 focus:ring-red-50"
-                            : "border-slate-200 focus:border-blue-500 focus:ring-blue-50"
+                        className={`theme-input h-11 w-full rounded-xl border pl-10 pr-4 text-sm outline-none transition focus:ring-4 ${
+                          touched.email &&
+                          validation.email
+                            ? "border-[var(--color-danger)] focus:border-[var(--color-danger)] focus:ring-[var(--color-danger)]/10"
+                            : "focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)]/10"
                         }`}
                       />
                     </div>
@@ -665,39 +697,48 @@ export default function TambahGuruPage() {
                     <FieldError name="email" />
                   </div>
 
+                  {/* PASSWORD */}
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-slate-700">
+                    <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                       Kata Sandi{" "}
-                      <span className="text-red-500">*</span>
+                      <span className="text-[var(--color-danger)]">
+                        *
+                      </span>
                     </label>
 
                     <div className="flex gap-2">
                       <div className="relative flex-1">
                         <Lock
                           size={18}
-                          className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                          className="theme-text-placeholder absolute left-3 top-1/2 -translate-y-1/2"
                         />
 
                         <input
-                          type={showPassword ? "text" : "password"}
+                          type={
+                            showPassword
+                              ? "text"
+                              : "password"
+                          }
                           name="kataSandi"
                           value={form.kataSandi}
                           onChange={handleChange}
                           placeholder="Minimal 6 karakter"
-                          className={`h-11 w-full rounded-xl border bg-white pl-10 pr-11 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:ring-4 ${
+                          className={`theme-input h-11 w-full rounded-xl border pl-10 pr-11 text-sm outline-none transition focus:ring-4 ${
                             touched.kataSandi &&
                             validation.kataSandi
-                              ? "border-red-300 focus:border-red-400 focus:ring-red-50"
-                              : "border-slate-200 focus:border-blue-500 focus:ring-blue-50"
+                              ? "border-[var(--color-danger)] focus:border-[var(--color-danger)] focus:ring-[var(--color-danger)]/10"
+                              : "focus:border-[var(--color-primary)] focus:ring-[var(--color-primary)]/10"
                           }`}
                         />
 
                         <button
                           type="button"
                           onClick={() =>
-                            setShowPassword((prev) => !prev)
+                            setShowPassword(
+                              (prev) => !prev
+                            )
                           }
-                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-slate-700"
+                          className="theme-text-placeholder absolute right-3 top-1/2 -translate-y-1/2 transition hover:text-[var(--color-text)]"
                         >
                           {showPassword ? (
                             <EyeOff size={18} />
@@ -709,8 +750,10 @@ export default function TambahGuruPage() {
 
                       <button
                         type="button"
-                        onClick={handleGeneratePassword}
-                        className="h-11 shrink-0 rounded-xl border border-blue-200 bg-blue-50 px-3 text-xs font-semibold text-blue-700 transition hover:bg-blue-100"
+                        onClick={
+                          handleGeneratePassword
+                        }
+                        className="theme-info theme-border h-11 shrink-0 rounded-xl border px-3 text-xs font-semibold transition hover:opacity-90"
                       >
                         Generate
                       </button>
@@ -721,7 +764,8 @@ export default function TambahGuruPage() {
                 </div>
               </section>
 
-              <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              {/* DATA KEPEGAWAIAN */}
+              <section className="theme-card theme-border rounded-2xl border p-6 shadow-sm">
                 <SectionTitle
                   icon={BriefcaseBusiness}
                   title="Data Kepegawaian"
@@ -729,15 +773,17 @@ export default function TambahGuruPage() {
                 />
 
                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+
+                  {/* NIP */}
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-slate-700">
+                    <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                       NIP
                     </label>
 
                     <div className="relative">
                       <Hash
                         size={18}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                        className="theme-text-placeholder absolute left-3 top-1/2 -translate-y-1/2"
                       />
 
                       <input
@@ -746,20 +792,21 @@ export default function TambahGuruPage() {
                         value={form.nip}
                         onChange={handleChange}
                         placeholder="Contoh: 198501012010011001"
-                        className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
+                        className="theme-input h-11 w-full rounded-xl border pl-10 pr-4 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-primary)]/10"
                       />
                     </div>
                   </div>
 
+                  {/* NUPTK */}
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-slate-700">
+                    <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                       NUPTK
                     </label>
 
                     <div className="relative">
                       <Hash
                         size={18}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                        className="theme-text-placeholder absolute left-3 top-1/2 -translate-y-1/2"
                       />
 
                       <input
@@ -768,13 +815,14 @@ export default function TambahGuruPage() {
                         value={form.nuptk}
                         onChange={handleChange}
                         placeholder="Masukkan NUPTK"
-                        className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
+                        className="theme-input h-11 w-full rounded-xl border pl-10 pr-4 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-primary)]/10"
                       />
                     </div>
                   </div>
 
+                  {/* JABATAN */}
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-slate-700">
+                    <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                       Jabatan
                     </label>
 
@@ -784,12 +832,13 @@ export default function TambahGuruPage() {
                       value={form.jabatan}
                       onChange={handleChange}
                       placeholder="Guru"
-                      className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
+                      className="theme-input h-11 w-full rounded-xl border px-4 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-primary)]/10"
                     />
                   </div>
 
+                  {/* GOLONGAN */}
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-slate-700">
+                    <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                       Golongan
                     </label>
 
@@ -797,9 +846,11 @@ export default function TambahGuruPage() {
                       name="golongan"
                       value={form.golongan}
                       onChange={handleChange}
-                      className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
+                      className="theme-input h-11 w-full rounded-xl border px-4 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-primary)]/10"
                     >
-                      <option value="">Pilih golongan</option>
+                      <option value="">
+                        Pilih golongan
+                      </option>
                       <option value="III/a">III/a</option>
                       <option value="III/b">III/b</option>
                       <option value="III/c">III/c</option>
@@ -812,8 +863,9 @@ export default function TambahGuruPage() {
                     </select>
                   </div>
 
+                  {/* JENIS KELAMIN */}
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-slate-700">
+                    <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                       Jenis Kelamin
                     </label>
 
@@ -821,22 +873,27 @@ export default function TambahGuruPage() {
                       name="jenisKelamin"
                       value={form.jenisKelamin}
                       onChange={handleChange}
-                      className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
+                      className="theme-input h-11 w-full rounded-xl border px-4 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-primary)]/10"
                     >
-                      <option value="L">Laki-laki</option>
-                      <option value="P">Perempuan</option>
+                      <option value="L">
+                        Laki-laki
+                      </option>
+                      <option value="P">
+                        Perempuan
+                      </option>
                     </select>
                   </div>
 
+                  {/* NIK */}
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-slate-700">
+                    <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                       NIK
                     </label>
 
                     <div className="relative">
                       <Hash
                         size={18}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                        className="theme-text-placeholder absolute left-3 top-1/2 -translate-y-1/2"
                       />
 
                       <input
@@ -846,14 +903,15 @@ export default function TambahGuruPage() {
                         onChange={handleChange}
                         placeholder="16 digit NIK"
                         maxLength={16}
-                        className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
+                        className="theme-input h-11 w-full rounded-xl border pl-10 pr-4 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-primary)]/10"
                       />
                     </div>
                   </div>
                 </div>
               </section>
 
-              <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              {/* DATA PRIBADI */}
+              <section className="theme-card theme-border rounded-2xl border p-6 shadow-sm">
                 <SectionTitle
                   icon={User}
                   title="Data Pribadi"
@@ -861,8 +919,10 @@ export default function TambahGuruPage() {
                 />
 
                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-3">
+
+                  {/* TEMPAT LAHIR */}
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-slate-700">
+                    <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                       Tempat Lahir
                     </label>
 
@@ -872,19 +932,20 @@ export default function TambahGuruPage() {
                       value={form.tempatLahir}
                       onChange={handleChange}
                       placeholder="Contoh: Jakarta"
-                      className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
+                      className="theme-input h-11 w-full rounded-xl border px-4 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-primary)]/10"
                     />
                   </div>
 
+                  {/* TANGGAL LAHIR */}
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-slate-700">
+                    <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                       Tanggal Lahir
                     </label>
 
                     <div className="relative">
                       <CalendarDays
                         size={18}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                        className="theme-text-placeholder absolute left-3 top-1/2 -translate-y-1/2"
                       />
 
                       <input
@@ -892,20 +953,21 @@ export default function TambahGuruPage() {
                         name="tanggalLahir"
                         value={form.tanggalLahir}
                         onChange={handleChange}
-                        className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
+                        className="theme-input h-11 w-full rounded-xl border pl-10 pr-4 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-primary)]/10"
                       />
                     </div>
                   </div>
 
+                  {/* TELEPON */}
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-slate-700">
+                    <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                       No. Telepon
                     </label>
 
                     <div className="relative">
                       <Phone
                         size={18}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                        className="theme-text-placeholder absolute left-3 top-1/2 -translate-y-1/2"
                       />
 
                       <input
@@ -914,14 +976,15 @@ export default function TambahGuruPage() {
                         value={form.noTelepon}
                         onChange={handleChange}
                         placeholder="08xxxxxxxxxx"
-                        className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
+                        className="theme-input h-11 w-full rounded-xl border pl-10 pr-4 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-primary)]/10"
                       />
                     </div>
                   </div>
                 </div>
               </section>
 
-              <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              {/* ALAMAT */}
+              <section className="theme-card theme-border rounded-2xl border p-6 shadow-sm">
                 <SectionTitle
                   icon={MapPin}
                   title="Alamat"
@@ -929,8 +992,10 @@ export default function TambahGuruPage() {
                 />
 
                 <div className="space-y-5">
+
+                  {/* ALAMAT */}
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-slate-700">
+                    <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                       Alamat
                     </label>
 
@@ -940,13 +1005,15 @@ export default function TambahGuruPage() {
                       onChange={handleChange}
                       rows={3}
                       placeholder="Masukkan alamat lengkap..."
-                      className="w-full resize-none rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
+                      className="theme-input w-full resize-none rounded-xl border px-4 py-3 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-primary)]/10"
                     />
                   </div>
 
                   <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+
+                    {/* ALAMAT KTP */}
                     <div>
-                      <label className="mb-2 block text-sm font-semibold text-slate-700">
+                      <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                         Alamat KTP
                       </label>
 
@@ -956,12 +1023,13 @@ export default function TambahGuruPage() {
                         onChange={handleChange}
                         rows={3}
                         placeholder="Alamat sesuai KTP..."
-                        className="w-full resize-none rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
+                        className="theme-input w-full resize-none rounded-xl border px-4 py-3 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-primary)]/10"
                       />
                     </div>
 
+                    {/* ALAMAT DOMISILI */}
                     <div>
-                      <label className="mb-2 block text-sm font-semibold text-slate-700">
+                      <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                         Alamat Domisili
                       </label>
 
@@ -971,14 +1039,16 @@ export default function TambahGuruPage() {
                         onChange={handleChange}
                         rows={3}
                         placeholder="Alamat tempat tinggal saat ini..."
-                        className="w-full resize-none rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
+                        className="theme-input w-full resize-none rounded-xl border px-4 py-3 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-primary)]/10"
                       />
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4">
+
+                    {/* KECAMATAN */}
                     <div>
-                      <label className="mb-2 block text-sm font-semibold text-slate-700">
+                      <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                         Kecamatan
                       </label>
 
@@ -988,12 +1058,13 @@ export default function TambahGuruPage() {
                         value={form.kecamatan}
                         onChange={handleChange}
                         placeholder="Kecamatan"
-                        className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
+                        className="theme-input h-11 w-full rounded-xl border px-4 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-primary)]/10"
                       />
                     </div>
 
+                    {/* KELURAHAN */}
                     <div>
-                      <label className="mb-2 block text-sm font-semibold text-slate-700">
+                      <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                         Kelurahan
                       </label>
 
@@ -1003,12 +1074,13 @@ export default function TambahGuruPage() {
                         value={form.kelurahan}
                         onChange={handleChange}
                         placeholder="Kelurahan"
-                        className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
+                        className="theme-input h-11 w-full rounded-xl border px-4 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-primary)]/10"
                       />
                     </div>
 
+                    {/* KOTA */}
                     <div>
-                      <label className="mb-2 block text-sm font-semibold text-slate-700">
+                      <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                         Kota / Kabupaten
                       </label>
 
@@ -1018,19 +1090,20 @@ export default function TambahGuruPage() {
                         value={form.kota}
                         onChange={handleChange}
                         placeholder="Kota / Kabupaten"
-                        className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
+                        className="theme-input h-11 w-full rounded-xl border px-4 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-primary)]/10"
                       />
                     </div>
 
+                    {/* STATUS */}
                     <div>
-                      <label className="mb-2 block text-sm font-semibold text-slate-700">
+                      <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                         Status
                       </label>
 
-                      <div className="flex h-11 items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-4">
-                        <span className="h-2.5 w-2.5 rounded-full bg-emerald-500" />
+                      <div className="theme-card-soft theme-border flex h-11 items-center gap-2 rounded-xl border px-4">
+                        <span className="h-2.5 w-2.5 rounded-full bg-[var(--color-success)]" />
 
-                        <span className="text-sm font-medium text-slate-700">
+                        <span className="theme-text-secondary text-sm font-medium">
                           Aktif
                         </span>
                       </div>
@@ -1039,34 +1112,39 @@ export default function TambahGuruPage() {
                 </div>
               </section>
 
-              <section className="rounded-2xl border border-amber-200 bg-amber-50/60 p-5">
+              {/* PENUGASAN MATA PELAJARAN */}
+              <section className="theme-warning theme-border rounded-2xl border p-5">
                 <div className="flex items-start gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-100 text-amber-700">
+                  <div className="theme-warning theme-border flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border">
                     <BookOpen size={20} />
                   </div>
 
                   <div>
-                    <h3 className="text-sm font-bold text-amber-900">
+                    <h3 className="text-sm font-bold text-[var(--color-warning)]">
                       Penugasan Mata Pelajaran
                     </h3>
 
-                    <p className="mt-1 text-sm leading-6 text-amber-800">
-                      Data guru pada halaman ini disimpan melalui endpoint
-                      pengguna. Berdasarkan schema backend kamu, mata
-                      pelajaran tidak disimpan langsung pada tabel Pengguna.
-                      Penugasan guru ke mata pelajaran dilakukan melalui
-                      relasi <b>KelasMapel</b>.
+                    <p className="mt-1 text-sm leading-6 text-[var(--color-warning)]">
+                      Data guru pada halaman ini disimpan
+                      melalui endpoint pengguna. Berdasarkan
+                      schema backend kamu, mata pelajaran tidak
+                      disimpan langsung pada tabel Pengguna.
+                      Penugasan guru ke mata pelajaran dilakukan
+                      melalui relasi <b>KelasMapel</b>.
                     </p>
                   </div>
                 </div>
               </section>
 
-              <div className="flex flex-col-reverse gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:justify-end">
+              {/* FOOTER BUTTON */}
+              <div className="theme-border flex flex-col-reverse gap-3 border-t pt-5 sm:flex-row sm:justify-end">
                 <button
                   type="button"
-                  onClick={() => router.push("/admin/guru")}
+                  onClick={() =>
+                    router.push("/admin/guru")
+                  }
                   disabled={loading}
-                  className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="theme-card theme-border theme-text-secondary theme-header-hover inline-flex h-11 items-center justify-center gap-2 rounded-xl border px-5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   <X size={17} />
                   Batal
@@ -1075,13 +1153,18 @@ export default function TambahGuruPage() {
                 <button
                   type="submit"
                   disabled={
-                    loading || loadingRole || !guruRoleId
+                    loading ||
+                    loadingRole ||
+                    !guruRoleId
                   }
-                  className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 text-sm font-semibold text-white shadow-lg shadow-blue-200 transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
+                  className="theme-primary inline-flex h-11 items-center justify-center gap-2 rounded-xl px-6 text-sm font-semibold shadow-lg transition disabled:cursor-not-allowed disabled:opacity-50 disabled:shadow-none"
                 >
                   {loading ? (
                     <>
-                      <Loader2 size={17} className="animate-spin" />
+                      <Loader2
+                        size={17}
+                        className="animate-spin"
+                      />
                       Menyimpan...
                     </>
                   ) : (

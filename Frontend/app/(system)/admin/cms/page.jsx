@@ -15,7 +15,6 @@ import {
   Lightbulb,
   TrendingUp,
   LayoutDashboard,
-  ChevronRight,
   PenLine,
   ExternalLink,
   BarChart3,
@@ -47,28 +46,28 @@ export default function CmsDashboardPage() {
       value: totalArticles,
       subtitle: `${publishedArticles} artikel dipublikasikan`,
       icon: FileText,
-      color: "indigo",
+      color: "info",
     },
     {
       title: "Artikel Terbit",
       value: publishedArticles,
       subtitle: "artikel aktif",
       icon: CheckCircle,
-      color: "emerald",
+      color: "success",
     },
     {
       title: "Halaman Statis",
       value: totalPages,
       subtitle: "halaman aktif",
       icon: File,
-      color: "violet",
+      color: "primary",
     },
     {
       title: "Total Dilihat",
       value: totalViews,
       subtitle: "views sepanjang waktu",
       icon: Eye,
-      color: "amber",
+      color: "warning",
     },
   ];
 
@@ -104,29 +103,29 @@ export default function CmsDashboardPage() {
   // ============================================================
 
   const colorClasses = {
-    indigo: {
-      icon: "text-indigo-600",
-      iconBg: "bg-indigo-50",
-      border: "border-indigo-100",
-      accent: "bg-indigo-600",
+    info: {
+      icon: "text-[var(--color-info)]",
+      iconBg: "theme-info",
+      border: "theme-border",
+      accent: "bg-[var(--color-info)]",
     },
-    emerald: {
-      icon: "text-emerald-600",
-      iconBg: "bg-emerald-50",
-      border: "border-emerald-100",
-      accent: "bg-emerald-600",
+    success: {
+      icon: "text-[var(--color-success)]",
+      iconBg: "theme-success",
+      border: "theme-border",
+      accent: "bg-[var(--color-success)]",
     },
-    violet: {
-      icon: "text-violet-600",
-      iconBg: "bg-violet-50",
-      border: "border-violet-100",
-      accent: "bg-violet-600",
+    primary: {
+      icon: "text-[var(--color-primary)]",
+      iconBg: "theme-card-soft",
+      border: "theme-border",
+      accent: "bg-[var(--color-primary)]",
     },
-    amber: {
-      icon: "text-amber-600",
-      iconBg: "bg-amber-50",
-      border: "border-amber-100",
-      accent: "bg-amber-600",
+    warning: {
+      icon: "text-[var(--color-warning)]",
+      iconBg: "theme-warning",
+      border: "theme-border",
+      accent: "bg-[var(--color-warning)]",
     },
   };
 
@@ -135,7 +134,7 @@ export default function CmsDashboardPage() {
   // ============================================================
 
   return (
-    <div className="flex min-h-screen w-full bg-slate-50">
+    <div className="theme-page flex min-h-screen w-full">
       {/* ========================================================
           SIDEBAR
       ======================================================== */}
@@ -153,6 +152,7 @@ export default function CmsDashboardPage() {
 
       <div className="flex min-w-0 flex-1 flex-col">
         {/* HEADER */}
+
         <Header
           user={{
             name: "CMS Admin",
@@ -166,7 +166,7 @@ export default function CmsDashboardPage() {
             CONTENT
         ====================================================== */}
 
-        <main className="flex-1 min-w-0 p-4 sm:p-6 lg:p-8">
+        <main className="theme-page flex-1 min-w-0 p-4 sm:p-6 lg:p-8">
           <div className="w-full max-w-[1600px] mx-auto">
 
             {/* ==================================================
@@ -177,15 +177,27 @@ export default function CmsDashboardPage() {
               <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
 
                 {/* LEFT */}
+
                 <div className="min-w-0">
-                  {/* Breadcrumb */}
-
-                 
-
                   {/* Title */}
 
                   <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 shrink-0 rounded-xl border border-slate-200 bg-white flex items-center justify-center text-indigo-600 shadow-sm">
+                    <div
+                      className="
+                        w-11
+                        h-11
+                        shrink-0
+                        rounded-xl
+                        border
+                        theme-border
+                        theme-card
+                        flex
+                        items-center
+                        justify-center
+                        text-[var(--color-primary)]
+                        shadow-sm
+                      "
+                    >
                       <LayoutDashboard
                         size={21}
                         strokeWidth={2}
@@ -194,16 +206,44 @@ export default function CmsDashboardPage() {
 
                     <div className="min-w-0">
                       <div className="flex items-center gap-2.5 flex-wrap">
-                        <h1 className="text-2xl sm:text-3xl font-semibold tracking-tight text-slate-800">
+                        <h1
+                          className="
+                            text-2xl
+                            sm:text-3xl
+                            font-semibold
+                            tracking-tight
+                            theme-text
+                          "
+                        >
                           Dashboard CMS
                         </h1>
 
-                        <span className="inline-flex items-center px-2.5 py-1 rounded-md bg-indigo-50 border border-indigo-100 text-[11px] font-semibold text-indigo-600">
+                        <span
+                          className="
+                            inline-flex
+                            items-center
+                            px-2.5
+                            py-1
+                            rounded-md
+                            theme-card-soft
+                            border
+                            theme-border
+                            text-[11px]
+                            font-semibold
+                            text-[var(--color-primary)]
+                          "
+                        >
                           Admin
                         </span>
                       </div>
 
-                      <p className="mt-1 text-sm text-slate-500">
+                      <p
+                        className="
+                          mt-1
+                          text-sm
+                          theme-text-muted
+                        "
+                      >
                         Kelola dan pantau konten website SmartSchool.
                       </p>
                     </div>
@@ -217,7 +257,24 @@ export default function CmsDashboardPage() {
                     href="/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center justify-center gap-2 px-3.5 py-2.5 rounded-lg border border-slate-200 bg-white text-sm font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-800 transition-all shadow-sm"
+                    className="
+                      inline-flex
+                      items-center
+                      justify-center
+                      gap-2
+                      px-3.5
+                      py-2.5
+                      rounded-lg
+                      border
+                      theme-border
+                      theme-card
+                      text-sm
+                      font-medium
+                      theme-text-secondary
+                      theme-sidebar-hover
+                      transition-all
+                      shadow-sm
+                    "
                   >
                     <ExternalLink size={16} />
 
@@ -226,7 +283,21 @@ export default function CmsDashboardPage() {
 
                   <a
                     href="/cmsAdmin/articles/create"
-                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-indigo-600 text-white text-sm font-medium hover:bg-indigo-700 transition-all shadow-sm"
+                    className="
+                      inline-flex
+                      items-center
+                      justify-center
+                      gap-2
+                      px-4
+                      py-2.5
+                      rounded-lg
+                      theme-primary
+                      text-white
+                      text-sm
+                      font-medium
+                      transition-all
+                      shadow-sm
+                    "
                   >
                     <Plus size={17} />
 
@@ -237,7 +308,7 @@ export default function CmsDashboardPage() {
 
               {/* Divider */}
 
-              <div className="mt-6 border-b border-slate-200" />
+              <div className="mt-6 border-b theme-border" />
             </section>
 
             {/* ==================================================
@@ -252,31 +323,86 @@ export default function CmsDashboardPage() {
                 return (
                   <div
                     key={stat.title}
-                    className={`relative overflow-hidden bg-white border ${color.border} rounded-xl p-4 sm:p-5 shadow-sm hover:shadow-md transition-all duration-200`}
+                    className={`
+                      relative
+                      overflow-hidden
+                      theme-card
+                      border
+                      ${color.border}
+                      rounded-xl
+                      p-4
+                      sm:p-5
+                      shadow-sm
+                      hover:shadow-md
+                      transition-all
+                      duration-200
+                    `}
                   >
                     {/* Small accent */}
 
                     <div
-                      className={`absolute left-0 top-0 bottom-0 w-1 ${color.accent}`}
+                      className={`
+                        absolute
+                        left-0
+                        top-0
+                        bottom-0
+                        w-1
+                        ${color.accent}
+                      `}
                     />
 
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-wide text-slate-400">
+                        <p
+                          className="
+                            text-[11px]
+                            sm:text-xs
+                            font-semibold
+                            uppercase
+                            tracking-wide
+                            theme-text-muted
+                          "
+                        >
                           {stat.title}
                         </p>
 
-                        <p className="mt-2 text-2xl sm:text-3xl font-semibold tracking-tight text-slate-800">
+                        <p
+                          className="
+                            mt-2
+                            text-2xl
+                            sm:text-3xl
+                            font-semibold
+                            tracking-tight
+                            theme-text
+                          "
+                        >
                           {stat.value}
                         </p>
 
-                        <p className="mt-1 text-xs text-slate-400 truncate">
+                        <p
+                          className="
+                            mt-1
+                            text-xs
+                            theme-text-muted
+                            truncate
+                          "
+                        >
                           {stat.subtitle}
                         </p>
                       </div>
 
                       <div
-                        className={`w-10 h-10 shrink-0 rounded-lg ${color.iconBg} ${color.icon} flex items-center justify-center`}
+                        className={`
+                          w-10
+                          h-10
+                          shrink-0
+                          rounded-lg
+                          ${color.iconBg}
+                          ${color.icon}
+                          flex
+                          items-center
+                          justify-center
+                        `}
                       >
                         <Icon size={19} />
                       </div>
@@ -296,30 +422,86 @@ export default function CmsDashboardPage() {
                   ARTICLES
               ================================================= */}
 
-              <section className="xl:col-span-2 bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-
+              <section
+                className="
+                  xl:col-span-2
+                  theme-card
+                  border
+                  theme-border
+                  rounded-xl
+                  shadow-sm
+                  overflow-hidden
+                "
+              >
                 {/* Card Header */}
 
-                <div className="px-5 sm:px-6 py-5 border-b border-slate-100">
+                <div
+                  className="
+                    px-5
+                    sm:px-6
+                    py-5
+                    border-b
+                    theme-border-soft
+                  "
+                >
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
 
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                      <div
+                        className="
+                          w-9
+                          h-9
+                          rounded-lg
+                          theme-info
+                          flex
+                          items-center
+                          justify-center
+                        "
+                      >
                         <FileText size={18} />
                       </div>
 
                       <div>
-                        <h2 className="text-sm sm:text-base font-semibold text-slate-800">
+                        <h2
+                          className="
+                            text-sm
+                            sm:text-base
+                            font-semibold
+                            theme-text
+                          "
+                        >
                           Artikel Terbaru
                         </h2>
 
-                        <p className="text-xs text-slate-400 mt-0.5">
+                        <p
+                          className="
+                            text-xs
+                            theme-text-muted
+                            mt-0.5
+                          "
+                        >
                           Konten yang baru ditambahkan
                         </p>
                       </div>
                     </div>
 
-                    <span className="inline-flex w-fit items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-50 border border-slate-200 text-xs font-medium text-slate-500">
+                    <span
+                      className="
+                        inline-flex
+                        w-fit
+                        items-center
+                        gap-1.5
+                        px-2.5
+                        py-1
+                        rounded-md
+                        theme-card-soft
+                        border
+                        theme-border
+                        text-xs
+                        font-medium
+                        theme-text-secondary
+                      "
+                    >
                       <FileText size={12} />
 
                       {latestArticles.length} artikel
@@ -331,22 +513,56 @@ export default function CmsDashboardPage() {
 
                 <div className="px-5 sm:px-6">
                   {latestArticles.length > 0 ? (
-                    <div className="divide-y divide-slate-100">
+                    <div className="divide-y divide-[var(--color-border-soft)]">
                       {latestArticles.map((article) => (
                         <div
                           key={article.id}
-                          className="group py-4 flex items-center gap-4"
+                          className="
+                            group
+                            py-4
+                            flex
+                            items-center
+                            gap-4
+                            theme-table-hover
+                          "
                         >
                           {/* Icon */}
 
-                          <div className="hidden sm:flex w-9 h-9 shrink-0 rounded-lg bg-slate-50 border border-slate-100 items-center justify-center text-slate-400 group-hover:text-indigo-600 group-hover:bg-indigo-50 group-hover:border-indigo-100 transition-all">
+                          <div
+                            className="
+                              hidden
+                              sm:flex
+                              w-9
+                              h-9
+                              shrink-0
+                              rounded-lg
+                              theme-card-soft
+                              border
+                              theme-border
+                              items-center
+                              justify-center
+                              theme-text-muted
+                              group-hover:text-[var(--color-primary)]
+                              group-hover:bg-[var(--color-sidebar-active)]
+                              transition-all
+                            "
+                          >
                             <PenLine size={16} />
                           </div>
 
                           {/* Content */}
 
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-slate-700 group-hover:text-indigo-600 transition-colors truncate">
+                            <p
+                              className="
+                                text-sm
+                                font-medium
+                                theme-text-secondary
+                                group-hover:text-[var(--color-primary)]
+                                transition-colors
+                                truncate
+                              "
+                            >
                               {article.title}
                             </p>
 
@@ -354,11 +570,22 @@ export default function CmsDashboardPage() {
                               {/* Status */}
 
                               <span
-                                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold ${
-                                  article.status === "published"
-                                    ? "bg-emerald-50 text-emerald-600 border border-emerald-100"
-                                    : "bg-amber-50 text-amber-600 border border-amber-100"
-                                }`}
+                                className={`
+                                  inline-flex
+                                  items-center
+                                  gap-1
+                                  px-2
+                                  py-0.5
+                                  rounded-md
+                                  text-[10px]
+                                  font-semibold
+                                  border
+                                  ${
+                                    article.status === "published"
+                                      ? "theme-success"
+                                      : "theme-warning"
+                                  }
+                                `}
                               >
                                 {article.status === "published" ? (
                                   <CheckCircle size={11} />
@@ -373,7 +600,7 @@ export default function CmsDashboardPage() {
 
                               {/* Category */}
 
-                              <span className="text-[11px] text-slate-400">
+                              <span className="text-[11px] theme-text-muted">
                                 {article.category || "Uncategorized"}
                               </span>
                             </div>
@@ -381,7 +608,17 @@ export default function CmsDashboardPage() {
 
                           {/* Date */}
 
-                          <div className="hidden md:flex shrink-0 items-center gap-1.5 text-xs text-slate-400">
+                          <div
+                            className="
+                              hidden
+                              md:flex
+                              shrink-0
+                              items-center
+                              gap-1.5
+                              text-xs
+                              theme-text-muted
+                            "
+                          >
                             <Clock3 size={13} />
 
                             {new Date(
@@ -397,7 +634,13 @@ export default function CmsDashboardPage() {
 
                           <ArrowRight
                             size={15}
-                            className="shrink-0 text-slate-300 group-hover:text-indigo-500 group-hover:translate-x-0.5 transition-all"
+                            className="
+                              shrink-0
+                              theme-text-placeholder
+                              group-hover:text-[var(--color-primary)]
+                              group-hover:translate-x-0.5
+                              transition-all
+                            "
                           />
                         </div>
                       ))}
@@ -406,14 +649,27 @@ export default function CmsDashboardPage() {
                     <div className="py-12 text-center">
                       <FileText
                         size={30}
-                        className="mx-auto text-slate-300"
+                        className="mx-auto theme-text-placeholder"
                       />
 
-                      <p className="mt-3 text-sm font-medium text-slate-600">
+                      <p
+                        className="
+                          mt-3
+                          text-sm
+                          font-medium
+                          theme-text-secondary
+                        "
+                      >
                         Belum ada artikel
                       </p>
 
-                      <p className="mt-1 text-xs text-slate-400">
+                      <p
+                        className="
+                          mt-1
+                          text-xs
+                          theme-text-muted
+                        "
+                      >
                         Mulai buat artikel pertama Anda.
                       </p>
                     </div>
@@ -422,10 +678,28 @@ export default function CmsDashboardPage() {
 
                 {/* Footer */}
 
-                <div className="px-5 sm:px-6 py-4 border-t border-slate-100 bg-slate-50/50">
+                <div
+                  className="
+                    px-5
+                    sm:px-6
+                    py-4
+                    border-t
+                    theme-border-soft
+                    theme-card-soft
+                  "
+                >
                   <a
                     href="/cmsAdmin/articles"
-                    className="inline-flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors"
+                    className="
+                      inline-flex
+                      items-center
+                      gap-1.5
+                      text-sm
+                      font-medium
+                      text-[var(--color-primary)]
+                      hover:text-[var(--color-primary-hover)]
+                      transition-colors
+                    "
                   >
                     Lihat semua artikel
 
@@ -438,22 +712,62 @@ export default function CmsDashboardPage() {
                   CONTENT OVERVIEW
               ================================================= */}
 
-              <section className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-
+              <section
+                className="
+                  theme-card
+                  border
+                  theme-border
+                  rounded-xl
+                  shadow-sm
+                  overflow-hidden
+                "
+              >
                 {/* Header */}
 
-                <div className="px-5 sm:px-6 py-5 border-b border-slate-100">
+                <div
+                  className="
+                    px-5
+                    sm:px-6
+                    py-5
+                    border-b
+                    theme-border-soft
+                  "
+                >
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center">
+                    <div
+                      className="
+                        w-9
+                        h-9
+                        rounded-lg
+                        theme-card-soft
+                        text-[var(--color-primary)]
+                        flex
+                        items-center
+                        justify-center
+                      "
+                    >
                       <BarChart3 size={18} />
                     </div>
 
                     <div>
-                      <h2 className="text-sm sm:text-base font-semibold text-slate-800">
+                      <h2
+                        className="
+                          text-sm
+                          sm:text-base
+                          font-semibold
+                          theme-text
+                        "
+                      >
                         Ringkasan Konten
                       </h2>
 
-                      <p className="text-xs text-slate-400 mt-0.5">
+                      <p
+                        className="
+                          text-xs
+                          theme-text-muted
+                          mt-0.5
+                        "
+                      >
                         Gambaran konten website
                       </p>
                     </div>
@@ -468,18 +782,42 @@ export default function CmsDashboardPage() {
 
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-medium text-slate-500">
+                      <span
+                        className="
+                          text-xs
+                          font-medium
+                          theme-text-secondary
+                        "
+                      >
                         Artikel Terbit
                       </span>
 
-                      <span className="text-xs font-semibold text-slate-700">
+                      <span
+                        className="
+                          text-xs
+                          font-semibold
+                          theme-text-secondary
+                        "
+                      >
                         {publishedArticles}/{totalArticles}
                       </span>
                     </div>
 
-                    <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div
+                      className="
+                        h-2
+                        theme-card-soft
+                        rounded-full
+                        overflow-hidden
+                      "
+                    >
                       <div
-                        className="h-full bg-emerald-500 rounded-full transition-all"
+                        className="
+                          h-full
+                          bg-[var(--color-success)]
+                          rounded-full
+                          transition-all
+                        "
                         style={{
                           width: `${
                             totalArticles > 0
@@ -498,48 +836,130 @@ export default function CmsDashboardPage() {
 
                   {/* Pages */}
 
-                  <div className="flex items-center justify-between p-3.5 rounded-lg bg-slate-50 border border-slate-100">
+                  <div
+                    className="
+                      flex
+                      items-center
+                      justify-between
+                      p-3.5
+                      rounded-lg
+                      theme-card-soft
+                      border
+                      theme-border-soft
+                    "
+                  >
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-violet-600">
+                      <div
+                        className="
+                          w-8
+                          h-8
+                          rounded-lg
+                          theme-card
+                          border
+                          theme-border
+                          flex
+                          items-center
+                          justify-center
+                          text-[var(--color-primary)]
+                        "
+                      >
                         <File size={15} />
                       </div>
 
                       <div>
-                        <p className="text-xs font-medium text-slate-600">
+                        <p
+                          className="
+                            text-xs
+                            font-medium
+                            theme-text-secondary
+                          "
+                        >
                           Halaman Statis
                         </p>
 
-                        <p className="text-[11px] text-slate-400">
+                        <p
+                          className="
+                            text-[11px]
+                            theme-text-muted
+                          "
+                        >
                           Halaman aktif
                         </p>
                       </div>
                     </div>
 
-                    <span className="text-lg font-semibold text-slate-800">
+                    <span
+                      className="
+                        text-lg
+                        font-semibold
+                        theme-text
+                      "
+                    >
                       {totalPages}
                     </span>
                   </div>
 
                   {/* Views */}
 
-                  <div className="flex items-center justify-between p-3.5 rounded-lg bg-slate-50 border border-slate-100">
+                  <div
+                    className="
+                      flex
+                      items-center
+                      justify-between
+                      p-3.5
+                      rounded-lg
+                      theme-card-soft
+                      border
+                      theme-border-soft
+                    "
+                  >
                     <div className="flex items-center gap-3">
-                      <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center text-amber-600">
+                      <div
+                        className="
+                          w-8
+                          h-8
+                          rounded-lg
+                          theme-card
+                          border
+                          theme-border
+                          flex
+                          items-center
+                          justify-center
+                          text-[var(--color-warning)]
+                        "
+                      >
                         <Eye size={15} />
                       </div>
 
                       <div>
-                        <p className="text-xs font-medium text-slate-600">
+                        <p
+                          className="
+                            text-xs
+                            font-medium
+                            theme-text-secondary
+                          "
+                        >
                           Total Views
                         </p>
 
-                        <p className="text-[11px] text-slate-400">
+                        <p
+                          className="
+                            text-[11px]
+                            theme-text-muted
+                          "
+                        >
                           Semua konten
                         </p>
                       </div>
                     </div>
 
-                    <span className="text-lg font-semibold text-slate-800">
+                    <span
+                      className="
+                        text-lg
+                        font-semibold
+                        theme-text
+                      "
+                    >
                       {totalViews}
                     </span>
                   </div>
@@ -548,7 +968,21 @@ export default function CmsDashboardPage() {
 
                   <a
                     href="/cmsAdmin/articles/create"
-                    className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-slate-800 text-white text-sm font-medium hover:bg-slate-900 transition-all"
+                    className="
+                      w-full
+                      inline-flex
+                      items-center
+                      justify-center
+                      gap-2
+                      px-4
+                      py-2.5
+                      rounded-lg
+                      theme-primary
+                      text-white
+                      text-sm
+                      font-medium
+                      transition-all
+                    "
                   >
                     <PenLine size={16} />
 
@@ -566,20 +1000,60 @@ export default function CmsDashboardPage() {
 
               {/* Tips */}
 
-              <div className="lg:col-span-2 bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-
-                <div className="px-5 sm:px-6 py-5 border-b border-slate-100">
+              <div
+                className="
+                  lg:col-span-2
+                  theme-card
+                  border
+                  theme-border
+                  rounded-xl
+                  shadow-sm
+                  overflow-hidden
+                "
+              >
+                <div
+                  className="
+                    px-5
+                    sm:px-6
+                    py-5
+                    border-b
+                    theme-border-soft
+                  "
+                >
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center">
+                    <div
+                      className="
+                        w-9
+                        h-9
+                        rounded-lg
+                        theme-warning
+                        flex
+                        items-center
+                        justify-center
+                      "
+                    >
                       <Lightbulb size={18} />
                     </div>
 
                     <div>
-                      <h2 className="text-sm sm:text-base font-semibold text-slate-800">
+                      <h2
+                        className="
+                          text-sm
+                          sm:text-base
+                          font-semibold
+                          theme-text
+                        "
+                      >
                         Panduan Menulis Konten
                       </h2>
 
-                      <p className="text-xs text-slate-400 mt-0.5">
+                      <p
+                        className="
+                          text-xs
+                          theme-text-muted
+                          mt-0.5
+                        "
+                      >
                         Beberapa hal yang perlu diperhatikan
                       </p>
                     </div>
@@ -591,20 +1065,62 @@ export default function CmsDashboardPage() {
                     {tips.map((tip) => (
                       <div
                         key={tip.number}
-                        className="flex gap-3.5 p-4 rounded-lg border border-slate-100 bg-slate-50/60 hover:bg-white hover:border-slate-200 transition-all"
+                        className="
+                          flex
+                          gap-3.5
+                          p-4
+                          rounded-lg
+                          border
+                          theme-border-soft
+                          theme-card-soft
+                          hover:theme-card
+                          transition-all
+                        "
                       >
-                        <div className="w-8 h-8 shrink-0 rounded-lg bg-white border border-slate-200 flex items-center justify-center">
-                          <span className="text-[11px] font-bold text-indigo-600">
+                        <div
+                          className="
+                            w-8
+                            h-8
+                            shrink-0
+                            rounded-lg
+                            theme-card
+                            border
+                            theme-border
+                            flex
+                            items-center
+                            justify-center
+                          "
+                        >
+                          <span
+                            className="
+                              text-[11px]
+                              font-bold
+                              text-[var(--color-primary)]
+                            "
+                          >
                             {tip.number}
                           </span>
                         </div>
 
                         <div className="min-w-0">
-                          <h3 className="text-sm font-semibold text-slate-700">
+                          <h3
+                            className="
+                              text-sm
+                              font-semibold
+                              theme-text-secondary
+                            "
+                          >
                             {tip.title}
                           </h3>
 
-                          <p className="mt-1 text-xs leading-relaxed text-slate-400">
+                          <p
+                            className="
+                              mt-1
+                              text-xs
+                              leading-relaxed
+                              theme-text-muted
+                            "
+                          >
                             {tip.desc}
                           </p>
                         </div>
@@ -616,26 +1132,72 @@ export default function CmsDashboardPage() {
 
               {/* Quick Action */}
 
-              <div className="bg-slate-800 rounded-xl shadow-sm overflow-hidden">
-
+              <div
+                className="
+                  rounded-xl
+                  shadow-sm
+                  overflow-hidden
+                  bg-[var(--color-sidebar)]
+                  border
+                  theme-border
+                "
+              >
                 <div className="p-5 sm:p-6">
-                  <div className="w-9 h-9 rounded-lg bg-white/10 text-white flex items-center justify-center mb-4">
+                  <div
+                    className="
+                      w-9
+                      h-9
+                      rounded-lg
+                      theme-card-soft
+                      text-[var(--color-primary)]
+                      flex
+                      items-center
+                      justify-center
+                      mb-4
+                    "
+                  >
                     <TrendingUp size={18} />
                   </div>
 
-                  <h2 className="text-base font-semibold text-white">
+                  <h2
+                    className="
+                      text-base
+                      font-semibold
+                      theme-text
+                    "
+                  >
                     Kelola Konten
                   </h2>
 
-                  <p className="text-xs text-slate-300 mt-1 leading-relaxed">
-                    Kelola artikel, halaman statis, dan seluruh konten
-                    website dari satu tempat.
+                  <p
+                    className="
+                      text-xs
+                      theme-text-muted
+                      mt-1
+                      leading-relaxed
+                    "
+                  >
+                    Kelola artikel, halaman statis, dan seluruh
+                    konten website dari satu tempat.
                   </p>
 
                   <div className="mt-5 space-y-2">
                     <a
                       href="/cmsAdmin/articles"
-                      className="flex items-center justify-between w-full px-3.5 py-2.5 rounded-lg bg-white/10 hover:bg-white/15 text-sm text-white transition-all"
+                      className="
+                        flex
+                        items-center
+                        justify-between
+                        w-full
+                        px-3.5
+                        py-2.5
+                        rounded-lg
+                        theme-card-soft
+                        hover:bg-[var(--color-sidebar-hover)]
+                        text-sm
+                        theme-text
+                        transition-all
+                      "
                     >
                       <span className="flex items-center gap-2">
                         <FileText size={15} />
@@ -647,7 +1209,20 @@ export default function CmsDashboardPage() {
 
                     <a
                       href="/cmsAdmin/pages"
-                      className="flex items-center justify-between w-full px-3.5 py-2.5 rounded-lg bg-white/10 hover:bg-white/15 text-sm text-white transition-all"
+                      className="
+                        flex
+                        items-center
+                        justify-between
+                        w-full
+                        px-3.5
+                        py-2.5
+                        rounded-lg
+                        theme-card-soft
+                        hover:bg-[var(--color-sidebar-hover)]
+                        text-sm
+                        theme-text
+                        transition-all
+                      "
                     >
                       <span className="flex items-center gap-2">
                         <File size={15} />
@@ -665,8 +1240,16 @@ export default function CmsDashboardPage() {
                 FOOTER
             ================================================== */}
 
-            <footer className="pt-5 pb-2 border-t border-slate-200 text-center">
-              <p className="text-xs text-slate-400">
+            <footer
+              className="
+                pt-5
+                pb-2
+                border-t
+                theme-border
+                text-center
+              "
+            >
+              <p className="text-xs theme-text-muted">
                 © 2026 SmartSchool • CMS Dashboard
               </p>
             </footer>

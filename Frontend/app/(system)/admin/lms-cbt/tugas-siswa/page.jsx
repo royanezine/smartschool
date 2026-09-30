@@ -16,12 +16,37 @@ import {
   FileText,
   CalendarDays,
   BookOpen,
-  MoreVertical,
   AlertCircle,
 } from "lucide-react";
 
 import Sidebar from "../../../../components/Sidebar";
 import Header from "../../../../components/Header";
+
+/* ============================================================
+   THEME HELPERS
+============================================================ */
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]";
+
+const themePrimaryHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
+
+const themeTextHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themePrimaryShadow =
+  "shadow-[0_10px_25px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_6px_24px_color-mix(in_srgb,var(--color-text)_6%,transparent)]";
+
+/* ============================================================
+   PAGE
+============================================================ */
 
 export default function TugasSiswaPage() {
   const [tugas, setTugas] = useState([
@@ -105,6 +130,7 @@ export default function TugasSiswaPage() {
   const [search, setSearch] = useState("");
   const [filterStatus, setFilterStatus] = useState("Semua");
   const [filterMapel, setFilterMapel] = useState("Semua");
+
   const [showModal, setShowModal] = useState(false);
   const [modalType, setModalType] = useState("add");
   const [selectedTugas, setSelectedTugas] = useState(null);
@@ -121,15 +147,30 @@ export default function TugasSiswaPage() {
     deskripsi: "",
   });
 
+  /* ============================================================
+     STATISTICS
+  ============================================================ */
+
   const totalTugas = tugas.length;
-  const published = tugas.filter((item) => item.status === "Published").length;
-  const draft = tugas.filter((item) => item.status === "Draft").length;
+
+  const published = tugas.filter(
+    (item) => item.status === "Published"
+  ).length;
+
+  const draft = tugas.filter(
+    (item) => item.status === "Draft"
+  ).length;
+
   const totalDikumpulkan = tugas.reduce(
     (total, item) => total + item.dikumpulkan,
     0
   );
 
   const mapelList = [...new Set(tugas.map((item) => item.mapel))];
+
+  /* ============================================================
+     FILTER
+  ============================================================ */
 
   const filteredTugas = useMemo(() => {
     return tugas.filter((item) => {
@@ -142,14 +183,20 @@ export default function TugasSiswaPage() {
         item.guru.toLowerCase().includes(keyword);
 
       const cocokStatus =
-        filterStatus === "Semua" || item.status === filterStatus;
+        filterStatus === "Semua" ||
+        item.status === filterStatus;
 
       const cocokMapel =
-        filterMapel === "Semua" || item.mapel === filterMapel;
+        filterMapel === "Semua" ||
+        item.mapel === filterMapel;
 
       return cocokSearch && cocokStatus && cocokMapel;
     });
   }, [tugas, search, filterStatus, filterMapel]);
+
+  /* ============================================================
+     MODAL
+  ============================================================ */
 
   const openAddModal = () => {
     setModalType("add");
@@ -195,6 +242,10 @@ export default function TugasSiswaPage() {
     setShowModal(true);
   };
 
+  /* ============================================================
+     DELETE
+  ============================================================ */
+
   const handleDelete = (id) => {
     const yakin = window.confirm(
       "Apakah Anda yakin ingin menghapus tugas ini?"
@@ -202,13 +253,24 @@ export default function TugasSiswaPage() {
 
     if (!yakin) return;
 
-    setTugas((prev) => prev.filter((item) => item.id !== id));
+    setTugas((prev) =>
+      prev.filter((item) => item.id !== id)
+    );
   };
+
+  /* ============================================================
+     SUBMIT
+  ============================================================ */
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    if (!form.judul || !form.mapel || !form.kelas || !form.deadline) {
+    if (
+      !form.judul ||
+      !form.mapel ||
+      !form.kelas ||
+      !form.deadline
+    ) {
       alert("Mohon lengkapi data tugas.");
       return;
     }
@@ -238,10 +300,16 @@ export default function TugasSiswaPage() {
     setShowModal(false);
   };
 
+  /* ============================================================
+     HELPERS
+  ============================================================ */
+
   const formatTanggal = (tanggal) => {
     if (!tanggal) return "-";
 
-    return new Date(tanggal + "T00:00:00").toLocaleDateString("id-ID", {
+    return new Date(
+      tanggal + "T00:00:00"
+    ).toLocaleDateString("id-ID", {
       day: "2-digit",
       month: "short",
       year: "numeric",
@@ -251,38 +319,68 @@ export default function TugasSiswaPage() {
   const getProgress = (item) => {
     if (!item.jumlahSiswa) return 0;
 
-    return Math.round((item.dikumpulkan / item.jumlahSiswa) * 100);
+    return Math.round(
+      (item.dikumpulkan / item.jumlahSiswa) * 100
+    );
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      {/* SIDEBAR */}
+    <div className="flex min-h-screen theme-page">
+      {/* ======================================================
+          SIDEBAR
+      ====================================================== */}
+
       <Sidebar />
 
-      {/* MAIN */}
+      {/* ======================================================
+          MAIN
+      ====================================================== */}
+
       <div className="flex-1 min-w-0 flex flex-col">
         <Header />
 
         <main className="flex-1 p-4 md:p-6 lg:p-8">
-          {/* BREADCRUMB */}
-          <div className="mb-2 text-sm text-slate-500">
+          {/* ==================================================
+              BREADCRUMB
+          ================================================== */}
+
+          <div className="mb-2 text-sm theme-text-secondary">
             LMS & CBT
-            <span className="mx-2">/</span>
-            <span className="text-slate-700">Tugas Siswa</span>
+
+            <span className="mx-2 theme-text-muted">
+              /
+            </span>
+
+            <span className="theme-text">
+              Tugas Siswa
+            </span>
           </div>
 
-          {/* HEADER */}
+          {/* ==================================================
+              HEADER
+          ================================================== */}
+
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-7">
             <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
+              <div
+                className={`
+                  w-12 h-12 rounded-xl
+                  bg-[var(--color-primary)]
+                  flex items-center justify-center
+                  text-white
+                  ${themePrimaryShadow}
+                  shrink-0
+                `}
+              >
                 <ClipboardList size={24} />
               </div>
 
               <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-slate-900">
+                <h1 className="text-2xl md:text-3xl font-bold theme-text">
                   Tugas Siswa
                 </h1>
-                <p className="text-sm text-slate-500 mt-1">
+
+                <p className="text-sm theme-text-secondary mt-1">
                   Kelola tugas, deadline, dan pengumpulan tugas siswa.
                 </p>
               </div>
@@ -290,20 +388,33 @@ export default function TugasSiswaPage() {
 
             <button
               onClick={openAddModal}
-              className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold shadow-lg shadow-blue-500/20 transition-all"
+              className={`
+                inline-flex items-center justify-center gap-2
+                px-5 py-3 rounded-xl
+                bg-[var(--color-primary)]
+                hover:opacity-90
+                text-white
+                text-sm font-semibold
+                ${themePrimaryShadow}
+                transition-all
+              `}
             >
               <Plus size={18} />
               Tambah Tugas
             </button>
           </div>
 
-          {/* STATISTICS */}
+          {/* ==================================================
+              STATISTICS
+          ================================================== */}
+
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
             <StatCard
               title="Total Tugas"
               value={totalTugas}
               description="Semua tugas"
               icon={ClipboardList}
+              variant="primary"
             />
 
             <StatCard
@@ -311,8 +422,7 @@ export default function TugasSiswaPage() {
               value={published}
               description="Sudah diterbitkan"
               icon={CheckCircle2}
-              iconClass="text-emerald-600"
-              bgClass="bg-emerald-50"
+              variant="success"
             />
 
             <StatCard
@@ -320,8 +430,7 @@ export default function TugasSiswaPage() {
               value={draft}
               description="Belum diterbitkan"
               icon={FileText}
-              iconClass="text-amber-600"
-              bgClass="bg-amber-50"
+              variant="warning"
             />
 
             <StatCard
@@ -329,55 +438,126 @@ export default function TugasSiswaPage() {
               value={totalDikumpulkan}
               description="Total pengumpulan"
               icon={Users}
-              iconClass="text-purple-600"
-              bgClass="bg-purple-50"
+              variant="info"
             />
           </div>
 
-          {/* FILTER CARD */}
-          <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 mb-5">
+          {/* ==================================================
+              FILTER CARD
+          ================================================== */}
+
+          <div className="theme-card rounded-2xl theme-border border p-4 mb-5 themeCardShadow">
             <div className="flex flex-col xl:flex-row gap-3">
               {/* SEARCH */}
+
               <div className="relative flex-1">
                 <Search
                   size={18}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                  className="
+                    absolute left-3.5 top-1/2
+                    -translate-y-1/2
+                    theme-text-muted
+                  "
                 />
 
                 <input
                   type="text"
                   value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  onChange={(e) =>
+                    setSearch(e.target.value)
+                  }
                   placeholder="Cari tugas, mata pelajaran, kelas, atau guru..."
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                  className="
+                    theme-input
+                    w-full
+                    pl-10 pr-4 py-2.5
+                    rounded-xl
+                    border
+                    theme-border
+                    text-sm
+                    theme-text
+                    theme-text-placeholder
+                    focus:outline-none
+                    focus:ring-2
+                    focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
+                    focus:border-[var(--color-primary)]
+                  "
                 />
               </div>
 
               {/* STATUS */}
+
               <div className="relative">
                 <Filter
                   size={16}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+                  className="
+                    absolute left-3 top-1/2
+                    -translate-y-1/2
+                    theme-text-muted
+                    pointer-events-none
+                  "
                 />
 
                 <select
                   value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value)}
-                  className="appearance-none w-full xl:w-44 pl-9 pr-8 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                  onChange={(e) =>
+                    setFilterStatus(e.target.value)
+                  }
+                  className="
+                    theme-input
+                    appearance-none
+                    w-full xl:w-44
+                    pl-9 pr-8 py-2.5
+                    rounded-xl
+                    border
+                    theme-border
+                    text-sm
+                    theme-text-secondary
+                    focus:outline-none
+                    focus:ring-2
+                    focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
+                    focus:border-[var(--color-primary)]
+                  "
                 >
-                  <option value="Semua">Semua Status</option>
-                  <option value="Published">Published</option>
-                  <option value="Draft">Draft</option>
+                  <option value="Semua">
+                    Semua Status
+                  </option>
+
+                  <option value="Published">
+                    Published
+                  </option>
+
+                  <option value="Draft">
+                    Draft
+                  </option>
                 </select>
               </div>
 
               {/* MAPEL */}
+
               <select
                 value={filterMapel}
-                onChange={(e) => setFilterMapel(e.target.value)}
-                className="w-full xl:w-52 px-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-600 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                onChange={(e) =>
+                  setFilterMapel(e.target.value)
+                }
+                className="
+                  theme-input
+                  w-full xl:w-52
+                  px-4 py-2.5
+                  rounded-xl
+                  border
+                  theme-border
+                  text-sm
+                  theme-text-secondary
+                  focus:outline-none
+                  focus:ring-2
+                  focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
+                  focus:border-[var(--color-primary)]
+                "
               >
-                <option value="Semua">Semua Mata Pelajaran</option>
+                <option value="Semua">
+                  Semua Mata Pelajaran
+                </option>
 
                 {mapelList.map((mapel) => (
                   <option key={mapel} value={mapel}>
@@ -388,32 +568,57 @@ export default function TugasSiswaPage() {
             </div>
           </div>
 
-          {/* LIST */}
+          {/* ==================================================
+              LIST
+          ================================================== */}
+
           <div className="space-y-4">
             {filteredTugas.length > 0 ? (
               filteredTugas.map((item) => (
                 <div
                   key={item.id}
-                  className="bg-white rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow overflow-hidden"
+                  className="
+                    theme-card
+                    rounded-2xl
+                    border
+                    theme-border
+                    overflow-hidden
+                    transition-all
+                    hover:-translate-y-[1px]
+                    shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_4%,transparent)]
+                    hover:shadow-[0_8px_28px_color-mix(in_srgb,var(--color-text)_8%,transparent)]
+                  "
                 >
                   <div className="p-5">
                     <div className="flex flex-col lg:flex-row lg:items-start gap-5">
                       {/* ICON */}
-                      <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+
+                      <div
+                        className={`
+                          w-12 h-12 rounded-xl
+                          ${themePrimarySoft}
+                          flex items-center justify-center
+                          shrink-0
+                          text-[var(--color-primary)]
+                        `}
+                      >
                         <ClipboardList size={23} />
                       </div>
 
                       {/* CONTENT */}
+
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-wrap items-center gap-2 mb-2">
-                          <h2 className="text-base md:text-lg font-bold text-slate-800">
+                          <h2 className="text-base md:text-lg font-bold theme-text">
                             {item.judul}
                           </h2>
 
-                          <StatusBadge status={item.status} />
+                          <StatusBadge
+                            status={item.status}
+                          />
                         </div>
 
-                        <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs text-slate-500 mb-3">
+                        <div className="flex flex-wrap gap-x-5 gap-y-2 text-xs theme-text-secondary mb-3">
                           <span className="inline-flex items-center gap-1.5">
                             <BookOpen size={14} />
                             {item.mapel}
@@ -430,39 +635,51 @@ export default function TugasSiswaPage() {
                           </span>
                         </div>
 
-                        <p className="text-sm text-slate-500 line-clamp-2 max-w-3xl">
+                        <p className="text-sm theme-text-secondary line-clamp-2 max-w-3xl">
                           {item.deskripsi}
                         </p>
 
                         {/* META */}
+
                         <div className="flex flex-wrap gap-4 mt-4">
-                          <div className="flex items-center gap-2 text-xs text-slate-500">
+                          <div className="flex items-center gap-2 text-xs theme-text-secondary">
                             <CalendarDays
                               size={15}
-                              className="text-blue-500"
+                              className="text-[var(--color-primary)]"
                             />
+
                             <span>
                               Deadline:{" "}
-                              <strong className="text-slate-700">
-                                {formatTanggal(item.deadline)}
+                              <strong className="theme-text">
+                                {formatTanggal(
+                                  item.deadline
+                                )}
                               </strong>
                             </span>
                           </div>
 
-                          <div className="flex items-center gap-2 text-xs text-slate-500">
-                            <Clock3 size={15} className="text-orange-500" />
+                          <div className="flex items-center gap-2 text-xs theme-text-secondary">
+                            <Clock3
+                              size={15}
+                              className="text-[var(--color-warning)]"
+                            />
+
                             <span>
-                              <strong className="text-slate-700">
+                              <strong className="theme-text">
                                 {item.waktu}
                               </strong>
                             </span>
                           </div>
 
-                          <div className="flex items-center gap-2 text-xs text-slate-500">
-                            <Users size={15} className="text-purple-500" />
+                          <div className="flex items-center gap-2 text-xs theme-text-secondary">
+                            <Users
+                              size={15}
+                              className="text-[var(--color-info)]"
+                            />
+
                             <span>
                               Guru:{" "}
-                              <strong className="text-slate-700">
+                              <strong className="theme-text">
                                 {item.guru}
                               </strong>
                             </span>
@@ -471,26 +688,72 @@ export default function TugasSiswaPage() {
                       </div>
 
                       {/* ACTION */}
+
                       <div className="flex lg:flex-col items-center gap-2">
+                        {/* DETAIL */}
+
                         <button
-                          onClick={() => openDetailModal(item)}
-                          className="w-9 h-9 rounded-lg border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 transition-all"
+                          onClick={() =>
+                            openDetailModal(item)
+                          }
+                          className={`
+                            w-9 h-9
+                            rounded-lg
+                            border
+                            theme-border
+                            flex items-center justify-center
+                            theme-text-secondary
+                            ${themePrimaryHover}
+                            hover:text-[var(--color-primary)]
+                            hover:border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]
+                            transition-all
+                          `}
                           title="Lihat detail"
                         >
                           <Eye size={16} />
                         </button>
 
+                        {/* EDIT */}
+
                         <button
-                          onClick={() => openEditModal(item)}
-                          className="w-9 h-9 rounded-lg border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-amber-50 hover:text-amber-600 hover:border-amber-200 transition-all"
+                          onClick={() =>
+                            openEditModal(item)
+                          }
+                          className="
+                            w-9 h-9
+                            rounded-lg
+                            border
+                            theme-border
+                            flex items-center justify-center
+                            theme-text-secondary
+                            hover:bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)]
+                            hover:text-[var(--color-warning)]
+                            hover:border-[color-mix(in_srgb,var(--color-warning)_25%,transparent)]
+                            transition-all
+                          "
                           title="Edit"
                         >
                           <Edit3 size={16} />
                         </button>
 
+                        {/* DELETE */}
+
                         <button
-                          onClick={() => handleDelete(item.id)}
-                          className="w-9 h-9 rounded-lg border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-all"
+                          onClick={() =>
+                            handleDelete(item.id)
+                          }
+                          className="
+                            w-9 h-9
+                            rounded-lg
+                            border
+                            theme-border
+                            flex items-center justify-center
+                            theme-text-secondary
+                            hover:bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)]
+                            hover:text-[var(--color-danger)]
+                            hover:border-[color-mix(in_srgb,var(--color-danger)_25%,transparent)]
+                            transition-all
+                          "
                           title="Hapus"
                         >
                           <Trash2 size={16} />
@@ -499,21 +762,30 @@ export default function TugasSiswaPage() {
                     </div>
                   </div>
 
-                  {/* PROGRESS */}
-                  <div className="border-t border-slate-100 bg-slate-50/50 px-5 py-3">
+                  {/* ==================================================
+                      PROGRESS
+                  ================================================== */}
+
+                  <div className="border-t theme-border-soft theme-card-soft px-5 py-3">
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-xs font-medium text-slate-500">
+                      <span className="text-xs font-medium theme-text-secondary">
                         Pengumpulan Tugas
                       </span>
 
-                      <span className="text-xs font-semibold text-slate-700">
-                        {item.dikumpulkan}/{item.jumlahSiswa} siswa
+                      <span className="text-xs font-semibold theme-text">
+                        {item.dikumpulkan}/
+                        {item.jumlahSiswa} siswa
                       </span>
                     </div>
 
-                    <div className="h-2 bg-slate-200 rounded-full overflow-hidden">
+                    <div className="h-2 theme-card rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-blue-600 rounded-full transition-all"
+                        className="
+                          h-full
+                          bg-[var(--color-primary)]
+                          rounded-full
+                          transition-all
+                        "
                         style={{
                           width: `${getProgress(item)}%`,
                         }}
@@ -523,19 +795,28 @@ export default function TugasSiswaPage() {
                 </div>
               ))
             ) : (
-              <div className="bg-white rounded-2xl border border-slate-200 p-12 text-center">
-                <div className="w-14 h-14 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-3">
-                  <ClipboardList
-                    size={25}
-                    className="text-slate-400"
-                  />
+              /* ==================================================
+                 EMPTY STATE
+              ================================================== */
+
+              <div className="theme-card rounded-2xl border theme-border p-12 text-center">
+                <div
+                  className={`
+                    w-14 h-14 rounded-full
+                    ${themePrimarySoft}
+                    flex items-center justify-center
+                    mx-auto mb-3
+                    text-[var(--color-primary)]
+                  `}
+                >
+                  <ClipboardList size={25} />
                 </div>
 
-                <h3 className="text-sm font-semibold text-slate-700">
+                <h3 className="text-sm font-semibold theme-text">
                   Tugas tidak ditemukan
                 </h3>
 
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="text-xs theme-text-muted mt-1">
                   Coba ubah kata pencarian atau filter.
                 </p>
               </div>
@@ -544,14 +825,41 @@ export default function TugasSiswaPage() {
         </main>
       </div>
 
-      {/* MODAL */}
+      {/* ========================================================
+          MODAL
+      ======================================================== */}
+
       {showModal && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm">
-          <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white rounded-2xl shadow-2xl">
-            {/* MODAL HEADER */}
-            <div className="sticky top-0 bg-white border-b border-slate-100 px-5 py-4 flex items-center justify-between z-10">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-[color-mix(in_srgb,var(--color-text)_40%,transparent)] backdrop-blur-sm">
+          <div
+            className="
+              w-full max-w-2xl
+              max-h-[90vh]
+              overflow-y-auto
+              theme-card
+              rounded-2xl
+              shadow-[0_20px_60px_color-mix(in_srgb,var(--color-text)_20%,transparent)]
+              border
+              theme-border
+            "
+          >
+            {/* ==================================================
+                MODAL HEADER
+            ================================================== */}
+
+            <div
+              className="
+                sticky top-0
+                theme-card
+                border-b
+                theme-border-soft
+                px-5 py-4
+                flex items-center justify-between
+                z-10
+              "
+            >
               <div>
-                <h2 className="text-lg font-bold text-slate-800">
+                <h2 className="text-lg font-bold theme-text">
                   {modalType === "add"
                     ? "Tambah Tugas"
                     : modalType === "edit"
@@ -559,7 +867,7 @@ export default function TugasSiswaPage() {
                     : "Detail Tugas"}
                 </h2>
 
-                <p className="text-xs text-slate-400 mt-0.5">
+                <p className="text-xs theme-text-muted mt-0.5">
                   {modalType === "detail"
                     ? "Informasi lengkap tugas siswa"
                     : "Lengkapi informasi tugas"}
@@ -568,31 +876,53 @@ export default function TugasSiswaPage() {
 
               <button
                 onClick={() => setShowModal(false)}
-                className="w-9 h-9 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-400"
+                className="
+                  w-9 h-9
+                  rounded-lg
+                  theme-text-secondary
+                  flex items-center justify-center
+                  hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
+                  transition-colors
+                "
               >
                 <X size={19} />
               </button>
             </div>
 
-            {/* DETAIL */}
-            {modalType === "detail" && selectedTugas ? (
+            {/* ==================================================
+                DETAIL
+            ================================================== */}
+
+            {modalType === "detail" &&
+            selectedTugas ? (
               <div className="p-5">
                 <div className="flex items-start gap-4 mb-6">
-                  <div className="w-12 h-12 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0">
+                  <div
+                    className={`
+                      w-12 h-12 rounded-xl
+                      ${themePrimarySoft}
+                      text-[var(--color-primary)]
+                      flex items-center justify-center
+                      shrink-0
+                    `}
+                  >
                     <ClipboardList size={23} />
                   </div>
 
                   <div>
                     <div className="flex flex-wrap items-center gap-2">
-                      <h3 className="text-xl font-bold text-slate-800">
+                      <h3 className="text-xl font-bold theme-text">
                         {selectedTugas.judul}
                       </h3>
 
-                      <StatusBadge status={selectedTugas.status} />
+                      <StatusBadge
+                        status={selectedTugas.status}
+                      />
                     </div>
 
-                    <p className="text-sm text-slate-400 mt-1">
-                      {selectedTugas.mapel} • {selectedTugas.kelas}
+                    <p className="text-sm theme-text-muted mt-1">
+                      {selectedTugas.mapel} •{" "}
+                      {selectedTugas.kelas}
                     </p>
                   </div>
                 </div>
@@ -637,40 +967,74 @@ export default function TugasSiswaPage() {
                   />
                 </div>
 
-                <div className="bg-slate-50 rounded-xl p-4">
-                  <p className="text-xs font-semibold text-slate-500 mb-2">
+                <div className="theme-card-soft rounded-xl p-4 border theme-border-soft">
+                  <p className="text-xs font-semibold theme-text-secondary mb-2">
                     Deskripsi Tugas
                   </p>
 
-                  <p className="text-sm text-slate-600 leading-relaxed">
-                    {selectedTugas.deskripsi || "Tidak ada deskripsi."}
+                  <p className="text-sm theme-text-secondary leading-relaxed">
+                    {selectedTugas.deskripsi ||
+                      "Tidak ada deskripsi."}
                   </p>
                 </div>
 
                 <div className="flex justify-end gap-2 mt-5">
                   <button
-                    onClick={() => setShowModal(false)}
-                    className="px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50"
+                    onClick={() =>
+                      setShowModal(false)
+                    }
+                    className="
+                      px-4 py-2.5
+                      rounded-xl
+                      border
+                      theme-border
+                      text-sm
+                      font-medium
+                      theme-text-secondary
+                      hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
+                      transition-colors
+                    "
                   >
                     Tutup
                   </button>
 
                   <button
-                    onClick={() => openEditModal(selectedTugas)}
-                    className="px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold"
+                    onClick={() =>
+                      openEditModal(selectedTugas)
+                    }
+                    className="
+                      px-4 py-2.5
+                      rounded-xl
+                      bg-[var(--color-primary)]
+                      hover:opacity-90
+                      text-white
+                      text-sm
+                      font-semibold
+                      transition-all
+                    "
                   >
                     Edit Tugas
                   </button>
                 </div>
               </div>
             ) : (
-              /* FORM */
-              <form onSubmit={handleSubmit} className="p-5">
+              /* ==================================================
+                 FORM
+              ================================================== */
+
+              <form
+                onSubmit={handleSubmit}
+                className="p-5"
+              >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   {/* JUDUL */}
+
                   <div className="md:col-span-2">
-                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">
-                      Judul Tugas <span className="text-red-500">*</span>
+                    <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
+                      Judul Tugas{" "}
+                      <span className="text-[var(--color-danger)]">
+                        *
+                      </span>
                     </label>
 
                     <input
@@ -683,14 +1047,32 @@ export default function TugasSiswaPage() {
                         })
                       }
                       placeholder="Masukkan judul tugas"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                      className="
+                        theme-input
+                        w-full
+                        px-3.5 py-2.5
+                        rounded-xl
+                        border
+                        theme-border
+                        text-sm
+                        theme-text
+                        theme-text-placeholder
+                        focus:outline-none
+                        focus:ring-2
+                        focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
+                        focus:border-[var(--color-primary)]
+                      "
                     />
                   </div>
 
                   {/* MAPEL */}
+
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">
-                      Mata Pelajaran <span className="text-red-500">*</span>
+                    <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
+                      Mata Pelajaran{" "}
+                      <span className="text-[var(--color-danger)]">
+                        *
+                      </span>
                     </label>
 
                     <input
@@ -703,14 +1085,32 @@ export default function TugasSiswaPage() {
                         })
                       }
                       placeholder="Contoh: Pemrograman Web"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                      className="
+                        theme-input
+                        w-full
+                        px-3.5 py-2.5
+                        rounded-xl
+                        border
+                        theme-border
+                        text-sm
+                        theme-text
+                        theme-text-placeholder
+                        focus:outline-none
+                        focus:ring-2
+                        focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
+                        focus:border-[var(--color-primary)]
+                      "
                     />
                   </div>
 
                   {/* KELAS */}
+
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">
-                      Kelas <span className="text-red-500">*</span>
+                    <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
+                      Kelas{" "}
+                      <span className="text-[var(--color-danger)]">
+                        *
+                      </span>
                     </label>
 
                     <input
@@ -723,13 +1123,28 @@ export default function TugasSiswaPage() {
                         })
                       }
                       placeholder="Contoh: XI PPLG 1"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                      className="
+                        theme-input
+                        w-full
+                        px-3.5 py-2.5
+                        rounded-xl
+                        border
+                        theme-border
+                        text-sm
+                        theme-text
+                        theme-text-placeholder
+                        focus:outline-none
+                        focus:ring-2
+                        focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
+                        focus:border-[var(--color-primary)]
+                      "
                     />
                   </div>
 
                   {/* GURU */}
+
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">
+                    <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
                       Guru
                     </label>
 
@@ -743,13 +1158,28 @@ export default function TugasSiswaPage() {
                         })
                       }
                       placeholder="Nama guru"
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                      className="
+                        theme-input
+                        w-full
+                        px-3.5 py-2.5
+                        rounded-xl
+                        border
+                        theme-border
+                        text-sm
+                        theme-text
+                        theme-text-placeholder
+                        focus:outline-none
+                        focus:ring-2
+                        focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
+                        focus:border-[var(--color-primary)]
+                      "
                     />
                   </div>
 
                   {/* TIPE */}
+
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">
+                    <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
                       Tipe Tugas
                     </label>
 
@@ -761,19 +1191,47 @@ export default function TugasSiswaPage() {
                           tipe: e.target.value,
                         })
                       }
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                      className="
+                        theme-input
+                        w-full
+                        px-3.5 py-2.5
+                        rounded-xl
+                        border
+                        theme-border
+                        text-sm
+                        theme-text
+                        focus:outline-none
+                        focus:ring-2
+                        focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
+                        focus:border-[var(--color-primary)]
+                      "
                     >
-                      <option>Tugas Individu</option>
-                      <option>Tugas Kelompok</option>
-                      <option>Proyek</option>
-                      <option>Praktikum</option>
+                      <option>
+                        Tugas Individu
+                      </option>
+
+                      <option>
+                        Tugas Kelompok
+                      </option>
+
+                      <option>
+                        Proyek
+                      </option>
+
+                      <option>
+                        Praktikum
+                      </option>
                     </select>
                   </div>
 
                   {/* DEADLINE */}
+
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">
-                      Deadline <span className="text-red-500">*</span>
+                    <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
+                      Deadline{" "}
+                      <span className="text-[var(--color-danger)]">
+                        *
+                      </span>
                     </label>
 
                     <input
@@ -785,13 +1243,27 @@ export default function TugasSiswaPage() {
                           deadline: e.target.value,
                         })
                       }
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                      className="
+                        theme-input
+                        w-full
+                        px-3.5 py-2.5
+                        rounded-xl
+                        border
+                        theme-border
+                        text-sm
+                        theme-text
+                        focus:outline-none
+                        focus:ring-2
+                        focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
+                        focus:border-[var(--color-primary)]
+                      "
                     />
                   </div>
 
                   {/* WAKTU */}
+
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">
+                    <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
                       Waktu Deadline
                     </label>
 
@@ -804,13 +1276,27 @@ export default function TugasSiswaPage() {
                           waktu: e.target.value,
                         })
                       }
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                      className="
+                        theme-input
+                        w-full
+                        px-3.5 py-2.5
+                        rounded-xl
+                        border
+                        theme-border
+                        text-sm
+                        theme-text
+                        focus:outline-none
+                        focus:ring-2
+                        focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
+                        focus:border-[var(--color-primary)]
+                      "
                     />
                   </div>
 
                   {/* STATUS */}
+
                   <div>
-                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">
+                    <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
                       Status
                     </label>
 
@@ -822,16 +1308,35 @@ export default function TugasSiswaPage() {
                           status: e.target.value,
                         })
                       }
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                      className="
+                        theme-input
+                        w-full
+                        px-3.5 py-2.5
+                        rounded-xl
+                        border
+                        theme-border
+                        text-sm
+                        theme-text
+                        focus:outline-none
+                        focus:ring-2
+                        focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
+                        focus:border-[var(--color-primary)]
+                      "
                     >
-                      <option value="Draft">Draft</option>
-                      <option value="Published">Published</option>
+                      <option value="Draft">
+                        Draft
+                      </option>
+
+                      <option value="Published">
+                        Published
+                      </option>
                     </select>
                   </div>
 
                   {/* DESKRIPSI */}
+
                   <div className="md:col-span-2">
-                    <label className="block text-xs font-semibold text-slate-600 mb-1.5">
+                    <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
                       Deskripsi Tugas
                     </label>
 
@@ -845,38 +1350,90 @@ export default function TugasSiswaPage() {
                         })
                       }
                       placeholder="Tuliskan instruksi atau deskripsi tugas..."
-                      className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                      className="
+                        theme-input
+                        w-full
+                        px-3.5 py-2.5
+                        rounded-xl
+                        border
+                        theme-border
+                        text-sm
+                        theme-text
+                        theme-text-placeholder
+                        resize-none
+                        focus:outline-none
+                        focus:ring-2
+                        focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
+                        focus:border-[var(--color-primary)]
+                      "
                     />
                   </div>
                 </div>
 
-                {/* INFO */}
-                <div className="mt-4 flex items-start gap-2 p-3 rounded-xl bg-blue-50 border border-blue-100">
+                {/* ==================================================
+                    INFO
+                ================================================== */}
+
+                <div
+                  className={`
+                    mt-4
+                    flex items-start gap-2
+                    p-3 rounded-xl
+                    ${themePrimarySoft}
+                    border
+                    ${themePrimarySoftBorder}
+                  `}
+                >
                   <AlertCircle
                     size={16}
-                    className="text-blue-500 mt-0.5 shrink-0"
+                    className="text-[var(--color-primary)] mt-0.5 shrink-0"
                   />
 
-                  <p className="text-xs text-blue-600 leading-relaxed">
+                  <p className="text-xs text-[var(--color-primary)] leading-relaxed">
                     Data tugas saat ini masih tersimpan sementara di
                     frontend. Setelah API backend tersedia, bagian ini
                     dapat dihubungkan ke endpoint tugas siswa.
                   </p>
                 </div>
 
-                {/* FOOTER */}
-                <div className="flex justify-end gap-2 mt-6 pt-4 border-t border-slate-100">
+                {/* ==================================================
+                    FOOTER
+                ================================================== */}
+
+                <div className="flex justify-end gap-2 mt-6 pt-4 border-t theme-border-soft">
                   <button
                     type="button"
-                    onClick={() => setShowModal(false)}
-                    className="px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50"
+                    onClick={() =>
+                      setShowModal(false)
+                    }
+                    className="
+                      px-4 py-2.5
+                      rounded-xl
+                      border
+                      theme-border
+                      text-sm
+                      font-medium
+                      theme-text-secondary
+                      hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
+                      transition-colors
+                    "
                   >
                     Batal
                   </button>
 
                   <button
                     type="submit"
-                    className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold shadow-md shadow-blue-500/20"
+                    className="
+                      px-5 py-2.5
+                      rounded-xl
+                      bg-[var(--color-primary)]
+                      hover:opacity-90
+                      text-white
+                      text-sm
+                      font-semibold
+                      shadow-[0_6px_18px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]
+                      transition-all
+                    "
                   >
                     {modalType === "edit"
                       ? "Simpan Perubahan"
@@ -901,26 +1458,68 @@ function StatCard({
   value,
   description,
   icon: Icon,
-  iconClass = "text-blue-600",
-  bgClass = "bg-blue-50",
+  variant = "primary",
 }) {
+  const variantConfig = {
+    primary: {
+      bg: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
+      text: "text-[var(--color-primary)]",
+    },
+
+    success: {
+      bg: "bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)]",
+      text: "text-[var(--color-success)]",
+    },
+
+    warning: {
+      bg: "bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)]",
+      text: "text-[var(--color-warning)]",
+    },
+
+    info: {
+      bg: "bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)]",
+      text: "text-[var(--color-info)]",
+    },
+  };
+
+  const current =
+    variantConfig[variant] ||
+    variantConfig.primary;
+
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+    <div
+      className="
+        theme-card
+        rounded-2xl
+        border
+        theme-border
+        p-5
+        shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_4%,transparent)]
+      "
+    >
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm text-slate-500">{title}</p>
+          <p className="text-sm theme-text-secondary">
+            {title}
+          </p>
 
-          <p className="text-2xl font-bold text-slate-900 mt-2">
+          <p className="text-2xl font-bold theme-text mt-2">
             {value}
           </p>
 
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs theme-text-muted mt-1">
             {description}
           </p>
         </div>
 
         <div
-          className={`w-11 h-11 rounded-xl ${bgClass} flex items-center justify-center ${iconClass}`}
+          className={`
+            w-11 h-11
+            rounded-xl
+            ${current.bg}
+            flex items-center justify-center
+            ${current.text}
+          `}
         >
           <Icon size={21} />
         </div>
@@ -936,7 +1535,19 @@ function StatCard({
 function StatusBadge({ status }) {
   if (status === "Published") {
     return (
-      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-600">
+      <span
+        className="
+          inline-flex items-center gap-1
+          px-2.5 py-1
+          rounded-full
+          text-[10px]
+          font-semibold
+          bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)]
+          text-[var(--color-success)]
+          border
+          border-[color-mix(in_srgb,var(--color-success)_20%,transparent)]
+        "
+      >
         <CheckCircle2 size={11} />
         Published
       </span>
@@ -944,7 +1555,19 @@ function StatusBadge({ status }) {
   }
 
   return (
-    <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[10px] font-semibold bg-amber-50 text-amber-600">
+    <span
+      className="
+        inline-flex items-center gap-1
+        px-2.5 py-1
+        rounded-full
+        text-[10px]
+        font-semibold
+        bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)]
+        text-[var(--color-warning)]
+        border
+        border-[color-mix(in_srgb,var(--color-warning)_20%,transparent)]
+      "
+    >
       <Clock3 size={11} />
       Draft
     </span>
@@ -955,15 +1578,19 @@ function StatusBadge({ status }) {
    DETAIL BOX
 ============================================================ */
 
-function DetailBox({ label, value, icon: Icon }) {
+function DetailBox({
+  label,
+  value,
+  icon: Icon,
+}) {
   return (
-    <div className="border border-slate-100 rounded-xl p-3.5">
-      <div className="flex items-center gap-2 text-xs text-slate-400 mb-1.5">
+    <div className="theme-card-soft border theme-border-soft rounded-xl p-3.5">
+      <div className="flex items-center gap-2 text-xs theme-text-muted mb-1.5">
         <Icon size={14} />
         {label}
       </div>
 
-      <p className="text-sm font-semibold text-slate-700">
+      <p className="text-sm font-semibold theme-text">
         {value || "-"}
       </p>
     </div>

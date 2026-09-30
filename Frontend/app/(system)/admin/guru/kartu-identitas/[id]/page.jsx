@@ -203,8 +203,8 @@ function TipeBadge({ tipe }) {
     <span
       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold ${
         isGuru
-          ? "bg-[#eaf1ff] text-[#155DFC] border border-[#c7dbff]"
-          : "bg-amber-50 text-amber-600 border border-amber-200"
+          ? "theme-info"
+          : "theme-warning"
       }`}
     >
       {isGuru ? <GraduationCap size={11} /> : <Briefcase size={11} />}
@@ -219,11 +219,11 @@ function StatusBadge({ status }) {
     <span
       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold ${
         isActive
-          ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
-          : "bg-slate-100 text-slate-500 border border-slate-200"
+          ? "theme-success"
+          : "theme-card-soft theme-text-muted theme-border"
       }`}
     >
-      <span className={`w-1.5 h-1.5 rounded-full ${isActive ? "bg-emerald-500" : "bg-slate-400"}`} />
+      <span className={`w-1.5 h-1.5 rounded-full ${isActive ? "bg-[var(--color-success)]" : "bg-[var(--color-text-muted)]"}`} />
       {isActive ? "Aktif" : "Nonaktif"}
     </span>
   );
@@ -235,9 +235,9 @@ function StatusBadge({ status }) {
 function FotoPlaceholder() {
   return (
     <svg viewBox="0 0 200 200" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-      <rect width="200" height="200" fill="#c9ced6" />
-      <circle cx="100" cy="80" r="38" fill="#f3f4f6" />
-      <path d="M30 200c0-51.7 31.3-93.6 70-93.6s70 41.9 70 93.6H30z" fill="#f3f4f6" />
+      <rect width="200" height="200" fill="var(--color-border-soft)" />
+      <circle cx="100" cy="80" r="38" fill="var(--color-card)" />
+      <path d="M30 200c0-51.7 31.3-93.6 70-93.6s70 41.9 70 93.6H30z" fill="var(--color-card)" />
     </svg>
   );
 }
@@ -280,7 +280,7 @@ function FotoProfil({ pegawaiId, editable = false }) {
 
   return (
     <div className="relative w-24 h-24 sm:w-28 sm:h-28 shrink-0">
-      <div className="w-full h-full rounded-2xl overflow-hidden shadow-lg shadow-slate-900/10 border-2 border-white ring-1 ring-slate-200">
+      <div className="w-full h-full rounded-2xl overflow-hidden shadow-[0_10px_30px_color-mix(in_srgb,var(--color-text)_14%,transparent)] border-2 border-[var(--color-card)] ring-1 ring-[var(--color-border)]">
         {loaded && foto ? (
           <img src={foto} alt="Foto profil" className="w-full h-full object-cover" />
         ) : (
@@ -293,7 +293,7 @@ function FotoProfil({ pegawaiId, editable = false }) {
             type="button"
             onClick={handlePilihFoto}
             title="Ubah foto"
-            className="absolute -bottom-1.5 -right-1.5 w-8 h-8 rounded-full bg-[#155DFC] hover:bg-[#0d47c9] text-white flex items-center justify-center shadow-md transition-colors"
+            className="absolute -bottom-1.5 -right-1.5 w-8 h-8 rounded-full theme-primary flex items-center justify-center shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)] transition-colors"
           >
             <Camera size={14} />
           </button>
@@ -308,6 +308,7 @@ function FotoProfil({ pegawaiId, editable = false }) {
       )}
     </div>
   );
+
 }
 
 export default function DetailPegawaiPage() {
@@ -336,7 +337,7 @@ export default function DetailPegawaiPage() {
 
   if (!pegawai) {
     return (
-      <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
+      <div className="flex h-screen w-full theme-page overflow-hidden">
         <Sidebar
           active="guruKartuIdentitas"
           setActive={() => {}}
@@ -352,12 +353,12 @@ export default function DetailPegawaiPage() {
           />
           <main className="flex-1 overflow-y-auto">
             <div className="p-4 sm:p-6 lg:p-8">
-              <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm p-10 text-center">
-                <p className="text-sm text-slate-500 mb-4">Data pegawai tidak ditemukan.</p>
+              <div className="theme-card theme-border rounded-xl border shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)] p-10 text-center">
+                <p className="text-sm theme-text-muted mb-4">Data pegawai tidak ditemukan.</p>
                 <button
                   type="button"
                   onClick={handleBack}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-[#155DFC] hover:bg-[#0d47c9] text-white rounded-xl text-sm font-medium transition-all"
+                  className="inline-flex items-center gap-2 px-4 py-2 theme-primary rounded-xl text-sm font-medium transition-all"
                 >
                   <ArrowLeft size={16} />
                   Kembali ke Kartu Identitas
@@ -371,7 +372,7 @@ export default function DetailPegawaiPage() {
   }
 
   return (
-    <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
+    <div className="flex h-screen w-full theme-page overflow-hidden">
       <Sidebar
         active="guruKartuIdentitas"
         setActive={() => {}}
@@ -392,7 +393,7 @@ export default function DetailPegawaiPage() {
               <button
                 type="button"
                 onClick={handleBack}
-                className="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-[#155DFC] transition-colors w-fit"
+                className="flex items-center gap-2 text-sm font-medium theme-text-secondary hover:text-[var(--color-primary)] transition-colors w-fit"
               >
                 <ArrowLeft size={16} />
                 Kembali ke Kartu Identitas
@@ -402,7 +403,7 @@ export default function DetailPegawaiPage() {
                 <button
                   type="button"
                   onClick={handleEdit}
-                  className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-amber-600 bg-amber-50 hover:bg-amber-100 transition-colors text-sm font-medium"
+                  className="flex items-center gap-2 px-3.5 py-2 rounded-xl theme-warning theme-sidebar-hover transition-colors text-sm font-medium"
                 >
                   <Pencil size={15} />
                   Edit
@@ -410,7 +411,7 @@ export default function DetailPegawaiPage() {
                 <button
                   type="button"
                   onClick={handleIdCard}
-                  className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-white bg-gradient-to-r from-[#155DFC] to-[#0d47c9] hover:brightness-110 transition-all text-sm font-medium"
+                  className="flex items-center gap-2 px-3.5 py-2 rounded-xl theme-primary transition-all text-sm font-medium"
                 >
                   <CreditCard size={15} />
                   Lihat ID Card
@@ -419,137 +420,137 @@ export default function DetailPegawaiPage() {
             </div>
 
             {/* PROFIL PEGAWAI */}
-            <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm p-5 sm:p-6">
+            <div className="theme-card theme-border rounded-xl border shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)] p-5 sm:p-6">
               <div className="flex flex-col sm:flex-row sm:items-center gap-5">
                 <FotoProfil pegawaiId={pegawai.id} editable />
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-2">
-                    <h1 className="text-xl font-bold text-slate-900">{pegawai.nama}</h1>
+                    <h1 className="text-xl font-bold theme-text">{pegawai.nama}</h1>
                     <TipeBadge tipe={pegawai.tipe} />
                     <StatusBadge status={pegawai.status} />
                   </div>
-                  <p className="text-sm text-slate-500 mt-0.5">
+                  <p className="text-sm theme-text-muted mt-0.5">
                     {pegawai.jabatan} • <span className="font-mono">{pegawai.nip}</span>
                   </p>
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-5 pt-5 border-t border-slate-100">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 mt-5 pt-5 border-t theme-border-soft">
                 <div className="flex items-start gap-2.5">
-                  <Mail size={15} className="text-slate-400 mt-0.5 shrink-0" />
+                  <Mail size={15} className="theme-text-muted mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-[11px] text-slate-400">Email</p>
-                    <p className="text-sm text-slate-700 truncate">{pegawai.email}</p>
+                    <p className="text-[11px] theme-text-muted">Email</p>
+                    <p className="text-sm theme-text-secondary truncate">{pegawai.email}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2.5">
-                  <Phone size={15} className="text-slate-400 mt-0.5 shrink-0" />
+                  <Phone size={15} className="theme-text-muted mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-[11px] text-slate-400">Telepon</p>
-                    <p className="text-sm text-slate-700">{pegawai.telp}</p>
+                    <p className="text-[11px] theme-text-muted">Telepon</p>
+                    <p className="text-sm theme-text-secondary">{pegawai.telp}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2.5">
-                  <MapPin size={15} className="text-slate-400 mt-0.5 shrink-0" />
+                  <MapPin size={15} className="theme-text-muted mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-[11px] text-slate-400">Alamat</p>
-                    <p className="text-sm text-slate-700">{pegawai.alamat}</p>
+                    <p className="text-[11px] theme-text-muted">Alamat</p>
+                    <p className="text-sm theme-text-secondary">{pegawai.alamat}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2.5">
-                  <CalendarDays size={15} className="text-slate-400 mt-0.5 shrink-0" />
+                  <CalendarDays size={15} className="theme-text-muted mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-[11px] text-slate-400">Tanggal Bergabung</p>
-                    <p className="text-sm text-slate-700">{pegawai.tglMasuk}</p>
+                    <p className="text-[11px] theme-text-muted">Tanggal Bergabung</p>
+                    <p className="text-sm theme-text-secondary">{pegawai.tglMasuk}</p>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* DATA DIRI */}
-            <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden">
-              <div className="px-5 sm:px-6 py-4 border-b border-slate-100 flex items-center gap-2.5">
-                <User size={16} className="text-[#155DFC]" />
-                <h2 className="text-sm font-semibold text-slate-800">Data Diri</h2>
+            <div className="theme-card theme-border rounded-xl border shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)] overflow-hidden">
+              <div className="px-5 sm:px-6 py-4 border-b theme-border-soft flex items-center gap-2.5">
+                <User size={16} className="text-[var(--color-primary)]" />
+                <h2 className="text-sm font-semibold theme-text">Data Diri</h2>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 divide-y sm:divide-y-0 divide-slate-100">
-                <div className="flex items-start gap-2.5 px-5 sm:px-6 py-4 sm:border-r sm:border-slate-100">
-                  <Fingerprint size={15} className="text-slate-400 mt-0.5 shrink-0" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 divide-y sm:divide-y-0 divide-[var(--color-border-soft)]">
+                <div className="flex items-start gap-2.5 px-5 sm:px-6 py-4 sm:border-r sm:theme-border-soft">
+                  <Fingerprint size={15} className="theme-text-muted mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-[11px] text-slate-400">NIK</p>
-                    <p className="text-sm font-medium text-slate-800 mt-0.5 font-mono">{pegawai.nik}</p>
+                    <p className="text-[11px] theme-text-muted">NIK</p>
+                    <p className="text-sm font-medium theme-text mt-0.5 font-mono">{pegawai.nik}</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-2.5 px-5 sm:px-6 py-4 lg:border-r lg:border-slate-100">
-                  <Cake size={15} className="text-slate-400 mt-0.5 shrink-0" />
+                <div className="flex items-start gap-2.5 px-5 sm:px-6 py-4 lg:border-r lg:theme-border-soft">
+                  <Cake size={15} className="theme-text-muted mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-[11px] text-slate-400">Tempat, Tanggal Lahir</p>
-                    <p className="text-sm font-medium text-slate-800 mt-0.5">
+                    <p className="text-[11px] theme-text-muted">Tempat, Tanggal Lahir</p>
+                    <p className="text-sm font-medium theme-text mt-0.5">
                       {pegawai.tempatLahir}, {pegawai.tglLahir}
                     </p>
                   </div>
                 </div>
-                <div className="flex items-start gap-2.5 px-5 sm:px-6 py-4 sm:border-r sm:border-slate-100 lg:border-r-0">
+                <div className="flex items-start gap-2.5 px-5 sm:px-6 py-4 sm:border-r sm:theme-border-soft lg:border-r-0">
                   {pegawai.jenisKelamin === "Perempuan" ? (
-                    <Venus size={15} className="text-slate-400 mt-0.5 shrink-0" />
+                    <Venus size={15} className="theme-text-muted mt-0.5 shrink-0" />
                   ) : (
-                    <Mars size={15} className="text-slate-400 mt-0.5 shrink-0" />
+                    <Mars size={15} className="theme-text-muted mt-0.5 shrink-0" />
                   )}
                   <div className="min-w-0">
-                    <p className="text-[11px] text-slate-400">Jenis Kelamin</p>
-                    <p className="text-sm font-medium text-slate-800 mt-0.5">{pegawai.jenisKelamin}</p>
+                    <p className="text-[11px] theme-text-muted">Jenis Kelamin</p>
+                    <p className="text-sm font-medium theme-text mt-0.5">{pegawai.jenisKelamin}</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-2.5 px-5 sm:px-6 py-4 lg:border-r lg:border-slate-100 border-t sm:border-t border-slate-100">
-                  <BookOpen size={15} className="text-slate-400 mt-0.5 shrink-0" />
+                <div className="flex items-start gap-2.5 px-5 sm:px-6 py-4 lg:border-r lg:theme-border-soft border-t sm:border-t theme-border-soft">
+                  <BookOpen size={15} className="theme-text-muted mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-[11px] text-slate-400">Agama</p>
-                    <p className="text-sm font-medium text-slate-800 mt-0.5">{pegawai.agama}</p>
+                    <p className="text-[11px] theme-text-muted">Agama</p>
+                    <p className="text-sm font-medium theme-text mt-0.5">{pegawai.agama}</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-2.5 px-5 sm:px-6 py-4 sm:border-r sm:border-slate-100 border-t border-slate-100">
-                  <Heart size={15} className="text-slate-400 mt-0.5 shrink-0" />
+                <div className="flex items-start gap-2.5 px-5 sm:px-6 py-4 sm:border-r sm:theme-border-soft border-t theme-border-soft">
+                  <Heart size={15} className="theme-text-muted mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-[11px] text-slate-400">Status Pernikahan</p>
-                    <p className="text-sm font-medium text-slate-800 mt-0.5">{pegawai.statusNikah}</p>
+                    <p className="text-[11px] theme-text-muted">Status Pernikahan</p>
+                    <p className="text-sm font-medium theme-text mt-0.5">{pegawai.statusNikah}</p>
                   </div>
                 </div>
-                <div className="flex items-start gap-2.5 px-5 sm:px-6 py-4 border-t border-slate-100">
-                  <GraduationCap size={15} className="text-slate-400 mt-0.5 shrink-0" />
+                <div className="flex items-start gap-2.5 px-5 sm:px-6 py-4 border-t theme-border-soft">
+                  <GraduationCap size={15} className="theme-text-muted mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-[11px] text-slate-400">Pendidikan Terakhir</p>
-                    <p className="text-sm font-medium text-slate-800 mt-0.5">{pegawai.pendidikanTerakhir}</p>
+                    <p className="text-[11px] theme-text-muted">Pendidikan Terakhir</p>
+                    <p className="text-sm font-medium theme-text mt-0.5">{pegawai.pendidikanTerakhir}</p>
                   </div>
                 </div>
               </div>
             </div>
 
             {/* INFO KEPEGAWAIAN */}
-            <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden">
-              <div className="px-5 sm:px-6 py-4 border-b border-slate-100 flex items-center gap-2.5">
-                <BadgeCheck size={16} className="text-[#155DFC]" />
-                <h2 className="text-sm font-semibold text-slate-800">Informasi Kepegawaian</h2>
+            <div className="theme-card theme-border rounded-xl border shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)] overflow-hidden">
+              <div className="px-5 sm:px-6 py-4 border-b theme-border-soft flex items-center gap-2.5">
+                <BadgeCheck size={16} className="text-[var(--color-primary)]" />
+                <h2 className="text-sm font-semibold theme-text">Informasi Kepegawaian</h2>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
+              <div className="grid grid-cols-1 sm:grid-cols-3 divide-y sm:divide-y-0 sm:divide-x divide-[var(--color-border-soft)]">
                 <div className="flex items-start gap-2.5 px-5 sm:px-6 py-4">
-                  <Building2 size={15} className="text-slate-400 mt-0.5 shrink-0" />
+                  <Building2 size={15} className="theme-text-muted mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-[11px] text-slate-400">Unit / Bidang</p>
-                    <p className="text-sm font-medium text-slate-800 mt-0.5">{pegawai.unit}</p>
+                    <p className="text-[11px] theme-text-muted">Unit / Bidang</p>
+                    <p className="text-sm font-medium theme-text mt-0.5">{pegawai.unit}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2.5 px-5 sm:px-6 py-4">
-                  <BadgeCheck size={15} className="text-slate-400 mt-0.5 shrink-0" />
+                  <BadgeCheck size={15} className="theme-text-muted mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-[11px] text-slate-400">Golongan</p>
-                    <p className="text-sm font-medium text-slate-800 mt-0.5">{pegawai.golongan}</p>
+                    <p className="text-[11px] theme-text-muted">Golongan</p>
+                    <p className="text-sm font-medium theme-text mt-0.5">{pegawai.golongan}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-2.5 px-5 sm:px-6 py-4">
-                  <GraduationCap size={15} className="text-slate-400 mt-0.5 shrink-0" />
+                  <GraduationCap size={15} className="theme-text-muted mt-0.5 shrink-0" />
                   <div className="min-w-0">
-                    <p className="text-[11px] text-slate-400">Level</p>
-                    <p className="text-sm font-medium text-slate-800 mt-0.5">{pegawai.level}</p>
+                    <p className="text-[11px] theme-text-muted">Level</p>
+                    <p className="text-sm font-medium theme-text mt-0.5">{pegawai.level}</p>
                   </div>
                 </div>
               </div>

@@ -94,34 +94,34 @@ const getRoleColor = (role = "") => {
   const value = role.toLowerCase();
 
   if (value.includes("kepala sekolah")) {
-    return "bg-purple-100 text-purple-600";
+    return "bg-[var(--color-info-background)] text-[var(--color-primary)]";
   }
 
   if (value.includes("wakil")) {
-    return "bg-indigo-100 text-indigo-600";
+    return "bg-[var(--color-info-background)] text-[var(--color-info)]";
   }
 
   if (value.includes("jurusan")) {
-    return "bg-blue-100 text-blue-600";
+    return "bg-[var(--color-sidebar-active)] text-[var(--color-sidebar-text-active)]";
   }
 
   if (value.includes("bk")) {
-    return "bg-cyan-100 text-cyan-600";
+    return "bg-[var(--color-info-background)] text-[var(--color-info)]";
   }
 
   if (value.includes("bendahara")) {
-    return "bg-emerald-100 text-emerald-600";
+    return "bg-[var(--color-success-background)] text-[var(--color-success)]";
   }
 
   if (value.includes("guru")) {
-    return "bg-amber-100 text-amber-600";
+    return "bg-[var(--color-warning-background)] text-[var(--color-warning)]";
   }
 
   if (value.includes("wali")) {
-    return "bg-rose-100 text-rose-600";
+    return "bg-[var(--color-danger-background)] text-[var(--color-danger)]";
   }
 
-  return "bg-slate-100 text-slate-600";
+  return "theme-card-soft theme-text-muted";
 };
 
 // =========================================================
@@ -177,7 +177,10 @@ const dummyUsers = [
     nip: "197501012005011001",
     email: "ahmad.fauzi@smartschool.com",
     noTelepon: "081234567890",
-    peran: { nama: "kepala_sekolah", namaTampilan: "Kepala Sekolah" },
+    peran: {
+      nama: "kepala_sekolah",
+      namaTampilan: "Kepala Sekolah",
+    },
     status: "aktif",
     terakhirLogin: "2026-01-15T08:30:00",
   },
@@ -187,7 +190,10 @@ const dummyUsers = [
     nip: "197805122008022002",
     email: "siti.rahayu@smartschool.com",
     noTelepon: "081298765432",
-    peran: { nama: "wakil_kepala", namaTampilan: "Wakil Kepala Sekolah" },
+    peran: {
+      nama: "wakil_kepala",
+      namaTampilan: "Wakil Kepala Sekolah",
+    },
     status: "aktif",
     terakhirLogin: "2026-01-14T13:15:00",
   },
@@ -197,7 +203,10 @@ const dummyUsers = [
     nip: "198210202009031003",
     email: "budi.santoso@smartschool.com",
     noTelepon: "087812345678",
-    peran: { nama: "kepala_jurusan", namaTampilan: "Kepala Jurusan RPL" },
+    peran: {
+      nama: "kepala_jurusan",
+      namaTampilan: "Kepala Jurusan RPL",
+    },
     status: "aktif",
     terakhirLogin: "2026-01-13T09:45:00",
   },
@@ -207,7 +216,10 @@ const dummyUsers = [
     nip: "198512302010042004",
     email: "dewi.lestari@smartschool.com",
     noTelepon: "085678912345",
-    peran: { nama: "guru_bk", namaTampilan: "Guru BK" },
+    peran: {
+      nama: "guru_bk",
+      namaTampilan: "Guru BK",
+    },
     status: "aktif",
     terakhirLogin: "2026-01-12T11:20:00",
   },
@@ -217,7 +229,10 @@ const dummyUsers = [
     nip: "198701152011052005",
     email: "eko.prasetyo@smartschool.com",
     noTelepon: "081345678901",
-    peran: { nama: "bendahara", namaTampilan: "Bendahara" },
+    peran: {
+      nama: "bendahara",
+      namaTampilan: "Bendahara",
+    },
     status: "nonaktif",
     terakhirLogin: "2025-12-20T14:10:00",
   },
@@ -227,7 +242,10 @@ const dummyUsers = [
     nip: "199003102012062006",
     email: "fitriani@smartschool.com",
     noTelepon: "082234567890",
-    peran: { nama: "guru", namaTampilan: "Guru Matematika" },
+    peran: {
+      nama: "guru",
+      namaTampilan: "Guru Matematika",
+    },
     status: "aktif",
     terakhirLogin: "2026-01-11T07:50:00",
   },
@@ -237,7 +255,10 @@ const dummyUsers = [
     nip: "199105212013072007",
     email: "gunawan@smartschool.com",
     noTelepon: "083456789012",
-    peran: { nama: "guru", namaTampilan: "Guru Komputer" },
+    peran: {
+      nama: "guru",
+      namaTampilan: "Guru Komputer",
+    },
     status: "aktif",
     terakhirLogin: "2026-01-10T10:30:00",
   },
@@ -247,7 +268,10 @@ const dummyUsers = [
     nip: "199208152014082008",
     email: "heni.kurniawati@smartschool.com",
     noTelepon: "084567890123",
-    peran: { nama: "wali_kelas", namaTampilan: "Wali Kelas XI IPA" },
+    peran: {
+      nama: "wali_kelas",
+      namaTampilan: "Wali Kelas XI IPA",
+    },
     status: "nonaktif",
     terakhirLogin: "2025-12-28T16:00:00",
   },
@@ -257,7 +281,10 @@ const dummyUsers = [
     nip: "199309202015092009",
     email: "irfan.maulana@smartschool.com",
     noTelepon: "085678901234",
-    peran: { nama: "guru", namaTampilan: "Guru Bahasa Inggris" },
+    peran: {
+      nama: "guru",
+      namaTampilan: "Guru Bahasa Inggris",
+    },
     status: "aktif",
     terakhirLogin: "2026-01-09T08:15:00",
   },
@@ -267,7 +294,10 @@ const dummyUsers = [
     nip: "199411122016102010",
     email: "joko.susilo@smartschool.com",
     noTelepon: "086789012345",
-    peran: { nama: "guru", namaTampilan: "Guru Olahraga" },
+    peran: {
+      nama: "guru",
+      namaTampilan: "Guru Olahraga",
+    },
     status: "aktif",
     terakhirLogin: "2026-01-08T12:40:00",
   },
@@ -277,7 +307,10 @@ const dummyUsers = [
     nip: "199512182017112011",
     email: "kartika.sari@smartschool.com",
     noTelepon: "087890123456",
-    peran: { nama: "bendahara", namaTampilan: "Bendahara" },
+    peran: {
+      nama: "bendahara",
+      namaTampilan: "Bendahara",
+    },
     status: "nonaktif",
     terakhirLogin: "2025-12-15T09:00:00",
   },
@@ -287,7 +320,10 @@ const dummyUsers = [
     nip: "199601252018122012",
     email: "lukman.hakim@smartschool.com",
     noTelepon: "088901234567",
-    peran: { nama: "wali_kelas", namaTampilan: "Wali Kelas XII IPS" },
+    peran: {
+      nama: "wali_kelas",
+      namaTampilan: "Wali Kelas XII IPS",
+    },
     status: "aktif",
     terakhirLogin: "2026-01-07T13:25:00",
   },
@@ -381,50 +417,87 @@ export default function KelolaUserPage() {
         setLoading(true);
       }
 
-      // Simulasi delay
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      await new Promise((resolve) =>
+        setTimeout(resolve, 300)
+      );
 
-      // Filter data dummy berdasarkan search, role, status
       let filtered = [...dummyUsers];
 
       if (search.trim()) {
-        const s = search.trim().toLowerCase();
+        const s =
+          search.trim().toLowerCase();
+
         filtered = filtered.filter(
           (user) =>
-            user.namaLengkap.toLowerCase().includes(s) ||
-            user.email.toLowerCase().includes(s) ||
+            user.namaLengkap
+              .toLowerCase()
+              .includes(s) ||
+            user.email
+              .toLowerCase()
+              .includes(s) ||
             user.nip.includes(s)
         );
       }
 
       if (statusFilter !== "Semua") {
         filtered = filtered.filter(
-          (user) => user.status === statusFilter
+          (user) =>
+            user.status ===
+            statusFilter
         );
       }
 
       if (roleFilter !== "Semua") {
         filtered = filtered.filter(
-          (user) => user.peran.nama === roleFilter
+          (user) =>
+            user.peran.nama ===
+            roleFilter
         );
       }
 
-      // Pagination
-      const total = filtered.length;
-      const totalPagesCalc = Math.max(1, Math.ceil(total / itemsPerPage));
-      const start = (page - 1) * itemsPerPage;
-      const end = start + itemsPerPage;
-      const paginated = filtered.slice(start, end);
+      const total =
+        filtered.length;
+
+      const totalPagesCalc =
+        Math.max(
+          1,
+          Math.ceil(
+            total /
+              itemsPerPage
+          )
+        );
+
+      const start =
+        (page - 1) *
+        itemsPerPage;
+
+      const end =
+        start +
+        itemsPerPage;
+
+      const paginated =
+        filtered.slice(
+          start,
+          end
+        );
 
       setUsers(paginated);
       setTotalItems(total);
-      setTotalPages(totalPagesCalc);
+      setTotalPages(
+        totalPagesCalc
+      );
     } catch (err) {
-      console.error("Error load dummy:", err);
+      console.error(
+        "Error load dummy:",
+        err
+      );
+
       setUsers([]);
       setTotalItems(0);
       setTotalPages(1);
-      setError("Gagal mengambil data dummy.");
+      setError(
+        "Gagal mengambil data dummy."
+      );
     } finally {
       setLoading(false);
       setRefreshing(false);
@@ -451,17 +524,22 @@ export default function KelolaUserPage() {
   // =======================================================
 
   const roleOptions = useMemo(() => {
-    const roleMap = new Map();
+    const roleMap =
+      new Map();
 
-    dummyUsers.forEach((user) => {
-      if (user?.peran?.nama) {
-        roleMap.set(
-          user.peran.nama,
-          user.peran.namaTampilan ||
-          user.peran.nama
-        );
+    dummyUsers.forEach(
+      (user) => {
+        if (
+          user?.peran?.nama
+        ) {
+          roleMap.set(
+            user.peran.nama,
+            user.peran.namaTampilan ||
+              user.peran.nama
+          );
+        }
       }
-    });
+    );
 
     return Array.from(
       roleMap.entries()
@@ -474,19 +552,22 @@ export default function KelolaUserPage() {
   }, []);
 
   // =======================================================
-  // STATISTICS (berdasarkan data yang tampil, atau semua? 
-  // Lebih tepat berdasarkan seluruh data dummy)
+  // STATISTICS
   // =======================================================
 
-  const totalAktif = dummyUsers.filter(
-    (user) =>
-      user.status === "aktif"
-  ).length;
+  const totalAktif =
+    dummyUsers.filter(
+      (user) =>
+        user.status ===
+        "aktif"
+    ).length;
 
-  const totalNonaktif = dummyUsers.filter(
-    (user) =>
-      user.status === "nonaktif"
-  ).length;
+  const totalNonaktif =
+    dummyUsers.filter(
+      (user) =>
+        user.status ===
+        "nonaktif"
+    ).length;
 
   // =======================================================
   // RESET FILTER
@@ -500,138 +581,204 @@ export default function KelolaUserPage() {
   };
 
   // =======================================================
-  // TOGGLE STATUS (DUMMY)
+  // TOGGLE STATUS
   // =======================================================
 
-  const handleToggleStatus = async (
-    user
-  ) => {
-    const isActive = user.status === "aktif";
-    const newStatus = isActive ? "nonaktif" : "aktif";
+  const handleToggleStatus =
+    async (user) => {
+      const isActive =
+        user.status ===
+        "aktif";
 
-    try {
-      setUpdatingStatusId(user.id);
-      setError("");
+      const newStatus =
+        isActive
+          ? "nonaktif"
+          : "aktif";
 
-      // Simulasi delay
-      await new Promise((resolve) => setTimeout(resolve, 300));
+      try {
+        setUpdatingStatusId(
+          user.id
+        );
 
-      // Update di dummyUsers (cari dan ubah)
-      const index = dummyUsers.findIndex((u) => u.id === user.id);
-      if (index !== -1) {
-        dummyUsers[index].status = newStatus;
-      }
+        setError("");
 
-      // Reload data
-      await loadUsers({
-        page: currentPage,
-        showRefresh: false,
-      });
-    } catch (err) {
-      console.error("Error update status dummy:", err);
-      setError("Gagal mengubah status pengguna.");
-    } finally {
-      setUpdatingStatusId(null);
-    }
-  };
+        await new Promise(
+          (resolve) =>
+            setTimeout(
+              resolve,
+              300
+            )
+        );
 
-  // =======================================================
-  // DELETE (DUMMY)
-  // =======================================================
+        const index =
+          dummyUsers.findIndex(
+            (u) =>
+              u.id === user.id
+          );
 
-  const handleDelete = async (
-    user
-  ) => {
-    const confirmed = window.confirm(
-      `Yakin ingin menonaktifkan pengguna "${user.namaLengkap}"?`
-    );
+        if (index !== -1) {
+          dummyUsers[
+            index
+          ].status =
+            newStatus;
+        }
 
-    if (!confirmed) return;
-
-    try {
-      setDeletingId(user.id);
-      setError("");
-
-      // Simulasi delay
-      await new Promise((resolve) => setTimeout(resolve, 300));
-
-      // Hapus dari dummyUsers
-      const index = dummyUsers.findIndex((u) => u.id === user.id);
-      if (index !== -1) {
-        dummyUsers.splice(index, 1);
-      }
-
-      // Kalau halaman terakhir tinggal 1 data
-      if (users.length === 1 && currentPage > 1) {
-        setCurrentPage(currentPage - 1);
-      } else {
         await loadUsers({
           page: currentPage,
+          showRefresh: false,
         });
+      } catch (err) {
+        console.error(
+          "Error update status dummy:",
+          err
+        );
+
+        setError(
+          "Gagal mengubah status pengguna."
+        );
+      } finally {
+        setUpdatingStatusId(
+          null
+        );
       }
-    } catch (err) {
-      console.error("Error delete dummy:", err);
-      setError("Gagal menghapus pengguna.");
-    } finally {
-      setDeletingId(null);
-    }
-  };
+    };
+
+  // =======================================================
+  // DELETE
+  // =======================================================
+
+  const handleDelete =
+    async (user) => {
+      const confirmed =
+        window.confirm(
+          `Yakin ingin menonaktifkan pengguna "${user.namaLengkap}"?`
+        );
+
+      if (!confirmed)
+        return;
+
+      try {
+        setDeletingId(
+          user.id
+        );
+
+        setError("");
+
+        await new Promise(
+          (resolve) =>
+            setTimeout(
+              resolve,
+              300
+            )
+        );
+
+        const index =
+          dummyUsers.findIndex(
+            (u) =>
+              u.id === user.id
+          );
+
+        if (index !== -1) {
+          dummyUsers.splice(
+            index,
+            1
+          );
+        }
+
+        if (
+          users.length ===
+            1 &&
+          currentPage > 1
+        ) {
+          setCurrentPage(
+            currentPage - 1
+          );
+        } else {
+          await loadUsers({
+            page: currentPage,
+          });
+        }
+      } catch (err) {
+        console.error(
+          "Error delete dummy:",
+          err
+        );
+
+        setError(
+          "Gagal menghapus pengguna."
+        );
+      } finally {
+        setDeletingId(
+          null
+        );
+      }
+    };
 
   // =======================================================
   // PAGINATION
   // =======================================================
 
-  const goToPage = (page) => {
+  const goToPage = (
+    page
+  ) => {
     if (
       page >= 1 &&
       page <= totalPages
     ) {
-      setCurrentPage(page);
-    }
-  };
-
-  const getPageNumbers = () => {
-    if (totalPages <= 5) {
-      return Array.from(
-        {
-          length: totalPages,
-        },
-        (_, index) =>
-          index + 1
+      setCurrentPage(
+        page
       );
     }
-
-    if (currentPage <= 3) {
-      return [
-        1,
-        2,
-        3,
-        4,
-        5,
-      ];
-    }
-
-    if (
-      currentPage >=
-      totalPages - 2
-    ) {
-      return [
-        totalPages - 4,
-        totalPages - 3,
-        totalPages - 2,
-        totalPages - 1,
-        totalPages,
-      ];
-    }
-
-    return [
-      currentPage - 2,
-      currentPage - 1,
-      currentPage,
-      currentPage + 1,
-      currentPage + 2,
-    ];
   };
+
+  const getPageNumbers =
+    () => {
+      if (
+        totalPages <= 5
+      ) {
+        return Array.from(
+          {
+            length:
+              totalPages,
+          },
+          (_, index) =>
+            index + 1
+        );
+      }
+
+      if (
+        currentPage <= 3
+      ) {
+        return [
+          1,
+          2,
+          3,
+          4,
+          5,
+        ];
+      }
+
+      if (
+        currentPage >=
+        totalPages - 2
+      ) {
+        return [
+          totalPages - 4,
+          totalPages - 3,
+          totalPages - 2,
+          totalPages - 1,
+          totalPages,
+        ];
+      }
+
+      return [
+        currentPage - 2,
+        currentPage - 1,
+        currentPage,
+        currentPage + 1,
+        currentPage + 2,
+      ];
+    };
 
   const startIndex =
     totalItems === 0
@@ -640,24 +787,27 @@ export default function KelolaUserPage() {
           itemsPerPage +
         1;
 
-  const endIndex = Math.min(
-    currentPage *
-      itemsPerPage,
-    totalItems
-  );
+  const endIndex =
+    Math.min(
+      currentPage *
+        itemsPerPage,
+      totalItems
+    );
 
   // =======================================================
   // RENDER
   // =======================================================
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[#f8fafc]">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
 
       {/* SIDEBAR */}
       <Sidebar
         active="kelolaUser"
         setActive={() => {}}
-        collapsed={isCollapsed}
+        collapsed={
+          isCollapsed
+        }
         setCollapsed={
           setIsCollapsed
         }
@@ -689,19 +839,22 @@ export default function KelolaUserPage() {
 
             <div className="mx-auto w-full max-w-[1600px] space-y-4 sm:space-y-5 lg:space-y-6">
 
-              {/* =================================================
-                  PAGE HEADER
-              ================================================= */}
+              {/* PAGE HEADER */}
+              <section className="theme-card relative overflow-hidden rounded-2xl border shadow-sm">
 
-              <section className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_2px_10px_rgba(15,23,42,0.05)]">
-
-                <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-blue-50/70 blur-3xl" />
+                <div
+                  className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full blur-3xl"
+                  style={{
+                    background:
+                      "color-mix(in srgb, var(--color-primary) 8%, transparent)",
+                  }}
+                />
 
                 <div className="relative flex flex-col gap-4 p-5 sm:p-6 lg:flex-row lg:items-center lg:justify-between lg:px-8 lg:py-6">
 
                   <div className="flex min-w-0 items-start gap-3 sm:gap-4">
 
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-[0_8px_20px_rgba(37,99,235,0.25)] sm:h-14 sm:w-14">
+                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[image:var(--color-brand-logo-bg)] text-white shadow-lg sm:h-14 sm:w-14">
                       <Users
                         size={22}
                         strokeWidth={1.9}
@@ -713,12 +866,18 @@ export default function KelolaUserPage() {
 
                       <div className="flex flex-wrap items-center gap-2">
 
-                        <h1 className="text-xl font-semibold tracking-[-0.025em] text-slate-900 sm:text-2xl lg:text-[26px]">
+                        <h1 className="theme-text text-xl font-semibold tracking-[-0.025em] sm:text-2xl lg:text-[26px]">
                           Kelola User
                         </h1>
 
-                        <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-100 bg-blue-50 px-2.5 py-0.5 text-[10px] font-semibold text-blue-600 sm:px-3 sm:py-1 sm:text-[11px]">
-                          <span className="h-1.5 w-1.5 rounded-full bg-blue-500" />
+                        <span className="theme-info inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10px] font-semibold sm:px-3 sm:py-1 sm:text-[11px]">
+                          <span
+                            className="h-1.5 w-1.5 rounded-full"
+                            style={{
+                              background:
+                                "var(--color-info)",
+                            }}
+                          />
                           Level Sekolah
                         </span>
 
@@ -728,10 +887,10 @@ export default function KelolaUserPage() {
 
                         <UserCog
                           size={13}
-                          className="shrink-0 text-blue-400 sm:h-[14px] sm:w-[14px]"
+                          className="shrink-0 text-[var(--color-primary)] sm:h-[14px] sm:w-[14px]"
                         />
 
-                        <p className="text-xs leading-5 text-slate-500 sm:text-sm">
+                        <p className="theme-text-muted text-xs leading-5 sm:text-sm">
                           Kelola pengguna di lingkungan sekolah Anda.
                         </p>
 
@@ -747,12 +906,16 @@ export default function KelolaUserPage() {
                     <button
                       onClick={() =>
                         loadUsers({
-                          page: currentPage,
-                          showRefresh: true,
+                          page:
+                            currentPage,
+                          showRefresh:
+                            true,
                         })
                       }
-                      disabled={refreshing}
-                      className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-[0_2px_5px_rgba(15,23,42,0.05)] transition-all hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800 disabled:cursor-not-allowed disabled:opacity-50 sm:h-11 sm:w-11"
+                      disabled={
+                        refreshing
+                      }
+                      className="theme-input flex h-10 w-10 items-center justify-center rounded-xl shadow-sm transition-all hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-50 sm:h-11 sm:w-11"
                       title="Refresh data"
                     >
                       <RefreshCw
@@ -772,13 +935,12 @@ export default function KelolaUserPage() {
                           "/admin/kelola-user/tambah"
                         )
                       }
-                      className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white shadow-[0_7px_18px_rgba(15,23,42,0.16)] transition-all hover:bg-slate-800 sm:h-11 sm:px-5"
+                      className="theme-primary inline-flex h-10 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold shadow-lg transition-all sm:h-11 sm:px-5"
                     >
                       <Plus
                         size={16}
                         strokeWidth={2.3}
                       />
-
                       Tambah User
                     </button>
 
@@ -788,25 +950,22 @@ export default function KelolaUserPage() {
 
               </section>
 
-              {/* =================================================
-                  ERROR
-              ================================================= */}
-
+              {/* ERROR */}
               {error && (
-                <div className="flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 p-4">
+                <div className="theme-danger flex items-start gap-3 rounded-xl border p-4">
 
                   <AlertCircle
                     size={18}
-                    className="mt-0.5 shrink-0 text-rose-600"
+                    className="mt-0.5 shrink-0"
                   />
 
                   <div className="min-w-0 flex-1">
 
-                    <p className="text-sm font-semibold text-rose-700">
+                    <p className="text-sm font-semibold">
                       Terjadi kesalahan
                     </p>
 
-                    <p className="mt-0.5 text-xs text-rose-600">
+                    <p className="mt-0.5 text-xs">
                       {error}
                     </p>
 
@@ -816,7 +975,7 @@ export default function KelolaUserPage() {
                     onClick={() =>
                       setError("")
                     }
-                    className="text-rose-400 hover:text-rose-600"
+                    className="transition-opacity hover:opacity-70"
                   >
                     <X size={16} />
                   </button>
@@ -824,51 +983,55 @@ export default function KelolaUserPage() {
                 </div>
               )}
 
-              {/* =================================================
-                  STATS
-              ================================================= */}
-
+              {/* STATS */}
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
 
                 <StatCard
                   label="Total User"
-                  value={dummyUsers.length}
+                  value={
+                    dummyUsers.length
+                  }
                   icon={Users}
                   color="blue"
                 />
 
                 <StatCard
                   label="Aktif"
-                  value={totalAktif}
-                  icon={CheckCircle}
+                  value={
+                    totalAktif
+                  }
+                  icon={
+                    CheckCircle
+                  }
                   color="emerald"
                 />
 
                 <StatCard
                   label="Nonaktif"
-                  value={totalNonaktif}
+                  value={
+                    totalNonaktif
+                  }
                   icon={UserX}
                   color="rose"
                 />
 
                 <StatCard
                   label="Role"
-                  value={roleOptions.length}
+                  value={
+                    roleOptions.length
+                  }
                   icon={Shield}
                   color="indigo"
                 />
 
               </div>
 
-              {/* =================================================
-                  SEARCH & FILTER
-              ================================================= */}
-
-              <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_2px_10px_rgba(15,23,42,0.04)] sm:p-5">
+              {/* SEARCH & FILTER */}
+              <section className="theme-card rounded-2xl border p-4 shadow-sm sm:p-5">
 
                 <div className="mb-4 flex items-center gap-2 sm:gap-3">
 
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600 sm:h-9 sm:w-9">
+                  <div className="theme-info flex h-8 w-8 shrink-0 items-center justify-center rounded-xl sm:h-9 sm:w-9">
                     <Filter
                       size={14}
                     />
@@ -876,11 +1039,11 @@ export default function KelolaUserPage() {
 
                   <div>
 
-                    <p className="text-sm font-semibold text-slate-800">
+                    <p className="theme-text text-sm font-semibold">
                       Filter & Pencarian
                     </p>
 
-                    <p className="text-xs text-slate-400">
+                    <p className="theme-text-muted text-xs">
                       Cari dan filter data user
                     </p>
 
@@ -895,34 +1058,42 @@ export default function KelolaUserPage() {
 
                     <Search
                       size={15}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                      className="theme-text-placeholder absolute left-3 top-1/2 -translate-y-1/2"
                     />
 
                     <input
                       type="text"
                       placeholder="Cari nama, email, NIP..."
-                      value={search}
+                      value={
+                        search
+                      }
                       onChange={(e) => {
                         setSearch(
                           e.target.value
                         );
-                        setCurrentPage(1);
+                        setCurrentPage(
+                          1
+                        );
                       }}
-                      className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 pl-9 pr-3 text-sm text-slate-700 outline-none transition-all placeholder:text-slate-400 focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
+                      className="theme-input h-10 w-full rounded-xl border pl-9 pr-3 text-sm outline-none transition-all focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]"
                     />
 
                   </div>
 
                   {/* ROLE */}
                   <select
-                    value={roleFilter}
+                    value={
+                      roleFilter
+                    }
                     onChange={(e) => {
                       setRoleFilter(
                         e.target.value
                       );
-                      setCurrentPage(1);
+                      setCurrentPage(
+                        1
+                      );
                     }}
-                    className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-600 outline-none transition-all focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
+                    className="theme-input h-10 w-full rounded-xl border px-3 text-sm outline-none transition-all focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]"
                   >
 
                     <option value="Semua">
@@ -930,14 +1101,20 @@ export default function KelolaUserPage() {
                     </option>
 
                     {roleOptions.map(
-                      (role) => (
+                      (
+                        role
+                      ) => (
                         <option
-                          key={role.value}
+                          key={
+                            role.value
+                          }
                           value={
                             role.value
                           }
                         >
-                          {role.label}
+                          {
+                            role.label
+                          }
                         </option>
                       )
                     )}
@@ -946,14 +1123,18 @@ export default function KelolaUserPage() {
 
                   {/* STATUS */}
                   <select
-                    value={statusFilter}
+                    value={
+                      statusFilter
+                    }
                     onChange={(e) => {
                       setStatusFilter(
                         e.target.value
                       );
-                      setCurrentPage(1);
+                      setCurrentPage(
+                        1
+                      );
                     }}
-                    className="h-10 w-full rounded-xl border border-slate-200 bg-slate-50 px-3 text-sm text-slate-600 outline-none transition-all focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
+                    className="theme-input h-10 w-full rounded-xl border px-3 text-sm outline-none transition-all focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]"
                   >
 
                     <option value="Semua">
@@ -972,22 +1153,26 @@ export default function KelolaUserPage() {
 
                   {/* RESET */}
                   <button
-                    onClick={handleReset}
-                    className="h-10 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-600 transition-all hover:border-slate-300 hover:bg-slate-50"
+                    onClick={
+                      handleReset
+                    }
+                    className="theme-input h-10 rounded-xl border px-4 text-sm font-medium transition-all hover:opacity-80"
                   >
                     Reset
                   </button>
 
                 </div>
 
-                <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3">
+                <div className="theme-border-soft mt-3 flex flex-wrap items-center justify-between gap-2 border-t pt-3">
 
-                  <p className="text-xs text-slate-400">
+                  <p className="theme-text-muted text-xs">
 
                     Menampilkan{" "}
 
-                    <span className="font-semibold text-slate-600">
-                      {totalItems}
+                    <span className="theme-text font-semibold">
+                      {
+                        totalItems
+                      }
                     </span>{" "}
 
                     data user
@@ -998,30 +1183,29 @@ export default function KelolaUserPage() {
 
               </section>
 
-              {/* =================================================
-                  TABLE
-              ================================================= */}
+              {/* TABLE */}
+              <section className="theme-card overflow-hidden rounded-2xl border shadow-sm">
 
-              <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_3px_14px_rgba(15,23,42,0.05)]">
-
-                <div className="border-b border-slate-100 px-5 py-4 sm:px-6 sm:py-5">
+                <div className="theme-border-soft border-b px-5 py-4 sm:px-6 sm:py-5">
 
                   <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
 
                     <div>
 
-                      <h2 className="text-sm font-semibold text-slate-800">
+                      <h2 className="theme-text text-sm font-semibold">
                         Daftar User
                       </h2>
 
-                      <p className="text-xs text-slate-500">
+                      <p className="theme-text-muted text-xs">
                         User yang terdaftar di lingkungan sekolah
                       </p>
 
                     </div>
 
-                    <div className="text-xs text-slate-500">
-                      {totalItems} user
+                    <div className="theme-text-muted text-xs">
+                      {
+                        totalItems
+                      } user
                     </div>
 
                   </div>
@@ -1031,23 +1215,27 @@ export default function KelolaUserPage() {
                 {/* LOADING */}
                 {loading ? (
                   <LoadingTable />
-                ) : users.length === 0 ? (
+                ) : users.length ===
+                  0 ? (
 
-                  /* EMPTY */
                   <div className="flex flex-col items-center justify-center py-16 text-center">
 
-                    <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
-                      <Users size={24} />
+                    <div className="theme-card-soft theme-text-muted flex h-14 w-14 items-center justify-center rounded-2xl border">
+                      <Users
+                        size={24}
+                      />
                     </div>
 
-                    <h3 className="mt-4 text-sm font-semibold text-slate-700">
+                    <h3 className="theme-text mt-4 text-sm font-semibold">
                       Tidak ada data user
                     </h3>
 
-                    <p className="mt-1 text-xs text-slate-400">
+                    <p className="theme-text-muted mt-1 text-xs">
                       {search ||
-                      roleFilter !== "Semua" ||
-                      statusFilter !== "Semua"
+                      roleFilter !==
+                        "Semua" ||
+                      statusFilter !==
+                        "Semua"
                         ? "Coba ubah filter pencarian"
                         : "Belum ada user yang terdaftar"}
                     </p>
@@ -1057,39 +1245,40 @@ export default function KelolaUserPage() {
                 ) : (
 
                   <>
+
                     <div className="overflow-x-auto">
 
                       <table className="w-full min-w-[1050px] border-collapse">
 
                         <thead>
 
-                          <tr className="border-b border-slate-200 bg-slate-50/80">
+                          <tr className="theme-table-header border-b">
 
-                            <th className="w-12 px-4 py-3 text-center text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-400">
+                            <th className="w-12 px-4 py-3 text-center text-[10px] font-semibold uppercase tracking-[0.08em]">
                               No
                             </th>
 
-                            <th className="min-w-[230px] px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-400">
+                            <th className="min-w-[230px] px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em]">
                               Nama / NIP
                             </th>
 
-                            <th className="min-w-[200px] px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-400">
+                            <th className="min-w-[200px] px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em]">
                               Email / Phone
                             </th>
 
-                            <th className="min-w-[180px] px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-400">
+                            <th className="min-w-[180px] px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em]">
                               Role
                             </th>
 
-                            <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-400">
+                            <th className="px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em]">
                               Status
                             </th>
 
-                            <th className="min-w-[180px] px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-400">
+                            <th className="min-w-[180px] px-4 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em]">
                               Terakhir Login
                             </th>
 
-                            <th className="w-36 px-4 py-3 text-center text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-400">
+                            <th className="w-36 px-4 py-3 text-center text-[10px] font-semibold uppercase tracking-[0.08em]">
                               Aksi
                             </th>
 
@@ -1097,7 +1286,7 @@ export default function KelolaUserPage() {
 
                         </thead>
 
-                        <tbody className="divide-y divide-slate-100">
+                        <tbody className="divide-y divide-[var(--color-border-soft)]">
 
                           {users.map(
                             (
@@ -1154,12 +1343,14 @@ export default function KelolaUserPage() {
                                   key={
                                     item.id
                                   }
-                                  className="transition-colors hover:bg-slate-50/70"
+                                  className="theme-table-hover transition-colors"
                                 >
 
                                   {/* NO */}
-                                  <td className="px-4 py-3.5 text-center text-sm text-slate-400">
-                                    {rowNumber}
+                                  <td className="theme-text-muted px-4 py-3.5 text-center text-sm">
+                                    {
+                                      rowNumber
+                                    }
                                   </td>
 
                                   {/* NAMA */}
@@ -1179,7 +1370,7 @@ export default function KelolaUserPage() {
                                           className="h-9 w-9 shrink-0 rounded-full object-cover"
                                         />
                                       ) : (
-                                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-100 text-sm font-bold text-blue-600">
+                                        <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-sm font-bold">
                                           {getInitials(
                                             item.namaLengkap
                                           )}
@@ -1188,12 +1379,14 @@ export default function KelolaUserPage() {
 
                                       <div className="min-w-0">
 
-                                        <p className="truncate text-sm font-semibold text-slate-800">
-                                          {item.namaLengkap ||
-                                            "-"}
+                                        <p className="theme-text truncate text-sm font-semibold">
+                                          {
+                                            item.namaLengkap ||
+                                            "-"
+                                          }
                                         </p>
 
-                                        <p className="text-xs text-slate-400">
+                                        <p className="theme-text-muted text-xs">
                                           {item.nip
                                             ? `NIP: ${item.nip}`
                                             : item.nipd
@@ -1214,14 +1407,18 @@ export default function KelolaUserPage() {
 
                                     <div className="min-w-0">
 
-                                      <p className="truncate text-sm text-slate-700">
-                                        {item.email ||
-                                          "-"}
+                                      <p className="theme-text-secondary truncate text-sm">
+                                        {
+                                          item.email ||
+                                          "-"
+                                        }
                                       </p>
 
-                                      <p className="text-xs text-slate-400">
-                                        {item.noTelepon ||
-                                          "-"}
+                                      <p className="theme-text-muted text-xs">
+                                        {
+                                          item.noTelepon ||
+                                          "-"
+                                        }
                                       </p>
 
                                     </div>
@@ -1245,15 +1442,19 @@ export default function KelolaUserPage() {
 
                                       <div className="min-w-0">
 
-                                        <p className="truncate text-sm font-medium text-slate-700">
-                                          {roleName}
+                                        <p className="theme-text-secondary truncate text-sm font-medium">
+                                          {
+                                            roleName
+                                          }
                                         </p>
 
                                         {roleKey &&
                                           roleKey !==
                                             roleName && (
-                                            <p className="text-[10px] text-slate-400">
-                                              {roleKey}
+                                            <p className="theme-text-muted text-[10px]">
+                                              {
+                                                roleKey
+                                              }
                                             </p>
                                           )}
 
@@ -1267,19 +1468,21 @@ export default function KelolaUserPage() {
                                   <td className="px-4 py-3.5">
 
                                     <span
-                                      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${
+                                      className={
                                         isActive
-                                          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                                          : "border-rose-200 bg-rose-50 text-rose-700"
-                                      }`}
+                                          ? "theme-success inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium"
+                                          : "theme-danger inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium"
+                                      }
                                     >
 
                                       <span
-                                        className={`h-1.5 w-1.5 rounded-full ${
-                                          isActive
-                                            ? "bg-emerald-500"
-                                            : "bg-rose-500"
-                                        }`}
+                                        className="h-1.5 w-1.5 rounded-full"
+                                        style={{
+                                          background:
+                                            isActive
+                                              ? "var(--color-success)"
+                                              : "var(--color-danger)",
+                                        }}
                                       />
 
                                       {isActive
@@ -1293,13 +1496,12 @@ export default function KelolaUserPage() {
                                   {/* LOGIN */}
                                   <td className="px-4 py-3.5">
 
-                                    <div className="flex items-center gap-1.5 text-sm text-slate-500">
+                                    <div className="theme-text-muted flex items-center gap-1.5 text-sm">
 
                                       <Clock
                                         size={
                                           13
                                         }
-                                        className="shrink-0 text-slate-400"
                                       />
 
                                       {formatDateTime(
@@ -1326,11 +1528,11 @@ export default function KelolaUserPage() {
                                           isUpdatingStatus ||
                                           isDeleting
                                         }
-                                        className={`rounded-lg p-1.5 text-slate-400 transition-all disabled:cursor-not-allowed disabled:opacity-40 ${
+                                        className={
                                           isActive
-                                            ? "hover:bg-amber-50 hover:text-amber-600"
-                                            : "hover:bg-emerald-50 hover:text-emerald-600"
-                                        }`}
+                                            ? "theme-text-muted rounded-lg p-1.5 transition-all hover:bg-[var(--color-warning-background)] hover:text-[var(--color-warning)] disabled:cursor-not-allowed disabled:opacity-40"
+                                            : "theme-text-muted rounded-lg p-1.5 transition-all hover:bg-[var(--color-success-background)] hover:text-[var(--color-success)] disabled:cursor-not-allowed disabled:opacity-40"
+                                        }
                                         title={
                                           isActive
                                             ? "Nonaktifkan"
@@ -1371,7 +1573,7 @@ export default function KelolaUserPage() {
                                         disabled={
                                           isDeleting
                                         }
-                                        className="rounded-lg p-1.5 text-slate-400 transition-all hover:bg-amber-50 hover:text-amber-600 disabled:opacity-40"
+                                        className="theme-text-muted rounded-lg p-1.5 transition-all hover:bg-[var(--color-warning-background)] hover:text-[var(--color-warning)] disabled:opacity-40"
                                         title="Edit"
                                       >
                                         <Edit
@@ -1391,7 +1593,7 @@ export default function KelolaUserPage() {
                                         disabled={
                                           isDeleting
                                         }
-                                        className="rounded-lg p-1.5 text-slate-400 transition-all hover:bg-blue-50 hover:text-blue-600 disabled:opacity-40"
+                                        className="theme-text-muted rounded-lg p-1.5 transition-all hover:bg-[var(--color-info-background)] hover:text-[var(--color-info)] disabled:opacity-40"
                                         title="Detail"
                                       >
                                         <Eye
@@ -1412,7 +1614,7 @@ export default function KelolaUserPage() {
                                           isDeleting ||
                                           isUpdatingStatus
                                         }
-                                        className="rounded-lg p-1.5 text-slate-400 transition-all hover:bg-rose-50 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-40"
+                                        className="theme-text-muted rounded-lg p-1.5 transition-all hover:bg-[var(--color-danger-background)] hover:text-[var(--color-danger)] disabled:cursor-not-allowed disabled:opacity-40"
                                         title="Hapus"
                                       >
 
@@ -1448,131 +1650,154 @@ export default function KelolaUserPage() {
 
                     </div>
 
-                    {/* =================================================
-                        PAGINATION
-                    ================================================= */}
+                    {/* PAGINATION */}
+                    <div className="theme-border border-t px-4 py-4 sm:px-5">
 
-                    <div className="flex flex-col gap-3 border-t border-slate-200 px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+                      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 
-                      <div className="text-xs text-slate-500">
+                        <div className="theme-text-muted text-xs">
 
-                        Menampilkan{" "}
+                          Menampilkan{" "}
 
-                        <span className="font-semibold text-slate-700">
-                          {startIndex}
-                        </span>
+                          <span className="theme-text font-semibold">
+                            {
+                              startIndex
+                            }
+                          </span>
 
-                        {" - "}
+                          {" - "}
 
-                        <span className="font-semibold text-slate-700">
-                          {endIndex}
-                        </span>
+                          <span className="theme-text font-semibold">
+                            {
+                              endIndex
+                            }
+                          </span>
 
-                        {" dari "}
+                          {" dari "}
 
-                        <span className="font-semibold text-slate-700">
-                          {totalItems}
-                        </span>
+                          <span className="theme-text font-semibold">
+                            {
+                              totalItems
+                            }
+                          </span>
 
-                        {" data"}
+                          {" data"}
 
-                      </div>
+                        </div>
 
-                      <div className="flex items-center gap-1">
+                        <div className="flex items-center gap-1">
 
-                        {/* FIRST */}
-                        <button
-                          onClick={() =>
-                            goToPage(1)
-                          }
-                          disabled={
-                            currentPage ===
-                            1
-                          }
-                          className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-all hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
-                        >
-                          <ChevronsLeft
-                            size={14}
-                          />
-                        </button>
-
-                        {/* PREVIOUS */}
-                        <button
-                          onClick={() =>
-                            goToPage(
-                              currentPage -
+                          {/* FIRST */}
+                          <button
+                            onClick={() =>
+                              goToPage(
                                 1
-                            )
-                          }
-                          disabled={
-                            currentPage ===
-                            1
-                          }
-                          className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-all hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
-                        >
-                          <ChevronLeft
-                            size={14}
-                          />
-                        </button>
-
-                        {/* NUMBERS */}
-                        {getPageNumbers().map(
-                          (page) => (
-                            <button
-                              key={page}
-                              onClick={() =>
-                                goToPage(
-                                  page
-                                )
+                              )
+                            }
+                            disabled={
+                              currentPage ===
+                              1
+                            }
+                            className="theme-text-muted flex h-8 w-8 items-center justify-center rounded-lg transition-all hover:bg-[var(--color-header-hover)] disabled:cursor-not-allowed disabled:opacity-40"
+                          >
+                            <ChevronsLeft
+                              size={
+                                14
                               }
-                              className={`flex h-8 min-w-8 items-center justify-center rounded-lg px-2 text-xs font-semibold transition-all ${
-                                currentPage ===
-                                page
-                                  ? "bg-blue-600 text-white shadow-[0_4px_10px_rgba(37,99,235,0.25)]"
-                                  : "text-slate-600 hover:bg-slate-100"
-                              }`}
-                            >
-                              {page}
-                            </button>
-                          )
-                        )}
+                            />
+                          </button>
 
-                        {/* NEXT */}
-                        <button
-                          onClick={() =>
-                            goToPage(
-                              currentPage +
-                                1
+                          {/* PREVIOUS */}
+                          <button
+                            onClick={() =>
+                              goToPage(
+                                currentPage -
+                                  1
+                              )
+                            }
+                            disabled={
+                              currentPage ===
+                              1
+                            }
+                            className="theme-text-muted flex h-8 w-8 items-center justify-center rounded-lg transition-all hover:bg-[var(--color-header-hover)] disabled:cursor-not-allowed disabled:opacity-40"
+                          >
+                            <ChevronLeft
+                              size={
+                                14
+                              }
+                            />
+                          </button>
+
+                          {/* NUMBERS */}
+                          {getPageNumbers().map(
+                            (
+                              page
+                            ) => (
+                              <button
+                                key={
+                                  page
+                                }
+                                onClick={() =>
+                                  goToPage(
+                                    page
+                                  )
+                                }
+                                className={
+                                  currentPage ===
+                                  page
+                                    ? "theme-primary flex h-8 min-w-8 items-center justify-center rounded-lg px-2 text-xs font-semibold shadow-md transition-all"
+                                    : "theme-text-secondary flex h-8 min-w-8 items-center justify-center rounded-lg px-2 text-xs font-semibold transition-all hover:bg-[var(--color-header-hover)]"
+                                }
+                              >
+                                {
+                                  page
+                                }
+                              </button>
                             )
-                          }
-                          disabled={
-                            currentPage ===
-                            totalPages
-                          }
-                          className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-all hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
-                        >
-                          <ChevronRight
-                            size={14}
-                          />
-                        </button>
+                          )}
 
-                        {/* LAST */}
-                        <button
-                          onClick={() =>
-                            goToPage(
+                          {/* NEXT */}
+                          <button
+                            onClick={() =>
+                              goToPage(
+                                currentPage +
+                                  1
+                              )
+                            }
+                            disabled={
+                              currentPage ===
                               totalPages
-                            )
-                          }
-                          disabled={
-                            currentPage ===
-                            totalPages
-                          }
-                          className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition-all hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-40"
-                        >
-                          <ChevronsRight
-                            size={14}
-                          />
-                        </button>
+                            }
+                            className="theme-text-muted flex h-8 w-8 items-center justify-center rounded-lg transition-all hover:bg-[var(--color-header-hover)] disabled:cursor-not-allowed disabled:opacity-40"
+                          >
+                            <ChevronRight
+                              size={
+                                14
+                              }
+                            />
+                          </button>
+
+                          {/* LAST */}
+                          <button
+                            onClick={() =>
+                              goToPage(
+                                totalPages
+                              )
+                            }
+                            disabled={
+                              currentPage ===
+                              totalPages
+                            }
+                            className="theme-text-muted flex h-8 w-8 items-center justify-center rounded-lg transition-all hover:bg-[var(--color-header-hover)] disabled:cursor-not-allowed disabled:opacity-40"
+                          >
+                            <ChevronsRight
+                              size={
+                                14
+                              }
+                            />
+                          </button>
+
+                        </div>
 
                       </div>
 
@@ -1584,25 +1809,24 @@ export default function KelolaUserPage() {
 
               </section>
 
-              {/* =================================================
-                  ROLE REFERENCE
-              ================================================= */}
-
-              <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_2px_10px_rgba(15,23,42,0.04)] sm:p-6">
+              {/* ROLE REFERENCE */}
+              <section className="theme-card rounded-2xl border p-5 shadow-sm sm:p-6">
 
                 <div className="mb-4 flex items-center gap-3">
 
-                  <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600">
-                    <Shield size={16} />
+                  <div className="theme-info flex h-9 w-9 items-center justify-center rounded-xl">
+                    <Shield
+                      size={16}
+                    />
                   </div>
 
                   <div>
 
-                    <p className="text-sm font-semibold text-slate-800">
+                    <p className="theme-text text-sm font-semibold">
                       Role Level Sekolah
                     </p>
 
-                    <p className="text-xs text-slate-400">
+                    <p className="theme-text-muted text-xs">
                       Role yang tersedia berdasarkan data backend
                     </p>
 
@@ -1613,14 +1837,14 @@ export default function KelolaUserPage() {
                 {roleOptions.length ===
                 0 ? (
 
-                  <div className="rounded-xl border border-dashed border-slate-200 py-8 text-center">
+                  <div className="theme-border rounded-xl border border-dashed py-8 text-center">
 
                     <Shield
                       size={24}
-                      className="mx-auto text-slate-300"
+                      className="theme-text-placeholder mx-auto"
                     />
 
-                    <p className="mt-2 text-xs text-slate-400">
+                    <p className="theme-text-muted mt-2 text-xs">
                       Belum ada data role
                     </p>
 
@@ -1632,8 +1856,7 @@ export default function KelolaUserPage() {
 
                     {roleOptions.map(
                       (
-                        role,
-                        index
+                        role
                       ) => {
 
                         const Icon =
@@ -1648,7 +1871,9 @@ export default function KelolaUserPage() {
 
                         const count =
                           dummyUsers.filter(
-                            (user) =>
+                            (
+                              user
+                            ) =>
                               user
                                 ?.peran
                                 ?.nama ===
@@ -1660,7 +1885,7 @@ export default function KelolaUserPage() {
                             key={
                               role.value
                             }
-                            className="rounded-xl border border-slate-200 p-3 text-center transition-all hover:border-blue-200 hover:shadow-sm"
+                            className="theme-card theme-border rounded-xl border p-3 text-center transition-all hover:border-[var(--color-primary)] hover:shadow-sm"
                           >
 
                             <div className="flex justify-center">
@@ -1677,16 +1902,21 @@ export default function KelolaUserPage() {
 
                             </div>
 
-                            <p className="mt-1.5 line-clamp-2 text-[10px] font-semibold leading-tight text-slate-700">
-                              {role.label}
+                            <p className="theme-text-secondary mt-1.5 line-clamp-2 text-[10px] font-semibold leading-tight">
+                              {
+                                role.label
+                              }
                             </p>
 
-                            <p className="mt-0.5 text-[10px] text-slate-400">
+                            <p className="theme-text-muted mt-0.5 text-[10px]">
                               Role
                             </p>
 
-                            <p className="mt-0.5 text-[10px] font-medium text-blue-600">
-                              {count} user
+                            <p className="mt-0.5 text-[10px] font-medium text-[var(--color-primary)]">
+                              {
+                                count
+                              }{" "}
+                              user
                             </p>
 
                           </div>
@@ -1701,10 +1931,9 @@ export default function KelolaUserPage() {
               </section>
 
               {/* FOOTER */}
+              <footer className="theme-border border-t pt-4 text-center sm:pt-5">
 
-              <footer className="border-t border-slate-200/70 pt-4 text-center sm:pt-5">
-
-                <p className="text-xs text-slate-400">
+                <p className="theme-text-muted text-xs">
                   © 2026 SmartSchool • Kelola User - Level Sekolah
                 </p>
 
@@ -1734,23 +1963,23 @@ function StatCard({
 }) {
   const colorMap = {
     blue: {
-      bg: "bg-blue-50",
-      text: "text-blue-600",
+      bg: "bg-[var(--color-info-background)]",
+      text: "text-[var(--color-primary)]",
     },
 
     emerald: {
-      bg: "bg-emerald-50",
-      text: "text-emerald-600",
+      bg: "bg-[var(--color-success-background)]",
+      text: "text-[var(--color-success)]",
     },
 
     rose: {
-      bg: "bg-rose-50",
-      text: "text-rose-600",
+      bg: "bg-[var(--color-danger-background)]",
+      text: "text-[var(--color-danger)]",
     },
 
     indigo: {
-      bg: "bg-indigo-50",
-      text: "text-indigo-600",
+      bg: "bg-[var(--color-sidebar-active)]",
+      text: "text-[var(--color-sidebar-text-active)]",
     },
   };
 
@@ -1759,17 +1988,17 @@ function StatCard({
     colorMap.blue;
 
   return (
-    <div className="group rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_2px_10px_rgba(15,23,42,0.04)] transition-all hover:-translate-y-0.5 hover:shadow-[0_7px_20px_rgba(15,23,42,0.08)] sm:p-5">
+    <div className="theme-card group rounded-2xl border p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-lg sm:p-5">
 
       <div className="flex items-center justify-between gap-3">
 
         <div className="min-w-0">
 
-          <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-slate-400">
+          <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-[0.06em]">
             {label}
           </p>
 
-          <p className="mt-1 text-2xl font-bold tracking-tight text-slate-800">
+          <p className="theme-text mt-1 text-2xl font-bold tracking-tight">
             {value}
           </p>
 
@@ -1796,51 +2025,54 @@ function StatCard({
 
 function LoadingTable() {
   return (
-    <div className="divide-y divide-slate-100">
+    <div className="divide-y divide-[var(--color-border-soft)]">
 
       {Array.from({
         length: 8,
-      }).map((_, index) => (
-        <div
-          key={index}
-          className="flex min-w-[1050px] items-center gap-5 px-5 py-4"
-        >
+      }).map(
+        (_, index) => (
+          <div
+            key={index}
+            className="flex min-w-[1050px] items-center gap-5 px-5 py-4"
+          >
 
-          <div className="h-4 w-5 animate-pulse rounded bg-slate-100" />
+            <div className="theme-card-soft h-4 w-5 animate-pulse rounded" />
 
-          <div className="flex flex-1 items-center gap-3">
+            <div className="flex flex-1 items-center gap-3">
 
-            <div className="h-9 w-9 animate-pulse rounded-full bg-slate-100" />
+              <div className="theme-card-soft h-9 w-9 animate-pulse rounded-full" />
 
-            <div className="space-y-2">
+              <div className="space-y-2">
 
-              <div className="h-3 w-40 animate-pulse rounded bg-slate-100" />
+                <div className="theme-card-soft h-3 w-40 animate-pulse rounded" />
 
-              <div className="h-2.5 w-28 animate-pulse rounded bg-slate-100" />
+                <div className="theme-card-soft h-2.5 w-28 animate-pulse rounded" />
+
+              </div>
 
             </div>
 
+            <div className="w-48 space-y-2">
+
+              <div className="theme-card-soft h-3 w-36 animate-pulse rounded" />
+
+              <div className="theme-card-soft h-2.5 w-24 animate-pulse rounded" />
+
+            </div>
+
+            <div className="theme-card-soft h-7 w-28 animate-pulse rounded-lg" />
+
+            <div className="theme-card-soft h-6 w-16 animate-pulse rounded-full" />
+
+            <div className="theme-card-soft h-4 w-32 animate-pulse rounded" />
+
+            <div className="theme-card-soft h-7 w-28 animate-pulse rounded" />
+
           </div>
-
-          <div className="w-48 space-y-2">
-
-            <div className="h-3 w-36 animate-pulse rounded bg-slate-100" />
-
-            <div className="h-2.5 w-24 animate-pulse rounded bg-slate-100" />
-
-          </div>
-
-          <div className="h-7 w-28 animate-pulse rounded-lg bg-slate-100" />
-
-          <div className="h-6 w-16 animate-pulse rounded-full bg-slate-100" />
-
-          <div className="h-4 w-32 animate-pulse rounded bg-slate-100" />
-
-          <div className="h-7 w-28 animate-pulse rounded bg-slate-100" />
-
-        </div>
-      ))}
+        )
+      )}
 
     </div>
   );
 }
+

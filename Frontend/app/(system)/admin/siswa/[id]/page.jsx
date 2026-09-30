@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 
 import Header from "../../../../components/Header";
 import Sidebar from "../../../../components/Sidebar";
@@ -23,6 +23,53 @@ import {
 
 import { getUsers } from "../../../../../services/user.service";
 
+/* ============================================================
+   THEME
+   ============================================================ */
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_16%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+/* ============================================================
+   PAGE
+   ============================================================ */
+
 export default function DetailSiswaPage() {
   const router = useRouter();
   const params = useParams();
@@ -33,6 +80,10 @@ export default function DetailSiswaPage() {
   const [siswa, setSiswa] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+
+  /* ============================================================
+     FETCH SISWA
+     ============================================================ */
 
   useEffect(() => {
     let mounted = true;
@@ -75,7 +126,8 @@ export default function DetailSiswaPage() {
         if (!mounted) return;
 
         setError(
-          err?.message || "Gagal mengambil data siswa dari backend."
+          err?.message ||
+            "Gagal mengambil data siswa dari backend."
         );
       } finally {
         if (mounted) {
@@ -93,9 +145,13 @@ export default function DetailSiswaPage() {
     };
   }, [id]);
 
+  /* ============================================================
+     LOADING
+     ============================================================ */
+
   if (loading) {
     return (
-      <div className="flex min-h-screen w-full bg-[#F8FAFC]">
+      <div className="theme-page flex min-h-screen w-full">
         <Sidebar
           active="siswa"
           setActive={() => {}}
@@ -105,7 +161,9 @@ export default function DetailSiswaPage() {
 
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
           <Header
-            toggleSidebar={() => setIsCollapsed(!isCollapsed)}
+            toggleSidebar={() =>
+              setIsCollapsed((prev) => !prev)
+            }
             notifications={[]}
             user={{
               name: "Admin Sekolah",
@@ -116,16 +174,22 @@ export default function DetailSiswaPage() {
 
           <main className="flex flex-1 items-center justify-center px-6">
             <div className="text-center">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+              <div
+                className={`mx-auto flex h-12 w-12 items-center justify-center rounded-full ${themePrimarySoft} ${themePrimaryText}`}
+              >
                 <User size={22} />
               </div>
 
-              <p className="mt-4 text-sm font-medium text-slate-600">
+              <p className="theme-text-secondary mt-4 text-sm font-medium">
                 Memuat data siswa...
               </p>
 
-              <div className="mx-auto mt-3 h-1.5 w-32 overflow-hidden rounded-full bg-slate-100">
-                <div className="h-full w-1/2 animate-pulse rounded-full bg-blue-500" />
+              <div
+                className={`mx-auto mt-3 h-1.5 w-32 overflow-hidden rounded-full ${themeNeutralSurface}`}
+              >
+                <div
+                  className="h-full w-1/2 animate-pulse rounded-full bg-[var(--color-primary)]"
+                />
               </div>
             </div>
           </main>
@@ -134,9 +198,13 @@ export default function DetailSiswaPage() {
     );
   }
 
+  /* ============================================================
+     ERROR
+     ============================================================ */
+
   if (error || !siswa) {
     return (
-      <div className="flex min-h-screen w-full bg-[#F8FAFC]">
+      <div className="theme-page flex min-h-screen w-full">
         <Sidebar
           active="siswa"
           setActive={() => {}}
@@ -146,7 +214,9 @@ export default function DetailSiswaPage() {
 
         <div className="flex min-w-0 flex-1 flex-col">
           <Header
-            toggleSidebar={() => setIsCollapsed(!isCollapsed)}
+            toggleSidebar={() =>
+              setIsCollapsed((prev) => !prev)
+            }
             notifications={[]}
             user={{
               name: "Admin Sekolah",
@@ -156,23 +226,29 @@ export default function DetailSiswaPage() {
           />
 
           <main className="flex flex-1 items-center justify-center px-6">
-            <div className="w-full max-w-md rounded-xl border border-[#DCE6F2] bg-white p-8 text-center shadow-sm">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-rose-50 text-rose-500">
+            <div
+              className={`theme-card w-full max-w-md rounded-xl border ${themeNeutralBorder} p-8 text-center ${themeCardShadow}`}
+            >
+              <div
+                className={`theme-danger mx-auto flex h-12 w-12 items-center justify-center rounded-full ${themeDangerSurface}`}
+              >
                 <User size={22} />
               </div>
 
-              <h1 className="mt-4 text-lg font-semibold text-[#172554]">
+              <h1 className="theme-text mt-4 text-lg font-semibold">
                 Data Siswa Tidak Ditemukan
               </h1>
 
-              <p className="mt-2 text-sm leading-6 text-slate-500">
+              <p className="theme-text-muted mt-2 text-sm leading-6">
                 {error || "Data siswa tidak tersedia."}
               </p>
 
               <button
                 type="button"
-                onClick={() => router.push("/admin/siswa")}
-                className="mt-5 inline-flex items-center gap-2 rounded-lg bg-[#2563EB] px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-[#1D4ED8]"
+                onClick={() =>
+                  router.push("/admin/siswa")
+                }
+                className={`theme-primary ${themePrimaryShadow} mt-5 inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-[var(--color-card)] transition hover:opacity-90`}
               >
                 <ArrowLeft size={16} />
                 Kembali ke Daftar Siswa
@@ -183,6 +259,10 @@ export default function DetailSiswaPage() {
       </div>
     );
   }
+
+  /* ============================================================
+     NORMALIZE DATA
+     ============================================================ */
 
   const nama =
     siswa.nama ||
@@ -300,8 +380,16 @@ export default function DetailSiswaPage() {
     siswa.createdAt ||
     "-";
 
+  const isActive =
+    String(status).toLowerCase() === "aktif";
+
+  /* ============================================================
+     RENDER
+     ============================================================ */
+
   return (
-    <div className="flex min-h-screen w-full min-w-0 bg-[#F8FAFC]">
+    <div className="theme-page flex min-h-screen w-full min-w-0">
+      {/* SIDEBAR */}
       <div className="shrink-0">
         <Sidebar
           active="siswa"
@@ -311,9 +399,12 @@ export default function DetailSiswaPage() {
         />
       </div>
 
+      {/* CONTENT */}
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <Header
-          toggleSidebar={() => setIsCollapsed(!isCollapsed)}
+          toggleSidebar={() =>
+            setIsCollapsed((prev) => !prev)
+          }
           notifications={[]}
           user={{
             name: "Admin Sekolah",
@@ -326,12 +417,15 @@ export default function DetailSiswaPage() {
           <div className="w-full px-4 py-5 sm:px-6 md:px-7 lg:px-8 xl:px-10">
             <div className="mx-auto w-full max-w-[1500px]">
 
-              {/* HEADER ACTION */}
+              {/* ==================================================
+                  ACTION BAR
+                  ================================================== */}
+
               <div className="mb-5 flex flex-col gap-3 sm:mb-6 sm:flex-row sm:items-center sm:justify-between">
                 <button
                   type="button"
                   onClick={() => router.back()}
-                  className="group inline-flex w-fit items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-[#1E3A8A]"
+                  className="theme-text-muted group inline-flex w-fit items-center gap-2 text-sm font-medium transition hover:text-[var(--color-primary)]"
                 >
                   <ArrowLeft
                     size={17}
@@ -346,38 +440,51 @@ export default function DetailSiswaPage() {
                 <button
                   type="button"
                   onClick={() =>
-                    router.push(`/admin/siswa/edit/${siswa.id}`)
+                    router.push(
+                      `/admin/siswa/edit/${siswa.id}`
+                    )
                   }
-                  className="inline-flex w-fit items-center justify-center gap-2 rounded-lg border border-[#BFDBFE] bg-white px-4 py-2.5 text-sm font-semibold text-[#2563EB] shadow-sm transition hover:border-[#93C5FD] hover:bg-[#EFF6FF]"
+                  className={`theme-card ${themePrimarySoftBorder} ${themePrimaryText} ${themeSmallShadow} inline-flex w-fit items-center justify-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-semibold transition hover:bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]`}
                 >
                   <Edit size={16} />
                   Edit Profil
                 </button>
               </div>
 
-              {/* PROFILE HEADER */}
-              <section className="overflow-hidden rounded-xl border border-[#DCE6F2] bg-white shadow-sm">
-                <div className="h-1 w-full bg-[#3B82F6]" />
+              {/* ==================================================
+                  PROFILE
+                  ================================================== */}
+
+              <section
+                className={`theme-card overflow-hidden rounded-xl border ${themeNeutralBorder} ${themeCardShadow}`}
+              >
+                <div className="h-1 w-full bg-[var(--color-primary)]" />
 
                 <div className="p-5 sm:p-6 lg:p-8">
                   <div className="flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
 
+                    {/* PROFILE IDENTITY */}
                     <div className="flex min-w-0 items-center gap-5">
-                      <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full border border-[#BFDBFE] bg-[#EFF6FF] text-2xl font-bold text-[#1D4ED8] sm:h-24 sm:w-24 sm:text-3xl">
+                      <div
+                        className={`flex h-20 w-20 shrink-0 items-center justify-center rounded-full border ${themePrimarySoftBorder} ${themePrimarySoft} ${themePrimaryText} text-2xl font-bold sm:h-24 sm:w-24 sm:text-3xl`}
+                      >
                         {initial}
                       </div>
 
                       <div className="min-w-0">
                         <div className="mb-2 flex flex-wrap items-center gap-2">
-                          <span className="rounded-md border border-[#DBEAFE] bg-[#EFF6FF] px-2.5 py-1 text-xs font-semibold text-[#2563EB]">
+
+                          <span
+                            className={`${themePrimarySoftBorder} ${themePrimarySoft} ${themePrimaryText} rounded-md border px-2.5 py-1 text-xs font-semibold`}
+                          >
                             DATA SISWA
                           </span>
 
                           <span
-                            className={`inline-flex items-center gap-1.5 rounded-md px-2.5 py-1 text-xs font-semibold ${
-                              String(status).toLowerCase() === "aktif"
-                                ? "border border-emerald-100 bg-emerald-50 text-emerald-700"
-                                : "border border-rose-100 bg-rose-50 text-rose-700"
+                            className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-semibold ${
+                              isActive
+                                ? `${themeSuccessBorder} ${themeSuccessSurface} theme-success`
+                                : `${themeDangerBorder} ${themeDangerSurface} theme-danger`
                             }`}
                           >
                             <span className="h-1.5 w-1.5 rounded-full bg-current" />
@@ -385,20 +492,21 @@ export default function DetailSiswaPage() {
                           </span>
                         </div>
 
-                        <h1 className="break-words text-2xl font-bold tracking-tight text-[#172554] sm:text-3xl">
+                        <h1 className="theme-text break-words text-2xl font-bold tracking-tight sm:text-3xl">
                           {nama}
                         </h1>
 
-                        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm text-slate-500">
+                        <div className="theme-text-muted mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
                           <span className="inline-flex items-center gap-1.5">
                             <Hash
                               size={14}
-                              className="text-[#60A5FA]"
+                              className={themePrimaryText}
                             />
+
                             NIS {nis}
                           </span>
 
-                          <span className="hidden text-slate-300 sm:inline">
+                          <span className="theme-text-muted hidden opacity-40 sm:inline">
                             |
                           </span>
 
@@ -406,26 +514,29 @@ export default function DetailSiswaPage() {
                             NISN {nisn}
                           </span>
 
-                          <span className="hidden text-slate-300 sm:inline">
+                          <span className="theme-text-muted hidden opacity-40 sm:inline">
                             |
                           </span>
 
-                          <span className="font-semibold text-[#1E40AF]">
+                          <span className="font-semibold text-[var(--color-primary)]">
                             {kelas}
                           </span>
                         </div>
                       </div>
                     </div>
 
-                    <div className="hidden shrink-0 border-l border-[#E2E8F0] pl-8 lg:block">
-                      <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                    {/* JOIN DATE */}
+                    <div
+                      className={`hidden shrink-0 border-l ${themeDivider} pl-8 lg:block`}
+                    >
+                      <p className="theme-text-muted text-xs font-medium uppercase tracking-wide">
                         Bergabung
                       </p>
 
-                      <div className="mt-1 flex items-center gap-2 text-sm font-semibold text-[#1E3A8A]">
+                      <div className="theme-text-secondary mt-1 flex items-center gap-2 text-sm font-semibold">
                         <Calendar
                           size={15}
-                          className="text-[#60A5FA]"
+                          className={themePrimaryText}
                         />
 
                         {formatDate(joinDate)}
@@ -433,8 +544,10 @@ export default function DetailSiswaPage() {
                     </div>
                   </div>
 
-                  <div className="mt-7 grid grid-cols-1 gap-x-8 gap-y-5 border-t border-[#EEF2F7] pt-6 sm:grid-cols-2 lg:grid-cols-4">
-
+                  {/* BASIC INFO */}
+                  <div
+                    className={`mt-7 grid grid-cols-1 gap-x-8 gap-y-5 border-t ${themeDivider} pt-6 sm:grid-cols-2 lg:grid-cols-4`}
+                  >
                     <InfoItem
                       icon={<User size={17} />}
                       label="Jenis Kelamin"
@@ -465,19 +578,26 @@ export default function DetailSiswaPage() {
                       label="Nomor Telepon"
                       value={phone}
                     />
-
                   </div>
                 </div>
               </section>
 
-              {/* CONTENT */}
+              {/* ==================================================
+                  DETAIL CONTENT
+                  ================================================== */}
+
               <div className="mt-5 grid grid-cols-1 gap-5 xl:grid-cols-3">
 
-                {/* LEFT */}
+                {/* ==================================================
+                    LEFT COLUMN
+                    ================================================== */}
+
                 <div className="min-w-0 space-y-5 xl:col-span-2">
 
                   {/* ALAMAT */}
-                  <section className="overflow-hidden rounded-xl border border-[#DCE6F2] bg-white shadow-sm">
+                  <section
+                    className={`theme-card overflow-hidden rounded-xl border ${themeNeutralBorder} ${themeCardShadow}`}
+                  >
                     <SectionHeader
                       icon={<MapPin size={18} />}
                       title="Alamat"
@@ -485,7 +605,6 @@ export default function DetailSiswaPage() {
                     />
 
                     <div className="grid grid-cols-1 gap-x-8 gap-y-5 p-5 sm:grid-cols-2 lg:p-6">
-
                       <DetailItem
                         label="Alamat Jalan"
                         value={alamat}
@@ -512,12 +631,13 @@ export default function DetailSiswaPage() {
                         label="Provinsi"
                         value={provinsi}
                       />
-
                     </div>
                   </section>
 
-                  {/* ORANG TUA */}
-                  <section className="overflow-hidden rounded-xl border border-[#DCE6F2] bg-white shadow-sm">
+                  {/* ORANG TUA / WALI */}
+                  <section
+                    className={`theme-card overflow-hidden rounded-xl border ${themeNeutralBorder} ${themeCardShadow}`}
+                  >
                     <SectionHeader
                       icon={<Users size={18} />}
                       title="Orang Tua / Wali"
@@ -540,7 +660,9 @@ export default function DetailSiswaPage() {
                       <DetailItem
                         label="Pekerjaan"
                         value={pekerjaanOrtu}
-                        icon={<BriefcaseBusiness size={14} />}
+                        icon={
+                          <BriefcaseBusiness size={14} />
+                        }
                       />
 
                       <div className="hidden sm:block" />
@@ -560,23 +682,29 @@ export default function DetailSiswaPage() {
                         />
 
                         {domisiliSama && (
-                          <div className="mt-3 inline-flex items-center gap-2 rounded-md border border-emerald-100 bg-emerald-50 px-3 py-1.5 text-xs font-medium text-emerald-700">
+                          <div
+                            className={`theme-success ${themeSuccessBorder} ${themeSuccessSurface} mt-3 inline-flex items-center gap-2 rounded-md border px-3 py-1.5 text-xs font-medium`}
+                          >
                             <CheckCircle size={14} />
+
                             Alamat domisili sama dengan alamat KTP
                           </div>
                         )}
                       </div>
-
                     </div>
                   </section>
-
                 </div>
 
-                {/* RIGHT */}
+                {/* ==================================================
+                    RIGHT COLUMN
+                    ================================================== */}
+
                 <div className="min-w-0 space-y-5">
 
-                  {/* AKADEMIK */}
-                  <section className="overflow-hidden rounded-xl border border-[#DCE6F2] bg-white shadow-sm">
+                  {/* STATISTIK AKADEMIK */}
+                  <section
+                    className={`theme-card overflow-hidden rounded-xl border ${themeNeutralBorder} ${themeCardShadow}`}
+                  >
                     <SectionHeader
                       icon={<GraduationCap size={18} />}
                       title="Statistik Akademik"
@@ -608,29 +736,31 @@ export default function DetailSiswaPage() {
                           siswa.tingkatKehadiran ??
                           "-"
                         }
-                        valueClass="text-emerald-600"
+                        valueClass="theme-success"
                       />
-
                     </div>
                   </section>
 
                   {/* RINGKASAN */}
-                  <section className="overflow-hidden rounded-xl border border-[#DCE6F2] bg-white shadow-sm">
+                  <section
+                    className={`theme-card overflow-hidden rounded-xl border ${themeNeutralBorder} ${themeCardShadow}`}
+                  >
                     <SectionHeader
                       icon={<User size={18} />}
                       title="Ringkasan"
                       description="Informasi utama siswa"
                     />
 
-                    <div className="divide-y divide-[#EEF2F7]">
-
+                    <div
+                      className={`divide-y ${themeDivider}`}
+                    >
                       <SummaryRow
                         label="Status"
                         value={status}
                         valueClass={
-                          String(status).toLowerCase() === "aktif"
-                            ? "text-emerald-600"
-                            : "text-rose-600"
+                          isActive
+                            ? "theme-success"
+                            : "theme-danger"
                         }
                       />
 
@@ -653,10 +783,8 @@ export default function DetailSiswaPage() {
                         label="Bergabung"
                         value={formatDate(joinDate)}
                       />
-
                     </div>
                   </section>
-
                 </div>
               </div>
 
@@ -669,8 +797,14 @@ export default function DetailSiswaPage() {
   );
 }
 
+/* ============================================================
+   FORMAT DATE
+   ============================================================ */
+
 function formatDate(value) {
-  if (!value || value === "-") return "-";
+  if (!value || value === "-") {
+    return "-";
+  }
 
   try {
     const date = new Date(value);
@@ -689,24 +823,34 @@ function formatDate(value) {
   }
 }
 
+/* ============================================================
+   SECTION HEADER
+   ============================================================ */
+
 function SectionHeader({
   icon,
   title,
   description,
 }) {
   return (
-    <div className="flex items-start gap-3 border-b border-[#EEF2F7] px-5 py-4 lg:px-6">
-      <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-[#DBEAFE] bg-[#EFF6FF] text-[#3B82F6]">
-        {icon}
+    <div
+      className={`flex items-start gap-3 border-b ${themeDivider} px-5 py-4 lg:px-6`}
+    >
+      <div
+        className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${themePrimarySoftBorder} ${themePrimarySoft}`}
+      >
+        <span className={themePrimaryText}>
+          {icon}
+        </span>
       </div>
 
       <div className="min-w-0">
-        <h2 className="text-sm font-semibold text-[#172554]">
+        <h2 className="theme-text text-sm font-semibold">
           {title}
         </h2>
 
         {description && (
-          <p className="mt-0.5 text-xs text-slate-400">
+          <p className="theme-text-muted mt-0.5 text-xs">
             {description}
           </p>
         )}
@@ -714,6 +858,10 @@ function SectionHeader({
     </div>
   );
 }
+
+/* ============================================================
+   INFO ITEM
+   ============================================================ */
 
 function InfoItem({
   icon,
@@ -723,17 +871,19 @@ function InfoItem({
 }) {
   return (
     <div className="flex min-w-0 items-start gap-2.5">
-      <div className="mt-0.5 shrink-0 text-[#60A5FA]">
+      <div
+        className={`mt-0.5 shrink-0 ${themePrimaryText}`}
+      >
         {icon}
       </div>
 
       <div className="min-w-0 flex-1">
-        <p className="text-xs font-medium text-slate-400">
+        <p className="theme-text-muted text-xs font-medium">
           {label}
         </p>
 
         <p
-          className={`mt-1 text-sm font-medium text-[#334155] ${
+          className={`theme-text-secondary mt-1 text-sm font-medium ${
             breakText
               ? "break-words [overflow-wrap:anywhere]"
               : "truncate"
@@ -747,6 +897,10 @@ function InfoItem({
   );
 }
 
+/* ============================================================
+   DETAIL ITEM
+   ============================================================ */
+
 function DetailItem({
   label,
   value,
@@ -757,19 +911,19 @@ function DetailItem({
   return (
     <div className={`min-w-0 ${className}`}>
       <div className="flex items-center gap-1.5">
-        <p className="text-xs font-medium text-slate-400">
+        <p className="theme-text-muted text-xs font-medium">
           {label}
         </p>
 
         {icon && (
-          <span className="text-[#60A5FA]">
+          <span className={themePrimaryText}>
             {icon}
           </span>
         )}
       </div>
 
       <p
-        className={`mt-1.5 text-sm font-medium text-[#334155] ${
+        className={`theme-text-secondary mt-1.5 text-sm font-medium ${
           breakText
             ? "break-words leading-6 [overflow-wrap:anywhere]"
             : "truncate"
@@ -782,15 +936,21 @@ function DetailItem({
   );
 }
 
+/* ============================================================
+   ACADEMIC STAT
+   ============================================================ */
+
 function AcademicStat({
   label,
   value,
-  valueClass = "text-[#172554]",
+  valueClass = "theme-text",
 }) {
   return (
-    <div className="flex min-w-0 items-center justify-between gap-4 rounded-lg border border-[#EEF2F7] bg-[#F8FAFC] p-4">
+    <div
+      className={`flex min-w-0 items-center justify-between gap-4 rounded-lg border ${themeNeutralBorder} ${themeNeutralSurface} p-4`}
+    >
       <div className="min-w-0 pr-3">
-        <p className="text-xs font-medium text-slate-400">
+        <p className="theme-text-muted text-xs font-medium">
           {label}
         </p>
       </div>
@@ -804,14 +964,18 @@ function AcademicStat({
   );
 }
 
+/* ============================================================
+   SUMMARY ROW
+   ============================================================ */
+
 function SummaryRow({
   label,
   value,
-  valueClass = "text-[#334155]",
+  valueClass = "theme-text-secondary",
 }) {
   return (
     <div className="flex items-center justify-between gap-4 px-5 py-3.5 lg:px-6">
-      <span className="text-xs font-medium text-slate-400">
+      <span className="theme-text-muted text-xs font-medium">
         {label}
       </span>
 

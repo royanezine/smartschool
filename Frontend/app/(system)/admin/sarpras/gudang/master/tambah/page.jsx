@@ -26,6 +26,68 @@ import {
   createGudang,
 } from "../../../../../../../services/sarpras.service";
 
+/* =========================================================
+   GLOBAL THEME
+========================================================= */
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]";
+
+/* =========================================================
+   PAGE
+========================================================= */
+
 export default function TambahMasterGudangPage() {
   const router = useRouter();
 
@@ -40,6 +102,10 @@ export default function TambahMasterGudangPage() {
     status: "aktif",
   });
 
+  /* =========================================================
+     HANDLE CHANGE
+  ========================================================= */
+
   function handleChange(e) {
     const { name, value } = e.target;
 
@@ -53,6 +119,10 @@ export default function TambahMasterGudangPage() {
     }
   }
 
+  /* =========================================================
+     SUBMIT
+  ========================================================= */
+
   async function handleSubmit(e) {
     e.preventDefault();
 
@@ -62,17 +132,23 @@ export default function TambahMasterGudangPage() {
     const lokasi = form.lokasi.trim();
 
     if (!nama) {
-      setError("Nama gudang wajib diisi.");
+      setError(
+        "Nama gudang wajib diisi."
+      );
       return;
     }
 
     if (nama.length < 3) {
-      setError("Nama gudang minimal 3 karakter.");
+      setError(
+        "Nama gudang minimal 3 karakter."
+      );
       return;
     }
 
     if (nama.length > 100) {
-      setError("Nama gudang maksimal 100 karakter.");
+      setError(
+        "Nama gudang maksimal 100 karakter."
+      );
       return;
     }
 
@@ -85,17 +161,25 @@ export default function TambahMasterGudangPage() {
         status: form.status,
       };
 
-      console.log("Payload create gudang:", payload);
+      console.log(
+        "Payload create gudang:",
+        payload
+      );
 
       await createGudang(payload);
 
       setSaved(true);
 
       setTimeout(() => {
-        router.push("/admin/sarpras/gudang/master");
+        router.push(
+          "/admin/sarpras/gudang/master"
+        );
       }, 1000);
     } catch (err) {
-      console.error("Gagal membuat gudang:", err);
+      console.error(
+        "Gagal membuat gudang:",
+        err
+      );
 
       setError(
         err?.message ||
@@ -106,17 +190,30 @@ export default function TambahMasterGudangPage() {
     }
   }
 
+  /* =========================================================
+     SIDEBAR
+  ========================================================= */
+
   function toggleSidebar() {
-    setIsCollapsed((current) => !current);
+    setIsCollapsed(
+      (current) => !current
+    );
   }
+
+  /* =========================================================
+     FORM STATUS
+  ========================================================= */
 
   const isFormComplete =
     form.nama.trim().length >= 3;
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-slate-50">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
 
-      {/* SIDEBAR */}
+      {/* =====================================================
+          SIDEBAR
+      ===================================================== */}
+
       <Sidebar
         active="sarpras"
         setActive={() => {}}
@@ -124,137 +221,227 @@ export default function TambahMasterGudangPage() {
         setCollapsed={setIsCollapsed}
       />
 
-      {/* CONTENT */}
+      {/* =====================================================
+          CONTENT
+      ===================================================== */}
+
       <div className="flex h-screen min-w-0 flex-1 flex-col overflow-hidden">
 
-        {/* HEADER */}
+        {/* ===================================================
+            HEADER
+        =================================================== */}
+
         <Header
           toggleSidebar={toggleSidebar}
           notifications={[]}
           user={{
             name: "Admin Sekolah",
-            email: "admin@smartschool.com",
+            email:
+              "admin@smartschool.com",
             avatar: "AD",
           }}
         />
 
-        {/* MAIN */}
+        {/* ===================================================
+            MAIN
+        =================================================== */}
+
         <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
 
           <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
 
-            {/* BACK */}
+            {/* =================================================
+                BACK
+            ================================================= */}
+
             <Link
               href="/admin/sarpras/gudang/master"
-              className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-slate-600 transition hover:text-blue-600"
+              className={`mb-5 inline-flex items-center gap-2 rounded-xl px-2 py-1.5 text-sm font-medium theme-text-secondary transition ${themeNeutralHover} ${themePrimaryText}`}
             >
               <ArrowLeft size={18} />
+
               Kembali ke Master Gudang
             </Link>
 
-            {/* PAGE HEADER */}
+            {/* =================================================
+                PAGE HEADER
+            ================================================= */}
+
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
               <div>
+
                 <div className="mb-2 flex items-center gap-2">
-                  <span className="rounded-full bg-blue-50 px-3 py-1 text-xs font-semibold text-blue-600">
+
+                  <span
+                    className={`rounded-full border ${themePrimarySoftBorder} ${themePrimarySoft} ${themePrimaryText} px-3 py-1 text-xs font-semibold`}
+                  >
                     SARPRAS
                   </span>
 
-                  <span className="text-xs text-slate-400">
+                  <span className="theme-text-muted text-xs">
                     Master Gudang
                   </span>
+
                 </div>
 
-                <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+                <h1 className="theme-text text-2xl font-bold tracking-tight sm:text-3xl">
                   Tambah Gudang
                 </h1>
 
-                <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-500">
-                  Tambahkan data gudang baru untuk mengelola
-                  penyimpanan sarana dan prasarana sekolah.
+                <p className="theme-text-muted mt-1 max-w-2xl text-sm leading-6">
+                  Tambahkan data gudang baru
+                  untuk mengelola penyimpanan
+                  sarana dan prasarana sekolah.
                 </p>
+
               </div>
 
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-blue-100 bg-blue-50 text-blue-600 shadow-sm">
+              <div
+                className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border ${themePrimarySoftBorder} ${themePrimarySoft} ${themePrimaryText} ${themeSmallShadow}`}
+              >
                 <Warehouse size={27} />
               </div>
+
             </div>
 
-            {/* ALERT ERROR */}
+            {/* =================================================
+                ALERT ERROR
+            ================================================= */}
+
             {error && (
-              <div className="mb-5 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3.5 text-sm text-red-700 shadow-sm">
+              <div
+                className={`mb-5 flex items-start gap-3 rounded-2xl border ${themeDangerBorder} ${themeDangerSurface} px-4 py-3.5 text-sm shadow-sm`}
+              >
 
-                <AlertCircle
-                  className="mt-0.5 shrink-0"
-                  size={19}
-                />
-
-                <div className="flex-1 font-medium">
-                  {error}
+                <div
+                  className={`theme-card flex h-9 w-9 shrink-0 items-center justify-center rounded-xl theme-danger ${themeSmallShadow}`}
+                >
+                  <AlertCircle
+                    size={19}
+                  />
                 </div>
+
+                <div className="flex-1">
+                  <p className="theme-danger text-sm font-semibold">
+                    Terjadi Kesalahan
+                  </p>
+
+                  <p className="theme-danger mt-0.5 text-sm">
+                    {error}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setError("")
+                  }
+                  className="theme-danger rounded-lg p-1.5 transition hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]"
+                >
+                  <span className="sr-only">
+                    Tutup
+                  </span>
+
+                  ×
+                </button>
+
               </div>
             )}
 
-            {/* ALERT SUCCESS */}
-            {saved && (
-              <div className="mb-5 flex items-center gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3.5 text-sm font-semibold text-emerald-700 shadow-sm">
+            {/* =================================================
+                ALERT SUCCESS
+            ================================================= */}
 
-                <CheckCircle2 size={19} />
+            {saved && (
+              <div
+                className={`mb-5 flex items-center gap-3 rounded-2xl border ${themeSuccessBorder} ${themeSuccessSurface} px-4 py-3.5 text-sm font-semibold theme-success shadow-sm`}
+              >
+
+                <div
+                  className={`theme-card flex h-9 w-9 shrink-0 items-center justify-center rounded-xl theme-success ${themeSmallShadow}`}
+                >
+                  <CheckCircle2 size={19} />
+                </div>
 
                 <span>
-                  Gudang berhasil ditambahkan. Mengalihkan...
+                  Gudang berhasil ditambahkan.
+                  Mengalihkan...
                 </span>
+
               </div>
             )}
 
-            {/* GRID */}
+            {/* =================================================
+                GRID
+            ================================================= */}
+
             <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
 
-              {/* =========================
+              {/* =================================================
                   LEFT - FORM
-              ========================== */}
-              <form onSubmit={handleSubmit}>
+              ================================================= */}
 
-                <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <form
+                onSubmit={handleSubmit}
+              >
 
-                  {/* FORM HEADER */}
-                  <div className="border-b border-slate-200 px-5 py-5 sm:px-7">
+                <div
+                  className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+                >
+
+                  {/* =================================================
+                      FORM HEADER
+                  ================================================= */}
+
+                  <div
+                    className={`border-b ${themeDivider} px-5 py-5 sm:px-7`}
+                  >
 
                     <div className="flex items-center gap-3">
 
-                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                      <div
+                        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
+                      >
                         <Warehouse size={21} />
                       </div>
 
                       <div className="min-w-0">
-                        <h2 className="text-base font-bold text-slate-900 sm:text-lg">
+
+                        <h2 className="theme-text text-base font-bold sm:text-lg">
                           Informasi Gudang
                         </h2>
 
-                        <p className="mt-0.5 text-sm text-slate-500">
-                          Lengkapi informasi utama gudang.
+                        <p className="theme-text-muted mt-0.5 text-sm">
+                          Lengkapi informasi utama
+                          gudang.
                         </p>
+
                       </div>
 
                     </div>
 
                   </div>
 
-                  {/* FORM BODY */}
+                  {/* =================================================
+                      FORM BODY
+                  ================================================= */}
+
                   <div className="space-y-6 px-5 py-6 sm:px-7">
 
-                    {/* =========================
+                    {/* =================================================
                         NAMA GUDANG
-                    ========================== */}
+                    ================================================= */}
+
                     <div>
 
                       <label
                         htmlFor="nama"
-                        className="mb-2 block text-sm font-semibold text-slate-800"
+                        className="theme-text-secondary mb-2 block text-sm font-semibold"
                       >
                         Nama Gudang
-                        <span className="ml-1 text-red-500">
+
+                        <span className="theme-danger ml-1">
                           *
                         </span>
                       </label>
@@ -263,7 +450,7 @@ export default function TambahMasterGudangPage() {
 
                         <Warehouse
                           size={18}
-                          className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-slate-400"
+                          className="theme-text-muted pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2"
                         />
 
                         <input
@@ -271,26 +458,25 @@ export default function TambahMasterGudangPage() {
                           type="text"
                           name="nama"
                           value={form.nama}
-                          onChange={handleChange}
+                          onChange={
+                            handleChange
+                          }
                           maxLength={100}
                           autoComplete="off"
                           placeholder="Contoh: Gudang Utama"
-                          className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-4 text-sm font-medium text-slate-900 caret-blue-600 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-                          style={{
-                            color: "#0f172a",
-                            WebkitTextFillColor: "#0f172a",
-                          }}
+                          className={`theme-input h-12 w-full rounded-xl border ${themeNeutralBorder} pl-11 pr-4 text-sm font-medium outline-none transition ${themeFocus} placeholder:text-[var(--color-text-placeholder)]`}
                         />
 
                       </div>
 
                       <div className="mt-1.5 flex items-center justify-between gap-3">
 
-                        <p className="text-xs text-slate-400">
-                          Minimal 3 karakter, maksimal 100 karakter.
+                        <p className="theme-text-muted text-xs">
+                          Minimal 3 karakter,
+                          maksimal 100 karakter.
                         </p>
 
-                        <span className="shrink-0 text-xs font-medium text-slate-400">
+                        <span className="theme-text-muted shrink-0 text-xs font-medium">
                           {form.nama.length}/100
                         </span>
 
@@ -298,14 +484,15 @@ export default function TambahMasterGudangPage() {
 
                     </div>
 
-                    {/* =========================
+                    {/* =================================================
                         LOKASI
-                    ========================== */}
+                    ================================================= */}
+
                     <div>
 
                       <label
                         htmlFor="lokasi"
-                        className="mb-2 block text-sm font-semibold text-slate-800"
+                        className="theme-text-secondary mb-2 block text-sm font-semibold"
                       >
                         Lokasi Gudang
                       </label>
@@ -314,7 +501,7 @@ export default function TambahMasterGudangPage() {
 
                         <MapPin
                           size={18}
-                          className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-slate-400"
+                          className="theme-text-muted pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2"
                         />
 
                         <input
@@ -322,36 +509,36 @@ export default function TambahMasterGudangPage() {
                           type="text"
                           name="lokasi"
                           value={form.lokasi}
-                          onChange={handleChange}
+                          onChange={
+                            handleChange
+                          }
                           maxLength={255}
                           autoComplete="off"
                           placeholder="Contoh: Gedung A Lantai 1"
-                          className="h-12 w-full rounded-xl border border-slate-200 bg-white pl-11 pr-4 text-sm font-medium text-slate-900 caret-blue-600 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-                          style={{
-                            color: "#0f172a",
-                            WebkitTextFillColor: "#0f172a",
-                          }}
+                          className={`theme-input h-12 w-full rounded-xl border ${themeNeutralBorder} pl-11 pr-4 text-sm font-medium outline-none transition ${themeFocus} placeholder:text-[var(--color-text-placeholder)]`}
                         />
 
                       </div>
 
-                      <p className="mt-1.5 text-xs text-slate-400">
+                      <p className="theme-text-muted mt-1.5 text-xs">
                         Lokasi bersifat opsional.
                       </p>
 
                     </div>
 
-                    {/* =========================
+                    {/* =================================================
                         STATUS
-                    ========================== */}
+                    ================================================= */}
+
                     <div>
 
                       <label
                         htmlFor="status"
-                        className="mb-2 block text-sm font-semibold text-slate-800"
+                        className="theme-text-secondary mb-2 block text-sm font-semibold"
                       >
                         Status
-                        <span className="ml-1 text-red-500">
+
+                        <span className="theme-danger ml-1">
                           *
                         </span>
                       </label>
@@ -360,37 +547,33 @@ export default function TambahMasterGudangPage() {
 
                         <ShieldCheck
                           size={18}
-                          className="pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2 text-slate-400"
+                          className="theme-text-muted pointer-events-none absolute left-4 top-1/2 z-10 -translate-y-1/2"
                         />
 
                         <select
                           id="status"
                           name="status"
                           value={form.status}
-                          onChange={handleChange}
-                          className="h-12 w-full cursor-pointer appearance-none rounded-xl border border-slate-200 bg-white pl-11 pr-10 text-sm font-semibold text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-                          style={{
-                            color: "#0f172a",
-                            colorScheme: "light",
-                          }}
+                          onChange={
+                            handleChange
+                          }
+                          className={`theme-input h-12 w-full cursor-pointer appearance-none rounded-xl border ${themeNeutralBorder} pl-11 pr-10 text-sm font-semibold outline-none transition ${themeFocus}`}
                         >
-                          <option
-                            value="aktif"
-                            className="bg-white text-slate-900"
-                          >
+
+                          <option value="aktif">
                             Aktif
                           </option>
 
-                          <option
-                            value="nonaktif"
-                            className="bg-white text-slate-900"
-                          >
+                          <option value="nonaktif">
                             Nonaktif
                           </option>
+
                         </select>
 
                         {/* CUSTOM ARROW */}
-                        <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
+
+                        <div className="theme-text-muted pointer-events-none absolute right-4 top-1/2 -translate-y-1/2">
+
                           <svg
                             width="16"
                             height="16"
@@ -403,24 +586,31 @@ export default function TambahMasterGudangPage() {
                               clipRule="evenodd"
                             />
                           </svg>
+
                         </div>
 
                       </div>
 
-                      <p className="mt-1.5 text-xs text-slate-400">
-                        Gudang aktif dapat digunakan untuk penyimpanan aset.
+                      <p className="theme-text-muted mt-1.5 text-xs">
+                        Gudang aktif dapat digunakan
+                        untuk penyimpanan aset.
                       </p>
 
                     </div>
 
                   </div>
 
-                  {/* FORM FOOTER */}
-                  <div className="flex flex-col-reverse gap-3 border-t border-slate-200 bg-slate-50 px-5 py-5 sm:flex-row sm:justify-end sm:px-7">
+                  {/* =================================================
+                      FORM FOOTER
+                  ================================================= */}
+
+                  <div
+                    className={`flex flex-col-reverse gap-3 border-t ${themeDivider} ${themeNeutralSurface} px-5 py-5 sm:flex-row sm:justify-end sm:px-7`}
+                  >
 
                     <Link
                       href="/admin/sarpras/gudang/master"
-                      className="inline-flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 hover:text-slate-900"
+                      className={`theme-card theme-text-secondary inline-flex h-11 items-center justify-center rounded-xl border ${themeNeutralBorder} px-5 text-sm font-semibold transition ${themeNeutralHover}`}
                     >
                       Batal
                     </Link>
@@ -428,22 +618,26 @@ export default function TambahMasterGudangPage() {
                     <button
                       type="submit"
                       disabled={saving}
-                      className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 hover:shadow-md disabled:cursor-not-allowed disabled:bg-slate-300 disabled:shadow-none"
+                      className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-5 text-sm font-semibold text-[var(--color-card)] ${themePrimaryShadow} transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60 disabled:shadow-none`}
                     >
+
                       {saving ? (
                         <>
                           <Loader2
                             size={18}
                             className="animate-spin"
                           />
+
                           Menyimpan...
                         </>
                       ) : (
                         <>
                           <Save size={18} />
+
                           Simpan Gudang
                         </>
                       )}
+
                     </button>
 
                   </div>
@@ -452,30 +646,45 @@ export default function TambahMasterGudangPage() {
 
               </form>
 
-              {/* =========================
+              {/* =================================================
                   RIGHT - PREVIEW
-              ========================== */}
+              ================================================= */}
+
               <aside className="space-y-5">
 
-                {/* PREVIEW CARD */}
-                <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm xl:sticky xl:top-6">
+                {/* =================================================
+                    PREVIEW CARD
+                ================================================= */}
+
+                <div
+                  className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow} xl:sticky xl:top-6`}
+                >
 
                   {/* CARD HEADER */}
-                  <div className="border-b border-slate-200 bg-gradient-to-br from-blue-50 to-white px-5 py-5">
+
+                  <div
+                    className={`border-b ${themeDivider} ${themePrimarySoft} px-5 py-5`}
+                  >
 
                     <div className="flex items-center justify-between gap-3">
 
                       <div>
-                        <p className="text-xs font-bold uppercase tracking-wider text-blue-600">
+
+                        <p
+                          className={`text-xs font-bold uppercase tracking-wider ${themePrimaryText}`}
+                        >
                           Preview
                         </p>
 
-                        <h3 className="mt-1 text-lg font-bold text-slate-900">
+                        <h3 className="theme-text mt-1 text-lg font-bold">
                           Data Gudang
                         </h3>
+
                       </div>
 
-                      <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-blue-600 shadow-sm ring-1 ring-blue-100">
+                      <div
+                        className={`flex h-11 w-11 items-center justify-center rounded-xl ${themeCardShadow} theme-card ${themePrimaryText} ring-1 ${themePrimarySoftBorder}`}
+                      >
                         <Building2 size={21} />
                       </div>
 
@@ -483,52 +692,66 @@ export default function TambahMasterGudangPage() {
 
                   </div>
 
-                  {/* PREVIEW BODY */}
+                  {/* =================================================
+                      PREVIEW BODY
+                  ================================================= */}
+
                   <div className="p-5">
 
                     {/* NAME PREVIEW */}
-                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
 
-                      <p className="mb-1 text-xs font-semibold uppercase tracking-wide text-slate-400">
+                    <div
+                      className={`rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} p-4`}
+                    >
+
+                      <p className="theme-text-muted mb-1 text-xs font-semibold uppercase tracking-wide">
                         Nama Gudang
                       </p>
 
                       <p
                         className={`break-words text-base font-bold ${
                           form.nama.trim()
-                            ? "text-slate-900"
-                            : "text-slate-400"
+                            ? "theme-text"
+                            : "theme-text-placeholder"
                         }`}
                       >
-                        {form.nama.trim() || "Nama gudang belum diisi"}
+                        {form.nama.trim() ||
+                          "Nama gudang belum diisi"}
                       </p>
 
                     </div>
 
-                    {/* INFO LIST */}
+                    {/* =================================================
+                        INFO LIST
+                    ================================================= */}
+
                     <div className="mt-4 space-y-3">
 
                       {/* LOCATION */}
+
                       <div className="flex items-start gap-3">
 
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+                        <div
+                          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${themeNeutralSurface} theme-text-secondary`}
+                        >
                           <MapPin size={17} />
                         </div>
 
                         <div className="min-w-0 flex-1">
 
-                          <p className="text-xs font-medium text-slate-400">
+                          <p className="theme-text-muted text-xs font-medium">
                             Lokasi
                           </p>
 
                           <p
                             className={`mt-0.5 break-words text-sm font-semibold ${
                               form.lokasi.trim()
-                                ? "text-slate-800"
-                                : "text-slate-400"
+                                ? "theme-text-secondary"
+                                : "theme-text-placeholder"
                             }`}
                           >
-                            {form.lokasi.trim() || "Belum ditentukan"}
+                            {form.lokasi.trim() ||
+                              "Belum ditentukan"}
                           </p>
 
                         </div>
@@ -536,28 +759,38 @@ export default function TambahMasterGudangPage() {
                       </div>
 
                       {/* STATUS */}
+
                       <div className="flex items-start gap-3">
 
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
+                        <div
+                          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${themeSuccessSurface} theme-success`}
+                        >
                           <ShieldCheck size={17} />
                         </div>
 
                         <div className="min-w-0 flex-1">
 
-                          <p className="text-xs font-medium text-slate-400">
+                          <p className="theme-text-muted text-xs font-medium">
                             Status
                           </p>
 
                           <div className="mt-1">
 
-                            {form.status === "aktif" ? (
-                              <span className="inline-flex items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-bold text-emerald-700">
-                                <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                            {form.status ===
+                            "aktif" ? (
+                              <span
+                                className={`inline-flex items-center gap-1.5 rounded-full ${themeSuccessSurface} px-2.5 py-1 text-xs font-bold theme-success`}
+                              >
+                                <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-success)]" />
+
                                 Aktif
                               </span>
                             ) : (
-                              <span className="inline-flex items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-xs font-bold text-slate-600">
-                                <span className="h-1.5 w-1.5 rounded-full bg-slate-400" />
+                              <span
+                                className={`inline-flex items-center gap-1.5 rounded-full ${themeNeutralSurface} px-2.5 py-1 text-xs font-bold theme-text-muted`}
+                              >
+                                <span className="h-1.5 w-1.5 rounded-full bg-[color-mix(in_srgb,var(--color-text)_40%,transparent)]" />
+
                                 Nonaktif
                               </span>
                             )}
@@ -570,38 +803,50 @@ export default function TambahMasterGudangPage() {
 
                     </div>
 
-                    {/* DIVIDER */}
-                    <div className="my-5 border-t border-slate-200" />
+                    {/* =================================================
+                        DIVIDER
+                    ================================================= */}
 
-                    {/* COMPLETION */}
+                    <div
+                      className={`my-5 border-t ${themeDivider}`}
+                    />
+
+                    {/* =================================================
+                        COMPLETION
+                    ================================================= */}
+
                     <div>
 
                       <div className="mb-2 flex items-center justify-between">
 
-                        <p className="text-sm font-semibold text-slate-700">
+                        <p className="theme-text-secondary text-sm font-semibold">
                           Kelengkapan Data
                         </p>
 
                         <span
                           className={`text-xs font-bold ${
                             isFormComplete
-                              ? "text-emerald-600"
-                              : "text-slate-400"
+                              ? "theme-success"
+                              : "theme-text-muted"
                           }`}
                         >
-                          {isFormComplete ? "Lengkap" : "Belum lengkap"}
+                          {isFormComplete
+                            ? "Lengkap"
+                            : "Belum lengkap"}
                         </span>
 
                       </div>
 
-                      <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+                      <div
+                        className={`h-2 overflow-hidden rounded-full ${themeNeutralSurface}`}
+                      >
 
                         <div
                           className={`h-full rounded-full transition-all duration-300 ${
                             isFormComplete
-                              ? "w-full bg-emerald-500"
+                              ? "w-full bg-[var(--color-success)]"
                               : form.nama.length > 0
-                              ? "w-1/2 bg-blue-500"
+                              ? "w-1/2 bg-[var(--color-primary)]"
                               : "w-0"
                           }`}
                         />
@@ -610,69 +855,82 @@ export default function TambahMasterGudangPage() {
 
                     </div>
 
-                    {/* CHECKLIST */}
+                    {/* =================================================
+                        CHECKLIST
+                    ================================================= */}
+
                     <div className="mt-5 space-y-2.5">
+
+                      {/* NAMA */}
 
                       <div className="flex items-center gap-2.5">
 
-                        {form.nama.trim().length >= 3 ? (
+                        {form.nama.trim()
+                          .length >= 3 ? (
                           <CircleCheck
                             size={17}
-                            className="shrink-0 text-emerald-500"
+                            className="theme-success shrink-0"
                           />
                         ) : (
                           <CircleAlert
                             size={17}
-                            className="shrink-0 text-slate-300"
+                            className="theme-text-placeholder shrink-0"
                           />
                         )}
 
                         <span
                           className={`text-xs ${
-                            form.nama.trim().length >= 3
-                              ? "font-medium text-slate-700"
-                              : "text-slate-400"
+                            form.nama.trim()
+                              .length >= 3
+                              ? "theme-text-secondary font-medium"
+                              : "theme-text-muted"
                           }`}
                         >
-                          Nama gudang sudah valid
+                          Nama gudang sudah
+                          valid
                         </span>
 
                       </div>
+
+                      {/* LOKASI */}
 
                       <div className="flex items-center gap-2.5">
 
                         {form.lokasi.trim() ? (
                           <CircleCheck
                             size={17}
-                            className="shrink-0 text-emerald-500"
+                            className="theme-success shrink-0"
                           />
                         ) : (
                           <CircleAlert
                             size={17}
-                            className="shrink-0 text-slate-300"
+                            className="theme-text-placeholder shrink-0"
                           />
                         )}
 
                         <span
                           className={`text-xs ${
                             form.lokasi.trim()
-                              ? "font-medium text-slate-700"
-                              : "text-slate-400"
+                              ? "theme-text-secondary font-medium"
+                              : "theme-text-muted"
                           }`}
                         >
-                          Lokasi gudang ditambahkan
+                          Lokasi gudang
+                          ditambahkan
                         </span>
 
                       </div>
+
+                      {/* STATUS */}
 
                       <div className="flex items-center gap-2.5">
 
                         <CircleCheck
                           size={17}
-                          className="shrink-0 text-emerald-500"
+                          className="theme-success shrink-0"
                         />
 
-                        <span className="text-xs font-medium text-slate-700">
+                        <span className="theme-text-secondary text-xs font-medium">
                           Status gudang dipilih
                         </span>
 
@@ -684,24 +942,33 @@ export default function TambahMasterGudangPage() {
 
                 </div>
 
-                {/* INFORMATION CARD */}
-                <div className="rounded-2xl border border-blue-100 bg-blue-50/70 p-5">
+                {/* =================================================
+                    INFORMATION CARD
+                ================================================= */}
+
+                <div
+                  className={`rounded-2xl border ${themeInfoBorder} ${themeInfoSurface} p-5`}
+                >
 
                   <div className="flex items-start gap-3">
 
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-blue-600 shadow-sm">
+                    <div
+                      className={`theme-card flex h-9 w-9 shrink-0 items-center justify-center rounded-lg theme-info ${themeSmallShadow}`}
+                    >
                       <Info size={18} />
                     </div>
 
                     <div>
 
-                      <h4 className="text-sm font-bold text-slate-900">
+                      <h4 className="theme-text text-sm font-bold">
                         Informasi
                       </h4>
 
-                      <p className="mt-1.5 text-xs leading-5 text-slate-600">
-                        Gunakan nama gudang yang mudah dikenali,
-                        misalnya berdasarkan fungsi atau lokasi
+                      <p className="theme-text-secondary mt-1.5 text-xs leading-5">
+                        Gunakan nama gudang
+                        yang mudah dikenali,
+                        misalnya berdasarkan
+                        fungsi atau lokasi
                         penyimpanannya.
                       </p>
 

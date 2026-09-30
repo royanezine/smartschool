@@ -203,7 +203,7 @@ export default function DetailJurnalKasPage() {
         setIsCollapsed={setIsCollapsed}
       >
         <div className="flex min-h-[500px] items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-200 border-t-[#1E3A8A]" />
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-primary)]" />
         </div>
       </PageShell>
     );
@@ -216,22 +216,22 @@ export default function DetailJurnalKasPage() {
         setIsCollapsed={setIsCollapsed}
       >
         <div className="mx-auto max-w-[900px] py-12">
-          <div className="rounded-2xl border border-slate-200 bg-white p-10 text-center shadow-sm">
-            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+          <div className="theme-card rounded-2xl border p-10 text-center shadow-sm">
+            <div className="theme-card-soft theme-text-muted mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border">
               <FileText size={25} />
             </div>
 
-            <h2 className="mt-5 text-lg font-bold text-[#0F172A]">
+            <h2 className="theme-text mt-5 text-lg font-bold">
               Transaksi tidak ditemukan
             </h2>
 
-            <p className="mt-2 text-sm text-slate-500">
+            <p className="theme-text-muted mt-2 text-sm">
               Data transaksi yang kamu cari tidak tersedia.
             </p>
 
             <Link
               href="/admin/keuangan/jurnalKas"
-              className="mt-6 inline-flex items-center gap-2 rounded-xl bg-[#1E3A8A] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[#172F70]"
+              className="theme-primary mt-6 inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold shadow-sm transition"
             >
               <ArrowLeft size={16} />
               Kembali ke Jurnal Kas
@@ -250,18 +250,19 @@ export default function DetailJurnalKasPage() {
       setIsCollapsed={setIsCollapsed}
     >
       <div className="mx-auto max-w-[1250px]">
+
         {/* BREADCRUMB */}
         <div className="mb-5 flex items-center gap-2 text-sm">
           <Link
             href="/admin/keuangan/jurnalKas"
-            className="text-slate-400 transition hover:text-[#1E3A8A]"
+            className="theme-text-muted transition hover:text-[var(--color-primary)]"
           >
             Jurnal & Kas
           </Link>
 
-          <span className="text-slate-300">/</span>
+          <span className="theme-text-placeholder">/</span>
 
-          <span className="font-medium text-slate-600">
+          <span className="theme-text-secondary font-medium">
             Detail Transaksi
           </span>
         </div>
@@ -269,12 +270,13 @@ export default function DetailJurnalKasPage() {
         {/* PAGE HEADER */}
         <div className="mb-6 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
           <div className="flex items-center gap-4">
+
             <div
-              className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${
+              className={
                 isIncome
-                  ? "bg-emerald-50 text-emerald-600"
-                  : "bg-rose-50 text-rose-600"
-              }`}
+                  ? "theme-success flex h-12 w-12 shrink-0 items-center justify-center rounded-xl"
+                  : "theme-danger flex h-12 w-12 shrink-0 items-center justify-center rounded-xl"
+              }
             >
               {isIncome ? (
                 <ArrowUpRight size={24} />
@@ -284,15 +286,15 @@ export default function DetailJurnalKasPage() {
             </div>
 
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[#2563EB]">
+              <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-[var(--color-primary)]">
                 DETAIL TRANSAKSI
               </p>
 
-              <h1 className="mt-1 text-2xl font-bold tracking-tight text-[#0F172A] sm:text-3xl">
+              <h1 className="theme-text mt-1 text-2xl font-bold tracking-tight sm:text-3xl">
                 {transaction.keterangan}
               </h1>
 
-              <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-400">
+              <div className="theme-text-muted mt-1 flex flex-wrap items-center gap-2 text-xs">
                 <span>ID #{transaction.id}</span>
                 <span>•</span>
                 <span>{formatDate(transaction.tanggal)}</span>
@@ -301,9 +303,10 @@ export default function DetailJurnalKasPage() {
           </div>
 
           <div className="flex flex-wrap gap-2">
+
             <Link
               href="/admin/keuangan/jurnalKas"
-              className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50"
+              className="theme-input inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm transition"
             >
               <ArrowLeft size={16} />
               Kembali
@@ -311,42 +314,41 @@ export default function DetailJurnalKasPage() {
 
             <Link
               href={`/admin/keuangan/jurnalKas/edit/${transaction.id}`}
-              className="inline-flex items-center gap-2 rounded-xl bg-[#1E3A8A] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#172F70]"
+              className="theme-primary inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm transition"
             >
               <Edit size={16} />
               Edit Transaksi
             </Link>
+
           </div>
         </div>
 
         {/* STATUS + AMOUNT */}
         <div className="mb-6 grid grid-cols-1 gap-4 lg:grid-cols-[1fr_320px]">
+
           <div
-            className={`relative overflow-hidden rounded-2xl border bg-white p-6 shadow-sm ${
-              isIncome
-                ? "border-emerald-100"
-                : "border-rose-100"
-            }`}
+            className={`theme-card relative overflow-hidden rounded-2xl border p-6 shadow-sm`}
           >
             <div
               className={`absolute left-0 top-0 h-full w-1 ${
                 isIncome
-                  ? "bg-emerald-500"
-                  : "bg-rose-500"
+                  ? "bg-[var(--color-success)]"
+                  : "bg-[var(--color-danger)]"
               }`}
             />
 
             <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+
               <div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+                <p className="theme-text-muted text-xs font-semibold uppercase tracking-wider">
                   Nilai Transaksi
                 </p>
 
                 <p
                   className={`mt-2 text-3xl font-bold tracking-tight ${
                     isIncome
-                      ? "text-emerald-600"
-                      : "text-rose-600"
+                      ? "text-[var(--color-success)]"
+                      : "text-[var(--color-danger)]"
                   }`}
                 >
                   {formatCurrency(
@@ -356,7 +358,7 @@ export default function DetailJurnalKasPage() {
                   )}
                 </p>
 
-                <p className="mt-2 text-sm text-slate-400">
+                <p className="theme-text-muted mt-2 text-sm">
                   {isIncome
                     ? "Dana masuk ke kas sekolah"
                     : "Dana keluar dari kas sekolah"}
@@ -364,86 +366,104 @@ export default function DetailJurnalKasPage() {
               </div>
 
               <div
-                className={`inline-flex w-fit items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold ${
+                className={
                   isIncome
-                    ? "bg-emerald-50 text-emerald-700"
-                    : "bg-rose-50 text-rose-700"
-                }`}
+                    ? "theme-success inline-flex w-fit items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-bold"
+                    : "theme-danger inline-flex w-fit items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-bold"
+                }
               >
                 <span
                   className={`h-1.5 w-1.5 rounded-full ${
                     isIncome
-                      ? "bg-emerald-500"
-                      : "bg-rose-500"
+                      ? "bg-[var(--color-success)]"
+                      : "bg-[var(--color-danger)]"
                   }`}
                 />
 
                 {transaction.jenis}
               </div>
+
             </div>
           </div>
 
-          <div className="rounded-2xl border border-slate-200 bg-[#0F172A] p-6 text-white shadow-sm">
+          {/* SALDO */}
+          <div className="theme-card rounded-2xl border p-6 shadow-sm">
+
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10">
+
+              <div className="theme-info flex h-10 w-10 items-center justify-center rounded-xl">
                 <Wallet size={19} />
               </div>
 
               <div>
-                <p className="text-[11px] font-medium text-slate-400">
+                <p className="theme-text-muted text-[11px] font-medium">
                   Saldo Setelah Transaksi
                 </p>
 
                 <p
                   className={`mt-1 text-xl font-bold ${
                     Number(transaction.saldo) >= 0
-                      ? "text-white"
-                      : "text-rose-300"
+                      ? "theme-text"
+                      : "text-[var(--color-danger)]"
                   }`}
                 >
                   {formatCurrency(transaction.saldo)}
                 </p>
               </div>
+
             </div>
 
-            <div className="mt-5 border-t border-white/10 pt-4">
+            <div className="theme-border mt-5 border-t pt-4">
+
               <div className="flex items-center justify-between text-xs">
-                <span className="text-slate-400">
+
+                <span className="theme-text-muted">
                   Status pencatatan
                 </span>
 
-                <span className="flex items-center gap-1.5 font-semibold text-emerald-400">
+                <span className="flex items-center gap-1.5 font-semibold text-[var(--color-success)]">
                   <CircleCheck size={13} />
                   Tercatat
                 </span>
+
               </div>
+
             </div>
           </div>
+
         </div>
 
         {/* MAIN CONTENT */}
         <div className="grid grid-cols-1 gap-5 lg:grid-cols-[1fr_350px]">
+
           {/* DETAIL */}
-          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <div className="border-b border-slate-200 px-6 py-5">
+          <div className="theme-card overflow-hidden rounded-2xl border shadow-sm">
+
+            <div className="theme-border border-b px-6 py-5">
+
               <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-[#1E3A8A]">
+
+                <div className="theme-info flex h-9 w-9 items-center justify-center rounded-lg">
                   <ReceiptText size={18} />
                 </div>
 
                 <div>
-                  <h2 className="text-sm font-bold text-[#0F172A]">
+
+                  <h2 className="theme-text text-sm font-bold">
                     Informasi Transaksi
                   </h2>
 
-                  <p className="mt-0.5 text-xs text-slate-400">
+                  <p className="theme-text-muted mt-0.5 text-xs">
                     Detail pencatatan transaksi kas sekolah
                   </p>
+
                 </div>
+
               </div>
             </div>
 
-            <div className="divide-y divide-slate-100">
+            <div className="divide-y divide-[var(--color-border-soft)]">
+
               <DetailRow
                 icon={<CalendarDays size={17} />}
                 label="Tanggal Transaksi"
@@ -468,8 +488,8 @@ export default function DetailJurnalKasPage() {
                 value={transaction.jenis}
                 valueClass={
                   isIncome
-                    ? "text-emerald-600"
-                    : "text-rose-600"
+                    ? "text-[var(--color-success)]"
+                    : "text-[var(--color-danger)]"
                 }
               />
 
@@ -493,7 +513,7 @@ export default function DetailJurnalKasPage() {
                     ? formatCurrency(transaction.debit)
                     : "-"
                 }
-                valueClass="text-rose-600"
+                valueClass="text-[var(--color-danger)]"
               />
 
               <DetailRow
@@ -504,7 +524,7 @@ export default function DetailJurnalKasPage() {
                     ? formatCurrency(transaction.kredit)
                     : "-"
                 }
-                valueClass="text-emerald-600"
+                valueClass="text-[var(--color-success)]"
               />
 
               <DetailRow
@@ -513,23 +533,28 @@ export default function DetailJurnalKasPage() {
                 value={formatCurrency(transaction.saldo)}
                 valueClass={
                   Number(transaction.saldo) >= 0
-                    ? "text-[#0F172A]"
-                    : "text-rose-600"
+                    ? "theme-text"
+                    : "text-[var(--color-danger)]"
                 }
               />
+
             </div>
           </div>
 
           {/* SIDEBAR DETAIL */}
           <div className="space-y-5">
-            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-              <div className="border-b border-slate-200 px-5 py-4">
-                <h2 className="text-sm font-bold text-[#0F172A]">
+
+            {/* INFORMASI PENCATATAN */}
+            <div className="theme-card overflow-hidden rounded-2xl border shadow-sm">
+
+              <div className="theme-border border-b px-5 py-4">
+                <h2 className="theme-text text-sm font-bold">
                   Informasi Pencatatan
                 </h2>
               </div>
 
               <div className="space-y-5 p-5">
+
                 <MetaItem
                   icon={<User size={16} />}
                   label="Dibuat Oleh"
@@ -556,53 +581,65 @@ export default function DetailJurnalKasPage() {
                   label="Unit"
                   value="Kas Sekolah"
                 />
+
               </div>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            {/* CATATAN */}
+            <div className="theme-card rounded-2xl border p-5 shadow-sm">
+
               <div className="flex items-center gap-3">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+
+                <div className="theme-card-soft theme-text-muted flex h-9 w-9 items-center justify-center rounded-lg border">
                   <FileText size={17} />
                 </div>
 
                 <div>
-                  <p className="text-sm font-bold text-[#0F172A]">
+
+                  <p className="theme-text text-sm font-bold">
                     Catatan
                   </p>
 
-                  <p className="text-xs text-slate-400">
+                  <p className="theme-text-muted text-xs">
                     Keterangan tambahan
                   </p>
+
                 </div>
+
               </div>
 
-              <div className="mt-4 rounded-xl bg-slate-50 p-4">
-                <p className="text-sm leading-6 text-slate-600">
+              <div className="theme-card-soft theme-border mt-4 rounded-xl border p-4">
+
+                <p className="theme-text-secondary text-sm leading-6">
                   {transaction.catatan ||
                     "Tidak ada catatan tambahan untuk transaksi ini."}
                 </p>
+
               </div>
             </div>
 
             {/* DANGER ACTION */}
-            <div className="rounded-2xl border border-rose-100 bg-rose-50/50 p-5">
-              <p className="text-sm font-bold text-rose-700">
+            <div className="theme-danger rounded-2xl border p-5">
+
+              <p className="text-sm font-bold">
                 Zona Tindakan
               </p>
 
-              <p className="mt-1 text-xs leading-5 text-rose-600/70">
+              <p className="mt-1 text-xs leading-5 opacity-80">
                 Penghapusan transaksi akan menghilangkan data
                 dari jurnal kas.
               </p>
 
               <button
                 onClick={handleDelete}
-                className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-rose-200 bg-white px-4 py-2.5 text-sm font-semibold text-rose-600 transition hover:bg-rose-50"
+                className="theme-input mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition hover:bg-[var(--color-danger-background)] hover:text-[var(--color-danger)]"
               >
                 <Trash2 size={16} />
                 Hapus Transaksi
               </button>
+
             </div>
+
           </div>
         </div>
 
@@ -618,7 +655,8 @@ function PageShell({
   setIsCollapsed,
 }) {
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[#F4F6F8]">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
+
       <Sidebar
         active="jurnalKas"
         setActive={() => {}}
@@ -627,6 +665,7 @@ function PageShell({
       />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+
         <Header
           toggleSidebar={() =>
             setIsCollapsed((prev) => !prev)
@@ -639,9 +678,10 @@ function PageShell({
           }}
         />
 
-        <main className="min-h-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8">
+        <main className="theme-page min-h-0 flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8">
           {children}
         </main>
+
       </div>
     </div>
   );
@@ -651,11 +691,12 @@ function DetailRow({
   icon,
   label,
   value,
-  valueClass = "text-slate-700",
+  valueClass = "theme-text-secondary",
 }) {
   return (
     <div className="flex flex-col gap-2 px-6 py-4 sm:flex-row sm:items-center">
-      <div className="flex w-full items-center gap-3 text-slate-400 sm:w-[210px]">
+
+      <div className="theme-text-muted flex w-full items-center gap-3 sm:w-[210px]">
         {icon}
 
         <span className="text-xs font-medium">
@@ -668,25 +709,33 @@ function DetailRow({
       >
         {value}
       </div>
+
     </div>
   );
 }
 
-function MetaItem({ icon, label, value }) {
+function MetaItem({
+  icon,
+  label,
+  value,
+}) {
   return (
     <div className="flex items-start gap-3">
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+
+      <div className="theme-card-soft theme-text-muted flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border">
         {icon}
       </div>
 
       <div className="min-w-0">
-        <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
+
+        <p className="theme-text-muted text-[11px] font-medium uppercase tracking-wide">
           {label}
         </p>
 
-        <p className="mt-1 break-words text-sm font-semibold text-slate-700">
+        <p className="theme-text-secondary mt-1 break-words text-sm font-semibold">
           {value}
         </p>
+
       </div>
     </div>
   );

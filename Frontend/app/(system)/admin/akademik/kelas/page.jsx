@@ -46,15 +46,6 @@ function getJenjangFromTingkat(tingkat) {
   return value ? `Tingkat ${value}` : "-";
 }
 
-/**
- * Mengambil jumlah siswa dari response API.
- *
- * Prioritas:
- * 1. _count.anggota
- * 2. jumlahSiswa
- * 3. jumlah_siswa
- * 4. anggota.length
- */
 function getJumlahSiswa(item) {
   if (!item) return 0;
 
@@ -104,24 +95,6 @@ function getNamaWaliKelas(item) {
   );
 }
 
-/**
- * Membaca nama tahun ajaran dari beberapa kemungkinan
- * bentuk response backend.
- *
- * Backend bisa mengirim:
- *
- * tahunAjaran: {
- *   tahunAjaran: "2026/2027",
- *   semester: "Genap"
- * }
- *
- * atau:
- *
- * tahunAjaran: {
- *   nama: "2026/2027",
- *   semester: "Genap"
- * }
- */
 function getNamaTahunAjaran(item) {
   return (
     item?.tahunAjaran?.nama ||
@@ -157,22 +130,30 @@ function StatCard({
   valueClass,
 }) {
   return (
-    <div className="group min-w-0 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
+    <div
+      className="
+        group min-w-0 rounded-2xl border
+        theme-border theme-card
+        p-4 shadow-sm
+        transition-all duration-200
+        hover:-translate-y-0.5 hover:shadow-md
+      "
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="truncate text-[10px] font-semibold uppercase tracking-wider text-slate-500">
+          <p className="truncate text-[10px] font-semibold uppercase tracking-wider theme-text-muted">
             {label}
           </p>
 
           <p
             className={`mt-2 text-2xl font-bold tracking-tight ${
-              valueClass || "text-slate-800"
+              valueClass || "theme-text"
             }`}
           >
             {value}
           </p>
 
-          <p className="mt-1 truncate text-[11px] text-slate-500">
+          <p className="mt-1 truncate text-[11px] theme-text-muted">
             {description}
           </p>
         </div>
@@ -214,9 +195,9 @@ export default function AdminKelasPage() {
 
   const [error, setError] = useState("");
 
-// =========================================================
-// LOAD TAHUN AJARAN
-// =========================================================
+  // =========================================================
+  // LOAD TAHUN AJARAN
+  // =========================================================
 
   const loadTahunAjaran = async () => {
     try {
@@ -234,15 +215,6 @@ export default function AdminKelasPage() {
         list = response.data.data;
       }
 
-      /**
-       * Normalisasi response backend.
-       *
-       * Backend:
-       * tahunAjaran: "2026/2027"
-       *
-       * FE:
-       * nama: "2026/2027"
-       */
       const normalized = list.map((item) => ({
         ...item,
 
@@ -281,9 +253,9 @@ export default function AdminKelasPage() {
     }
   };
 
-// =========================================================
-// LOAD KELAS
-// =========================================================
+  // =========================================================
+  // LOAD KELAS
+  // =========================================================
 
   const loadKelas = async (isRefresh = false) => {
     try {
@@ -410,17 +382,17 @@ export default function AdminKelasPage() {
     }
   };
 
-// =========================================================
-// INITIAL LOAD
-// =========================================================
+  // =========================================================
+  // INITIAL LOAD
+  // =========================================================
 
   useEffect(() => {
     loadTahunAjaran();
   }, []);
 
-// =========================================================
-// LOAD KELAS
-// =========================================================
+  // =========================================================
+  // LOAD KELAS
+  // =========================================================
 
   useEffect(() => {
     loadKelas(false);
@@ -432,9 +404,9 @@ export default function AdminKelasPage() {
     tahunAjaranFilter,
   ]);
 
-// =========================================================
-// TOTAL PAGE
-// =========================================================
+  // =========================================================
+  // TOTAL PAGE
+  // =========================================================
 
   const totalPages = Math.max(
     1,
@@ -443,9 +415,9 @@ export default function AdminKelasPage() {
     )
   );
 
-// =========================================================
-// SAFETY CURRENT PAGE
-// =========================================================
+  // =========================================================
+  // SAFETY CURRENT PAGE
+  // =========================================================
 
   useEffect(() => {
     if (
@@ -459,9 +431,9 @@ export default function AdminKelasPage() {
     totalPages,
   ]);
 
-// =========================================================
-// DISPLAYED DATA
-// =========================================================
+  // =========================================================
+  // DISPLAYED DATA
+  // =========================================================
 
   const displayedKelas = useMemo(() => {
     return Array.isArray(kelas)
@@ -469,9 +441,9 @@ export default function AdminKelasPage() {
       : [];
   }, [kelas]);
 
-// =========================================================
-// STATISTICS
-// =========================================================
+  // =========================================================
+  // STATISTICS
+  // =========================================================
 
   const totalKelas = totalData;
 
@@ -501,9 +473,9 @@ export default function AdminKelasPage() {
     displayedKelas.length -
     totalWali;
 
-// =========================================================
-// REFRESH
-// =========================================================
+  // =========================================================
+  // REFRESH
+  // =========================================================
 
   const handleRefresh = async () => {
     await Promise.all([
@@ -512,9 +484,9 @@ export default function AdminKelasPage() {
     ]);
   };
 
-// =========================================================
-// DELETE
-// =========================================================
+  // =========================================================
+  // DELETE
+  // =========================================================
 
   const handleDelete = async (item) => {
     const confirmed =
@@ -546,9 +518,9 @@ export default function AdminKelasPage() {
     }
   };
 
-// =========================================================
-// PAGINATION
-// =========================================================
+  // =========================================================
+  // PAGINATION
+  // =========================================================
 
   const goToPage = (page) => {
     if (
@@ -611,13 +583,13 @@ export default function AdminKelasPage() {
     totalData
   );
 
-// =========================================================
-// LOADING
-// =========================================================
+  // =========================================================
+  // LOADING
+  // =========================================================
 
   if (loading) {
     return (
-      <div className="flex h-screen w-full overflow-hidden bg-slate-100">
+      <div className="flex h-screen w-full overflow-hidden theme-page">
 
         <Sidebar
           active="kelas"
@@ -643,13 +615,13 @@ export default function AdminKelasPage() {
             }}
           />
 
-          <main className="flex min-h-0 flex-1 items-center justify-center">
+          <main className="theme-page flex min-h-0 flex-1 items-center justify-center">
 
             <div className="flex flex-col items-center gap-3">
 
-              <div className="h-9 w-9 animate-spin rounded-full border-4 border-blue-500 border-t-transparent" />
+              <div className="h-9 w-9 animate-spin rounded-full border-4 border-[var(--color-primary)] border-t-transparent" />
 
-              <p className="text-sm font-medium text-slate-500">
+              <p className="text-sm font-medium theme-text-muted">
                 Memuat data kelas...
               </p>
 
@@ -663,12 +635,12 @@ export default function AdminKelasPage() {
     );
   }
 
-// =========================================================
-// PAGE
-// =========================================================
+  // =========================================================
+  // PAGE
+  // =========================================================
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-slate-100">
+    <div className="flex h-screen w-full overflow-hidden theme-page">
 
       {/* SIDEBAR */}
 
@@ -702,7 +674,7 @@ export default function AdminKelasPage() {
 
         {/* MAIN */}
 
-        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
 
           <div className="w-full px-4 py-5 sm:px-5 sm:py-6 md:px-6 lg:px-8 xl:px-10">
 
@@ -710,17 +682,42 @@ export default function AdminKelasPage() {
 
               {/* PAGE HEADER */}
 
-              <section className="relative overflow-hidden rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 via-white to-indigo-50 p-5 shadow-sm sm:p-6">
+              <section
+                className="
+                  theme-card
+                  theme-border
+                  relative overflow-hidden
+                  rounded-2xl border
+                  p-5 shadow-sm
+                  sm:p-6
+                "
+              >
 
-                <div className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-blue-100/60 blur-2xl" />
+                <div
+                  className="
+                    theme-info
+                    pointer-events-none absolute
+                    -right-12 -top-12
+                    h-40 w-40 rounded-full
+                    opacity-60 blur-2xl
+                  "
+                />
 
-                <div className="pointer-events-none absolute -bottom-16 right-40 h-32 w-32 rounded-full bg-indigo-100/50 blur-2xl" />
+                <div
+                  className="
+                    theme-info
+                    pointer-events-none absolute
+                    -bottom-16 right-40
+                    h-32 w-32 rounded-full
+                    opacity-50 blur-2xl
+                  "
+                />
 
                 <div className="relative flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
 
                   <div className="flex min-w-0 items-center gap-4">
 
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-lg shadow-blue-200">
+                    <div className="theme-primary flex h-12 w-12 shrink-0 items-center justify-center rounded-xl shadow-lg">
                       <GraduationCap size={23} />
                     </div>
 
@@ -728,21 +725,21 @@ export default function AdminKelasPage() {
 
                       <div className="mb-1 flex flex-wrap items-center gap-2">
 
-                        <span className="rounded-md bg-blue-100 px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-blue-700">
+                        <span className="theme-info rounded-md px-2 py-1 text-[10px] font-bold uppercase tracking-wider">
                           Akademik
                         </span>
 
-                        <span className="rounded-md bg-white px-2 py-1 text-[10px] font-semibold text-slate-500 shadow-sm">
+                        <span className="theme-card-soft theme-text-muted rounded-md px-2 py-1 text-[10px] font-semibold shadow-sm">
                           {totalKelas} Kelas
                         </span>
 
                       </div>
 
-                      <h1 className="text-xl font-bold tracking-tight text-slate-800 sm:text-2xl">
+                      <h1 className="text-xl font-bold tracking-tight theme-text sm:text-2xl">
                         Kelola Kelas
                       </h1>
 
-                      <p className="mt-1 text-sm text-slate-500">
+                      <p className="mt-1 text-sm theme-text-muted">
                         Kelola data kelas,
                         wali kelas, tahun
                         ajaran, dan
@@ -759,7 +756,20 @@ export default function AdminKelasPage() {
                       type="button"
                       onClick={handleRefresh}
                       disabled={refreshing}
-                      className="flex min-h-10 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="
+                        theme-card
+                        theme-border
+                        theme-text-secondary
+                        theme-header-hover
+                        flex min-h-10
+                        items-center justify-center
+                        gap-2 rounded-xl
+                        border px-4 py-2.5
+                        text-sm font-semibold
+                        shadow-sm transition
+                        disabled:cursor-not-allowed
+                        disabled:opacity-50
+                      "
                     >
 
                       <RefreshCw
@@ -782,7 +792,15 @@ export default function AdminKelasPage() {
                           "/admin/akademik/kelas/tambah"
                         )
                       }
-                      className="flex min-h-10 items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-md shadow-blue-200 transition hover:bg-blue-700 hover:shadow-lg"
+                      className="
+                        theme-primary
+                        flex min-h-10
+                        items-center justify-center
+                        gap-2 rounded-xl
+                        px-5 py-2.5
+                        text-sm font-semibold
+                        shadow-md transition
+                      "
                     >
 
                       <Plus size={18} />
@@ -800,20 +818,27 @@ export default function AdminKelasPage() {
               {/* ERROR */}
 
               {error && (
-                <div className="flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4">
+                <div
+                  className="
+                    theme-danger
+                    theme-border
+                    flex items-start gap-3
+                    rounded-2xl border p-4
+                  "
+                >
 
                   <AlertCircle
                     size={18}
-                    className="mt-0.5 shrink-0 text-red-500"
+                    className="mt-0.5 shrink-0 text-[var(--color-danger)]"
                   />
 
                   <div className="min-w-0 flex-1">
 
-                    <p className="text-sm font-semibold text-red-700">
+                    <p className="text-sm font-semibold">
                       Gagal memuat data kelas
                     </p>
 
-                    <p className="mt-1 break-words text-xs leading-5 text-red-600">
+                    <p className="mt-1 break-words text-xs leading-5">
                       {error}
                     </p>
 
@@ -824,7 +849,11 @@ export default function AdminKelasPage() {
                     onClick={() =>
                       setError("")
                     }
-                    className="rounded-lg p-1 text-red-400 transition hover:bg-red-100 hover:text-red-600"
+                    className="
+                      theme-header-hover
+                      rounded-lg p-1
+                      transition
+                    "
                   >
                     <X size={16} />
                   </button>
@@ -841,7 +870,7 @@ export default function AdminKelasPage() {
                   label="Total Kelas"
                   value={totalKelas}
                   description="Kelas terdaftar"
-                  iconClass="bg-blue-100 text-blue-700"
+                  iconClass="theme-info"
                 />
 
                 <StatCard
@@ -849,8 +878,8 @@ export default function AdminKelasPage() {
                   label="Total Siswa"
                   value={totalSiswa}
                   description="Siswa pada halaman"
-                  iconClass="bg-indigo-100 text-indigo-700"
-                  valueClass="text-indigo-700"
+                  iconClass="theme-card-soft text-[var(--color-info)]"
+                  valueClass="text-[var(--color-info)]"
                 />
 
                 <StatCard
@@ -858,8 +887,8 @@ export default function AdminKelasPage() {
                   label="Punya Wali"
                   value={totalWali}
                   description="Sudah ada wali kelas"
-                  iconClass="bg-emerald-100 text-emerald-700"
-                  valueClass="text-emerald-700"
+                  iconClass="theme-success"
+                  valueClass="text-[var(--color-success)]"
                 />
 
                 <StatCard
@@ -867,15 +896,22 @@ export default function AdminKelasPage() {
                   label="Belum Ada Wali"
                   value={totalTanpaWali}
                   description="Belum ditentukan"
-                  iconClass="bg-amber-100 text-amber-700"
-                  valueClass="text-amber-700"
+                  iconClass="theme-warning"
+                  valueClass="text-[var(--color-warning)]"
                 />
 
               </section>
 
               {/* FILTER */}
 
-              <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <section
+                className="
+                  theme-card
+                  theme-border
+                  rounded-2xl border
+                  p-4 shadow-sm
+                "
+              >
 
                 <div className="flex flex-col gap-3">
 
@@ -885,7 +921,12 @@ export default function AdminKelasPage() {
 
                     <Search
                       size={17}
-                      className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                      className="
+                        pointer-events-none absolute
+                        left-3.5 top-1/2
+                        -translate-y-1/2
+                        text-[var(--color-primary)]
+                      "
                     />
 
                     <input
@@ -899,7 +940,14 @@ export default function AdminKelasPage() {
                         setCurrentPage(1);
                       }}
                       placeholder="Cari nama kelas atau wali kelas..."
-                      className="w-full rounded-xl border border-slate-300 bg-slate-50 py-2.5 pl-10 pr-4 text-sm text-slate-800 outline-none transition hover:border-slate-400 hover:bg-white focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
+                      className="
+                        theme-input
+                        w-full rounded-xl
+                        py-2.5 pl-10 pr-4
+                        text-sm
+                        outline-none transition
+                        focus:outline-none
+                      "
                     />
 
                   </div>
@@ -917,7 +965,15 @@ export default function AdminKelasPage() {
 
                         setCurrentPage(1);
                       }}
-                      className="min-w-[130px] rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-700 outline-none transition hover:border-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                      className="
+                        theme-input
+                        min-w-[130px]
+                        rounded-lg
+                        px-3 py-2
+                        text-sm
+                        outline-none
+                        focus:outline-none
+                      "
                     >
 
                       <option value="Semua">
@@ -947,7 +1003,15 @@ export default function AdminKelasPage() {
 
                         setCurrentPage(1);
                       }}
-                      className="min-w-[200px] rounded-lg border border-slate-300 bg-slate-50 px-3 py-2 text-sm text-slate-700 outline-none transition hover:border-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                      className="
+                        theme-input
+                        min-w-[200px]
+                        rounded-lg
+                        px-3 py-2
+                        text-sm
+                        outline-none
+                        focus:outline-none
+                      "
                     >
 
                       <option value="Semua">
@@ -984,12 +1048,19 @@ export default function AdminKelasPage() {
                         );
                         setCurrentPage(1);
                       }}
-                      className="rounded-lg px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-100 hover:text-slate-800"
+                      className="
+                        theme-sidebar-text-active
+                        theme-sidebar-hover
+                        rounded-lg
+                        px-3 py-2
+                        text-sm font-medium
+                        transition
+                      "
                     >
                       Reset
                     </button>
 
-                    <span className="ml-auto hidden text-sm text-slate-500 sm:block">
+                    <span className="ml-auto hidden text-sm theme-text-muted sm:block">
                       {totalData} kelas ditemukan
                     </span>
 
@@ -1001,23 +1072,53 @@ export default function AdminKelasPage() {
 
               {/* TABLE */}
 
-              <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <section
+                className="
+                  theme-card
+                  theme-border
+                  overflow-hidden
+                  rounded-2xl border
+                  shadow-sm
+                "
+              >
 
-                <div className="flex flex-col gap-3 border-b border-slate-100 bg-slate-50/70 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                <div
+                  className="
+                    theme-card-soft
+                    flex flex-col gap-3
+                    border-b theme-border
+                    px-5 py-4
+                    sm:flex-row
+                    sm:items-center
+                    sm:justify-between
+                    sm:px-6
+                  "
+                >
 
                   <div>
 
-                    <h2 className="text-sm font-bold text-slate-800 sm:text-base">
+                    <h2 className="text-sm font-bold theme-text sm:text-base">
                       Daftar Kelas
                     </h2>
 
-                    <p className="mt-1 text-xs text-slate-400">
+                    <p className="mt-1 text-xs theme-text-muted">
                       Data langsung dari database sekolah.
                     </p>
 
                   </div>
 
-                  <div className="flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-xs font-semibold text-slate-500 shadow-sm">
+                  <div
+                    className="
+                      theme-card
+                      theme-border
+                      theme-text-muted
+                      flex items-center gap-2
+                      rounded-lg border
+                      px-3 py-2
+                      text-xs font-semibold
+                      shadow-sm
+                    "
+                  >
 
                     <CalendarDays size={14} />
 
@@ -1043,33 +1144,33 @@ export default function AdminKelasPage() {
 
                     <thead>
 
-                      <tr className="border-b border-slate-200 bg-white">
+                      <tr className="theme-table-header border-b theme-border">
 
-                        <th className="w-[6%] px-4 py-3 text-center text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                        <th className="w-[6%] px-4 py-3 text-center text-[11px] font-bold uppercase tracking-wider">
                           No
                         </th>
 
-                        <th className="w-[20%] px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                        <th className="w-[20%] px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider">
                           Kelas
                         </th>
 
-                        <th className="w-[11%] px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                        <th className="w-[11%] px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider">
                           Tingkat
                         </th>
 
-                        <th className="w-[23%] px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                        <th className="w-[23%] px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider">
                           Wali Kelas
                         </th>
 
-                        <th className="w-[17%] px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                        <th className="w-[17%] px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider">
                           Tahun Ajaran
                         </th>
 
-                        <th className="w-[11%] px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                        <th className="w-[11%] px-4 py-3 text-left text-[11px] font-bold uppercase tracking-wider">
                           Siswa
                         </th>
 
-                        <th className="w-[12%] px-4 py-3 text-right text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                        <th className="w-[12%] px-4 py-3 text-right text-[11px] font-bold uppercase tracking-wider">
                           Aksi
                         </th>
 
@@ -1077,7 +1178,7 @@ export default function AdminKelasPage() {
 
                     </thead>
 
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody>
 
                       {displayedKelas.length ===
                       0 ? (
@@ -1091,17 +1192,25 @@ export default function AdminKelasPage() {
 
                             <div className="mx-auto flex max-w-sm flex-col items-center">
 
-                              <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+                              <div
+                                className="
+                                  theme-card-soft
+                                  theme-text-muted
+                                  flex h-14 w-14
+                                  items-center justify-center
+                                  rounded-2xl
+                                "
+                              >
                                 <GraduationCap
                                   size={28}
                                 />
                               </div>
 
-                              <p className="mt-4 text-sm font-bold text-slate-700">
+                              <p className="mt-4 text-sm font-bold theme-text-secondary">
                                 Belum ada data kelas
                               </p>
 
-                              <p className="mt-1 text-xs leading-5 text-slate-400">
+                              <p className="mt-1 text-xs leading-5 theme-text-muted">
                                 Belum ada kelas yang
                                 sesuai dengan
                                 sekolah atau filter
@@ -1115,7 +1224,15 @@ export default function AdminKelasPage() {
                                     "/admin/akademik/kelas/tambah"
                                   )
                                 }
-                                className="mt-4 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-blue-700"
+                                className="
+                                  theme-primary
+                                  mt-4 inline-flex
+                                  items-center gap-2
+                                  rounded-lg
+                                  px-4 py-2
+                                  text-xs font-semibold
+                                  transition
+                                "
                               >
 
                                 <Plus size={15} />
@@ -1164,12 +1281,17 @@ export default function AdminKelasPage() {
 
                               <tr
                                 key={item.id}
-                                className="group transition-colors hover:bg-blue-50/40"
+                                className="
+                                  theme-table-hover
+                                  border-b theme-border-soft
+                                  transition-colors
+                                  last:border-0
+                                "
                               >
 
                                 {/* NO */}
 
-                                <td className="px-4 py-4 text-center text-sm font-medium text-slate-500">
+                                <td className="px-4 py-4 text-center text-sm font-medium theme-text-muted">
                                   {(currentPage -
                                     1) *
                                     itemsPerPage +
@@ -1183,7 +1305,7 @@ export default function AdminKelasPage() {
 
                                   <div className="flex items-center gap-3">
 
-                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                                    <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
                                       <GraduationCap
                                         size={18}
                                       />
@@ -1191,12 +1313,12 @@ export default function AdminKelasPage() {
 
                                     <div className="min-w-0">
 
-                                      <p className="truncate text-sm font-bold text-slate-800">
+                                      <p className="truncate text-sm font-bold theme-text">
                                         {item.nama ||
                                           "-"}
                                       </p>
 
-                                      <p className="mt-0.5 text-[11px] text-slate-400">
+                                      <p className="mt-0.5 text-[11px] theme-text-muted">
                                         Kapasitas{" "}
                                         {item.kapasitas ??
                                           0}{" "}
@@ -1213,11 +1335,11 @@ export default function AdminKelasPage() {
 
                                 <td className="px-4 py-4">
 
-                                  <span className="inline-flex rounded-full bg-indigo-100 px-2.5 py-1 text-xs font-semibold text-indigo-700">
+                                  <span className="theme-info inline-flex rounded-full px-2.5 py-1 text-xs font-semibold">
                                     {jenjang}
                                   </span>
 
-                                  <p className="mt-1 text-[10px] text-slate-400">
+                                  <p className="mt-1 text-[10px] theme-text-muted">
                                     Tingkat{" "}
                                     {item.tingkat ??
                                       "-"}
@@ -1235,8 +1357,8 @@ export default function AdminKelasPage() {
                                       className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
                                         item.waliKelasId ||
                                         item.wali_kelas_id
-                                          ? "bg-emerald-50 text-emerald-600"
-                                          : "bg-slate-100 text-slate-400"
+                                          ? "theme-success"
+                                          : "theme-card-soft theme-text-muted"
                                       }`}
                                     >
                                       <UserCheck
@@ -1250,8 +1372,8 @@ export default function AdminKelasPage() {
                                         className={`truncate text-sm font-medium ${
                                           item.waliKelasId ||
                                           item.wali_kelas_id
-                                            ? "text-slate-700"
-                                            : "text-slate-400"
+                                            ? "theme-text-secondary"
+                                            : "theme-text-muted"
                                         }`}
                                       >
                                         {wali}
@@ -1263,7 +1385,7 @@ export default function AdminKelasPage() {
                                         item
                                           ?.wali_kelas
                                           ?.nip) && (
-                                        <p className="mt-0.5 truncate text-[10px] text-slate-400">
+                                        <p className="mt-0.5 truncate text-[10px] theme-text-muted">
                                           NIP{" "}
                                           {item
                                             ?.waliKelas
@@ -1288,18 +1410,18 @@ export default function AdminKelasPage() {
 
                                     <CalendarDays
                                       size={15}
-                                      className="shrink-0 text-slate-400"
+                                      className="shrink-0 theme-text-muted"
                                     />
 
                                     <div className="min-w-0">
 
-                                      <p className="truncate text-sm font-medium text-slate-700">
+                                      <p className="truncate text-sm font-medium theme-text-secondary">
                                         {
                                           namaTahunAjaran
                                         }
                                       </p>
 
-                                      <p className="text-[10px] text-slate-400">
+                                      <p className="text-[10px] theme-text-muted">
                                         Semester{" "}
                                         {
                                           semester
@@ -1320,10 +1442,10 @@ export default function AdminKelasPage() {
 
                                     <Users
                                       size={15}
-                                      className="text-slate-400"
+                                      className="theme-text-muted"
                                     />
 
-                                    <span className="text-sm font-semibold text-slate-700">
+                                    <span className="text-sm font-semibold theme-text-secondary">
                                       {
                                         jumlahSiswa
                                       }
@@ -1346,7 +1468,11 @@ export default function AdminKelasPage() {
                                           `/admin/akademik/kelas/${item.id}`
                                         )
                                       }
-                                      className="rounded-lg p-2 text-slate-400 transition hover:bg-blue-100 hover:text-blue-700"
+                                      className="
+                                        theme-info
+                                        rounded-lg p-2
+                                        transition
+                                      "
                                       title="Detail Kelas"
                                     >
                                       <Eye
@@ -1361,7 +1487,11 @@ export default function AdminKelasPage() {
                                           `/admin/akademik/kelas/edit/${item.id}`
                                         )
                                       }
-                                      className="rounded-lg p-2 text-slate-400 transition hover:bg-amber-100 hover:text-amber-700"
+                                      className="
+                                        theme-warning
+                                        rounded-lg p-2
+                                        transition
+                                      "
                                       title="Edit Kelas"
                                     >
                                       <Edit
@@ -1376,7 +1506,11 @@ export default function AdminKelasPage() {
                                           item
                                         )
                                       }
-                                      className="rounded-lg p-2 text-slate-400 transition hover:bg-rose-100 hover:text-rose-700"
+                                      className="
+                                        theme-danger
+                                        rounded-lg p-2
+                                        transition
+                                      "
                                       title="Hapus Kelas"
                                     >
                                       <Trash2
@@ -1406,25 +1540,35 @@ export default function AdminKelasPage() {
 
                 {totalData > 0 && (
 
-                  <div className="flex flex-col gap-3 border-t border-slate-100 bg-slate-50/50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                  <div
+                    className="
+                      theme-card-soft
+                      flex flex-col gap-3
+                      border-t theme-border-soft
+                      px-5 py-4
+                      sm:flex-row
+                      sm:items-center
+                      sm:justify-between
+                    "
+                  >
 
-                    <div className="text-[11px] text-slate-500">
+                    <div className="text-[11px] theme-text-muted">
 
                       Menampilkan{" "}
 
-                      <span className="font-semibold text-slate-700">
+                      <span className="font-semibold theme-text-secondary">
                         {startIndex}
                       </span>{" "}
 
                       -{" "}
 
-                      <span className="font-semibold text-slate-700">
+                      <span className="font-semibold theme-text-secondary">
                         {endIndex}
                       </span>{" "}
 
                       dari{" "}
 
-                      <span className="font-semibold text-slate-700">
+                      <span className="font-semibold theme-text-secondary">
                         {totalData}
                       </span>{" "}
 
@@ -1445,7 +1589,14 @@ export default function AdminKelasPage() {
 
                           setCurrentPage(1);
                         }}
-                        className="rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-xs text-slate-600 outline-none focus:border-blue-500"
+                        className="
+                          theme-input
+                          rounded-lg
+                          px-2.5 py-1.5
+                          text-xs
+                          outline-none
+                          focus:outline-none
+                        "
                       >
 
                         <option value={10}>
@@ -1472,7 +1623,19 @@ export default function AdminKelasPage() {
                         disabled={
                           currentPage === 1
                         }
-                        className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="
+                          theme-card
+                          theme-border
+                          theme-text-secondary
+                          theme-header-hover
+                          rounded-lg
+                          border
+                          px-3 py-1.5
+                          text-xs font-medium
+                          transition
+                          disabled:cursor-not-allowed
+                          disabled:opacity-40
+                        "
                       >
                         Prev
                       </button>
@@ -1485,12 +1648,19 @@ export default function AdminKelasPage() {
                             onClick={() =>
                               goToPage(page)
                             }
-                            className={`flex h-8 w-8 items-center justify-center rounded-lg text-xs font-semibold transition ${
-                              currentPage ===
-                              page
-                                ? "bg-blue-600 text-white shadow-sm"
-                                : "text-slate-500 hover:bg-white hover:text-blue-600"
-                            }`}
+                            className={`
+                              flex h-8 w-8
+                              items-center justify-center
+                              rounded-lg
+                              text-xs font-semibold
+                              transition
+                              ${
+                                currentPage ===
+                                page
+                                  ? "theme-primary shadow-sm"
+                                  : "theme-text-muted theme-header-hover"
+                              }
+                            `}
                           >
                             {page}
                           </button>
@@ -1508,7 +1678,19 @@ export default function AdminKelasPage() {
                           currentPage >=
                           totalPages
                         }
-                        className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="
+                          theme-card
+                          theme-border
+                          theme-text-secondary
+                          theme-header-hover
+                          rounded-lg
+                          border
+                          px-3 py-1.5
+                          text-xs font-medium
+                          transition
+                          disabled:cursor-not-allowed
+                          disabled:opacity-40
+                        "
                       >
                         Next
                       </button>
@@ -1525,19 +1707,38 @@ export default function AdminKelasPage() {
 
               <section className="grid grid-cols-1 gap-4 lg:grid-cols-2">
 
-                <div className="flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50/60 p-4">
+                <div
+                  className="
+                    theme-info
+                    theme-border
+                    flex items-start gap-3
+                    rounded-xl border
+                    p-4
+                  "
+                >
 
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-blue-600 shadow-sm">
-                    <School size={17} />
+                  <div
+                    className="
+                      theme-card
+                      flex h-9 w-9 shrink-0
+                      items-center justify-center
+                      rounded-lg
+                      shadow-sm
+                    "
+                  >
+                    <School
+                      size={17}
+                      className="text-[var(--color-info)]"
+                    />
                   </div>
 
                   <div>
 
-                    <p className="text-xs font-bold text-blue-800">
+                    <p className="text-xs font-bold">
                       Data berdasarkan sekolah
                     </p>
 
-                    <p className="mt-1 text-[11px] leading-5 text-blue-700/70">
+                    <p className="mt-1 text-[11px] leading-5 opacity-80">
                       Data kelas yang
                       ditampilkan berasal
                       dari sekolah yang
@@ -1550,19 +1751,34 @@ export default function AdminKelasPage() {
 
                 </div>
 
-                <div className="flex items-start gap-3 rounded-xl border border-indigo-100 bg-indigo-50/60 p-4">
+                <div
+                  className="
+                    theme-card-soft
+                    theme-border
+                    flex items-start gap-3
+                    rounded-xl border
+                    p-4
+                  "
+                >
 
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-indigo-600 shadow-sm">
+                  <div
+                    className="
+                      theme-info
+                      flex h-9 w-9 shrink-0
+                      items-center justify-center
+                      rounded-lg
+                    "
+                  >
                     <LayoutGrid size={17} />
                   </div>
 
                   <div>
 
-                    <p className="text-xs font-bold text-indigo-800">
+                    <p className="text-xs font-bold theme-text">
                       Terhubung ke backend
                     </p>
 
-                    <p className="mt-1 text-[11px] leading-5 text-indigo-700/70">
+                    <p className="mt-1 text-[11px] leading-5 theme-text-muted">
                       Tambah, ubah, lihat
                       detail, dan hapus
                       kelas diproses melalui
@@ -1577,9 +1793,9 @@ export default function AdminKelasPage() {
 
               {/* FOOTER */}
 
-              <footer className="border-t border-slate-200 py-5 text-center">
+              <footer className="border-t theme-border py-5 text-center">
 
-                <div className="flex items-center justify-center gap-2 text-[11px] text-slate-400">
+                <div className="flex items-center justify-center gap-2 text-[11px] theme-text-muted">
 
                   <LayoutGrid size={14} />
 

@@ -1,9 +1,11 @@
+// app/cmsAdmin/agenda/tambah/page.jsx
 "use client";
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Header from "../../../../../components/Header";
 import Sidebar from "../../../../../components/Sidebar";
+
 import {
   Save,
   X,
@@ -73,7 +75,9 @@ export default function TambahAgendaPage() {
       form.tanggalSelesai &&
       form.tanggalMulai > form.tanggalSelesai
     ) {
-      alert("Tanggal selesai tidak boleh lebih awal dari tanggal mulai.");
+      alert(
+        "Tanggal selesai tidak boleh lebih awal dari tanggal mulai."
+      );
       return;
     }
 
@@ -97,60 +101,37 @@ export default function TambahAgendaPage() {
       label: "Draft",
       description: "Simpan sebagai draft",
       icon: FileEdit,
-      activeClass:
-        "border-amber-300 bg-amber-50 text-amber-700",
-      iconClass: "bg-amber-100 text-amber-600",
+      activeClass: "theme-warning",
+      iconClass: "theme-warning",
     },
     {
       value: "published",
       label: "Publikasikan",
       description: "Tampilkan sekarang",
       icon: CheckCircle2,
-      activeClass:
-        "border-emerald-300 bg-emerald-50 text-emerald-700",
-      iconClass: "bg-emerald-100 text-emerald-600",
+      activeClass: "theme-success",
+      iconClass: "theme-success",
     },
     {
       value: "scheduled",
       label: "Jadwalkan",
       description: "Terbit sesuai waktu",
       icon: Timer,
-      activeClass:
-        "border-sky-300 bg-sky-50 text-sky-700",
-      iconClass: "bg-sky-100 text-sky-600",
+      activeClass: "theme-info",
+      iconClass: "theme-info",
     },
   ];
 
   // =====================================================
   // INPUT CLASS
   // =====================================================
-  const inputClass = `
-    w-full
-    min-w-0
-    rounded-xl
-    border
-    border-slate-200
-    bg-white
-    px-4
-    py-3
-    text-sm
-    font-medium
-    text-slate-800
-    placeholder:text-slate-400
-    outline-none
-    transition-all
-    duration-200
-    hover:border-slate-300
-    focus:border-sky-500
-    focus:ring-4
-    focus:ring-sky-500/10
-  `;
+  const inputClass =
+    "theme-input w-full min-w-0 rounded-xl border px-4 py-3 text-sm font-medium shadow-sm outline-none transition-all duration-200 focus:border-[var(--color-primary)]";
 
   return (
-    <div className="flex min-h-screen w-full bg-slate-50">
+    <div className="theme-page flex min-h-screen w-full">
       {/* =====================================================
           SIDEBAR
-          TIDAK DIUBAH / TIDAK DIPOTONG
       ====================================================== */}
       <aside className="shrink-0">
         <Sidebar
@@ -163,18 +144,14 @@ export default function TambahAgendaPage() {
 
       {/* =====================================================
           MAIN
-          flex-1 + min-w-0 agar mengikuti sidebar
       ====================================================== */}
       <main
         className="
+          theme-page
           flex-1
           min-w-0
           overflow-x-hidden
           overflow-y-auto
-          bg-gradient-to-br
-          from-slate-50
-          via-slate-50
-          to-sky-50/40
           transition-all
           duration-300
         "
@@ -187,8 +164,6 @@ export default function TambahAgendaPage() {
 
         {/* =====================================================
             CONTENT
-            Tidak menggunakan max-w sehingga saat zoom out
-            area halaman dapat melebar mengikuti viewport.
         ====================================================== */}
         <div
           className="
@@ -206,6 +181,7 @@ export default function TambahAgendaPage() {
           "
         >
           <div className="w-full min-w-0 space-y-6">
+
             {/* =================================================
                 BREADCRUMB
             ================================================== */}
@@ -224,39 +200,44 @@ export default function TambahAgendaPage() {
               <nav className="min-w-0 overflow-x-auto">
                 <ol
                   className="
+                    theme-text-muted
                     flex
                     items-center
                     gap-2
                     whitespace-nowrap
                     text-xs
                     font-medium
-                    text-slate-500
                     sm:text-sm
                   "
                 >
                   <li className="shrink-0">
                     <a
                       href="/cmsAdmin"
-                      className="transition-colors hover:text-sky-600"
+                      className="transition-opacity hover:opacity-70"
                     >
                       Dashboard
                     </a>
                   </li>
 
-                  <li className="text-slate-300">/</li>
+                  <li className="theme-text-placeholder">/</li>
 
                   <li className="shrink-0">
                     <a
                       href="/cmsAdmin/agenda"
-                      className="transition-colors hover:text-sky-600"
+                      className="transition-opacity hover:opacity-70"
                     >
                       Agenda
                     </a>
                   </li>
 
-                  <li className="text-slate-300">/</li>
+                  <li className="theme-text-placeholder">/</li>
 
-                  <li className="shrink-0 font-semibold text-sky-600">
+                  <li
+                    className="shrink-0 font-semibold"
+                    style={{
+                      color: "var(--color-primary)",
+                    }}
+                  >
                     Tambah Baru
                   </li>
                 </ol>
@@ -266,6 +247,7 @@ export default function TambahAgendaPage() {
                 type="button"
                 onClick={() => router.back()}
                 className="
+                  theme-text-secondary
                   inline-flex
                   w-fit
                   shrink-0
@@ -276,10 +258,8 @@ export default function TambahAgendaPage() {
                   py-1.5
                   text-xs
                   font-semibold
-                  text-slate-600
-                  transition-all
-                  hover:bg-white
-                  hover:text-sky-600
+                  transition
+                  hover:opacity-70
                   sm:text-sm
                 "
               >
@@ -293,20 +273,53 @@ export default function TambahAgendaPage() {
             ================================================== */}
             <section
               className="
+                theme-card
+                theme-border
                 relative
                 w-full
                 min-w-0
                 overflow-hidden
                 rounded-2xl
                 border
-                border-slate-200/70
-                bg-white
                 shadow-sm
               "
             >
-              {/* decorative background */}
-              <div className="pointer-events-none absolute -right-20 -top-20 h-48 w-48 rounded-full bg-sky-100/50 blur-3xl" />
-              <div className="pointer-events-none absolute -bottom-20 left-1/3 h-40 w-40 rounded-full bg-cyan-100/40 blur-3xl" />
+              {/* Decorative background */}
+              <div
+                className="
+                  pointer-events-none
+                  absolute
+                  -right-20
+                  -top-20
+                  h-48
+                  w-48
+                  rounded-full
+                  blur-3xl
+                  opacity-20
+                "
+                style={{
+                  background:
+                    "var(--color-primary)",
+                }}
+              />
+
+              <div
+                className="
+                  pointer-events-none
+                  absolute
+                  -bottom-20
+                  left-1/3
+                  h-40
+                  w-40
+                  rounded-full
+                  blur-3xl
+                  opacity-10
+                "
+                style={{
+                  background:
+                    "var(--color-info)",
+                }}
+              />
 
               <div
                 className="
@@ -325,72 +338,23 @@ export default function TambahAgendaPage() {
                 "
               >
                 <div className="flex min-w-0 items-start gap-4">
-                  <div
-                    className="
-                      flex
-                      h-12
-                      w-12
-                      shrink-0
-                      items-center
-                      justify-center
-                      rounded-2xl
-                      border
-                      border-sky-200
-                      bg-sky-50
-                      shadow-sm
-                    "
-                  >
-                    <Calendar className="h-6 w-6 text-sky-600" />
+                  <div className="theme-info flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border shadow-sm">
+                    <Calendar className="h-6 w-6" />
                   </div>
 
                   <div className="min-w-0">
                     <div className="mb-1 flex items-center gap-2">
-                      <span
-                        className="
-                          inline-flex
-                          items-center
-                          gap-1.5
-                          rounded-full
-                          border
-                          border-sky-200
-                          bg-sky-50
-                          px-2.5
-                          py-1
-                          text-[10px]
-                          font-bold
-                          uppercase
-                          tracking-wider
-                          text-sky-700
-                        "
-                      >
+                      <span className="theme-info inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider">
                         <Sparkles className="h-3 w-3" />
                         Agenda
                       </span>
                     </div>
 
-                    <h1
-                      className="
-                        text-xl
-                        font-bold
-                        tracking-tight
-                        text-slate-900
-                        sm:text-2xl
-                        lg:text-3xl
-                      "
-                    >
+                    <h1 className="theme-text text-xl font-bold tracking-tight sm:text-2xl lg:text-3xl">
                       Tambah Agenda Baru
                     </h1>
 
-                    <p
-                      className="
-                        mt-1.5
-                        max-w-2xl
-                        text-xs
-                        leading-relaxed
-                        text-slate-500
-                        sm:text-sm
-                      "
-                    >
+                    <p className="theme-text-muted mt-1.5 max-w-2xl text-xs leading-relaxed sm:text-sm">
                       Buat dan kelola agenda kegiatan sekolah
                       dengan informasi yang lengkap dan terstruktur.
                     </p>
@@ -405,13 +369,13 @@ export default function TambahAgendaPage() {
             <form
               onSubmit={handleSubmit}
               className="
+                theme-card
+                theme-border
                 w-full
                 min-w-0
                 overflow-hidden
                 rounded-2xl
                 border
-                border-slate-200/70
-                bg-white
                 shadow-sm
               "
             >
@@ -420,40 +384,28 @@ export default function TambahAgendaPage() {
               ================================================== */}
               <div
                 className="
+                  theme-card-soft
+                  theme-border-soft
                   flex
                   items-center
                   gap-3
                   border-b
-                  border-slate-100
-                  bg-slate-50/70
                   px-5
                   py-4
                   sm:px-6
                   lg:px-8
                 "
               >
-                <div
-                  className="
-                    flex
-                    h-9
-                    w-9
-                    shrink-0
-                    items-center
-                    justify-center
-                    rounded-xl
-                    bg-sky-50
-                    text-sky-600
-                  "
-                >
+                <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-xl">
                   <FileText className="h-4 w-4" />
                 </div>
 
                 <div className="min-w-0">
-                  <h2 className="text-sm font-bold text-slate-900 sm:text-base">
+                  <h2 className="theme-text text-sm font-bold sm:text-base">
                     Informasi Agenda
                   </h2>
 
-                  <p className="mt-0.5 text-[11px] text-slate-500 sm:text-xs">
+                  <p className="theme-text-muted mt-0.5 text-[11px] sm:text-xs">
                     Isi informasi berikut untuk membuat agenda.
                   </p>
                 </div>
@@ -478,25 +430,21 @@ export default function TambahAgendaPage() {
                 <div className="w-full min-w-0">
                   <label
                     htmlFor="judul"
-                    className="mb-2 block text-sm font-semibold text-slate-700"
+                    className="theme-text-secondary mb-2 block text-sm font-semibold"
                   >
                     Judul Agenda
-                    <span className="ml-1 text-red-500">*</span>
+                    <span
+                      className="ml-1"
+                      style={{
+                        color: "var(--color-danger)",
+                      }}
+                    >
+                      *
+                    </span>
                   </label>
 
                   <div className="relative">
-                    <Calendar
-                      className="
-                        pointer-events-none
-                        absolute
-                        left-3.5
-                        top-1/2
-                        h-4
-                        w-4
-                        -translate-y-1/2
-                        text-slate-400
-                      "
-                    />
+                    <Calendar className="theme-text-placeholder pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2" />
 
                     <input
                       id="judul"
@@ -504,7 +452,10 @@ export default function TambahAgendaPage() {
                       required
                       value={form.judul}
                       onChange={(e) =>
-                        handleChange("judul", e.target.value)
+                        handleChange(
+                          "judul",
+                          e.target.value
+                        )
                       }
                       placeholder="Contoh: Rapat Evaluasi Semester"
                       className={`${inputClass} pl-10`}
@@ -530,24 +481,13 @@ export default function TambahAgendaPage() {
                   <div className="min-w-0">
                     <label
                       htmlFor="kategori"
-                      className="mb-2 block text-sm font-semibold text-slate-700"
+                      className="theme-text-secondary mb-2 block text-sm font-semibold"
                     >
                       Kategori
                     </label>
 
                     <div className="relative">
-                      <Tag
-                        className="
-                          pointer-events-none
-                          absolute
-                          left-3.5
-                          top-1/2
-                          h-4
-                          w-4
-                          -translate-y-1/2
-                          text-slate-400
-                        "
-                      />
+                      <Tag className="theme-text-placeholder pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2" />
 
                       <select
                         id="kategori"
@@ -563,11 +503,15 @@ export default function TambahAgendaPage() {
                         <option value="">
                           Pilih Kategori
                         </option>
-                        <option value="Rapat">Rapat</option>
+                        <option value="Rapat">
+                          Rapat
+                        </option>
                         <option value="Kegiatan">
                           Kegiatan
                         </option>
-                        <option value="PPDB">PPDB</option>
+                        <option value="PPDB">
+                          PPDB
+                        </option>
                       </select>
                     </div>
                   </div>
@@ -576,24 +520,13 @@ export default function TambahAgendaPage() {
                   <div className="min-w-0">
                     <label
                       htmlFor="lokasi"
-                      className="mb-2 block text-sm font-semibold text-slate-700"
+                      className="theme-text-secondary mb-2 block text-sm font-semibold"
                     >
                       Lokasi
                     </label>
 
                     <div className="relative">
-                      <MapPin
-                        className="
-                          pointer-events-none
-                          absolute
-                          left-3.5
-                          top-1/2
-                          h-4
-                          w-4
-                          -translate-y-1/2
-                          text-slate-400
-                        "
-                      />
+                      <MapPin className="theme-text-placeholder pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2" />
 
                       <input
                         id="lokasi"
@@ -615,26 +548,30 @@ export default function TambahAgendaPage() {
                   <div className="min-w-0">
                     <label
                       htmlFor="tanggalMulai"
-                      className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-slate-700"
+                      className="theme-text-secondary mb-2 flex items-center gap-1.5 text-sm font-semibold"
                     >
-                      <Clock className="h-4 w-4 text-sky-600" />
+                      <Clock
+                        className="h-4 w-4"
+                        style={{
+                          color:
+                            "var(--color-primary)",
+                        }}
+                      />
+
                       Tanggal Mulai
-                      <span className="text-red-500">*</span>
+
+                      <span
+                        style={{
+                          color:
+                            "var(--color-danger)",
+                        }}
+                      >
+                        *
+                      </span>
                     </label>
 
                     <div className="relative">
-                      <Calendar
-                        className="
-                          pointer-events-none
-                          absolute
-                          left-3.5
-                          top-1/2
-                          h-4
-                          w-4
-                          -translate-y-1/2
-                          text-slate-400
-                        "
-                      />
+                      <Calendar className="theme-text-placeholder pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2" />
 
                       <input
                         id="tanggalMulai"
@@ -656,25 +593,21 @@ export default function TambahAgendaPage() {
                   <div className="min-w-0">
                     <label
                       htmlFor="tanggalSelesai"
-                      className="mb-2 flex items-center gap-1.5 text-sm font-semibold text-slate-700"
+                      className="theme-text-secondary mb-2 flex items-center gap-1.5 text-sm font-semibold"
                     >
-                      <Clock className="h-4 w-4 text-sky-600" />
+                      <Clock
+                        className="h-4 w-4"
+                        style={{
+                          color:
+                            "var(--color-primary)",
+                        }}
+                      />
+
                       Tanggal Selesai
                     </label>
 
                     <div className="relative">
-                      <Calendar
-                        className="
-                          pointer-events-none
-                          absolute
-                          left-3.5
-                          top-1/2
-                          h-4
-                          w-4
-                          -translate-y-1/2
-                          text-slate-400
-                        "
-                      />
+                      <Calendar className="theme-text-placeholder pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2" />
 
                       <input
                         id="tanggalSelesai"
@@ -698,23 +631,13 @@ export default function TambahAgendaPage() {
                 <div className="w-full min-w-0">
                   <label
                     htmlFor="deskripsi"
-                    className="mb-2 block text-sm font-semibold text-slate-700"
+                    className="theme-text-secondary mb-2 block text-sm font-semibold"
                   >
                     Deskripsi Agenda
                   </label>
 
                   <div className="relative">
-                    <FileText
-                      className="
-                        pointer-events-none
-                        absolute
-                        left-3.5
-                        top-3.5
-                        h-4
-                        w-4
-                        text-slate-400
-                      "
-                    />
+                    <FileText className="theme-text-placeholder pointer-events-none absolute left-3.5 top-3.5 h-4 w-4" />
 
                     <textarea
                       id="deskripsi"
@@ -737,11 +660,11 @@ export default function TambahAgendaPage() {
                 ================================================== */}
                 <div className="w-full min-w-0">
                   <div className="mb-3">
-                    <label className="block text-sm font-semibold text-slate-700">
+                    <label className="theme-text-secondary block text-sm font-semibold">
                       Status Agenda
                     </label>
 
-                    <p className="mt-1 text-xs text-slate-400">
+                    <p className="theme-text-muted mt-1 text-xs">
                       Tentukan bagaimana agenda akan dipublikasikan.
                     </p>
                   </div>
@@ -787,7 +710,7 @@ export default function TambahAgendaPage() {
                             ${
                               selected
                                 ? option.activeClass
-                                : "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+                                : "theme-card theme-border theme-text-secondary hover:opacity-80"
                             }
                           `}
                         >
@@ -803,7 +726,7 @@ export default function TambahAgendaPage() {
                               ${
                                 selected
                                   ? option.iconClass
-                                  : "bg-slate-100 text-slate-500"
+                                  : "theme-card-soft theme-text-muted"
                               }
                             `}
                           >
@@ -815,13 +738,13 @@ export default function TambahAgendaPage() {
                               {option.label}
                             </p>
 
-                            <p className="mt-0.5 truncate text-[10px] text-slate-400 sm:text-xs">
+                            <p className="theme-text-muted mt-0.5 truncate text-[10px] sm:text-xs">
                               {option.description}
                             </p>
                           </div>
 
                           {selected && (
-                            <CheckCircle2 className="h-4 w-4 shrink-0 text-current" />
+                            <CheckCircle2 className="h-4 w-4 shrink-0" />
                           )}
                         </button>
                       );
@@ -835,14 +758,14 @@ export default function TambahAgendaPage() {
               ================================================== */}
               <div
                 className="
+                  theme-card-soft
+                  theme-border-soft
                   flex
                   w-full
                   min-w-0
                   flex-col-reverse
                   gap-3
                   border-t
-                  border-slate-100
-                  bg-slate-50/60
                   p-5
                   sm:flex-row
                   sm:justify-end
@@ -854,6 +777,9 @@ export default function TambahAgendaPage() {
                   type="button"
                   onClick={() => router.back()}
                   className="
+                    theme-card
+                    theme-border
+                    theme-text-secondary
                     inline-flex
                     w-full
                     items-center
@@ -861,19 +787,14 @@ export default function TambahAgendaPage() {
                     gap-2
                     rounded-xl
                     border
-                    border-slate-200
-                    bg-white
                     px-6
                     py-3
                     text-sm
                     font-semibold
-                    text-slate-600
                     shadow-sm
                     transition-all
                     duration-200
-                    hover:border-slate-300
-                    hover:bg-slate-50
-                    hover:text-slate-800
+                    hover:opacity-80
                     sm:w-auto
                   "
                 >
@@ -885,25 +806,21 @@ export default function TambahAgendaPage() {
                   type="submit"
                   disabled={loading}
                   className="
+                    theme-primary
                     inline-flex
                     w-full
                     items-center
                     justify-center
                     gap-2
                     rounded-xl
-                    bg-sky-600
                     px-7
                     py-3
                     text-sm
                     font-semibold
-                    text-white
                     shadow-lg
-                    shadow-sky-600/20
                     transition-all
                     duration-200
-                    hover:bg-sky-700
-                    hover:shadow-xl
-                    hover:shadow-sky-600/25
+                    hover:opacity-90
                     active:scale-[0.98]
                     disabled:cursor-not-allowed
                     disabled:opacity-60
@@ -923,6 +840,7 @@ export default function TambahAgendaPage() {
                           border-t-white
                         "
                       />
+
                       Menyimpan...
                     </>
                   ) : (
@@ -940,6 +858,8 @@ export default function TambahAgendaPage() {
             ================================================== */}
             <div
               className="
+                theme-card
+                theme-border
                 flex
                 w-full
                 min-w-0
@@ -947,34 +867,20 @@ export default function TambahAgendaPage() {
                 gap-3
                 rounded-xl
                 border
-                border-slate-200/70
-                bg-white
                 p-4
                 shadow-sm
               "
             >
-              <div
-                className="
-                  flex
-                  h-8
-                  w-8
-                  shrink-0
-                  items-center
-                  justify-center
-                  rounded-lg
-                  bg-slate-100
-                  text-slate-500
-                "
-              >
+              <div className="theme-card-soft theme-text-muted flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
                 <FileText className="h-4 w-4" />
               </div>
 
               <div className="min-w-0">
-                <p className="text-xs font-semibold text-slate-700">
+                <p className="theme-text-secondary text-xs font-semibold">
                   Informasi
                 </p>
 
-                <p className="mt-0.5 text-[11px] leading-relaxed text-slate-400 sm:text-xs">
+                <p className="theme-text-muted mt-0.5 text-[11px] leading-relaxed sm:text-xs">
                   Pastikan informasi agenda sudah sesuai sebelum
                   menyimpannya.
                 </p>

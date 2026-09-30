@@ -3,9 +3,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import Sidebar from "../../../components/Sidebar";
-import Header from "../../../components/Header";
-
 import { getKelas, getKelasById } from "../../../../services/kelas.service";
 
 import {
@@ -25,6 +22,115 @@ import {
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
+// ============================================================
+// THEME HELPERS
+// ============================================================
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySurface =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySurfaceStrong =
+  "bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+
+const themePrimaryBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryHoverBorder =
+  "hover:border-[color-mix(in_srgb,var(--color-primary)_30%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themePrimaryBg =
+  "bg-[var(--color-primary)]";
+
+const themePrimaryHoverText =
+  "hover:text-[var(--color-primary)]";
+
+const themePrimaryHoverSurface =
+  "hover:bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeHoverShadow =
+  "hover:shadow-[0_8px_22px_color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralSurfaceStrong =
+  "bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeNeutralHoverBorder =
+  "hover:border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeDivide =
+  "divide-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoSurfaceStrong =
+  "bg-[color-mix(in_srgb,var(--color-info)_13%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeInfoText =
+  "text-[var(--color-info)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeSuccessText =
+  "text-[var(--color-success)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeWarningText =
+  "text-[var(--color-warning)]";
+
+const themeCardSurface =
+  "theme-card";
+
+const themeText =
+  "theme-text";
+
+const themeTextSecondary =
+  "theme-text-secondary";
+
+const themeTextMuted =
+  "theme-text-muted";
+
+const themeTextPlaceholder =
+  "theme-text-placeholder";
 
 // ============================================================
 // ICON MAP
@@ -49,48 +155,6 @@ const iconMap = {
 };
 
 // ============================================================
-// COLOR LIST
-// ============================================================
-
-const colorList = [
-  "blue",
-  "indigo",
-  "slate",
-  "blue",
-  "indigo",
-  "blue",
-  "slate",
-  "indigo",
-];
-
-// ============================================================
-// COLOR MAP
-// ============================================================
-
-const colorMap = {
-  blue: {
-    gradient: "from-blue-600 to-blue-700",
-    background: "bg-blue-50",
-    text: "text-blue-600",
-    border: "hover:border-blue-300",
-  },
-
-  indigo: {
-    gradient: "from-indigo-600 to-blue-700",
-    background: "bg-indigo-50",
-    text: "text-indigo-600",
-    border: "hover:border-indigo-300",
-  },
-
-  slate: {
-    gradient: "from-slate-700 to-slate-800",
-    background: "bg-slate-100",
-    text: "text-slate-600",
-    border: "hover:border-slate-300",
-  },
-};
-
-// ============================================================
 // HELPER
 // ============================================================
 
@@ -103,7 +167,6 @@ function normalizeText(value) {
 
 // ============================================================
 // EXTRACT ARRAY
-// Mendukung beberapa kemungkinan response backend
 // ============================================================
 
 function extractArray(result) {
@@ -132,7 +195,6 @@ function extractArray(result) {
 
 // ============================================================
 // EXTRACT OBJECT
-// Untuk response GET /api/kelas/:id
 // ============================================================
 
 function extractObject(result) {
@@ -259,8 +321,6 @@ function getUserId(user) {
 
 // ============================================================
 // GET USER KELAS ID
-// Kalau login response suatu saat sudah punya kelasId,
-// fungsi ini tetap bisa langsung menggunakannya.
 // ============================================================
 
 function getUserKelasId(user) {
@@ -281,87 +341,35 @@ function getUserKelasId(user) {
 }
 
 // ============================================================
-// GET USER NAME
-// ============================================================
-
-function getUserName(user) {
-  return (
-    user?.namaLengkap ||
-    user?.nama ||
-    user?.name ||
-    user?.siswa?.namaLengkap ||
-    user?.siswa?.nama ||
-    user?.data?.namaLengkap ||
-    user?.data?.nama ||
-    "Siswa"
-  );
-}
-
-// ============================================================
-// GET USER EMAIL
-// ============================================================
-
-function getUserEmail(user) {
-  return (
-    user?.email ||
-    user?.siswa?.email ||
-    user?.data?.email ||
-    "siswa@smartschool.com"
-  );
-}
-
-// ============================================================
-// GET USER AVATAR
-// ============================================================
-
-function getUserAvatar(user) {
-  const name = getUserName(user);
-
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .map((item) => item[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
-}
-
-// ============================================================
 // PAGE
 // ============================================================
 
 export default function MataPelajaranPage() {
   const router = useRouter();
 
-  // ==========================================================
-  // STATE
-  // ==========================================================
+  const [mataPelajaranList, setMataPelajaranList] =
+    useState([]);
 
-  const [mataPelajaranList, setMataPelajaranList] = useState([]);
+  const [selectedId, setSelectedId] =
+    useState(null);
 
-  const [selectedId, setSelectedId] = useState(null);
+  const [loading, setLoading] =
+    useState(true);
 
-  const [loading, setLoading] = useState(true);
+  const [error, setError] =
+    useState("");
 
-  const [error, setError] = useState("");
+  const [currentUser, setCurrentUser] =
+    useState(null);
 
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [userLoaded, setUserLoaded] =
+    useState(false);
 
-  const [currentUser, setCurrentUser] = useState(null);
+  const [kelasSiswa, setKelasSiswa] =
+    useState(null);
 
-  const [userLoaded, setUserLoaded] = useState(false);
-
-  // ==========================================================
-  // KELAS SISWA
-  // ==========================================================
-
-  const [kelasSiswa, setKelasSiswa] = useState(null);
-
-  // ==========================================================
-  // NOTIFICATION STATE
-  // ==========================================================
-
-  const [notifications, setNotifications] = useState([]);
+  const [notifications, setNotifications] =
+    useState([]);
 
   const [notificationLoading, setNotificationLoading] =
     useState(true);
@@ -370,231 +378,252 @@ export default function MataPelajaranPage() {
   // FIND KELAS SISWA
   // ==========================================================
 
-  const findKelasSiswa = useCallback(async (user) => {
-    const userId = getUserId(user);
+  const findKelasSiswa = useCallback(
+    async (user) => {
+      const userId = getUserId(user);
 
-    if (!userId) {
-      throw new Error(
-        "ID siswa tidak ditemukan. Silakan login kembali."
-      );
-    }
-
-    console.log("======================================");
-    console.log("[MATA PELAJARAN] USER ID:", userId);
-    console.log(
-      "[MATA PELAJARAN] USER KELAS ID:",
-      getUserKelasId(user)
-    );
-    console.log("======================================");
-
-    // --------------------------------------------------------
-    // JIKA KELAS ID SUDAH ADA DI LOCAL STORAGE
-    // --------------------------------------------------------
-
-    const explicitKelasId = getUserKelasId(user);
-
-    if (explicitKelasId) {
-      try {
-        console.log(
-          "[MATA PELAJARAN] Mengambil kelas langsung:",
-          explicitKelasId
-        );
-
-        const result =
-          await getKelasById(explicitKelasId);
-
-        const detail = extractObject(result);
-
-        if (detail) {
-          console.log(
-            "[MATA PELAJARAN] Kelas ditemukan langsung:",
-            detail
-          );
-
-          return detail;
-        }
-      } catch (error) {
-        console.warn(
-          "[MATA PELAJARAN] Gagal mengambil kelas langsung:",
-          error
+      if (!userId) {
+        throw new Error(
+          "ID siswa tidak ditemukan. Silakan login kembali."
         );
       }
-    }
 
-    // --------------------------------------------------------
-    // KALAU KELAS ID TIDAK ADA
-    // CARI BERDASARKAN ANGGOTA KELAS
-    // --------------------------------------------------------
-
-    console.log(
-      "[MATA PELAJARAN] kelasId tidak tersedia."
-    );
-
-    console.log(
-      "[MATA PELAJARAN] Mencari kelas berdasarkan anggota.siswa.id..."
-    );
-
-    const kelasResult = await getKelas({
-      page: 1,
-      limit: 100,
-      sortBy: "tingkat",
-      sortOrder: "asc",
-    });
-
-    console.log(
-      "[MATA PELAJARAN] RESPONSE GET KELAS:",
-      kelasResult
-    );
-
-    const kelasList = extractArray(kelasResult);
-
-    if (!kelasList.length) {
-      throw new Error(
-        "Data kelas belum tersedia untuk sekolah ini."
+      console.log(
+        "======================================"
       );
-    }
 
-    console.log(
-      "[MATA PELAJARAN] JUMLAH KELAS:",
-      kelasList.length
-    );
+      console.log(
+        "[MATA PELAJARAN] USER ID:",
+        userId
+      );
 
-    // --------------------------------------------------------
-    // AMBIL DETAIL SEMUA KELAS
-    // --------------------------------------------------------
+      console.log(
+        "[MATA PELAJARAN] USER KELAS ID:",
+        getUserKelasId(user)
+      );
 
-    const detailKelasList = await Promise.all(
-      kelasList.map(async (kelas) => {
-        if (!kelas?.id) {
-          return null;
-        }
+      console.log(
+        "======================================"
+      );
 
+      const explicitKelasId =
+        getUserKelasId(user);
+
+      if (explicitKelasId) {
         try {
-          const result =
-            await getKelasById(kelas.id);
+          console.log(
+            "[MATA PELAJARAN] Mengambil kelas langsung:",
+            explicitKelasId
+          );
 
-          return extractObject(result);
+          const result =
+            await getKelasById(
+              explicitKelasId
+            );
+
+          const detail =
+            extractObject(result);
+
+          if (detail) {
+            console.log(
+              "[MATA PELAJARAN] Kelas ditemukan langsung:",
+              detail
+            );
+
+            return detail;
+          }
         } catch (error) {
           console.warn(
-            `[MATA PELAJARAN] Gagal mengambil detail kelas ${kelas.id}:`,
+            "[MATA PELAJARAN] Gagal mengambil kelas langsung:",
             error
           );
-
-          return null;
         }
-      })
-    );
-
-    // --------------------------------------------------------
-    // CARI KELAS YANG MEMILIKI SISWA LOGIN
-    // --------------------------------------------------------
-
-    const foundKelas = detailKelasList.find(
-      (kelas) => {
-        if (!kelas) {
-          return false;
-        }
-
-        const anggota = Array.isArray(
-          kelas.anggota
-        )
-          ? kelas.anggota
-          : [];
-
-        return anggota.some((anggotaItem) => {
-          const siswaId =
-            anggotaItem?.siswa?.id ??
-            anggotaItem?.siswaId ??
-            null;
-
-          return (
-            siswaId &&
-            String(siswaId) ===
-              String(userId)
-          );
-        });
       }
-    );
 
-    console.log(
-      "[MATA PELAJARAN] KELAS SISWA:",
-      foundKelas
-    );
-
-    if (!foundKelas) {
-      throw new Error(
-        "Kelas siswa belum ditemukan. Pastikan siswa sudah dimasukkan ke dalam kelas."
+      console.log(
+        "[MATA PELAJARAN] kelasId tidak tersedia."
       );
-    }
 
-    return foundKelas;
-  }, []);
+      console.log(
+        "[MATA PELAJARAN] Mencari kelas berdasarkan anggota.siswa.id..."
+      );
+
+      const kelasResult =
+        await getKelas({
+          page: 1,
+          limit: 100,
+          sortBy: "tingkat",
+          sortOrder: "asc",
+        });
+
+      console.log(
+        "[MATA PELAJARAN] RESPONSE GET KELAS:",
+        kelasResult
+      );
+
+      const kelasList =
+        extractArray(kelasResult);
+
+      if (!kelasList.length) {
+        throw new Error(
+          "Data kelas belum tersedia untuk sekolah ini."
+        );
+      }
+
+      console.log(
+        "[MATA PELAJARAN] JUMLAH KELAS:",
+        kelasList.length
+      );
+
+      const detailKelasList =
+        await Promise.all(
+          kelasList.map(
+            async (kelas) => {
+              if (!kelas?.id) {
+                return null;
+              }
+
+              try {
+                const result =
+                  await getKelasById(
+                    kelas.id
+                  );
+
+                return extractObject(
+                  result
+                );
+              } catch (error) {
+                console.warn(
+                  `[MATA PELAJARAN] Gagal mengambil detail kelas ${kelas.id}:`,
+                  error
+                );
+
+                return null;
+              }
+            }
+          )
+        );
+
+      const foundKelas =
+        detailKelasList.find(
+          (kelas) => {
+            if (!kelas) {
+              return false;
+            }
+
+            const anggota =
+              Array.isArray(
+                kelas.anggota
+              )
+                ? kelas.anggota
+                : [];
+
+            return anggota.some(
+              (anggotaItem) => {
+                const siswaId =
+                  anggotaItem?.siswa
+                    ?.id ??
+                  anggotaItem?.siswaId ??
+                  null;
+
+                return (
+                  siswaId &&
+                  String(
+                    siswaId
+                  ) ===
+                    String(
+                      userId
+                    )
+                );
+              }
+            );
+          }
+        );
+
+      console.log(
+        "[MATA PELAJARAN] KELAS SISWA:",
+        foundKelas
+      );
+
+      if (!foundKelas) {
+        throw new Error(
+          "Kelas siswa belum ditemukan. Pastikan siswa sudah dimasukkan ke dalam kelas."
+        );
+      }
+
+      return foundKelas;
+    },
+    []
+  );
 
   // ==========================================================
   // FETCH NOTIFICATIONS
   // ==========================================================
 
-  const fetchNotifications = useCallback(async () => {
-    try {
-      setNotificationLoading(true);
-
-      const token = getToken();
-
-      if (!token) {
-        setNotifications([]);
-        return;
-      }
-
-      const response = await fetch(
-        `${API_URL}/api/v1/notifikasi`,
-        {
-          method: "GET",
-          headers: getHeaders(),
-          cache: "no-store",
-        }
-      );
-
-      let result = null;
-
+  const fetchNotifications =
+    useCallback(async () => {
       try {
-        result = await response.json();
-      } catch {
-        result = null;
-      }
+        setNotificationLoading(true);
 
-      if (!response.ok) {
+        const token = getToken();
+
+        if (!token) {
+          setNotifications([]);
+          return;
+        }
+
+        const response =
+          await fetch(
+            `${API_URL}/api/v1/notifikasi`,
+            {
+              method: "GET",
+              headers: getHeaders(),
+              cache: "no-store",
+            }
+          );
+
+        let result = null;
+
+        try {
+          result =
+            await response.json();
+        } catch {
+          result = null;
+        }
+
+        if (!response.ok) {
+          console.error(
+            "[MATA PELAJARAN] Gagal mengambil notifikasi:",
+            result
+          );
+
+          setNotifications([]);
+          return;
+        }
+
+        const list =
+          result?.data?.list ||
+          result?.data?.data ||
+          result?.data ||
+          result?.list ||
+          [];
+
+        setNotifications(
+          Array.isArray(list)
+            ? list.slice(0, 5)
+            : []
+        );
+      } catch (error) {
         console.error(
-          "[MATA PELAJARAN] Gagal mengambil notifikasi:",
-          result
+          "[MATA PELAJARAN] Error notifikasi:",
+          error
         );
 
         setNotifications([]);
-        return;
+      } finally {
+        setNotificationLoading(false);
       }
-
-      const list =
-        result?.data?.list ||
-        result?.data?.data ||
-        result?.data ||
-        result?.list ||
-        [];
-
-      setNotifications(
-        Array.isArray(list)
-          ? list.slice(0, 5)
-          : []
-      );
-    } catch (error) {
-      console.error(
-        "[MATA PELAJARAN] Error notifikasi:",
-        error
-      );
-
-      setNotifications([]);
-    } finally {
-      setNotificationLoading(false);
-    }
-  }, []);
+    }, []);
 
   // ==========================================================
   // AUTO REFRESH NOTIFICATION
@@ -603,9 +632,10 @@ export default function MataPelajaranPage() {
   useEffect(() => {
     fetchNotifications();
 
-    const interval = setInterval(() => {
-      fetchNotifications();
-    }, 30000);
+    const interval =
+      setInterval(() => {
+        fetchNotifications();
+      }, 30000);
 
     return () => {
       clearInterval(interval);
@@ -616,53 +646,57 @@ export default function MataPelajaranPage() {
   // FETCH TUGAS
   // ==========================================================
 
-  const fetchJumlahTugas = useCallback(
-    async (kelasMapelId) => {
-      try {
-        if (!kelasMapelId) {
-          return 0;
-        }
-
-        const response = await fetch(
-          `${API_URL}/api/v1/tugas/kelas-mapel/${kelasMapelId}`,
-          {
-            method: "GET",
-            headers: getHeaders(),
-            cache: "no-store",
-          }
-        );
-
-        let result = null;
-
+  const fetchJumlahTugas =
+    useCallback(
+      async (kelasMapelId) => {
         try {
-          result = await response.json();
-        } catch {
-          result = null;
-        }
+          if (!kelasMapelId) {
+            return 0;
+          }
 
-        if (!response.ok) {
+          const response =
+            await fetch(
+              `${API_URL}/api/v1/tugas/kelas-mapel/${kelasMapelId}`,
+              {
+                method: "GET",
+                headers: getHeaders(),
+                cache: "no-store",
+              }
+            );
+
+          let result = null;
+
+          try {
+            result =
+              await response.json();
+          } catch {
+            result = null;
+          }
+
+          if (!response.ok) {
+            console.error(
+              `[MATA PELAJARAN] Gagal fetch tugas ${kelasMapelId}:`,
+              result
+            );
+
+            return 0;
+          }
+
+          const tugasData =
+            extractArray(result);
+
+          return tugasData.length;
+        } catch (error) {
           console.error(
             `[MATA PELAJARAN] Gagal fetch tugas ${kelasMapelId}:`,
-            result
+            error
           );
 
           return 0;
         }
-
-        const tugasData = extractArray(result);
-
-        return tugasData.length;
-      } catch (error) {
-        console.error(
-          `[MATA PELAJARAN] Gagal fetch tugas ${kelasMapelId}:`,
-          error
-        );
-
-        return 0;
-      }
-    },
-    []
-  );
+      },
+      []
+    );
 
   // ==========================================================
   // FETCH JUMLAH TUGAS SEMUA MAPEL
@@ -679,17 +713,19 @@ export default function MataPelajaranPage() {
         }
 
         return Promise.all(
-          data.map(async (item) => {
-            const jumlahTugas =
-              await fetchJumlahTugas(
-                item?.id
-              );
+          data.map(
+            async (item) => {
+              const jumlahTugas =
+                await fetchJumlahTugas(
+                  item?.id
+                );
 
-            return {
-              ...item,
-              jumlahTugas,
-            };
-          })
+              return {
+                ...item,
+                jumlahTugas,
+              };
+            }
+          )
         );
       },
       [fetchJumlahTugas]
@@ -699,22 +735,24 @@ export default function MataPelajaranPage() {
   // FETCH MATERI
   // ==========================================================
 
-  const fetchSemuaMateri = useCallback(
-    async () => {
+  const fetchSemuaMateri =
+    useCallback(async () => {
       try {
-        const response = await fetch(
-          `${API_URL}/api/v1/materi-pembelajaran`,
-          {
-            method: "GET",
-            headers: getHeaders(),
-            cache: "no-store",
-          }
-        );
+        const response =
+          await fetch(
+            `${API_URL}/api/v1/materi-pembelajaran`,
+            {
+              method: "GET",
+              headers: getHeaders(),
+              cache: "no-store",
+            }
+          );
 
         let result = null;
 
         try {
-          result = await response.json();
+          result =
+            await response.json();
         } catch {
           result = null;
         }
@@ -728,7 +766,9 @@ export default function MataPelajaranPage() {
           return [];
         }
 
-        return extractArray(result);
+        return extractArray(
+          result
+        );
       } catch (error) {
         console.error(
           "[MATA PELAJARAN] Error fetch materi:",
@@ -737,16 +777,14 @@ export default function MataPelajaranPage() {
 
         return [];
       }
-    },
-    []
-  );
+    }, []);
 
   // ==========================================================
   // FETCH MATA PELAJARAN
   // ==========================================================
 
-  const fetchMataPelajaran = useCallback(
-    async () => {
+  const fetchMataPelajaran =
+    useCallback(async () => {
       try {
         setLoading(true);
         setError("");
@@ -774,13 +812,10 @@ export default function MataPelajaranPage() {
           );
         }
 
-        // ------------------------------------------------------
-        // CARI KELAS SISWA DARI BACKEND
-        // ------------------------------------------------------
-
-        const kelas = await findKelasSiswa(
-          user
-        );
+        const kelas =
+          await findKelasSiswa(
+            user
+          );
 
         setKelasSiswa(kelas);
 
@@ -807,10 +842,6 @@ export default function MataPelajaranPage() {
           "======================================"
         );
 
-        // ------------------------------------------------------
-        // AMBIL KELAS MAPEL DARI DETAIL KELAS
-        // ------------------------------------------------------
-
         const dataKelasSiswa =
           Array.isArray(
             kelas?.kelasMapel
@@ -833,10 +864,6 @@ export default function MataPelajaranPage() {
           return;
         }
 
-        // ------------------------------------------------------
-        // FETCH MATERI + TUGAS
-        // ------------------------------------------------------
-
         const [
           materiData,
           dataDenganTugas,
@@ -847,10 +874,6 @@ export default function MataPelajaranPage() {
           ),
         ]);
 
-        // ------------------------------------------------------
-        // NORMALIZE
-        // ------------------------------------------------------
-
         const normalized =
           dataDenganTugas.map(
             (item, index) => {
@@ -858,8 +881,10 @@ export default function MataPelajaranPage() {
                 item?.id || null;
 
               const namaMapel =
-                item?.mataPelajaran?.nama ||
-                item?.mataPelajaran?.namaMapel ||
+                item?.mataPelajaran
+                  ?.nama ||
+                item?.mataPelajaran
+                  ?.namaMapel ||
                 item?.mataPelajaran
                   ?.namaMataPelajaran ||
                 item?.mataPelajaran
@@ -870,7 +895,8 @@ export default function MataPelajaranPage() {
               const guru =
                 item?.guruPengajar
                   ?.namaLengkap ||
-                item?.guru?.namaLengkap ||
+                item?.guru
+                  ?.namaLengkap ||
                 item?.guruNama ||
                 "Guru";
 
@@ -894,7 +920,8 @@ export default function MataPelajaranPage() {
                     const materiKelasMapelId =
                       materi?.kelasMapelId ??
                       materi?.kelas_mapel_id ??
-                      materi?.kelasMapel?.id ??
+                      materi?.kelasMapel
+                        ?.id ??
                       null;
 
                     return (
@@ -926,12 +953,6 @@ export default function MataPelajaranPage() {
 
                 icon: Icon,
 
-                color:
-                  colorList[
-                    index %
-                      colorList.length
-                  ],
-
                 materi:
                   jumlahMateri,
 
@@ -941,6 +962,10 @@ export default function MataPelajaranPage() {
                   ) || 0,
 
                 ujian: 0,
+
+                color:
+                  index %
+                    3,
               };
             }
           );
@@ -966,14 +991,12 @@ export default function MataPelajaranPage() {
       } finally {
         setLoading(false);
       }
-    },
-    [
+    }, [
       currentUser,
       findKelasSiswa,
       fetchSemuaMateri,
       fetchJumlahTugasSemuaMapel,
-    ]
-  );
+    ]);
 
   // ==========================================================
   // LOAD USER
@@ -1004,6 +1027,7 @@ export default function MataPelajaranPage() {
       !currentUser
     ) {
       setLoading(false);
+
       setError(
         "Data siswa tidak ditemukan. Silakan login kembali."
       );
@@ -1018,69 +1042,51 @@ export default function MataPelajaranPage() {
   // SELECTED MAPEL
   // ==========================================================
 
-  const selected = useMemo(
-    () =>
-      mataPelajaranList.find(
-        (item) =>
-          item.kelasMapelId ===
-          selectedId
-      ),
-    [
-      mataPelajaranList,
-      selectedId,
-    ]
-  );
+  const selected =
+    useMemo(
+      () =>
+        mataPelajaranList.find(
+          (item) =>
+            item.kelasMapelId ===
+            selectedId
+        ),
+      [
+        mataPelajaranList,
+        selectedId,
+      ]
+    );
 
   // ==========================================================
   // TOTAL
   // ==========================================================
 
-  const totalMateri = useMemo(
-    () =>
-      mataPelajaranList.reduce(
-        (total, item) =>
-          total +
-          Number(
-            item.materi || 0
-          ),
-        0
-      ),
-    [mataPelajaranList]
-  );
+  const totalMateri =
+    useMemo(
+      () =>
+        mataPelajaranList.reduce(
+          (total, item) =>
+            total +
+            Number(
+              item.materi || 0
+            ),
+          0
+        ),
+      [mataPelajaranList]
+    );
 
-  const totalTugas = useMemo(
-    () =>
-      mataPelajaranList.reduce(
-        (total, item) =>
-          total +
-          Number(
-            item.tugas || 0
-          ),
-        0
-      ),
-    [mataPelajaranList]
-  );
-
-  // ==========================================================
-  // HEADER USER
-  // ==========================================================
-
-  const headerUser = useMemo(
-    () => ({
-      name: getUserName(
-        currentUser
-      ),
-
-      email: getUserEmail(
-        currentUser
-      ),
-
-      avatar: getUserAvatar(
-        currentUser
-      ),
-    }),
-    [currentUser]
-  );
+  const totalTugas =
+    useMemo(
+      () =>
+        mataPelajaranList.reduce(
+          (total, item) =>
+            total +
+            Number(
+              item.tugas || 0
+            ),
+          0
+        ),
+      [mataPelajaranList]
+    );
 
   // ==========================================================
   // GO TO SECTION
@@ -1122,70 +1128,51 @@ export default function MataPelajaranPage() {
 
   if (loading) {
     return (
-      <div className="flex h-screen bg-slate-50 overflow-hidden">
-        <Sidebar
-          role="siswa"
-          active="mataPelajaran"
-          collapsed={
-            sidebarCollapsed
-          }
-          setCollapsed={
-            setSidebarCollapsed
-          }
-        />
+      <div className="theme-page theme-text min-h-full">
+        <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+          <div className="animate-pulse">
+            <div
+              className={`h-4 w-28 rounded mb-3 ${themeNeutralSurface}`}
+            />
 
-        <div className="flex-1 min-w-0 flex flex-col">
-          <Header
-            toggleSidebar={() =>
-              setSidebarCollapsed(
-                !sidebarCollapsed
-              )
-            }
-            user={{
-              name: "Siswa",
-              email:
-                "siswa@smartschool.com",
-              avatar: "S",
-            }}
-          />
+            <div
+              className={`h-8 w-64 rounded mb-2 ${themeNeutralSurface}`}
+            />
 
-          <main className="flex-1 overflow-y-auto">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-              <div className="animate-pulse">
-                <div className="h-4 w-28 bg-slate-200 rounded mb-3" />
+            <div
+              className={`h-4 w-80 max-w-full rounded mb-8 ${themeNeutralSurface}`}
+            />
 
-                <div className="h-8 w-64 bg-slate-200 rounded mb-2" />
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+              {[1, 2, 3].map(
+                (item) => (
+                  <div
+                    key={item}
+                    className={`h-24 rounded-2xl ${themeCardSurface} ${themeNeutralBorder}`}
+                  />
+                )
+              )}
+            </div>
 
-                <div className="h-4 w-80 max-w-full bg-slate-200 rounded mb-8" />
+            <div
+              className={`${themeCardSurface} ${themeNeutralBorder} rounded-2xl p-5`}
+            >
+              <div
+                className={`h-5 w-40 rounded mb-5 ${themeNeutralSurface}`}
+              />
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                  {[1, 2, 3].map(
-                    (item) => (
-                      <div
-                        key={item}
-                        className="h-24 bg-white border border-slate-200 rounded-2xl"
-                      />
-                    )
-                  )}
-                </div>
-
-                <div className="bg-white border border-slate-200 rounded-2xl p-5">
-                  <div className="h-5 w-40 bg-slate-200 rounded mb-5" />
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {[1, 2, 3, 4, 5, 6].map(
-                      (item) => (
-                        <div
-                          key={item}
-                          className="h-48 bg-slate-100 rounded-2xl"
-                        />
-                      )
-                    )}
-                  </div>
-                </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {[1, 2, 3, 4, 5, 6].map(
+                  (item) => (
+                    <div
+                      key={item}
+                      className={`h-48 rounded-2xl ${themeNeutralSurface}`}
+                    />
+                  )
+                )}
               </div>
             </div>
-          </main>
+          </div>
         </div>
       </div>
     );
@@ -1196,936 +1183,1181 @@ export default function MataPelajaranPage() {
   // ==========================================================
 
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden">
-      {/* SIDEBAR */}
+    <div className="theme-page theme-text min-h-full">
+      <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
 
-      <Sidebar
-        role="siswa"
-        active="mataPelajaran"
-        collapsed={
-          sidebarCollapsed
-        }
-        setCollapsed={
-          setSidebarCollapsed
-        }
-      />
+        {/* PAGE TITLE */}
 
-      <div className="flex-1 min-w-0 flex flex-col">
-        {/* HEADER */}
+        <div className="flex items-start gap-3 mb-7">
+          {selected && (
+            <button
+              type="button"
+              onClick={backToList}
+              className={`
+                mt-1
+                w-10 h-10
+                flex items-center justify-center
+                rounded-xl
+                ${themeCardSurface}
+                ${themeNeutralBorder}
+                ${themeTextSecondary}
+                ${themePrimaryHoverText}
+                ${themePrimaryHoverBorder}
+                ${themePrimaryHoverSurface}
+                transition
+              `}
+            >
+              <ArrowLeft size={17} />
+            </button>
+          )}
 
-        <Header
-          toggleSidebar={() =>
-            setSidebarCollapsed(
-              !sidebarCollapsed
-            )
-          }
-          user={headerUser}
-        />
+          <div className="min-w-0">
+            <div className="flex items-center gap-2 mb-1.5">
+              <span
+                className={`w-1.5 h-1.5 rounded-full ${themePrimaryBg}`}
+              />
 
-        {/* MAIN */}
+              <p
+                className={`text-xs sm:text-sm font-semibold ${themePrimaryText}`}
+              >
+                {selected?.kelas ||
+                  kelasSiswa?.nama ||
+                  currentUser?.kelas?.nama ||
+                  "Kelas Siswa"}
+              </p>
+            </div>
 
-        <main className="flex-1 overflow-y-auto">
-          <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
-            {/* PAGE TITLE */}
+            <h1
+              className={`text-2xl sm:text-3xl font-bold tracking-tight ${themeText}`}
+            >
+              {selected
+                ? selected.nama
+                : "Mata Pelajaran"}
+            </h1>
 
-            <div className="flex items-start gap-3 mb-7">
-              {selected && (
+            <p
+              className={`text-sm ${themeTextMuted} mt-1.5 max-w-2xl`}
+            >
+              {selected
+                ? `Diampu oleh ${selected.guru}`
+                : "Kelola aktivitas pembelajaran berdasarkan mata pelajaran yang kamu ikuti."}
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => {
+              fetchMataPelajaran();
+              fetchNotifications();
+            }}
+            disabled={loading}
+            className={`
+              ml-auto
+              flex-shrink-0
+              w-10 h-10
+              flex items-center justify-center
+              rounded-xl
+              ${themeCardSurface}
+              ${themeNeutralBorder}
+              ${themeTextSecondary}
+              ${themePrimaryHoverText}
+              ${themePrimaryHoverBorder}
+              ${themePrimaryHoverSurface}
+              transition
+              disabled:opacity-50
+            `}
+            title="Refresh"
+          >
+            <RefreshCw
+              size={17}
+              className={
+                loading
+                  ? "animate-spin"
+                  : ""
+              }
+            />
+          </button>
+        </div>
+
+        {/* ERROR */}
+
+        {error && (
+          <div
+            className={`
+              mb-6
+              rounded-2xl
+              border
+              ${themeNeutralBorder}
+              ${themeCardSurface}
+              p-4
+              ${themeCardShadow}
+            `}
+          >
+            <div className="flex items-start gap-3">
+              <div
+                className={`
+                  w-9 h-9
+                  rounded-xl
+                  ${themeNeutralSurface}
+                  flex items-center justify-center
+                  flex-shrink-0
+                `}
+              >
+                <AlertCircle
+                  size={18}
+                  className={themeTextSecondary}
+                />
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <p
+                  className={`text-sm font-semibold ${themeText}`}
+                >
+                  Gagal memuat data
+                </p>
+
+                <p
+                  className={`text-xs ${themeTextMuted} mt-1 break-words`}
+                >
+                  {error}
+                </p>
+
                 <button
                   type="button"
                   onClick={
-                    backToList
+                    fetchMataPelajaran
                   }
-                  className="
-                    mt-1
-                    w-10 h-10
-                    flex items-center justify-center
-                    rounded-xl
-                    bg-white
-                    border border-slate-200
-                    text-slate-500
-                    hover:text-blue-600
-                    hover:border-blue-200
-                    hover:bg-blue-50
+                  className={`
+                    mt-3
+                    inline-flex items-center gap-2
+                    px-3 py-2
+                    rounded-lg
+                    ${themePrimaryGradient}
+                    text-[var(--color-card)]
+                    text-xs font-semibold
+                    hover:opacity-90
                     transition
-                  "
+                  `}
                 >
-                  <ArrowLeft
-                    size={17}
-                  />
+                  <RefreshCw size={13} />
+                  Coba lagi
                 </button>
-              )}
-
-              <div className="min-w-0">
-                <div className="flex items-center gap-2 mb-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
-
-                  <p className="text-xs sm:text-sm font-semibold text-blue-600">
-                    {selected?.kelas ||
-                      kelasSiswa?.nama ||
-                      currentUser
-                        ?.kelas
-                        ?.nama ||
-                      "Kelas Siswa"}
-                  </p>
-                </div>
-
-                <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-900">
-                  {selected
-                    ? selected.nama
-                    : "Mata Pelajaran"}
-                </h1>
-
-                <p className="text-sm text-slate-500 mt-1.5 max-w-2xl">
-                  {selected
-                    ? `Diampu oleh ${selected.guru}`
-                    : "Kelola aktivitas pembelajaran berdasarkan mata pelajaran yang kamu ikuti."}
-                </p>
               </div>
-
-              <button
-                type="button"
-                onClick={() => {
-                  fetchMataPelajaran();
-                  fetchNotifications();
-                }}
-                disabled={loading}
-                className="
-                  ml-auto
-                  flex-shrink-0
-                  w-10 h-10
-                  flex items-center justify-center
-                  rounded-xl
-                  bg-white
-                  border border-slate-200
-                  text-slate-500
-                  hover:text-blue-600
-                  hover:border-blue-200
-                  hover:bg-blue-50
-                  transition
-                  disabled:opacity-50
-                "
-                title="Refresh"
-              >
-                <RefreshCw
-                  size={17}
-                  className={
-                    loading
-                      ? "animate-spin"
-                      : ""
-                  }
-                />
-              </button>
             </div>
+          </div>
+        )}
 
-            {/* ERROR */}
+        {/* DETAIL MAPEL */}
 
-            {error && (
-              <div className="mb-6 rounded-2xl border border-rose-200 bg-white p-4 shadow-sm">
-                <div className="flex items-start gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-rose-50 flex items-center justify-center flex-shrink-0">
-                    <AlertCircle
-                      size={18}
-                      className="text-rose-600"
+        {selected ? (
+          <div className="space-y-6">
+
+            {/* DETAIL HEADER */}
+
+            <div
+              className={`
+                relative
+                overflow-hidden
+                rounded-2xl
+                ${themeCardSurface}
+                border
+                ${themeNeutralBorder}
+                ${themeCardShadow}
+              `}
+            >
+              <div
+                className={`
+                  absolute
+                  right-0
+                  top-0
+                  w-56
+                  h-56
+                  rounded-full
+                  ${themePrimarySurface}
+                  blur-3xl
+                  pointer-events-none
+                `}
+              />
+
+              <div className="relative p-5 sm:p-6">
+                <div className="flex flex-col sm:flex-row sm:items-center gap-5">
+                  <div
+                    className={`
+                      w-16 h-16
+                      rounded-2xl
+                      ${themePrimaryGradient}
+                      text-[var(--color-card)]
+                      flex items-center justify-center
+                      ${themePrimaryShadow}
+                      flex-shrink-0
+                    `}
+                  >
+                    <selected.icon
+                      size={27}
+                      strokeWidth={1.8}
                     />
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-slate-800">
-                      Gagal memuat data
-                    </p>
-
-                    <p className="text-xs text-slate-500 mt-1 break-words">
-                      {error}
-                    </p>
-
-                    <button
-                      type="button"
-                      onClick={
-                        fetchMataPelajaran
-                      }
-                      className="
-                        mt-3
-                        inline-flex items-center gap-2
-                        px-3 py-2
-                        rounded-lg
-                        bg-blue-600
-                        text-white
-                        text-xs font-semibold
-                        hover:bg-blue-700
-                        transition
-                      "
+                    <p
+                      className={`text-xs font-medium ${themeTextMuted} uppercase tracking-wider`}
                     >
-                      <RefreshCw
-                        size={13}
+                      Mata Pelajaran
+                    </p>
+
+                    <h2
+                      className={`text-xl sm:text-2xl font-bold ${themeText} mt-1`}
+                    >
+                      {selected.nama}
+                    </h2>
+
+                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5">
+                      <span
+                        className={`text-sm ${themeTextSecondary}`}
+                      >
+                        {selected.guru}
+                      </span>
+
+                      <span
+                        className={`hidden sm:block w-1 h-1 rounded-full ${themeNeutralSurface}`}
                       />
 
-                      Coba lagi
-                    </button>
+                      <span
+                        className={`text-sm ${themeTextMuted}`}
+                      >
+                        {selected.kelas}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div
+                    className={`
+                      hidden sm:flex
+                      items-center gap-2
+                      px-3 py-2
+                      rounded-xl
+                      ${themePrimarySurface}
+                      ${themePrimaryText}
+                    `}
+                  >
+                    <BookOpen size={16} />
+
+                    <span className="text-xs font-semibold">
+                      Pembelajaran
+                    </span>
                   </div>
                 </div>
               </div>
-            )}
+            </div>
 
-            {/* ==================================================
-                DETAIL MAPEL
-            ================================================== */}
+            {/* SUMMARY */}
 
-            {selected ? (
-              <div className="space-y-6">
-                {/* DETAIL HEADER */}
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <MiniStat
+                label="Materi"
+                value={selected.materi}
+                description="Materi tersedia"
+                icon={FileText}
+              />
 
-                <div className="relative overflow-hidden rounded-2xl bg-white border border-slate-200 shadow-sm">
-                  <div className="absolute right-0 top-0 w-56 h-56 rounded-full bg-blue-50/80 blur-3xl pointer-events-none" />
+              <MiniStat
+                label="Tugas"
+                value={selected.tugas}
+                description="Tugas pembelajaran"
+                icon={ClipboardList}
+              />
 
-                  <div className="relative p-5 sm:p-6">
-                    <div className="flex flex-col sm:flex-row sm:items-center gap-5">
-                      <div
-                        className="
-                          w-16 h-16
-                          rounded-2xl
-                          bg-gradient-to-br from-blue-600 to-blue-700
-                          text-white
-                          flex items-center justify-center
-                          shadow-lg shadow-blue-600/15
-                          flex-shrink-0
-                        "
-                      >
-                        <selected.icon
-                          size={27}
-                          strokeWidth={1.8}
-                        />
-                      </div>
+              <MiniStat
+                label="Ujian"
+                value={selected.ujian}
+                description="Jadwal ujian"
+                icon={GraduationCap}
+              />
+            </div>
 
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs font-medium text-slate-400 uppercase tracking-wider">
-                          Mata Pelajaran
-                        </p>
+            {/* AKTIVITAS */}
 
-                        <h2 className="text-xl sm:text-2xl font-bold text-slate-900 mt-1">
-                          {selected.nama}
-                        </h2>
+            <div>
+              <div className="mb-4">
+                <h2
+                  className={`text-base font-bold ${themeText}`}
+                >
+                  Aktivitas Pembelajaran
+                </h2>
 
-                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5">
-                          <span className="text-sm text-slate-500">
-                            {selected.guru}
-                          </span>
+                <p
+                  className={`text-xs ${themeTextMuted} mt-1`}
+                >
+                  Akses materi, tugas, dan ujian untuk
+                  mata pelajaran ini.
+                </p>
+              </div>
 
-                          <span className="hidden sm:block w-1 h-1 rounded-full bg-slate-300" />
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <SectionCard
+                  icon={FileText}
+                  title="Materi"
+                  description="Pelajari materi pembelajaran"
+                  count={selected.materi}
+                  countLabel="materi"
+                  variant="primary"
+                  onClick={() =>
+                    goTo("materi")
+                  }
+                />
 
-                          <span className="text-sm text-slate-400">
-                            {selected.kelas}
-                          </span>
-                        </div>
-                      </div>
+                <SectionCard
+                  icon={ClipboardList}
+                  title="Tugas"
+                  description="Lihat dan kerjakan tugas"
+                  count={selected.tugas}
+                  countLabel="tugas"
+                  variant="info"
+                  onClick={() =>
+                    goTo("tugas")
+                  }
+                />
 
-                      <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl bg-blue-50 text-blue-700">
-                        <BookOpen
-                          size={16}
-                        />
+                <SectionCard
+                  icon={GraduationCap}
+                  title="Ujian"
+                  description="Jadwal dan hasil ujian"
+                  count={selected.ujian}
+                  countLabel="ujian"
+                  variant="neutral"
+                  onClick={() =>
+                    goTo("ujian")
+                  }
+                />
+              </div>
+            </div>
 
-                        <span className="text-xs font-semibold">
-                          Pembelajaran
-                        </span>
-                      </div>
-                    </div>
+            {/* INFO PEMBELAJARAN */}
+
+            <div
+              className={`
+                rounded-2xl
+                border
+                ${themeInfoBorder}
+                ${themeInfoSurface}
+                p-4
+              `}
+            >
+              <div className="flex items-start gap-3">
+                <div
+                  className={`
+                    w-9 h-9
+                    rounded-xl
+                    ${themeCardSurface}
+                    border
+                    ${themeInfoBorder}
+                    flex items-center justify-center
+                    flex-shrink-0
+                  `}
+                >
+                  <BookOpen
+                    size={17}
+                    className={themeInfoText}
+                  />
+                </div>
+
+                <div className="min-w-0">
+                  <p
+                    className={`text-sm font-semibold ${themeInfoText}`}
+                  >
+                    Informasi pembelajaran
+                  </p>
+
+                  <p
+                    className={`text-xs ${themeInfoText} mt-1`}
+                  >
+                    {selected.kelas}
+                    {" · "}
+                    {selected.nama}
+                    {" · "}
+                    {selected.guru}
+                  </p>
+
+                  <p
+                    className={`text-[11px] ${themeTextMuted} mt-2 break-all`}
+                  >
+                    ID Kelas Mapel:{" "}
+                    {selected.kelasMapelId}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* AKTIVITAS TERBARU */}
+
+            <div
+              className={`
+                ${themeCardSurface}
+                rounded-2xl
+                border
+                ${themeNeutralBorder}
+                ${themeCardShadow}
+                overflow-hidden
+              `}
+            >
+              <div
+                className={`px-5 py-4 border-b ${themeDivider}`}
+              >
+                <div className="flex items-center gap-3">
+                  <div
+                    className={`
+                      w-9 h-9
+                      rounded-xl
+                      ${themeNeutralSurface}
+                      ${themeTextSecondary}
+                      flex items-center justify-center
+                    `}
+                  >
+                    <Bell size={17} />
                   </div>
-                </div>
 
-                {/* SUMMARY */}
+                  <div>
+                    <h3
+                      className={`text-sm font-semibold ${themeText}`}
+                    >
+                      Aktivitas Terbaru
+                    </h3>
 
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <MiniStat
-                    label="Materi"
-                    value={
-                      selected.materi
-                    }
-                    description="Materi tersedia"
-                    icon={FileText}
-                  />
-
-                  <MiniStat
-                    label="Tugas"
-                    value={
-                      selected.tugas
-                    }
-                    description="Tugas pembelajaran"
-                    icon={
-                      ClipboardList
-                    }
-                  />
-
-                  <MiniStat
-                    label="Ujian"
-                    value={
-                      selected.ujian
-                    }
-                    description="Jadwal ujian"
-                    icon={
-                      GraduationCap
-                    }
-                  />
-                </div>
-
-                {/* AKTIVITAS */}
-
-                <div>
-                  <div className="mb-4">
-                    <h2 className="text-base font-bold text-slate-900">
-                      Aktivitas Pembelajaran
-                    </h2>
-
-                    <p className="text-xs text-slate-400 mt-1">
-                      Akses materi, tugas, dan
-                      ujian untuk mata pelajaran ini.
+                    <p
+                      className={`text-xs ${themeTextMuted} mt-0.5`}
+                    >
+                      Pembaruan pembelajaran{" "}
+                      {selected.nama}
                     </p>
                   </div>
+                </div>
+              </div>
 
-                  <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <SectionCard
-                      icon={FileText}
-                      title="Materi"
-                      description="Pelajari materi pembelajaran"
-                      count={
-                        selected.materi
-                      }
-                      countLabel="materi"
-                      color="blue"
-                      onClick={() =>
-                        goTo("materi")
-                      }
-                    />
+              <EmptyActivity />
+            </div>
+          </div>
+        ) : (
+          <div className="space-y-6">
 
-                    <SectionCard
-                      icon={
-                        ClipboardList
-                      }
-                      title="Tugas"
-                      description="Lihat dan kerjakan tugas"
-                      count={
-                        selected.tugas
-                      }
-                      countLabel="tugas"
-                      color="indigo"
-                      onClick={() =>
-                        goTo("tugas")
-                      }
-                    />
+            {/* OVERVIEW */}
 
-                    <SectionCard
-                      icon={
-                        GraduationCap
-                      }
-                      title="Ujian"
-                      description="Jadwal dan hasil ujian"
-                      count={
-                        selected.ujian
-                      }
-                      countLabel="ujian"
-                      color="slate"
-                      onClick={() =>
-                        goTo("ujian")
-                      }
-                    />
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <OverviewCard
+                icon={BookOpen}
+                label="Mata Pelajaran"
+                value={
+                  mataPelajaranList.length
+                }
+                description="Pelajaran aktif"
+                primary
+              />
+
+              <OverviewCard
+                icon={FileText}
+                label="Total Materi"
+                value={totalMateri}
+                description="Materi tersedia"
+              />
+
+              <OverviewCard
+                icon={ClipboardList}
+                label="Total Tugas"
+                value={totalTugas}
+                description="Tugas pembelajaran"
+              />
+            </div>
+
+            {/* CONTENT */}
+
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+              {/* MAPEL */}
+
+              <section
+                className={`
+                  lg:col-span-2
+                  ${themeCardSurface}
+                  rounded-2xl
+                  border
+                  ${themeNeutralBorder}
+                  ${themeCardShadow}
+                  overflow-hidden
+                `}
+              >
+                <div
+                  className={`px-5 py-5 border-b ${themeDivider}`}
+                >
+                  <div className="flex items-center justify-between gap-4">
+                    <div>
+                      <h2
+                        className={`text-base font-bold ${themeText}`}
+                      >
+                        Mata Pelajaran
+                      </h2>
+
+                      <p
+                        className={`text-xs ${themeTextMuted} mt-1`}
+                      >
+                        Pilih mata pelajaran untuk melihat
+                        detail pembelajaran.
+                      </p>
+                    </div>
+
+                    <div
+                      className={`
+                        hidden sm:flex
+                        items-center gap-2
+                        px-3 py-2
+                        rounded-xl
+                        ${themePrimarySurface}
+                        ${themePrimaryText}
+                      `}
+                    >
+                      <BookOpen size={16} />
+
+                      <span className="text-xs font-semibold">
+                        {mataPelajaranList.length}{" "}
+                        pelajaran
+                      </span>
+                    </div>
                   </div>
                 </div>
 
-                {/* INFO PEMBELAJARAN */}
+                {mataPelajaranList.length ===
+                0 ? (
+                  <EmptySubjects
+                    onRefresh={
+                      fetchMataPelajaran
+                    }
+                  />
+                ) : (
+                  <div className="p-5">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      {mataPelajaranList.map(
+                        (mapel) => {
+                          const Icon =
+                            mapel.icon;
 
-                <div className="rounded-2xl border border-blue-100 bg-blue-50/70 p-4">
-                  <div className="flex items-start gap-3">
-                    <div className="w-9 h-9 rounded-xl bg-white border border-blue-100 flex items-center justify-center flex-shrink-0">
-                      <BookOpen
-                        size={17}
-                        className="text-blue-600"
-                      />
-                    </div>
+                          return (
+                            <button
+                              key={
+                                mapel.kelasMapelId
+                              }
+                              type="button"
+                              onClick={() =>
+                                setSelectedId(
+                                  mapel.kelasMapelId
+                                )
+                              }
+                              className={`
+                                group
+                                text-left
+                                w-full
+                                ${themeCardSurface}
+                                border
+                                ${themeNeutralBorder}
+                                ${themePrimaryHoverBorder}
+                                rounded-2xl
+                                p-4
+                                ${themeSmallShadow}
+                                ${themeHoverShadow}
+                                hover:-translate-y-0.5
+                                transition-all
+                                duration-200
+                              `}
+                            >
+                              <div className="flex items-start justify-between">
+                                <div
+                                  className={`
+                                    w-11 h-11
+                                    rounded-xl
+                                    ${themePrimaryGradient}
+                                    text-[var(--color-card)]
+                                    flex items-center justify-center
+                                    ${themeSmallShadow}
+                                  `}
+                                >
+                                  <Icon
+                                    size={20}
+                                    strokeWidth={1.9}
+                                  />
+                                </div>
 
-                    <div className="min-w-0">
-                      <p className="text-sm font-semibold text-blue-900">
-                        Informasi pembelajaran
-                      </p>
+                                <div
+                                  className={`
+                                    w-8 h-8
+                                    rounded-lg
+                                    ${themeNeutralSurface}
+                                    flex items-center justify-center
+                                    ${themePrimaryHoverSurface}
+                                    transition
+                                  `}
+                                >
+                                  <ChevronRight
+                                    size={16}
+                                    className={`
+                                      ${themeTextMuted}
+                                      ${themePrimaryHoverText}
+                                      transition
+                                    `}
+                                  />
+                                </div>
+                              </div>
 
-                      <p className="text-xs text-blue-700 mt-1">
-                        {selected.kelas}
-                        {" · "}
-                        {selected.nama}
-                        {" · "}
-                        {selected.guru}
-                      </p>
+                              <div className="mt-4">
+                                <h3
+                                  className={`
+                                    text-sm
+                                    font-bold
+                                    ${themeText}
+                                    truncate
+                                  `}
+                                >
+                                  {mapel.nama}
+                                </h3>
 
-                      <p className="text-[11px] text-blue-500/80 mt-2 break-all">
-                        ID Kelas Mapel:{" "}
-                        {selected.kelasMapelId}
-                      </p>
+                                <p
+                                  className={`
+                                    text-xs
+                                    ${themeTextSecondary}
+                                    mt-1
+                                    truncate
+                                  `}
+                                >
+                                  {mapel.guru}
+                                </p>
+
+                                <div className="flex items-center gap-2 mt-1">
+                                  <span
+                                    className={`
+                                      w-1 h-1
+                                      rounded-full
+                                      ${themeNeutralSurface}
+                                    `}
+                                  />
+
+                                  <span
+                                    className={`
+                                      text-[11px]
+                                      ${themeTextMuted}
+                                      truncate
+                                    `}
+                                  >
+                                    {mapel.kelas}
+                                  </span>
+                                </div>
+                              </div>
+
+                              <div
+                                className={`
+                                  mt-4
+                                  pt-3
+                                  border-t
+                                  ${themeDivider}
+                                  flex items-center
+                                  justify-between gap-2
+                                `}
+                              >
+                                <div className="flex items-center gap-2">
+                                  <ContentBadge
+                                    icon={FileText}
+                                    value={
+                                      mapel.materi
+                                    }
+                                    label="materi"
+                                  />
+
+                                  <ContentBadge
+                                    icon={
+                                      ClipboardList
+                                    }
+                                    value={
+                                      mapel.tugas
+                                    }
+                                    label="tugas"
+                                    primary
+                                  />
+                                </div>
+
+                                <span
+                                  className={`
+                                    text-[11px]
+                                    font-semibold
+                                    ${themePrimaryText}
+                                  `}
+                                >
+                                  Buka
+                                </span>
+                              </div>
+                            </button>
+                          );
+                        }
+                      )}
                     </div>
                   </div>
-                </div>
+                )}
+              </section>
 
-                {/* AKTIVITAS TERBARU */}
+              {/* RIGHT SIDEBAR */}
 
-                <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                  <div className="px-5 py-4 border-b border-slate-100">
+              <aside className="space-y-4">
+
+                {/* INFO */}
+
+                <div
+                  className={`
+                    ${themeCardSurface}
+                    rounded-2xl
+                    border
+                    ${themeNeutralBorder}
+                    ${themeCardShadow}
+                    overflow-hidden
+                  `}
+                >
+                  <div
+                    className={`px-5 py-4 border-b ${themeDivider}`}
+                  >
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-slate-50 text-slate-600 flex items-center justify-center">
-                        <Bell
-                          size={17}
-                        />
+                      <div
+                        className={`
+                          w-9 h-9
+                          rounded-xl
+                          ${themePrimarySurface}
+                          ${themePrimaryText}
+                          flex items-center justify-center
+                        `}
+                      >
+                        <BookOpen size={17} />
                       </div>
 
                       <div>
-                        <h3 className="text-sm font-semibold text-slate-800">
-                          Aktivitas Terbaru
+                        <h3
+                          className={`text-sm font-semibold ${themeText}`}
+                        >
+                          Pembelajaran
                         </h3>
 
-                        <p className="text-xs text-slate-400 mt-0.5">
-                          Pembaruan pembelajaran{" "}
-                          {selected.nama}
+                        <p
+                          className={`text-xs ${themeTextMuted} mt-0.5`}
+                        >
+                          {kelasSiswa?.nama
+                            ? `Ringkasan ${kelasSiswa.nama}`
+                            : "Ringkasan kelas kamu"}
                         </p>
                       </div>
                     </div>
                   </div>
 
-                  <EmptyActivity />
-                </div>
-              </div>
-            ) : (
-              /* =================================================
-                 LIST MAPEL
-              ================================================= */
-
-              <div className="space-y-6">
-                {/* OVERVIEW */}
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <OverviewCard
-                    icon={BookOpen}
-                    label="Mata Pelajaran"
-                    value={
-                      mataPelajaranList.length
-                    }
-                    description="Pelajaran aktif"
-                    primary
-                  />
-
-                  <OverviewCard
-                    icon={FileText}
-                    label="Total Materi"
-                    value={
-                      totalMateri
-                    }
-                    description="Materi tersedia"
-                  />
-
-                  <OverviewCard
-                    icon={
-                      ClipboardList
-                    }
-                    label="Total Tugas"
-                    value={
-                      totalTugas
-                    }
-                    description="Tugas pembelajaran"
-                  />
-                </div>
-
-                {/* CONTENT */}
-
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                  {/* MAPEL */}
-
-                  <section className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                    <div className="px-5 py-5 border-b border-slate-100">
-                      <div className="flex items-center justify-between gap-4">
-                        <div>
-                          <h2 className="text-base font-bold text-slate-900">
-                            Mata Pelajaran
-                          </h2>
-
-                          <p className="text-xs text-slate-400 mt-1">
-                            Pilih mata pelajaran untuk
-                            melihat detail pembelajaran.
-                          </p>
-                        </div>
-
-                        <div className="hidden sm:flex items-center gap-2 px-3 py-2 rounded-xl bg-blue-50 text-blue-600">
-                          <BookOpen
-                            size={16}
-                          />
-
-                          <span className="text-xs font-semibold">
-                            {
-                              mataPelajaranList.length
-                            }{" "}
-                            pelajaran
-                          </span>
-                        </div>
-                      </div>
-                    </div>
-
-                    {mataPelajaranList.length ===
-                    0 ? (
-                      <EmptySubjects
-                        onRefresh={
-                          fetchMataPelajaran
+                  <div className="p-5">
+                    <div className="space-y-4">
+                      <InfoRow
+                        label="Kelas"
+                        value={
+                          kelasSiswa?.nama ||
+                          "-"
                         }
                       />
-                    ) : (
-                      <div className="p-5">
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                          {mataPelajaranList.map(
-                            (mapel) => {
-                              const Icon =
-                                mapel.icon;
 
-                              const c =
-                                colorMap[
-                                  mapel.color
-                                ] ||
-                                colorMap.blue;
+                      <InfoRow
+                        label="Mata Pelajaran"
+                        value={
+                          mataPelajaranList.length
+                        }
+                      />
 
-                              return (
-                                <button
-                                  key={
-                                    mapel.kelasMapelId
-                                  }
-                                  type="button"
-                                  onClick={() =>
-                                    setSelectedId(
-                                      mapel.kelasMapelId
-                                    )
-                                  }
-                                  className={`
-                                    group
-                                    text-left
-                                    w-full
-                                    bg-white
-                                    border border-slate-200
-                                    ${c.border}
-                                    rounded-2xl
-                                    p-4
-                                    shadow-sm
-                                    hover:shadow-md
-                                    hover:-translate-y-0.5
-                                    transition-all
-                                    duration-200
-                                  `}
-                                >
-                                  <div className="flex items-start justify-between">
-                                    <div
-                                      className={`
-                                        w-11 h-11
-                                        rounded-xl
-                                        bg-gradient-to-br
-                                        ${c.gradient}
-                                        text-white
-                                        flex items-center justify-center
-                                        shadow-sm
-                                      `}
-                                    >
-                                      <Icon
-                                        size={20}
-                                        strokeWidth={
-                                          1.9
-                                        }
-                                      />
-                                    </div>
+                      <InfoRow
+                        label="Total Materi"
+                        value={totalMateri}
+                      />
 
-                                    <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center group-hover:bg-blue-50 transition">
-                                      <ChevronRight
-                                        size={16}
-                                        className="text-slate-300 group-hover:text-blue-600 transition"
-                                      />
-                                    </div>
-                                  </div>
+                      <InfoRow
+                        label="Total Tugas"
+                        value={totalTugas}
+                      />
+                    </div>
+                  </div>
+                </div>
 
-                                  <div className="mt-4">
-                                    <h3 className="text-sm font-bold text-slate-900 truncate">
-                                      {
-                                        mapel.nama
-                                      }
-                                    </h3>
+                {/* QUICK NOTE */}
 
-                                    <p className="text-xs text-slate-500 mt-1 truncate">
-                                      {
-                                        mapel.guru
-                                      }
-                                    </p>
+                <div
+                  className={`
+                    relative
+                    overflow-hidden
+                    rounded-2xl
+                    ${themePrimaryGradient}
+                    p-5
+                    text-[var(--color-card)]
+                    ${themePrimaryShadow}
+                  `}
+                >
+                  <div
+                    className="
+                      absolute
+                      -right-8
+                      -top-8
+                      w-28
+                      h-28
+                      rounded-full
+                      bg-white/10
+                    "
+                  />
 
-                                    <div className="flex items-center gap-2 mt-1">
-                                      <span className="w-1 h-1 rounded-full bg-slate-300" />
+                  <div className="relative">
+                    <div
+                      className="
+                        w-9 h-9
+                        rounded-xl
+                        bg-white/10
+                        border border-white/10
+                        flex items-center justify-center
+                        mb-4
+                      "
+                    >
+                      <GraduationCap size={18} />
+                    </div>
 
-                                      <span className="text-[11px] text-slate-400 truncate">
-                                        {
-                                          mapel.kelas
-                                        }
-                                      </span>
-                                    </div>
-                                  </div>
+                    <h3 className="text-sm font-semibold">
+                      Fokus belajar
+                    </h3>
 
-                                  <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-                                    <div className="flex items-center gap-2">
-                                      <ContentBadge
-                                        icon={
-                                          FileText
-                                        }
-                                        value={
-                                          mapel.materi
-                                        }
-                                        label="materi"
-                                      />
+                    <p className="text-xs opacity-80 leading-relaxed mt-1.5">
+                      Pilih mata pelajaran dan lanjutkan
+                      aktivitas pembelajaranmu.
+                    </p>
+                  </div>
+                </div>
 
-                                      <ContentBadge
-                                        icon={
-                                          ClipboardList
-                                        }
-                                        value={
-                                          mapel.tugas
-                                        }
-                                        label="tugas"
-                                        blue
-                                      />
-                                    </div>
+                {/* INFO TERBARU */}
 
-                                    <span className="text-[11px] font-semibold text-blue-600 group-hover:text-blue-700">
-                                      Buka
-                                    </span>
-                                  </div>
-                                </button>
-                              );
-                            }
+                <div
+                  className={`
+                    ${themeCardSurface}
+                    rounded-2xl
+                    border
+                    ${themeNeutralBorder}
+                    ${themeCardShadow}
+                    overflow-hidden
+                  `}
+                >
+                  <div
+                    className={`px-5 py-4 border-b ${themeDivider}`}
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`
+                            relative
+                            w-9 h-9
+                            rounded-xl
+                            ${themePrimarySurface}
+                            ${themePrimaryText}
+                            flex items-center justify-center
+                          `}
+                        >
+                          <Bell size={17} />
+
+                          {notifications.some(
+                            (notification) =>
+                              !notification.dibaca
+                          ) && (
+                            <span
+                              className={`
+                                absolute
+                                -top-1
+                                -right-1
+                                w-2.5
+                                h-2.5
+                                rounded-full
+                                ${themePrimaryBg}
+                                border-2
+                                border-[var(--color-card)]
+                              `}
+                            />
                           )}
                         </div>
+
+                        <div>
+                          <h3
+                            className={`text-sm font-semibold ${themeText}`}
+                          >
+                            Info Terbaru
+                          </h3>
+
+                          <p
+                            className={`text-xs ${themeTextMuted} mt-0.5`}
+                          >
+                            Notifikasi pembelajaran kamu
+                          </p>
+                        </div>
                       </div>
-                    )}
-                  </section>
 
-                  {/* =================================================
-                      RIGHT SIDEBAR
-                  ================================================= */}
+                      {notifications.length >
+                        0 && (
+                        <span
+                          className={`
+                            text-[10px]
+                            font-semibold
+                            ${themePrimaryText}
+                            ${themePrimarySurface}
+                            px-2
+                            py-1
+                            rounded-lg
+                          `}
+                        >
+                          {notifications.length}{" "}
+                          terbaru
+                        </span>
+                      )}
+                    </div>
+                  </div>
 
-                  <aside className="space-y-4">
-                    {/* INFO */}
-
-                    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                      <div className="px-5 py-4 border-b border-slate-100">
-                        <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-                            <BookOpen
-                              size={17}
+                  {notificationLoading ? (
+                    <div className="p-5 space-y-3">
+                      {[1, 2, 3].map(
+                        (item) => (
+                          <div
+                            key={item}
+                            className="flex items-start gap-3 animate-pulse"
+                          >
+                            <div
+                              className={`
+                                w-9 h-9
+                                rounded-xl
+                                ${themeNeutralSurface}
+                                flex-shrink-0
+                              `}
                             />
-                          </div>
 
-                          <div>
-                            <h3 className="text-sm font-semibold text-slate-800">
-                              Pembelajaran
-                            </h3>
-
-                            <p className="text-xs text-slate-400 mt-0.5">
-                              {kelasSiswa?.nama
-                                ? `Ringkasan ${kelasSiswa.nama}`
-                                : "Ringkasan kelas kamu"}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="p-5">
-                        <div className="space-y-4">
-                          <InfoRow
-                            label="Kelas"
-                            value={
-                              kelasSiswa?.nama ||
-                              "-"
-                            }
-                          />
-
-                          <InfoRow
-                            label="Mata Pelajaran"
-                            value={
-                              mataPelajaranList.length
-                            }
-                          />
-
-                          <InfoRow
-                            label="Total Materi"
-                            value={
-                              totalMateri
-                            }
-                          />
-
-                          <InfoRow
-                            label="Total Tugas"
-                            value={
-                              totalTugas
-                            }
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* QUICK NOTE */}
-
-                    <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 to-blue-700 p-5 text-white shadow-sm">
-                      <div className="absolute -right-8 -top-8 w-28 h-28 rounded-full bg-white/10" />
-
-                      <div className="relative">
-                        <div className="w-9 h-9 rounded-xl bg-white/10 border border-white/10 flex items-center justify-center mb-4">
-                          <GraduationCap
-                            size={18}
-                          />
-                        </div>
-
-                        <h3 className="text-sm font-semibold">
-                          Fokus belajar
-                        </h3>
-
-                        <p className="text-xs text-blue-100 leading-relaxed mt-1.5">
-                          Pilih mata pelajaran dan
-                          lanjutkan aktivitas
-                          pembelajaranmu.
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* =================================================
-                        INFO TERBARU / NOTIFIKASI
-                    ================================================= */}
-
-                    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-                      <div className="px-5 py-4 border-b border-slate-100">
-                        <div className="flex items-center justify-between gap-3">
-                          <div className="flex items-center gap-3">
-                            <div className="relative w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-                              <Bell
-                                size={17}
+                            <div className="flex-1 min-w-0">
+                              <div
+                                className={`
+                                  h-3
+                                  w-3/4
+                                  rounded
+                                  ${themeNeutralSurface}
+                                `}
                               />
 
-                              {notifications.some(
-                                (
-                                  notification
-                                ) =>
-                                  !notification.dibaca
-                              ) && (
-                                <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-red-500 border-2 border-white" />
-                              )}
-                            </div>
+                              <div
+                                className={`
+                                  h-2.5
+                                  w-full
+                                  rounded
+                                  mt-2
+                                  ${themeNeutralSurface}
+                                `}
+                              />
 
-                            <div>
-                              <h3 className="text-sm font-semibold text-slate-800">
-                                Info Terbaru
-                              </h3>
-
-                              <p className="text-xs text-slate-400 mt-0.5">
-                                Notifikasi pembelajaran kamu
-                              </p>
+                              <div
+                                className={`
+                                  h-2.5
+                                  w-1/3
+                                  rounded
+                                  mt-2
+                                  ${themeNeutralSurface}
+                                `}
+                              />
                             </div>
                           </div>
-
-                          {notifications.length >
-                            0 && (
-                            <span className="text-[10px] font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-lg">
-                              {
-                                notifications.length
-                              }{" "}
-                              terbaru
-                            </span>
-                          )}
-                        </div>
+                        )
+                      )}
+                    </div>
+                  ) : notifications.length ===
+                    0 ? (
+                    <div className="p-6 text-center">
+                      <div
+                        className={`
+                          w-11 h-11
+                          mx-auto
+                          rounded-xl
+                          ${themeNeutralSurface}
+                          flex items-center justify-center
+                        `}
+                      >
+                        <Bell
+                          size={19}
+                          className={themeTextMuted}
+                        />
                       </div>
 
-                      {/* LOADING */}
+                      <p
+                        className={`text-xs ${themeTextMuted} mt-3`}
+                      >
+                        Belum ada notifikasi terbaru.
+                      </p>
 
-                      {notificationLoading ? (
-                        <div className="p-5 space-y-3">
-                          {[1, 2, 3].map(
-                            (item) => (
-                              <div
-                                key={item}
-                                className="flex items-start gap-3 animate-pulse"
-                              >
-                                <div className="w-9 h-9 rounded-xl bg-slate-100 flex-shrink-0" />
+                      <p
+                        className={`text-[11px] ${themeTextPlaceholder} mt-1`}
+                      >
+                        Notifikasi tugas dan pembelajaran
+                        akan muncul di sini.
+                      </p>
+                    </div>
+                  ) : (
+                    <div
+                      className={`divide-y ${themeDivide}`}
+                    >
+                      {notifications.map(
+                        (notification) => {
+                          const isUnread =
+                            !notification.dibaca;
 
-                                <div className="flex-1 min-w-0">
-                                  <div className="h-3 w-3/4 bg-slate-100 rounded" />
+                          const title =
+                            notification.judul ||
+                            "Notifikasi";
 
-                                  <div className="h-2.5 w-full bg-slate-100 rounded mt-2" />
+                          const description =
+                            notification.isi ||
+                            "Ada informasi baru untuk kamu.";
 
-                                  <div className="h-2.5 w-1/3 bg-slate-100 rounded mt-2" />
-                                </div>
-                              </div>
-                            )
-                          )}
-                        </div>
-                      ) : notifications.length ===
-                        0 ? (
-                        <div className="p-6 text-center">
-                          <div className="w-11 h-11 mx-auto rounded-xl bg-slate-50 flex items-center justify-center">
-                            <Bell
-                              size={19}
-                              className="text-slate-300"
-                            />
-                          </div>
+                          let timeText = "";
 
-                          <p className="text-xs text-slate-400 mt-3">
-                            Belum ada notifikasi terbaru.
-                          </p>
-
-                          <p className="text-[11px] text-slate-300 mt-1">
-                            Notifikasi tugas dan pembelajaran
-                            akan muncul di sini.
-                          </p>
-                        </div>
-                      ) : (
-                        <div className="divide-y divide-slate-100">
-                          {notifications.map(
-                            (
-                              notification
-                            ) => {
-                              const isUnread =
-                                !notification.dibaca;
-
-                              const title =
-                                notification.judul ||
-                                "Notifikasi";
-
-                              const description =
-                                notification.isi ||
-                                "Ada informasi baru untuk kamu.";
-
-                              let timeText =
-                                "";
-
-                              if (
+                          if (
+                            notification.dibuatPada
+                          ) {
+                            const date =
+                              new Date(
                                 notification.dibuatPada
-                              ) {
-                                const date =
-                                  new Date(
-                                    notification.dibuatPada
-                                  );
+                              );
 
-                                if (
-                                  !Number.isNaN(
-                                    date.getTime()
-                                  )
-                                ) {
-                                  timeText =
-                                    date.toLocaleString(
-                                      "id-ID",
-                                      {
-                                        day: "2-digit",
-                                        month:
-                                          "short",
-                                        hour: "2-digit",
-                                        minute:
-                                          "2-digit",
-                                      }
-                                    );
-                                }
-                              }
-
-                              return (
-                                <button
-                                  key={
-                                    notification.id
+                            if (
+                              !Number.isNaN(
+                                date.getTime()
+                              )
+                            ) {
+                              timeText =
+                                date.toLocaleString(
+                                  "id-ID",
+                                  {
+                                    day: "2-digit",
+                                    month:
+                                      "short",
+                                    hour: "2-digit",
+                                    minute:
+                                      "2-digit",
                                   }
-                                  type="button"
-                                  onClick={() => {
-                                    if (
-                                      notification.targetUrl
-                                    ) {
-                                      router.push(
-                                        notification.targetUrl
-                                      );
-                                    }
-                                  }}
-                                  className={`
-                                    w-full
-                                    text-left
-                                    p-4
-                                    flex items-start gap-3
-                                    transition
-                                    hover:bg-slate-50
-                                    ${
-                                      isUnread
-                                        ? "bg-blue-50/40"
-                                        : "bg-white"
-                                    }
-                                  `}
-                                >
-                                  {/* ICON */}
+                                );
+                            }
+                          }
 
-                                  <div
+                          return (
+                            <button
+                              key={
+                                notification.id
+                              }
+                              type="button"
+                              onClick={() => {
+                                if (
+                                  notification.targetUrl
+                                ) {
+                                  router.push(
+                                    notification.targetUrl
+                                  );
+                                }
+                              }}
+                              className={`
+                                w-full
+                                text-left
+                                p-4
+                                flex items-start gap-3
+                                transition
+                                ${themeNeutralHover}
+                                ${
+                                  isUnread
+                                    ? themePrimarySurface
+                                    : themeCardSurface
+                                }
+                              `}
+                            >
+                              <div
+                                className={`
+                                  w-9 h-9
+                                  rounded-xl
+                                  flex items-center justify-center
+                                  flex-shrink-0
+                                  ${
+                                    isUnread
+                                      ? `${themePrimarySurface} ${themePrimaryText}`
+                                      : `${themeNeutralSurface} ${themeTextSecondary}`
+                                  }
+                                `}
+                              >
+                                {notification.kategori ===
+                                "deadline_tugas" ? (
+                                  <ClipboardList
+                                    size={16}
+                                  />
+                                ) : (
+                                  <Bell size={16} />
+                                )}
+                              </div>
+
+                              <div className="min-w-0 flex-1">
+                                <div className="flex items-start gap-2">
+                                  <p
                                     className={`
-                                      w-9 h-9
-                                      rounded-xl
-                                      flex items-center justify-center
-                                      flex-shrink-0
+                                      text-xs
+                                      leading-relaxed
+                                      flex-1
                                       ${
                                         isUnread
-                                          ? "bg-blue-100 text-blue-600"
-                                          : "bg-slate-100 text-slate-500"
+                                          ? `font-semibold ${themeText}`
+                                          : `font-medium ${themeTextSecondary}`
                                       }
                                     `}
                                   >
-                                    {notification.kategori ===
-                                    "deadline_tugas" ? (
-                                      <ClipboardList
-                                        size={16}
-                                      />
-                                    ) : (
-                                      <Bell
-                                        size={16}
-                                      />
-                                    )}
-                                  </div>
+                                    {title}
+                                  </p>
 
-                                  {/* CONTENT */}
+                                  {isUnread && (
+                                    <span
+                                      className={`
+                                        w-2 h-2
+                                        rounded-full
+                                        ${themePrimaryBg}
+                                        flex-shrink-0
+                                        mt-1
+                                      `}
+                                    />
+                                  )}
+                                </div>
 
-                                  <div className="min-w-0 flex-1">
-                                    <div className="flex items-start gap-2">
-                                      <p
-                                        className={`
-                                          text-xs
-                                          leading-relaxed
-                                          flex-1
-                                          ${
-                                            isUnread
-                                              ? "font-semibold text-slate-800"
-                                              : "font-medium text-slate-700"
-                                          }
-                                        `}
-                                      >
-                                        {title}
-                                      </p>
+                                <p
+                                  className={`
+                                    text-[11px]
+                                    ${themeTextSecondary}
+                                    leading-relaxed
+                                    mt-1
+                                    line-clamp-2
+                                  `}
+                                >
+                                  {description}
+                                </p>
 
-                                      {isUnread && (
-                                        <span className="w-2 h-2 rounded-full bg-blue-600 flex-shrink-0 mt-1" />
-                                      )}
-                                    </div>
-
-                                    <p className="text-[11px] text-slate-500 leading-relaxed mt-1 line-clamp-2">
-                                      {description}
-                                    </p>
-
-                                    {timeText && (
-                                      <p className="text-[10px] text-slate-400 mt-1.5">
-                                        {timeText}
-                                      </p>
-                                    )}
-                                  </div>
-                                </button>
-                              );
-                            }
-                          )}
-                        </div>
+                                {timeText && (
+                                  <p
+                                    className={`
+                                      text-[10px]
+                                      ${themeTextMuted}
+                                      mt-1.5
+                                    `}
+                                  >
+                                    {timeText}
+                                  </p>
+                                )}
+                              </div>
+                            </button>
+                          );
+                        }
                       )}
                     </div>
-                  </aside>
+                  )}
                 </div>
-              </div>
-            )}
+              </aside>
+            </div>
           </div>
-        </main>
+        )}
       </div>
     </div>
   );
@@ -2145,20 +2377,31 @@ function OverviewCard({
   return (
     <div
       className={`
-        relative overflow-hidden
+        relative
+        overflow-hidden
         rounded-2xl
         border
-        shadow-sm
         p-4 sm:p-5
+        ${themeCardShadow}
         ${
           primary
-            ? "bg-blue-600 border-blue-600 text-white"
-            : "bg-white border-slate-200"
+            ? `${themePrimaryGradient} border-[color-mix(in_srgb,var(--color-primary)_40%,transparent)] text-[var(--color-card)]`
+            : `${themeCardSurface} ${themeNeutralBorder}`
         }
       `}
     >
       {primary && (
-        <div className="absolute -right-8 -top-8 w-28 h-28 rounded-full bg-white/10" />
+        <div
+          className="
+            absolute
+            -right-8
+            -top-8
+            w-28
+            h-28
+            rounded-full
+            bg-white/10
+          "
+        />
       )}
 
       <div className="relative flex items-center justify-between gap-4">
@@ -2166,8 +2409,8 @@ function OverviewCard({
           <p
             className={`text-xs font-medium ${
               primary
-                ? "text-blue-100"
-                : "text-slate-400"
+                ? "opacity-75"
+                : themeTextMuted
             }`}
           >
             {label}
@@ -2177,8 +2420,8 @@ function OverviewCard({
             <span
               className={`text-2xl font-bold ${
                 primary
-                  ? "text-white"
-                  : "text-slate-900"
+                  ? "text-[var(--color-card)]"
+                  : themeText
               }`}
             >
               {value}
@@ -2188,8 +2431,8 @@ function OverviewCard({
           <p
             className={`text-[11px] mt-0.5 ${
               primary
-                ? "text-blue-100"
-                : "text-slate-400"
+                ? "opacity-75"
+                : themeTextMuted
             }`}
           >
             {description}
@@ -2204,8 +2447,8 @@ function OverviewCard({
             flex-shrink-0
             ${
               primary
-                ? "bg-white/10 text-white"
-                : "bg-blue-50 text-blue-600"
+                ? "bg-white/10 text-[var(--color-card)]"
+                : `${themePrimarySurface} ${themePrimaryText}`
             }
           `}
         >
@@ -2227,29 +2470,54 @@ function MiniStat({
   description,
 }) {
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4">
+    <div
+      className={`
+        ${themeCardSurface}
+        rounded-2xl
+        border
+        ${themeNeutralBorder}
+        ${themeCardShadow}
+        p-4
+      `}
+    >
       <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="text-xs font-medium text-slate-400">
+          <p
+            className={`text-xs font-medium ${themeTextMuted}`}
+          >
             {label}
           </p>
 
           <div className="flex items-baseline gap-1.5 mt-1">
-            <span className="text-2xl font-bold text-slate-900">
+            <span
+              className={`text-2xl font-bold ${themeText}`}
+            >
               {value}
             </span>
 
-            <span className="text-xs text-slate-400">
+            <span
+              className={`text-xs ${themeTextMuted}`}
+            >
               item
             </span>
           </div>
 
-          <p className="text-[11px] text-slate-400 mt-0.5">
+          <p
+            className={`text-[11px] ${themeTextMuted} mt-0.5`}
+          >
             {description}
           </p>
         </div>
 
-        <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
+        <div
+          className={`
+            w-10 h-10
+            rounded-xl
+            ${themePrimarySurface}
+            ${themePrimaryText}
+            flex items-center justify-center
+          `}
+        >
           <Icon size={18} />
         </div>
       </div>
@@ -2267,12 +2535,33 @@ function SectionCard({
   description,
   count,
   countLabel,
-  color,
+  variant = "primary",
   onClick,
 }) {
+  const variantClasses = {
+    primary: {
+      surface: themePrimarySurface,
+      text: themePrimaryText,
+      border: themePrimaryHoverBorder,
+    },
+
+    info: {
+      surface: themeInfoSurface,
+      text: themeInfoText,
+      border:
+        "hover:border-[color-mix(in_srgb,var(--color-info)_30%,transparent)]",
+    },
+
+    neutral: {
+      surface: themeNeutralSurface,
+      text: themeTextSecondary,
+      border: themeNeutralHoverBorder,
+    },
+  };
+
   const c =
-    colorMap[color] ||
-    colorMap.blue;
+    variantClasses[variant] ||
+    variantClasses.primary;
 
   return (
     <button
@@ -2282,13 +2571,14 @@ function SectionCard({
         group
         text-left
         w-full
-        bg-white
-        border border-slate-200
+        ${themeCardSurface}
+        border
+        ${themeNeutralBorder}
         ${c.border}
         rounded-2xl
         p-5
-        shadow-sm
-        hover:shadow-md
+        ${themeSmallShadow}
+        ${themeHoverShadow}
         hover:-translate-y-0.5
         transition-all
         duration-200
@@ -2299,7 +2589,7 @@ function SectionCard({
           className={`
             w-11 h-11
             rounded-xl
-            ${c.background}
+            ${c.surface}
             ${c.text}
             flex items-center justify-center
           `}
@@ -2310,19 +2600,36 @@ function SectionCard({
           />
         </div>
 
-        <div className="w-8 h-8 rounded-lg bg-slate-50 flex items-center justify-center group-hover:bg-blue-50 transition">
+        <div
+          className={`
+            w-8 h-8
+            rounded-lg
+            ${themeNeutralSurface}
+            flex items-center justify-center
+            ${themePrimaryHoverSurface}
+            transition
+          `}
+        >
           <ChevronRight
             size={16}
-            className="text-slate-300 group-hover:text-blue-600 transition"
+            className={`
+              ${themeTextMuted}
+              ${themePrimaryHoverText}
+              transition
+            `}
           />
         </div>
       </div>
 
-      <h3 className="text-sm font-bold text-slate-900 mt-5">
+      <h3
+        className={`text-sm font-bold ${themeText} mt-5`}
+      >
         {title}
       </h3>
 
-      <p className="text-xs text-slate-500 mt-1 leading-relaxed">
+      <p
+        className={`text-xs ${themeTextSecondary} mt-1 leading-relaxed`}
+      >
         {description}
       </p>
 
@@ -2333,7 +2640,9 @@ function SectionCard({
           {count}
         </span>
 
-        <span className="text-xs text-slate-400">
+        <span
+          className={`text-xs ${themeTextMuted}`}
+        >
           {countLabel}
         </span>
       </div>
@@ -2349,7 +2658,7 @@ function ContentBadge({
   icon: Icon,
   value,
   label,
-  blue = false,
+  primary = false,
 }) {
   return (
     <span
@@ -2359,9 +2668,9 @@ function ContentBadge({
         rounded-lg
         text-[10px] font-semibold
         ${
-          blue
-            ? "bg-blue-50 text-blue-600"
-            : "bg-slate-50 text-slate-500"
+          primary
+            ? `${themePrimarySurface} ${themePrimaryText}`
+            : `${themeNeutralSurface} ${themeTextSecondary}`
         }
       `}
     >
@@ -2382,11 +2691,15 @@ function InfoRow({
 }) {
   return (
     <div className="flex items-center justify-between gap-4">
-      <span className="text-xs text-slate-500">
+      <span
+        className={`text-xs ${themeTextSecondary}`}
+      >
         {label}
       </span>
 
-      <span className="text-sm font-semibold text-slate-800">
+      <span
+        className={`text-sm font-semibold ${themeText}`}
+      >
         {value}
       </span>
     </div>
@@ -2402,36 +2715,55 @@ function EmptySubjects({
 }) {
   return (
     <div className="py-16 px-5 text-center">
-      <div className="w-14 h-14 mx-auto rounded-2xl bg-slate-50 flex items-center justify-center">
+      <div
+        className={`
+          w-14 h-14
+          mx-auto
+          rounded-2xl
+          ${themeNeutralSurface}
+          flex items-center justify-center
+        `}
+      >
         <BookOpen
           size={24}
-          className="text-slate-300"
+          className={themeTextMuted}
         />
       </div>
 
-      <h3 className="text-sm font-semibold text-slate-700 mt-4">
+      <h3
+        className={`text-sm font-semibold ${themeText} mt-4`}
+      >
         Belum ada mata pelajaran
       </h3>
 
-      <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto leading-relaxed">
-        Belum ada data mata pelajaran yang
-        tersedia untuk kelas kamu.
+      <p
+        className={`
+          text-xs
+          ${themeTextMuted}
+          mt-1
+          max-w-sm
+          mx-auto
+          leading-relaxed
+        `}
+      >
+        Belum ada data mata pelajaran yang tersedia
+        untuk kelas kamu.
       </p>
 
       <button
         type="button"
         onClick={onRefresh}
-        className="
+        className={`
           mt-5
           inline-flex items-center gap-2
           px-4 py-2.5
           rounded-xl
-          bg-blue-600
-          text-white
+          ${themePrimaryGradient}
+          text-[var(--color-card)]
           text-xs font-semibold
-          hover:bg-blue-700
+          hover:opacity-90
           transition
-        "
+        `}
       >
         <RefreshCw size={14} />
 
@@ -2448,18 +2780,30 @@ function EmptySubjects({
 function EmptyActivity() {
   return (
     <div className="py-12 px-5 text-center">
-      <div className="w-12 h-12 mx-auto rounded-xl bg-slate-50 flex items-center justify-center">
+      <div
+        className={`
+          w-12 h-12
+          mx-auto
+          rounded-xl
+          ${themeNeutralSurface}
+          flex items-center justify-center
+        `}
+      >
         <Bell
           size={20}
-          className="text-slate-300"
+          className={themeTextMuted}
         />
       </div>
 
-      <p className="text-sm text-slate-400 mt-3">
+      <p
+        className={`text-sm ${themeTextMuted} mt-3`}
+      >
         Belum ada aktivitas terbaru.
       </p>
 
-      <p className="text-[11px] text-slate-300 mt-1">
+      <p
+        className={`text-[11px] ${themeTextPlaceholder} mt-1`}
+      >
         Aktivitas pembelajaran akan muncul di sini.
       </p>
     </div>

@@ -37,10 +37,6 @@ import {
 import { getKelas } from "../../../../../services/kelas.service";
 
 export default function AdminTahunAjaranPage() {
-  // =========================================================
-  // STATE
-  // =========================================================
-
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const [tahunAjaran, setTahunAjaran] = useState([]);
@@ -92,18 +88,15 @@ export default function AdminTahunAjaranPage() {
     return {
       ...item,
 
-      // BE menggunakan tahunAjaran
       tahunAjaran:
         item?.tahunAjaran ??
         item?.nama ??
         item?.tahun_ajaran ??
         "",
 
-      semester:
-        item?.semester ?? "",
+      semester: item?.semester ?? "",
 
-      status:
-        item?.status ?? "tidak_aktif",
+      status: item?.status ?? "tidak_aktif",
 
       sekolahId:
         item?.sekolahId ??
@@ -128,7 +121,6 @@ export default function AdminTahunAjaranPage() {
 
       const [tahunResponse, kelasResponse] = await Promise.all([
         getTahunAjaran(),
-
         getKelas({
           page: 1,
           limit: 1000,
@@ -137,15 +129,8 @@ export default function AdminTahunAjaranPage() {
         }),
       ]);
 
-      console.log(
-        "[TAHUN AJARAN] Response:",
-        tahunResponse
-      );
-
-      console.log(
-        "[KELAS] Response:",
-        kelasResponse
-      );
+      console.log("[TAHUN AJARAN] Response:", tahunResponse);
+      console.log("[KELAS] Response:", kelasResponse);
 
       const tahunData = extractArray(tahunResponse);
       const kelasData = extractArray(kelasResponse);
@@ -219,7 +204,6 @@ export default function AdminTahunAjaranPage() {
   const filteredData = useMemo(() => {
     let result = [...tahunAjaran];
 
-    // FILTER STATUS
     if (filterStatus !== "semua") {
       result = result.filter(
         (item) =>
@@ -228,7 +212,6 @@ export default function AdminTahunAjaranPage() {
       );
     }
 
-    // FILTER SEMESTER
     if (filterSemester !== "semua") {
       result = result.filter(
         (item) =>
@@ -237,7 +220,6 @@ export default function AdminTahunAjaranPage() {
       );
     }
 
-    // SEARCH
     const keyword = search.trim().toLowerCase();
 
     if (keyword) {
@@ -288,9 +270,7 @@ export default function AdminTahunAjaranPage() {
 
   const totalPages = Math.max(
     1,
-    Math.ceil(
-      filteredData.length / itemsPerPage
-    )
+    Math.ceil(filteredData.length / itemsPerPage)
   );
 
   const safeCurrentPage = Math.min(
@@ -299,14 +279,12 @@ export default function AdminTahunAjaranPage() {
   );
 
   const startIndex =
-    (safeCurrentPage - 1) *
-    itemsPerPage;
+    (safeCurrentPage - 1) * itemsPerPage;
 
-  const currentItems =
-    filteredData.slice(
-      startIndex,
-      startIndex + itemsPerPage
-    );
+  const currentItems = filteredData.slice(
+    startIndex,
+    startIndex + itemsPerPage
+  );
 
   useEffect(() => {
     if (currentPage > totalPages) {
@@ -319,18 +297,15 @@ export default function AdminTahunAjaranPage() {
   // =========================================================
 
   const activeYear = tahunAjaran.find(
-    (item) =>
-      item?.status === "aktif"
+    (item) => item?.status === "aktif"
   );
 
   const activeCount = tahunAjaran.filter(
-    (item) =>
-      item?.status === "aktif"
+    (item) => item?.status === "aktif"
   ).length;
 
   const inactiveCount = tahunAjaran.filter(
-    (item) =>
-      item?.status === "tidak_aktif"
+    (item) => item?.status === "tidak_aktif"
   ).length;
 
   const totalKelas = kelas.length;
@@ -370,12 +345,9 @@ export default function AdminTahunAjaranPage() {
     try {
       setError("");
 
-      await updateTahunAjaran(
-        item.id,
-        {
-          status: "aktif",
-        }
-      );
+      await updateTahunAjaran(item.id, {
+        status: "aktif",
+      });
 
       await loadData(true);
     } catch (err) {
@@ -413,15 +385,10 @@ export default function AdminTahunAjaranPage() {
     try {
       setError("");
 
-      await deleteTahunAjaran(
-        item.id
-      );
+      await deleteTahunAjaran(item.id);
 
       setTahunAjaran((prev) =>
-        prev.filter(
-          (row) =>
-            row.id !== item.id
-        )
+        prev.filter((row) => row.id !== item.id)
       );
     } catch (err) {
       console.error(
@@ -454,7 +421,7 @@ export default function AdminTahunAjaranPage() {
 
   if (loading) {
     return (
-      <div className="flex h-screen w-full overflow-hidden bg-[#f4f7fb]">
+      <div className="theme-page flex h-screen w-full overflow-hidden">
         <Sidebar
           active="tahunAjaran"
           setActive={() => {}}
@@ -465,29 +432,26 @@ export default function AdminTahunAjaranPage() {
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
           <Header
             toggleSidebar={() =>
-              setIsCollapsed(
-                (prev) => !prev
-              )
+              setIsCollapsed((prev) => !prev)
             }
             notifications={[]}
             user={{
               name: "Admin Sekolah",
-              email:
-                "admin@smartschool.com",
+              email: "admin@smartschool.com",
               avatar: "AD",
             }}
           />
 
-          <main className="flex min-h-0 flex-1 items-center justify-center">
+          <main className="theme-page flex min-h-0 flex-1 items-center justify-center">
             <div className="flex flex-col items-center gap-4">
-              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50">
+              <div className="theme-info flex h-12 w-12 items-center justify-center rounded-xl">
                 <RefreshCw
                   size={24}
-                  className="animate-spin text-[#2563EB]"
+                  className="animate-spin"
                 />
               </div>
 
-              <p className="text-sm font-medium text-slate-500">
+              <p className="theme-text-muted text-sm font-medium">
                 Memuat data tahun ajaran...
               </p>
             </div>
@@ -502,7 +466,7 @@ export default function AdminTahunAjaranPage() {
   // =========================================================
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[#f4f7fb]">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
       {/* SIDEBAR */}
 
       <Sidebar
@@ -517,20 +481,17 @@ export default function AdminTahunAjaranPage() {
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <Header
           toggleSidebar={() =>
-            setIsCollapsed(
-              (prev) => !prev
-            )
+            setIsCollapsed((prev) => !prev)
           }
           notifications={[]}
           user={{
             name: "Admin Sekolah",
-            email:
-              "admin@smartschool.com",
+            email: "admin@smartschool.com",
             avatar: "AD",
           }}
         />
 
-        <main className="min-h-0 flex-1 overflow-y-auto">
+        <main className="theme-page min-h-0 flex-1 overflow-y-auto">
           <div className="mx-auto w-full max-w-[1440px] px-4 py-6 sm:px-6 lg:px-8 xl:px-10">
             <div className="space-y-6">
 
@@ -550,7 +511,7 @@ export default function AdminTahunAjaranPage() {
 
                     <div className="flex min-w-0 items-start gap-4">
 
-                      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-blue-400/20 bg-blue-500/15 text-blue-300 shadow-inner">
+                      <div className="theme-info flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl border border-white/10 shadow-inner">
                         <CalendarDays size={27} />
                       </div>
 
@@ -562,13 +523,13 @@ export default function AdminTahunAjaranPage() {
                             Tahun Ajaran
                           </h1>
 
-                          <span className="rounded-full border border-blue-400/20 bg-blue-500/15 px-3 py-1 text-[11px] font-semibold text-blue-200">
+                          <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-[11px] font-semibold text-white/80">
                             Admin
                           </span>
 
                         </div>
 
-                        <p className="mt-1.5 max-w-2xl text-sm leading-6 text-blue-200/80">
+                        <p className="mt-1.5 max-w-2xl text-sm leading-6 text-white/70">
                           Kelola periode akademik,
                           semester, dan kelas sekolah
                           dalam satu tempat.
@@ -580,9 +541,7 @@ export default function AdminTahunAjaranPage() {
                     <div className="flex shrink-0 flex-wrap items-center gap-2">
 
                       <button
-                        onClick={() =>
-                          loadData(true)
-                        }
+                        onClick={() => loadData(true)}
                         disabled={refreshing}
                         className="inline-flex h-11 items-center gap-2 rounded-xl border border-white/15 bg-white/10 px-4 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-50"
                       >
@@ -600,7 +559,7 @@ export default function AdminTahunAjaranPage() {
 
                       <Link
                         href="/admin/akademik/tahun-ajaran/tambah"
-                        className="inline-flex h-11 items-center gap-2 rounded-xl bg-[#2563EB] px-5 text-sm font-semibold text-white shadow-lg shadow-blue-950/20 transition hover:bg-[#3B82F6]"
+                        className="theme-primary inline-flex h-11 items-center gap-2 rounded-xl px-5 text-sm font-semibold shadow-lg shadow-blue-950/20 transition"
                       >
                         <Plus size={18} />
                         Tambah Tahun Ajaran
@@ -621,7 +580,7 @@ export default function AdminTahunAjaranPage() {
                         </div>
 
                         <div>
-                          <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
+                          <p className="text-[11px] font-medium uppercase tracking-wide text-white/50">
                             Total Periode
                           </p>
 
@@ -641,7 +600,7 @@ export default function AdminTahunAjaranPage() {
                         </div>
 
                         <div>
-                          <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
+                          <p className="text-[11px] font-medium uppercase tracking-wide text-white/50">
                             Periode Aktif
                           </p>
 
@@ -661,7 +620,7 @@ export default function AdminTahunAjaranPage() {
                         </div>
 
                         <div>
-                          <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
+                          <p className="text-[11px] font-medium uppercase tracking-wide text-white/50">
                             Tidak Aktif
                           </p>
 
@@ -681,7 +640,7 @@ export default function AdminTahunAjaranPage() {
                         </div>
 
                         <div>
-                          <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
+                          <p className="text-[11px] font-medium uppercase tracking-wide text-white/50">
                             Total Kelas
                           </p>
 
@@ -702,9 +661,9 @@ export default function AdminTahunAjaranPage() {
               {/* ================================================= */}
 
               {error && (
-                <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
+                <div className="theme-danger flex items-start gap-3 rounded-xl border p-4">
 
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-100">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-500/10">
                     <AlertCircle size={19} />
                   </div>
 
@@ -714,17 +673,15 @@ export default function AdminTahunAjaranPage() {
                       Terjadi kesalahan
                     </p>
 
-                    <p className="mt-0.5 text-sm text-red-600">
+                    <p className="mt-0.5 text-sm opacity-80">
                       {error}
                     </p>
 
                   </div>
 
                   <button
-                    onClick={() =>
-                      setError("")
-                    }
-                    className="rounded-lg p-1 text-red-400 transition hover:bg-red-100 hover:text-red-600"
+                    onClick={() => setError("")}
+                    className="theme-header-hover rounded-lg p-1 transition"
                   >
                     <X size={18} />
                   </button>
@@ -736,7 +693,7 @@ export default function AdminTahunAjaranPage() {
               {/* FILTER */}
               {/* ================================================= */}
 
-              <section className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-[0_5px_20px_rgba(15,23,42,0.05)] sm:p-5">
+              <section className="theme-card theme-border rounded-2xl border p-4 shadow-[0_5px_20px_rgba(15,23,42,0.05)] sm:p-5">
 
                 <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
 
@@ -744,33 +701,31 @@ export default function AdminTahunAjaranPage() {
 
                     <div className="flex items-center gap-3">
 
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-[#2563EB]">
+                      <div className="theme-info flex h-10 w-10 items-center justify-center rounded-xl">
                         <Filter size={18} />
                       </div>
 
                       <div>
-                        <p className="text-sm font-semibold text-slate-800">
+                        <p className="theme-text text-sm font-semibold">
                           Filter Data
                         </p>
 
-                        <p className="text-xs text-slate-400">
+                        <p className="theme-text-muted text-xs">
                           Saring periode akademik
                         </p>
                       </div>
 
                     </div>
 
-                    <div className="hidden h-8 w-px bg-slate-200 sm:block" />
+                    <div className="theme-border-soft hidden h-8 w-px border-l sm:block" />
 
                     <select
                       value={filterStatus}
                       onChange={(e) => {
-                        setFilterStatus(
-                          e.target.value
-                        );
+                        setFilterStatus(e.target.value);
                         setCurrentPage(1);
                       }}
-                      className="h-10 rounded-xl border border-slate-200 bg-white px-3.5 text-sm font-medium text-slate-700 outline-none transition hover:border-slate-300 focus:border-[#2563EB] focus:ring-4 focus:ring-blue-500/10"
+                      className="theme-input h-10 rounded-xl border px-3.5 text-sm font-medium outline-none transition"
                     >
                       <option value="semua">
                         Semua Status
@@ -788,12 +743,10 @@ export default function AdminTahunAjaranPage() {
                     <select
                       value={filterSemester}
                       onChange={(e) => {
-                        setFilterSemester(
-                          e.target.value
-                        );
+                        setFilterSemester(e.target.value);
                         setCurrentPage(1);
                       }}
-                      className="h-10 rounded-xl border border-slate-200 bg-white px-3.5 text-sm font-medium text-slate-700 outline-none transition hover:border-slate-300 focus:border-[#2563EB] focus:ring-4 focus:ring-blue-500/10"
+                      className="theme-input h-10 rounded-xl border px-3.5 text-sm font-medium outline-none transition"
                     >
                       <option value="semua">
                         Semua Semester
@@ -816,28 +769,24 @@ export default function AdminTahunAjaranPage() {
 
                     <Search
                       size={17}
-                      className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                      className="theme-text-muted absolute left-3.5 top-1/2 -translate-y-1/2"
                     />
 
                     <input
                       type="text"
                       value={search}
                       onChange={(e) => {
-                        setSearch(
-                          e.target.value
-                        );
+                        setSearch(e.target.value);
                         setCurrentPage(1);
                       }}
                       placeholder="Cari tahun ajaran atau kelas..."
-                      className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50/50 pl-10 pr-10 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-[#2563EB] focus:bg-white focus:ring-4 focus:ring-blue-500/10"
+                      className="theme-input h-11 w-full rounded-xl border pl-10 pr-10 text-sm outline-none transition"
                     />
 
                     {search && (
                       <button
-                        onClick={
-                          handleResetSearch
-                        }
-                        className="absolute right-2.5 top-1/2 -translate-y-1/2 rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+                        onClick={handleResetSearch}
+                        className="theme-text-muted theme-header-hover absolute right-2.5 top-1/2 -translate-y-1/2 rounded-lg p-1.5 transition"
                       >
                         <X size={15} />
                       </button>
@@ -856,11 +805,11 @@ export default function AdminTahunAjaranPage() {
 
                 <div>
 
-                  <h2 className="text-xl font-bold text-[#0F172A]">
+                  <h2 className="theme-text text-xl font-bold">
                     Daftar Tahun Ajaran
                   </h2>
 
-                  <p className="mt-1 text-sm text-slate-400">
+                  <p className="theme-text-muted mt-1 text-sm">
                     {filteredData.length} periode ditampilkan
 
                     {tahunAjaran.length !==
@@ -872,13 +821,10 @@ export default function AdminTahunAjaranPage() {
 
                 {(search ||
                   filterStatus !== "semua" ||
-                  filterSemester !==
-                    "semua") && (
+                  filterSemester !== "semua") && (
                   <button
-                    onClick={
-                      handleResetSearch
-                    }
-                    className="self-start text-sm font-medium text-[#2563EB] hover:text-blue-700 sm:self-auto"
+                    onClick={handleResetSearch}
+                    className="theme-sidebar-text-active self-start text-sm font-medium transition sm:self-auto"
                   >
                     Reset filter
                   </button>
@@ -890,7 +836,7 @@ export default function AdminTahunAjaranPage() {
               {/* TABLE */}
               {/* ================================================= */}
 
-              <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-[0_5px_20px_rgba(15,23,42,0.05)]">
+              <section className="theme-card theme-border overflow-hidden rounded-2xl border shadow-[0_5px_20px_rgba(15,23,42,0.05)]">
 
                 <div className="overflow-x-auto">
 
@@ -898,29 +844,29 @@ export default function AdminTahunAjaranPage() {
 
                     <thead>
 
-                      <tr className="border-b border-slate-100 bg-slate-50/80">
+                      <tr className="theme-table-header theme-border-soft border-b">
 
-                        <th className="w-16 px-5 py-4 text-center text-[11px] font-bold uppercase tracking-wide text-slate-400">
+                        <th className="w-16 px-5 py-4 text-center text-[11px] font-bold uppercase tracking-wide">
                           No
                         </th>
 
-                        <th className="px-5 py-4 text-left text-[11px] font-bold uppercase tracking-wide text-slate-400">
+                        <th className="px-5 py-4 text-left text-[11px] font-bold uppercase tracking-wide">
                           Tahun Ajaran
                         </th>
 
-                        <th className="px-5 py-4 text-left text-[11px] font-bold uppercase tracking-wide text-slate-400">
+                        <th className="px-5 py-4 text-left text-[11px] font-bold uppercase tracking-wide">
                           Semester
                         </th>
 
-                        <th className="px-5 py-4 text-left text-[11px] font-bold uppercase tracking-wide text-slate-400">
+                        <th className="px-5 py-4 text-left text-[11px] font-bold uppercase tracking-wide">
                           Kelas
                         </th>
 
-                        <th className="px-5 py-4 text-left text-[11px] font-bold uppercase tracking-wide text-slate-400">
+                        <th className="px-5 py-4 text-left text-[11px] font-bold uppercase tracking-wide">
                           Status
                         </th>
 
-                        <th className="px-5 py-4 text-right text-[11px] font-bold uppercase tracking-wide text-slate-400">
+                        <th className="px-5 py-4 text-right text-[11px] font-bold uppercase tracking-wide">
                           Aksi
                         </th>
 
@@ -930,8 +876,7 @@ export default function AdminTahunAjaranPage() {
 
                     <tbody>
 
-                      {currentItems.length ===
-                      0 ? (
+                      {currentItems.length === 0 ? (
                         <tr>
 
                           <td
@@ -941,42 +886,32 @@ export default function AdminTahunAjaranPage() {
 
                             <div className="mx-auto max-w-sm">
 
-                              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-50 text-slate-300">
-                                <CalendarDays
-                                  size={28}
-                                />
+                              <div className="theme-card-soft theme-text-muted mx-auto flex h-16 w-16 items-center justify-center rounded-2xl">
+                                <CalendarDays size={28} />
                               </div>
 
-                              <p className="mt-4 text-base font-semibold text-slate-700">
+                              <p className="theme-text mt-4 text-base font-semibold">
                                 {search ||
-                                filterStatus !==
-                                  "semua" ||
-                                filterSemester !==
-                                  "semua"
+                                filterStatus !== "semua" ||
+                                filterSemester !== "semua"
                                   ? "Data tidak ditemukan"
                                   : "Belum ada tahun ajaran"}
                               </p>
 
-                              <p className="mt-1 text-sm leading-6 text-slate-400">
+                              <p className="theme-text-muted mt-1 text-sm leading-6">
                                 {search ||
-                                filterStatus !==
-                                  "semua" ||
-                                filterSemester !==
-                                  "semua"
+                                filterStatus !== "semua" ||
+                                filterSemester !== "semua"
                                   ? "Coba ubah filter atau kata kunci pencarian."
                                   : "Tambahkan tahun ajaran baru untuk memulai."}
                               </p>
 
                               {(search ||
-                                filterStatus !==
-                                  "semua" ||
-                                filterSemester !==
-                                  "semua") && (
+                                filterStatus !== "semua" ||
+                                filterSemester !== "semua") && (
                                 <button
-                                  onClick={
-                                    handleResetSearch
-                                  }
-                                  className="mt-5 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50"
+                                  onClick={handleResetSearch}
+                                  className="theme-card theme-border theme-text-secondary theme-header-hover mt-5 rounded-xl border px-4 py-2 text-sm font-semibold shadow-sm transition"
                                 >
                                   Reset Filter
                                 </button>
@@ -988,297 +923,224 @@ export default function AdminTahunAjaranPage() {
 
                         </tr>
                       ) : (
-                        currentItems.map(
-                          (
-                            item,
-                            index
-                          ) => {
+                        currentItems.map((item, index) => {
+                          const isActive =
+                            item?.status === "aktif";
 
-                            const isActive =
-                              item?.status ===
-                              "aktif";
+                          const daftarKelas =
+                            kelasByTahunAjaran[item?.id] || [];
 
-                            const daftarKelas =
-                              kelasByTahunAjaran[
-                                item?.id
-                              ] || [];
+                          const isExpanded = Boolean(
+                            expandedRows[item?.id]
+                          );
 
-                            const isExpanded =
-                              Boolean(
-                                expandedRows[
-                                  item?.id
-                                ]
-                              );
+                          return (
+                            <tr
+                              key={item.id}
+                              className={`theme-border-soft theme-table-hover border-b last:border-0 transition ${
+                                isActive
+                                  ? "bg-[var(--color-primary)]/5"
+                                  : ""
+                              }`}
+                            >
 
-                            return (
-                              <tr
-                                key={
-                                  item.id
-                                }
-                                className={`border-b border-slate-100 last:border-0 transition ${
-                                  isActive
-                                    ? "bg-blue-50/25"
-                                    : "hover:bg-slate-50/60"
-                                }`}
-                              >
+                              {/* NO */}
 
-                                {/* NO */}
+                              <td className="theme-text-muted px-5 py-4 text-center text-sm font-medium">
+                                {startIndex + index + 1}
+                              </td>
 
-                                <td className="px-5 py-4 text-center text-sm font-medium text-slate-400">
-                                  {startIndex +
-                                    index +
-                                    1}
-                                </td>
+                              {/* TAHUN AJARAN */}
 
-                                {/* TAHUN AJARAN */}
+                              <td className="px-5 py-4">
 
-                                <td className="px-5 py-4">
+                                <div className="flex items-center gap-3">
 
-                                  <div className="flex items-center gap-3">
+                                  <div
+                                    className={
+                                      isActive
+                                        ? "theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                                        : "theme-card-soft theme-text-muted flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
+                                    }
+                                  >
+                                    <CalendarDays size={18} />
+                                  </div>
 
-                                    <div
-                                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
-                                        isActive
-                                          ? "bg-blue-50 text-[#2563EB]"
-                                          : "bg-slate-50 text-slate-500"
-                                      }`}
-                                    >
-                                      <CalendarDays
-                                        size={18}
-                                      />
-                                    </div>
+                                  <div className="min-w-0">
 
-                                    <div className="min-w-0">
+                                    <p className="theme-text font-semibold">
+                                      {item?.tahunAjaran || "-"}
+                                    </p>
 
-                                      <p className="font-semibold text-slate-800">
-                                        {item?.tahunAjaran ||
-                                          "-"}
+                                    {item?.id && (
+                                      <p className="theme-text-muted mt-0.5 text-[11px]">
+                                        ID:{" "}
+                                        {item.id.slice(0, 8)}
+                                        ...
                                       </p>
-
-                                      {item?.id && (
-                                        <p className="mt-0.5 text-[11px] text-slate-400">
-                                          ID:{" "}
-                                          {item.id.slice(
-                                            0,
-                                            8
-                                          )}
-                                          ...
-                                        </p>
-                                      )}
-
-                                    </div>
+                                    )}
 
                                   </div>
 
-                                </td>
+                                </div>
 
-                                {/* SEMESTER */}
+                              </td>
 
-                                <td className="px-5 py-4">
+                              {/* SEMESTER */}
 
-                                  <span
-                                    className={`inline-flex rounded-full px-3 py-1.5 text-xs font-semibold ${
-                                      item?.semester ===
-                                      "Ganjil"
-                                        ? "bg-indigo-50 text-indigo-600"
-                                        : "bg-blue-50 text-blue-600"
-                                    }`}
-                                  >
-                                    {item?.semester ||
-                                      "-"}
+                              <td className="px-5 py-4">
+
+                                <span
+                                  className={
+                                    item?.semester === "Ganjil"
+                                      ? "theme-info inline-flex rounded-full px-3 py-1.5 text-xs font-semibold"
+                                      : "theme-primary-outline inline-flex rounded-full border px-3 py-1.5 text-xs font-semibold"
+                                  }
+                                >
+                                  {item?.semester || "-"}
+                                </span>
+
+                              </td>
+
+                              {/* KELAS */}
+
+                              <td className="px-5 py-4">
+
+                                {daftarKelas.length === 0 ? (
+                                  <span className="theme-text-muted text-xs">
+                                    Belum ada kelas
                                   </span>
+                                ) : (
+                                  <div className="flex flex-col gap-2">
 
-                                </td>
+                                    <div className="flex items-center gap-2">
 
-                                {/* KELAS */}
+                                      <span className="theme-info inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-semibold">
+                                        <Users size={13} />
 
-                                <td className="px-5 py-4">
+                                        {daftarKelas.length} kelas
+                                      </span>
 
-                                  {daftarKelas.length ===
-                                  0 ? (
-                                    <span className="text-xs text-slate-400">
-                                      Belum ada kelas
-                                    </span>
-                                  ) : (
-                                    <div className="flex flex-col gap-2">
-
-                                      <div className="flex items-center gap-2">
-
-                                        <span className="inline-flex items-center gap-1.5 rounded-lg bg-violet-50 px-2.5 py-1.5 text-xs font-semibold text-violet-600">
-
-                                          <Users
-                                            size={13}
-                                          />
-
-                                          {
-                                            daftarKelas.length
-                                          }{" "}
-                                          kelas
-                                        </span>
-
-                                        <button
-                                          onClick={() =>
-                                            toggleRow(
-                                              item.id
-                                            )
-                                          }
-                                          className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-medium text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
-                                        >
-                                          {isExpanded
-                                            ? "Sembunyikan"
-                                            : "Lihat"}
-
-                                          {isExpanded ? (
-                                            <ChevronUp
-                                              size={
-                                                14
-                                              }
-                                            />
-                                          ) : (
-                                            <ChevronDown
-                                              size={
-                                                14
-                                              }
-                                            />
-                                          )}
-                                        </button>
-
-                                      </div>
-
-                                      {isExpanded && (
-                                        <div className="flex max-w-[360px] flex-wrap gap-1.5 pt-1">
-
-                                          {daftarKelas.map(
-                                            (
-                                              kelasItem
-                                            ) => (
-                                              <Link
-                                                key={
-                                                  kelasItem.id
-                                                }
-                                                href={`/admin/kelas/${kelasItem.id}`}
-                                                className="rounded-lg border border-violet-100 bg-violet-50 px-2.5 py-1.5 text-xs font-medium text-violet-600 transition hover:border-violet-200 hover:bg-violet-100"
-                                              >
-                                                {kelasItem?.nama ||
-                                                  "Kelas"}
-                                              </Link>
-                                            )
-                                          )}
-
-                                        </div>
-                                      )}
-
-                                    </div>
-                                  )}
-
-                                </td>
-
-                                {/* STATUS */}
-
-                                <td className="px-5 py-4">
-
-                                  <span
-                                    className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold ${
-                                      isActive
-                                        ? "bg-emerald-50 text-emerald-600"
-                                        : "bg-slate-100 text-slate-500"
-                                    }`}
-                                  >
-
-                                    {isActive ? (
-                                      <CheckCircle
-                                        size={
-                                          13
-                                        }
-                                      />
-                                    ) : (
-                                      <XCircle
-                                        size={
-                                          13
-                                        }
-                                      />
-                                    )}
-
-                                    {isActive
-                                      ? "Aktif"
-                                      : "Tidak Aktif"}
-
-                                  </span>
-
-                                </td>
-
-                                {/* AKSI */}
-
-                                <td className="px-5 py-4">
-
-                                  <div className="flex items-center justify-end gap-1">
-
-                                    <Link
-                                      href={`/admin/akademik/tahun-ajaran/${item.id}`}
-                                      title="Detail"
-                                      className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-blue-50 hover:text-[#2563EB]"
-                                    >
-                                      <Eye
-                                        size={
-                                          16
-                                        }
-                                      />
-                                    </Link>
-
-                                    {!isActive && (
                                       <button
                                         onClick={() =>
-                                          handleSetActive(
-                                            item
-                                          )
+                                          toggleRow(item.id)
                                         }
-                                        title="Set Aktif"
-                                        className="flex h-9 w-9 items-center justify-center rounded-lg text-emerald-500 transition hover:bg-emerald-50 hover:text-emerald-600"
+                                        className="theme-text-muted theme-header-hover inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-xs font-medium transition"
                                       >
-                                        <Check
-                                          size={
-                                            17
-                                          }
-                                        />
+                                        {isExpanded
+                                          ? "Sembunyikan"
+                                          : "Lihat"}
+
+                                        {isExpanded ? (
+                                          <ChevronUp size={14} />
+                                        ) : (
+                                          <ChevronDown size={14} />
+                                        )}
                                       </button>
+
+                                    </div>
+
+                                    {isExpanded && (
+                                      <div className="flex max-w-[360px] flex-wrap gap-1.5 pt-1">
+
+                                        {daftarKelas.map(
+                                          (kelasItem) => (
+                                            <Link
+                                              key={kelasItem.id}
+                                              href={`/admin/kelas/${kelasItem.id}`}
+                                              className="theme-info rounded-lg border px-2.5 py-1.5 text-xs font-medium transition"
+                                            >
+                                              {kelasItem?.nama ||
+                                                "Kelas"}
+                                            </Link>
+                                          )
+                                        )}
+
+                                      </div>
                                     )}
 
-                                    <Link
-                                      href={`/admin/akademik/tahun-ajaran/edit/${item.id}`}
-                                      title="Edit"
-                                      className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-amber-50 hover:text-amber-600"
-                                    >
-                                      <Edit
-                                        size={
-                                          16
-                                        }
-                                      />
-                                    </Link>
+                                  </div>
+                                )}
 
+                              </td>
+
+                              {/* STATUS */}
+
+                              <td className="px-5 py-4">
+
+                                <span
+                                  className={
+                                    isActive
+                                      ? "theme-success inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold"
+                                      : "theme-card-soft theme-text-muted inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold"
+                                  }
+                                >
+
+                                  {isActive ? (
+                                    <CheckCircle size={13} />
+                                  ) : (
+                                    <XCircle size={13} />
+                                  )}
+
+                                  {isActive
+                                    ? "Aktif"
+                                    : "Tidak Aktif"}
+
+                                </span>
+
+                              </td>
+
+                              {/* AKSI */}
+
+                              <td className="px-5 py-4">
+
+                                <div className="flex items-center justify-end gap-1">
+
+                                  <Link
+                                    href={`/admin/akademik/tahun-ajaran/${item.id}`}
+                                    title="Detail"
+                                    className="theme-info flex h-9 w-9 items-center justify-center rounded-lg transition"
+                                  >
+                                    <Eye size={16} />
+                                  </Link>
+
+                                  {!isActive && (
                                     <button
                                       onClick={() =>
-                                        handleDelete(
-                                          item
-                                        )
+                                        handleSetActive(item)
                                       }
-                                      title="Hapus"
-                                      className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-red-50 hover:text-red-600"
+                                      title="Set Aktif"
+                                      className="theme-success flex h-9 w-9 items-center justify-center rounded-lg transition"
                                     >
-                                      <Trash2
-                                        size={
-                                          16
-                                        }
-                                      />
+                                      <Check size={17} />
                                     </button>
+                                  )}
 
-                                  </div>
+                                  <Link
+                                    href={`/admin/akademik/tahun-ajaran/edit/${item.id}`}
+                                    title="Edit"
+                                    className="theme-warning flex h-9 w-9 items-center justify-center rounded-lg transition"
+                                  >
+                                    <Edit size={16} />
+                                  </Link>
 
-                                </td>
+                                  <button
+                                    onClick={() =>
+                                      handleDelete(item)
+                                    }
+                                    title="Hapus"
+                                    className="theme-danger flex h-9 w-9 items-center justify-center rounded-lg transition"
+                                  >
+                                    <Trash2 size={16} />
+                                  </button>
 
-                              </tr>
-                            );
-                          }
-                        )
+                                </div>
+
+                              </td>
+
+                            </tr>
+                          );
+                        })
                       )}
 
                     </tbody>
@@ -1289,22 +1151,20 @@ export default function AdminTahunAjaranPage() {
 
                 {/* PAGINATION */}
 
-                {filteredData.length >
-                  0 && (
-                  <div className="flex flex-col gap-3 border-t border-slate-100 bg-slate-50/50 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                {filteredData.length > 0 && (
+                  <div className="theme-card-soft theme-border-soft flex flex-col gap-3 border-t px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
 
-                    <p className="text-xs text-slate-400 sm:text-sm">
+                    <p className="theme-text-muted text-xs sm:text-sm">
 
                       Menampilkan{" "}
 
-                      <span className="font-semibold text-slate-600">
-                        {startIndex +
-                          1}
+                      <span className="theme-text-secondary font-semibold">
+                        {startIndex + 1}
                       </span>
 
                       {" - "}
 
-                      <span className="font-semibold text-slate-600">
+                      <span className="theme-text-secondary font-semibold">
                         {Math.min(
                           startIndex +
                             currentItems.length,
@@ -1314,10 +1174,8 @@ export default function AdminTahunAjaranPage() {
 
                       {" dari "}
 
-                      <span className="font-semibold text-slate-600">
-                        {
-                          filteredData.length
-                        }
+                      <span className="theme-text-secondary font-semibold">
+                        {filteredData.length}
                       </span>
 
                       {" data"}
@@ -1328,83 +1186,62 @@ export default function AdminTahunAjaranPage() {
 
                       <button
                         onClick={() =>
-                          setCurrentPage(
-                            (p) =>
-                              Math.max(
-                                1,
-                                p - 1
-                              )
+                          setCurrentPage((p) =>
+                            Math.max(1, p - 1)
                           )
                         }
-                        disabled={
-                          safeCurrentPage ===
-                          1
-                        }
-                        className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-500 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                        disabled={safeCurrentPage === 1}
+                        className="theme-card theme-border theme-text-secondary theme-header-hover rounded-lg border px-3 py-2 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         Sebelumnya
                       </button>
 
                       {Array.from(
                         {
-                          length:
-                            totalPages,
+                          length: totalPages,
                         },
-                        (_, i) =>
-                          i + 1
+                        (_, i) => i + 1
                       )
                         .slice(
                           Math.max(
                             0,
-                            safeCurrentPage -
-                              3
+                            safeCurrentPage - 3
                           ),
                           Math.min(
                             totalPages,
-                            safeCurrentPage +
-                              2
+                            safeCurrentPage + 2
                           )
                         )
-                        .map(
-                          (page) => (
-                            <button
-                              key={
-                                page
-                              }
-                              onClick={() =>
-                                setCurrentPage(
-                                  page
-                                )
-                              }
-                              className={`h-9 w-9 rounded-lg text-xs font-semibold transition ${
-                                safeCurrentPage ===
-                                page
-                                  ? "bg-[#2563EB] text-white shadow-sm"
-                                  : "text-slate-500 hover:bg-slate-100"
-                              }`}
-                            >
-                              {
-                                page
-                              }
-                            </button>
-                          )
-                        )}
+                        .map((page) => (
+                          <button
+                            key={page}
+                            onClick={() =>
+                              setCurrentPage(page)
+                            }
+                            className={
+                              safeCurrentPage === page
+                                ? "theme-primary h-9 w-9 rounded-lg text-xs font-semibold shadow-sm"
+                                : "theme-text-muted theme-header-hover h-9 w-9 rounded-lg text-xs font-semibold transition"
+                            }
+                          >
+                            {page}
+                          </button>
+                        ))}
 
                       <button
                         onClick={() =>
-                          setCurrentPage(
-                            (p) =>
-                              Math.min(
-                                totalPages,
-                                p + 1
-                              )
+                          setCurrentPage((p) =>
+                            Math.min(
+                              totalPages,
+                              p + 1
+                            )
                           )
                         }
                         disabled={
                           safeCurrentPage ===
                           totalPages
                         }
-                        className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-500 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="theme-card theme-border theme-text-secondary theme-header-hover rounded-lg border px-3 py-2 text-xs font-medium transition disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         Berikutnya
                       </button>
@@ -1420,21 +1257,21 @@ export default function AdminTahunAjaranPage() {
               {/* ACTIVE PERIOD INFO */}
               {/* ================================================= */}
 
-              <section className="rounded-2xl border border-blue-100 bg-gradient-to-r from-blue-50 to-indigo-50 p-5">
+              <section className="theme-info rounded-2xl border p-5">
 
                 <div className="flex items-start gap-3">
 
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-[#2563EB] shadow-sm">
+                  <div className="theme-card flex h-10 w-10 shrink-0 items-center justify-center rounded-xl shadow-sm">
                     <Database size={18} />
                   </div>
 
                   <div className="min-w-0">
 
-                    <p className="text-sm font-semibold text-slate-700">
+                    <p className="theme-text text-sm font-semibold">
                       Informasi Periode Aktif
                     </p>
 
-                    <p className="mt-1 text-sm leading-6 text-slate-500">
+                    <p className="theme-text-secondary mt-1 text-sm leading-6">
 
                       {activeYear
                         ? `${activeYear.tahunAjaran} · ${activeYear.semester} adalah periode akademik yang sedang aktif dan digunakan oleh sekolah.`
@@ -1450,7 +1287,7 @@ export default function AdminTahunAjaranPage() {
 
               {/* FOOTER */}
 
-              <footer className="py-2 text-center text-xs text-slate-400">
+              <footer className="theme-text-muted py-2 text-center text-xs">
                 © 2026 SmartSchool • Tahun Ajaran
               </footer>
 

@@ -44,7 +44,7 @@ export default function DetailTahunAjaranPage() {
   const [error, setError] = useState("");
 
   // =========================================================
-  // Helper untuk mengambil array kelas dari berbagai bentuk response
+  // Helper mengambil array kelas dari berbagai bentuk response
   // =========================================================
   const extractKelas = (response) => {
     if (Array.isArray(response)) {
@@ -71,7 +71,7 @@ export default function DetailTahunAjaranPage() {
   };
 
   // =========================================================
-  // Helper untuk mengambil list tahun ajaran
+  // Helper mengambil list tahun ajaran
   // =========================================================
   const extractTahunAjaran = (response) => {
     if (Array.isArray(response)) {
@@ -238,7 +238,7 @@ export default function DetailTahunAjaranPage() {
   // =========================================================
   if (loading) {
     return (
-      <div className="flex h-screen w-full overflow-hidden bg-slate-50">
+      <div className="theme-page flex h-screen w-full overflow-hidden">
         <Sidebar
           active="tahunAjaran"
           setActive={() => {}}
@@ -257,11 +257,11 @@ export default function DetailTahunAjaranPage() {
             }}
           />
 
-          <main className="flex min-h-0 flex-1 items-center justify-center">
+          <main className="flex min-h-0 flex-1 items-center justify-center theme-page">
             <div className="flex flex-col items-center gap-4">
-              <div className="h-10 w-10 animate-spin rounded-full border-4 border-[#155DFC] border-t-transparent" />
+              <div className="h-10 w-10 animate-spin rounded-full border-4 border-[var(--color-primary)] border-t-transparent" />
 
-              <p className="text-sm font-medium text-slate-500">
+              <p className="text-sm font-medium theme-text-muted">
                 Memuat detail tahun ajaran...
               </p>
             </div>
@@ -275,7 +275,7 @@ export default function DetailTahunAjaranPage() {
   // MAIN
   // =========================================================
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-slate-50">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
       {/* SIDEBAR */}
       <Sidebar
         active="tahunAjaran"
@@ -298,7 +298,7 @@ export default function DetailTahunAjaranPage() {
         />
 
         {/* MAIN */}
-        <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden bg-gradient-to-b from-slate-50/80 to-white">
+        <main className="theme-page min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 xl:px-10">
             <div className="space-y-7">
 
@@ -311,19 +311,20 @@ export default function DetailTahunAjaranPage() {
                   onClick={() =>
                     router.push("/admin/akademik/tahun-ajaran")
                   }
-                  className="inline-flex items-center gap-1.5 text-slate-500 transition hover:text-[#155DFC]"
+                  className="inline-flex items-center gap-1.5 theme-text-muted transition theme-sidebar-hover"
                 >
                   <ArrowLeft size={16} />
+
                   <span className="font-medium">
                     Kembali
                   </span>
                 </button>
 
-                <span className="text-slate-300">
+                <span className="theme-text-placeholder">
                   /
                 </span>
 
-                <span className="font-medium text-slate-600">
+                <span className="font-medium theme-text-secondary">
                   Detail Tahun Ajaran
                 </span>
               </div>
@@ -332,21 +333,20 @@ export default function DetailTahunAjaranPage() {
                   ERROR
               ================================================= */}
               {error && (
-                <div className="rounded-xl border border-red-200 bg-red-50/80 p-5">
+                <div className="theme-danger rounded-xl border p-5">
                   <div className="flex items-start gap-4">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-red-100">
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full theme-danger">
                       <AlertCircle
                         size={20}
-                        className="text-red-600"
                       />
                     </div>
 
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-semibold text-red-800">
+                      <p className="text-sm font-semibold">
                         Gagal memuat data
                       </p>
 
-                      <p className="mt-1 text-sm text-red-600">
+                      <p className="mt-1 text-sm">
                         {error}
                       </p>
                     </div>
@@ -358,7 +358,7 @@ export default function DetailTahunAjaranPage() {
                           "/admin/akademik/tahun-ajaran"
                         )
                       }
-                      className="rounded-lg border border-red-200 bg-white px-4 py-2 text-sm font-medium text-red-600 transition hover:bg-red-50"
+                      className="rounded-lg border theme-border theme-card px-4 py-2 text-sm font-medium theme-text-secondary transition theme-header-hover"
                     >
                       Kembali
                     </button>
@@ -374,18 +374,18 @@ export default function DetailTahunAjaranPage() {
                   {/* =================================================
                       HERO
                   ================================================= */}
-                  <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
-                    <div className="bg-gradient-to-r from-[#0F172A] to-[#1E293B] px-6 py-6 sm:px-8 sm:py-7">
+                  <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
+                    <div className="theme-primary px-6 py-6 sm:px-8 sm:py-7">
                       <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
 
                         {/* TITLE */}
                         <div className="flex items-center gap-4">
-                          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-white/5 bg-white/10 text-white">
+                          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl border border-white/20 bg-white/10 text-white">
                             <CalendarDays size={28} />
                           </div>
 
                           <div className="min-w-0">
-                            <p className="text-xs font-semibold uppercase tracking-wider text-blue-300">
+                            <p className="text-xs font-semibold uppercase tracking-wider text-white/75">
                               Tahun Ajaran
                             </p>
 
@@ -393,7 +393,7 @@ export default function DetailTahunAjaranPage() {
                               {data.nama || "-"}
                             </h1>
 
-                            <p className="mt-1 text-sm text-slate-300">
+                            <p className="mt-1 text-sm text-white/75">
                               Semester{" "}
                               {data.semester || "-"}
                             </p>
@@ -407,8 +407,8 @@ export default function DetailTahunAjaranPage() {
                           <span
                             className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-semibold ${
                               isActive
-                                ? "border-emerald-200/50 bg-emerald-50/90 text-emerald-700"
-                                : "border-slate-200/50 bg-slate-100/90 text-slate-600"
+                                ? "theme-success"
+                                : "theme-card-soft theme-text-secondary"
                             }`}
                           >
                             {isActive ? (
@@ -427,7 +427,7 @@ export default function DetailTahunAjaranPage() {
                               loadDetail(true)
                             }
                             disabled={refreshing}
-                            className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="inline-flex items-center gap-2 rounded-lg border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium text-white transition hover:bg-white/20 disabled:cursor-not-allowed disabled:opacity-50"
                           >
                             <RefreshCw
                               size={15}
@@ -444,9 +444,10 @@ export default function DetailTahunAjaranPage() {
                           {/* EDIT */}
                           <Link
                             href={`/admin/akademik/tahun-ajaran/edit/${data.id}`}
-                            className="inline-flex items-center gap-2 rounded-lg bg-[#155DFC] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0d47c9]"
+                            className="theme-card inline-flex items-center gap-2 rounded-lg border border-white/20 bg-white px-5 py-2.5 text-sm font-semibold theme-text transition hover:bg-white/90"
                           >
                             <Edit size={16} />
+
                             Edit
                           </Link>
                         </div>
@@ -454,7 +455,7 @@ export default function DetailTahunAjaranPage() {
                     </div>
 
                     {/* STATS */}
-                    <div className="grid grid-cols-1 divide-y divide-slate-100 sm:grid-cols-4 sm:divide-x sm:divide-y-0">
+                    <div className="grid grid-cols-1 divide-y sm:grid-cols-4 sm:divide-x sm:divide-y-0 divide-[var(--color-border-soft)]">
                       <StatItem
                         icon={
                           <CalendarCheck size={18} />
@@ -470,12 +471,12 @@ export default function DetailTahunAjaranPage() {
                           isActive ? (
                             <CheckCircle2
                               size={18}
-                              className="text-emerald-600"
+                              className="text-[var(--color-success)]"
                             />
                           ) : (
                             <XCircle
                               size={18}
-                              className="text-slate-400"
+                              className="theme-text-muted"
                             />
                           )
                         }
@@ -483,8 +484,8 @@ export default function DetailTahunAjaranPage() {
                         value={statusLabel}
                         valueClass={
                           isActive
-                            ? "text-emerald-600"
-                            : "text-slate-600"
+                            ? "text-[var(--color-success)]"
+                            : "theme-text-secondary"
                         }
                       />
 
@@ -537,12 +538,12 @@ export default function DetailTahunAjaranPage() {
                         label="Semester"
                         value={
                           <span
-                            className={`inline-flex rounded-md border px-2.5 py-1 text-xs font-semibold ${
+                            className={
                               data.semester ===
                               "Ganjil"
-                                ? "border-indigo-100 bg-indigo-50 text-indigo-700"
-                                : "border-blue-100 bg-blue-50 text-blue-700"
-                            }`}
+                                ? "theme-info inline-flex rounded-md border px-2.5 py-1 text-xs font-semibold"
+                                : "theme-primary-outline inline-flex rounded-md border px-2.5 py-1 text-xs font-semibold"
+                            }
                           >
                             {data.semester ||
                               "-"}
@@ -563,8 +564,8 @@ export default function DetailTahunAjaranPage() {
                           <span
                             className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${
                               isActive
-                                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                                : "border-slate-200 bg-slate-100 text-slate-600"
+                                ? "theme-success"
+                                : "theme-card-soft theme-text-secondary"
                             }`}
                           >
                             {isActive ? (
@@ -614,7 +615,7 @@ export default function DetailTahunAjaranPage() {
                           <span className="flex items-center gap-1.5">
                             <Clock3
                               size={14}
-                              className="text-slate-400"
+                              className="theme-text-muted"
                             />
                             Dibuat
                           </span>
@@ -629,7 +630,7 @@ export default function DetailTahunAjaranPage() {
                           <span className="flex items-center gap-1.5">
                             <RefreshCw
                               size={14}
-                              className="text-slate-400"
+                              className="theme-text-muted"
                             />
                             Diperbarui
                           </span>
@@ -644,7 +645,7 @@ export default function DetailTahunAjaranPage() {
                           <span className="flex items-center gap-1.5">
                             <XCircle
                               size={14}
-                              className="text-slate-400"
+                              className="theme-text-muted"
                             />
                             Dihapus
                           </span>
@@ -659,21 +660,21 @@ export default function DetailTahunAjaranPage() {
                   {/* =================================================
                       KELAS
                   ================================================= */}
-                  <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
+                  <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
 
                     {/* HEADER KELAS */}
-                    <div className="flex flex-col gap-4 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                    <div className="theme-card-soft theme-border-soft flex flex-col gap-4 border-b px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                       <div className="flex items-center gap-3">
-                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                        <div className="theme-info flex h-11 w-11 shrink-0 items-center justify-center rounded-xl">
                           <Layers3 size={21} />
                         </div>
 
                         <div>
-                          <h2 className="text-base font-bold text-slate-800">
+                          <h2 className="text-base font-bold theme-text">
                             Kelas
                           </h2>
 
-                          <p className="mt-1 text-xs text-slate-400">
+                          <p className="mt-1 text-xs theme-text-muted">
                             Daftar kelas yang
                             terhubung dengan
                             tahun ajaran ini.
@@ -682,7 +683,7 @@ export default function DetailTahunAjaranPage() {
                       </div>
 
                       <div className="flex items-center gap-2">
-                        <span className="rounded-full bg-indigo-50 px-3 py-1.5 text-xs font-bold text-indigo-600">
+                        <span className="theme-info rounded-full px-3 py-1.5 text-xs font-bold">
                           {loadingKelas
                             ? "Memuat..."
                             : `${kelas.length} Kelas`}
@@ -690,7 +691,7 @@ export default function DetailTahunAjaranPage() {
 
                         <Link
                           href="/admin/kelas"
-                          className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 transition hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
+                          className="theme-card theme-border inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-xs font-semibold theme-text-secondary transition theme-header-hover"
                         >
                           <GraduationCap
                             size={15}
@@ -710,7 +711,7 @@ export default function DetailTahunAjaranPage() {
                           <div className="flex flex-col items-center gap-3">
                             <Loader />
 
-                            <p className="text-sm text-slate-400">
+                            <p className="text-sm theme-text-muted">
                               Memuat data kelas...
                             </p>
                           </div>
@@ -718,20 +719,20 @@ export default function DetailTahunAjaranPage() {
                       ) : kelas.length === 0 ? (
 
                         /* EMPTY STATE */
-                        <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50/60 px-5 py-10 text-center">
-                          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-white text-slate-300 shadow-sm">
+                        <div className="theme-card-soft theme-border rounded-xl border border-dashed px-5 py-10 text-center">
+                          <div className="theme-card mx-auto flex h-12 w-12 items-center justify-center rounded-xl theme-text-placeholder shadow-sm">
                             <Layers3 size={24} />
                           </div>
 
-                          <h3 className="mt-4 text-sm font-bold text-slate-700">
+                          <h3 className="mt-4 text-sm font-bold theme-text">
                             Belum ada kelas
                           </h3>
 
-                          <p className="mx-auto mt-1 max-w-md text-xs leading-5 text-slate-400">
+                          <p className="mx-auto mt-1 max-w-md text-xs leading-5 theme-text-muted">
                             Belum ada kelas yang
                             menggunakan tahun
                             ajaran{" "}
-                            <span className="font-semibold text-slate-500">
+                            <span className="font-semibold theme-text-secondary">
                               {data.nama}
                             </span>
                             .
@@ -739,7 +740,7 @@ export default function DetailTahunAjaranPage() {
 
                           <Link
                             href="/admin/kelas"
-                            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-[#155DFC] px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-[#0d47c9]"
+                            className="theme-primary mt-4 inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-xs font-semibold transition"
                           >
                             <GraduationCap
                               size={15}
@@ -755,30 +756,30 @@ export default function DetailTahunAjaranPage() {
                         <div className="overflow-x-auto">
                           <table className="w-full min-w-[700px] text-left">
                             <thead>
-                              <tr className="border-b border-slate-100">
-                                <th className="px-4 py-3 text-[11px] font-bold uppercase tracking-wide text-slate-400">
+                              <tr className="theme-border-soft border-b">
+                                <th className="theme-table-header px-4 py-3 text-[11px] font-bold uppercase tracking-wide">
                                   No
                                 </th>
 
-                                <th className="px-4 py-3 text-[11px] font-bold uppercase tracking-wide text-slate-400">
+                                <th className="theme-table-header px-4 py-3 text-[11px] font-bold uppercase tracking-wide">
                                   Nama Kelas
                                 </th>
 
-                                <th className="px-4 py-3 text-[11px] font-bold uppercase tracking-wide text-slate-400">
+                                <th className="theme-table-header px-4 py-3 text-[11px] font-bold uppercase tracking-wide">
                                   Tingkat
                                 </th>
 
-                                <th className="px-4 py-3 text-[11px] font-bold uppercase tracking-wide text-slate-400">
+                                <th className="theme-table-header px-4 py-3 text-[11px] font-bold uppercase tracking-wide">
                                   Kapasitas
                                 </th>
 
-                                <th className="px-4 py-3 text-[11px] font-bold uppercase tracking-wide text-slate-400">
+                                <th className="theme-table-header px-4 py-3 text-[11px] font-bold uppercase tracking-wide">
                                   Wali Kelas
                                 </th>
                               </tr>
                             </thead>
 
-                            <tbody className="divide-y divide-slate-100">
+                            <tbody className="divide-y divide-[var(--color-border-soft)]">
                               {kelas.map(
                                 (
                                   item,
@@ -789,31 +790,29 @@ export default function DetailTahunAjaranPage() {
                                       item.id ||
                                       index
                                     }
-                                    className="transition hover:bg-slate-50/70"
+                                    className="theme-table-hover transition"
                                   >
                                     {/* NO */}
-                                    <td className="px-4 py-4 text-sm text-slate-500">
+                                    <td className="px-4 py-4 text-sm theme-text-muted">
                                       {index + 1}
                                     </td>
 
                                     {/* NAMA */}
                                     <td className="px-4 py-4">
                                       <div className="flex items-center gap-3">
-                                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+                                        <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
                                           <GraduationCap
-                                            size={
-                                              17
-                                            }
+                                            size={17}
                                           />
                                         </div>
 
                                         <div className="min-w-0">
-                                          <p className="truncate text-sm font-semibold text-slate-700">
+                                          <p className="truncate text-sm font-semibold theme-text-secondary">
                                             {item.nama ||
                                               "-"}
                                           </p>
 
-                                          <p className="mt-0.5 text-[11px] text-slate-400">
+                                          <p className="mt-0.5 text-[11px] theme-text-muted">
                                             ID:{" "}
                                             {item.id ||
                                               "-"}
@@ -824,22 +823,20 @@ export default function DetailTahunAjaranPage() {
 
                                     {/* TINGKAT */}
                                     <td className="px-4 py-4">
-                                      <span className="inline-flex rounded-md bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700">
+                                      <span className="theme-info inline-flex rounded-md px-2.5 py-1 text-xs font-semibold">
                                         Tingkat{" "}
-                                        {item.tingkat ??
-                                          "-"}
+                                        {item.tingkat ?? "-"}
                                       </span>
                                     </td>
 
                                     {/* KAPASITAS */}
-                                    <td className="px-4 py-4 text-sm text-slate-600">
-                                      {item.kapasitas ??
-                                        "-"}{" "}
+                                    <td className="px-4 py-4 text-sm theme-text-secondary">
+                                      {item.kapasitas ?? "-"}{" "}
                                       siswa
                                     </td>
 
                                     {/* WALI KELAS */}
-                                    <td className="px-4 py-4 text-sm font-medium text-slate-600">
+                                    <td className="px-4 py-4 text-sm font-medium theme-text-secondary">
                                       {item
                                         ?.waliKelas
                                         ?.namaLengkap ||
@@ -863,34 +860,40 @@ export default function DetailTahunAjaranPage() {
                       STATUS INFORMATION
                   ================================================= */}
                   <div
-                    className={`rounded-2xl border p-5 ${
+                    className={
                       isActive
-                        ? "border-emerald-200/70 bg-emerald-50/60"
-                        : "border-slate-200/70 bg-slate-50/60"
-                    }`}
+                        ? "theme-success rounded-2xl border p-5"
+                        : "theme-card-soft theme-border rounded-2xl border p-5"
+                    }
                   >
                     <div className="flex items-start gap-4">
                       <div
-                        className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white ${
+                        className={
                           isActive
-                            ? "text-emerald-600"
-                            : "text-slate-500"
-                        }`}
+                            ? "theme-card flex h-11 w-11 shrink-0 items-center justify-center rounded-xl"
+                            : "theme-card-soft flex h-11 w-11 shrink-0 items-center justify-center rounded-xl"
+                        }
                       >
                         {isActive ? (
-                          <CheckCircle2 size={22} />
+                          <CheckCircle2
+                            size={22}
+                            className="text-[var(--color-success)]"
+                          />
                         ) : (
-                          <Info size={22} />
+                          <Info
+                            size={22}
+                            className="theme-text-muted"
+                          />
                         )}
                       </div>
 
                       <div>
                         <p
-                          className={`text-sm font-bold ${
+                          className={
                             isActive
-                              ? "text-emerald-800"
-                              : "text-slate-700"
-                          }`}
+                              ? "text-sm font-bold text-[var(--color-success)]"
+                              : "text-sm font-bold theme-text"
+                          }
                         >
                           {isActive
                             ? "Tahun Ajaran Aktif"
@@ -898,11 +901,11 @@ export default function DetailTahunAjaranPage() {
                         </p>
 
                         <p
-                          className={`mt-1 text-sm leading-6 ${
+                          className={
                             isActive
-                              ? "text-emerald-700/80"
-                              : "text-slate-500"
-                          }`}
+                              ? "mt-1 text-sm leading-6 text-[var(--color-success)] opacity-80"
+                              : "mt-1 text-sm leading-6 theme-text-secondary"
+                          }
                         >
                           {isActive
                             ? `${data.nama} semester ${data.semester} sedang digunakan sebagai periode akademik aktif sekolah.`
@@ -915,7 +918,7 @@ export default function DetailTahunAjaranPage() {
                   {/* =================================================
                       FOOTER ACTION
                   ================================================= */}
-                  <div className="flex flex-col gap-3 border-t border-slate-200/60 pt-6 sm:flex-row sm:justify-between">
+                  <div className="theme-border-soft flex flex-col gap-3 border-t pt-6 sm:flex-row sm:justify-between">
                     <button
                       type="button"
                       onClick={() =>
@@ -923,7 +926,7 @@ export default function DetailTahunAjaranPage() {
                           "/admin/akademik/tahun-ajaran"
                         )
                       }
-                      className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-medium text-slate-600 transition hover:border-slate-300 hover:bg-slate-50"
+                      className="theme-card theme-border theme-text-secondary inline-flex items-center justify-center gap-2 rounded-xl border px-5 py-2.5 text-sm font-medium transition theme-header-hover"
                     >
                       <ArrowLeft size={16} />
 
@@ -932,7 +935,7 @@ export default function DetailTahunAjaranPage() {
 
                     <Link
                       href={`/admin/akademik/tahun-ajaran/edit/${data.id}`}
-                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#155DFC] px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0d47c9]"
+                      className="theme-primary inline-flex items-center justify-center gap-2 rounded-xl px-6 py-2.5 text-sm font-semibold shadow-sm transition"
                     >
                       <Edit size={16} />
 
@@ -943,7 +946,7 @@ export default function DetailTahunAjaranPage() {
                   {/* =================================================
                       FOOTER
                   ================================================= */}
-                  <footer className="pt-6 text-center text-xs text-slate-400">
+                  <footer className="pt-6 text-center text-xs theme-text-muted">
                     © 2026 SmartSchool • Detail Tahun Ajaran
                   </footer>
                 </>
@@ -961,7 +964,7 @@ export default function DetailTahunAjaranPage() {
 // =============================================================
 function Loader() {
   return (
-    <div className="h-8 w-8 animate-spin rounded-full border-4 border-[#155DFC] border-t-transparent" />
+    <div className="h-8 w-8 animate-spin rounded-full border-4 border-[var(--color-primary)] border-t-transparent" />
   );
 }
 
@@ -972,17 +975,17 @@ function StatItem({
   icon,
   label,
   value,
-  valueClass = "text-slate-800",
+  valueClass = "theme-text",
   truncate = false,
 }) {
   return (
     <div className="flex items-center gap-4 px-6 py-4 sm:py-5">
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-50 text-[#155DFC]">
+      <div className="theme-card-soft flex h-10 w-10 shrink-0 items-center justify-center rounded-lg theme-sidebar-text-active">
         {icon}
       </div>
 
       <div className="min-w-0">
-        <p className="text-xs font-medium text-slate-400">
+        <p className="text-xs font-medium theme-text-muted">
           {label}
         </p>
 
@@ -1008,19 +1011,19 @@ function DetailCard({
   children,
 }) {
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
-      <div className="border-b border-slate-100/80 px-5 py-4 sm:px-6">
+    <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
+      <div className="theme-border-soft border-b px-5 py-4 sm:px-6">
         <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#eaf1ff] text-[#155DFC]">
+          <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
             {icon}
           </div>
 
           <div>
-            <h2 className="text-sm font-bold text-slate-800">
+            <h2 className="text-sm font-bold theme-text">
               {title}
             </h2>
 
-            <p className="mt-0.5 text-xs text-slate-400">
+            <p className="mt-0.5 text-xs theme-text-muted">
               {description}
             </p>
           </div>
@@ -1028,7 +1031,7 @@ function DetailCard({
       </div>
 
       <div className="px-5 py-4 sm:px-6 sm:py-5">
-        <div className="divide-y divide-slate-100/80">
+        <div className="divide-y divide-[var(--color-border-soft)]">
           {children}
         </div>
       </div>
@@ -1046,12 +1049,12 @@ function DetailRow({
 }) {
   return (
     <div className="flex flex-col gap-1 py-3 first:pt-0 last:pb-0 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
-      <span className="text-xs font-medium text-slate-500">
+      <span className="text-xs font-medium theme-text-secondary">
         {label}
       </span>
 
       <span
-        className={`text-sm font-semibold text-slate-700 sm:text-right ${
+        className={`text-sm font-semibold theme-text sm:text-right ${
           breakValue ? "break-all" : ""
         } sm:max-w-[60%]`}
       >
@@ -1060,4 +1063,3 @@ function DetailRow({
     </div>
   );
 }
-

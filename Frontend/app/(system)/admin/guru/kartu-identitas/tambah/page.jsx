@@ -40,14 +40,14 @@ const REQUIRED_FIELDS = ["nama", "nip", "jabatan", "unit"];
 function Field({ label, children }) {
   return (
     <label className="block">
-      <span className="text-xs font-medium text-slate-500">{label}</span>
+      <span className="text-xs font-medium theme-text-muted">{label}</span>
       {children}
     </label>
   );
 }
 
 const inputClass =
-  "mt-1 w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#155DFC]/25 focus:border-[#155DFC]/50 text-slate-800";
+  "mt-1 w-full px-3 py-2 text-sm rounded-lg border theme-input focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20 focus:border-[var(--color-primary)] transition-colors";
 
 export default function TambahPegawaiPage() {
   const router = useRouter();
@@ -59,15 +59,22 @@ export default function TambahPegawaiPage() {
 
   const handleChange = (field) => (e) => {
     setForm((f) => ({ ...f, [field]: e.target.value }));
-    if (errors[field]) setErrors((er) => ({ ...er, [field]: undefined }));
+    if (errors[field]) {
+      setErrors((er) => ({ ...er, [field]: undefined }));
+    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
     const nextErrors = {};
+
     REQUIRED_FIELDS.forEach((field) => {
-      if (!String(form[field] || "").trim()) nextErrors[field] = "Wajib diisi";
+      if (!String(form[field] || "").trim()) {
+        nextErrors[field] = "Wajib diisi";
+      }
     });
+
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
       return;
@@ -76,7 +83,9 @@ export default function TambahPegawaiPage() {
     try {
       const raw = window.localStorage.getItem(QUEUE_KEY);
       const queue = raw ? JSON.parse(raw) : [];
+
       queue.push(form);
+
       window.localStorage.setItem(QUEUE_KEY, JSON.stringify(queue));
     } catch (err) {
       console.error("Gagal menitipkan data pegawai baru:", err);
@@ -86,7 +95,7 @@ export default function TambahPegawaiPage() {
   };
 
   return (
-    <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
+    <div className="flex h-screen w-full theme-page overflow-hidden">
       <Sidebar
         active="guruKartuIdentitas"
         setActive={() => {}}
@@ -94,34 +103,74 @@ export default function TambahPegawaiPage() {
         setCollapsed={setIsCollapsed}
         role="admin"
       />
+
       <div className="flex-1 flex flex-col min-w-0 w-full h-full overflow-hidden">
         <Header
           toggleSidebar={toggleSidebar}
           notifications={[]}
-          user={{ name: "Admin Sekolah", email: "admin@smartschool.com", avatar: "AD" }}
+          user={{
+            name: "Admin Sekolah",
+            email: "admin@smartschool.com",
+            avatar: "AD",
+          }}
         />
+
         <main className="flex-1 w-full overflow-y-auto">
           <div className="w-full max-w-none p-4 sm:p-6 lg:p-8 space-y-6">
             {/* HEADER */}
             <div className="flex items-center gap-3">
               <button
-                onClick={() => router.push("/admin/guru/kartu-identitas")}
-                className="w-9 h-9 rounded-lg border border-slate-200 bg-white flex items-center justify-center text-slate-500 hover:bg-slate-50 flex-shrink-0"
+                onClick={() =>
+                  router.push("/admin/guru/kartu-identitas")
+                }
+                className="
+                  w-9 h-9 rounded-lg
+                  border theme-border
+                  theme-card
+                  flex items-center justify-center
+                  theme-text-muted
+                  theme-table-hover
+                  flex-shrink-0
+                  transition-colors
+                "
                 title="Kembali ke daftar"
               >
                 <ArrowLeft size={16} />
               </button>
-              <div className="p-2.5 rounded-xl bg-gradient-to-br from-[#155DFC] to-[#0d47c9] text-white shadow-lg shadow-slate-900/10">
+
+              <div
+                className="
+                  p-2.5 rounded-xl
+                  theme-primary
+                  shadow-lg
+                  flex-shrink-0
+                "
+              >
                 <IdCard size={20} />
               </div>
+
               <div>
-                <h1 className="text-2xl font-bold text-slate-800">Tambah Pegawai</h1>
-                <p className="text-sm text-slate-500">Isi data identitas guru atau staff baru.</p>
+                <h1 className="text-2xl font-bold theme-text">
+                  Tambah Pegawai
+                </h1>
+
+                <p className="text-sm theme-text-muted">
+                  Isi data identitas guru atau staff baru.
+                </p>
               </div>
             </div>
 
             {/* FORM */}
-            <div className="w-full bg-white rounded-2xl border border-slate-200/80 shadow-sm p-6">
+            <div
+              className="
+                w-full
+                theme-card
+                rounded-2xl
+                border theme-border
+                shadow-sm
+                p-6
+              "
+            >
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4">
                   <Field label="Nama lengkap & gelar">
@@ -132,7 +181,12 @@ export default function TambahPegawaiPage() {
                       placeholder="cth. Sarah Amelia, S.Pd"
                       className={inputClass}
                     />
-                    {errors.nama && <p className="text-[11px] text-red-500 mt-1">{errors.nama}</p>}
+
+                    {errors.nama && (
+                      <p className="text-[11px] mt-1 text-[var(--color-danger)]">
+                        {errors.nama}
+                      </p>
+                    )}
                   </Field>
 
                   <Field label="NIP">
@@ -143,11 +197,20 @@ export default function TambahPegawaiPage() {
                       placeholder="cth. 198501152010012001"
                       className={`${inputClass} font-mono`}
                     />
-                    {errors.nip && <p className="text-[11px] text-red-500 mt-1">{errors.nip}</p>}
+
+                    {errors.nip && (
+                      <p className="text-[11px] mt-1 text-[var(--color-danger)]">
+                        {errors.nip}
+                      </p>
+                    )}
                   </Field>
 
                   <Field label="Tipe">
-                    <select value={form.tipe} onChange={handleChange("tipe")} className={`${inputClass} bg-white`}>
+                    <select
+                      value={form.tipe}
+                      onChange={handleChange("tipe")}
+                      className={inputClass}
+                    >
                       {TIPE_OPTIONS.map((t) => (
                         <option key={t} value={t}>
                           {t}
@@ -157,7 +220,11 @@ export default function TambahPegawaiPage() {
                   </Field>
 
                   <Field label="Status">
-                    <select value={form.status} onChange={handleChange("status")} className={`${inputClass} bg-white`}>
+                    <select
+                      value={form.status}
+                      onChange={handleChange("status")}
+                      className={inputClass}
+                    >
                       {STATUS_OPTIONS.map((s) => (
                         <option key={s} value={s}>
                           {s === "aktif" ? "Aktif" : "Nonaktif"}
@@ -174,7 +241,12 @@ export default function TambahPegawaiPage() {
                       placeholder="cth. Guru Matematika"
                       className={inputClass}
                     />
-                    {errors.jabatan && <p className="text-[11px] text-red-500 mt-1">{errors.jabatan}</p>}
+
+                    {errors.jabatan && (
+                      <p className="text-[11px] mt-1 text-[var(--color-danger)]">
+                        {errors.jabatan}
+                      </p>
+                    )}
                   </Field>
 
                   <Field label="Level">
@@ -195,7 +267,12 @@ export default function TambahPegawaiPage() {
                       placeholder="cth. Mata Pelajaran Matematika"
                       className={inputClass}
                     />
-                    {errors.unit && <p className="text-[11px] text-red-500 mt-1">{errors.unit}</p>}
+
+                    {errors.unit && (
+                      <p className="text-[11px] mt-1 text-[var(--color-danger)]">
+                        {errors.unit}
+                      </p>
+                    )}
                   </Field>
 
                   <Field label="Golongan">
@@ -254,15 +331,47 @@ export default function TambahPegawaiPage() {
                 <div className="flex items-center gap-2 pt-2 max-w-md ml-auto">
                   <button
                     type="button"
-                    onClick={() => router.push("/admin/guru/kartu-identitas")}
-                    className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 transition-colors"
+                    onClick={() =>
+                      router.push("/admin/guru/kartu-identitas")
+                    }
+                    className="
+                      flex-1
+                      inline-flex
+                      items-center
+                      justify-center
+                      gap-2
+                      px-4
+                      py-2.5
+                      rounded-xl
+                      border theme-border
+                      theme-card
+                      theme-text-secondary
+                      theme-table-hover
+                      text-sm
+                      font-medium
+                      transition-colors
+                    "
                   >
                     <X size={15} />
                     Batal
                   </button>
+
                   <button
                     type="submit"
-                    className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#155DFC] to-[#0d47c9] text-white text-sm font-semibold hover:brightness-110 transition-all"
+                    className="
+                      flex-1
+                      inline-flex
+                      items-center
+                      justify-center
+                      gap-2
+                      px-4
+                      py-2.5
+                      rounded-xl
+                      theme-primary
+                      text-sm
+                      font-semibold
+                      transition-all
+                    "
                   >
                     <Save size={15} />
                     Simpan Pegawai

@@ -25,6 +25,74 @@ import {
   deleteGudang,
 } from "../../../../../../services/sarpras.service";
 
+/* =========================================================
+   GLOBAL THEME HELPERS
+========================================================= */
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+
+/* =========================================================
+   RESPONSE HELPER
+========================================================= */
+
 function extractArray(response) {
   if (Array.isArray(response)) {
     return response;
@@ -49,21 +117,40 @@ function extractArray(response) {
   return [];
 }
 
+/* =========================================================
+   PAGE
+========================================================= */
+
 export default function MasterGudangPage() {
   const router = useRouter();
 
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] =
+    useState(false);
 
-  const [gudangList, setGudangList] = useState([]);
+  const [gudangList, setGudangList] =
+    useState([]);
 
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState("Semua");
+  const [search, setSearch] =
+    useState("");
 
-  const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
-  const [error, setError] = useState("");
+  const [statusFilter, setStatusFilter] =
+    useState("Semua");
 
-  const [deletingId, setDeletingId] = useState(null);
+  const [loading, setLoading] =
+    useState(true);
+
+  const [refreshing, setRefreshing] =
+    useState(false);
+
+  const [error, setError] =
+    useState("");
+
+  const [deletingId, setDeletingId] =
+    useState(null);
+
+  /* =========================================================
+     LOAD DATA
+  ========================================================= */
 
   async function loadGudang(showRefresh = false) {
     try {
@@ -77,15 +164,25 @@ export default function MasterGudangPage() {
 
       const response = await getGudang();
 
-      console.log("Response gudang:", response);
+      console.log(
+        "Response gudang:",
+        response
+      );
 
-      const data = extractArray(response);
+      const data =
+        extractArray(response);
 
-      console.log("Data gudang:", data);
+      console.log(
+        "Data gudang:",
+        data
+      );
 
       setGudangList(data);
     } catch (err) {
-      console.error("Gagal mengambil data gudang:", err);
+      console.error(
+        "Gagal mengambil data gudang:",
+        err
+      );
 
       setError(
         err?.message ||
@@ -97,17 +194,34 @@ export default function MasterGudangPage() {
     }
   }
 
+  /* =========================================================
+     INITIAL LOAD
+  ========================================================= */
+
   useEffect(() => {
     loadGudang();
   }, []);
 
+  /* =========================================================
+     FILTER DATA
+  ========================================================= */
+
   const filteredGudang = useMemo(() => {
-    const keyword = search.trim().toLowerCase();
+    const keyword =
+      search.trim().toLowerCase();
 
     return gudangList.filter((item) => {
-      const nama = String(item?.nama || "").toLowerCase();
-      const lokasi = String(item?.lokasi || "").toLowerCase();
-      const status = String(item?.status || "aktif").toLowerCase();
+      const nama = String(
+        item?.nama || ""
+      ).toLowerCase();
+
+      const lokasi = String(
+        item?.lokasi || ""
+      ).toLowerCase();
+
+      const status = String(
+        item?.status || "aktif"
+      ).toLowerCase();
 
       const matchSearch =
         !keyword ||
@@ -118,28 +232,53 @@ export default function MasterGudangPage() {
         statusFilter === "Semua" ||
         status === statusFilter;
 
-      return matchSearch && matchStatus;
+      return (
+        matchSearch &&
+        matchStatus
+      );
     });
-  }, [gudangList, search, statusFilter]);
+  }, [
+    gudangList,
+    search,
+    statusFilter,
+  ]);
 
-  const totalGudang = gudangList.length;
+  /* =========================================================
+     STATISTICS
+  ========================================================= */
 
-  const gudangAktif = gudangList.filter(
-    (item) =>
-      String(item?.status || "aktif").toLowerCase() ===
-      "aktif"
-  ).length;
+  const totalGudang =
+    gudangList.length;
 
-  const gudangNonaktif = gudangList.filter(
-    (item) =>
-      String(item?.status || "").toLowerCase() ===
-      "nonaktif"
-  ).length;
+  const gudangAktif =
+    gudangList.filter(
+      (item) =>
+        String(
+          item?.status || "aktif"
+        ).toLowerCase() === "aktif"
+    ).length;
 
-  async function handleDelete(id, nama) {
-    const confirmed = window.confirm(
-      `Yakin ingin menghapus gudang "${nama}"?`
-    );
+  const gudangNonaktif =
+    gudangList.filter(
+      (item) =>
+        String(
+          item?.status || ""
+        ).toLowerCase() ===
+        "nonaktif"
+    ).length;
+
+  /* =========================================================
+     DELETE
+  ========================================================= */
+
+  async function handleDelete(
+    id,
+    nama
+  ) {
+    const confirmed =
+      window.confirm(
+        `Yakin ingin menghapus gudang "${nama}"?`
+      );
 
     if (!confirmed) {
       return;
@@ -151,14 +290,19 @@ export default function MasterGudangPage() {
       await deleteGudang(id);
 
       setGudangList((current) =>
-        current.filter((item) => item.id !== id)
+        current.filter(
+          (item) => item.id !== id
+        )
       );
 
       window.alert(
         `Gudang "${nama}" berhasil dihapus.`
       );
     } catch (err) {
-      console.error("Gagal menghapus gudang:", err);
+      console.error(
+        "Gagal menghapus gudang:",
+        err
+      );
 
       window.alert(
         err?.message ||
@@ -169,17 +313,36 @@ export default function MasterGudangPage() {
     }
   }
 
+  /* =========================================================
+     RESET FILTER
+  ========================================================= */
+
   function handleReset() {
     setSearch("");
     setStatusFilter("Semua");
   }
 
+  /* =========================================================
+     SIDEBAR
+  ========================================================= */
+
   function toggleSidebar() {
-    setIsCollapsed((current) => !current);
+    setIsCollapsed(
+      (current) => !current
+    );
   }
 
+  /* =========================================================
+     RENDER
+  ========================================================= */
+
   return (
-    <div className="h-screen overflow-hidden bg-slate-50">
+    <div className="theme-page h-screen overflow-hidden">
+
+      {/* =====================================================
+          SIDEBAR
+      ===================================================== */}
+
       <div className="fixed inset-y-0 left-0 z-50">
         <Sidebar
           active="sarpras"
@@ -189,6 +352,10 @@ export default function MasterGudangPage() {
         />
       </div>
 
+      {/* =====================================================
+          CONTENT
+      ===================================================== */}
+
       <div
         className={`flex h-screen min-w-0 flex-col overflow-hidden transition-[margin] duration-300 ${
           isCollapsed
@@ -196,46 +363,75 @@ export default function MasterGudangPage() {
             : "lg:ml-[260px]"
         }`}
       >
+
+        {/* ===================================================
+            HEADER
+        =================================================== */}
+
         <div className="z-30 flex-shrink-0">
           <Header
             toggleSidebar={toggleSidebar}
             notifications={[]}
             user={{
               name: "Admin Sekolah",
-              email: "admin@smartschool.com",
+              email:
+                "admin@smartschool.com",
               avatar: "AD",
             }}
           />
         </div>
 
+        {/* ===================================================
+            MAIN
+        =================================================== */}
+
         <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
+
           <div className="w-full p-4 md:p-6 lg:p-8">
+
             <div className="mx-auto w-full max-w-[1600px] space-y-5">
 
-              {/* HEADER */}
+              {/* =================================================
+                  HEADER
+              ================================================= */}
+
               <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+
                 <div className="flex min-w-0 items-center gap-3">
-                  <div className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-200">
+
+                  <div
+                    className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
+                  >
                     <Warehouse size={21} />
                   </div>
 
                   <div className="min-w-0">
-                    <h1 className="text-xl font-semibold text-slate-900">
+
+                    <h1 className="theme-text text-xl font-semibold">
                       Master Gudang
                     </h1>
 
-                    <p className="mt-0.5 text-sm text-slate-500">
-                      Kelola data gudang penyimpanan sarana dan prasarana sekolah
+                    <p className="theme-text-muted mt-0.5 text-sm">
+                      Kelola data gudang
+                      penyimpanan sarana dan
+                      prasarana sekolah
                     </p>
+
                   </div>
+
                 </div>
 
+                {/* ACTION */}
+
                 <div className="flex flex-wrap items-center gap-2">
+
                   <button
                     type="button"
-                    onClick={() => loadGudang(true)}
+                    onClick={() =>
+                      loadGudang(true)
+                    }
                     disabled={refreshing}
-                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-600 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    className={`theme-card theme-text-secondary inline-flex items-center justify-center gap-2 rounded-xl border ${themeNeutralBorder} px-3.5 py-2.5 text-sm font-medium ${themeSmallShadow} transition ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-60`}
                   >
                     <RefreshCw
                       size={16}
@@ -258,129 +454,198 @@ export default function MasterGudangPage() {
                         "/admin/sarpras/gudang/master/tambah"
                       )
                     }
-                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:shadow-lg hover:shadow-blue-200"
+                    className={`inline-flex items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-4 py-2.5 text-sm font-semibold text-[var(--color-card)] ${themePrimaryShadow} transition hover:brightness-95`}
                   >
                     <Plus size={17} />
                     Tambah Gudang
                   </button>
+
                 </div>
+
               </div>
 
-              {/* ERROR */}
+              {/* =================================================
+                  ERROR
+              ================================================= */}
+
               {error && (
-                <div className="flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 p-4">
+                <div
+                  className={`flex items-start gap-3 rounded-xl border ${themeDangerBorder} ${themeDangerSurface} p-4`}
+                >
+
                   <XCircle
                     size={19}
-                    className="mt-0.5 flex-shrink-0 text-rose-500"
+                    className="theme-danger mt-0.5 flex-shrink-0"
                   />
 
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-rose-700">
+
+                    <p className="theme-danger text-sm font-semibold">
                       Gagal memuat data
                     </p>
 
-                    <p className="mt-1 text-sm text-rose-600">
+                    <p className="theme-danger mt-1 text-sm">
                       {error}
                     </p>
 
                     <button
                       type="button"
-                      onClick={() => loadGudang()}
-                      className="mt-3 text-sm font-semibold text-rose-700 underline underline-offset-2"
+                      onClick={() =>
+                        loadGudang()
+                      }
+                      className="theme-danger mt-3 text-sm font-semibold underline underline-offset-2"
                     >
                       Coba lagi
                     </button>
+
                   </div>
+
                 </div>
               )}
 
-              {/* STATISTIK */}
+              {/* =================================================
+                  STATISTIK
+              ================================================= */}
+
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
 
-                <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                {/* TOTAL */}
+
+                <div
+                  className={`theme-card rounded-xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}
+                >
+
                   <div className="flex items-center justify-between">
+
                     <div>
-                      <p className="text-xs font-medium text-slate-500">
+
+                      <p className="theme-text-muted text-xs font-medium">
                         Total Gudang
                       </p>
 
-                      <p className="mt-1 text-2xl font-bold text-slate-900">
+                      <p className="theme-text mt-1 text-2xl font-bold">
                         {totalGudang}
                       </p>
+
                     </div>
 
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                    <div
+                      className={`flex h-10 w-10 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
+                    >
                       <Boxes size={19} />
                     </div>
+
                   </div>
+
                 </div>
 
-                <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                {/* AKTIF */}
+
+                <div
+                  className={`theme-card rounded-xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}
+                >
+
                   <div className="flex items-center justify-between">
+
                     <div>
-                      <p className="text-xs font-medium text-slate-500">
+
+                      <p className="theme-text-muted text-xs font-medium">
                         Gudang Aktif
                       </p>
 
-                      <p className="mt-1 text-2xl font-bold text-emerald-600">
+                      <p className="theme-success mt-1 text-2xl font-bold">
                         {gudangAktif}
                       </p>
+
                     </div>
 
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                    <div
+                      className={`flex h-10 w-10 items-center justify-center rounded-xl ${themeSuccessSurface} theme-success`}
+                    >
                       <CheckCircle2 size={19} />
                     </div>
+
                   </div>
+
                 </div>
 
-                <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+                {/* NONAKTIF */}
+
+                <div
+                  className={`theme-card rounded-xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}
+                >
+
                   <div className="flex items-center justify-between">
+
                     <div>
-                      <p className="text-xs font-medium text-slate-500">
+
+                      <p className="theme-text-muted text-xs font-medium">
                         Gudang Nonaktif
                       </p>
 
-                      <p className="mt-1 text-2xl font-bold text-rose-600">
+                      <p className="theme-danger mt-1 text-2xl font-bold">
                         {gudangNonaktif}
                       </p>
+
                     </div>
 
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-rose-50 text-rose-600">
+                    <div
+                      className={`flex h-10 w-10 items-center justify-center rounded-xl ${themeDangerSurface} theme-danger`}
+                    >
                       <XCircle size={19} />
                     </div>
+
                   </div>
+
                 </div>
 
               </div>
 
-              {/* FILTER */}
-              <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm">
+              {/* =================================================
+                  FILTER
+              ================================================= */}
+
+              <div
+                className={`theme-card rounded-xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}
+              >
+
                 <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
 
+                  {/* SEARCH */}
+
                   <div className="relative min-w-0 flex-1">
+
                     <Search
                       size={17}
-                      className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                      className="theme-text-muted absolute left-3.5 top-1/2 -translate-y-1/2"
                     />
 
                     <input
                       type="text"
                       value={search}
                       onChange={(e) =>
-                        setSearch(e.target.value)
+                        setSearch(
+                          e.target.value
+                        )
                       }
                       placeholder="Cari nama atau lokasi gudang..."
-                      className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-4 text-sm text-slate-800 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-500/20"
+                      className={`theme-input w-full rounded-xl border ${themeNeutralBorder} py-2.5 pl-10 pr-4 text-sm outline-none transition ${themeFocus}`}
                     />
+
                   </div>
+
+                  {/* STATUS */}
 
                   <select
                     value={statusFilter}
                     onChange={(e) =>
-                      setStatusFilter(e.target.value)
+                      setStatusFilter(
+                        e.target.value
+                      )
                     }
-                    className="w-full cursor-pointer rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm font-medium text-slate-700 outline-none transition focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 lg:w-[180px]"
+                    className={`theme-input w-full cursor-pointer rounded-xl border ${themeNeutralBorder} px-3 py-2.5 text-sm font-medium outline-none transition ${themeFocus} lg:w-[180px]`}
                   >
+
                     <option value="Semua">
                       Semua Status
                     </option>
@@ -392,25 +657,45 @@ export default function MasterGudangPage() {
                     <option value="nonaktif">
                       Nonaktif
                     </option>
+
                   </select>
+
+                  {/* RESET */}
 
                   <button
                     type="button"
                     onClick={handleReset}
-                    className="rounded-xl px-3 py-2.5 text-sm font-medium text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
+                    className={`theme-text-muted rounded-xl px-3 py-2.5 text-sm font-medium transition ${themeNeutralHover} hover:text-[var(--color-text)]`}
                   >
                     Reset
                   </button>
+
                 </div>
+
               </div>
 
-              {/* TABLE */}
-              <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+              {/* =================================================
+                  TABLE
+              ================================================= */}
+
+              <div
+                className={`theme-card overflow-hidden rounded-xl border ${themeNeutralBorder} ${themeCardShadow}`}
+              >
+
                 <div className="overflow-x-auto">
+
                   <table className="w-full min-w-[700px] text-sm">
 
+                    {/* =================================================
+                        TABLE HEAD
+                    ================================================= */}
+
                     <thead>
-                      <tr className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
+
+                      <tr
+                        className={`${themePrimaryGradient} text-[var(--color-card)]`}
+                      >
+
                         <th className="px-5 py-3 text-left font-semibold">
                           Nama Gudang
                         </th>
@@ -426,50 +711,77 @@ export default function MasterGudangPage() {
                         <th className="px-5 py-3 text-center font-semibold">
                           Aksi
                         </th>
+
                       </tr>
+
                     </thead>
+
+                    {/* =================================================
+                        TABLE BODY
+                    ================================================= */}
 
                     <tbody>
 
+                      {/* LOADING */}
+
                       {loading ? (
                         <tr>
+
                           <td
                             colSpan={4}
                             className="px-5 py-16 text-center"
                           >
+
                             <div className="flex flex-col items-center">
+
                               <Loader2
                                 size={28}
-                                className="animate-spin text-blue-600"
+                                className={`${themePrimaryText} animate-spin`}
                               />
 
-                              <p className="mt-3 text-sm text-slate-500">
+                              <p className="theme-text-muted mt-3 text-sm">
                                 Memuat data gudang...
                               </p>
+
                             </div>
+
                           </td>
+
                         </tr>
-                      ) : filteredGudang.length === 0 ? (
+
+                      ) : filteredGudang.length ===
+                        0 ? (
+
+                        /* =================================================
+                           EMPTY
+                        ================================================= */
+
                         <tr>
+
                           <td
                             colSpan={4}
                             className="px-5 py-16 text-center"
                           >
+
                             <div className="flex flex-col items-center">
-                              <div className="flex h-14 w-14 items-center justify-center rounded-full bg-blue-50">
+
+                              <div
+                                className={`flex h-14 w-14 items-center justify-center rounded-full ${themePrimarySoft}`}
+                              >
                                 <Warehouse
                                   size={28}
-                                  className="text-blue-300"
+                                  className={`${themePrimaryText} opacity-45`}
                                 />
                               </div>
 
-                              <p className="mt-3 text-sm font-semibold text-slate-600">
+                              <p className="theme-text-secondary mt-3 text-sm font-semibold">
                                 Belum ada gudang
                               </p>
 
-                              <p className="mt-1 max-w-sm text-xs text-slate-400">
+                              <p className="theme-text-muted mt-1 max-w-sm text-xs">
                                 {search ||
-                                statusFilter !== "Semua"
+                                statusFilter !==
+                                  "Semua"
                                   ? "Tidak ada gudang yang sesuai dengan pencarian atau filter."
                                   : "Tambahkan gudang terlebih dahulu agar dapat digunakan pada inventaris barang."}
                               </p>
@@ -484,18 +796,28 @@ export default function MasterGudangPage() {
                                         "/admin/sarpras/gudang/master/tambah"
                                       )
                                     }
-                                    className="mt-4 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
+                                    className={`mt-4 inline-flex items-center gap-2 rounded-xl ${themePrimaryGradient} px-4 py-2.5 text-sm font-semibold text-[var(--color-card)] ${themePrimaryShadow} transition hover:brightness-95`}
                                   >
                                     <Plus size={16} />
                                     Tambah Gudang
                                   </button>
                                 )}
+
                             </div>
+
                           </td>
+
                         </tr>
+
                       ) : (
+
+                        /* =================================================
+                           DATA
+                        ================================================= */
+
                         filteredGudang.map(
                           (item, index) => {
+
                             const status =
                               String(
                                 item?.status ||
@@ -509,68 +831,101 @@ export default function MasterGudangPage() {
                             return (
                               <tr
                                 key={item.id}
-                                className={`border-b border-slate-100 last:border-0 transition hover:bg-blue-50/70 ${
-                                  index % 2 === 0
-                                    ? "bg-slate-50/40"
-                                    : "bg-white"
+                                className={`border-b ${themeDivider} last:border-0 transition ${themeNeutralHover} ${
+                                  index % 2 ===
+                                  0
+                                    ? themeNeutralSurface
+                                    : ""
                                 }`}
                               >
+
+                                {/* NAMA */}
+
                                 <td className="px-5 py-4">
+
                                   <div className="flex items-center gap-3">
-                                    <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+
+                                    <div
+                                      className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText}`}
+                                    >
                                       <Warehouse
                                         size={17}
                                       />
                                     </div>
 
                                     <div>
-                                      <p className="font-semibold text-slate-900">
+
+                                      <p className="theme-text font-semibold">
                                         {item?.nama ||
                                           "-"}
                                       </p>
 
-                                      <p className="mt-0.5 text-xs text-slate-400">
+                                      <p className="theme-text-muted mt-0.5 text-xs">
                                         Gudang Sarpras
                                       </p>
+
                                     </div>
+
                                   </div>
+
                                 </td>
 
+                                {/* LOKASI */}
+
                                 <td className="px-5 py-4">
-                                  <div className="flex items-center gap-2 text-slate-600">
+
+                                  <div className="theme-text-secondary flex items-center gap-2">
+
                                     <MapPin
                                       size={15}
-                                      className="text-slate-400"
+                                      className="theme-text-muted"
                                     />
 
                                     <span>
                                       {item?.lokasi ||
                                         "Tidak ada lokasi"}
                                     </span>
+
                                   </div>
+
                                 </td>
 
+                                {/* STATUS */}
+
                                 <td className="px-5 py-4">
+
                                   {status ===
                                   "aktif" ? (
-                                    <span className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-50 px-2.5 py-1.5 text-xs font-semibold text-emerald-600">
+                                    <span
+                                      className={`inline-flex items-center gap-1.5 rounded-lg ${themeSuccessSurface} px-2.5 py-1.5 text-xs font-semibold theme-success`}
+                                    >
                                       <CheckCircle2
                                         size={14}
                                       />
+
                                       Aktif
                                     </span>
                                   ) : (
-                                    <span className="inline-flex items-center gap-1.5 rounded-lg bg-rose-50 px-2.5 py-1.5 text-xs font-semibold text-rose-600">
+                                    <span
+                                      className={`inline-flex items-center gap-1.5 rounded-lg ${themeDangerSurface} px-2.5 py-1.5 text-xs font-semibold theme-danger`}
+                                    >
                                       <XCircle
                                         size={14}
                                       />
+
                                       Nonaktif
                                     </span>
                                   )}
+
                                 </td>
 
+                                {/* AKSI */}
+
                                 <td className="px-5 py-4">
+
                                   <div className="flex items-center justify-center gap-1">
+
+                                    {/* EDIT */}
 
                                     <button
                                       type="button"
@@ -579,13 +934,15 @@ export default function MasterGudangPage() {
                                           `/admin/sarpras/gudang/master/edit/${item.id}`
                                         )
                                       }
-                                      className="rounded-lg p-2 text-slate-500 transition hover:bg-amber-50 hover:text-amber-600"
+                                      className={`theme-text-muted rounded-lg p-2 transition ${themeWarningSurface} hover:text-[var(--color-warning)]`}
                                       title="Edit Gudang"
                                     >
                                       <Edit
                                         size={16}
                                       />
                                     </button>
+
+                                    {/* DELETE */}
 
                                     <button
                                       type="button"
@@ -599,7 +956,7 @@ export default function MasterGudangPage() {
                                             "gudang"
                                         )
                                       }
-                                      className="rounded-lg p-2 text-slate-500 transition hover:bg-rose-50 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-40"
+                                      className={`theme-text-muted rounded-lg p-2 transition ${themeDangerSurface} hover:theme-danger disabled:cursor-not-allowed disabled:opacity-40`}
                                       title="Hapus Gudang"
                                     >
                                       {isDeleting ? (
@@ -615,7 +972,9 @@ export default function MasterGudangPage() {
                                     </button>
 
                                   </div>
+
                                 </td>
+
                               </tr>
                             );
                           }
@@ -623,18 +982,32 @@ export default function MasterGudangPage() {
                       )}
 
                     </tbody>
+
                   </table>
+
                 </div>
+
               </div>
 
-              <footer className="border-t border-slate-200/70 py-4 text-center text-[11px] text-slate-400">
-                © 2026 SmartSchool • Master Gudang Sarana & Prasarana
+              {/* =================================================
+                  FOOTER
+              ================================================= */}
+
+              <footer
+                className={`border-t ${themeDivider} py-4 text-center text-[11px] theme-text-muted`}
+              >
+                © 2026 SmartSchool • Master Gudang
+                Sarana & Prasarana
               </footer>
 
             </div>
+
           </div>
+
         </main>
+
       </div>
+
     </div>
   );
 }

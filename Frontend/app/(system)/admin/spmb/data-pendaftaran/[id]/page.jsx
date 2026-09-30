@@ -2,10 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-
 import Sidebar from "../../../../../components/Sidebar";
 import Header from "../../../../../components/Header";
-
 import {
   ArrowLeft,
   UserRound,
@@ -23,8 +21,66 @@ import {
   AlertCircle,
   Download,
 } from "lucide-react";
-
 import { getPendaftarPpdb } from "../../../../../../services/ppdb.service";
+
+// =========================================================
+// THEME HELPERS
+// =========================================================
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+
+// =========================================================
+// STATUS
+// =========================================================
 
 function normalizeStatus(status) {
   const value = String(status || "").toLowerCase();
@@ -32,8 +88,7 @@ function normalizeStatus(status) {
   if (value === "lulus") {
     return {
       label: "Terverifikasi",
-      className:
-        "border-emerald-200 bg-emerald-50 text-emerald-700",
+      className: `${themeSuccessBorder} ${themeSuccessSurface} text-[var(--color-success)]`,
       icon: CheckCircle2,
     };
   }
@@ -41,19 +96,21 @@ function normalizeStatus(status) {
   if (value === "ditolak") {
     return {
       label: "Ditolak",
-      className:
-        "border-red-200 bg-red-50 text-red-700",
+      className: `${themeNeutralBorder} ${themeNeutralSurface} theme-danger`,
       icon: XCircle,
     };
   }
 
   return {
     label: "Menunggu Verifikasi",
-    className:
-      "border-amber-200 bg-amber-50 text-amber-700",
+    className: `${themeWarningBorder} ${themeWarningSurface} text-[var(--color-warning)]`,
     icon: Clock3,
   };
 }
+
+// =========================================================
+// FORMATTERS
+// =========================================================
 
 function formatTanggal(value) {
   if (!value) {
@@ -104,6 +161,10 @@ function getInitials(nama) {
     .toUpperCase();
 }
 
+// =========================================================
+// FOTO URL
+// =========================================================
+
 function getFotoUrl(item) {
   const rawUrl =
     item?.foto ||
@@ -136,6 +197,10 @@ function getFotoUrl(item) {
   return `${baseUrl.replace(/\/+$/, "")}/${value.replace(/^\/+/, "")}`;
 }
 
+// =========================================================
+// DETAIL ITEM
+// =========================================================
+
 function DetailItem({
   icon: Icon,
   label,
@@ -144,21 +209,35 @@ function DetailItem({
 }) {
   return (
     <div
-      className={`rounded-xl border border-slate-200 bg-slate-50 p-4 ${
-        full ? "sm:col-span-2" : ""
-      }`}
+      className={`
+        rounded-xl
+        border ${themeNeutralBorder}
+        ${themeNeutralSurface}
+        p-4
+        ${full ? "sm:col-span-2" : ""}
+      `}
     >
       <div className="flex items-start gap-3">
-        <div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-slate-400">
+        <div
+          className={`
+            mt-0.5
+            flex h-8 w-8 shrink-0
+            items-center justify-center
+            rounded-lg
+            ${themeCardShadow}
+            theme-card
+            theme-text-muted
+          `}
+        >
           <Icon size={15} />
         </div>
 
         <div className="min-w-0">
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+          <p className="text-[10px] font-semibold uppercase tracking-wide theme-text-muted">
             {label}
           </p>
 
-          <p className="mt-1 break-words text-sm font-semibold text-slate-700">
+          <p className="mt-1 break-words text-sm font-semibold theme-text">
             {value || "-"}
           </p>
         </div>
@@ -167,29 +246,61 @@ function DetailItem({
   );
 }
 
+// =========================================================
+// SECTION
+// =========================================================
+
 function Section({
   title,
   icon: Icon,
   children,
 }) {
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-      <div className="flex items-center gap-3 border-b border-slate-100 px-5 py-4">
-        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#eaf1ff] text-[#155DFC]">
+    <section
+      className={`
+        rounded-2xl
+        border ${themeNeutralBorder}
+        theme-card
+        ${themeCardShadow}
+        overflow-hidden
+      `}
+    >
+      <div
+        className={`
+          flex items-center gap-3
+          border-b ${themeDivider}
+          px-5 py-4
+        `}
+      >
+        <div
+          className={`
+            flex h-9 w-9
+            items-center justify-center
+            rounded-lg
+            ${themePrimarySoft}
+            ${themePrimaryText}
+          `}
+        >
           <Icon size={17} />
         </div>
 
         <div>
-          <h2 className="text-sm font-bold text-slate-800">
+          <h2 className="text-sm font-bold theme-text">
             {title}
           </h2>
         </div>
       </div>
 
-      <div className="p-5">{children}</div>
+      <div className="p-5">
+        {children}
+      </div>
     </section>
   );
 }
+
+// =========================================================
+// MAIN PAGE
+// =========================================================
 
 export default function DetailPendaftaranPage() {
   const router = useRouter();
@@ -204,12 +315,14 @@ export default function DetailPendaftaranPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  // =======================================================
+  // LOAD DETAIL
+  // =======================================================
+
   useEffect(() => {
     async function loadDetail() {
       if (!id) {
-        setError(
-          "ID pendaftaran tidak ditemukan."
-        );
+        setError("ID pendaftaran tidak ditemukan.");
         setLoading(false);
         return;
       }
@@ -218,8 +331,7 @@ export default function DetailPendaftaranPage() {
         setLoading(true);
         setError("");
 
-        const response =
-          await getPendaftarPpdb();
+        const response = await getPendaftarPpdb();
 
         if (!response?.success) {
           throw new Error(
@@ -228,16 +340,13 @@ export default function DetailPendaftaranPage() {
           );
         }
 
-        const list = Array.isArray(
-          response?.data
-        )
+        const list = Array.isArray(response?.data)
           ? response.data
           : [];
 
         const found = list.find(
           (item) =>
-            String(item?.id) ===
-            String(id)
+            String(item?.id) === String(id)
         );
 
         if (!found) {
@@ -266,11 +375,16 @@ export default function DetailPendaftaranPage() {
     loadDetail();
   }, [id]);
 
+  // =======================================================
+  // DATA TURUNAN
+  // =======================================================
+
   const statusInfo = normalizeStatus(
     data?.status
   );
 
   const StatusIcon = statusInfo.icon;
+
   const fotoUrl = getFotoUrl(data);
 
   const apiUrl =
@@ -296,13 +410,25 @@ export default function DetailPendaftaranPage() {
     )}/${value.replace(/^\/+/, "")}`;
   };
 
+  // =======================================================
+  // RENDER
+  // =======================================================
+
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-slate-50">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
+      {/* =================================================
+          SIDEBAR
+      ================================================= */}
+
       <Sidebar
         collapsed={collapsed}
         setCollapsed={setCollapsed}
         activeMenu="spmb"
       />
+
+      {/* =================================================
+          CONTENT
+      ================================================= */}
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <Header
@@ -321,6 +447,7 @@ export default function DetailPendaftaranPage() {
           <div className="w-full p-4 sm:p-6 lg:p-8">
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
+                {/* KEMBALI */}
                 <button
                   type="button"
                   onClick={() =>
@@ -328,62 +455,105 @@ export default function DetailPendaftaranPage() {
                       "/admin/spmb/data-pendaftaran"
                     )
                   }
-                  className="mb-4 inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-[#155DFC]"
+                  className={`
+                    mb-4
+                    inline-flex items-center gap-2
+                    text-sm font-medium
+                    theme-text-secondary
+                    transition
+                    hover:text-[var(--color-primary)]
+                  `}
                 >
                   <ArrowLeft size={16} />
                   Kembali ke Data Pendaftaran
                 </button>
 
-                <div className="flex items-center gap-2 text-sm text-slate-400">
+                {/* BREADCRUMB */}
+                <div className="flex items-center gap-2 text-sm theme-text-muted">
                   <span>SPMB</span>
                   <span>/</span>
                   <span>Data Pendaftaran</span>
                   <span>/</span>
-                  <span className="font-medium text-blue-600">
+                  <span
+                    className={`${themePrimaryText} font-medium`}
+                  >
                     Detail
                   </span>
                 </div>
 
-                <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">
+                {/* TITLE */}
+                <h1 className="mt-2 text-2xl font-bold tracking-tight theme-text md:text-3xl">
                   Detail Pendaftar
                 </h1>
 
-                <p className="mt-1 text-sm text-slate-500">
-                  Informasi lengkap calon peserta didik dan
-                  dokumen pendaftaran.
+                <p className="mt-1 text-sm theme-text-secondary">
+                  Informasi lengkap calon peserta didik
+                  dan dokumen pendaftaran.
                 </p>
               </div>
             </div>
 
+            {/* =================================================
+                LOADING
+            ================================================= */}
+
             {loading ? (
-              <div className="flex min-h-[500px] items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <div
+                className={`
+                  flex min-h-[500px]
+                  items-center justify-center
+                  rounded-2xl
+                  border ${themeNeutralBorder}
+                  theme-card
+                  ${themeCardShadow}
+                `}
+              >
                 <div className="text-center">
-                  <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-50">
+                  <div
+                    className={`
+                      mx-auto
+                      flex h-12 w-12
+                      items-center justify-center
+                      rounded-full
+                      ${themePrimarySoft}
+                    `}
+                  >
                     <Loader2
                       size={24}
-                      className="animate-spin text-blue-600"
+                      className={`${themePrimaryText} animate-spin`}
                     />
                   </div>
 
-                  <p className="mt-4 text-sm font-medium text-slate-700">
+                  <p className="mt-4 text-sm font-medium theme-text">
                     Memuat detail pendaftar...
                   </p>
                 </div>
               </div>
             ) : error ? (
-              <div className="rounded-2xl border border-red-200 bg-red-50 p-6">
+              /* =================================================
+                 ERROR
+              ================================================= */
+
+              <div
+                className={`
+                  rounded-2xl
+                  border ${themeWarningBorder}
+                  ${themeWarningSurface}
+                  p-6
+                `}
+              >
                 <div className="flex items-start gap-3">
                   <AlertCircle
                     size={20}
-                    className="mt-0.5 shrink-0 text-red-500"
+                    className="mt-0.5 shrink-0 text-[var(--color-warning)]"
                   />
 
                   <div>
-                    <h2 className="text-sm font-bold text-red-700">
+                    <h2 className="text-sm font-bold theme-text">
                       Gagal memuat data
                     </h2>
 
-                    <p className="mt-1 text-sm text-red-600">
+                    <p className="mt-1 text-sm theme-text-secondary">
                       {error}
                     </p>
 
@@ -394,7 +564,17 @@ export default function DetailPendaftaranPage() {
                           "/admin/spmb/data-pendaftaran"
                         )
                       }
-                      className="mt-4 inline-flex items-center gap-2 rounded-lg bg-[#155DFC] px-4 py-2 text-xs font-semibold text-white hover:bg-[#0d47c9]"
+                      className={`
+                        mt-4
+                        inline-flex items-center gap-2
+                        rounded-lg
+                        ${themePrimaryGradient}
+                        px-4 py-2
+                        text-xs font-semibold
+                        text-[var(--color-card)]
+                        transition
+                        hover:opacity-90
+                      `}
                     >
                       <ArrowLeft size={14} />
                       Kembali
@@ -404,10 +584,39 @@ export default function DetailPendaftaranPage() {
               </div>
             ) : (
               <>
-                <div className="mb-5 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                  <div className="bg-gradient-to-r from-blue-600 to-blue-500 px-5 py-6 sm:px-7">
+                {/* =================================================
+                    PROFILE HEADER
+                ================================================= */}
+
+                <div
+                  className={`
+                    mb-5
+                    overflow-hidden
+                    rounded-2xl
+                    border ${themeNeutralBorder}
+                    theme-card
+                    ${themeCardShadow}
+                  `}
+                >
+                  <div
+                    className={`
+                      ${themePrimaryGradient}
+                      px-5 py-6
+                      sm:px-7
+                    `}
+                  >
                     <div className="flex flex-col gap-5 sm:flex-row sm:items-center">
-                      <div className="h-24 w-24 shrink-0 overflow-hidden rounded-2xl border-4 border-white/40 bg-white shadow-lg">
+                      {/* FOTO */}
+                      <div
+                        className="
+                          h-24 w-24 shrink-0
+                          overflow-hidden
+                          rounded-2xl
+                          border-4 border-white/40
+                          bg-white/10
+                          shadow-lg
+                        "
+                      >
                         {fotoUrl ? (
                           <img
                             src={fotoUrl}
@@ -418,7 +627,15 @@ export default function DetailPendaftaranPage() {
                             className="h-full w-full object-cover"
                           />
                         ) : (
-                          <div className="flex h-full w-full items-center justify-center bg-blue-100 text-2xl font-bold text-blue-600">
+                          <div
+                            className={`
+                              flex h-full w-full
+                              items-center justify-center
+                              ${themePrimarySoft}
+                              text-2xl font-bold
+                              ${themePrimaryText}
+                            `}
+                          >
                             {getInitials(
                               data?.namaLengkap
                             ) || "PS"}
@@ -426,37 +643,58 @@ export default function DetailPendaftaranPage() {
                         )}
                       </div>
 
-                      <div className="min-w-0 flex-1 text-white">
+                      {/* INFORMASI */}
+                      <div className="min-w-0 flex-1 text-[var(--color-card)]">
                         <div className="flex flex-wrap items-center gap-2">
                           <h2 className="text-xl font-bold sm:text-2xl">
-                            {data?.namaLengkap ||
-                              "-"}
+                            {data?.namaLengkap || "-"}
                           </h2>
 
                           <span
-                            className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-bold ${statusInfo.className}`}
+                            className={`
+                              inline-flex items-center gap-1.5
+                              rounded-full
+                              border
+                              px-3 py-1
+                              text-[11px] font-bold
+                              ${statusInfo.className}
+                            `}
                           >
                             <StatusIcon size={13} />
                             {statusInfo.label}
                           </span>
                         </div>
 
-                        <p className="mt-1 text-sm text-blue-100">
-                          {data?.nomorPendaftaran ||
-                            "-"}
+                        <p className="mt-1 text-sm opacity-80">
+                          {data?.nomorPendaftaran || "-"}
                         </p>
 
                         <div className="mt-4 flex flex-wrap gap-2">
-                          <span className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-1.5 text-xs text-white">
+                          <span
+                            className="
+                              inline-flex items-center gap-1.5
+                              rounded-lg
+                              bg-white/10
+                              px-3 py-1.5
+                              text-xs
+                              text-white
+                            "
+                          >
                             <Route size={13} />
-                            {data?.jalurPpdb?.nama ||
-                              "-"}
+                            {data?.jalurPpdb?.nama || "-"}
                           </span>
 
-                          <span className="inline-flex items-center gap-1.5 rounded-lg bg-white/10 px-3 py-1.5 text-xs text-white">
-                            <CalendarDays
-                              size={13}
-                            />
+                          <span
+                            className="
+                              inline-flex items-center gap-1.5
+                              rounded-lg
+                              bg-white/10
+                              px-3 py-1.5
+                              text-xs
+                              text-white
+                            "
+                          >
+                            <CalendarDays size={13} />
                             {formatTanggal(
                               data?.dibuatPada
                             )}
@@ -466,28 +704,31 @@ export default function DetailPendaftaranPage() {
                     </div>
                   </div>
 
-                  <div className="grid grid-cols-1 divide-y divide-slate-100 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+                  {/* SUMMARY */}
+                  <div
+                    className={`
+                      grid grid-cols-1
+                      divide-y ${themeDivider}
+                      sm:grid-cols-3
+                      sm:divide-x
+                      sm:divide-y-0
+                    `}
+                  >
                     <SummaryItem
                       label="NISN"
-                      value={
-                        data?.nisn || "-"
-                      }
+                      value={data?.nisn || "-"}
                     />
 
                     <SummaryItem
                       label="Jenis Kelamin"
                       value={
                         String(
-                          data?.jenisKelamin ||
-                            ""
-                        ).toUpperCase() ===
-                        "L"
+                          data?.jenisKelamin || ""
+                        ).toUpperCase() === "L"
                           ? "Laki-laki"
                           : String(
-                              data?.jenisKelamin ||
-                                ""
-                            ).toUpperCase() ===
-                            "P"
+                              data?.jenisKelamin || ""
+                            ).toUpperCase() === "P"
                           ? "Perempuan"
                           : "-"
                       }
@@ -502,8 +743,18 @@ export default function DetailPendaftaranPage() {
                   </div>
                 </div>
 
+                {/* =================================================
+                    MAIN GRID
+                ================================================= */}
+
                 <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
+                  {/* =================================================
+                      LEFT
+                  ================================================= */}
+
                   <div className="space-y-5 xl:col-span-2">
+                    {/* DATA CALON SISWA */}
+
                     <Section
                       title="Data Calon Siswa"
                       icon={UserRound}
@@ -512,9 +763,7 @@ export default function DetailPendaftaranPage() {
                         <DetailItem
                           icon={UserRound}
                           label="Nama Lengkap"
-                          value={
-                            data?.namaLengkap
-                          }
+                          value={data?.namaLengkap}
                         />
 
                         <DetailItem
@@ -526,9 +775,7 @@ export default function DetailPendaftaranPage() {
                         <DetailItem
                           icon={MapPin}
                           label="Tempat Lahir"
-                          value={
-                            data?.tempatLahir
-                          }
+                          value={data?.tempatLahir}
                         />
 
                         <DetailItem
@@ -544,56 +791,45 @@ export default function DetailPendaftaranPage() {
                           label="Jenis Kelamin"
                           value={
                             String(
-                              data?.jenisKelamin ||
-                                ""
-                            ).toUpperCase() ===
-                            "L"
+                              data?.jenisKelamin || ""
+                            ).toUpperCase() === "L"
                               ? "Laki-laki"
                               : String(
-                                  data?.jenisKelamin ||
-                                    ""
-                                ).toUpperCase() ===
-                                "P"
+                                  data?.jenisKelamin || ""
+                                ).toUpperCase() === "P"
                               ? "Perempuan"
-                              : data?.jenisKelamin ||
-                                "-"
+                              : data?.jenisKelamin || "-"
                           }
                         />
 
                         <DetailItem
                           icon={School}
                           label="Asal Sekolah"
-                          value={
-                            data?.asalSekolah
-                          }
+                          value={data?.asalSekolah}
                         />
 
                         <DetailItem
                           icon={Phone}
                           label="Nomor Telepon"
-                          value={
-                            data?.telepon
-                          }
+                          value={data?.telepon}
                         />
 
                         <DetailItem
                           icon={Mail}
                           label="Email"
-                          value={
-                            data?.email
-                          }
+                          value={data?.email}
                         />
 
                         <DetailItem
                           icon={MapPin}
                           label="Alamat"
-                          value={
-                            data?.alamat
-                          }
+                          value={data?.alamat}
                           full
                         />
                       </div>
                     </Section>
+
+                    {/* DATA ORANG TUA */}
 
                     <Section
                       title="Data Orang Tua / Wali"
@@ -603,36 +839,30 @@ export default function DetailPendaftaranPage() {
                         <DetailItem
                           icon={UserRound}
                           label="Nama Ayah"
-                          value={
-                            data?.namaAyah
-                          }
+                          value={data?.namaAyah}
                         />
 
                         <DetailItem
                           icon={UserRound}
                           label="Nama Ibu"
-                          value={
-                            data?.namaIbu
-                          }
+                          value={data?.namaIbu}
                         />
 
                         <DetailItem
                           icon={Phone}
                           label="Nomor Telepon"
-                          value={
-                            data?.telepon
-                          }
+                          value={data?.telepon}
                         />
 
                         <DetailItem
                           icon={Mail}
                           label="Email"
-                          value={
-                            data?.email
-                          }
+                          value={data?.email}
                         />
                       </div>
                     </Section>
+
+                    {/* INFORMASI PPDB */}
 
                     <Section
                       title="Informasi PPDB"
@@ -642,26 +872,21 @@ export default function DetailPendaftaranPage() {
                         <DetailItem
                           icon={School}
                           label="ID Sekolah"
-                          value={
-                            data?.sekolahId
-                          }
+                          value={data?.sekolahId}
                         />
 
                         <DetailItem
                           icon={Route}
                           label="Jalur PPDB"
                           value={
-                            data?.jalurPpdb?.nama ||
-                            "-"
+                            data?.jalurPpdb?.nama || "-"
                           }
                         />
 
                         <DetailItem
                           icon={FileCheck2}
                           label="ID Jalur PPDB"
-                          value={
-                            data?.jalurPpdbId
-                          }
+                          value={data?.jalurPpdbId}
                         />
 
                         <DetailItem
@@ -675,19 +900,15 @@ export default function DetailPendaftaranPage() {
                         <DetailItem
                           icon={CheckCircle2}
                           label="Status"
-                          value={
-                            statusInfo.label
-                          }
+                          value={statusInfo.label}
                         />
 
                         <DetailItem
                           icon={Route}
                           label="Nilai Rapor"
                           value={
-                            data?.nilaiRapor !==
-                              null &&
-                            data?.nilaiRapor !==
-                              undefined
+                            data?.nilaiRapor !== null &&
+                            data?.nilaiRapor !== undefined
                               ? data.nilaiRapor
                               : "-"
                           }
@@ -713,12 +934,25 @@ export default function DetailPendaftaranPage() {
                     </Section>
                   </div>
 
+                  {/* =================================================
+                      RIGHT
+                  ================================================= */}
+
                   <div className="space-y-5">
+                    {/* FOTO PENDAFTAR */}
+
                     <Section
                       title="Foto Pendaftar"
                       icon={UserRound}
                     >
-                      <div className="overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+                      <div
+                        className={`
+                          overflow-hidden
+                          rounded-xl
+                          border ${themeNeutralBorder}
+                          ${themeNeutralSurface}
+                        `}
+                      >
                         <div className="aspect-[3/4] w-full">
                           {fotoUrl ? (
                             <img
@@ -730,18 +964,34 @@ export default function DetailPendaftaranPage() {
                               className="h-full w-full object-cover"
                             />
                           ) : (
-                            <div className="flex h-full w-full flex-col items-center justify-center bg-slate-100">
-                              <div className="flex h-24 w-24 items-center justify-center rounded-2xl bg-blue-50 text-3xl font-bold text-blue-600">
+                            <div
+                              className={`
+                                flex h-full w-full
+                                flex-col
+                                items-center justify-center
+                                ${themeNeutralSurface}
+                              `}
+                            >
+                              <div
+                                className={`
+                                  flex h-24 w-24
+                                  items-center justify-center
+                                  rounded-2xl
+                                  ${themePrimarySoft}
+                                  text-3xl font-bold
+                                  ${themePrimaryText}
+                                `}
+                              >
                                 {getInitials(
                                   data?.namaLengkap
                                 ) || "PS"}
                               </div>
 
-                              <p className="mt-4 text-sm font-semibold text-slate-600">
+                              <p className="mt-4 text-sm font-semibold theme-text-secondary">
                                 Foto belum tersedia
                               </p>
 
-                              <p className="mt-1 text-xs text-slate-400">
+                              <p className="mt-1 text-xs theme-text-muted">
                                 Belum ada foto pada data
                                 pendaftar.
                               </p>
@@ -750,6 +1000,8 @@ export default function DetailPendaftaranPage() {
                         </div>
                       </div>
                     </Section>
+
+                    {/* BERKAS */}
 
                     <Section
                       title="Berkas Pendaftaran"
@@ -764,26 +1016,36 @@ export default function DetailPendaftaranPage() {
                             (berkas) => (
                               <div
                                 key={berkas.id}
-                                className="rounded-xl border border-slate-200 bg-slate-50 p-3"
+                                className={`
+                                  rounded-xl
+                                  border ${themeNeutralBorder}
+                                  ${themeNeutralSurface}
+                                  p-3
+                                `}
                               >
                                 <div className="flex items-start gap-3">
-                                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                                  <div
+                                    className={`
+                                      flex h-9 w-9
+                                      shrink-0
+                                      items-center justify-center
+                                      rounded-lg
+                                      ${themePrimarySoft}
+                                      ${themePrimaryText}
+                                    `}
+                                  >
                                     <FileCheck2
                                       size={16}
                                     />
                                   </div>
 
                                   <div className="min-w-0 flex-1">
-                                    <p className="text-xs font-bold text-slate-700">
-                                      {
-                                        berkas.namaBerkas
-                                      }
+                                    <p className="text-xs font-bold theme-text">
+                                      {berkas.namaBerkas}
                                     </p>
 
-                                    <p className="mt-1 text-[10px] text-slate-400">
-                                      {
-                                        berkas.status
-                                      }
+                                    <p className="mt-1 text-[10px] theme-text-muted">
+                                      {berkas.status}
                                     </p>
                                   </div>
                                 </div>
@@ -795,28 +1057,47 @@ export default function DetailPendaftaranPage() {
                                   target="_blank"
                                   rel="noreferrer"
                                   download
-                                  className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-100"
+                                  className={`
+                                    mt-3
+                                    inline-flex w-full
+                                    items-center justify-center gap-2
+                                    rounded-lg
+                                    border ${themeNeutralBorder}
+                                    theme-card
+                                    px-3 py-2
+                                    text-xs font-semibold
+                                    theme-text-secondary
+                                    transition
+                                    ${themeNeutralHover}
+                                  `}
                                 >
-                                  <Download
-                                    size={14}
-                                  />
+                                  <Download size={14} />
                                   Lihat / Unduh Berkas
                                 </a>
                               </div>
                             )
                           )
                         ) : (
-                          <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center">
+                          <div
+                            className={`
+                              rounded-xl
+                              border border-dashed
+                              ${themeNeutralBorder}
+                              ${themeNeutralSurface}
+                              px-4 py-8
+                              text-center
+                            `}
+                          >
                             <FileCheck2
                               size={24}
-                              className="mx-auto text-slate-300"
+                              className="mx-auto theme-text-muted"
                             />
 
-                            <p className="mt-3 text-sm font-semibold text-slate-500">
+                            <p className="mt-3 text-sm font-semibold theme-text-secondary">
                               Belum ada berkas
                             </p>
 
-                            <p className="mt-1 text-xs text-slate-400">
+                            <p className="mt-1 text-xs theme-text-muted">
                               Pendaftar belum mengunggah
                               dokumen.
                             </p>
@@ -824,6 +1105,8 @@ export default function DetailPendaftaranPage() {
                         )}
                       </div>
                     </Section>
+
+                    {/* INFORMASI SISTEM */}
 
                     <Section
                       title="Informasi Sistem"
@@ -874,14 +1157,18 @@ export default function DetailPendaftaranPage() {
   );
 }
 
+// =========================================================
+// SUMMARY ITEM
+// =========================================================
+
 function SummaryItem({ label, value }) {
   return (
     <div className="px-5 py-4 sm:px-6">
-      <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+      <p className="text-[10px] font-semibold uppercase tracking-wide theme-text-muted">
         {label}
       </p>
 
-      <p className="mt-1 text-sm font-bold text-slate-700">
+      <p className="mt-1 text-sm font-bold theme-text">
         {value}
       </p>
     </div>

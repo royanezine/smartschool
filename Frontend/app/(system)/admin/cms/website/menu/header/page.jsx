@@ -109,7 +109,7 @@ export default function MenuHeaderPage() {
   // =========================
   if (menuItems.length === 0) {
     return (
-      <div className="flex min-h-screen w-full bg-slate-50 overflow-x-hidden">
+      <div className="theme-page flex min-h-screen w-full overflow-x-hidden">
         {/* SIDEBAR */}
         <div className="shrink-0">
           <Sidebar
@@ -123,12 +123,12 @@ export default function MenuHeaderPage() {
         {/* MAIN */}
         <main
           className="
+            theme-page
             flex-1
             min-w-0
             w-full
             overflow-x-hidden
             overflow-y-auto
-            bg-slate-50
             transition-all
             duration-300
           "
@@ -187,32 +187,38 @@ export default function MenuHeaderPage() {
                       text-xs
                       sm:text-sm
                       font-medium
-                      text-slate-500
+                      theme-text-muted
                     "
                   >
                     <li>
                       <a
                         href="/cmsAdmin"
-                        className="hover:text-indigo-600"
+                        className="
+                          hover:text-[var(--color-primary)]
+                          transition-colors
+                        "
                       >
                         Dashboard
                       </a>
                     </li>
 
-                    <li className="text-slate-300">/</li>
+                    <li className="theme-text-placeholder">/</li>
 
                     <li>
                       <a
                         href="/cmsAdmin/website/menu"
-                        className="hover:text-indigo-600"
+                        className="
+                          hover:text-[var(--color-primary)]
+                          transition-colors
+                        "
                       >
                         Menu
                       </a>
                     </li>
 
-                    <li className="text-slate-300">/</li>
+                    <li className="theme-text-placeholder">/</li>
 
-                    <li className="text-indigo-600 font-semibold">
+                    <li className="text-[var(--color-primary)] font-semibold">
                       Header
                     </li>
                   </ol>
@@ -229,8 +235,8 @@ export default function MenuHeaderPage() {
                     gap-2
                     text-xs
                     sm:text-sm
-                    text-slate-600
-                    hover:text-indigo-600
+                    theme-text-secondary
+                    hover:text-[var(--color-primary)]
                     transition-colors
                   "
                 >
@@ -242,11 +248,11 @@ export default function MenuHeaderPage() {
               {/* EMPTY CARD */}
               <div
                 className="
-                  bg-white
+                  theme-card
                   rounded-xl
                   sm:rounded-2xl
                   border
-                  border-slate-200
+                  theme-border
                   shadow-sm
                   px-5
                   py-12
@@ -266,18 +272,18 @@ export default function MenuHeaderPage() {
                     items-center
                     justify-center
                     rounded-full
-                    bg-slate-100
+                    theme-card-soft
                     mb-4
                   "
                 >
-                  <LinkIcon className="h-7 w-7 sm:h-8 sm:w-8 text-slate-400" />
+                  <LinkIcon className="h-7 w-7 sm:h-8 sm:w-8 theme-text-muted" />
                 </div>
 
-                <h3 className="text-base sm:text-lg font-semibold text-slate-900">
+                <h3 className="text-base sm:text-lg font-semibold theme-text">
                   Belum ada menu header
                 </h3>
 
-                <p className="mt-2 text-xs sm:text-sm text-slate-500 max-w-sm mx-auto leading-relaxed">
+                <p className="mt-2 text-xs sm:text-sm theme-text-muted max-w-sm mx-auto leading-relaxed">
                   Tambahkan menu navigasi utama untuk website Anda.
                 </p>
               </div>
@@ -292,7 +298,7 @@ export default function MenuHeaderPage() {
   // MAIN PAGE
   // =========================
   return (
-    <div className="flex min-h-screen w-full bg-slate-50 overflow-x-hidden">
+    <div className="theme-page flex min-h-screen w-full overflow-x-hidden">
       {/* ================= SIDEBAR ================= */}
       <div className="shrink-0">
         <Sidebar
@@ -306,12 +312,12 @@ export default function MenuHeaderPage() {
       {/* ================= MAIN CONTENT ================= */}
       <main
         className="
+          theme-page
           flex-1
           min-w-0
           w-full
           overflow-x-hidden
           overflow-y-auto
-          bg-slate-50
           transition-all
           duration-300
         "
@@ -373,32 +379,38 @@ export default function MenuHeaderPage() {
                     text-xs
                     sm:text-sm
                     font-medium
-                    text-slate-500
+                    theme-text-muted
                   "
                 >
                   <li>
                     <a
                       href="/cmsAdmin"
-                      className="hover:text-indigo-600 transition-colors"
+                      className="
+                        hover:text-[var(--color-primary)]
+                        transition-colors
+                      "
                     >
                       Dashboard
                     </a>
                   </li>
 
-                  <li className="text-slate-300">/</li>
+                  <li className="theme-text-placeholder">/</li>
 
                   <li>
                     <a
                       href="/cmsAdmin/website/menu"
-                      className="hover:text-indigo-600 transition-colors"
+                      className="
+                        hover:text-[var(--color-primary)]
+                        transition-colors
+                      "
                     >
                       Menu
                     </a>
                   </li>
 
-                  <li className="text-slate-300">/</li>
+                  <li className="theme-text-placeholder">/</li>
 
-                  <li className="text-indigo-600 font-semibold">
+                  <li className="text-[var(--color-primary)] font-semibold">
                     Header
                   </li>
                 </ol>
@@ -416,8 +428,8 @@ export default function MenuHeaderPage() {
                   gap-2
                   text-xs
                   sm:text-sm
-                  text-slate-600
-                  hover:text-indigo-600
+                  theme-text-secondary
+                  hover:text-[var(--color-primary)]
                   transition-colors
                 "
               >
@@ -429,15 +441,15 @@ export default function MenuHeaderPage() {
             {/* ================= PAGE HEADER ================= */}
             <div
               className="
+                theme-card
                 w-full
-                bg-white
                 p-4
                 sm:p-5
                 md:p-6
                 rounded-xl
                 sm:rounded-2xl
                 border
-                border-slate-200/60
+                theme-border
                 shadow-sm
               "
             >
@@ -466,14 +478,14 @@ export default function MenuHeaderPage() {
                       shrink-0
                       p-2.5
                       sm:p-3
-                      bg-indigo-50
+                      theme-info
                       rounded-xl
                       sm:rounded-2xl
                       border
-                      border-indigo-100
+                      theme-border
                     "
                   >
-                    <LinkIcon className="w-5 h-5 text-indigo-600" />
+                    <LinkIcon className="w-5 h-5 text-[var(--color-info)]" />
                   </div>
 
                   <div className="min-w-0">
@@ -484,7 +496,7 @@ export default function MenuHeaderPage() {
                         md:text-2xl
                         font-bold
                         tracking-tight
-                        text-slate-900
+                        theme-text
                       "
                     >
                       Atur Menu Header
@@ -494,7 +506,7 @@ export default function MenuHeaderPage() {
                       className="
                         text-xs
                         sm:text-sm
-                        text-slate-500
+                        theme-text-muted
                         mt-1
                         leading-relaxed
                         max-w-2xl
@@ -515,6 +527,7 @@ export default function MenuHeaderPage() {
                     )
                   }
                   className="
+                    theme-primary
                     inline-flex
                     w-full
                     sm:w-fit
@@ -527,14 +540,11 @@ export default function MenuHeaderPage() {
                     py-2.5
                     rounded-lg
                     sm:rounded-full
-                    bg-indigo-600
-                    text-white
                     text-xs
                     sm:text-sm
                     font-semibold
                     shadow-lg
-                    shadow-indigo-600/20
-                    hover:bg-indigo-700
+                    shadow-blue-600/20
                     hover:shadow-xl
                     transition-all
                     duration-200
@@ -550,12 +560,12 @@ export default function MenuHeaderPage() {
             {/* ================= MENU LIST ================= */}
             <div
               className="
+                theme-card
                 w-full
-                bg-white
                 rounded-xl
                 sm:rounded-2xl
                 border
-                border-slate-200/70
+                theme-border
                 shadow-sm
                 overflow-hidden
               "
@@ -564,13 +574,13 @@ export default function MenuHeaderPage() {
               <div
                 className="
                   border-b
-                  border-slate-100
+                  theme-border-soft
                   px-4
                   sm:px-5
                   md:px-6
                   py-3.5
                   sm:py-4
-                  bg-slate-50/60
+                  theme-card-soft
                   flex
                   items-center
                   justify-between
@@ -582,7 +592,7 @@ export default function MenuHeaderPage() {
                     text-[10px]
                     sm:text-xs
                     font-semibold
-                    text-slate-500
+                    theme-text-muted
                     uppercase
                     tracking-wider
                     flex
@@ -590,7 +600,7 @@ export default function MenuHeaderPage() {
                     gap-2
                   "
                 >
-                  <GripVertical className="w-4 h-4 text-slate-400 shrink-0" />
+                  <GripVertical className="w-4 h-4 theme-text-muted shrink-0" />
 
                   <span>Urutan Navigasi</span>
                 </h3>
@@ -600,8 +610,8 @@ export default function MenuHeaderPage() {
                     shrink-0
                     text-[10px]
                     sm:text-xs
-                    bg-slate-100
-                    text-slate-600
+                    theme-card-soft
+                    theme-text-secondary
                     px-2
                     sm:px-2.5
                     py-1
@@ -614,7 +624,7 @@ export default function MenuHeaderPage() {
               </div>
 
               {/* Items */}
-              <div className="divide-y divide-slate-100">
+              <div className="divide-y divide-[var(--color-border-soft)]">
                 {menuItems.map((item, index) => (
                   <div
                     key={item.id}
@@ -629,7 +639,7 @@ export default function MenuHeaderPage() {
                       sm:px-4
                       md:px-6
                       py-4
-                      hover:bg-slate-50/80
+                      theme-table-hover
                       transition-all
                       duration-200
                       min-w-0
@@ -643,8 +653,8 @@ export default function MenuHeaderPage() {
                         w-6
                         h-6
                         rounded-full
-                        bg-slate-100
-                        text-slate-500
+                        theme-card-soft
+                        theme-text-muted
                         text-[10px]
                         font-bold
                         items-center
@@ -662,8 +672,8 @@ export default function MenuHeaderPage() {
                         w-4
                         h-4
                         mt-1
-                        text-slate-200
-                        group-hover:text-slate-400
+                        theme-text-placeholder
+                        group-hover:text-[var(--color-text-muted)]
                         transition-colors
                         cursor-grab
                       "
@@ -684,9 +694,9 @@ export default function MenuHeaderPage() {
                         className="
                           text-sm
                           font-bold
-                          text-slate-800
+                          theme-text
                           truncate
-                          group-hover:text-indigo-600
+                          group-hover:text-[var(--color-primary)]
                           transition-colors
                         "
                       >
@@ -706,7 +716,7 @@ export default function MenuHeaderPage() {
                           className="
                             w-3
                             h-3
-                            text-slate-400
+                            theme-text-muted
                             shrink-0
                           "
                         />
@@ -719,9 +729,9 @@ export default function MenuHeaderPage() {
                             truncate
                             text-[11px]
                             sm:text-xs
-                            text-slate-400
+                            theme-text-placeholder
                             font-mono
-                            bg-slate-50
+                            theme-card-soft
                             px-1.5
                             py-0.5
                             rounded
@@ -750,8 +760,8 @@ export default function MenuHeaderPage() {
                           items-center
                           rounded-lg
                           border
-                          border-slate-200
-                          bg-white
+                          theme-border
+                          theme-card
                           shadow-sm
                           overflow-hidden
                           mr-1
@@ -767,14 +777,14 @@ export default function MenuHeaderPage() {
                           className="
                             p-1.5
                             sm:p-2
-                            text-slate-400
-                            hover:text-indigo-600
-                            hover:bg-indigo-50
+                            theme-text-muted
+                            hover:text-[var(--color-primary)]
+                            hover:bg-[var(--color-sidebar-active)]
                             transition-colors
                             disabled:opacity-40
                             disabled:cursor-not-allowed
                             disabled:hover:bg-transparent
-                            disabled:hover:text-slate-400
+                            disabled:hover:text-[var(--color-text-muted)]
                           "
                           title="Naikkan posisi"
                         >
@@ -792,14 +802,14 @@ export default function MenuHeaderPage() {
                           className="
                             p-1.5
                             sm:p-2
-                            text-slate-400
-                            hover:text-indigo-600
-                            hover:bg-indigo-50
+                            theme-text-muted
+                            hover:text-[var(--color-primary)]
+                            hover:bg-[var(--color-sidebar-active)]
                             transition-colors
                             disabled:opacity-40
                             disabled:cursor-not-allowed
                             disabled:hover:bg-transparent
-                            disabled:hover:text-slate-400
+                            disabled:hover:text-[var(--color-text-muted)]
                           "
                           title="Turunkan posisi"
                         >
@@ -814,9 +824,9 @@ export default function MenuHeaderPage() {
                           p-1.5
                           sm:p-2
                           rounded-lg
-                          text-slate-400
-                          hover:text-blue-600
-                          hover:bg-blue-50
+                          theme-text-muted
+                          hover:text-[var(--color-primary)]
+                          theme-sidebar-hover
                           transition-colors
                         "
                         title="Edit"
@@ -834,9 +844,9 @@ export default function MenuHeaderPage() {
                           p-1.5
                           sm:p-2
                           rounded-lg
-                          text-slate-400
-                          hover:text-red-600
-                          hover:bg-red-50
+                          theme-text-muted
+                          hover:text-[var(--color-danger)]
+                          hover:bg-[var(--color-danger-background)]
                           transition-colors
                         "
                         title="Hapus"
@@ -855,8 +865,8 @@ export default function MenuHeaderPage() {
                   sm:px-6
                   py-3
                   border-t
-                  border-slate-100
-                  bg-slate-50/60
+                  theme-border-soft
+                  theme-card-soft
                   flex
                   items-center
                   justify-end
@@ -867,14 +877,14 @@ export default function MenuHeaderPage() {
                     text-[9px]
                     sm:text-[10px]
                     font-medium
-                    text-slate-400
-                    bg-slate-100/80
+                    theme-text-placeholder
+                    theme-card-soft
                     px-2.5
                     sm:px-3
                     py-1
                     rounded-full
                     ring-1
-                    ring-slate-200/50
+                    ring-[var(--color-border)]
                     whitespace-nowrap
                   "
                 >
@@ -886,9 +896,9 @@ export default function MenuHeaderPage() {
             {/* ================= TIPS ================= */}
             <div
               className="
-                bg-indigo-50/60
+                theme-info
                 border
-                border-indigo-200/60
+                theme-border
                 rounded-xl
                 sm:rounded-2xl
                 p-4
@@ -905,12 +915,12 @@ export default function MenuHeaderPage() {
                 className="
                   p-2
                   sm:p-2.5
-                  bg-indigo-100/90
+                  theme-card-soft
                   rounded-lg
-                  text-indigo-600
+                  text-[var(--color-info)]
                   shrink-0
                   ring-1
-                  ring-indigo-200/50
+                  ring-[var(--color-border)]
                   shadow-sm
                 "
               >
@@ -924,7 +934,7 @@ export default function MenuHeaderPage() {
                     text-xs
                     sm:text-sm
                     font-bold
-                    text-indigo-800
+                    text-[var(--color-info)]
                   "
                 >
                   Urutkan Menu dengan Mudah
@@ -934,7 +944,7 @@ export default function MenuHeaderPage() {
                   className="
                     text-xs
                     sm:text-sm
-                    text-indigo-700/90
+                    theme-text-secondary
                     mt-1
                     leading-relaxed
                   "

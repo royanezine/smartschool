@@ -17,6 +17,55 @@ import {
 } from "lucide-react";
 
 // ======================================================
+// THEME HELPERS
+// ======================================================
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+
+// ======================================================
 // DATA DUMMY
 // ======================================================
 
@@ -229,7 +278,7 @@ export default function EditStafPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex">
+      <div className="min-h-screen theme-page flex">
         {sidebar}
 
         <div className="flex-1 min-w-0 flex flex-col">
@@ -237,9 +286,11 @@ export default function EditStafPage() {
 
           <main className="flex-1 flex items-center justify-center p-6">
             <div className="flex flex-col items-center gap-3">
-              <div className="w-8 h-8 rounded-full border-[3px] border-blue-600 border-t-transparent animate-spin" />
+              <div
+                className={`w-8 h-8 rounded-full border-[3px] border-[var(--color-primary)] border-t-transparent animate-spin`}
+              />
 
-              <p className="text-sm text-slate-500">
+              <p className="text-sm theme-text-muted">
                 Memuat data staf...
               </p>
             </div>
@@ -255,7 +306,7 @@ export default function EditStafPage() {
 
   if (notFound || !staf) {
     return (
-      <div className="min-h-screen bg-slate-50 flex">
+      <div className="min-h-screen theme-page flex">
         {sidebar}
 
         <div className="flex-1 min-w-0 flex flex-col">
@@ -263,24 +314,26 @@ export default function EditStafPage() {
 
           <main className="flex-1 flex items-center justify-center p-6">
             <div className="text-center max-w-sm w-full">
-              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-rose-50 border border-rose-100 flex items-center justify-center">
+              <div
+                className={`w-12 h-12 mx-auto mb-4 rounded-full ${themeDangerSurface} ${themeDangerBorder} border flex items-center justify-center`}
+              >
                 <AlertCircle
                   size={24}
-                  className="text-rose-500"
+                  className="theme-danger"
                 />
               </div>
 
-              <h2 className="text-base font-semibold text-slate-800">
+              <h2 className="text-base font-semibold theme-text">
                 Data staf tidak ditemukan
               </h2>
 
-              <p className="text-sm text-slate-500 mt-1 mb-5">
+              <p className="text-sm theme-text-muted mt-1 mb-5">
                 Data staf yang ingin Anda edit tidak tersedia.
               </p>
 
               <button
                 onClick={goBack}
-                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium transition"
+                className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg ${themePrimaryGradient} text-[var(--color-card)] text-sm font-medium transition hover:opacity-90`}
               >
                 <ArrowLeft size={16} />
                 Kembali ke Daftar Staf
@@ -297,7 +350,7 @@ export default function EditStafPage() {
   // ======================================================
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div className="min-h-screen theme-page flex">
 
       {/* ==================================================
           SIDEBAR
@@ -330,7 +383,7 @@ export default function EditStafPage() {
               <button
                 type="button"
                 onClick={goBack}
-                className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-blue-600 transition mb-4"
+                className={`inline-flex items-center gap-2 text-sm theme-text-secondary hover:text-[var(--color-primary)] transition mb-4`}
               >
                 <ArrowLeft size={17} />
                 <span>Kembali ke Daftar Staf</span>
@@ -338,19 +391,21 @@ export default function EditStafPage() {
 
               <div className="flex items-start gap-3">
 
-                <div className="w-10 h-10 shrink-0 rounded-lg bg-blue-600 flex items-center justify-center">
+                <div
+                  className={`w-10 h-10 shrink-0 rounded-lg ${themePrimaryGradient} flex items-center justify-center`}
+                >
                   <User
                     size={20}
-                    className="text-white"
+                    className="text-[var(--color-card)]"
                   />
                 </div>
 
                 <div className="min-w-0">
-                  <h1 className="text-xl sm:text-2xl font-semibold text-slate-800">
+                  <h1 className="text-xl sm:text-2xl font-semibold theme-text">
                     Edit Staf
                   </h1>
 
-                  <p className="text-sm text-slate-500 mt-1">
+                  <p className="text-sm theme-text-muted mt-1">
                     Perbarui informasi akun dan hak akses staf.
                   </p>
                 </div>
@@ -364,21 +419,25 @@ export default function EditStafPage() {
 
             <form
               onSubmit={handleSubmit}
-              className="w-full bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden"
+              className="w-full theme-card border theme-border rounded-xl shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)] overflow-hidden"
             >
 
               {/* ==================================================
                   PROFILE SUMMARY
               ================================================== */}
 
-              <div className="px-4 sm:px-5 lg:px-6 py-5 border-b border-slate-200 bg-slate-50/50">
+              <div
+                className={`px-4 sm:px-5 lg:px-6 py-5 border-b ${themeDivider} ${themeNeutralSurface}`}
+              >
 
                 <div className="flex flex-col sm:flex-row sm:items-center gap-4">
 
                   {/* AVATAR */}
 
-                  <div className="w-14 h-14 shrink-0 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center">
-                    <span className="text-sm font-semibold text-blue-600">
+                  <div
+                    className={`w-14 h-14 shrink-0 rounded-full ${themePrimarySoft} ${themePrimarySoftBorder} border flex items-center justify-center`}
+                  >
+                    <span className={`text-sm font-semibold ${themePrimaryText}`}>
                       {staf.avatar}
                     </span>
                   </div>
@@ -387,42 +446,44 @@ export default function EditStafPage() {
 
                   <div className="min-w-0 flex-1">
 
-                    <p className="text-xs text-slate-400 mb-1">
+                    <p className="text-xs theme-text-placeholder mb-1">
                       Akun yang sedang diedit
                     </p>
 
-                    <h2 className="text-base sm:text-lg font-semibold text-slate-800 break-words">
+                    <h2 className="text-base sm:text-lg font-semibold theme-text break-words">
                       {staf.nama}
                     </h2>
 
                     <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
 
-                      <span className="text-xs text-slate-500 break-all">
+                      <span className="text-xs theme-text-secondary break-all">
                         {staf.email}
                       </span>
 
-                      <span className="hidden sm:block w-1 h-1 rounded-full bg-slate-300 shrink-0" />
+                      <span
+                        className={`hidden sm:block w-1 h-1 rounded-full bg-[color-mix(in_srgb,var(--color-text)_20%,transparent)] shrink-0`}
+                      />
 
-                      <span className="text-xs text-slate-500">
+                      <span className="text-xs theme-text-secondary">
                         {staf.role}
                       </span>
 
                       <span
                         className={`inline-flex items-center gap-1 text-xs font-medium ${
                           staf.status === "Aktif"
-                            ? "text-emerald-600"
+                            ? "text-[var(--color-success)]"
                             : staf.status === "Trial"
-                            ? "text-amber-600"
-                            : "text-slate-500"
+                            ? "text-[var(--color-warning)]"
+                            : "theme-text-muted"
                         }`}
                       >
                         <span
                           className={`w-1.5 h-1.5 rounded-full ${
                             staf.status === "Aktif"
-                              ? "bg-emerald-500"
+                              ? "bg-[var(--color-success)]"
                               : staf.status === "Trial"
-                              ? "bg-amber-500"
-                              : "bg-slate-400"
+                              ? "bg-[var(--color-warning)]"
+                              : "bg-[color-mix(in_srgb,var(--color-text)_35%,transparent)]"
                           }`}
                         />
 
@@ -443,11 +504,11 @@ export default function EditStafPage() {
                 {/* SECTION */}
 
                 <div className="mb-5">
-                  <h3 className="text-sm font-semibold text-slate-800">
+                  <h3 className="text-sm font-semibold theme-text">
                     Informasi Akun
                   </h3>
 
-                  <p className="text-xs text-slate-400 mt-1">
+                  <p className="text-xs theme-text-muted mt-1">
                     Perbarui informasi dasar staf.
                   </p>
                 </div>
@@ -584,14 +645,16 @@ export default function EditStafPage() {
 
                   <div className="lg:col-span-2">
 
-                    <div className="h-px bg-slate-200 my-2 mb-6" />
+                    <div
+                      className={`h-px ${themeNeutralSurface} my-2 mb-6`}
+                    />
 
                     <div className="mb-5">
-                      <h3 className="text-sm font-semibold text-slate-800">
+                      <h3 className="text-sm font-semibold theme-text">
                         Keamanan Akun
                       </h3>
 
-                      <p className="text-xs text-slate-400 mt-1">
+                      <p className="text-xs theme-text-muted mt-1">
                         Ubah password hanya jika diperlukan.
                       </p>
                     </div>
@@ -612,7 +675,7 @@ export default function EditStafPage() {
                           placeholder="Kosongkan jika password tidak diubah"
                         />
 
-                        <p className="text-xs text-slate-400 mt-2">
+                        <p className="text-xs theme-text-muted mt-2">
                           Gunakan minimal 8 karakter untuk password baru.
                         </p>
                       </FormField>
@@ -627,11 +690,13 @@ export default function EditStafPage() {
                   FOOTER
               ================================================== */}
 
-              <div className="px-4 sm:px-5 lg:px-6 py-4 bg-slate-50/70 border-t border-slate-200">
+              <div
+                className={`px-4 sm:px-5 lg:px-6 py-4 ${themeNeutralSurface} border-t ${themeDivider}`}
+              >
 
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
 
-                  <p className="text-xs text-slate-400 leading-relaxed">
+                  <p className="text-xs theme-text-muted leading-relaxed">
                     Pastikan informasi sudah benar sebelum menyimpan.
                   </p>
 
@@ -640,14 +705,14 @@ export default function EditStafPage() {
                     <button
                       type="button"
                       onClick={goBack}
-                      className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg border border-slate-200 bg-white text-sm font-medium text-slate-600 hover:bg-slate-50 transition"
+                      className={`inline-flex items-center justify-center px-5 py-2.5 rounded-lg border ${themeNeutralBorder} theme-card text-sm font-medium theme-text-secondary ${themeNeutralHover} transition`}
                     >
                       Batal
                     </button>
 
                     <button
                       type="submit"
-                      className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium shadow-sm transition"
+                      className={`inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg ${themePrimaryGradient} text-[var(--color-card)] text-sm font-medium transition hover:opacity-90`}
                     >
                       <Save size={16} />
                       <span>Simpan Perubahan</span>
@@ -678,11 +743,11 @@ function FormField({
   return (
     <div className="min-w-0 w-full">
 
-      <label className="block text-xs font-medium text-slate-600 mb-2">
+      <label className="block text-xs font-medium theme-text-secondary mb-2">
         {label}
 
         {required && (
-          <span className="text-rose-500 ml-1">
+          <span className="theme-danger ml-1">
             *
           </span>
         )}
@@ -693,7 +758,7 @@ function FormField({
         <div className="absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none z-10">
           <Icon
             size={16}
-            className="text-slate-400"
+            className="theme-text-placeholder"
           />
         </div>
 
@@ -708,5 +773,22 @@ function FormField({
 // INPUT STYLE
 // ======================================================
 
-const inputClass =
-  "block w-full min-w-0 h-10 sm:h-11 pl-10 pr-3 text-sm text-slate-700 bg-white border border-slate-200 rounded-lg outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/10 transition";
+const inputClass = `
+  block
+  w-full
+  min-w-0
+  h-10
+  sm:h-11
+  pl-10
+  pr-3
+  text-sm
+  theme-text
+  theme-input
+  border
+  theme-border
+  rounded-lg
+  outline-none
+  placeholder:text-[var(--color-text-placeholder)]
+  ${themeFocus}
+  transition
+`;

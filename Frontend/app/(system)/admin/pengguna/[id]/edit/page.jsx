@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-
 import Sidebar from "../../../../../components/Sidebar";
 import Header from "../../../../../components/Header";
 
@@ -14,6 +13,25 @@ const getToken = () => {
   if (typeof window === "undefined") return null;
   return localStorage.getItem("token");
 };
+
+/* =========================================================
+   THEME HELPERS
+========================================================= */
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]";
+
+const themePrimaryHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_6px_24px_color-mix(in_srgb,var(--color-text)_6%,transparent)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_24px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]";
 
 /* =========================================================
    HELPER
@@ -83,9 +101,11 @@ function FormInput({
 }) {
   return (
     <div className="space-y-2">
-      <label className="block text-sm font-semibold text-slate-700">
+      <label className="theme-text block text-sm font-semibold">
         {label}
-        {required && <span className="ml-1 text-red-500">*</span>}
+        {required && (
+          <span className="ml-1 text-[var(--color-warning)]">*</span>
+        )}
       </label>
 
       <input
@@ -96,11 +116,12 @@ function FormInput({
         placeholder={placeholder}
         required={required}
         disabled={disabled}
-        className={`w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 ${
-          disabled
-            ? "cursor-not-allowed bg-slate-100 text-slate-500"
-            : ""
-        }`}
+        className={`theme-input w-full rounded-xl px-4 py-3 text-sm outline-none transition
+          focus:border-[var(--color-primary)]
+          focus:ring-4
+          focus:ring-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]
+          ${disabled ? "cursor-not-allowed opacity-60" : ""}
+        `}
       />
     </div>
   );
@@ -121,9 +142,11 @@ function FormSelect({
 }) {
   return (
     <div className="space-y-2">
-      <label className="block text-sm font-semibold text-slate-700">
+      <label className="theme-text block text-sm font-semibold">
         {label}
-        {required && <span className="ml-1 text-red-500">*</span>}
+        {required && (
+          <span className="ml-1 text-[var(--color-warning)]">*</span>
+        )}
       </label>
 
       <select
@@ -132,11 +155,12 @@ function FormSelect({
         onChange={onChange}
         required={required}
         disabled={disabled}
-        className={`w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 ${
-          disabled
-            ? "cursor-not-allowed bg-slate-100 text-slate-500"
-            : ""
-        }`}
+        className={`theme-input w-full rounded-xl px-4 py-3 text-sm outline-none transition
+          focus:border-[var(--color-primary)]
+          focus:ring-4
+          focus:ring-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]
+          ${disabled ? "cursor-not-allowed opacity-60" : ""}
+        `}
       >
         <option value="">Pilih {label}</option>
 
@@ -164,10 +188,8 @@ export default function EditPenggunaPage() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-
   const [roleOptions, setRoleOptions] = useState([]);
 
   const [form, setForm] = useState({
@@ -175,7 +197,6 @@ export default function EditPenggunaPage() {
     namaPengguna: "",
     email: "",
     kataSandi: "",
-
     noTelepon: "",
     jabatan: "",
     nip: "",
@@ -183,16 +204,12 @@ export default function EditPenggunaPage() {
     nuptk: "",
     nisn: "",
     nik: "",
-
     jenisKelamin: "",
     golongan: "",
-
     tempatLahir: "",
     tanggalLahir: "",
-
     alamat: "",
     alamatDomisili: "",
-
     peranId: "",
     status: "aktif",
   });
@@ -245,7 +262,6 @@ export default function EditPenggunaPage() {
         if (response.status === 401) {
           localStorage.removeItem("token");
           localStorage.removeItem("user");
-
           router.push("/login");
           return;
         }
@@ -267,7 +283,6 @@ export default function EditPenggunaPage() {
           namaPengguna: user.namaPengguna || "",
           email: user.email || "",
           kataSandi: "",
-
           noTelepon: user.noTelepon || "",
           jabatan: user.jabatan || "",
           nip: user.nip || "",
@@ -275,18 +290,12 @@ export default function EditPenggunaPage() {
           nuptk: user.nuptk || "",
           nisn: user.nisn || "",
           nik: user.nik || "",
-
           jenisKelamin: normalizeGender(user.jenisKelamin),
           golongan: user.golongan || "",
-
           tempatLahir: user.tempatLahir || "",
-          tanggalLahir: formatDateForInput(
-            user.tanggalLahir
-          ),
-
+          tanggalLahir: formatDateForInput(user.tanggalLahir),
           alamat: user.alamat || "",
           alamatDomisili: user.alamatDomisili || "",
-
           peranId: user.peran?.id || "",
           status: user.status || "aktif",
         });
@@ -296,7 +305,6 @@ export default function EditPenggunaPage() {
         ===================================================== */
 
         const currentRole = user.peran;
-
         const initialRoles = [];
 
         if (currentRole?.id) {
@@ -310,7 +318,6 @@ export default function EditPenggunaPage() {
 
         /* =====================================================
            AMBIL ROLE DARI USER LAIN
-           Karena BE saat ini belum punya GET /api/roles
         ===================================================== */
 
         try {
@@ -405,24 +412,12 @@ export default function EditPenggunaPage() {
 
       /* =====================================================
          PAYLOAD SESUAI BACKEND
-         
-         Backend menggunakan:
-         - namaLengkap
-         - namaPengguna
-         - email
-         - kataSandi
-         - peranId
-         
-         BUKAN:
-         - password
-         - peran
       ===================================================== */
 
       const payload = {
         namaLengkap: form.namaLengkap.trim(),
         namaPengguna: form.namaPengguna.trim(),
         email: form.email.trim(),
-
         noTelepon: form.noTelepon.trim(),
         jabatan: form.jabatan.trim(),
         nip: form.nip.trim(),
@@ -430,17 +425,12 @@ export default function EditPenggunaPage() {
         nuptk: form.nuptk.trim(),
         nisn: form.nisn.trim(),
         nik: form.nik.trim(),
-
         jenisKelamin: form.jenisKelamin,
         golongan: form.golongan.trim(),
-
         tempatLahir: form.tempatLahir.trim(),
         tanggalLahir: form.tanggalLahir || null,
-
         alamat: form.alamat.trim(),
-        alamatDomisili:
-          form.alamatDomisili.trim(),
-
+        alamatDomisili: form.alamatDomisili.trim(),
         peranId: form.peranId,
         status: form.status,
       };
@@ -450,8 +440,7 @@ export default function EditPenggunaPage() {
       ===================================================== */
 
       if (form.kataSandi.trim()) {
-        payload.kataSandi =
-          form.kataSandi.trim();
+        payload.kataSandi = form.kataSandi.trim();
       }
 
       /* =====================================================
@@ -500,7 +489,6 @@ export default function EditPenggunaPage() {
       if (response.status === 401) {
         localStorage.removeItem("token");
         localStorage.removeItem("user");
-
         router.push("/login");
         return;
       }
@@ -543,7 +531,7 @@ export default function EditPenggunaPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-slate-50">
+      <div className="theme-page flex min-h-screen">
         <Sidebar
           activeMenu="pengguna"
           role="admin"
@@ -554,9 +542,16 @@ export default function EditPenggunaPage() {
 
           <main className="flex flex-1 items-center justify-center p-6">
             <div className="text-center">
-              <div className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-blue-100 border-t-blue-600" />
+              <div
+                className="
+                  mx-auto mb-4 h-10 w-10 animate-spin rounded-full
+                  border-4
+                  border-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]
+                  border-t-[var(--color-primary)]
+                "
+              />
 
-              <p className="text-sm font-medium text-slate-500">
+              <p className="theme-text-muted text-sm font-medium">
                 Memuat data pengguna...
               </p>
             </div>
@@ -571,7 +566,7 @@ export default function EditPenggunaPage() {
   ========================================================= */
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="theme-page flex min-h-screen">
       {/* =====================================================
           SIDEBAR
       ===================================================== */}
@@ -590,6 +585,7 @@ export default function EditPenggunaPage() {
 
         <main className="flex-1 p-4 sm:p-6 lg:p-8">
           <div className="mx-auto max-w-6xl">
+
             {/* =================================================
                 PAGE HEADER
             ================================================= */}
@@ -597,7 +593,15 @@ export default function EditPenggunaPage() {
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <div className="mb-2 flex items-center gap-3">
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm">
+                  <div
+                    className={`
+                      flex h-11 w-11 items-center justify-center
+                      rounded-xl
+                      bg-[var(--color-primary)]
+                      text-white
+                      ${themePrimaryShadow}
+                    `}
+                  >
                     <svg
                       xmlns="http://www.w3.org/2000/svg"
                       className="h-5 w-5"
@@ -627,11 +631,11 @@ export default function EditPenggunaPage() {
                   </div>
 
                   <div>
-                    <h1 className="text-xl font-bold text-slate-800 sm:text-2xl">
+                    <h1 className="theme-text text-xl font-bold sm:text-2xl">
                       Edit Pengguna
                     </h1>
 
-                    <p className="text-sm text-slate-500">
+                    <p className="theme-text-muted text-sm">
                       Perbarui informasi pengguna
                     </p>
                   </div>
@@ -645,7 +649,15 @@ export default function EditPenggunaPage() {
                     `/admin/pengguna/${id}`
                   )
                 }
-                className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
+                className={`
+                  theme-card theme-border theme-text-secondary
+                  inline-flex items-center justify-center gap-2
+                  rounded-xl border
+                  px-4 py-3 text-sm font-semibold
+                  transition
+                  ${themePrimaryHover}
+                  hover:text-[var(--color-primary)]
+                `}
               >
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
@@ -677,8 +689,15 @@ export default function EditPenggunaPage() {
             ================================================= */}
 
             {error && (
-              <div className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4">
-                <div className="mt-0.5 text-red-600">
+              <div
+                className="
+                  mb-6 flex items-start gap-3 rounded-xl border
+                  border-[color-mix(in_srgb,var(--color-warning)_30%,transparent)]
+                  bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)]
+                  p-4
+                "
+              >
+                <div className="mt-0.5 text-[var(--color-warning)]">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-5 w-5"
@@ -708,11 +727,11 @@ export default function EditPenggunaPage() {
                 </div>
 
                 <div>
-                  <p className="text-sm font-semibold text-red-700">
+                  <p className="theme-text text-sm font-semibold">
                     Gagal
                   </p>
 
-                  <p className="mt-1 text-sm text-red-600">
+                  <p className="theme-text-secondary mt-1 text-sm">
                     {error}
                   </p>
                 </div>
@@ -724,8 +743,15 @@ export default function EditPenggunaPage() {
             ================================================= */}
 
             {success && (
-              <div className="mb-6 flex items-start gap-3 rounded-xl border border-green-200 bg-green-50 p-4">
-                <div className="mt-0.5 text-green-600">
+              <div
+                className="
+                  mb-6 flex items-start gap-3 rounded-xl border
+                  border-[color-mix(in_srgb,var(--color-success)_30%,transparent)]
+                  bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)]
+                  p-4
+                "
+              >
+                <div className="mt-0.5 text-[var(--color-success)]">
                   <svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-5 w-5"
@@ -749,11 +775,11 @@ export default function EditPenggunaPage() {
                 </div>
 
                 <div>
-                  <p className="text-sm font-semibold text-green-700">
+                  <p className="theme-text text-sm font-semibold">
                     Berhasil
                   </p>
 
-                  <p className="mt-1 text-sm text-green-600">
+                  <p className="theme-text-secondary mt-1 text-sm">
                     {success}
                   </p>
                 </div>
@@ -765,14 +791,28 @@ export default function EditPenggunaPage() {
             ================================================= */}
 
             <form onSubmit={handleSubmit}>
+
               {/* =================================================
                   DATA AKUN
               ================================================= */}
 
-              <div className="mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <div className="border-b border-slate-100 px-5 py-5 sm:px-6">
+              <div
+                className={`
+                  theme-card theme-border
+                  mb-6 overflow-hidden rounded-2xl border
+                  ${themeCardShadow}
+                `}
+              >
+                <div className="theme-border-soft border-b px-5 py-5 sm:px-6">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                    <div
+                      className={`
+                        flex h-10 w-10 items-center justify-center
+                        rounded-xl
+                        ${themePrimarySoft}
+                        text-[var(--color-primary)]
+                      `}
+                    >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         className="h-5 w-5"
@@ -798,11 +838,11 @@ export default function EditPenggunaPage() {
                     </div>
 
                     <div>
-                      <h2 className="font-bold text-slate-800">
+                      <h2 className="theme-text font-bold">
                         Informasi Akun
                       </h2>
 
-                      <p className="text-sm text-slate-500">
+                      <p className="theme-text-muted text-sm">
                         Informasi login dan akses pengguna
                       </p>
                     </div>
@@ -880,10 +920,23 @@ export default function EditPenggunaPage() {
                   DATA IDENTITAS
               ================================================= */}
 
-              <div className="mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <div className="border-b border-slate-100 px-5 py-5 sm:px-6">
+              <div
+                className={`
+                  theme-card theme-border
+                  mb-6 overflow-hidden rounded-2xl border
+                  ${themeCardShadow}
+                `}
+              >
+                <div className="theme-border-soft border-b px-5 py-5 sm:px-6">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                    <div
+                      className={`
+                        flex h-10 w-10 items-center justify-center
+                        rounded-xl
+                        ${themePrimarySoft}
+                        text-[var(--color-primary)]
+                      `}
+                    >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         className="h-5 w-5"
@@ -913,11 +966,11 @@ export default function EditPenggunaPage() {
                     </div>
 
                     <div>
-                      <h2 className="font-bold text-slate-800">
+                      <h2 className="theme-text font-bold">
                         Data Identitas
                       </h2>
 
-                      <p className="text-sm text-slate-500">
+                      <p className="theme-text-muted text-sm">
                         Informasi identitas pengguna
                       </p>
                     </div>
@@ -1012,10 +1065,23 @@ export default function EditPenggunaPage() {
                   DATA KELAHIRAN
               ================================================= */}
 
-              <div className="mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <div className="border-b border-slate-100 px-5 py-5 sm:px-6">
+              <div
+                className={`
+                  theme-card theme-border
+                  mb-6 overflow-hidden rounded-2xl border
+                  ${themeCardShadow}
+                `}
+              >
+                <div className="theme-border-soft border-b px-5 py-5 sm:px-6">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                    <div
+                      className={`
+                        flex h-10 w-10 items-center justify-center
+                        rounded-xl
+                        ${themePrimarySoft}
+                        text-[var(--color-primary)]
+                      `}
+                    >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         className="h-5 w-5"
@@ -1041,11 +1107,11 @@ export default function EditPenggunaPage() {
                     </div>
 
                     <div>
-                      <h2 className="font-bold text-slate-800">
+                      <h2 className="theme-text font-bold">
                         Data Kelahiran
                       </h2>
 
-                      <p className="text-sm text-slate-500">
+                      <p className="theme-text-muted text-sm">
                         Informasi tempat dan tanggal lahir
                       </p>
                     </div>
@@ -1075,10 +1141,23 @@ export default function EditPenggunaPage() {
                   ALAMAT
               ================================================= */}
 
-              <div className="mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <div className="border-b border-slate-100 px-5 py-5 sm:px-6">
+              <div
+                className={`
+                  theme-card theme-border
+                  mb-6 overflow-hidden rounded-2xl border
+                  ${themeCardShadow}
+                `}
+              >
+                <div className="theme-border-soft border-b px-5 py-5 sm:px-6">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                    <div
+                      className={`
+                        flex h-10 w-10 items-center justify-center
+                        rounded-xl
+                        ${themePrimarySoft}
+                        text-[var(--color-primary)]
+                      `}
+                    >
                       <svg
                         xmlns="http://www.w3.org/2000/svg"
                         className="h-5 w-5"
@@ -1102,11 +1181,11 @@ export default function EditPenggunaPage() {
                     </div>
 
                     <div>
-                      <h2 className="font-bold text-slate-800">
+                      <h2 className="theme-text font-bold">
                         Alamat
                       </h2>
 
-                      <p className="text-sm text-slate-500">
+                      <p className="theme-text-muted text-sm">
                         Informasi alamat tempat tinggal pengguna
                       </p>
                     </div>
@@ -1115,7 +1194,7 @@ export default function EditPenggunaPage() {
 
                 <div className="grid gap-5 p-5 sm:p-6">
                   <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-slate-700">
+                    <label className="theme-text block text-sm font-semibold">
                       Alamat KTP
                     </label>
 
@@ -1125,12 +1204,18 @@ export default function EditPenggunaPage() {
                       onChange={handleChange}
                       rows={4}
                       placeholder="Masukkan alamat sesuai KTP"
-                      className="w-full resize-none rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                      className="
+                        theme-input w-full resize-none rounded-xl
+                        px-4 py-3 text-sm outline-none transition
+                        focus:border-[var(--color-primary)]
+                        focus:ring-4
+                        focus:ring-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]
+                      "
                     />
                   </div>
 
                   <div className="space-y-2">
-                    <label className="block text-sm font-semibold text-slate-700">
+                    <label className="theme-text block text-sm font-semibold">
                       Alamat Domisili
                     </label>
 
@@ -1140,7 +1225,13 @@ export default function EditPenggunaPage() {
                       onChange={handleChange}
                       rows={4}
                       placeholder="Masukkan alamat domisili"
-                      className="w-full resize-none rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                      className="
+                        theme-input w-full resize-none rounded-xl
+                        px-4 py-3 text-sm outline-none transition
+                        focus:border-[var(--color-primary)]
+                        focus:ring-4
+                        focus:ring-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]
+                      "
                     />
                   </div>
                 </div>
@@ -1159,7 +1250,16 @@ export default function EditPenggunaPage() {
                     )
                   }
                   disabled={saving}
-                  className="rounded-xl border border-slate-200 bg-white px-6 py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="
+                    theme-card theme-border theme-text-secondary
+                    rounded-xl border
+                    px-6 py-3 text-sm font-semibold
+                    transition
+                    hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
+                    hover:text-[var(--color-text)]
+                    disabled:cursor-not-allowed
+                    disabled:opacity-60
+                  "
                 >
                   Batal
                 </button>
@@ -1167,7 +1267,17 @@ export default function EditPenggunaPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:from-blue-700 hover:to-blue-600 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="
+                    inline-flex items-center justify-center gap-2
+                    rounded-xl
+                    bg-[var(--color-primary)]
+                    px-6 py-3 text-sm font-semibold text-white
+                    shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]
+                    transition
+                    hover:brightness-95
+                    disabled:cursor-not-allowed
+                    disabled:opacity-60
+                  "
                 >
                   {saving ? (
                     <>

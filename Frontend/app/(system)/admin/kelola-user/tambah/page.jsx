@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useState } from "react";
@@ -249,7 +250,7 @@ export default function TambahUserPage() {
   );
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[#f8fafc]">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
       {/* SIDEBAR */}
       <Sidebar
         active="kelolaUser"
@@ -279,7 +280,7 @@ export default function TambahUserPage() {
               <button
                 type="button"
                 onClick={() => router.push("/admin/kelola-user")}
-                className="group inline-flex max-w-full items-center gap-2 text-sm font-medium text-slate-600 transition hover:text-blue-600"
+                className="group inline-flex max-w-full items-center gap-2 text-sm font-medium text-[var(--color-text-secondary)] transition hover:text-[var(--color-primary)]"
               >
                 <ArrowLeft
                   size={18}
@@ -292,24 +293,36 @@ export default function TambahUserPage() {
               </button>
 
               {/* HEADER */}
-              <section className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-blue-50 blur-3xl" />
+              <section className="theme-card relative overflow-hidden rounded-2xl border shadow-sm">
+                <div
+                  className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full blur-3xl"
+                  style={{
+                    background:
+                      "color-mix(in srgb, var(--color-primary) 10%, transparent)",
+                  }}
+                />
 
                 <div className="relative flex min-w-0 flex-col gap-5 p-4 sm:p-5 lg:flex-row lg:items-center lg:justify-between lg:p-6">
 
                   {/* TITLE */}
                   <div className="flex min-w-0 items-start gap-3 sm:gap-4">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg sm:h-14 sm:w-14">
+                    <div
+                      className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-white shadow-lg sm:h-14 sm:w-14"
+                      style={{
+                        backgroundImage:
+                          "var(--color-brand-logo-bg)",
+                      }}
+                    >
                       <UserPlus size={23} />
                     </div>
 
                     <div className="min-w-0">
                       <div className="flex flex-wrap items-center gap-2">
-                        <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+                        <h1 className="theme-text text-xl font-bold tracking-tight sm:text-2xl">
                           Tambah User
                         </h1>
 
-                        <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[11px] font-semibold text-blue-600">
+                        <span className="theme-info rounded-full px-2.5 py-1 text-[11px] font-semibold">
                           Level Sekolah
                         </span>
                       </div>
@@ -317,10 +330,10 @@ export default function TambahUserPage() {
                       <div className="mt-1.5 flex min-w-0 items-start gap-2">
                         <UserCog
                           size={15}
-                          className="mt-0.5 shrink-0 text-blue-400"
+                          className="mt-0.5 shrink-0 text-[var(--color-primary)]"
                         />
 
-                        <p className="text-sm leading-relaxed text-slate-500">
+                        <p className="theme-text-muted text-sm leading-relaxed">
                           Tambahkan user baru ke lingkungan sekolah.
                         </p>
                       </div>
@@ -332,7 +345,7 @@ export default function TambahUserPage() {
                     <button
                       type="button"
                       onClick={() => router.push("/admin/kelola-user")}
-                      className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-medium text-slate-600 transition hover:bg-slate-50 sm:flex-none sm:px-5"
+                      className="theme-input inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl px-4 text-sm font-medium transition sm:flex-none sm:px-5"
                     >
                       <X size={17} />
                       Batal
@@ -342,7 +355,7 @@ export default function TambahUserPage() {
                       type="submit"
                       form="user-form"
                       disabled={isSaving || isLoadingRoles}
-                      className="inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl bg-slate-900 px-4 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none sm:px-5"
+                      className="theme-primary inline-flex h-11 flex-1 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-50 sm:flex-none sm:px-5"
                     >
                       {isSaving ? (
                         <Loader2 size={17} className="animate-spin" />
@@ -360,10 +373,10 @@ export default function TambahUserPage() {
 
               {/* SUCCESS */}
               {saved && (
-                <div className="flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800">
+                <div className="theme-success flex items-start gap-3 rounded-2xl border p-4 text-sm">
                   <CheckCircle
                     size={19}
-                    className="mt-0.5 shrink-0 text-emerald-600"
+                    className="mt-0.5 shrink-0"
                   />
 
                   <span className="leading-relaxed">
@@ -374,10 +387,10 @@ export default function TambahUserPage() {
 
               {/* ERROR */}
               {serverError && (
-                <div className="flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
+                <div className="theme-danger flex items-start gap-3 rounded-2xl border p-4 text-sm">
                   <AlertCircle
                     size={19}
-                    className="mt-0.5 shrink-0 text-rose-600"
+                    className="mt-0.5 shrink-0"
                   />
 
                   <div className="min-w-0">
@@ -393,20 +406,20 @@ export default function TambahUserPage() {
               )}
 
               {/* FORM CARD */}
-              <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5 lg:p-6">
+              <section className="theme-card rounded-2xl border p-4 shadow-sm sm:p-5 lg:p-6">
 
                 {/* FORM TITLE */}
-                <div className="mb-6 flex items-center gap-3 border-b border-slate-100 pb-4">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
+                <div className="mb-6 flex items-center gap-3 border-b pb-4 theme-border-soft">
+                  <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-xl">
                     <Info size={17} />
                   </div>
 
                   <div className="min-w-0">
-                    <p className="text-sm font-bold text-slate-800">
+                    <p className="theme-text text-sm font-bold">
                       Informasi User
                     </p>
 
-                    <p className="mt-0.5 text-xs leading-relaxed text-slate-400">
+                    <p className="theme-text-muted mt-0.5 text-xs leading-relaxed">
                       Masukkan data user secara lengkap
                     </p>
                   </div>
@@ -422,15 +435,15 @@ export default function TambahUserPage() {
 
                     {/* NAMA */}
                     <div className="min-w-0 md:col-span-2">
-                      <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+                      <label className="theme-text-secondary mb-1.5 block text-sm font-semibold">
                         Nama Lengkap{" "}
-                        <span className="text-rose-500">*</span>
+                        <span className="text-[var(--color-danger)]">*</span>
                       </label>
 
                       <div className="relative">
                         <User
                           size={17}
-                          className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                          className="theme-text-placeholder pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2"
                         />
 
                         <input
@@ -519,7 +532,7 @@ export default function TambahUserPage() {
                         <button
                           type="button"
                           onClick={generateUsername}
-                          className="h-11 shrink-0 rounded-xl border border-blue-200 bg-blue-50 px-4 text-xs font-bold text-blue-600 transition hover:bg-blue-100"
+                          className="theme-info h-11 shrink-0 rounded-xl border px-4 text-xs font-bold transition hover:bg-[var(--color-info-background)]"
                         >
                           Generate
                         </button>
@@ -552,7 +565,7 @@ export default function TambahUserPage() {
                         <button
                           type="button"
                           onClick={generatePassword}
-                          className="h-11 shrink-0 rounded-xl border border-blue-200 bg-blue-50 px-4 text-xs font-bold text-blue-600 transition hover:bg-blue-100"
+                          className="theme-info h-11 shrink-0 rounded-xl border px-4 text-xs font-bold transition hover:bg-[var(--color-info-background)]"
                         >
                           Generate
                         </button>
@@ -579,15 +592,15 @@ export default function TambahUserPage() {
 
                     {/* ROLE */}
                     <div className="min-w-0">
-                      <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+                      <label className="theme-text-secondary mb-1.5 block text-sm font-semibold">
                         Role{" "}
-                        <span className="text-rose-500">*</span>
+                        <span className="text-[var(--color-danger)]">*</span>
                       </label>
 
                       <div className="relative">
                         <Shield
                           size={17}
-                          className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                          className="theme-text-placeholder pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2"
                         />
 
                         <select
@@ -629,9 +642,9 @@ export default function TambahUserPage() {
 
                     {/* JENIS KELAMIN */}
                     <div className="min-w-0">
-                      <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+                      <label className="theme-text-secondary mb-1.5 block text-sm font-semibold">
                         Jenis Kelamin{" "}
-                        <span className="text-rose-500">*</span>
+                        <span className="text-[var(--color-danger)]">*</span>
                       </label>
 
                       <div className="grid grid-cols-2 gap-2">
@@ -648,8 +661,8 @@ export default function TambahUserPage() {
                               }
                               className={`min-h-11 rounded-xl border px-3 py-2.5 text-sm font-semibold transition ${
                                 formData.jenisKelamin === gender
-                                  ? "border-blue-400 bg-blue-50 text-blue-700 ring-2 ring-blue-500/20"
-                                  : "border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100"
+                                  ? "border-[var(--color-primary)] bg-[var(--color-info-background)] text-[var(--color-primary)] ring-2 ring-[var(--color-primary)]/20"
+                                  : "theme-input"
                               }`}
                             >
                               {gender}
@@ -689,7 +702,7 @@ export default function TambahUserPage() {
 
                     {/* STATUS */}
                     <div className="min-w-0">
-                      <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+                      <label className="theme-text-secondary mb-1.5 block text-sm font-semibold">
                         Status
                       </label>
 
@@ -708,9 +721,9 @@ export default function TambahUserPage() {
                               className={`min-h-11 rounded-xl border px-3 py-2.5 text-sm font-semibold transition ${
                                 formData.status === status
                                   ? status === "aktif"
-                                    ? "border-emerald-300 bg-emerald-50 text-emerald-700"
-                                    : "border-rose-300 bg-rose-50 text-rose-700"
-                                  : "border-slate-200 bg-slate-50 text-slate-600 hover:bg-slate-100"
+                                    ? "theme-success"
+                                    : "theme-danger"
+                                  : "theme-input"
                               }`}
                             >
                               {status === "aktif"
@@ -724,15 +737,15 @@ export default function TambahUserPage() {
 
                     {/* ALAMAT */}
                     <div className="min-w-0 md:col-span-2">
-                      <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+                      <label className="theme-text-secondary mb-1.5 block text-sm font-semibold">
                         Alamat{" "}
-                        <span className="text-rose-500">*</span>
+                        <span className="text-[var(--color-danger)]">*</span>
                       </label>
 
                       <div className="relative">
                         <MapPin
                           size={17}
-                          className="pointer-events-none absolute left-3.5 top-3.5 text-slate-400"
+                          className="theme-text-placeholder pointer-events-none absolute left-3.5 top-3.5"
                         />
 
                         <textarea
@@ -761,24 +774,24 @@ export default function TambahUserPage() {
 
                   {/* SELECTED ROLE */}
                   {selectedRole && (
-                    <div className="rounded-2xl border border-blue-100 bg-blue-50 p-4">
+                    <div className="theme-info rounded-2xl border p-4">
                       <div className="flex items-start gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-blue-600">
+                        <div className="theme-card flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
                           <Shield size={18} />
                         </div>
 
                         <div className="min-w-0">
-                          <p className="text-sm font-bold text-blue-800">
+                          <p className="text-sm font-bold">
                             Role Dipilih
                           </p>
 
-                          <p className="mt-1 text-sm font-semibold text-blue-700">
+                          <p className="mt-1 text-sm font-semibold">
                             {selectedRole.namaTampilan ||
                               selectedRole.nama}
                           </p>
 
                           {selectedRole.deskripsi && (
-                            <p className="mt-1 text-xs leading-relaxed text-blue-600">
+                            <p className="mt-1 text-xs leading-relaxed">
                               {selectedRole.deskripsi}
                             </p>
                           )}
@@ -788,18 +801,18 @@ export default function TambahUserPage() {
                   )}
 
                   {/* INFO */}
-                  <div className="flex items-start gap-3 rounded-2xl border border-blue-100 bg-blue-50/70 p-4">
+                  <div className="theme-info flex items-start gap-3 rounded-2xl border p-4">
                     <Info
                       size={17}
-                      className="mt-0.5 shrink-0 text-blue-600"
+                      className="mt-0.5 shrink-0"
                     />
 
                     <div className="min-w-0">
-                      <p className="text-sm font-bold text-blue-800">
+                      <p className="text-sm font-bold">
                         Informasi
                       </p>
 
-                      <p className="mt-1 text-xs leading-relaxed text-blue-700 sm:text-sm">
+                      <p className="mt-1 text-xs leading-relaxed sm:text-sm">
                         Role yang tersedia diambil langsung
                         dari database. Sistem akan menyimpan
                         ID role pada field{" "}
@@ -809,13 +822,13 @@ export default function TambahUserPage() {
                   </div>
 
                   {/* ACTION */}
-                  <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:justify-end">
+                  <div className="theme-border-soft flex flex-col-reverse gap-3 border-t pt-5 sm:flex-row sm:justify-end">
                     <button
                       type="button"
                       onClick={() =>
                         router.push("/admin/kelola-user")
                       }
-                      className="h-11 w-full rounded-xl border border-slate-200 bg-white px-6 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 sm:w-auto"
+                      className="theme-input h-11 w-full rounded-xl px-6 text-sm font-semibold transition sm:w-auto"
                     >
                       Batal
                     </button>
@@ -825,7 +838,7 @@ export default function TambahUserPage() {
                       disabled={
                         isSaving || isLoadingRoles
                       }
-                      className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-slate-900 px-6 text-sm font-bold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+                      className="theme-primary inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl px-6 text-sm font-bold transition disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
                     >
                       {isSaving ? (
                         <>
@@ -847,8 +860,8 @@ export default function TambahUserPage() {
               </section>
 
               {/* FOOTER */}
-              <footer className="border-t border-slate-200 py-5 text-center">
-                <p className="text-xs text-slate-400">
+              <footer className="theme-border border-t py-5 text-center">
+                <p className="theme-text-muted text-xs">
                   © 2026 SmartSchool • Tambah User - Level Sekolah
                 </p>
               </footer>
@@ -873,15 +886,15 @@ function Field({
 }) {
   return (
     <div className="min-w-0">
-      <label className="mb-1.5 block text-sm font-semibold text-slate-700">
+      <label className="theme-text-secondary mb-1.5 block text-sm font-semibold">
         {label}{" "}
         {required && (
-          <span className="text-rose-500">*</span>
+          <span className="text-[var(--color-danger)]">*</span>
         )}
       </label>
 
       <div className="relative min-w-0">
-        <div className="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 text-slate-400">
+        <div className="theme-text-placeholder pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2">
           {icon}
         </div>
 
@@ -900,10 +913,10 @@ function Field({
 ===================================================== */
 
 function inputClass(error) {
-  return `h-11 w-full min-w-0 rounded-xl border bg-slate-50 py-2.5 pl-10 pr-4 text-sm font-medium text-slate-900 placeholder:text-slate-400 outline-none transition focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-500/10 ${
+  return `theme-input h-11 w-full min-w-0 rounded-xl border py-2.5 pl-10 pr-4 text-sm font-medium outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-primary)]/10 ${
     error
-      ? "border-rose-300"
-      : "border-slate-200"
+      ? "border-[var(--color-danger)]"
+      : "theme-border"
   }`;
 }
 
@@ -913,12 +926,15 @@ function inputClass(error) {
 
 function ErrorText({ children }) {
   return (
-    <p className="mt-1.5 flex items-start gap-1 text-xs font-medium leading-relaxed text-rose-600">
+    <p className="theme-text-danger mt-1.5 flex items-start gap-1 text-xs font-medium leading-relaxed">
       <AlertCircle
         size={12}
-        className="mt-0.5 shrink-0"
+        className="mt-0.5 shrink-0 text-[var(--color-danger)]"
       />
-      <span>{children}</span>
+
+      <span className="text-[var(--color-danger)]">
+        {children}
+      </span>
     </p>
   );
 }

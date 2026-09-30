@@ -12,12 +12,38 @@ import {
   FileText,
 } from "lucide-react";
 
-import Sidebar from "../../../../components/Sidebar";
-import Header from "../../../../components/Header";
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
 export default function TambahLanggananPage() {
   const router = useRouter();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const [form, setForm] = useState({
     sekolah: "",
@@ -27,21 +53,6 @@ export default function TambahLanggananPage() {
     metodePembayaran: "",
     catatan: "",
   });
-
-  const notifications = [
-    {
-      id: 1,
-      title: "Pembaruan Sistem v2.0",
-      desc: "Dikirim 2 jam lalu",
-      read: false,
-    },
-    {
-      id: 2,
-      title: "Pengingat: Backup Data",
-      desc: "Dikirim 1 hari lalu",
-      read: false,
-    },
-  ];
 
   const handleChange = (e) => {
     setForm({
@@ -59,433 +70,252 @@ export default function TambahLanggananPage() {
   };
 
   return (
-    <div className="flex min-h-screen w-full bg-slate-50">
-      {/* SIDEBAR */}
-      <div className="shrink-0 self-stretch">
-        <Sidebar
-          active="langganan"
-          setActive={() => {}}
-          collapsed={!sidebarOpen}
-          setCollapsed={() => setSidebarOpen(!sidebarOpen)}
-        />
-      </div>
+    <div className="theme-page theme-text min-h-full">
+      <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+        <div className="mx-auto w-full max-w-5xl">
+          {/* BACK */}
+          <button
+            type="button"
+            onClick={() => router.back()}
+            className={`mb-5 inline-flex items-center gap-2 rounded border ${themeNeutralBorder} ${themeNeutralSurface} px-4 py-2.5 text-sm font-medium theme-text-secondary transition ${themeNeutralHover} hover:text-[var(--color-primary)]`}
+          >
+            <ArrowLeft size={18} />
+            Kembali
+          </button>
 
-      {/* AREA KANAN */}
-      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
-        {/* HEADER */}
-        <Header
-          toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-          notifications={notifications}
-          user={{
-            name: "Sarah",
-            email: "sarah@smartschool.com",
-            avatar: "SA",
-          }}
-        />
+          {/* TITLE */}
+          <div className="mb-6">
+            <h1 className="text-2xl font-bold theme-text">
+              Tambah Langganan
+            </h1>
 
-        {/* MAIN */}
-        <main className="min-w-0 flex-1 overflow-x-hidden">
-          <div className="w-full px-4 py-5 sm:px-6 lg:px-8">
-            
-            {/* CONTAINER */}
-            <div className="mx-auto w-full max-w-5xl">
-              
-              {/* BACK */}
-              <button
-                type="button"
-                onClick={() => router.back()}
-                className="
-                  mb-5
-                  inline-flex
-                  items-center
-                  gap-2
-                  border
-                  border-slate-200
-                  bg-white
-                  px-4
-                  rounded
-                  py-2.5
-                  text-sm
-                  font-medium
-                  text-slate-600
-                  shadow-sm
-                  transition
-                  hover:bg-slate-50
-                  hover:text-slate-900
-                "
-              >
-                <ArrowLeft size={18} />
-                Kembali
-              </button>
+            <p className="mt-1 text-sm theme-text-muted">
+              Tambahkan langganan baru untuk sekolah.
+            </p>
+          </div>
 
-              {/* TITLE */}
-              <div className="mb-6">
-                <h1 className="text-2xl font-bold text-slate-800">
-                  Tambah Langganan
-                </h1>
+          {/* CARD */}
+          <div
+            className={`w-full overflow-hidden rounded-xl border theme-border theme-card ${themeCardShadow}`}
+          >
+            {/* CARD HEADER */}
+            <div className={`border-b ${themeDivider} px-5 py-5 sm:px-7`}>
+              <div className="flex items-center gap-3">
+                <div
+                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border ${themeInfoBorder} ${themeInfoSurface} text-[var(--color-info)]`}
+                >
+                  <CreditCard size={20} />
+                </div>
 
-                <p className="mt-1 text-sm text-slate-500">
-                  Tambahkan langganan baru untuk sekolah.
-                </p>
+                <div className="min-w-0">
+                  <h2 className="text-base font-semibold theme-text">
+                    Informasi Langganan
+                  </h2>
+
+                  <p className="text-sm theme-text-muted">
+                    Lengkapi informasi langganan di bawah ini.
+                  </p>
+                </div>
               </div>
+            </div>
 
-              {/* CARD */}
-              <div className="w-full overflow-hidden border border-slate-200 bg-white shadow-sm">
-                
-                {/* CARD HEADER */}
-                <div className="border-b border-slate-200 px-5 py-5 sm:px-7">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center bg-blue-50 text-blue-600">
-                      <CreditCard size={20} />
-                    </div>
+            {/* FORM */}
+            <form onSubmit={handleSubmit}>
+              <div className="grid grid-cols-1 gap-5 p-5 sm:p-7 lg:grid-cols-2">
+                {/* SEKOLAH */}
+                <div className="min-w-0">
+                  <label className="mb-2 block text-sm font-medium theme-text-secondary">
+                    Sekolah
+                  </label>
 
-                    <div className="min-w-0">
-                      <h2 className="text-base font-semibold text-slate-800">
-                        Informasi Langganan
-                      </h2>
+                  <div className="relative">
+                    <Building2
+                      size={18}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 theme-text-placeholder"
+                    />
 
-                      <p className="text-sm text-slate-500">
-                        Lengkapi informasi langganan di bawah ini.
-                      </p>
-                    </div>
+                    <select
+                      name="sekolah"
+                      value={form.sekolah}
+                      onChange={handleChange}
+                      required
+                      className={`box-border w-full min-w-0 appearance-none rounded border theme-border theme-input py-3 pl-10 pr-4 text-sm theme-text-secondary outline-none transition ${themeFocus}`}
+                    >
+                      <option value="">Pilih sekolah</option>
+                      <option value="SMK Taruna Bhakti">
+                        SMK Taruna Bhakti
+                      </option>
+                      <option value="SMA SmartSchool">
+                        SMA SmartSchool
+                      </option>
+                      <option value="SMP SmartSchool">
+                        SMP SmartSchool
+                      </option>
+                    </select>
                   </div>
                 </div>
 
-                {/* FORM */}
-                <form onSubmit={handleSubmit}>
-                  <div className="grid grid-cols-1 gap-5 p-5 sm:p-7 lg:grid-cols-2">
+                {/* PAKET */}
+                <div className="min-w-0">
+                  <label className="mb-2 block text-sm font-medium theme-text-secondary">
+                    Paket Langganan
+                  </label>
 
-                    {/* SEKOLAH */}
-                    <div className="min-w-0">
-                      <label className="mb-2 block text-sm font-medium text-slate-700">
-                        Sekolah
-                      </label>
+                  <div className="relative">
+                    <Package
+                      size={18}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 theme-text-placeholder"
+                    />
 
-                      <div className="relative">
-                        <Building2
-                          size={18}
-                          className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                        />
-
-                        <select
-                          name="sekolah"
-                          value={form.sekolah}
-                          onChange={handleChange}
-                          required
-                          className="
-                            box-border
-                            w-full
-                            min-w-0
-                            appearance-none
-                            border
-                            border-slate-200
-                            bg-white
-                            py-3
-                            pl-10
-                            pr-4
-                            text-sm
-                            text-slate-700
-                            outline-none
-                            focus:border-blue-500
-                            focus:ring-2
-                            focus:ring-blue-100
-                          "
-                        >
-                          <option value="">Pilih sekolah</option>
-                          <option value="SMK Taruna Bhakti">
-                            SMK Taruna Bhakti
-                          </option>
-                          <option value="SMA SmartSchool">
-                            SMA SmartSchool
-                          </option>
-                          <option value="SMP SmartSchool">
-                            SMP SmartSchool
-                          </option>
-                        </select>
-                      </div>
-                    </div>
-
-                    {/* PAKET */}
-                    <div className="min-w-0">
-                      <label className="mb-2 block text-sm font-medium text-slate-700">
-                        Paket Langganan
-                      </label>
-
-                      <div className="relative">
-                        <Package
-                          size={18}
-                          className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                        />
-
-                        <select
-                          name="paket"
-                          value={form.paket}
-                          onChange={handleChange}
-                          required
-                          className="
-                            box-border
-                            w-full
-                            min-w-0
-                            appearance-none
-                            border
-                            border-slate-200
-                            bg-white
-                            py-3
-                            pl-10
-                            pr-4
-                            text-sm
-                            text-slate-700
-                            outline-none
-                            focus:border-blue-500
-                            focus:ring-2
-                            focus:ring-blue-100
-                          "
-                        >
-                          <option value="">Pilih paket</option>
-                          <option value="Basic">Basic</option>
-                          <option value="Professional">
-                            Professional
-                          </option>
-                          <option value="Enterprise">
-                            Enterprise
-                          </option>
-                        </select>
-                      </div>
-                    </div>
-
-                    {/* TANGGAL MULAI */}
-                    <div className="min-w-0">
-                      <label className="mb-2 block text-sm font-medium text-slate-700">
-                        Tanggal Mulai
-                      </label>
-
-                      <div className="relative">
-                        <CalendarDays
-                          size={18}
-                          className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                        />
-
-                        <input
-                          type="date"
-                          name="tanggalMulai"
-                          value={form.tanggalMulai}
-                          onChange={handleChange}
-                          required
-                          className="
-                            box-border
-                            w-full
-                            min-w-0
-                            border
-                            border-slate-200
-                            bg-white
-                            py-3
-                            pl-10
-                            pr-4
-                            text-sm
-                            text-slate-700
-                            outline-none
-                            focus:border-blue-500
-                            focus:ring-2
-                            focus:ring-blue-100
-                          "
-                        />
-                      </div>
-                    </div>
-
-                    {/* TANGGAL BERAKHIR */}
-                    <div className="min-w-0">
-                      <label className="mb-2 block text-sm font-medium text-slate-700">
-                        Tanggal Berakhir
-                      </label>
-
-                      <div className="relative">
-                        <CalendarDays
-                          size={18}
-                          className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                        />
-
-                        <input
-                          type="date"
-                          name="tanggalBerakhir"
-                          value={form.tanggalBerakhir}
-                          onChange={handleChange}
-                          required
-                          className="
-                            box-border
-                            w-full
-                            min-w-0
-                            border
-                            border-slate-200
-                            bg-white
-                            py-3
-                            pl-10
-                            pr-4
-                            text-sm
-                            text-slate-700
-                            outline-none
-                            focus:border-blue-500
-                            focus:ring-2
-                            focus:ring-blue-100
-                          "
-                        />
-                      </div>
-                    </div>
-
-                    {/* METODE PEMBAYARAN */}
-                    <div className="min-w-0 lg:col-span-2">
-                      <label className="mb-2 block text-sm font-medium text-slate-700">
-                        Metode Pembayaran
-                      </label>
-
-                      <div className="relative">
-                        <CreditCard
-                          size={18}
-                          className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
-                        />
-
-                        <select
-                          name="metodePembayaran"
-                          value={form.metodePembayaran}
-                          onChange={handleChange}
-                          required
-                          className="
-                            box-border
-                            w-full
-                            min-w-0
-                            appearance-none
-                            border
-                            border-slate-200
-                            bg-white
-                            py-3
-                            pl-10
-                            pr-4
-                            text-sm
-                            text-slate-700
-                            outline-none
-                            focus:border-blue-500
-                            focus:ring-2
-                            focus:ring-blue-100
-                          "
-                        >
-                          <option value="">
-                            Pilih metode pembayaran
-                          </option>
-
-                          <option value="Transfer Bank">
-                            Transfer Bank
-                          </option>
-
-                          <option value="Virtual Account">
-                            Virtual Account
-                          </option>
-
-                          <option value="Cash">
-                            Cash
-                          </option>
-                        </select>
-                      </div>
-                    </div>
-
-                    {/* CATATAN */}
-                    <div className="min-w-0 lg:col-span-2">
-                      <label className="mb-2 block text-sm font-medium text-slate-700">
-                        Catatan{" "}
-                        <span className="font-normal text-slate-400">
-                          (Opsional)
-                        </span>
-                      </label>
-
-                      <div className="relative">
-                        <FileText
-                          size={18}
-                          className="absolute left-3 top-3.5 text-slate-400"
-                        />
-
-                        <textarea
-                          name="catatan"
-                          value={form.catatan}
-                          onChange={handleChange}
-                          rows={4}
-                          placeholder="Tambahkan catatan jika diperlukan..."
-                          className="
-                            box-border
-                            w-full
-                            min-w-0
-                            resize-none
-                            border
-                            border-slate-200
-                            bg-white
-                            py-3
-                            pl-10
-                            pr-4
-                            text-sm
-                            text-slate-700
-                            outline-none
-                            placeholder:text-slate-400
-                            focus:border-blue-500
-                            focus:ring-2
-                            focus:ring-blue-100
-                          "
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* FOOTER */}
-                  <div className="flex flex-col gap-3 border-t border-slate-200 px-5 py-5 sm:flex-row sm:justify-end sm:px-7">
-
-                    <button
-                      type="button"
-                      onClick={() => router.back()}
-                      className="
-                        w-full
-                        border
-                        border-slate-200
-                        bg-white
-                        px-5
-                        rounded
-                        py-2.5
-                        text-sm
-                        font-medium
-                        text-slate-600
-                        transition
-                        hover:bg-slate-50
-                        sm:w-auto
-                      "
+                    <select
+                      name="paket"
+                      value={form.paket}
+                      onChange={handleChange}
+                      required
+                      className={`box-border w-full min-w-0 appearance-none rounded border theme-border theme-input py-3 pl-10 pr-4 text-sm theme-text-secondary outline-none transition ${themeFocus}`}
                     >
-                      Batal
-                    </button>
-
-                    <button
-                      type="submit"
-                      className="
-                        inline-flex
-                        w-full
-                        items-center
-                        justify-center
-                        gap-2
-                        bg-blue-600
-                        px-5
-                        py-2.5
-                        text-sm
-                        font-semibold
-                        text-white
-                        transition
-                        rounded
-                        hover:bg-blue-700
-                        sm:w-auto
-                      "
-                    >
-                      <Save size={18} />
-                      Simpan Langganan
-                    </button>
-
+                      <option value="">Pilih paket</option>
+                      <option value="Basic">Basic</option>
+                      <option value="Professional">
+                        Professional
+                      </option>
+                      <option value="Enterprise">Enterprise</option>
+                    </select>
                   </div>
-                </form>
+                </div>
+
+                {/* TANGGAL MULAI */}
+                <div className="min-w-0">
+                  <label className="mb-2 block text-sm font-medium theme-text-secondary">
+                    Tanggal Mulai
+                  </label>
+
+                  <div className="relative">
+                    <CalendarDays
+                      size={18}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 theme-text-placeholder"
+                    />
+
+                    <input
+                      type="date"
+                      name="tanggalMulai"
+                      value={form.tanggalMulai}
+                      onChange={handleChange}
+                      required
+                      className={`box-border w-full min-w-0 rounded border theme-border theme-input py-3 pl-10 pr-4 text-sm theme-text-secondary outline-none transition ${themeFocus}`}
+                    />
+                  </div>
+                </div>
+
+                {/* TANGGAL BERAKHIR */}
+                <div className="min-w-0">
+                  <label className="mb-2 block text-sm font-medium theme-text-secondary">
+                    Tanggal Berakhir
+                  </label>
+
+                  <div className="relative">
+                    <CalendarDays
+                      size={18}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 theme-text-placeholder"
+                    />
+
+                    <input
+                      type="date"
+                      name="tanggalBerakhir"
+                      value={form.tanggalBerakhir}
+                      onChange={handleChange}
+                      required
+                      className={`box-border w-full min-w-0 rounded border theme-border theme-input py-3 pl-10 pr-4 text-sm theme-text-secondary outline-none transition ${themeFocus}`}
+                    />
+                  </div>
+                </div>
+
+                {/* METODE PEMBAYARAN */}
+                <div className="min-w-0 lg:col-span-2">
+                  <label className="mb-2 block text-sm font-medium theme-text-secondary">
+                    Metode Pembayaran
+                  </label>
+
+                  <div className="relative">
+                    <CreditCard
+                      size={18}
+                      className="absolute left-3 top-1/2 -translate-y-1/2 theme-text-placeholder"
+                    />
+
+                    <select
+                      name="metodePembayaran"
+                      value={form.metodePembayaran}
+                      onChange={handleChange}
+                      required
+                      className={`box-border w-full min-w-0 appearance-none rounded border theme-border theme-input py-3 pl-10 pr-4 text-sm theme-text-secondary outline-none transition ${themeFocus}`}
+                    >
+                      <option value="">
+                        Pilih metode pembayaran
+                      </option>
+
+                      <option value="Transfer Bank">
+                        Transfer Bank
+                      </option>
+
+                      <option value="Virtual Account">
+                        Virtual Account
+                      </option>
+
+                      <option value="Cash">Cash</option>
+                    </select>
+                  </div>
+                </div>
+
+                {/* CATATAN */}
+                <div className="min-w-0 lg:col-span-2">
+                  <label className="mb-2 block text-sm font-medium theme-text-secondary">
+                    Catatan{" "}
+                    <span className="font-normal theme-text-placeholder">
+                      (Opsional)
+                    </span>
+                  </label>
+
+                  <div className="relative">
+                    <FileText
+                      size={18}
+                      className="absolute left-3 top-3.5 theme-text-placeholder"
+                    />
+
+                    <textarea
+                      name="catatan"
+                      value={form.catatan}
+                      onChange={handleChange}
+                      rows={4}
+                      placeholder="Tambahkan catatan jika diperlukan..."
+                      className={`box-border w-full min-w-0 resize-none rounded border theme-border theme-input py-3 pl-10 pr-4 text-sm theme-text-secondary outline-none transition placeholder:theme-text-placeholder ${themeFocus}`}
+                    />
+                  </div>
+                </div>
               </div>
-            </div>
+
+              {/* FOOTER */}
+              <div
+                className={`flex flex-col gap-3 border-t ${themeDivider} px-5 py-5 sm:flex-row sm:justify-end sm:px-7`}
+              >
+                <button
+                  type="button"
+                  onClick={() => router.back()}
+                  className={`w-full rounded border ${themeNeutralBorder} ${themeNeutralSurface} px-5 py-2.5 text-sm font-medium theme-text-secondary transition ${themeNeutralHover} sm:w-auto`}
+                >
+                  Batal
+                </button>
+
+                <button
+                  type="submit"
+                  className={`inline-flex w-full items-center justify-center gap-2 rounded px-5 py-2.5 text-sm font-semibold text-[var(--color-card)] transition ${themePrimaryGradient} ${themePrimaryShadow} hover:brightness-95 sm:w-auto`}
+                >
+                  <Save size={18} />
+                  Simpan Langganan
+                </button>
+              </div>
+            </form>
           </div>
-        </main>
+        </div>
       </div>
     </div>
   );

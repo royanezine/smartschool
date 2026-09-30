@@ -11,18 +11,22 @@ import { createPortal } from "react-dom";
 import { usePathname, useRouter } from "next/navigation";
 import Image from "next/image";
 import {
-  Crown,
   ChevronRight,
   ChevronDown,
+  ChevronUp,
   Menu,
   X,
 } from "lucide-react";
 
-import { guruSidebarConfig } from "./sidebar/guruSidebar";
-import { superadminSidebarConfig } from "./sidebar/superadmin";
-import { yayasanSidebarConfig } from "./sidebar/yayasanSidebar";
-import { adminSidebarConfig } from "./sidebar/adminSidebar";
-import { siswaSidebarConfig } from "./sidebar/siswaSidebar";
+/* =========================================================
+   NAVIGATION CONFIG
+========================================================= */
+
+import { guruSidebarConfig } from "../../configs/navigation/guru";
+import { superadminSidebarConfig } from "../../configs/navigation/superAdmin";
+import { yayasanSidebarConfig } from "../../configs/navigation/yayasan";
+import { adminSidebarConfig } from "../../configs/navigation/admin";
+import { siswaSidebarConfig } from "../../configs/navigation/siswa";
 
 import {
   getAuthRole,
@@ -31,7 +35,7 @@ import {
 } from "../../lib/auth";
 
 /* =========================================================
-   CONFIG
+   CONFIG BY ROLE
 ========================================================= */
 
 const configByRole = {
@@ -42,7 +46,11 @@ const configByRole = {
   siswa: siswaSidebarConfig,
 };
 
-const DEFAULT_ROLE = "super-admin";
+const DEFAULT_ROLE = "admin";
+
+/* =========================================================
+   CONSTANTS
+========================================================= */
 
 const SIDEBAR_COLLAPSED_KEY = "sidebar-collapsed";
 const SIDEBAR_SCROLL_KEY = "sidebar-scroll-top";
@@ -51,20 +59,38 @@ const SIDEBAR_EXPANDED_WIDTH = "w-64";
 const SIDEBAR_COLLAPSED_WIDTH = "w-[72px]";
 
 /* =========================================================
+   ACTIVE STYLE
+========================================================= */
+
+/*
+ * LIGHT:
+ * biru terang + teks putih
+ *
+ * DARK:
+ * biru gelap + teks biru terang
+ */
+
+const ACTIVE_SOLID = `
+  bg-[#2474e8]
+  text-white
+  shadow-md
+  shadow-blue-300/40
+
+  dark:bg-blue-900/70
+  dark:text-blue-100
+  dark:border
+  dark:border-blue-700/60
+  dark:shadow-none
+`;
+
+/* =========================================================
    ROLE HELPERS
 ========================================================= */
 
-/**
- * Normalisasi role dari backend/frontend.
- *
- * Contoh:
- *
- * admin-sekolah -> admin_sekolah
- * Admin_Sekolah -> admin_sekolah
- * ADMIN_SEKOLAH -> admin_sekolah
- */
 function normalizeRole(role) {
-  if (!role) return "";
+  if (!role) {
+    return "";
+  }
 
   return String(role)
     .trim()
@@ -72,17 +98,6 @@ function normalizeRole(role) {
     .replace(/-/g, "_");
 }
 
-/**
- * Mengubah role backend menjadi role yang dipakai
- * oleh konfigurasi Sidebar.
- *
- * PENTING:
- *
- * admin_sekolah TETAP menjadi admin.
- *
- * Sarpras, SPMB, dan CMS sekarang
- * merupakan bagian dari area Admin Sekolah.
- */
 function getSidebarRole(role) {
   const normalized = normalizeRole(role);
 
@@ -97,7 +112,10 @@ function getSidebarRole(role) {
     return "admin";
   }
 
-  if (normalized === "admin_yayasan") {
+  if (
+    normalized === "admin_yayasan" ||
+    normalized === "yayasan"
+  ) {
     return "yayasan";
   }
 
@@ -109,59 +127,67 @@ function getSidebarRole(role) {
     return "siswa";
   }
 
-  return DEFAULT_ROLE;
+  return "";
 }
 
-/**
- * Menentukan role berdasarkan URL.
- *
- * Semua route /admin sekarang menggunakan
- * Admin School Sidebar.
- *
- * Contoh:
- *
- * /admin
- * /admin/sarpras
- * /admin/spmb
- * /admin/cms
- *
- * semuanya -> admin
- */
+/* =========================================================
+   RESOLVE ROLE FROM URL
+========================================================= */
+
 function resolveRole(pathname = "") {
-  if (pathname.startsWith("/guru")) {
-    return "guru";
-  }
+  const path = String(pathname || "")
+    .trim()
+    .toLowerCase();
 
-  if (pathname.startsWith("/yayasan")) {
-    return "yayasan";
-  }
-
-  if (pathname.startsWith("/super-admin")) {
+  if (
+    path === "/super-admin" ||
+    path.startsWith("/super-admin/")
+  ) {
     return "super-admin";
   }
 
-  if (pathname.startsWith("/siswa")) {
+  if (
+    path === "/yayasan" ||
+    path.startsWith("/yayasan/")
+  ) {
+    return "yayasan";
+  }
+
+  if (
+    path === "/guru" ||
+    path.startsWith("/guru/")
+  ) {
+    return "guru";
+  }
+
+  if (
+    path === "/siswa" ||
+    path.startsWith("/siswa/")
+  ) {
     return "siswa";
   }
 
-  if (pathname.startsWith("/admin")) {
+  if (
+    path === "/adminperpustakaan" ||
+    path.startsWith("/adminperpustakaan/")
+  ) {
     return "admin";
   }
 
-  return DEFAULT_ROLE;
+  if (
+    path === "/admin" ||
+    path.startsWith("/admin/")
+  ) {
+    return "admin";
+  }
+
+  return "";
 }
 
-/**
- * Mengecek apakah menu boleh diakses role tertentu.
- *
- * Bisa menerima:
- *
- * role: "admin"
- *
- * atau:
- *
- * role: ["admin", "admin_sekolah"]
- */
+/* =========================================================
+   ROLE ACCESS
+========================================================= */
+
 function isRoleAllowed(menuRole, currentRole) {
   if (!menuRole) {
     return true;
@@ -171,25 +197,18 @@ function isRoleAllowed(menuRole, currentRole) {
 
   if (Array.isArray(menuRole)) {
     return menuRole.some(
-      (role) =>
-        getSidebarRole(role) === current
+      (role) => getSidebarRole(role) === current
     );
   }
 
-  return (
-    getSidebarRole(menuRole) === current
-  );
+  return getSidebarRole(menuRole) === current;
 }
 
 /* =========================================================
    PERMISSION / MODULE
 ========================================================= */
 
-function canViewMenu(
-  item,
-  permissions,
-  modules
-) {
+function canViewMenu(item, permissions, modules) {
   if (!item) {
     return false;
   }
@@ -202,10 +221,7 @@ function canViewMenu(
     !item.module ||
     modules.includes(item.module);
 
-  return (
-    permissionAllowed &&
-    moduleAllowed
-  );
+  return permissionAllowed && moduleAllowed;
 }
 
 /* =========================================================
@@ -228,9 +244,7 @@ function filterMenuItems(
         return null;
       }
 
-      /* ================================================
-         HEADER
-      ================================================= */
+      /* HEADER */
 
       if (item.type === "header") {
         return {
@@ -239,22 +253,13 @@ function filterMenuItems(
         };
       }
 
-      /* ================================================
-         ROLE
-      ================================================= */
+      /* ROLE */
 
-      if (
-        !isRoleAllowed(
-          item.role,
-          currentRole
-        )
-      ) {
+      if (!isRoleAllowed(item.role, currentRole)) {
         return null;
       }
 
-      /* ================================================
-         CHILDREN
-      ================================================= */
+      /* CHILDREN */
 
       if (Array.isArray(item.children)) {
         const filteredChildren =
@@ -272,38 +277,23 @@ function filterMenuItems(
             modules
           );
 
-        /*
-         * Parent dan child sama-sama boleh
-         */
         if (
           parentAllowed &&
           filteredChildren.length > 0
         ) {
           return {
             ...item,
-            children:
-              filteredChildren,
+            children: filteredChildren,
           };
         }
 
-        /*
-         * Parent tidak punya permission,
-         * tetapi child boleh.
-         */
-        if (
-          filteredChildren.length > 0
-        ) {
+        if (filteredChildren.length > 0) {
           return {
             ...item,
-            children:
-              filteredChildren,
+            children: filteredChildren,
           };
         }
 
-        /*
-         * Parent boleh tetapi tidak
-         * memiliki child yang visible.
-         */
         if (parentAllowed) {
           return {
             ...item,
@@ -314,9 +304,7 @@ function filterMenuItems(
         return null;
       }
 
-      /* ================================================
-         NORMAL ITEM
-      ================================================= */
+      /* NORMAL ITEM */
 
       if (
         !canViewMenu(
@@ -337,52 +325,39 @@ function filterMenuItems(
    REMOVE EMPTY HEADERS
 ========================================================= */
 
-function removeEmptyHeaders(
-  sections
-) {
+function removeEmptyHeaders(sections) {
   if (!Array.isArray(sections)) {
     return [];
   }
 
   const result = [];
 
-  for (
-    let i = 0;
-    i < sections.length;
-    i++
-  ) {
-    const current =
-      sections[i];
+  for (let i = 0; i < sections.length; i++) {
+    const current = sections[i];
 
     if (!current) {
       continue;
     }
 
-    if (
-      current.type !== "header"
-    ) {
+    if (current.type !== "header") {
       result.push(current);
       continue;
     }
 
-    let hasItemAfterHeader =
-      false;
+    let hasItemAfterHeader = false;
 
     for (
       let j = i + 1;
       j < sections.length;
       j++
     ) {
-      const next =
-        sections[j];
+      const next = sections[j];
 
       if (!next) {
         continue;
       }
 
-      if (
-        next.type === "header"
-      ) {
+      if (next.type === "header") {
         break;
       }
 
@@ -438,25 +413,18 @@ export default function Sidebar({
   const [mounted, setMounted] =
     useState(false);
 
-  const [
-    permissions,
-    setPermissions,
-  ] = useState([]);
+  const [permissions, setPermissions] =
+    useState([]);
 
-  const [
-    modules,
-    setModules,
-  ] = useState([]);
+  const [modules, setModules] =
+    useState([]);
 
   /* =======================================================
      REFS
   ======================================================= */
 
-  const sidebarNavRef =
-    useRef(null);
-
-  const flyoutPanelRef =
-    useRef(null);
+  const sidebarNavRef = useRef(null);
+  const flyoutPanelRef = useRef(null);
 
   const closeTimeoutRef =
     useRef(null);
@@ -471,23 +439,17 @@ export default function Sidebar({
     useRef(null);
 
   /* =======================================================
-     FLYOUT / TOOLTIP STATE
+     FLYOUT / TOOLTIP
   ======================================================= */
 
-  const [
-    flyoutState,
-    setFlyoutState,
-  ] = useState(null);
+  const [flyoutState, setFlyoutState] =
+    useState(null);
 
-  const [
-    logoTooltip,
-    setLogoTooltip,
-  ] = useState(null);
+  const [logoTooltip, setLogoTooltip] =
+    useState(null);
 
-  const [
-    itemTooltip,
-    setItemTooltip,
-  ] = useState(null);
+  const [itemTooltip, setItemTooltip] =
+    useState(null);
 
   /* =======================================================
      MOUNT
@@ -501,45 +463,38 @@ export default function Sidebar({
      SET COLLAPSED
   ======================================================= */
 
-  const setCollapsed = (
-    value
-  ) => {
-    setCollapsedInternal(
-      (prev) => {
-        const next =
-          typeof value ===
-          "function"
-            ? value(prev)
-            : value;
+  const setCollapsed = (value) => {
+    setCollapsedInternal((prev) => {
+      const next =
+        typeof value === "function"
+          ? value(prev)
+          : value;
 
-        try {
-          localStorage.setItem(
-            SIDEBAR_COLLAPSED_KEY,
-            String(next)
-          );
-        } catch (e) {
-          /* ignore */
-        }
-
-        return next;
+      try {
+        localStorage.setItem(
+          SIDEBAR_COLLAPSED_KEY,
+          String(next)
+        );
+      } catch (e) {
+        /* ignore */
       }
-    );
+
+      return next;
+    });
   };
 
   /* =======================================================
-     SYNC WITH PARENT
+     SYNC PARENT
   ======================================================= */
 
   useEffect(() => {
-    setCollapsedProp?.(
-      collapsed
-    );
+    setCollapsedProp?.(collapsed);
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [collapsed]);
 
   /* =======================================================
-     LOAD PERMISSIONS
+     LOAD AUTH DATA
   ======================================================= */
 
   useEffect(() => {
@@ -556,17 +511,13 @@ export default function Sidebar({
           getActiveModules();
 
         setPermissions(
-          Array.isArray(
-            userPermissions
-          )
+          Array.isArray(userPermissions)
             ? userPermissions
             : []
         );
 
         setModules(
-          Array.isArray(
-            activeModules
-          )
+          Array.isArray(activeModules)
             ? activeModules
             : []
         );
@@ -583,13 +534,8 @@ export default function Sidebar({
 
     loadAuthData();
 
-    const handleStorage = (
-      event
-    ) => {
-      if (
-        event.key ===
-        "token"
-      ) {
+    const handleStorage = (event) => {
+      if (event.key === "token") {
         loadAuthData();
       }
     };
@@ -612,46 +558,42 @@ export default function Sidebar({
   ======================================================= */
 
   const role = useMemo(() => {
-    /*
-     * =====================================================
-     * ROLE DARI PROP
-     * =====================================================
-     */
+    const pathnameRole =
+      resolveRole(pathname);
 
-    if (roleProp) {
-      return getSidebarRole(
-        roleProp
-      );
+    /* URL */
+
+    if (pathnameRole) {
+      return pathnameRole;
     }
 
-    /*
-     * =====================================================
-     * ROLE DARI TOKEN
-     * =====================================================
-     */
+    /* PROP */
+
+    if (roleProp) {
+      const propRole =
+        getSidebarRole(roleProp);
+
+      if (propRole) {
+        return propRole;
+      }
+    }
+
+    /* TOKEN */
 
     const tokenRole =
       getAuthRole();
 
     if (tokenRole) {
-      return getSidebarRole(
-        tokenRole
-      );
+      const normalizedTokenRole =
+        getSidebarRole(tokenRole);
+
+      if (normalizedTokenRole) {
+        return normalizedTokenRole;
+      }
     }
 
-    /*
-     * =====================================================
-     * FALLBACK BERDASARKAN URL
-     * =====================================================
-     */
-
-    return resolveRole(
-      pathname
-    );
-  }, [
-    roleProp,
-    pathname,
-  ]);
+    return DEFAULT_ROLE;
+  }, [pathname, roleProp]);
 
   /* =======================================================
      CONFIG
@@ -659,9 +601,7 @@ export default function Sidebar({
 
   const config =
     configByRole[role] ??
-    configByRole[
-      DEFAULT_ROLE
-    ];
+    configByRole[DEFAULT_ROLE];
 
   /* =======================================================
      MENU
@@ -670,7 +610,10 @@ export default function Sidebar({
   const menuSections =
     useMemo(() => {
       if (
-        !config?.menuSections
+        !config ||
+        !Array.isArray(
+          config.menuSections
+        )
       ) {
         return [];
       }
@@ -694,7 +637,7 @@ export default function Sidebar({
     ]);
 
   /* =======================================================
-     INITIAL RESPONSIVE MODE
+     RESPONSIVE
   ======================================================= */
 
   useLayoutEffect(() => {
@@ -717,18 +660,14 @@ export default function Sidebar({
     const applyInitialMode = (
       mobile
     ) => {
-      setIsMobile(
-        mobile
-      );
+      setIsMobile(mobile);
 
       if (stored !== null) {
         setCollapsedInternal(
           stored === "true"
         );
       } else if (mobile) {
-        setCollapsedInternal(
-          true
-        );
+        setCollapsedInternal(true);
 
         try {
           localStorage.setItem(
@@ -746,13 +685,9 @@ export default function Sidebar({
     );
 
     const raf =
-      requestAnimationFrame(
-        () => {
-          setAllowTransition(
-            true
-          );
-        }
-      );
+      requestAnimationFrame(() => {
+        setAllowTransition(true);
+      });
 
     const handleMediaChange =
       (event) => {
@@ -760,12 +695,8 @@ export default function Sidebar({
           event.matches
         );
 
-        if (
-          event.matches
-        ) {
-          setMobileOpen(
-            false
-          );
+        if (event.matches) {
+          setMobileOpen(false);
         }
       };
 
@@ -780,16 +711,14 @@ export default function Sidebar({
         handleMediaChange
       );
 
-      cancelAnimationFrame(
-        raf
-      );
+      cancelAnimationFrame(raf);
     };
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /* =======================================================
-     RESTORE SIDEBAR SCROLL
+     RESTORE SCROLL
   ======================================================= */
 
   useLayoutEffect(() => {
@@ -816,17 +745,14 @@ export default function Sidebar({
       savedScrollTop = 0;
     }
 
-    const restoreScroll =
-      () => {
-        if (
-          !sidebarNavRef.current
-        ) {
-          return;
-        }
+    const restoreScroll = () => {
+      if (!sidebarNavRef.current) {
+        return;
+      }
 
-        sidebarNavRef.current.scrollTop =
-          savedScrollTop;
-      };
+      sidebarNavRef.current.scrollTop =
+        savedScrollTop;
+    };
 
     restoreScroll();
 
@@ -836,27 +762,17 @@ export default function Sidebar({
       );
 
     const raf2 =
-      requestAnimationFrame(
-        () => {
-          requestAnimationFrame(
-            restoreScroll
-          );
-        }
-      );
+      requestAnimationFrame(() => {
+        requestAnimationFrame(
+          restoreScroll
+        );
+      });
 
     return () => {
-      cancelAnimationFrame(
-        raf1
-      );
-
-      cancelAnimationFrame(
-        raf2
-      );
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
     };
-  }, [
-    pathname,
-    role,
-  ]);
+  }, [pathname, role]);
 
   /* =======================================================
      SAVE SCROLL
@@ -875,9 +791,7 @@ export default function Sidebar({
         try {
           sessionStorage.setItem(
             SIDEBAR_SCROLL_KEY,
-            String(
-              nav.scrollTop
-            )
+            String(nav.scrollTop)
           );
         } catch (e) {
           /* ignore */
@@ -887,9 +801,7 @@ export default function Sidebar({
     nav.addEventListener(
       "scroll",
       handleSidebarScroll,
-      {
-        passive: true,
-      }
+      { passive: true }
     );
 
     handleSidebarScroll();
@@ -900,19 +812,16 @@ export default function Sidebar({
         handleSidebarScroll
       );
     };
-  }, [
-    pathname,
-    role,
-  ]);
+  }, [pathname, role]);
 
   /* =======================================================
-     LOCK BODY SCROLL MOBILE
+     BODY LOCK MOBILE
   ======================================================= */
 
   useEffect(() => {
     if (
       isMobile &&
-      !collapsed
+      mobileOpen
     ) {
       document.body.style.overflow =
         "hidden";
@@ -925,72 +834,66 @@ export default function Sidebar({
       document.body.style.overflow =
         "";
     };
-  }, [
-    isMobile,
-    collapsed,
-  ]);
+  }, [isMobile, mobileOpen]);
 
   /* =======================================================
      SUBMENU STATE
   ======================================================= */
 
-  const [
-    openMenus,
-    setOpenMenus,
-  ] = useState(() => {
-    const initial = {};
+  const [openMenus, setOpenMenus] =
+    useState(() => {
+      const initial = {};
 
-    menuSections.forEach(
-      (item) => {
-        if (item.children) {
-          initial[item.key] =
-            true;
+      menuSections.forEach(
+        (item) => {
+          if (
+            Array.isArray(
+              item.children
+            )
+          ) {
+            initial[item.key] = true;
+          }
         }
-      }
-    );
+      );
 
-    return initial;
-  });
+      return initial;
+    });
 
   useEffect(() => {
     const next = {};
 
     menuSections.forEach(
       (item) => {
-        if (item.children) {
-          next[item.key] =
-            true;
+        if (
+          Array.isArray(
+            item.children
+          )
+        ) {
+          next[item.key] = true;
         }
       }
     );
 
-    setOpenMenus(
-      (prev) => ({
-        ...next,
-        ...prev,
-      })
-    );
-
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [role]);
+    setOpenMenus((prev) => ({
+      ...next,
+      ...prev,
+    }));
+  }, [menuSections, role]);
 
   /* =======================================================
-     FLYOUT HELPERS
+     FLYOUT
   ======================================================= */
 
-  const clearCloseTimeout =
-    () => {
-      if (
+  const clearCloseTimeout = () => {
+    if (closeTimeoutRef.current) {
+      clearTimeout(
         closeTimeoutRef.current
-      ) {
-        clearTimeout(
-          closeTimeoutRef.current
-        );
+      );
 
-        closeTimeoutRef.current =
-          null;
-      }
-    };
+      closeTimeoutRef.current =
+        null;
+    }
+  };
 
   const openFlyoutFor = (
     item,
@@ -1013,42 +916,41 @@ export default function Sidebar({
     });
   };
 
-  const scheduleCloseFlyout =
-    () => {
-      clearCloseTimeout();
+  const scheduleCloseFlyout = () => {
+    clearCloseTimeout();
 
-      closeTimeoutRef.current =
-        setTimeout(() => {
-          setFlyoutState(
-            null
-          );
-        }, 150);
-    };
+    closeTimeoutRef.current =
+      setTimeout(() => {
+        setFlyoutState(null);
+      }, 150);
+  };
 
   const toggleFlyoutByClick = (
     item,
     triggerElement
   ) => {
-    setFlyoutState(
-      (prev) => {
-        if (
-          prev &&
-          prev.key === item.key
-        ) {
-          return null;
-        }
+    if (!triggerElement) {
+      return;
+    }
 
-        const rect =
-          triggerElement.getBoundingClientRect();
-
-        return {
-          key: item.key,
-          item,
-          top: rect.top,
-          left: rect.right + 12,
-        };
+    setFlyoutState((prev) => {
+      if (
+        prev &&
+        prev.key === item.key
+      ) {
+        return null;
       }
-    );
+
+      const rect =
+        triggerElement.getBoundingClientRect();
+
+      return {
+        key: item.key,
+        item,
+        top: rect.top,
+        left: rect.right + 12,
+      };
+    });
   };
 
   /* =======================================================
@@ -1076,14 +978,15 @@ export default function Sidebar({
           !clickedInsideNav &&
           !clickedInsidePanel
         ) {
-          setFlyoutState(
-            null
-          );
+          setFlyoutState(null);
         }
       };
 
     const close = () =>
       setFlyoutState(null);
+
+    const nav =
+      sidebarNavRef.current;
 
     document.addEventListener(
       "mousedown",
@@ -1095,7 +998,7 @@ export default function Sidebar({
       close
     );
 
-    sidebarNavRef.current?.addEventListener(
+    nav?.addEventListener(
       "scroll",
       close
     );
@@ -1111,24 +1014,18 @@ export default function Sidebar({
         close
       );
 
-      sidebarNavRef.current?.removeEventListener(
+      nav?.removeEventListener(
         "scroll",
         close
       );
     };
-  }, [
-    flyoutState,
-  ]);
+  }, [flyoutState]);
 
   useEffect(() => {
     if (!collapsed) {
-      setFlyoutState(
-        null
-      );
+      setFlyoutState(null);
     }
-  }, [
-    collapsed,
-  ]);
+  }, [collapsed]);
 
   /* =======================================================
      LOGO TOOLTIP
@@ -1148,39 +1045,33 @@ export default function Sidebar({
       }
     };
 
-  const showLogoTooltip =
-    () => {
-      clearLogoTooltipTimeout();
+  const showLogoTooltip = () => {
+    clearLogoTooltipTimeout();
 
-      if (
-        !logoWrapRef.current
-      ) {
-        return;
-      }
+    if (!logoWrapRef.current) {
+      return;
+    }
 
-      const rect =
-        logoWrapRef.current.getBoundingClientRect();
+    const rect =
+      logoWrapRef.current.getBoundingClientRect();
 
-      setLogoTooltip({
-        top:
-          rect.top +
-          rect.height / 2,
-        left:
-          rect.right + 12,
-      });
-    };
+    setLogoTooltip({
+      top:
+        rect.top +
+        rect.height / 2,
+      left:
+        rect.right + 12,
+    });
+  };
 
-  const hideLogoTooltip =
-    () => {
-      clearLogoTooltipTimeout();
+  const hideLogoTooltip = () => {
+    clearLogoTooltipTimeout();
 
-      logoTooltipTimeoutRef.current =
-        setTimeout(() => {
-          setLogoTooltip(
-            null
-          );
-        }, 100);
-    };
+    logoTooltipTimeoutRef.current =
+      setTimeout(() => {
+        setLogoTooltip(null);
+      }, 100);
+  };
 
   useEffect(() => {
     if (!logoTooltip) {
@@ -1213,9 +1104,7 @@ export default function Sidebar({
         true
       );
     };
-  }, [
-    logoTooltip,
-  ]);
+  }, [logoTooltip]);
 
   /* =======================================================
      ITEM TOOLTIP
@@ -1259,17 +1148,14 @@ export default function Sidebar({
     });
   };
 
-  const hideItemTooltip =
-    () => {
-      clearItemTooltipTimeout();
+  const hideItemTooltip = () => {
+    clearItemTooltipTimeout();
 
-      itemTooltipTimeoutRef.current =
-        setTimeout(() => {
-          setItemTooltip(
-            null
-          );
-        }, 100);
-    };
+    itemTooltipTimeoutRef.current =
+      setTimeout(() => {
+        setItemTooltip(null);
+      }, 100);
+  };
 
   useEffect(() => {
     if (!itemTooltip) {
@@ -1278,6 +1164,9 @@ export default function Sidebar({
 
     const close = () =>
       setItemTooltip(null);
+
+    const nav =
+      sidebarNavRef.current;
 
     window.addEventListener(
       "resize",
@@ -1290,7 +1179,7 @@ export default function Sidebar({
       true
     );
 
-    sidebarNavRef.current?.addEventListener(
+    nav?.addEventListener(
       "scroll",
       close
     );
@@ -1307,55 +1196,40 @@ export default function Sidebar({
         true
       );
 
-      sidebarNavRef.current?.removeEventListener(
+      nav?.removeEventListener(
         "scroll",
         close
       );
     };
-  }, [
-    itemTooltip,
-  ]);
+  }, [itemTooltip]);
 
   useEffect(() => {
     if (!collapsed) {
-      setItemTooltip(
-        null
-      );
+      setItemTooltip(null);
     }
-  }, [
-    collapsed,
-  ]);
+  }, [collapsed]);
 
   useEffect(() => {
     if (flyoutState) {
-      setItemTooltip(
-        null
-      );
+      setItemTooltip(null);
     }
-  }, [
-    flyoutState,
-  ]);
+  }, [flyoutState]);
 
   /* =======================================================
      ACTIONS
   ======================================================= */
 
-  const toggleSidebar =
-    () =>
-      setCollapsed(
-        (prev) => !prev
-      );
-
-  const toggleSubmenu = (
-    key
-  ) => {
-    setOpenMenus(
-      (prev) => ({
-        ...prev,
-        [key]:
-          !prev[key],
-      })
+  const toggleSidebar = () => {
+    setCollapsed(
+      (prev) => !prev
     );
+  };
+
+  const toggleSubmenu = (key) => {
+    setOpenMenus((prev) => ({
+      ...prev,
+      [key]: !prev[key],
+    }));
   };
 
   const handleMenuClick = (
@@ -1363,25 +1237,17 @@ export default function Sidebar({
     collapsedIconMode,
     triggerElement
   ) => {
-    /*
-     * =====================================================
-     * COLLAPSED + ADA CHILDREN
-     * =====================================================
-     */
+    /* COLLAPSED + CHILDREN */
 
     if (
       collapsedIconMode &&
-      item.children
+      Array.isArray(item.children) &&
+      item.children.length > 0
     ) {
       if (isMobile) {
         if (item.path) {
-          setActive?.(
-            item.key
-          );
-
-          router.push(
-            item.path
-          );
+          setActive?.(item.key);
+          router.push(item.path);
         }
 
         return;
@@ -1395,114 +1261,89 @@ export default function Sidebar({
       return;
     }
 
-    setItemTooltip(
-      null
-    );
+    setItemTooltip(null);
 
     const alreadyOnThisPage =
       pathname === item.path;
 
-    setActive?.(
-      item.key
-    );
+    setActive?.(item.key);
 
-    /*
-     * =====================================================
-     * SUBMENU
-     * =====================================================
-     */
+    /* SUBMENU */
 
     if (
-      item.children &&
+      Array.isArray(item.children) &&
       alreadyOnThisPage
     ) {
-      toggleSubmenu(
-        item.key
-      );
+      toggleSubmenu(item.key);
 
       return;
     }
 
-    /*
-     * =====================================================
-     * NAVIGATE
-     * =====================================================
-     */
+    /* NAVIGATE */
 
     if (item.path) {
-      router.push(
-        item.path
-      );
+      router.push(item.path);
     }
   };
 
-  const handleSubItemClick =
-    (
-      parentKey,
-      child
-    ) => {
-      if (
-        sidebarNavRef.current
-      ) {
-        try {
-          sessionStorage.setItem(
-            SIDEBAR_SCROLL_KEY,
-            String(
-              sidebarNavRef.current
-                .scrollTop
-            )
-          );
-        } catch (e) {
-          /* ignore */
-        }
-      }
-
-      setActive?.(
-        child.key
-      );
-
-      router.push(
-        child.path
-      );
-
-      setFlyoutState(
-        null
-      );
-
-      setMobileOpen(
-        false
-      );
-
-      if (onClose) {
-        onClose();
-      }
-    };
-
-  const handleLogout =
-    () => {
+  const handleSubItemClick = (
+    parentKey,
+    child
+  ) => {
+    if (sidebarNavRef.current) {
       try {
-        localStorage.removeItem(
-          "token"
-        );
-
-        localStorage.removeItem(
-          SIDEBAR_COLLAPSED_KEY
-        );
-
-        sessionStorage.removeItem(
-          SIDEBAR_SCROLL_KEY
+        sessionStorage.setItem(
+          SIDEBAR_SCROLL_KEY,
+          String(
+            sidebarNavRef.current
+              .scrollTop
+          )
         );
       } catch (e) {
-        console.error(
-          "[SIDEBAR] Logout error:",
-          e
-        );
+        /* ignore */
       }
+    }
 
-      router.push(
-        "/login"
+    setActive?.(child.key);
+
+    if (child.path) {
+      router.push(child.path);
+    }
+
+    setFlyoutState(null);
+    setMobileOpen(false);
+
+    if (onClose) {
+      onClose();
+    }
+  };
+
+  /* =======================================================
+     LOGOUT
+  ======================================================= */
+
+  const handleLogout = () => {
+    try {
+      localStorage.removeItem(
+        "token"
       );
-    };
+
+      localStorage.removeItem(
+        SIDEBAR_COLLAPSED_KEY
+      );
+
+      sessionStorage.removeItem(
+        SIDEBAR_SCROLL_KEY
+      );
+    } catch (e) {
+      console.error(
+        "[SIDEBAR] Logout error:",
+        e
+      );
+    }
+
+    router.push("/login");
+  };
 
   /* =======================================================
      DERIVED
@@ -1528,12 +1369,17 @@ export default function Sidebar({
   const wrapperClasses =
     isMobile
       ? "relative shrink-0 h-screen w-[72px] z-50 overflow-visible"
-      : `relative shrink-0 h-screen ${desktopWidth} z-40 overflow-visible sticky top-0 ${transitionClass}`;
-
-  const isDrawerOpen =
-    isMobile
-      ? mobileOpen
-      : !collapsed;
+      : `
+          relative
+          shrink-0
+          h-screen
+          ${desktopWidth}
+          z-40
+          overflow-visible
+          sticky
+          top-0
+          ${transitionClass}
+        `;
 
   /* =======================================================
      ASIDE
@@ -1542,41 +1388,56 @@ export default function Sidebar({
   const asideClasses =
     isMobile
       ? `
-        fixed
-        inset-y-0
-        left-0
-        z-50
-        ${
-          collapsed
-            ? SIDEBAR_COLLAPSED_WIDTH
-            : "w-64 max-w-[85vw]"
-        }
-        bg-[#0f1729]
-        flex
-        flex-col
-        border-r
-        border-white/10
-        overflow-visible
-        ${transitionClass}
-        ${
-          isDrawerOpen
-            ? "translate-x-0"
-            : "-translate-x-full"
-        }
-      `
+          fixed
+          inset-y-0
+          left-0
+          z-50
+          ${
+            collapsed
+              ? SIDEBAR_COLLAPSED_WIDTH
+              : "w-64 max-w-[85vw]"
+          }
+
+          bg-[#f4f8ff]
+          dark:bg-[#0b1220]
+
+          flex
+          flex-col
+
+          border-r
+          border-blue-100
+          dark:border-slate-800
+
+          overflow-visible
+
+          ${transitionClass}
+
+          ${
+            mobileOpen
+              ? "translate-x-0"
+              : "-translate-x-full"
+          }
+        `
       : `
-        relative
-        ${desktopWidth}
-        h-screen
-        bg-[#0f1729]
-        flex
-        flex-col
-        flex-shrink-0
-        border-r
-        border-white/10
-        overflow-visible
-        ${transitionClass}
-      `;
+          relative
+          ${desktopWidth}
+          h-screen
+
+          bg-[#f4f8ff]
+          dark:bg-[#0b1220]
+
+          flex
+          flex-col
+          flex-shrink-0
+
+          border-r
+          border-blue-100
+          dark:border-slate-800
+
+          overflow-visible
+
+          ${transitionClass}
+        `;
 
   /* =======================================================
      RENDER
@@ -1592,15 +1453,16 @@ export default function Sidebar({
         mobileOpen && (
           <div
             onClick={() =>
-              setMobileOpen(
-                false
-              )
+              setMobileOpen(false)
             }
             className="
               fixed
               inset-0
               z-40
-              bg-slate-900/60
+
+              bg-slate-900/40
+              dark:bg-black/70
+
               backdrop-blur-sm
               transition-opacity
               duration-300
@@ -1610,7 +1472,7 @@ export default function Sidebar({
         )}
 
       {/* ===================================================
-          MOBILE TOGGLE
+          MOBILE OPEN BUTTON
       =================================================== */}
 
       {isMobile &&
@@ -1618,9 +1480,7 @@ export default function Sidebar({
           <button
             type="button"
             onClick={() =>
-              setMobileOpen(
-                true
-              )
+              setMobileOpen(true)
             }
             aria-label="Buka sidebar"
             className="
@@ -1628,20 +1488,29 @@ export default function Sidebar({
               left-4
               top-4
               z-30
+
               flex
               h-10
               w-10
               items-center
               justify-center
-              rounded-lg
-              border
-              border-white/10
-              bg-[#0f1729]
+
+              rounded-xl
+
+              bg-[#2474e8]
+              dark:bg-blue-800
+
               text-white
+
               shadow-lg
-              hover:bg-[#1c2a4a]
+              dark:shadow-black/40
+
+              hover:bg-blue-600
+              dark:hover:bg-blue-700
+
               transition-all
               duration-200
+
               lg:hidden
             "
           >
@@ -1663,87 +1532,219 @@ export default function Sidebar({
             asideClasses
           }
         >
-          <div className="relative z-10 flex flex-col h-full min-h-0 overflow-hidden">
+          <div
+            className="
+              relative
+              z-10
+              flex
+              flex-col
+              h-full
+              min-h-0
+              overflow-hidden
 
+              bg-[#f4f8ff]
+              dark:bg-[#0b1220]
+            "
+          >
             {/* =================================================
-                TOP ACCENT
+                HEADER
             ================================================= */}
 
-            <div className="h-[3px] w-full bg-[#155DFC] shrink-0" />
+            <div
+              className="
+                relative
+                h-[112px]
+                shrink-0
 
-            {/* =================================================
-                LOGO HEADER
-            ================================================= */}
+                bg-[#2474e8]
+                dark:bg-[#102a43]
 
-            <div className="flex items-center h-20 px-4 shrink-0 border-b border-white/10 bg-[#1c2a4a]">
+                overflow-visible
+              "
+            >
+              {/* LOGO + BRAND */}
+
               <div
-                ref={
-                  logoWrapRef
-                }
+                ref={logoWrapRef}
                 onMouseEnter={
-                  showLogoTooltip
+                  collapsed
+                    ? showLogoTooltip
+                    : undefined
                 }
                 onMouseLeave={
-                  hideLogoTooltip
-                }
-                className={`flex items-center gap-3 min-w-0 ${
                   collapsed
-                    ? "w-full justify-center"
-                    : ""
-                }`}
+                    ? hideLogoTooltip
+                    : undefined
+                }
+                className="
+                  absolute
+                  left-3
+                  top-4
+                  z-20
+
+                  flex
+                  items-center
+                  gap-3
+
+                  min-w-0
+                "
               >
-                <div className="relative w-11 h-11 shrink-0 rounded-lg bg-white p-1.5 shadow-sm">
+              <div
+  className="
+    relative
+    w-12
+    h-12
+    shrink-0
+
+    rounded-full
+
+    bg-white
+    dark:bg-blue-100
+
+    shadow-md
+    shadow-blue-900/20
+    dark:shadow-black/30
+
+    ring-2
+    ring-white/40
+    dark:ring-blue-300/20
+  "
+>
                   <Image
                     src="/logo/logoSS.png"
                     alt="Logo SmartSchool"
                     fill
-                    sizes="44px"
-                    className="object-contain p-1"
+                    sizes="48px"
+                    className="
+                      object-contain
+                      p-2
+                    "
                     priority
                   />
                 </div>
 
                 {showLabels && (
-                  <div className="flex flex-col min-w-0 leading-tight text-left">
-                    <span className="text-xl font-bold tracking-tight text-white truncate">
+                  <div
+                    className="
+                      flex
+                      flex-col
+                      min-w-0
+                      leading-tight
+                      text-left
+                    "
+                  >
+                    <span
+                      className="
+                        text-[17px]
+                        font-semibold
+                        tracking-tight
+
+                        text-white
+
+                        truncate
+                      "
+                    >
                       Smart
-                      <span className="text-blue-400">
+                      <span
+                        className="
+                          text-blue-100
+                          dark:text-blue-300
+                        "
+                      >
                         School
                       </span>
                     </span>
 
-                    
+                    <span
+                      className="
+                        mt-0.5
+
+                        text-[9px]
+                        font-medium
+                        tracking-[0.1em]
+                        uppercase
+
+                        text-white/85
+                        dark:text-blue-200/80
+
+                        truncate
+                      "
+                    >
+                      {config?.brandName ||
+                        "ADMIN SEKOLAH"}
+                    </span>
                   </div>
                 )}
               </div>
 
-              {/* =================================================
-                  MOBILE CLOSE
-              ================================================= */}
+              {/* MOBILE CLOSE */}
 
               {isMobile &&
                 mobileOpen && (
                   <button
                     type="button"
                     onClick={() =>
-                      setMobileOpen(
-                        false
-                      )
+                      setMobileOpen(false)
                     }
                     aria-label="Tutup sidebar"
                     className="
-                      ml-auto
+                      absolute
+                      right-3
+                      top-4
+                      z-20
+
                       rounded-lg
                       p-1.5
-                      text-slate-400
-                      hover:bg-white/10
+
+                      text-white/80
+                      dark:text-blue-100/80
+
+                      hover:bg-white/15
+                      dark:hover:bg-blue-900/40
+
                       hover:text-white
+                      dark:hover:text-white
+
                       transition
                     "
                   >
                     <X size={18} />
                   </button>
                 )}
+
+              {/* =================================================
+                  CURVE
+              ================================================= */}
+
+              <svg
+                className="
+                  absolute
+                  left-0
+                  bottom-[-1px]
+                  w-full
+                  h-[42px]
+                  z-10
+
+                  pointer-events-none
+                "
+                viewBox="0 0 320 42"
+                preserveAspectRatio="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="
+                    M0 0
+                    C70 28, 250 28, 320 0
+                    L320 42
+                    L0 42
+                    Z
+                  "
+                  className="
+                    fill-[#f4f8ff]
+                    dark:fill-[#0b1220]
+                  "
+                />
+              </svg>
             </div>
 
             {/* =================================================
@@ -1751,21 +1752,24 @@ export default function Sidebar({
             ================================================= */}
 
             <nav
-              ref={
-                sidebarNavRef
-              }
+              ref={sidebarNavRef}
               className="
                 flex-1
                 min-h-0
+
                 overflow-y-auto
                 overflow-x-hidden
+
                 px-3
-                py-4
-                mt-2
-                space-y-0.5
+                py-2
+                space-y-1
                 pb-6
+
                 scrollbar-thin
-                scrollbar-thumb-slate-700
+
+                scrollbar-thumb-blue-200
+                dark:scrollbar-thumb-slate-700
+
                 scrollbar-track-transparent
               "
             >
@@ -1776,9 +1780,9 @@ export default function Sidebar({
                     item,
                     index
                   ) => {
-                    /* =========================================
-                       SECTION HEADER
-                    ========================================= */
+                    /* =================================================
+                       HEADER
+                    ================================================= */
 
                     if (
                       item.type ===
@@ -1787,48 +1791,106 @@ export default function Sidebar({
                       if (
                         !showLabels
                       ) {
-                        return null;
+                        return (
+                          <div
+                            key={`header-${index}`}
+                            className="px-3 py-2"
+                          >
+                            <div
+                              className="
+                                h-px
+
+                                bg-slate-200
+                                dark:bg-slate-800
+                              "
+                            />
+                          </div>
+                        );
                       }
 
                       return (
                         <div
                           key={`header-${index}`}
-                          className="px-2 pt-5 pb-2"
+                          className="
+                            px-2
+                            pt-4
+                            pb-2
+                          "
                         >
-                          <div className="flex items-center gap-2">
-                            <div className="flex-1 h-px bg-white/10" />
+                          <div
+                            className="
+                              flex
+                              items-center
+                              gap-3
+                            "
+                          >
+                            <div
+                              className="
+                                flex-1
+                                h-px
 
-                            <span className="text-[9px] font-semibold uppercase tracking-[0.2em] text-blue-300/70 whitespace-nowrap">
+                                bg-slate-300
+                                dark:bg-slate-700
+                              "
+                            />
+
+                            <span
+                              className="
+                                text-[10px]
+                                font-medium
+                                uppercase
+                                tracking-[0.18em]
+                                whitespace-nowrap
+
+                                text-blue-600
+                                dark:text-blue-400
+                              "
+                            >
                               {
                                 item.label
                               }
                             </span>
 
-                            <div className="flex-1 h-px bg-white/10" />
+                            <div
+                              className="
+                                flex-1
+                                h-px
+
+                                bg-slate-300
+                                dark:bg-slate-700
+                              "
+                            />
                           </div>
                         </div>
                       );
                     }
 
-                    /* =========================================
-                       MENU DATA
-                    ========================================= */
+                    /* =================================================
+                       MENU
+                    ================================================= */
 
                     const hasChildren =
-                      !!item.children;
+                      Array.isArray(
+                        item.children
+                      ) &&
+                      item.children
+                        .length >
+                        0;
 
                     const isChildActive =
                       hasChildren &&
                       item.children.some(
-                        (c) =>
+                        (
+                          child
+                        ) =>
                           pathname ===
-                          c.path
+                          child.path
                       );
 
-                    const isActive =
+                    const isLeafActive =
+                      !hasChildren &&
                       pathname ===
-                        item.path ||
-                      isChildActive;
+                        item.path;
 
                     const isOpen =
                       !!openMenus[
@@ -1838,17 +1900,59 @@ export default function Sidebar({
                     const collapsedIconMode =
                       collapsed;
 
-                    const isFlyoutActive =
-                      flyoutState?.key ===
-                      item.key;
+                    /* =================================================
+                       MENU STATE
+                    ================================================= */
+
+                    let stateClass = `
+                      text-slate-700
+                      dark:text-slate-300
+
+                      hover:bg-blue-50
+                      dark:hover:bg-slate-800
+
+                      hover:text-blue-700
+                      dark:hover:text-blue-300
+                    `;
+
+                    if (
+                      isLeafActive
+                    ) {
+                      stateClass =
+                        ACTIVE_SOLID;
+                    } else if (
+                      hasChildren &&
+                      isChildActive &&
+                      collapsedIconMode
+                    ) {
+                      stateClass = `
+                        text-blue-700
+                        bg-blue-100
+
+                        dark:text-blue-200
+                        dark:bg-blue-900/50
+                        dark:border
+                        dark:border-blue-800/60
+                      `;
+                    }
+
+                    const iconColor =
+                      isLeafActive
+                        ? "text-white"
+                        : `
+                            text-blue-600
+                            dark:text-blue-400
+                          `;
 
                     return (
                       <div
-                        key={
-                          item.key
-                        }
+                        key={item.key}
                         className="relative"
                       >
+                        {/* =================================================
+                           MAIN MENU BUTTON
+                        ================================================= */}
+
                         <div
                           onClick={(
                             event
@@ -1936,21 +2040,24 @@ export default function Sidebar({
                             items-center
                             w-full
                             gap-3
+
                             px-3
                             py-2.5
+
                             rounded-xl
+
                             cursor-pointer
                             select-none
-                            text-sm
+
+                            text-[13px]
                             font-medium
+
                             transition-all
                             duration-200
                             ease-out
-                            ${
-                              isActive
-                                ? "text-white bg-white/10 border border-blue-500/30"
-                                : "text-slate-300 hover:text-white hover:bg-white/10"
-                            }
+
+                            ${stateClass}
+
                             ${
                               collapsedIconMode
                                 ? "justify-center px-2"
@@ -1958,17 +2065,29 @@ export default function Sidebar({
                             }
                           `}
                         >
-                          {/* =================================
-                              ACTIVE INDICATOR
-                          ================================= */}
+                          {/* ACTIVE INDICATOR */}
 
-                          {isActive && (
-                            <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 rounded-r-full bg-gradient-to-b from-blue-500 to-indigo-500" />
-                          )}
+                          {isLeafActive &&
+                            !collapsedIconMode && (
+                              <div
+                                className="
+                                  absolute
+                                  left-0
+                                  top-1/2
+                                  -translate-y-1/2
 
-                          {/* =================================
-                              ICON
-                          ================================= */}
+                                  w-1
+                                  h-8
+
+                                  rounded-r-full
+
+                                  bg-blue-500
+                                  dark:bg-blue-400
+                                "
+                              />
+                            )}
+
+                          {/* ICON */}
 
                           <div
                             className={`
@@ -1977,13 +2096,12 @@ export default function Sidebar({
                               items-center
                               justify-center
                               shrink-0
+
                               transition-all
                               duration-200
-                              ${
-                                isActive
-                                  ? "text-blue-400"
-                                  : "text-blue-400/70 group-hover:text-blue-300"
-                              }
+
+                              ${iconColor}
+
                               ${
                                 collapsedIconMode
                                   ? "w-10 h-10"
@@ -1993,36 +2111,36 @@ export default function Sidebar({
                           >
                             {item.icon && (
                               <item.icon
-                                size={20}
-                                className={`
-                                  transition-all
+                                size={18}
+                                className="
+                                  transition-transform
                                   duration-200
-                                  ${
-                                    isActive
-                                      ? "scale-110"
-                                      : ""
-                                  }
-                                  group-hover:scale-110
-                                `}
+
+                                  group-hover:scale-105
+                                "
                               />
                             )}
                           </div>
 
-                          {/* =================================
-                              LABEL
-                          ================================= */}
+                          {/* LABEL */}
 
                           {showLabels && (
-                            <span className="flex-1 min-w-0 text-left text-xs tracking-wide truncate">
+                            <span
+                              className="
+                                flex-1
+                                min-w-0
+
+                                text-left
+                                truncate
+                              "
+                            >
                               {
                                 item.label
                               }
                             </span>
                           )}
 
-                          {/* =================================
-                              SUBMENU TOGGLE
-                          ================================= */}
+                          {/* SUBMENU ARROW */}
 
                           {showLabels &&
                             hasChildren && (
@@ -2039,10 +2157,21 @@ export default function Sidebar({
                                 }}
                                 className="
                                   shrink-0
+
                                   p-1
                                   -m-1
+
                                   rounded-md
-                                  hover:bg-white/10
+
+                                  text-slate-500
+                                  dark:text-slate-400
+
+                                  hover:bg-blue-100
+                                  dark:hover:bg-slate-700
+
+                                  hover:text-blue-600
+                                  dark:hover:text-blue-300
+
                                   transition-colors
                                   duration-150
                                 "
@@ -2052,55 +2181,59 @@ export default function Sidebar({
                                     : "Buka submenu"
                                 }
                               >
-                                <ChevronDown
-                                  size={
-                                    14
-                                  }
-                                  className={`
-                                    text-slate-400
-                                    transition-transform
-                                    duration-200
-                                    ${
-                                      isOpen
-                                        ? "rotate-180"
-                                        : ""
+                                {isOpen ? (
+                                  <ChevronUp
+                                    size={
+                                      15
                                     }
-                                  `}
-                                />
+                                  />
+                                ) : (
+                                  <ChevronDown
+                                    size={
+                                      15
+                                    }
+                                  />
+                                )}
                               </button>
-                            )}
-
-                          {/* =================================
-                              ACTIVE DOT
-                          ================================= */}
-
-                          {showLabels &&
-                            !hasChildren &&
-                            isActive && (
-                              <div className="w-1.5 h-1.5 shrink-0 rounded-full bg-blue-500" />
                             )}
                         </div>
 
-                        {/* =====================================
-                            DESKTOP SUBMENU
-                        ===================================== */}
+                        {/* =================================================
+                           SUBMENU
+                        ================================================= */}
 
                         {hasChildren &&
                           showLabels && (
                             <div
                               className={`
                                 overflow-hidden
+
                                 transition-all
                                 duration-200
                                 ease-out
+
                                 ${
                                   isOpen
-                                    ? "max-h-[600px] opacity-100 mt-0.5"
+                                    ? "max-h-[600px] opacity-100 mt-1"
                                     : "max-h-0 opacity-0"
                                 }
                               `}
                             >
-                              <div className="ml-4 pl-3 py-1 space-y-0.5 border-l border-white/10">
+                              <div
+                                className="
+                                  ml-4
+                                  pl-3
+
+                                  py-1
+
+                                  space-y-0.5
+
+                                  border-l
+
+                                  border-blue-100
+                                  dark:border-slate-700
+                                "
+                              >
                                 {item.children.map(
                                   (
                                     child
@@ -2125,42 +2258,78 @@ export default function Sidebar({
                                           flex
                                           items-center
                                           w-full
-                                          gap-2.5
+                                          gap-3
+
                                           px-3
                                           py-2
-                                          rounded-lg
-                                          text-xs
-                                          font-medium
+
+                                          rounded-xl
+
+                                          text-[12.5px]
+
                                           transition-all
                                           duration-200
+
                                           ${
                                             isChildItemActive
-                                              ? "text-white bg-white/10 border border-blue-500/30"
-                                              : "text-slate-400 hover:text-white hover:bg-white/10"
+                                              ? `${ACTIVE_SOLID} font-medium`
+                                              : `
+                                                  font-normal
+
+                                                  text-slate-600
+                                                  dark:text-slate-400
+
+                                                  hover:text-blue-700
+                                                  dark:hover:text-blue-300
+
+                                                  hover:bg-blue-50
+                                                  dark:hover:bg-slate-800
+                                                `
                                           }
                                         `}
                                       >
                                         {child.icon && (
                                           <child.icon
                                             size={
-                                              15
+                                              16
                                             }
-                                            className={
-                                              isChildItemActive
-                                                ? "text-blue-400 shrink-0"
-                                                : "text-slate-500 shrink-0"
-                                            }
+                                            className={`
+                                              shrink-0
+
+                                              ${
+                                                isChildItemActive
+                                                  ? "text-white dark:text-blue-100"
+                                                  : "text-slate-500 dark:text-slate-500"
+                                              }
+                                            `}
                                           />
                                         )}
 
-                                        <span className="flex-1 min-w-0 text-left tracking-wide truncate">
+                                        <span
+                                          className="
+                                            flex-1
+                                            min-w-0
+                                            text-left
+                                            truncate
+                                          "
+                                        >
                                           {
                                             child.label
                                           }
                                         </span>
 
                                         {isChildItemActive && (
-                                          <div className="w-1 h-1 shrink-0 rounded-full bg-blue-500" />
+                                          <ChevronDown
+                                            size={
+                                              12
+                                            }
+                                            className="
+                                              shrink-0
+
+                                              text-white
+                                              dark:text-blue-200
+                                            "
+                                          />
                                         )}
                                       </button>
                                     );
@@ -2177,9 +2346,13 @@ export default function Sidebar({
                 <div
                   className={`
                     mt-6
+
                     text-center
                     text-xs
+
                     text-slate-400
+                    dark:text-slate-600
+
                     ${
                       collapsed
                         ? "px-1"
@@ -2195,7 +2368,7 @@ export default function Sidebar({
           </div>
 
           {/* =================================================
-              SIDEBAR TOGGLE DESKTOP
+              DESKTOP TOGGLE
           ================================================= */}
 
           {!isMobile && (
@@ -2220,25 +2393,45 @@ export default function Sidebar({
               className="
                 absolute
                 z-[100]
-                top-24
+
+                top-8
                 -right-3
+
                 w-7
                 h-7
+
                 rounded-full
+
                 bg-white
+                dark:bg-slate-900
+
                 border
                 border-blue-200
+                dark:border-slate-700
+
                 flex
                 items-center
                 justify-center
+
                 text-blue-500
+                dark:text-blue-400
+
                 shadow-md
                 shadow-blue-100
+                dark:shadow-black/40
+
                 hover:bg-blue-50
+                dark:hover:bg-slate-800
+
                 hover:text-blue-600
+                dark:hover:text-blue-300
+
                 hover:border-blue-300
+                dark:hover:border-blue-600
+
                 hover:scale-110
                 active:scale-95
+
                 transition-all
                 duration-200
                 ease-in-out
@@ -2250,6 +2443,7 @@ export default function Sidebar({
                   transition-transform
                   duration-300
                   ease-in-out
+
                   ${
                     collapsed
                       ? ""
@@ -2291,23 +2485,72 @@ export default function Sidebar({
               className="
                 min-w-[230px]
                 max-w-[320px]
-                bg-[#0f1729]
+
+                bg-white
+                dark:bg-[#111827]
+
                 rounded-xl
+
                 shadow-xl
+                dark:shadow-black/50
+
                 border
-                border-white/10
+                border-blue-100
+                dark:border-slate-700
+
                 p-2
               "
             >
-              <div className="absolute -left-1.5 top-5 w-3 h-3 bg-[#0f1729] border-l border-b border-white/10 rotate-45" />
+              {/* ARROW */}
 
-              <div className="px-2 pt-1 pb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400 truncate">
+              <div
+                className="
+                  absolute
+                  -left-1.5
+                  top-5
+
+                  w-3
+                  h-3
+
+                  bg-white
+                  dark:bg-[#111827]
+
+                  border-l
+                  border-b
+
+                  border-blue-100
+                  dark:border-slate-700
+
+                  rotate-45
+                "
+              />
+
+              {/* TITLE */}
+
+              <div
+                className="
+                  px-2
+                  pt-1
+                  pb-2
+
+                  text-[10px]
+                  font-semibold
+                  uppercase
+                  tracking-wider
+
+                  text-slate-400
+                  dark:text-slate-500
+
+                  truncate
+                "
+              >
                 {
-                  flyoutState
-                    .item
+                  flyoutState.item
                     .label
                 }
               </div>
+
+              {/* CHILDREN */}
 
               <div className="space-y-0.5">
                 {flyoutState.item.children.map(
@@ -2334,42 +2577,63 @@ export default function Sidebar({
                           flex
                           items-center
                           w-full
-                          gap-2.5
+                          gap-3
+
                           px-3
                           py-2
-                          rounded-lg
-                          text-xs
-                          font-medium
+
+                          rounded-xl
+
+                          text-[12.5px]
                           text-left
+
                           transition-all
                           duration-200
+
                           ${
                             isChildItemActive
-                              ? "text-white bg-blue-500/20 border border-blue-500/30"
-                              : "text-slate-300 hover:text-white hover:bg-white/10"
+                              ? `${ACTIVE_SOLID} font-medium`
+                              : `
+                                  font-normal
+
+                                  text-slate-600
+                                  dark:text-slate-400
+
+                                  hover:text-blue-700
+                                  dark:hover:text-blue-300
+
+                                  hover:bg-blue-50
+                                  dark:hover:bg-slate-800
+                                `
                           }
                         `}
                       >
                         {child.icon && (
                           <child.icon
-                            size={15}
-                            className={
-                              isChildItemActive
-                                ? "text-blue-400 shrink-0"
-                                : "text-slate-500 shrink-0"
-                            }
+                            size={16}
+                            className={`
+                              shrink-0
+
+                              ${
+                                isChildItemActive
+                                  ? "text-white dark:text-blue-100"
+                                  : "text-slate-500 dark:text-slate-500"
+                              }
+                            `}
                           />
                         )}
 
-                        <span className="flex-1 min-w-0 truncate">
+                        <span
+                          className="
+                            flex-1
+                            min-w-0
+                            truncate
+                          "
+                        >
                           {
                             child.label
                           }
                         </span>
-
-                        {isChildItemActive && (
-                          <div className="w-1 h-1 shrink-0 rounded-full bg-blue-500" />
-                        )}
                       </button>
                     );
                   }
@@ -2401,27 +2665,50 @@ export default function Sidebar({
               className="
                 px-3
                 py-1.5
+
                 rounded-lg
+
                 bg-slate-800
+                dark:bg-slate-700
+
                 text-white
+
                 text-[10px]
-                font-bold
+                font-medium
+
                 whitespace-nowrap
+
                 shadow-lg
+                dark:shadow-black/50
+
                 pointer-events-none
               "
             >
-              {
-                config.brandName
-              }
+              {config?.brandName ??
+                "SmartSchool"}
 
-              <div className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-3 h-3 bg-slate-800 rotate-45" />
+              <div
+                className="
+                  absolute
+                  -left-1.5
+                  top-1/2
+                  -translate-y-1/2
+
+                  w-3
+                  h-3
+
+                  bg-slate-800
+                  dark:bg-slate-700
+
+                  rotate-45
+                "
+              />
             </div>,
             document.body
           )}
 
         {/* ===================================================
-            MENU ITEM TOOLTIP
+            MENU TOOLTIP
         =================================================== */}
 
         {mounted &&
@@ -2442,13 +2729,22 @@ export default function Sidebar({
               className="
                 px-3
                 py-1.5
+
                 rounded-lg
+
                 bg-slate-800
+                dark:bg-slate-700
+
                 text-white
+
                 text-[10px]
-                font-bold
+                font-medium
+
                 whitespace-nowrap
+
                 shadow-lg
+                dark:shadow-black/50
+
                 pointer-events-none
               "
             >
@@ -2456,7 +2752,22 @@ export default function Sidebar({
                 itemTooltip.label
               }
 
-              <div className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-3 h-3 bg-slate-800 rotate-45" />
+              <div
+                className="
+                  absolute
+                  -left-1.5
+                  top-1/2
+                  -translate-y-1/2
+
+                  w-3
+                  h-3
+
+                  bg-slate-800
+                  dark:bg-slate-700
+
+                  rotate-45
+                "
+              />
             </div>,
             document.body
           )}

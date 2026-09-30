@@ -25,15 +25,98 @@ import {
   updateGudang,
 } from "../../../../../../../../services/sarpras.service";
 
+/* =========================================================
+   GLOBAL THEME
+========================================================= */
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]";
+
+const themePrimaryHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]";
+
+const themeBorderClass = "theme-border";
+
+/* =========================================================
+   RESPONSE HELPER
+========================================================= */
+
 function getResponseData(response) {
   if (Array.isArray(response)) return response;
-  if (Array.isArray(response?.data)) return response.data;
-  if (Array.isArray(response?.result)) return response.result;
-  if (Array.isArray(response?.data?.data)) return response.data.data;
-  if (Array.isArray(response?.result?.data)) return response.result.data;
+
+  if (Array.isArray(response?.data)) {
+    return response.data;
+  }
+
+  if (Array.isArray(response?.result)) {
+    return response.result;
+  }
+
+  if (Array.isArray(response?.data?.data)) {
+    return response.data.data;
+  }
+
+  if (Array.isArray(response?.result?.data)) {
+    return response.result.data;
+  }
 
   return [];
 }
+
+/* =========================================================
+   PAGE
+========================================================= */
 
 export default function EditGudangPage() {
   const router = useRouter();
@@ -74,24 +157,32 @@ export default function EditGudangPage() {
       const list = getResponseData(response);
 
       const gudang = list.find(
-        (item) => String(item?.id) === String(id)
+        (item) =>
+          String(item?.id) === String(id)
       );
 
       if (!gudang) {
-        setError("Data gudang tidak ditemukan.");
+        setError(
+          "Data gudang tidak ditemukan."
+        );
         return;
       }
 
       setForm({
         nama: gudang?.nama || "",
         lokasi: gudang?.lokasi || "",
-        status: gudang?.status || "aktif",
+        status:
+          gudang?.status || "aktif",
       });
     } catch (err) {
-      console.error("Gagal mengambil data gudang:", err);
+      console.error(
+        "Gagal mengambil data gudang:",
+        err
+      );
 
       setError(
-        err?.message || "Gagal mengambil data gudang."
+        err?.message ||
+          "Gagal mengambil data gudang."
       );
     } finally {
       setLoading(false);
@@ -122,12 +213,16 @@ export default function EditGudangPage() {
     event.preventDefault();
 
     if (!form.nama.trim()) {
-      setError("Nama gudang wajib diisi.");
+      setError(
+        "Nama gudang wajib diisi."
+      );
       return;
     }
 
     if (form.nama.trim().length < 3) {
-      setError("Nama gudang minimal 3 karakter.");
+      setError(
+        "Nama gudang minimal 3 karakter."
+      );
       return;
     }
 
@@ -138,20 +233,29 @@ export default function EditGudangPage() {
 
       const payload = {
         nama: form.nama.trim(),
-        lokasi: form.lokasi.trim() || null,
-        status: form.status || "aktif",
+        lokasi:
+          form.lokasi.trim() || null,
+        status:
+          form.status || "aktif",
       };
 
       await updateGudang(id, payload);
 
-      setSuccess("Data gudang berhasil diperbarui.");
+      setSuccess(
+        "Data gudang berhasil diperbarui."
+      );
 
       setTimeout(() => {
-        router.push("/admin/sarpras/gudang/master");
+        router.push(
+          "/admin/sarpras/gudang/master"
+        );
         router.refresh();
       }, 900);
     } catch (err) {
-      console.error("Gagal memperbarui gudang:", err);
+      console.error(
+        "Gagal memperbarui gudang:",
+        err
+      );
 
       setError(
         err?.message ||
@@ -167,7 +271,9 @@ export default function EditGudangPage() {
   ========================================================= */
 
   const handleCancel = () => {
-    router.push("/admin/sarpras/gudang/master");
+    router.push(
+      "/admin/sarpras/gudang/master"
+    );
   };
 
   /* =========================================================
@@ -176,8 +282,9 @@ export default function EditGudangPage() {
 
   if (loading) {
     return (
-      <div className="flex h-screen w-full overflow-hidden bg-[#f8fafc]">
+      <div className="theme-page flex h-screen w-full overflow-hidden">
         {/* SIDEBAR */}
+
         <div className="shrink-0">
           <Sidebar
             active="sarpras"
@@ -188,25 +295,33 @@ export default function EditGudangPage() {
         </div>
 
         {/* CONTENT */}
+
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
           <div className="shrink-0">
             <Header
               toggleSidebar={() =>
-                setCollapsed((prev) => !prev)
+                setCollapsed(
+                  (prev) => !prev
+                )
               }
               notifications={[]}
               user={{
                 name: "Admin Sekolah",
-                email: "admin@smartschool.com",
+                email:
+                  "admin@smartschool.com",
                 avatar: "AD",
               }}
             />
           </div>
 
           <main className="flex min-h-0 flex-1 items-center justify-center overflow-hidden p-4">
-            <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 shadow-[0_10px_35px_rgba(15,23,42,0.06)]">
+            <div
+              className={`theme-card w-full max-w-md rounded-3xl border ${themeBorderClass} p-8 ${themeCardShadow}`}
+            >
               <div className="flex flex-col items-center justify-center text-center">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+                <div
+                  className={`flex h-14 w-14 items-center justify-center rounded-2xl ${themePrimarySoft} ${themePrimaryText}`}
+                >
                   <Loader2
                     size={27}
                     strokeWidth={2}
@@ -214,12 +329,13 @@ export default function EditGudangPage() {
                   />
                 </div>
 
-                <h2 className="mt-5 text-base font-bold text-slate-900">
+                <h2 className="theme-text mt-5 text-base font-bold">
                   Memuat Data Gudang
                 </h2>
 
-                <p className="mt-1.5 text-sm text-slate-500">
-                  Mengambil informasi gudang...
+                <p className="theme-text-muted mt-1.5 text-sm">
+                  Mengambil informasi
+                  gudang...
                 </p>
               </div>
             </div>
@@ -234,7 +350,7 @@ export default function EditGudangPage() {
   ========================================================= */
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[#f8fafc]">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
       {/* =====================================================
           SIDEBAR
       ===================================================== */}
@@ -258,33 +374,34 @@ export default function EditGudangPage() {
         <div className="shrink-0">
           <Header
             toggleSidebar={() =>
-              setCollapsed((prev) => !prev)
+              setCollapsed(
+                (prev) => !prev
+              )
             }
             notifications={[]}
             user={{
               name: "Admin Sekolah",
-              email: "admin@smartschool.com",
+              email:
+                "admin@smartschool.com",
               avatar: "AD",
             }}
           />
         </div>
 
-        {/* ===================================================
-            PAGE
-        =================================================== */}
+        {/* PAGE */}
 
         <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="w-full p-4 sm:p-5 lg:p-7 xl:p-8">
             <div className="mx-auto w-full max-w-[1250px]">
 
               {/* =================================================
-                  BREADCRUMB / BACK
+                  BACK
               ================================================= */}
 
               <button
                 type="button"
                 onClick={handleCancel}
-                className="group mb-5 inline-flex items-center gap-2 rounded-xl px-2 py-1.5 text-sm font-medium text-slate-500 transition-all hover:bg-white hover:text-blue-600"
+                className={`group mb-5 inline-flex items-center gap-2 rounded-xl px-2 py-1.5 text-sm font-medium theme-text-secondary transition-all ${themeNeutralHover} hover:${themePrimaryText}`}
               >
                 <ArrowLeft
                   size={17}
@@ -300,7 +417,9 @@ export default function EditGudangPage() {
 
               <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex min-w-0 items-center gap-4">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-[0_8px_20px_rgba(37,99,235,0.18)] sm:h-14 sm:w-14">
+                  <div
+                    className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow} sm:h-14 sm:w-14`}
+                  >
                     <Boxes
                       size={25}
                       strokeWidth={1.9}
@@ -309,51 +428,63 @@ export default function EditGudangPage() {
 
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <p className="text-xs font-bold uppercase tracking-[0.12em] text-blue-600">
+                      <p
+                        className={`text-xs font-bold uppercase tracking-[0.12em] ${themePrimaryText}`}
+                      >
                         Sarana & Prasarana
                       </p>
 
-                      <span className="rounded-full border border-blue-100 bg-blue-50 px-2.5 py-1 text-[10px] font-semibold text-blue-600">
+                      <span
+                        className={`rounded-full border ${themePrimarySoftBorder} ${themePrimarySoft} ${themePrimaryText} px-2.5 py-1 text-[10px] font-semibold`}
+                      >
                         EDIT DATA
                       </span>
                     </div>
 
-                    <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-[28px]">
+                    <h1 className="theme-text mt-1 text-2xl font-bold tracking-tight sm:text-[28px]">
                       Edit Gudang
                     </h1>
 
-                    <p className="mt-1 text-sm text-slate-500">
-                      Perbarui informasi gudang yang tersimpan
-                      di sistem.
+                    <p className="theme-text-muted mt-1 text-sm">
+                      Perbarui informasi
+                      gudang yang
+                      tersimpan di
+                      sistem.
                     </p>
                   </div>
                 </div>
               </div>
 
               {/* =================================================
-                  ALERT ERROR
+                  ERROR
               ================================================= */}
 
               {error && (
-                <div className="mb-5 flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-rose-600 shadow-sm">
+                <div
+                  className={`mb-5 flex items-start gap-3 rounded-2xl border ${themeDangerBorder} ${themeDangerSurface} p-4`}
+                >
+                  <div
+                    className={`theme-card flex h-9 w-9 shrink-0 items-center justify-center rounded-xl theme-danger ${themeSmallShadow}`}
+                  >
                     <AlertCircle size={18} />
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-rose-900">
+                    <p className="theme-danger text-sm font-semibold">
                       Terjadi Kesalahan
                     </p>
 
-                    <p className="mt-1 text-sm leading-5 text-rose-700">
+                    <p className="theme-danger mt-1 text-sm leading-5">
                       {error}
                     </p>
                   </div>
 
                   <button
                     type="button"
-                    onClick={() => setError("")}
-                    className="rounded-lg p-1.5 text-rose-400 transition hover:bg-rose-100 hover:text-rose-700"
+                    onClick={() =>
+                      setError("")
+                    }
+                    className="theme-danger rounded-lg p-1.5 transition hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]"
                   >
                     <X size={17} />
                   </button>
@@ -365,17 +496,21 @@ export default function EditGudangPage() {
               ================================================= */}
 
               {success && (
-                <div className="mb-5 flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-emerald-600 shadow-sm">
+                <div
+                  className={`mb-5 flex items-start gap-3 rounded-2xl border ${themeSuccessBorder} ${themeSuccessSurface} p-4`}
+                >
+                  <div
+                    className={`theme-card flex h-9 w-9 shrink-0 items-center justify-center rounded-xl theme-success ${themeSmallShadow}`}
+                  >
                     <CheckCircle2 size={18} />
                   </div>
 
                   <div>
-                    <p className="text-sm font-semibold text-emerald-900">
+                    <p className="theme-success text-sm font-semibold">
                       Berhasil
                     </p>
 
-                    <p className="mt-1 text-sm text-emerald-700">
+                    <p className="theme-success mt-1 text-sm">
                       {success}
                     </p>
                   </div>
@@ -389,21 +524,27 @@ export default function EditGudangPage() {
               <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_340px]">
 
                 {/* =================================================
-                    LEFT - FORM
+                    LEFT FORM
                 ================================================= */}
 
                 <form
                   onSubmit={handleSubmit}
                   className="min-w-0"
                 >
-                  <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_4px_18px_rgba(15,23,42,0.045)]">
+                  <div
+                    className={`theme-card overflow-hidden rounded-3xl border ${themeBorderClass} ${themeCardShadow}`}
+                  >
 
                     {/* FORM HEADER */}
 
-                    <div className="border-b border-slate-100 px-5 py-5 sm:px-7">
+                    <div
+                      className={`border-b ${themeDivider} px-5 py-5 sm:px-7`}
+                    >
                       <div className="flex items-center justify-between gap-4">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                          <div
+                            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
+                          >
                             <Database
                               size={19}
                               strokeWidth={1.9}
@@ -411,17 +552,20 @@ export default function EditGudangPage() {
                           </div>
 
                           <div>
-                            <h2 className="text-sm font-bold text-slate-900">
+                            <h2 className="theme-text text-sm font-bold">
                               Informasi Gudang
                             </h2>
 
-                            <p className="mt-0.5 text-xs text-slate-500">
-                              Perbarui data dasar gudang.
+                            <p className="theme-text-muted mt-0.5 text-xs">
+                              Perbarui data
+                              dasar gudang.
                             </p>
                           </div>
                         </div>
 
-                        <span className="hidden rounded-full border border-slate-200 bg-slate-50 px-3 py-1.5 text-[10px] font-semibold text-slate-500 sm:inline-flex">
+                        <span
+                          className={`hidden rounded-full border ${themeNeutralBorder} ${themeNeutralSurface} theme-text-muted px-3 py-1.5 text-[10px] font-semibold sm:inline-flex`}
+                        >
                           ID #{id}
                         </span>
                       </div>
@@ -439,16 +583,17 @@ export default function EditGudangPage() {
                         <div className="mb-2 flex items-center justify-between gap-3">
                           <label
                             htmlFor="nama"
-                            className="text-sm font-semibold text-slate-700"
+                            className="theme-text-secondary text-sm font-semibold"
                           >
                             Nama Gudang
-                            <span className="ml-1 text-rose-500">
+                            <span className="theme-danger ml-1">
                               *
                             </span>
                           </label>
 
-                          <span className="text-[11px] text-slate-400">
-                            {form.nama.length}/100
+                          <span className="theme-text-muted text-[11px]">
+                            {form.nama.length}
+                            /100
                           </span>
                         </div>
 
@@ -456,7 +601,7 @@ export default function EditGudangPage() {
                           <Boxes
                             size={18}
                             strokeWidth={1.8}
-                            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                            className="theme-text-muted pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2"
                           />
 
                           <input
@@ -464,16 +609,19 @@ export default function EditGudangPage() {
                             name="nama"
                             type="text"
                             value={form.nama}
-                            onChange={handleChange}
+                            onChange={
+                              handleChange
+                            }
                             disabled={saving}
                             maxLength={100}
                             placeholder="Contoh: Gudang Sarpras Utama"
-                            className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm font-medium text-slate-900 caret-blue-600 outline-none transition-all placeholder:font-normal placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-60"
+                            className={`theme-input h-12 w-full rounded-xl border ${themeBorderClass} pl-11 pr-4 text-sm font-medium outline-none transition-all placeholder:text-[var(--color-text-placeholder)] ${themeFocus} disabled:cursor-not-allowed disabled:opacity-60`}
                           />
                         </div>
 
-                        <p className="mt-1.5 text-xs text-slate-400">
-                          Gunakan nama yang mudah dikenali.
+                        <p className="theme-text-muted mt-1.5 text-xs">
+                          Gunakan nama yang
+                          mudah dikenali.
                         </p>
                       </div>
 
@@ -485,12 +633,12 @@ export default function EditGudangPage() {
                         <div className="mb-2 flex items-center justify-between gap-3">
                           <label
                             htmlFor="lokasi"
-                            className="text-sm font-semibold text-slate-700"
+                            className="theme-text-secondary text-sm font-semibold"
                           >
                             Lokasi Gudang
                           </label>
 
-                          <span className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                          <span className="theme-text-muted text-[10px] font-semibold uppercase tracking-wide">
                             Opsional
                           </span>
                         </div>
@@ -499,7 +647,7 @@ export default function EditGudangPage() {
                           <MapPin
                             size={18}
                             strokeWidth={1.8}
-                            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                            className="theme-text-muted pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2"
                           />
 
                           <input
@@ -507,17 +655,20 @@ export default function EditGudangPage() {
                             name="lokasi"
                             type="text"
                             value={form.lokasi}
-                            onChange={handleChange}
+                            onChange={
+                              handleChange
+                            }
                             disabled={saving}
                             maxLength={255}
                             placeholder="Contoh: Gedung A Lantai 1"
-                            className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm font-medium text-slate-900 caret-blue-600 outline-none transition-all placeholder:font-normal placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-60"
+                            className={`theme-input h-12 w-full rounded-xl border ${themeBorderClass} pl-11 pr-4 text-sm font-medium outline-none transition-all placeholder:text-[var(--color-text-placeholder)] ${themeFocus} disabled:cursor-not-allowed disabled:opacity-60`}
                           />
                         </div>
 
-                        <p className="mt-1.5 text-xs text-slate-400">
-                          Masukkan lokasi fisik gudang di
-                          lingkungan sekolah.
+                        <p className="theme-text-muted mt-1.5 text-xs">
+                          Masukkan lokasi fisik
+                          gudang di lingkungan
+                          sekolah.
                         </p>
                       </div>
 
@@ -528,10 +679,10 @@ export default function EditGudangPage() {
                       <div>
                         <label
                           htmlFor="status"
-                          className="mb-2 block text-sm font-semibold text-slate-700"
+                          className="theme-text-secondary mb-2 block text-sm font-semibold"
                         >
                           Status
-                          <span className="ml-1 text-rose-500">
+                          <span className="theme-danger ml-1">
                             *
                           </span>
                         </label>
@@ -540,36 +691,29 @@ export default function EditGudangPage() {
                           <Activity
                             size={18}
                             strokeWidth={1.8}
-                            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                            className="theme-text-muted pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2"
                           />
 
                           <select
                             id="status"
                             name="status"
                             value={form.status}
-                            onChange={handleChange}
+                            onChange={
+                              handleChange
+                            }
                             disabled={saving}
-                            className="h-12 w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-10 text-sm font-medium text-slate-900 outline-none transition-all hover:border-slate-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-60"
-                            style={{
-                              colorScheme: "light",
-                            }}
+                            className={`theme-input h-12 w-full appearance-none rounded-xl border ${themeBorderClass} pl-11 pr-10 text-sm font-medium outline-none transition-all ${themeFocus} disabled:cursor-not-allowed disabled:opacity-60`}
                           >
-                            <option
-                              value="aktif"
-                              style={{ color: "#0f172a" }}
-                            >
+                            <option value="aktif">
                               Aktif
                             </option>
 
-                            <option
-                              value="nonaktif"
-                              style={{ color: "#0f172a" }}
-                            >
+                            <option value="nonaktif">
                               Nonaktif
                             </option>
                           </select>
 
-                          <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
+                          <div className="theme-text-muted pointer-events-none absolute right-4 top-1/2 -translate-y-1/2">
                             <svg
                               width="16"
                               height="16"
@@ -583,9 +727,10 @@ export default function EditGudangPage() {
                           </div>
                         </div>
 
-                        <p className="mt-1.5 text-xs text-slate-400">
-                          Gudang nonaktif tidak digunakan
-                          untuk transaksi baru.
+                        <p className="theme-text-muted mt-1.5 text-xs">
+                          Gudang nonaktif tidak
+                          digunakan untuk
+                          transaksi baru.
                         </p>
                       </div>
 
@@ -593,22 +738,28 @@ export default function EditGudangPage() {
                           INFO
                       ================================================= */}
 
-                      <div className="rounded-2xl border border-blue-100 bg-blue-50/70 p-4">
+                      <div
+                        className={`rounded-2xl border ${themeInfoBorder} ${themeInfoSurface} p-4`}
+                      >
                         <div className="flex items-start gap-3">
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-blue-600 shadow-sm">
+                          <div
+                            className={`theme-card flex h-9 w-9 shrink-0 items-center justify-center rounded-xl theme-info ${themeSmallShadow}`}
+                          >
                             <AlertCircle size={18} />
                           </div>
 
                           <div>
-                            <p className="text-sm font-semibold text-blue-900">
+                            <p className="theme-info text-sm font-semibold">
                               Informasi Pengelolaan
                             </p>
 
-                            <p className="mt-1 text-xs leading-5 text-blue-700">
-                              Perubahan data gudang akan
-                              diterapkan pada data aset
-                              yang terhubung dengan gudang
-                              ini.
+                            <p className="theme-info mt-1 text-xs leading-5">
+                              Perubahan data
+                              gudang akan
+                              diterapkan pada
+                              data aset yang
+                              terhubung dengan
+                              gudang ini.
                             </p>
                           </div>
                         </div>
@@ -619,12 +770,16 @@ export default function EditGudangPage() {
                         FORM FOOTER
                     ================================================= */}
 
-                    <div className="flex flex-col-reverse gap-3 border-t border-slate-100 bg-slate-50/60 px-5 py-4 sm:flex-row sm:items-center sm:justify-end sm:px-7">
+                    <div
+                      className={`flex flex-col-reverse gap-3 border-t ${themeDivider} ${themeNeutralSurface} px-5 py-4 sm:flex-row sm:items-center sm:justify-end sm:px-7`}
+                    >
                       <button
                         type="button"
-                        onClick={handleCancel}
+                        onClick={
+                          handleCancel
+                        }
                         disabled={saving}
-                        className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 shadow-sm transition-all hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                        className={`theme-card theme-text-secondary inline-flex h-11 items-center justify-center gap-2 rounded-xl border ${themeBorderClass} px-5 text-sm font-semibold shadow-sm transition-all ${themeNeutralHover} active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50`}
                       >
                         <X size={17} />
                         Batal
@@ -633,7 +788,7 @@ export default function EditGudangPage() {
                       <button
                         type="submit"
                         disabled={saving}
-                        className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 text-sm font-semibold text-white shadow-[0_7px_18px_rgba(37,99,235,0.20)] transition-all hover:bg-blue-700 hover:shadow-[0_9px_22px_rgba(37,99,235,0.28)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+                        className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-6 text-sm font-semibold text-[var(--color-card)] ${themePrimaryShadow} transition-all hover:brightness-95 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60`}
                       >
                         {saving ? (
                           <>
@@ -641,11 +796,13 @@ export default function EditGudangPage() {
                               size={17}
                               className="animate-spin"
                             />
+
                             Menyimpan...
                           </>
                         ) : (
                           <>
                             <Save size={17} />
+
                             Simpan Perubahan
                           </>
                         )}
@@ -655,18 +812,24 @@ export default function EditGudangPage() {
                 </form>
 
                 {/* =================================================
-                    RIGHT - PREVIEW / SUMMARY CARD
+                    RIGHT PREVIEW
                 ================================================= */}
 
                 <aside className="min-w-0">
-                  <div className="sticky top-5 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-[0_4px_18px_rgba(15,23,42,0.045)]">
+                  <div
+                    className={`sticky top-5 overflow-hidden rounded-3xl border ${themeBorderClass} theme-card ${themeCardShadow}`}
+                  >
 
                     {/* CARD HEADER */}
 
-                    <div className="border-b border-slate-100 px-5 py-5">
+                    <div
+                      className={`border-b ${themeDivider} px-5 py-5`}
+                    >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white">
+                          <div
+                            className={`flex h-10 w-10 items-center justify-center rounded-xl ${themePrimaryGradient} text-[var(--color-card)]`}
+                          >
                             <Building2
                               size={19}
                               strokeWidth={1.9}
@@ -674,21 +837,23 @@ export default function EditGudangPage() {
                           </div>
 
                           <div>
-                            <h2 className="text-sm font-bold text-slate-900">
+                            <h2 className="theme-text text-sm font-bold">
                               Preview
                             </h2>
 
-                            <p className="mt-0.5 text-xs text-slate-500">
-                              Ringkasan data gudang
+                            <p className="theme-text-muted mt-0.5 text-xs">
+                              Ringkasan data
+                              gudang
                             </p>
                           </div>
                         </div>
 
                         <div
                           className={`h-2.5 w-2.5 rounded-full ${
-                            form.status === "aktif"
-                              ? "bg-emerald-500 shadow-[0_0_0_4px_rgba(16,185,129,0.10)]"
-                              : "bg-slate-400 shadow-[0_0_0_4px_rgba(100,116,139,0.10)]"
+                            form.status ===
+                            "aktif"
+                              ? "bg-[var(--color-success)]"
+                              : "bg-[color-mix(in_srgb,var(--color-text)_40%,transparent)]"
                           }`}
                         />
                       </div>
@@ -698,31 +863,37 @@ export default function EditGudangPage() {
 
                     <div className="p-5">
 
-                      {/* VISUAL */}
+                      {/* VISUAL CARD */}
 
-                      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-700 p-5 text-white">
-                        <div className="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-white/10" />
+                      <div
+                        className={`relative overflow-hidden rounded-2xl ${themePrimaryGradient} p-5`}
+                      >
+                        <div
+                          className={`pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)] blur-2xl`}
+                        />
 
-                        <div className="pointer-events-none absolute -bottom-10 -left-8 h-28 w-28 rounded-full bg-white/5" />
+                        <div
+                          className={`pointer-events-none absolute -bottom-10 -left-8 h-28 w-28 rounded-full bg-[color-mix(in_srgb,var(--color-info)_16%,transparent)] blur-2xl`}
+                        />
 
                         <div className="relative">
-                          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white/15 ring-1 ring-white/20 backdrop-blur-sm">
+                          <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--color-card)_14%,transparent)] text-[var(--color-card)] ring-1 ring-[color-mix(in_srgb,var(--color-card)_15%,transparent)]">
                             <Boxes
                               size={24}
                               strokeWidth={1.8}
                             />
                           </div>
 
-                          <p className="mt-5 text-[10px] font-semibold uppercase tracking-[0.16em] text-blue-100">
+                          <p className="mt-5 text-[10px] font-semibold uppercase tracking-[0.16em] text-[color-mix(in_srgb,var(--color-card)_72%,transparent)]">
                             Gudang
                           </p>
 
-                          <h3 className="mt-1 break-words text-lg font-bold leading-6">
+                          <h3 className="mt-1 break-words text-lg font-bold leading-6 text-[var(--color-card)]">
                             {form.nama.trim() ||
                               "Nama Gudang"}
                           </h3>
 
-                          <div className="mt-3 flex items-center gap-1.5 text-xs text-blue-100">
+                          <div className="mt-3 flex items-center gap-1.5 text-xs text-[color-mix(in_srgb,var(--color-card)_75%,transparent)]">
                             <MapPin size={13} />
 
                             <span className="truncate">
@@ -735,7 +906,9 @@ export default function EditGudangPage() {
 
                       {/* DETAIL */}
 
-                      <div className="mt-4 divide-y divide-slate-100 rounded-2xl border border-slate-100 bg-slate-50/60">
+                      <div
+                        className={`theme-card mt-4 divide-y ${themeDivider} overflow-hidden rounded-2xl border ${themeBorderClass}`}
+                      >
 
                         {/* STATUS */}
 
@@ -743,30 +916,33 @@ export default function EditGudangPage() {
                           <div className="flex items-center gap-2.5">
                             <Activity
                               size={16}
-                              className="text-slate-400"
+                              className="theme-text-muted"
                             />
 
-                            <span className="text-xs font-medium text-slate-500">
+                            <span className="theme-text-muted text-xs font-medium">
                               Status
                             </span>
                           </div>
 
                           <span
                             className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-bold ${
-                              form.status === "aktif"
-                                ? "bg-emerald-50 text-emerald-600"
-                                : "bg-slate-100 text-slate-500"
+                              form.status ===
+                              "aktif"
+                                ? `${themeSuccessSurface} theme-success`
+                                : `${themeNeutralSurface} theme-text-muted`
                             }`}
                           >
                             <span
                               className={`h-1.5 w-1.5 rounded-full ${
-                                form.status === "aktif"
-                                  ? "bg-emerald-500"
-                                  : "bg-slate-400"
+                                form.status ===
+                                "aktif"
+                                  ? "bg-[var(--color-success)]"
+                                  : "bg-[color-mix(in_srgb,var(--color-text)_40%,transparent)]"
                               }`}
                             />
 
-                            {form.status === "aktif"
+                            {form.status ===
+                            "aktif"
                               ? "Aktif"
                               : "Nonaktif"}
                           </span>
@@ -778,15 +954,15 @@ export default function EditGudangPage() {
                           <div className="flex items-center gap-2.5">
                             <MapPin
                               size={16}
-                              className="shrink-0 text-slate-400"
+                              className="theme-text-muted shrink-0"
                             />
 
-                            <span className="text-xs font-medium text-slate-500">
+                            <span className="theme-text-muted text-xs font-medium">
                               Lokasi
                             </span>
                           </div>
 
-                          <span className="max-w-[170px] break-words text-right text-xs font-semibold text-slate-700">
+                          <span className="theme-text-secondary max-w-[170px] break-words text-right text-xs font-semibold">
                             {form.lokasi.trim() ||
                               "Belum diisi"}
                           </span>
@@ -798,15 +974,17 @@ export default function EditGudangPage() {
                           <div className="flex items-center gap-2.5">
                             <Database
                               size={16}
-                              className="text-slate-400"
+                              className="theme-text-muted"
                             />
 
-                            <span className="text-xs font-medium text-slate-500">
+                            <span className="theme-text-muted text-xs font-medium">
                               ID Gudang
                             </span>
                           </div>
 
-                          <span className="max-w-[150px] truncate rounded-lg bg-white px-2 py-1 font-mono text-[10px] font-semibold text-slate-600 shadow-sm ring-1 ring-slate-100">
+                          <span
+                            className={`theme-card theme-text-secondary max-w-[150px] truncate rounded-lg border ${themeBorderClass} px-2 py-1 font-mono text-[10px] font-semibold`}
+                          >
                             {id}
                           </span>
                         </div>
@@ -814,14 +992,19 @@ export default function EditGudangPage() {
 
                       {/* TIP */}
 
-                      <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4">
+                      <div
+                        className={`theme-card mt-4 rounded-2xl border ${themeBorderClass} p-4`}
+                      >
                         <div className="flex items-start gap-2.5">
-                          <div className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-500" />
+                          <div
+                            className={`mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-primary)]`}
+                          />
 
-                          <p className="text-[11px] leading-5 text-slate-500">
-                            Pastikan nama dan lokasi gudang
-                            sudah sesuai sebelum menyimpan
-                            perubahan.
+                          <p className="theme-text-muted text-[11px] leading-5">
+                            Pastikan nama dan
+                            lokasi gudang sudah
+                            sesuai sebelum
+                            menyimpan perubahan.
                           </p>
                         </div>
                       </div>
@@ -829,15 +1012,18 @@ export default function EditGudangPage() {
 
                     {/* CARD FOOTER */}
 
-                    <div className="border-t border-slate-100 bg-slate-50/50 px-5 py-3.5">
-                      <div className="flex items-center gap-2 text-[11px] text-slate-400">
+                    <div
+                      className={`border-t ${themeDivider} ${themeNeutralSurface} px-5 py-3.5`}
+                    >
+                      <div className="flex items-center gap-2 theme-text-muted text-[11px]">
                         <CheckCircle2
                           size={14}
-                          className="text-emerald-500"
+                          className="theme-success"
                         />
 
                         <span>
-                          Preview diperbarui otomatis
+                          Preview diperbarui
+                          otomatis
                         </span>
                       </div>
                     </div>
@@ -849,10 +1035,12 @@ export default function EditGudangPage() {
                   FOOTER
               ================================================= */}
 
-              <div className="mt-6 border-t border-slate-200/80 pt-5 text-center">
-                <p className="text-xs text-slate-400">
-                  © 2026 SmartSchool • Modul Sarana &
-                  Prasarana
+              <div
+                className={`mt-6 border-t ${themeDivider} pt-5 text-center`}
+              >
+                <p className="theme-text-muted text-xs">
+                  © 2026 SmartSchool • Modul
+                  Sarana & Prasarana
                 </p>
               </div>
             </div>

@@ -18,6 +18,58 @@ import {
 } from "lucide-react";
 
 /* =========================================================
+   THEME HELPERS
+========================================================= */
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themePrimarySurface =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimaryBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_9%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_24%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+
+/* =========================================================
    MOCK DATA
 ========================================================= */
 
@@ -162,8 +214,8 @@ function JenisKelaminBadge({ jenisKelamin }) {
     <span
       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold ${
         isPria
-          ? "bg-[#eaf1ff] text-[#155DFC] border border-[#c7dbff]"
-          : "bg-pink-50 text-pink-600 border border-pink-200"
+          ? `${themePrimarySurface} text-[var(--color-primary)] border ${themePrimaryBorder}`
+          : `${themeInfoSurface} text-[var(--color-info)] border ${themeInfoBorder}`
       }`}
     >
       {isPria ? "Laki-laki" : "Perempuan"}
@@ -182,15 +234,15 @@ function StatusBadge({ status }) {
     <span
       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold ${
         isActive
-          ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
-          : "bg-slate-100 text-slate-500 border border-slate-200"
+          ? `${themeSuccessSurface} text-[var(--color-success)] border ${themeSuccessBorder}`
+          : `${themeNeutralSurface} theme-text-muted border ${themeNeutralBorder}`
       }`}
     >
       <span
         className={`w-1.5 h-1.5 rounded-full ${
           isActive
-            ? "bg-emerald-500"
-            : "bg-slate-400"
+            ? "bg-[var(--color-success)]"
+            : "bg-[var(--color-text-muted)]"
         }`}
       />
 
@@ -211,7 +263,7 @@ function Avatar({ nama, size = "md" }) {
 
   return (
     <div
-      className={`${dims} rounded-full bg-gradient-to-br from-[#155DFC] to-[#0d47c9] text-white flex items-center justify-center font-bold flex-shrink-0`}
+      className={`${dims} rounded-full ${themePrimaryGradient} text-[var(--color-card)] flex items-center justify-center font-bold flex-shrink-0 ${themeSmallShadow}`}
     >
       {getInitials(nama)}
     </div>
@@ -319,7 +371,7 @@ export default function KartuIdentitasSiswaPage() {
   ======================================================= */
 
   return (
-    <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
+    <div className="flex h-screen w-full theme-page overflow-hidden">
 
       {/* ===================================================
           SIDEBAR
@@ -365,17 +417,19 @@ export default function KartuIdentitasSiswaPage() {
 
               <div className="flex items-center gap-3">
 
-                <div className="p-2.5 rounded-xl bg-gradient-to-br from-[#155DFC] to-[#0d47c9] text-white shadow-lg shadow-[#155DFC]/20">
+                <div
+                  className={`p-2.5 rounded-xl ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
+                >
                   <IdCard size={20} />
                 </div>
 
                 <div>
 
-                  <h1 className="text-2xl font-bold text-slate-800">
+                  <h1 className="text-2xl font-bold theme-text">
                     Kartu Identitas Siswa
                   </h1>
 
-                  <p className="text-sm text-slate-500">
+                  <p className="text-sm theme-text-secondary">
                     Data identitas siswa dan lihat detail profil.
                   </p>
 
@@ -389,7 +443,7 @@ export default function KartuIdentitasSiswaPage() {
                     "/admin/siswa/kartu-identitas/tambah"
                   )
                 }
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-br from-[#155DFC] to-[#0d47c9] text-white text-sm font-semibold shadow-lg shadow-[#155DFC]/20 hover:opacity-90 transition-opacity"
+                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl ${themePrimaryGradient} text-[var(--color-card)] text-sm font-semibold ${themePrimaryShadow} hover:brightness-110 transition-all`}
               >
                 <Plus size={16} />
                 Tambah Siswa
@@ -405,22 +459,24 @@ export default function KartuIdentitasSiswaPage() {
 
               {/* TOTAL SISWA */}
 
-              <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm">
+              <div
+                className={`theme-card rounded-xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}
+              >
 
                 <div className="flex items-center gap-2">
 
                   <Users
                     size={14}
-                    className="text-[#155DFC]"
+                    className="text-[var(--color-primary)]"
                   />
 
-                  <p className="text-[11px] font-medium text-slate-500 tracking-wide">
+                  <p className="text-[11px] font-medium theme-text-muted tracking-wide">
                     Total Siswa
                   </p>
 
                 </div>
 
-                <p className="text-2xl font-bold text-slate-900 mt-1.5">
+                <p className="text-2xl font-bold theme-text mt-1.5">
                   {totalSiswa}
                 </p>
 
@@ -428,22 +484,24 @@ export default function KartuIdentitasSiswaPage() {
 
               {/* JUMLAH KELAS */}
 
-              <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm">
+              <div
+                className={`theme-card rounded-xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}
+              >
 
                 <div className="flex items-center gap-2">
 
                   <School
                     size={14}
-                    className="text-[#155DFC]"
+                    className="text-[var(--color-primary)]"
                   />
 
-                  <p className="text-[11px] font-medium text-slate-500 tracking-wide">
+                  <p className="text-[11px] font-medium theme-text-muted tracking-wide">
                     Jumlah Kelas
                   </p>
 
                 </div>
 
-                <p className="text-2xl font-bold text-slate-900 mt-1.5">
+                <p className="text-2xl font-bold theme-text mt-1.5">
                   {totalKelas}
                 </p>
 
@@ -451,22 +509,24 @@ export default function KartuIdentitasSiswaPage() {
 
               {/* AKTIF */}
 
-              <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm">
+              <div
+                className={`theme-card rounded-xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}
+              >
 
                 <div className="flex items-center gap-2">
 
                   <CheckCircle2
                     size={14}
-                    className="text-emerald-500"
+                    className="text-[var(--color-success)]"
                   />
 
-                  <p className="text-[11px] font-medium text-slate-500 tracking-wide">
+                  <p className="text-[11px] font-medium theme-text-muted tracking-wide">
                     Status Aktif
                   </p>
 
                 </div>
 
-                <p className="text-2xl font-bold text-slate-900 mt-1.5">
+                <p className="text-2xl font-bold theme-text mt-1.5">
                   {totalAktif}
                 </p>
 
@@ -474,22 +534,24 @@ export default function KartuIdentitasSiswaPage() {
 
               {/* RATA-RATA */}
 
-              <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm">
+              <div
+                className={`theme-card rounded-xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}
+              >
 
                 <div className="flex items-center gap-2">
 
                   <GraduationCap
                     size={14}
-                    className="text-[#155DFC]"
+                    className="text-[var(--color-primary)]"
                   />
 
-                  <p className="text-[11px] font-medium text-slate-500 tracking-wide">
+                  <p className="text-[11px] font-medium theme-text-muted tracking-wide">
                     Rata-rata / Kelas
                   </p>
 
                 </div>
 
-                <p className="text-2xl font-bold text-slate-900 mt-1.5">
+                <p className="text-2xl font-bold theme-text mt-1.5">
                   {totalKelas
                     ? Math.round(
                         totalSiswa / totalKelas
@@ -505,7 +567,9 @@ export default function KartuIdentitasSiswaPage() {
                 FILTER
             ================================================= */}
 
-            <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm flex flex-col sm:flex-row gap-3">
+            <div
+              className={`theme-card rounded-xl border ${themeNeutralBorder} p-4 ${themeCardShadow} flex flex-col sm:flex-row gap-3`}
+            >
 
               {/* SEARCH */}
 
@@ -513,7 +577,7 @@ export default function KartuIdentitasSiswaPage() {
 
                 <Search
                   size={16}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 theme-text-muted"
                 />
 
                 <input
@@ -523,7 +587,7 @@ export default function KartuIdentitasSiswaPage() {
                     setSearch(e.target.value)
                   }
                   placeholder="Cari nama atau NISN..."
-                  className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#155DFC]/25 focus:border-[#155DFC]/50 text-slate-800"
+                  className={`w-full pl-9 pr-3 py-2 text-sm rounded-lg theme-input theme-text placeholder:text-[var(--color-text-placeholder)] focus:outline-none ${themeFocus} transition-colors`}
                 />
 
               </div>
@@ -534,7 +598,7 @@ export default function KartuIdentitasSiswaPage() {
 
                 <Filter
                   size={15}
-                  className="text-[#155DFC] hidden sm:block"
+                  className="text-[var(--color-primary)] hidden sm:block"
                 />
 
                 <select
@@ -542,7 +606,7 @@ export default function KartuIdentitasSiswaPage() {
                   onChange={(e) =>
                     setKelasFilter(e.target.value)
                   }
-                  className="text-sm rounded-lg border border-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#155DFC]/25 focus:border-[#155DFC]/50 bg-white text-slate-800 font-medium"
+                  className={`text-sm rounded-lg theme-input theme-text px-3 py-2 font-medium focus:outline-none ${themeFocus} transition-colors`}
                 >
                   {KELAS_OPTIONS.map((k) => (
                     <option
@@ -559,7 +623,7 @@ export default function KartuIdentitasSiswaPage() {
                   onChange={(e) =>
                     setStatusFilter(e.target.value)
                   }
-                  className="text-sm rounded-lg border border-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#155DFC]/25 focus:border-[#155DFC]/50 bg-white text-slate-800 font-medium"
+                  className={`text-sm rounded-lg theme-input theme-text px-3 py-2 font-medium focus:outline-none ${themeFocus} transition-colors`}
                 >
                   {STATUS_OPTIONS.map((s) => (
                     <option
@@ -579,7 +643,9 @@ export default function KartuIdentitasSiswaPage() {
                 TABEL
             ================================================= */}
 
-            <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden">
+            <div
+              className={`theme-card rounded-xl border ${themeNeutralBorder} ${themeCardShadow} overflow-hidden`}
+            >
 
               <div className="overflow-x-auto">
 
@@ -591,7 +657,9 @@ export default function KartuIdentitasSiswaPage() {
 
                   <thead>
 
-                    <tr className="bg-gradient-to-r from-[#155DFC] to-[#0d47c9] text-white">
+                    <tr
+                      className={`${themePrimaryGradient} text-[var(--color-card)]`}
+                    >
 
                       {/* NO */}
 
@@ -649,18 +717,20 @@ export default function KartuIdentitasSiswaPage() {
 
                       <tr
                         key={s.id}
-                        className={`border-b border-slate-100 last:border-0 transition-colors hover:bg-[#eaf1ff] ${
+                        className={`border-b ${themeDivider} last:border-0 transition-colors ${
                           idx % 2 === 0
-                            ? "bg-[#f7f9ff]"
-                            : "bg-white"
-                        }`}
+                            ? themeNeutralSurface
+                            : "bg-transparent"
+                        } hover:bg-[color-mix(in_srgb,var(--color-primary)_7%,transparent)]`}
                       >
 
                         {/* NO */}
 
                         <td className="px-4 py-3 text-center">
 
-                          <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#eaf1ff] text-[#155DFC] border border-[#c7dbff] text-xs font-bold">
+                          <span
+                            className={`inline-flex items-center justify-center w-7 h-7 rounded-lg ${themePrimarySurface} text-[var(--color-primary)] border ${themePrimaryBorder} text-xs font-bold`}
+                          >
                             {idx + 1}
                           </span>
 
@@ -686,11 +756,11 @@ export default function KartuIdentitasSiswaPage() {
 
                             <div>
 
-                              <p className="font-semibold text-slate-900 group-hover:text-[#155DFC] transition-colors">
+                              <p className="font-semibold theme-text group-hover:text-[var(--color-primary)] transition-colors">
                                 {s.nama}
                               </p>
 
-                              <p className="text-[11px] text-slate-400 mt-0.5">
+                              <p className="text-[11px] theme-text-muted mt-0.5">
                                 Siswa • {s.jenjang}
                               </p>
 
@@ -704,7 +774,7 @@ export default function KartuIdentitasSiswaPage() {
 
                         <td className="px-4 py-3">
 
-                          <span className="font-mono text-xs font-medium text-slate-600">
+                          <span className="font-mono text-xs font-medium theme-text-secondary">
                             {s.nisn}
                           </span>
 
@@ -714,7 +784,9 @@ export default function KartuIdentitasSiswaPage() {
 
                         <td className="px-4 py-3">
 
-                          <span className="inline-flex items-center justify-center min-w-[48px] px-2.5 py-1 rounded-lg text-xs font-bold text-[#155DFC] bg-[#eaf1ff] border border-[#c7dbff]">
+                          <span
+                            className={`inline-flex items-center justify-center min-w-[48px] px-2.5 py-1 rounded-lg text-xs font-bold text-[var(--color-primary)] ${themePrimarySurface} border ${themePrimaryBorder}`}
+                          >
                             {s.kelas}
                           </span>
 
@@ -755,7 +827,7 @@ export default function KartuIdentitasSiswaPage() {
                                 handleDetail(s)
                               }
                               title="Lihat detail siswa"
-                              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[#155DFC] bg-[#eaf1ff] border border-[#c7dbff] hover:bg-[#d6e6ff] text-xs font-medium transition-colors"
+                              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[var(--color-primary)] ${themePrimarySurface} border ${themePrimaryBorder} hover:bg-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] text-xs font-medium transition-colors`}
                             >
 
                               <Eye size={13} />
@@ -771,7 +843,7 @@ export default function KartuIdentitasSiswaPage() {
                                 handleIdCard(s)
                               }
                               title="Lihat ID Card"
-                              className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-white bg-gradient-to-r from-[#155DFC] to-[#0d47c9] hover:brightness-110 text-xs font-medium transition-all shadow-sm"
+                              className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md ${themePrimaryGradient} text-[var(--color-card)] hover:brightness-110 text-xs font-medium transition-all ${themeSmallShadow}`}
                             >
 
                               <CreditCard
@@ -797,26 +869,28 @@ export default function KartuIdentitasSiswaPage() {
                       <tr>
 
                         <td
-                          colSpan={7}
+                          colSpan={8}
                           className="px-4 py-12 text-center"
                         >
 
                           <div className="flex flex-col items-center">
 
-                            <div className="w-12 h-12 rounded-full bg-[#eaf1ff] flex items-center justify-center mb-3">
+                            <div
+                              className={`w-12 h-12 rounded-full ${themePrimarySurface} flex items-center justify-center mb-3`}
+                            >
 
                               <Search
                                 size={20}
-                                className="text-[#155DFC]"
+                                className="text-[var(--color-primary)]"
                               />
 
                             </div>
 
-                            <p className="text-sm font-semibold text-slate-700">
+                            <p className="text-sm font-semibold theme-text">
                               Data siswa tidak ditemukan
                             </p>
 
-                            <p className="text-xs text-slate-400 mt-1">
+                            <p className="text-xs theme-text-muted mt-1">
                               Coba ubah kata kunci atau filter.
                             </p>
 
@@ -838,19 +912,21 @@ export default function KartuIdentitasSiswaPage() {
                   TABLE FOOTER
               ================================================= */}
 
-              <div className="px-4 py-3 border-t border-slate-100 bg-slate-50/60 flex items-center justify-between">
+              <div
+                className={`px-4 py-3 border-t ${themeDivider} ${themeNeutralSurface} flex items-center justify-between`}
+              >
 
-                <p className="text-xs text-slate-500">
+                <p className="text-xs theme-text-secondary">
 
                   Menampilkan{" "}
 
-                  <span className="font-semibold text-slate-700">
+                  <span className="font-semibold theme-text">
                     {filteredSiswa.length}
                   </span>{" "}
 
                   dari{" "}
 
-                  <span className="font-semibold text-slate-700">
+                  <span className="font-semibold theme-text">
                     {totalSiswa}
                   </span>{" "}
 
@@ -860,13 +936,13 @@ export default function KartuIdentitasSiswaPage() {
 
                 <div className="flex items-center gap-2">
 
-                  <span className="text-[11px] text-slate-400">
+                  <span className="text-[11px] theme-text-muted">
                     Kartu Identitas Siswa
                   </span>
 
                   <IdCard
                     size={15}
-                    className="text-[#155DFC]"
+                    className="text-[var(--color-primary)]"
                   />
 
                 </div>

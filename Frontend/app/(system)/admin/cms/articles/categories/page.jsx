@@ -50,7 +50,9 @@ function extractList(data) {
 ========================================================= */
 
 function StatusBadge({ status }) {
-  const normalizedStatus = String(status || "").toLowerCase();
+  const normalizedStatus = String(
+    status || ""
+  ).toLowerCase();
 
   const isActive =
     normalizedStatus === "aktif" ||
@@ -69,22 +71,18 @@ function StatusBadge({ status }) {
         font-semibold
         ${
           isActive
-            ? "bg-emerald-50 text-emerald-700"
-            : "bg-slate-100 text-slate-500"
+            ? "theme-success"
+            : "theme-card theme-text-muted theme-border border"
         }
       `}
     >
       <span
-        className={`
-          h-1.5
-          w-1.5
-          rounded-full
-          ${
-            isActive
-              ? "bg-emerald-500"
-              : "bg-slate-400"
-          }
-        `}
+        className="h-1.5 w-1.5 rounded-full"
+        style={{
+          backgroundColor: isActive
+            ? "var(--color-success)"
+            : "var(--color-text-muted)",
+        }}
       />
 
       {isActive ? "Aktif" : "Nonaktif"}
@@ -106,10 +104,10 @@ function StatCard({
   return (
     <div
       className="
+        theme-card
+        theme-border
         rounded-xl
         border
-        border-slate-200
-        bg-white
         p-5
         shadow-[0_1px_3px_rgba(15,23,42,0.04)]
         transition
@@ -118,15 +116,15 @@ function StatCard({
     >
       <div className="flex items-center justify-between gap-4">
         <div className="min-w-0">
-          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-slate-400">
+          <p className="theme-text-muted text-[10px] font-bold uppercase tracking-[0.14em]">
             {label}
           </p>
 
-          <p className="mt-2 text-2xl font-bold tracking-tight text-[#0F172A]">
+          <p className="theme-text mt-2 text-2xl font-bold tracking-tight">
             {value}
           </p>
 
-          <p className="mt-1 text-xs text-slate-400">
+          <p className="theme-text-muted mt-1 text-xs">
             {description}
           </p>
         </div>
@@ -432,7 +430,7 @@ export default function ArticleCategoriesPage() {
   ======================================================= */
 
   return (
-    <div className="fixed inset-0 overflow-hidden bg-[#F8FAFC]">
+    <div className="theme-page fixed inset-0 overflow-hidden">
       {/* ===================================================
           SIDEBAR
       =================================================== */}
@@ -445,6 +443,7 @@ export default function ArticleCategoriesPage() {
 
       <div
         className="
+          theme-page
           absolute
           inset-y-0
           left-[60px]
@@ -453,13 +452,12 @@ export default function ArticleCategoriesPage() {
           min-w-0
           flex-col
           overflow-hidden
-          bg-[#F8FAFC]
           lg:left-[260px]
         "
       >
         <Header />
 
-        <main className="min-h-0 flex-1 overflow-hidden">
+        <main className="theme-page min-h-0 flex-1 overflow-hidden">
           <div className="h-full overflow-auto">
             <div
               className="
@@ -493,40 +491,45 @@ export default function ArticleCategoriesPage() {
                     {/* BREADCRUMB */}
 
                     <div className="mb-2 flex flex-wrap items-center gap-2 text-[10px] font-bold uppercase tracking-[0.14em]">
-                      <span className="text-blue-600">
+                      <span
+                        style={{
+                          color:
+                            "var(--color-primary)",
+                        }}
+                      >
                         CMS
                       </span>
 
-                      <span className="text-slate-300">
+                      <span className="theme-text-placeholder">
                         /
                       </span>
 
-                      <span className="text-slate-400">
+                      <span className="theme-text-muted">
                         Artikel
                       </span>
 
-                      <span className="text-slate-300">
+                      <span className="theme-text-placeholder">
                         /
                       </span>
 
-                      <span className="text-slate-400">
+                      <span className="theme-text-muted">
                         Kategori
                       </span>
                     </div>
 
                     <h1
                       className="
+                        theme-text
                         text-[26px]
                         font-bold
                         tracking-tight
-                        text-[#0F172A]
                         sm:text-[30px]
                       "
                     >
                       Kategori Artikel
                     </h1>
 
-                    <p className="mt-1.5 max-w-2xl text-sm leading-6 text-slate-500">
+                    <p className="theme-text-muted mt-1.5 max-w-2xl text-sm leading-6">
                       Kelola kategori untuk
                       mengorganisir konten artikel
                       sekolah.
@@ -541,6 +544,9 @@ export default function ArticleCategoriesPage() {
                       onClick={loadCategories}
                       disabled={loading}
                       className="
+                        theme-card
+                        theme-border
+                        theme-text-secondary
                         inline-flex
                         h-10
                         items-center
@@ -548,16 +554,12 @@ export default function ArticleCategoriesPage() {
                         gap-2
                         rounded-lg
                         border
-                        border-slate-200
-                        bg-white
                         px-4
                         text-sm
                         font-semibold
-                        text-slate-600
                         shadow-sm
                         transition
-                        hover:bg-slate-50
-                        hover:text-slate-700
+                        hover:opacity-80
                         disabled:cursor-not-allowed
                         disabled:opacity-50
                       "
@@ -578,21 +580,18 @@ export default function ArticleCategoriesPage() {
                       type="button"
                       onClick={openAddModal}
                       className="
+                        theme-primary
                         inline-flex
                         h-10
                         items-center
                         justify-center
                         gap-2
                         rounded-lg
-                        bg-[#2563EB]
                         px-4
                         text-sm
                         font-semibold
-                        text-white
                         shadow-sm
                         transition
-                        hover:bg-[#1D4ED8]
-                        hover:shadow
                       "
                     >
                       <Plus size={16} />
@@ -612,30 +611,24 @@ export default function ArticleCategoriesPage() {
                   label="Total Kategori"
                   value={totalCategories}
                   description="Semua kategori artikel"
-                  icon={
-                    <Tags size={18} />
-                  }
-                  iconClassName="bg-blue-50 text-blue-600"
+                  icon={<Tags size={18} />}
+                  iconClassName="theme-info"
                 />
 
                 <StatCard
                   label="Kategori Aktif"
                   value={activeCategories}
                   description="Dapat digunakan"
-                  icon={
-                    <Check size={18} />
-                  }
-                  iconClassName="bg-emerald-50 text-emerald-600"
+                  icon={<Check size={18} />}
+                  iconClassName="theme-success"
                 />
 
                 <StatCard
                   label="Nonaktif"
                   value={inactiveCategories}
                   description="Tidak digunakan"
-                  icon={
-                    <FolderOpen size={18} />
-                  }
-                  iconClassName="bg-slate-100 text-slate-500"
+                  icon={<FolderOpen size={18} />}
+                  iconClassName="theme-card theme-text-muted"
                 />
               </div>
 
@@ -645,11 +638,11 @@ export default function ArticleCategoriesPage() {
 
               <div
                 className="
+                  theme-card
+                  theme-border
                   overflow-hidden
                   rounded-xl
                   border
-                  border-slate-200
-                  bg-white
                   shadow-[0_1px_3px_rgba(15,23,42,0.04)]
                 "
               >
@@ -657,11 +650,11 @@ export default function ArticleCategoriesPage() {
 
                 <div
                   className="
+                    theme-border-soft
                     flex
                     flex-col
                     gap-4
                     border-b
-                    border-slate-100
                     px-5
                     py-4
                     sm:flex-row
@@ -671,11 +664,11 @@ export default function ArticleCategoriesPage() {
                   "
                 >
                   <div>
-                    <p className="text-sm font-bold text-[#0F172A]">
+                    <p className="theme-text text-sm font-bold">
                       Daftar Kategori
                     </p>
 
-                    <p className="mt-0.5 text-xs text-slate-400">
+                    <p className="theme-text-muted mt-0.5 text-xs">
                       Kelola kategori artikel
                       yang tersedia.
                     </p>
@@ -687,11 +680,11 @@ export default function ArticleCategoriesPage() {
                     <Search
                       size={16}
                       className="
+                        theme-text-muted
                         absolute
                         left-3
                         top-1/2
                         -translate-y-1/2
-                        text-slate-400
                       "
                     />
 
@@ -705,23 +698,17 @@ export default function ArticleCategoriesPage() {
                       }
                       placeholder="Cari kategori..."
                       className="
+                        theme-input
                         h-10
                         w-full
                         rounded-lg
                         border
-                        border-slate-200
-                        bg-white
                         pl-9
                         pr-9
                         text-sm
-                        text-slate-700
                         outline-none
                         transition
-                        placeholder:text-slate-400
-                        hover:border-slate-300
-                        focus:border-blue-500
-                        focus:ring-4
-                        focus:ring-blue-50
+                        focus:border-[var(--color-primary)]
                       "
                     />
 
@@ -732,6 +719,8 @@ export default function ArticleCategoriesPage() {
                           setSearch("")
                         }
                         className="
+                          theme-text-muted
+                          theme-header-hover
                           absolute
                           right-2.5
                           top-1/2
@@ -742,10 +731,8 @@ export default function ArticleCategoriesPage() {
                           items-center
                           justify-center
                           rounded-md
-                          text-slate-400
                           transition
-                          hover:bg-slate-100
-                          hover:text-slate-600
+                          hover:opacity-80
                         "
                         title="Hapus pencarian"
                       >
@@ -762,7 +749,7 @@ export default function ArticleCategoriesPage() {
                 <div className="hidden overflow-x-auto md:block">
                   <table className="w-full min-w-[720px]">
                     <thead>
-                      <tr className="border-b border-slate-100 bg-slate-50/70">
+                      <tr className="theme-table-header theme-border-soft border-b">
                         <th
                           className="
                             w-16
@@ -773,7 +760,6 @@ export default function ArticleCategoriesPage() {
                             font-bold
                             uppercase
                             tracking-[0.12em]
-                            text-slate-400
                           "
                         >
                           No
@@ -788,7 +774,6 @@ export default function ArticleCategoriesPage() {
                             font-bold
                             uppercase
                             tracking-[0.12em]
-                            text-slate-400
                           "
                         >
                           Kategori
@@ -803,7 +788,6 @@ export default function ArticleCategoriesPage() {
                             font-bold
                             uppercase
                             tracking-[0.12em]
-                            text-slate-400
                           "
                         >
                           Slug
@@ -818,7 +802,6 @@ export default function ArticleCategoriesPage() {
                             font-bold
                             uppercase
                             tracking-[0.12em]
-                            text-slate-400
                           "
                         >
                           Status
@@ -833,7 +816,6 @@ export default function ArticleCategoriesPage() {
                             font-bold
                             uppercase
                             tracking-[0.12em]
-                            text-slate-400
                           "
                         >
                           Aksi
@@ -841,7 +823,7 @@ export default function ArticleCategoriesPage() {
                       </tr>
                     </thead>
 
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-[var(--color-border-soft)]">
                       {/* LOADING */}
 
                       {loading && (
@@ -852,18 +834,18 @@ export default function ArticleCategoriesPage() {
                           >
                             <Loader2
                               size={26}
-                              className="
-                                mx-auto
-                                animate-spin
-                                text-blue-600
-                              "
+                              className="mx-auto animate-spin"
+                              style={{
+                                color:
+                                  "var(--color-primary)",
+                              }}
                             />
 
-                            <p className="mt-3 text-sm font-semibold text-slate-500">
+                            <p className="theme-text-secondary mt-3 text-sm font-semibold">
                               Memuat kategori...
                             </p>
 
-                            <p className="mt-1 text-xs text-slate-400">
+                            <p className="theme-text-muted mt-1 text-xs">
                               Mengambil data dari
                               server
                             </p>
@@ -883,6 +865,8 @@ export default function ArticleCategoriesPage() {
                             >
                               <div
                                 className="
+                                  theme-card-soft
+                                  theme-text-muted
                                   mx-auto
                                   flex
                                   h-12
@@ -890,8 +874,7 @@ export default function ArticleCategoriesPage() {
                                   items-center
                                   justify-center
                                   rounded-xl
-                                  bg-slate-100
-                                  text-slate-400
+                                  border
                                 "
                               >
                                 {search ? (
@@ -905,13 +888,13 @@ export default function ArticleCategoriesPage() {
                                 )}
                               </div>
 
-                              <h3 className="mt-4 text-sm font-bold text-slate-600">
+                              <h3 className="theme-text-secondary mt-4 text-sm font-bold">
                                 {search
                                   ? "Kategori tidak ditemukan"
                                   : "Belum ada kategori"}
                               </h3>
 
-                              <p className="mx-auto mt-1 max-w-md text-sm text-slate-400">
+                              <p className="theme-text-muted mx-auto mt-1 max-w-md text-sm">
                                 {search
                                   ? "Tidak ada kategori yang sesuai dengan pencarian."
                                   : "Buat kategori artikel pertama untuk mulai mengelola konten CMS."}
@@ -924,19 +907,16 @@ export default function ArticleCategoriesPage() {
                                     openAddModal
                                   }
                                   className="
+                                    theme-primary
                                     mt-5
                                     inline-flex
                                     h-10
                                     items-center
                                     gap-2
                                     rounded-lg
-                                    bg-[#2563EB]
                                     px-4
                                     text-sm
                                     font-semibold
-                                    text-white
-                                    transition
-                                    hover:bg-[#1D4ED8]
                                   "
                                 >
                                   <Plus
@@ -963,14 +943,14 @@ export default function ArticleCategoriesPage() {
                                 category.id
                               }
                               className="
+                                theme-table-hover
                                 group
                                 transition
-                                hover:bg-slate-50/70
                               "
                             >
                               {/* NO */}
 
-                              <td className="px-5 py-4 text-sm font-medium text-slate-400">
+                              <td className="theme-text-muted px-5 py-4 text-sm font-medium">
                                 {index + 1}
                               </td>
 
@@ -980,6 +960,7 @@ export default function ArticleCategoriesPage() {
                                 <div className="flex items-center gap-3">
                                   <div
                                     className="
+                                      theme-info
                                       flex
                                       h-9
                                       w-9
@@ -987,8 +968,7 @@ export default function ArticleCategoriesPage() {
                                       items-center
                                       justify-center
                                       rounded-lg
-                                      bg-blue-50
-                                      text-blue-600
+                                      border
                                     "
                                   >
                                     <Tags
@@ -997,13 +977,13 @@ export default function ArticleCategoriesPage() {
                                   </div>
 
                                   <div className="min-w-0">
-                                    <p className="truncate text-sm font-semibold text-[#0F172A]">
+                                    <p className="theme-text truncate text-sm font-semibold">
                                       {
                                         category.nama
                                       }
                                     </p>
 
-                                    <p className="mt-0.5 text-[11px] text-slate-400">
+                                    <p className="theme-text-muted mt-0.5 text-[11px]">
                                       Kategori
                                       artikel
                                     </p>
@@ -1016,13 +996,15 @@ export default function ArticleCategoriesPage() {
                               <td className="px-5 py-4">
                                 <span
                                   className="
+                                    theme-card-soft
+                                    theme-text-muted
+                                    inline-block
                                     rounded-md
-                                    bg-slate-50
+                                    border
                                     px-2
                                     py-1
                                     font-mono
                                     text-[11px]
-                                    text-slate-500
                                   "
                                 >
                                   {category.slug ||
@@ -1052,6 +1034,9 @@ export default function ArticleCategoriesPage() {
                                       )
                                     }
                                     className="
+                                      theme-card
+                                      theme-border
+                                      theme-text-muted
                                       flex
                                       h-8
                                       w-8
@@ -1059,13 +1044,8 @@ export default function ArticleCategoriesPage() {
                                       justify-center
                                       rounded-lg
                                       border
-                                      border-slate-200
-                                      bg-white
-                                      text-slate-500
                                       transition
-                                      hover:border-blue-200
-                                      hover:bg-blue-50
-                                      hover:text-blue-600
+                                      hover:opacity-80
                                     "
                                     title="Edit kategori"
                                   >
@@ -1082,6 +1062,9 @@ export default function ArticleCategoriesPage() {
                                       )
                                     }
                                     className="
+                                      theme-card
+                                      theme-border
+                                      theme-text-muted
                                       flex
                                       h-8
                                       w-8
@@ -1089,13 +1072,8 @@ export default function ArticleCategoriesPage() {
                                       justify-center
                                       rounded-lg
                                       border
-                                      border-slate-200
-                                      bg-white
-                                      text-slate-400
                                       transition
-                                      hover:border-red-200
-                                      hover:bg-red-50
-                                      hover:text-red-500
+                                      hover:opacity-80
                                     "
                                     title="Hapus kategori"
                                   >
@@ -1116,21 +1094,21 @@ export default function ArticleCategoriesPage() {
                     MOBILE
                 ================================================= */}
 
-                <div className="divide-y divide-slate-100 md:hidden">
+                <div className="divide-y divide-[var(--color-border-soft)] md:hidden">
                   {/* LOADING */}
 
                   {loading && (
                     <div className="px-5 py-16 text-center">
                       <Loader2
                         size={26}
-                        className="
-                          mx-auto
-                          animate-spin
-                          text-blue-600
-                        "
+                        className="mx-auto animate-spin"
+                        style={{
+                          color:
+                            "var(--color-primary)",
+                        }}
                       />
 
-                      <p className="mt-3 text-sm font-semibold text-slate-500">
+                      <p className="theme-text-secondary mt-3 text-sm font-semibold">
                         Memuat kategori...
                       </p>
                     </div>
@@ -1144,6 +1122,8 @@ export default function ArticleCategoriesPage() {
                       <div className="px-5 py-16 text-center">
                         <div
                           className="
+                            theme-card-soft
+                            theme-text-muted
                             mx-auto
                             flex
                             h-12
@@ -1151,8 +1131,7 @@ export default function ArticleCategoriesPage() {
                             items-center
                             justify-center
                             rounded-xl
-                            bg-slate-100
-                            text-slate-400
+                            border
                           "
                         >
                           {search ? (
@@ -1166,13 +1145,13 @@ export default function ArticleCategoriesPage() {
                           )}
                         </div>
 
-                        <h3 className="mt-4 text-sm font-bold text-slate-600">
+                        <h3 className="theme-text-secondary mt-4 text-sm font-bold">
                           {search
                             ? "Kategori tidak ditemukan"
                             : "Belum ada kategori"}
                         </h3>
 
-                        <p className="mt-1 text-sm text-slate-400">
+                        <p className="theme-text-muted mt-1 text-sm">
                           {search
                             ? "Coba gunakan kata pencarian lain."
                             : "Belum ada kategori artikel."}
@@ -1185,17 +1164,16 @@ export default function ArticleCategoriesPage() {
                               openAddModal
                             }
                             className="
+                              theme-primary
                               mt-5
                               inline-flex
                               h-10
                               items-center
                               gap-2
                               rounded-lg
-                              bg-[#2563EB]
                               px-4
                               text-sm
                               font-semibold
-                              text-white
                             "
                           >
                             <Plus
@@ -1226,6 +1204,7 @@ export default function ArticleCategoriesPage() {
                             <div className="flex min-w-0 items-center gap-3">
                               <div
                                 className="
+                                  theme-info
                                   flex
                                   h-9
                                   w-9
@@ -1233,8 +1212,7 @@ export default function ArticleCategoriesPage() {
                                   items-center
                                   justify-center
                                   rounded-lg
-                                  bg-blue-50
-                                  text-blue-600
+                                  border
                                 "
                               >
                                 <Tags
@@ -1243,13 +1221,13 @@ export default function ArticleCategoriesPage() {
                               </div>
 
                               <div className="min-w-0">
-                                <p className="truncate text-sm font-bold text-[#0F172A]">
+                                <p className="theme-text truncate text-sm font-bold">
                                   {
                                     category.nama
                                   }
                                 </p>
 
-                                <p className="mt-0.5 text-[11px] text-slate-400">
+                                <p className="theme-text-muted mt-0.5 text-[11px]">
                                   #{index + 1}
                                 </p>
                               </div>
@@ -1264,18 +1242,20 @@ export default function ArticleCategoriesPage() {
 
                           <div
                             className="
+                              theme-card-soft
+                              theme-border
                               mt-4
                               rounded-lg
-                              bg-slate-50
+                              border
                               px-3
                               py-2.5
                             "
                           >
-                            <p className="text-[9px] font-bold uppercase tracking-[0.12em] text-slate-400">
+                            <p className="theme-text-muted text-[9px] font-bold uppercase tracking-[0.12em]">
                               Slug
                             </p>
 
-                            <p className="mt-1 break-all font-mono text-[11px] text-slate-500">
+                            <p className="theme-text-secondary mt-1 break-all font-mono text-[11px]">
                               {category.slug ||
                                 "-"}
                             </p>
@@ -1290,22 +1270,20 @@ export default function ArticleCategoriesPage() {
                                 )
                               }
                               className="
+                                theme-card
+                                theme-border
+                                theme-text-secondary
                                 inline-flex
                                 h-9
                                 items-center
                                 gap-2
                                 rounded-lg
                                 border
-                                border-slate-200
-                                bg-white
                                 px-3
                                 text-xs
                                 font-semibold
-                                text-slate-600
                                 transition
-                                hover:border-blue-200
-                                hover:bg-blue-50
-                                hover:text-blue-600
+                                hover:opacity-80
                               "
                             >
                               <Pencil
@@ -1323,22 +1301,20 @@ export default function ArticleCategoriesPage() {
                                 )
                               }
                               className="
+                                theme-card
+                                theme-border
+                                theme-text-secondary
                                 inline-flex
                                 h-9
                                 items-center
                                 gap-2
                                 rounded-lg
                                 border
-                                border-slate-200
-                                bg-white
                                 px-3
                                 text-xs
                                 font-semibold
-                                text-slate-600
                                 transition
-                                hover:border-red-200
-                                hover:bg-red-50
-                                hover:text-red-500
+                                hover:opacity-80
                               "
                             >
                               <Trash2
@@ -1361,25 +1337,23 @@ export default function ArticleCategoriesPage() {
                   categories.length > 0 && (
                     <div
                       className="
+                        theme-border-soft
+                        theme-text-muted
                         flex
                         items-center
                         gap-2
                         border-t
-                        border-slate-100
                         px-5
                         py-3.5
                         text-[11px]
-                        text-slate-400
                         sm:px-6
                       "
                     >
-                      <FileText
-                        size={13}
-                      />
+                      <FileText size={13} />
 
                       Menampilkan
 
-                      <span className="font-semibold text-slate-500">
+                      <span className="theme-text-secondary font-semibold">
                         {
                           filteredCategories.length
                         }
@@ -1387,7 +1361,7 @@ export default function ArticleCategoriesPage() {
 
                       dari
 
-                      <span className="font-semibold text-slate-500">
+                      <span className="theme-text-secondary font-semibold">
                         {categories.length}
                       </span>
 
@@ -1400,8 +1374,8 @@ export default function ArticleCategoriesPage() {
                   PAGE FOOTER
               ================================================= */}
 
-              <div className="mt-6 border-t border-slate-200 pt-4">
-                <p className="text-[11px] text-slate-400">
+              <div className="theme-border mt-6 border-t pt-4">
+                <p className="theme-text-muted text-[11px]">
                   CMS Admin • Pengelolaan Kategori
                   Artikel Sekolah
                 </p>
@@ -1439,13 +1413,13 @@ export default function ArticleCategoriesPage() {
         >
           <div
             className="
+              theme-card
+              theme-border
               w-full
               max-w-lg
               overflow-hidden
               rounded-xl
               border
-              border-slate-200
-              bg-white
               shadow-[0_20px_60px_rgba(15,23,42,0.18)]
             "
           >
@@ -1453,28 +1427,34 @@ export default function ArticleCategoriesPage() {
 
             <div
               className="
+                theme-border-soft
                 flex
                 items-center
                 justify-between
                 border-b
-                border-slate-100
                 px-5
                 py-4
                 sm:px-6
               "
             >
               <div>
-                <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-blue-600">
+                <p
+                  className="text-[10px] font-bold uppercase tracking-[0.14em]"
+                  style={{
+                    color:
+                      "var(--color-primary)",
+                  }}
+                >
                   CMS
                 </p>
 
-                <h2 className="mt-1 text-base font-bold text-[#0F172A]">
+                <h2 className="theme-text mt-1 text-base font-bold">
                   {editingCategory
                     ? "Edit Kategori"
                     : "Tambah Kategori"}
                 </h2>
 
-                <p className="mt-0.5 text-xs text-slate-400">
+                <p className="theme-text-muted mt-0.5 text-xs">
                   {editingCategory
                     ? "Perbarui informasi kategori artikel."
                     : "Buat kategori baru untuk artikel CMS."}
@@ -1486,16 +1466,16 @@ export default function ArticleCategoriesPage() {
                 onClick={closeModal}
                 disabled={saving}
                 className="
+                  theme-text-muted
+                  theme-header-hover
                   flex
                   h-8
                   w-8
                   items-center
                   justify-center
                   rounded-lg
-                  text-slate-400
                   transition
-                  hover:bg-slate-100
-                  hover:text-slate-600
+                  hover:opacity-80
                   disabled:cursor-not-allowed
                   disabled:opacity-50
                 "
@@ -1511,9 +1491,15 @@ export default function ArticleCategoriesPage() {
                 {/* NAME */}
 
                 <div>
-                  <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-slate-500">
+                  <label className="theme-text-secondary mb-2 block text-xs font-bold uppercase tracking-wide">
                     Nama Kategori
-                    <span className="ml-1 text-red-500">
+                    <span
+                      className="ml-1"
+                      style={{
+                        color:
+                          "var(--color-danger)",
+                      }}
+                    >
                       *
                     </span>
                   </label>
@@ -1527,34 +1513,29 @@ export default function ArticleCategoriesPage() {
                     autoFocus
                     disabled={saving}
                     className="
+                      theme-input
                       h-11
                       w-full
                       rounded-lg
                       border
-                      border-slate-200
-                      bg-white
                       px-4
                       text-sm
                       font-medium
-                      text-slate-700
                       outline-none
                       transition
-                      placeholder:text-slate-400
-                      hover:border-slate-300
-                      focus:border-blue-500
-                      focus:ring-4
-                      focus:ring-blue-50
-                      disabled:bg-slate-50
+                      focus:border-[var(--color-primary)]
+                      disabled:cursor-not-allowed
+                      disabled:opacity-60
                     "
                   />
 
                   <div className="mt-2 flex items-center justify-between">
-                    <p className="text-[11px] text-slate-400">
+                    <p className="theme-text-muted text-[11px]">
                       Gunakan nama yang singkat
                       dan mudah dipahami.
                     </p>
 
-                    <span className="text-[10px] text-slate-400">
+                    <span className="theme-text-muted text-[10px]">
                       {form.nama.length}
                     </span>
                   </div>
@@ -1563,7 +1544,7 @@ export default function ArticleCategoriesPage() {
                 {/* STATUS */}
 
                 <div>
-                  <label className="mb-2 block text-xs font-bold uppercase tracking-wide text-slate-500">
+                  <label className="theme-text-secondary mb-2 block text-xs font-bold uppercase tracking-wide">
                     Status
                   </label>
 
@@ -1573,23 +1554,19 @@ export default function ArticleCategoriesPage() {
                     onChange={handleChange}
                     disabled={saving}
                     className="
+                      theme-input
                       h-11
                       w-full
                       rounded-lg
                       border
-                      border-slate-200
-                      bg-white
                       px-3
                       text-sm
                       font-medium
-                      text-slate-700
                       outline-none
                       transition
-                      hover:border-slate-300
-                      focus:border-blue-500
-                      focus:ring-4
-                      focus:ring-blue-50
-                      disabled:bg-slate-50
+                      focus:border-[var(--color-primary)]
+                      disabled:cursor-not-allowed
+                      disabled:opacity-60
                     "
                   >
                     <option value="aktif">
@@ -1601,7 +1578,7 @@ export default function ArticleCategoriesPage() {
                     </option>
                   </select>
 
-                  <p className="mt-2 text-[11px] leading-5 text-slate-400">
+                  <p className="theme-text-muted mt-2 text-[11px] leading-5">
                     Kategori aktif dapat dipilih
                     ketika membuat artikel.
                   </p>
@@ -1609,28 +1586,18 @@ export default function ArticleCategoriesPage() {
 
                 {/* INFO */}
 
-                <div
-                  className="
-                    flex
-                    gap-3
-                    rounded-lg
-                    border
-                    border-blue-100
-                    bg-blue-50/60
-                    p-4
-                  "
-                >
+                <div className="theme-info flex gap-3 rounded-lg border p-4">
                   <AlertCircle
                     size={16}
-                    className="mt-0.5 shrink-0 text-blue-600"
+                    className="mt-0.5 shrink-0"
                   />
 
                   <div>
-                    <p className="text-xs font-bold text-blue-700">
+                    <p className="text-xs font-bold">
                       Informasi
                     </p>
 
-                    <p className="mt-1 text-[11px] leading-5 text-blue-600/80">
+                    <p className="mt-1 text-[11px] leading-5 opacity-80">
                       Slug kategori akan dibuat
                       otomatis oleh sistem
                       berdasarkan nama kategori.
@@ -1643,12 +1610,12 @@ export default function ArticleCategoriesPage() {
 
               <div
                 className="
+                  theme-card-soft
+                  theme-border-soft
                   flex
                   flex-col-reverse
                   gap-2
                   border-t
-                  border-slate-100
-                  bg-slate-50/70
                   px-5
                   py-4
                   sm:flex-row
@@ -1661,17 +1628,17 @@ export default function ArticleCategoriesPage() {
                   onClick={closeModal}
                   disabled={saving}
                   className="
+                    theme-card
+                    theme-border
+                    theme-text-secondary
                     h-10
                     rounded-lg
                     border
-                    border-slate-200
-                    bg-white
                     px-5
                     text-sm
                     font-semibold
-                    text-slate-600
                     transition
-                    hover:bg-slate-50
+                    hover:opacity-80
                     disabled:cursor-not-allowed
                     disabled:opacity-50
                   "
@@ -1686,20 +1653,18 @@ export default function ArticleCategoriesPage() {
                     !form.nama.trim()
                   }
                   className="
+                    theme-primary
                     inline-flex
                     h-10
                     items-center
                     justify-center
                     gap-2
                     rounded-lg
-                    bg-[#2563EB]
                     px-5
                     text-sm
                     font-semibold
-                    text-white
                     shadow-sm
                     transition
-                    hover:bg-[#1D4ED8]
                     disabled:cursor-not-allowed
                     disabled:opacity-50
                   "
@@ -1737,30 +1702,19 @@ export default function ArticleCategoriesPage() {
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-[2px]">
           <div
             className="
+              theme-card
+              theme-border
               w-full
               max-w-md
               overflow-hidden
               rounded-xl
               border
-              border-slate-200
-              bg-white
               shadow-[0_20px_60px_rgba(15,23,42,0.18)]
             "
           >
             <div className="p-6">
               <div className="flex items-start justify-between">
-                <div
-                  className="
-                    flex
-                    h-10
-                    w-10
-                    items-center
-                    justify-center
-                    rounded-lg
-                    bg-red-50
-                    text-red-500
-                  "
-                >
+                <div className="theme-danger flex h-10 w-10 items-center justify-center rounded-lg">
                   <Trash2 size={18} />
                 </div>
 
@@ -1771,16 +1725,16 @@ export default function ArticleCategoriesPage() {
                   }
                   disabled={deleting}
                   className="
+                    theme-text-muted
+                    theme-header-hover
                     flex
                     h-8
                     w-8
                     items-center
                     justify-center
                     rounded-lg
-                    text-slate-400
                     transition
-                    hover:bg-slate-100
-                    hover:text-slate-600
+                    hover:opacity-80
                     disabled:opacity-50
                   "
                 >
@@ -1788,31 +1742,21 @@ export default function ArticleCategoriesPage() {
                 </button>
               </div>
 
-              <h2 className="mt-5 text-lg font-bold tracking-tight text-[#0F172A]">
+              <h2 className="theme-text mt-5 text-lg font-bold tracking-tight">
                 Hapus Kategori?
               </h2>
 
-              <p className="mt-2 text-sm leading-6 text-slate-500">
+              <p className="theme-text-secondary mt-2 text-sm leading-6">
                 Kamu yakin ingin menghapus
                 kategori{" "}
-                <span className="font-semibold text-slate-700">
+                <span className="theme-text font-semibold">
                   "{deleteTarget.nama}"
                 </span>
                 ?
               </p>
 
-              <div
-                className="
-                  mt-4
-                  rounded-lg
-                  border
-                  border-amber-100
-                  bg-amber-50
-                  px-4
-                  py-3
-                "
-              >
-                <p className="text-[11px] leading-5 text-amber-700">
+              <div className="theme-warning mt-4 rounded-lg border px-4 py-3">
+                <p className="text-[11px] leading-5">
                   Pastikan kategori ini tidak
                   sedang dibutuhkan oleh artikel
                   yang sudah ada.
@@ -1822,12 +1766,12 @@ export default function ArticleCategoriesPage() {
 
             <div
               className="
+                theme-card-soft
+                theme-border-soft
                 flex
                 flex-col-reverse
                 gap-2
                 border-t
-                border-slate-100
-                bg-slate-50/70
                 px-6
                 py-4
                 sm:flex-row
@@ -1841,17 +1785,17 @@ export default function ArticleCategoriesPage() {
                 }
                 disabled={deleting}
                 className="
+                  theme-card
+                  theme-border
+                  theme-text-secondary
                   h-10
                   rounded-lg
                   border
-                  border-slate-200
-                  bg-white
                   px-5
                   text-sm
                   font-semibold
-                  text-slate-600
                   transition
-                  hover:bg-slate-50
+                  hover:opacity-80
                   disabled:opacity-50
                 "
               >
@@ -1863,19 +1807,19 @@ export default function ArticleCategoriesPage() {
                 onClick={handleDelete}
                 disabled={deleting}
                 className="
+                  theme-danger
                   inline-flex
                   h-10
                   items-center
                   justify-center
                   gap-2
                   rounded-lg
-                  bg-red-600
+                  border
                   px-5
                   text-sm
                   font-semibold
-                  text-white
                   transition
-                  hover:bg-red-700
+                  hover:opacity-80
                   disabled:cursor-not-allowed
                   disabled:opacity-50
                 "

@@ -30,6 +30,80 @@ import Sidebar from "../../../components/Sidebar";
 
 import { getGedung } from "../../../../services/infrastruktur.service";
 
+// ============================================================
+// GLOBAL THEME HELPERS
+// ============================================================
+
+const themePrimarySurface =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySurfaceHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+
+const themePrimaryBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_24%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themePrimaryHover =
+  "hover:text-[var(--color-primary)]";
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_9%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_24%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+
+// ============================================================
+// PAGE
+// ============================================================
+
 export default function SarprasPage() {
   const router = useRouter();
 
@@ -154,7 +228,7 @@ export default function SarprasPage() {
       icon: Building2,
       href: "/admin/sarpras/gedung",
       stat: `${totalGedung} Gedung`,
-      iconClass: "bg-blue-50 text-blue-600",
+      iconClass: `${themeInfoSurface} text-[var(--color-info)]`,
     },
     {
       title: "Inventaris",
@@ -163,7 +237,7 @@ export default function SarprasPage() {
       icon: Package,
       href: "/admin/sarpras/gudang",
       stat: "Kelola Aset",
-      iconClass: "bg-violet-50 text-violet-600",
+      iconClass: `${themePrimarySurface} ${themePrimaryText}`,
     },
     {
       title: "Fasilitas",
@@ -172,7 +246,7 @@ export default function SarprasPage() {
       icon: Boxes,
       href: "/admin/sarpras/fasilitas",
       stat: "Kelola Fasilitas",
-      iconClass: "bg-emerald-50 text-emerald-600",
+      iconClass: `${themeSuccessSurface} text-[var(--color-success)]`,
     },
     {
       title: "Peminjaman",
@@ -181,7 +255,7 @@ export default function SarprasPage() {
       icon: ClipboardList,
       href: "/admin/sarpras/peminjaman",
       stat: "Kelola Peminjaman",
-      iconClass: "bg-amber-50 text-amber-600",
+      iconClass: `${themeWarningSurface} text-[var(--color-warning)]`,
     },
     {
       title: "Pemeliharaan",
@@ -190,7 +264,7 @@ export default function SarprasPage() {
       icon: Wrench,
       href: "/admin/sarpras/pemeliharaan",
       stat: "Kelola Perawatan",
-      iconClass: "bg-cyan-50 text-cyan-600",
+      iconClass: `${themeInfoSurface} text-[var(--color-info)]`,
     },
     {
       title: "Laporan Kerusakan",
@@ -199,7 +273,7 @@ export default function SarprasPage() {
       icon: AlertTriangle,
       href: "/admin/sarpras/kerusakan",
       stat: "Lihat Laporan",
-      iconClass: "bg-rose-50 text-rose-600",
+      iconClass: `${themeDangerSurface} theme-danger`,
     },
   ];
 
@@ -247,7 +321,7 @@ export default function SarprasPage() {
   };
 
   return (
-    <div className="h-screen overflow-hidden bg-slate-50">
+    <div className="theme-page h-screen overflow-hidden">
       {/* SIDEBAR */}
       <div className="fixed inset-y-0 left-0 z-50">
         <Sidebar
@@ -279,7 +353,7 @@ export default function SarprasPage() {
           />
         </div>
 
-        {/* CONTENT SAJA YANG SCROLL */}
+        {/* CONTENT */}
         <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
             <div className="mx-auto w-full max-w-[1600px]">
@@ -287,21 +361,21 @@ export default function SarprasPage() {
               {/* PAGE HEADER */}
               <div className="mb-6 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
                 <div className="min-w-0">
-                  <div className="mb-2 flex items-center gap-2 text-sm text-slate-500">
+                  <div className="mb-2 flex items-center gap-2 text-sm theme-text-muted">
                     <span>Admin</span>
 
                     <ChevronRight size={15} />
 
-                    <span className="font-medium text-[#2563EB]">
+                    <span className={`font-medium ${themePrimaryText}`}>
                       Sarana & Prasarana
                     </span>
                   </div>
 
-                  <h1 className="text-2xl font-bold tracking-tight text-[#0F172A] sm:text-3xl">
+                  <h1 className="text-2xl font-bold tracking-tight theme-text sm:text-3xl">
                     Sarana & Prasarana
                   </h1>
 
-                  <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-500">
+                  <p className="mt-1 max-w-2xl text-sm leading-6 theme-text-secondary">
                     Kelola gedung, ruangan, inventaris,
                     fasilitas, peminjaman, dan
                     pemeliharaan sarana sekolah.
@@ -313,7 +387,7 @@ export default function SarprasPage() {
                     type="button"
                     onClick={() => loadData(true)}
                     disabled={isRefreshing}
-                    className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600 disabled:cursor-not-allowed disabled:opacity-60"
+                    className={`inline-flex h-10 items-center justify-center gap-2 rounded-lg border ${themeNeutralBorder} theme-card px-4 text-sm font-medium theme-text-secondary ${themeSmallShadow} transition ${themePrimaryBorder} ${themePrimarySurfaceHover} disabled:cursor-not-allowed disabled:opacity-60`}
                   >
                     <RefreshCw
                       size={16}
@@ -334,7 +408,7 @@ export default function SarprasPage() {
                         "/admin/sarpras/gedung/tambah"
                       )
                     }
-                    className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-[#2563EB] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1D4ED8]"
+                    className={`inline-flex h-10 items-center justify-center gap-2 rounded-lg ${themePrimaryGradient} px-4 text-sm font-semibold text-[var(--color-card)] ${themePrimaryShadow} transition hover:opacity-90`}
                   >
                     <Plus size={17} />
 
@@ -354,8 +428,8 @@ export default function SarprasPage() {
                   }
                   description="Gedung terdaftar"
                   icon={Building2}
-                  iconBg="bg-blue-50"
-                  iconColor="text-blue-600"
+                  iconBg={themeInfoSurface}
+                  iconColor="text-[var(--color-info)]"
                   trend="Data real-time"
                 />
 
@@ -368,8 +442,8 @@ export default function SarprasPage() {
                   }
                   description="Dalam kondisi aktif"
                   icon={CheckCircle2}
-                  iconBg="bg-emerald-50"
-                  iconColor="text-emerald-600"
+                  iconBg={themeSuccessSurface}
+                  iconColor="text-[var(--color-success)]"
                   trend="Status aktif"
                 />
 
@@ -382,8 +456,8 @@ export default function SarprasPage() {
                   }
                   description="Perlu diperiksa"
                   icon={CircleAlert}
-                  iconBg="bg-amber-50"
-                  iconColor="text-amber-600"
+                  iconBg={themeWarningSurface}
+                  iconColor="text-[var(--color-warning)]"
                   trend="Perlu perhatian"
                 />
 
@@ -392,27 +466,29 @@ export default function SarprasPage() {
                   value="6"
                   description="Menu pengelolaan"
                   icon={LayoutGrid}
-                  iconBg="bg-violet-50"
-                  iconColor="text-violet-600"
+                  iconBg={themePrimarySurface}
+                  iconColor={themePrimaryText}
                   trend="Terintegrasi"
                 />
               </div>
 
               {/* ERROR */}
               {error && (
-                <div className="mb-6 flex flex-col gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div
+                  className={`mb-6 flex flex-col gap-3 rounded-xl border ${themeWarningBorder} ${themeWarningSurface} p-4 sm:flex-row sm:items-center sm:justify-between`}
+                >
                   <div className="flex items-start gap-3">
                     <CircleAlert
                       size={20}
-                      className="mt-0.5 shrink-0 text-amber-600"
+                      className="mt-0.5 shrink-0 text-[var(--color-warning)]"
                     />
 
                     <div>
-                      <p className="text-sm font-semibold text-amber-800">
+                      <p className="text-sm font-semibold theme-text">
                         Data belum dapat dimuat
                       </p>
 
-                      <p className="mt-1 text-sm text-amber-700">
+                      <p className="mt-1 text-sm theme-text-secondary">
                         {error}
                       </p>
                     </div>
@@ -421,7 +497,7 @@ export default function SarprasPage() {
                   <button
                     type="button"
                     onClick={() => loadData()}
-                    className="inline-flex h-9 items-center justify-center gap-2 rounded-lg border border-amber-300 bg-white px-3 text-sm font-medium text-amber-700 hover:bg-amber-100"
+                    className={`inline-flex h-9 items-center justify-center gap-2 rounded-lg border ${themeWarningBorder} theme-card px-3 text-sm font-medium theme-text-secondary transition ${themeWarningSurface}`}
                   >
                     <RefreshCw size={15} />
 
@@ -433,11 +509,11 @@ export default function SarprasPage() {
               {/* AKSI CEPAT */}
               <section className="mb-6">
                 <div className="mb-4">
-                  <h2 className="text-lg font-bold text-[#0F172A]">
+                  <h2 className="text-lg font-bold theme-text">
                     Aksi Cepat
                   </h2>
 
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="mt-1 text-sm theme-text-secondary">
                     Akses fitur Sarpras yang sering digunakan
                   </p>
                 </div>
@@ -453,25 +529,27 @@ export default function SarprasPage() {
                         onClick={() =>
                           router.push(action.href)
                         }
-                        className="group flex min-w-0 items-center gap-4 rounded-xl border border-slate-200 bg-white p-4 text-left shadow-sm transition hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md"
+                        className={`group flex min-w-0 items-center gap-4 rounded-xl border ${themeNeutralBorder} theme-card p-4 text-left ${themeCardShadow} transition hover:-translate-y-0.5 ${themePrimaryBorder} ${themeNeutralHover}`}
                       >
-                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-[#2563EB] transition group-hover:bg-[#2563EB] group-hover:text-white">
+                        <div
+                          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg ${themePrimarySurface} ${themePrimaryText} transition group-hover:${themePrimarySurface}`}
+                        >
                           <Icon size={20} />
                         </div>
 
                         <div className="min-w-0 flex-1">
-                          <p className="truncate text-sm font-semibold text-slate-800">
+                          <p className="truncate text-sm font-semibold theme-text">
                             {action.title}
                           </p>
 
-                          <p className="mt-1 truncate text-xs text-slate-500">
+                          <p className="mt-1 truncate text-xs theme-text-muted">
                             {action.description}
                           </p>
                         </div>
 
                         <ArrowRight
                           size={17}
-                          className="shrink-0 text-slate-300 transition group-hover:translate-x-1 group-hover:text-[#2563EB]"
+                          className={`shrink-0 theme-text-muted transition group-hover:translate-x-1 ${themePrimaryHover}`}
                         />
                       </button>
                     );
@@ -483,23 +561,27 @@ export default function SarprasPage() {
               <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.65fr)_minmax(300px,0.8fr)]">
 
                 {/* MODUL SARPRAS */}
-                <section className="min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-                  <div className="border-b border-slate-100 p-5 sm:p-6">
+                <section
+                  className={`min-w-0 overflow-hidden rounded-xl border ${themeNeutralBorder} theme-card ${themeCardShadow}`}
+                >
+                  <div className={`border-b ${themeDivider} p-5 sm:p-6`}>
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                       <div>
-                        <h2 className="text-lg font-bold text-[#0F172A]">
+                        <h2 className="text-lg font-bold theme-text">
                           Pengelolaan Sarpras
                         </h2>
 
-                        <p className="mt-1 text-sm text-slate-500">
+                        <p className="mt-1 text-sm theme-text-secondary">
                           Pilih modul yang ingin dikelola
                         </p>
                       </div>
 
-                      <div className="flex h-10 w-full items-center rounded-lg border border-slate-200 bg-slate-50 px-3 lg:w-[250px]">
+                      <div
+                        className={`flex h-10 w-full items-center rounded-lg border ${themeNeutralBorder} ${themeNeutralSurface} px-3 lg:w-[250px]`}
+                      >
                         <Search
                           size={16}
-                          className="shrink-0 text-slate-400"
+                          className="shrink-0 theme-text-muted"
                         />
 
                         <input
@@ -509,7 +591,7 @@ export default function SarprasPage() {
                             setSearch(e.target.value)
                           }
                           placeholder="Cari gedung..."
-                          className="ml-2 min-w-0 flex-1 bg-transparent text-sm text-slate-700 outline-none placeholder:text-slate-400"
+                          className={`ml-2 min-w-0 flex-1 bg-transparent text-sm theme-text outline-none placeholder:text-[var(--color-text-placeholder)] ${themeFocus}`}
                         />
                       </div>
                     </div>
@@ -526,7 +608,7 @@ export default function SarprasPage() {
                           onClick={() =>
                             router.push(item.href)
                           }
-                          className="group flex min-h-[125px] flex-col rounded-xl border border-slate-200 bg-white p-4 text-left transition hover:border-blue-200 hover:bg-slate-50 hover:shadow-sm"
+                          className={`group flex min-h-[125px] flex-col rounded-xl border ${themeNeutralBorder} theme-card p-4 text-left transition ${themePrimaryBorder} ${themeNeutralHover} ${themeSmallShadow}`}
                         >
                           <div className="flex items-start justify-between gap-3">
                             <div
@@ -537,20 +619,22 @@ export default function SarprasPage() {
 
                             <ArrowRight
                               size={17}
-                              className="text-slate-300 transition group-hover:translate-x-1 group-hover:text-[#2563EB]"
+                              className={`theme-text-muted transition group-hover:translate-x-1 ${themePrimaryText}`}
                             />
                           </div>
 
                           <div className="mt-4">
-                            <h3 className="text-sm font-bold text-slate-800">
+                            <h3 className="text-sm font-bold theme-text">
                               {item.title}
                             </h3>
 
-                            <p className="mt-1 line-clamp-2 text-xs leading-5 text-slate-500">
+                            <p className="mt-1 line-clamp-2 text-xs leading-5 theme-text-secondary">
                               {item.description}
                             </p>
 
-                            <div className="mt-3 flex items-center gap-1.5 text-xs font-medium text-[#2563EB]">
+                            <div
+                              className={`mt-3 flex items-center gap-1.5 text-xs font-medium ${themePrimaryText}`}
+                            >
                               <span>{item.stat}</span>
 
                               <ChevronRight size={13} />
@@ -564,26 +648,30 @@ export default function SarprasPage() {
 
                 {/* RINGKASAN */}
                 <div className="space-y-6">
-                  <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-                    <div className="border-b border-slate-100 p-5">
+                  <section
+                    className={`overflow-hidden rounded-xl border ${themeNeutralBorder} theme-card ${themeCardShadow}`}
+                  >
+                    <div className={`border-b ${themeDivider} p-5`}>
                       <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                        <div
+                          className={`flex h-10 w-10 items-center justify-center rounded-lg ${themeInfoSurface} text-[var(--color-info)]`}
+                        >
                           <School size={19} />
                         </div>
 
                         <div>
-                          <h2 className="text-base font-bold text-[#0F172A]">
+                          <h2 className="text-base font-bold theme-text">
                             Ringkasan Sarpras
                           </h2>
 
-                          <p className="text-xs text-slate-500">
+                          <p className="text-xs theme-text-secondary">
                             Informasi pengelolaan fasilitas
                           </p>
                         </div>
                       </div>
                     </div>
 
-                    <div className="divide-y divide-slate-100">
+                    <div className="divide-y divide-[color-mix(in_srgb,var(--color-text)_8%,transparent)]">
                       <SummaryRow
                         icon={Building2}
                         label="Gedung"
@@ -615,22 +703,30 @@ export default function SarprasPage() {
                   </section>
 
                   {/* INFO CARD */}
-                  <section className="overflow-hidden rounded-xl bg-[#0F172A] shadow-sm">
+                  <section
+                    className={`relative overflow-hidden rounded-xl border ${themeNeutralBorder} theme-card ${themeCardShadow}`}
+                  >
                     <div className="relative p-5 sm:p-6">
-                      <div className="absolute -right-10 -top-10 h-32 w-32 rounded-full bg-blue-500/10" />
+                      <div
+                        className={`absolute -right-10 -top-10 h-32 w-32 rounded-full ${themePrimarySurface}`}
+                      />
 
-                      <div className="absolute -bottom-12 -left-12 h-32 w-32 rounded-full bg-blue-400/10" />
+                      <div
+                        className={`absolute -bottom-12 -left-12 h-32 w-32 rounded-full ${themeInfoSurface}`}
+                      />
 
                       <div className="relative">
-                        <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-lg bg-blue-500/15 text-blue-300">
+                        <div
+                          className={`mb-4 flex h-10 w-10 items-center justify-center rounded-lg ${themePrimarySurface} ${themePrimaryText}`}
+                        >
                           <TrendingUp size={19} />
                         </div>
 
-                        <h2 className="text-base font-bold text-white">
+                        <h2 className="text-base font-bold theme-text">
                           Kelola Sarpras dengan Mudah
                         </h2>
 
-                        <p className="mt-2 text-sm leading-6 text-slate-400">
+                        <p className="mt-2 text-sm leading-6 theme-text-secondary">
                           Pastikan seluruh fasilitas sekolah
                           tercatat, terawat, dan dapat
                           digunakan secara optimal.
@@ -643,7 +739,7 @@ export default function SarprasPage() {
                               "/admin/sarpras/gedung"
                             )
                           }
-                          className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-blue-300 transition hover:text-blue-200"
+                          className={`mt-5 inline-flex items-center gap-2 text-sm font-semibold ${themePrimaryText} transition hover:opacity-80`}
                         >
                           Kelola Gedung
 
@@ -656,15 +752,17 @@ export default function SarprasPage() {
               </div>
 
               {/* GEDUNG TERDAFTAR */}
-              <section className="mt-6 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-                <div className="border-b border-slate-100 p-5 sm:p-6">
+              <section
+                className={`mt-6 overflow-hidden rounded-xl border ${themeNeutralBorder} theme-card ${themeCardShadow}`}
+              >
+                <div className={`border-b ${themeDivider} p-5 sm:p-6`}>
                   <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                      <h2 className="text-lg font-bold text-[#0F172A]">
+                      <h2 className="text-lg font-bold theme-text">
                         Gedung Terdaftar
                       </h2>
 
-                      <p className="mt-1 text-sm text-slate-500">
+                      <p className="mt-1 text-sm theme-text-secondary">
                         Data gedung yang sudah tercatat pada
                         sistem
                       </p>
@@ -677,7 +775,7 @@ export default function SarprasPage() {
                           "/admin/sarpras/gedung"
                         )
                       }
-                      className="inline-flex items-center gap-1.5 text-sm font-semibold text-[#2563EB] hover:text-[#1D4ED8]"
+                      className={`inline-flex items-center gap-1.5 text-sm font-semibold ${themePrimaryText} transition hover:opacity-80`}
                     >
                       Lihat Semua
 
@@ -691,37 +789,49 @@ export default function SarprasPage() {
                     {[1, 2, 3].map((item) => (
                       <div
                         key={item}
-                        className="animate-pulse rounded-xl border border-slate-200 p-4"
+                        className={`animate-pulse rounded-xl border ${themeNeutralBorder} p-4`}
                       >
                         <div className="flex gap-3">
-                          <div className="h-10 w-10 rounded-lg bg-slate-200" />
+                          <div
+                            className={`h-10 w-10 rounded-lg ${themeNeutralSurface}`}
+                          />
 
                           <div className="flex-1">
-                            <div className="h-4 w-3/4 rounded bg-slate-200" />
+                            <div
+                              className={`h-4 w-3/4 rounded ${themeNeutralSurface}`}
+                            />
 
-                            <div className="mt-2 h-3 w-1/2 rounded bg-slate-100" />
+                            <div
+                              className={`mt-2 h-3 w-1/2 rounded ${themeNeutralSurface}`}
+                            />
                           </div>
                         </div>
 
-                        <div className="mt-4 h-3 w-full rounded bg-slate-100" />
+                        <div
+                          className={`mt-4 h-3 w-full rounded ${themeNeutralSurface}`}
+                        />
 
-                        <div className="mt-2 h-3 w-2/3 rounded bg-slate-100" />
+                        <div
+                          className={`mt-2 h-3 w-2/3 rounded ${themeNeutralSurface}`}
+                        />
                       </div>
                     ))}
                   </div>
                 ) : filteredGedung.length === 0 ? (
                   <div className="flex flex-col items-center justify-center px-6 py-12 text-center">
-                    <div className="flex h-14 w-14 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
+                    <div
+                      className={`flex h-14 w-14 items-center justify-center rounded-xl ${themeNeutralSurface} theme-text-muted`}
+                    >
                       <Building2 size={25} />
                     </div>
 
-                    <h3 className="mt-4 text-sm font-bold text-slate-800">
+                    <h3 className="mt-4 text-sm font-bold theme-text">
                       {search
                         ? "Gedung tidak ditemukan"
                         : "Belum ada data gedung"}
                     </h3>
 
-                    <p className="mt-1 max-w-sm text-sm leading-6 text-slate-500">
+                    <p className="mt-1 max-w-sm text-sm leading-6 theme-text-secondary">
                       {search
                         ? "Coba gunakan kata kunci pencarian yang berbeda."
                         : "Tambahkan gedung pertama untuk mulai mengelola sarana dan prasarana."}
@@ -735,7 +845,7 @@ export default function SarprasPage() {
                             "/admin/sarpras/gedung/tambah"
                           )
                         }
-                        className="mt-5 inline-flex h-9 items-center gap-2 rounded-lg bg-[#2563EB] px-4 text-sm font-semibold text-white hover:bg-[#1D4ED8]"
+                        className={`mt-5 inline-flex h-9 items-center gap-2 rounded-lg ${themePrimaryGradient} px-4 text-sm font-semibold text-[var(--color-card)] transition hover:opacity-90`}
                       >
                         <Plus size={16} />
 
@@ -796,20 +906,22 @@ export default function SarprasPage() {
                                 );
                               }
                             }}
-                            className="group min-w-0 rounded-xl border border-slate-200 p-4 text-left transition hover:border-blue-200 hover:bg-slate-50 hover:shadow-sm"
+                            className={`group min-w-0 rounded-xl border ${themeNeutralBorder} p-4 text-left transition ${themePrimaryBorder} ${themeNeutralHover} ${themeSmallShadow}`}
                           >
                             <div className="flex items-start justify-between gap-3">
                               <div className="flex min-w-0 items-center gap-3">
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                                <div
+                                  className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${themeInfoSurface} text-[var(--color-info)]`}
+                                >
                                   <Building2 size={19} />
                                 </div>
 
                                 <div className="min-w-0">
-                                  <h3 className="truncate text-sm font-bold text-slate-800">
+                                  <h3 className="truncate text-sm font-bold theme-text">
                                     {nama}
                                   </h3>
 
-                                  <p className="mt-0.5 truncate text-xs text-slate-500">
+                                  <p className="mt-0.5 truncate text-xs theme-text-secondary">
                                     Kode: {kode}
                                   </p>
                                 </div>
@@ -817,11 +929,11 @@ export default function SarprasPage() {
 
                               <ChevronRight
                                 size={17}
-                                className="mt-1 shrink-0 text-slate-300 transition group-hover:translate-x-1 group-hover:text-blue-600"
+                                className={`mt-1 shrink-0 theme-text-muted transition group-hover:translate-x-1 ${themePrimaryText}`}
                               />
                             </div>
 
-                            <div className="mt-4 flex items-center gap-2 text-xs text-slate-500">
+                            <div className="mt-4 flex items-center gap-2 text-xs theme-text-secondary">
                               <MapPin
                                 size={14}
                                 className="shrink-0"
@@ -832,19 +944,21 @@ export default function SarprasPage() {
                               </span>
                             </div>
 
-                            <div className="mt-3 flex items-center justify-between gap-3 border-t border-slate-100 pt-3">
+                            <div
+                              className={`mt-3 flex items-center justify-between gap-3 border-t ${themeDivider} pt-3`}
+                            >
                               <span
                                 className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[11px] font-semibold ${
                                   status === "aktif"
-                                    ? "bg-emerald-50 text-emerald-700"
-                                    : "bg-slate-100 text-slate-600"
+                                    ? `${themeSuccessSurface} text-[var(--color-success)]`
+                                    : `${themeNeutralSurface} theme-text-muted`
                                 }`}
                               >
                                 <span
                                   className={`h-1.5 w-1.5 rounded-full ${
                                     status === "aktif"
-                                      ? "bg-emerald-500"
-                                      : "bg-slate-400"
+                                      ? "bg-[var(--color-success)]"
+                                      : "bg-[var(--color-text-muted)]"
                                   }`}
                                 />
 
@@ -853,7 +967,7 @@ export default function SarprasPage() {
                                   : "Tidak Aktif"}
                               </span>
 
-                              <span className="flex items-center gap-1 text-[11px] text-slate-400">
+                              <span className="flex items-center gap-1 text-[11px] theme-text-muted">
                                 <Clock3 size={12} />
 
                                 {formatDate(createdAt)}
@@ -867,7 +981,9 @@ export default function SarprasPage() {
               </section>
 
               {/* FOOTER */}
-              <div className="mt-6 flex flex-col gap-2 border-t border-slate-200 py-5 text-xs text-slate-400 sm:flex-row sm:items-center sm:justify-between">
+              <div
+                className={`mt-6 flex flex-col gap-2 border-t ${themeDivider} py-5 text-xs theme-text-muted sm:flex-row sm:items-center sm:justify-between`}
+              >
                 <div className="flex items-center gap-2">
                   <FileText size={14} />
 
@@ -879,7 +995,7 @@ export default function SarprasPage() {
                 <div className="flex items-center gap-2">
                   <CheckCircle2
                     size={14}
-                    className="text-emerald-500"
+                    className="text-[var(--color-success)]"
                   />
 
                   <span>Sistem terintegrasi</span>
@@ -894,6 +1010,10 @@ export default function SarprasPage() {
   );
 }
 
+// ============================================================
+// STAT CARD
+// ============================================================
+
 function StatCard({
   title,
   value,
@@ -904,7 +1024,9 @@ function StatCard({
   trend,
 }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm transition hover:shadow-md">
+    <div
+      className={`rounded-xl border ${themeNeutralBorder} theme-card p-5 ${themeCardShadow} transition hover:-translate-y-0.5`}
+    >
       <div className="flex items-start justify-between gap-3">
         <div
           className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-lg ${iconBg} ${iconColor}`}
@@ -912,27 +1034,33 @@ function StatCard({
           <Icon size={20} />
         </div>
 
-        <span className="rounded-full bg-slate-50 px-2.5 py-1 text-[10px] font-medium text-slate-500">
+        <span
+          className={`rounded-full ${themeNeutralSurface} px-2.5 py-1 text-[10px] font-medium theme-text-muted`}
+        >
           {trend}
         </span>
       </div>
 
       <div className="mt-5">
-        <p className="text-sm font-medium text-slate-500">
+        <p className="text-sm font-medium theme-text-secondary">
           {title}
         </p>
 
-        <p className="mt-1 text-2xl font-bold tracking-tight text-[#0F172A]">
+        <p className="mt-1 text-2xl font-bold tracking-tight theme-text">
           {value}
         </p>
 
-        <p className="mt-1 text-xs text-slate-400">
+        <p className="mt-1 text-xs theme-text-muted">
           {description}
         </p>
       </div>
     </div>
   );
 }
+
+// ============================================================
+// SUMMARY ROW
+// ============================================================
 
 function SummaryRow({
   icon: Icon,
@@ -942,16 +1070,18 @@ function SummaryRow({
   return (
     <div className="flex items-center justify-between gap-4 px-5 py-4">
       <div className="flex min-w-0 items-center gap-3">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-50 text-slate-500">
+        <div
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${themeNeutralSurface} theme-text-muted`}
+        >
           <Icon size={17} />
         </div>
 
-        <span className="truncate text-sm text-slate-600">
+        <span className="truncate text-sm theme-text-secondary">
           {label}
         </span>
       </div>
 
-      <span className="text-sm font-bold text-slate-800">
+      <span className="text-sm font-bold theme-text">
         {value}
       </span>
     </div>

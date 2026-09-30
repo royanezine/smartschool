@@ -4,6 +4,7 @@ import { useState, useMemo, useRef } from "react";
 import * as XLSX from "xlsx";
 import Header from "../../../../components/Header";
 import Sidebar from "../../../../components/Sidebar";
+
 import {
   CalendarDays,
   Clock,
@@ -19,6 +20,55 @@ import {
   Pencil,
   Trash2,
 } from "lucide-react";
+
+/* =========================================================
+   THEME HELPERS
+========================================================= */
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_16%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
 
 /* =========================================================
    DATA DASAR
@@ -204,16 +254,16 @@ function buildInitialJadwal() {
 function cellStyle(tipe) {
   switch (tipe) {
     case "istirahat":
-      return "bg-slate-50 text-slate-400";
+      return `${themeNeutralSurface} theme-text-muted ${themeNeutralBorder}`;
 
     case "upacara":
-      return "bg-amber-50 text-amber-700 border border-amber-200";
+      return `${themeWarningSurface} theme-warning ${themeWarningBorder}`;
 
     case "ekskul":
-      return "bg-violet-50 text-violet-700 border border-violet-200";
+      return `${themePrimarySoft} ${themePrimaryText} ${themePrimarySoftBorder}`;
 
     default:
-      return "bg-[#f5f8ff] text-slate-800 border border-slate-100";
+      return `${themePrimarySoft} theme-text ${themePrimarySoftBorder}`;
   }
 }
 
@@ -846,7 +896,7 @@ export default function JadwalPelajaranPage() {
   ======================================================= */
 
   return (
-    <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
 
       {/* SIDEBAR */}
 
@@ -860,7 +910,7 @@ export default function JadwalPelajaranPage() {
 
       {/* CONTENT */}
 
-      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+      <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
 
         {/* HEADER */}
 
@@ -878,29 +928,27 @@ export default function JadwalPelajaranPage() {
 
         <main className="flex-1 overflow-y-auto">
 
-          <div className="p-4 sm:p-6 lg:p-8 space-y-6">
+          <div className="space-y-6 p-4 sm:p-6 lg:p-8">
 
             {/* PAGE HEADER */}
 
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
               <div className="flex items-center gap-3">
 
-                <div className="p-2.5 rounded-xl bg-gradient-to-br from-[#155DFC] to-[#0d47c9] text-white shadow-lg shadow-slate-900/10">
-
-                  <CalendarDays
-                    size={20}
-                  />
-
+                <div
+                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl theme-primary text-[var(--color-card)] ${themePrimaryShadow}`}
+                >
+                  <CalendarDays size={20} />
                 </div>
 
-                <div>
+                <div className="min-w-0">
 
-                  <h1 className="text-2xl font-bold text-slate-800">
+                  <h1 className="theme-text text-2xl font-bold">
                     Jadwal Mata Pelajaran
                   </h1>
 
-                  <p className="text-sm text-slate-500">
+                  <p className="theme-text-secondary text-sm">
                     Kelola jadwal mingguan
                     setiap kelas, Senin
                     sampai Sabtu.
@@ -910,7 +958,7 @@ export default function JadwalPelajaranPage() {
 
               </div>
 
-              <div className="flex items-center gap-2 flex-wrap">
+              <div className="flex flex-wrap items-center gap-2">
 
                 <input
                   type="file"
@@ -927,7 +975,7 @@ export default function JadwalPelajaranPage() {
                   onClick={() =>
                     fileInputRef.current?.click()
                   }
-                  className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 transition-colors"
+                  className={`inline-flex items-center gap-2 rounded-xl border ${themeNeutralBorder} theme-card px-3.5 py-2.5 text-sm font-medium theme-text-secondary transition-colors hover:${themePrimarySoft}`}
                 >
                   <Upload size={15} />
                   Import Excel
@@ -938,11 +986,9 @@ export default function JadwalPelajaranPage() {
                   onClick={
                     handleExportExcel
                   }
-                  className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-gradient-to-r from-[#155DFC] to-[#0d47c9] text-white text-sm font-semibold hover:brightness-110 transition-all"
+                  className="theme-primary inline-flex items-center gap-2 rounded-xl px-3.5 py-2.5 text-sm font-semibold text-[var(--color-card)] transition-all hover:brightness-110"
                 >
-                  <Download
-                    size={15}
-                  />
+                  <Download size={15} />
                   Export Excel
                 </button>
 
@@ -954,25 +1000,19 @@ export default function JadwalPelajaranPage() {
 
             {importMsg && (
               <div
-                className={`flex items-center justify-between gap-2 px-4 py-3 rounded-xl text-sm font-medium ${
-                  importMsg.type ===
-                  "sukses"
-                    ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                    : "bg-rose-50 text-rose-700 border border-rose-200"
+                className={`flex items-center justify-between gap-2 rounded-xl border px-4 py-3 text-sm font-medium ${
+                  importMsg.type === "sukses"
+                    ? `${themeSuccessSurface} ${themeSuccessBorder} theme-success`
+                    : `${themeDangerSurface} ${themeDangerBorder} theme-danger`
                 }`}
               >
 
                 <div className="flex items-center gap-2">
 
-                  {importMsg.type ===
-                  "sukses" ? (
-                    <CheckCircle2
-                      size={15}
-                    />
+                  {importMsg.type === "sukses" ? (
+                    <CheckCircle2 size={15} />
                   ) : (
-                    <AlertCircle
-                      size={15}
-                    />
+                    <AlertCircle size={15} />
                   )}
 
                   {importMsg.text}
@@ -984,6 +1024,7 @@ export default function JadwalPelajaranPage() {
                   onClick={() =>
                     setImportMsg(null)
                   }
+                  className="rounded-md p-1 transition hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]"
                 >
                   <X size={14} />
                 </button>
@@ -993,7 +1034,7 @@ export default function JadwalPelajaranPage() {
 
             {/* STATISTIK */}
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
 
               <StatCard
                 icon={School}
@@ -1035,11 +1076,10 @@ export default function JadwalPelajaranPage() {
                         kelas
                       )
                     }
-                    className={`px-4 py-2 rounded-lg text-sm font-semibold transition-colors ${
-                      kelasAktif ===
-                      kelas
-                        ? "bg-gradient-to-r from-[#155DFC] to-[#0d47c9] text-white shadow-sm"
-                        : "bg-white text-slate-600 border border-slate-200 hover:bg-[#eaf1ff] hover:text-[#155DFC]"
+                    className={`rounded-lg px-4 py-2 text-sm font-semibold transition-colors ${
+                      kelasAktif === kelas
+                        ? "theme-primary text-[var(--color-card)] shadow-sm"
+                        : `theme-card ${themeNeutralBorder} theme-text-secondary hover:${themePrimarySoft} hover:text-[var(--color-primary)]`
                     }`}
                   >
                     Kelas {kelas}
@@ -1055,12 +1095,11 @@ export default function JadwalPelajaranPage() {
 
               <div>
 
-                <p className="text-sm font-semibold text-slate-700">
-                  Jadwal Kelas{" "}
-                  {kelasAktif}
+                <p className="theme-text text-sm font-semibold">
+                  Jadwal Kelas {kelasAktif}
                 </p>
 
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="theme-text-muted mt-1 text-xs">
                   Klik tombol{" "}
                   <Plus
                     size={11}
@@ -1077,17 +1116,19 @@ export default function JadwalPelajaranPage() {
 
             {/* JADWAL */}
 
-            <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden">
+            <div
+              className={`theme-card overflow-hidden rounded-xl border ${themeNeutralBorder} ${themeCardShadow}`}
+            >
 
               <div className="overflow-x-auto">
 
-                <table className="w-full text-sm border-collapse min-w-[1100px]">
+                <table className="w-full min-w-[1100px] border-collapse text-sm">
 
                   <thead>
 
-                    <tr className="bg-gradient-to-r from-[#155DFC] to-[#0d47c9] text-white">
+                    <tr className="theme-primary text-[var(--color-card)]">
 
-                      <th className="text-left font-semibold px-3 py-3 whitespace-nowrap w-28">
+                      <th className="w-28 whitespace-nowrap px-3 py-3 text-left font-semibold">
                         Jam
                       </th>
 
@@ -1095,7 +1136,7 @@ export default function JadwalPelajaranPage() {
                         (hari) => (
                           <th
                             key={hari}
-                            className="text-left font-semibold px-3 py-3 min-w-[175px]"
+                            className="min-w-[175px] px-3 py-3 text-left font-semibold"
                           >
                             {hari}
                           </th>
@@ -1116,12 +1157,12 @@ export default function JadwalPelajaranPage() {
 
                         <tr
                           key={jam}
-                          className="border-b border-slate-100 last:border-0"
+                          className={`border-b ${themeDivider} last:border-0`}
                         >
 
                           {/* JAM */}
 
-                          <td className="px-3 py-2.5 text-xs font-mono text-slate-500 whitespace-nowrap align-top">
+                          <td className="theme-text-muted whitespace-nowrap px-3 py-2.5 align-top font-mono text-xs">
                             {jam}
                           </td>
 
@@ -1140,9 +1181,7 @@ export default function JadwalPelajaranPage() {
                               if (!slot) {
                                 return (
                                   <td
-                                    key={
-                                      hari
-                                    }
+                                    key={hari}
                                     className="px-2 py-2 align-top"
                                   >
                                     <button
@@ -1153,36 +1192,28 @@ export default function JadwalPelajaranPage() {
                                           rowIdx
                                         )
                                       }
-                                      className="w-full min-h-[72px] rounded-lg border border-dashed border-slate-200 text-slate-300 hover:border-[#155DFC] hover:text-[#155DFC] hover:bg-[#f7f9ff] transition-colors flex items-center justify-center"
+                                      className={`flex min-h-[72px] w-full items-center justify-center rounded-lg border border-dashed ${themeNeutralBorder} theme-text-placeholder transition-colors hover:border-[var(--color-primary)] hover:text-[var(--color-primary)] ${themePrimarySoft}`}
                                     >
-                                      <Plus
-                                        size={
-                                          17
-                                        }
-                                      />
+                                      <Plus size={17} />
                                     </button>
                                   </td>
                                 );
                               }
 
                               const isEmpty =
-                                slot.mapel ===
-                                "-";
+                                slot.mapel === "-";
 
                               const isReguler =
-                                slot.tipe ===
-                                "reguler";
+                                slot.tipe === "reguler";
 
                               return (
                                 <td
-                                  key={
-                                    hari
-                                  }
+                                  key={hari}
                                   className="px-2 py-1.5 align-top"
                                 >
 
                                   <div
-                                    className={`group relative rounded-lg px-2.5 py-2 min-h-[70px] ${cellStyle(
+                                    className={`group relative min-h-[70px] rounded-lg px-2.5 py-2 ${cellStyle(
                                       slot.tipe
                                     )}`}
                                   >
@@ -1191,7 +1222,7 @@ export default function JadwalPelajaranPage() {
 
                                     <div className="pr-8">
 
-                                      <p className="text-xs font-semibold leading-tight">
+                                      <p className="theme-text text-xs font-semibold leading-tight">
 
                                         {isEmpty
                                           ? "Belum ada jadwal"
@@ -1201,10 +1232,8 @@ export default function JadwalPelajaranPage() {
 
                                       {isReguler &&
                                         !isEmpty && (
-                                          <p className="text-[10px] text-slate-500 mt-1 leading-tight">
-                                            {
-                                              slot.guru
-                                            }
+                                          <p className="theme-text-muted mt-1 text-[10px] leading-tight">
+                                            {slot.guru}
                                           </p>
                                         )}
 
@@ -1212,7 +1241,7 @@ export default function JadwalPelajaranPage() {
 
                                     {/* ACTION */}
 
-                                    <div className="absolute top-1.5 right-1.5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1">
+                                    <div className="absolute right-1.5 top-1.5 flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
 
                                       {/* EDIT */}
 
@@ -1225,13 +1254,9 @@ export default function JadwalPelajaranPage() {
                                           )
                                         }
                                         title="Edit jadwal"
-                                        className="w-6 h-6 rounded-md bg-white border border-slate-200 text-[#155DFC] flex items-center justify-center hover:bg-[#eaf1ff] shadow-sm"
+                                        className={`flex h-6 w-6 items-center justify-center rounded-md theme-card ${themeNeutralBorder} ${themePrimaryText} ${themeSmallShadow} transition hover:${themePrimarySoft}`}
                                       >
-                                        <Pencil
-                                          size={
-                                            11
-                                          }
-                                        />
+                                        <Pencil size={11} />
                                       </button>
 
                                       {/* HAPUS */}
@@ -1246,13 +1271,9 @@ export default function JadwalPelajaranPage() {
                                             )
                                           }
                                           title="Hapus jadwal"
-                                          className="w-6 h-6 rounded-md bg-white border border-slate-200 text-red-500 flex items-center justify-center hover:bg-red-50 shadow-sm"
+                                          className={`theme-danger flex h-6 w-6 items-center justify-center rounded-md theme-card ${themeNeutralBorder} ${themeSmallShadow} transition hover:${themeDangerSurface}`}
                                         >
-                                          <Trash2
-                                            size={
-                                              11
-                                            }
-                                          />
+                                          <Trash2 size={11} />
                                         </button>
                                       )}
 
@@ -1280,39 +1301,27 @@ export default function JadwalPelajaranPage() {
 
             {/* FOOTER INFO */}
 
-            <div className="flex flex-wrap items-center gap-4 text-xs text-slate-400">
+            <div className="flex flex-wrap items-center gap-4 theme-text-muted text-xs">
 
-              <div className="flex items-center gap-2">
+              <LegendItem
+                className={`${themePrimarySoft} ${themePrimarySoftBorder}`}
+                label="Jadwal Pelajaran"
+              />
 
-                <span className="w-3 h-3 rounded bg-[#f5f8ff] border border-slate-200" />
+              <LegendItem
+                className={`${themeWarningSurface} ${themeWarningBorder}`}
+                label="Upacara"
+              />
 
-                Jadwal Pelajaran
+              <LegendItem
+                className={`${themePrimarySoft} ${themePrimarySoftBorder}`}
+                label="Ekstrakurikuler"
+              />
 
-              </div>
-
-              <div className="flex items-center gap-2">
-
-                <span className="w-3 h-3 rounded bg-amber-50 border border-amber-200" />
-
-                Upacara
-
-              </div>
-
-              <div className="flex items-center gap-2">
-
-                <span className="w-3 h-3 rounded bg-violet-50 border border-violet-200" />
-
-                Ekstrakurikuler
-
-              </div>
-
-              <div className="flex items-center gap-2">
-
-                <span className="w-3 h-3 rounded bg-slate-50 border border-slate-200" />
-
-                Istirahat
-
-              </div>
+              <LegendItem
+                className={`${themeNeutralSurface} ${themeNeutralBorder}`}
+                label="Istirahat"
+              />
 
             </div>
 
@@ -1329,35 +1338,33 @@ export default function JadwalPelajaranPage() {
       {showModal &&
         editingData && (
 
-          <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
 
-            <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden">
+            <div
+              className={`theme-card w-full max-w-md overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+            >
 
               {/* MODAL HEADER */}
 
-              <div className="flex items-center justify-between p-5 border-b border-slate-200">
+              <div
+                className={`flex items-center justify-between border-b ${themeDivider} p-5`}
+              >
 
                 <div>
 
-                  <h2 className="text-lg font-bold text-slate-800">
+                  <h2 className="theme-text text-lg font-bold">
 
-                    {editingData.mode ===
-                    "edit"
+                    {editingData.mode === "edit"
                       ? "Edit Jadwal"
                       : "Tambah Jadwal"}
 
                   </h2>
 
-                  <p className="text-xs text-slate-500 mt-1">
+                  <p className="theme-text-muted mt-1 text-xs">
 
                     Kelas {kelasAktif} •{" "}
-                    {
-                      editingData.hari
-                    }{" "}
-                    •{" "}
-                    {
-                      editingData.jam
-                    }
+                    {editingData.hari} •{" "}
+                    {editingData.jam}
 
                   </p>
 
@@ -1366,14 +1373,10 @@ export default function JadwalPelajaranPage() {
                 <button
                   type="button"
                   onClick={() => {
-                    setShowModal(
-                      false
-                    );
-                    setEditingData(
-                      null
-                    );
+                    setShowModal(false);
+                    setEditingData(null);
                   }}
-                  className="w-9 h-9 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500"
+                  className={`theme-text-muted flex h-9 w-9 items-center justify-center rounded-lg transition hover:bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)]`}
                 >
                   <X size={18} />
                 </button>
@@ -1382,20 +1385,20 @@ export default function JadwalPelajaranPage() {
 
               {/* FORM */}
 
-              <div className="p-5 space-y-4">
+              <div className="space-y-4 p-5">
 
                 {/* KELAS */}
 
                 <div>
 
-                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">
+                  <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
                     Kelas
                   </label>
 
                   <input
                     value={kelasAktif}
                     disabled
-                    className="w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-slate-50 text-sm text-slate-500"
+                    className={`theme-input w-full rounded-lg border px-3 py-2.5 text-sm`}
                   />
 
                 </div>
@@ -1404,16 +1407,14 @@ export default function JadwalPelajaranPage() {
 
                 <div>
 
-                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">
+                  <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
                     Hari
                   </label>
 
                   <input
-                    value={
-                      editingData.hari
-                    }
+                    value={editingData.hari}
                     disabled
-                    className="w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-slate-50 text-sm text-slate-500"
+                    className={`theme-input w-full rounded-lg border px-3 py-2.5 text-sm`}
                   />
 
                 </div>
@@ -1422,16 +1423,14 @@ export default function JadwalPelajaranPage() {
 
                 <div>
 
-                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">
+                  <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
                     Jam
                   </label>
 
                   <input
-                    value={
-                      editingData.jam
-                    }
+                    value={editingData.jam}
                     disabled
-                    className="w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-slate-50 text-sm text-slate-500"
+                    className={`theme-input w-full rounded-lg border px-3 py-2.5 text-sm`}
                   />
 
                 </div>
@@ -1440,7 +1439,7 @@ export default function JadwalPelajaranPage() {
 
                 <div>
 
-                  <label className="block text-xs font-semibold text-slate-600 mb-1.5">
+                  <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
                     Tipe Jadwal
                   </label>
 
@@ -1450,13 +1449,11 @@ export default function JadwalPelajaranPage() {
                       setForm(
                         (prev) => ({
                           ...prev,
-                          tipe:
-                            e.target
-                              .value,
+                          tipe: e.target.value,
                         })
                       )
                     }
-                    className="w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#155DFC]/25 focus:border-[#155DFC]/50"
+                    className={`theme-input w-full rounded-lg border px-3 py-2.5 text-sm outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]`}
                   >
 
                     <option value="reguler">
@@ -1481,52 +1478,40 @@ export default function JadwalPelajaranPage() {
 
                 {/* MAPEL */}
 
-                {form.tipe ===
-                  "reguler" && (
+                {form.tipe === "reguler" && (
 
                   <>
 
                     <div>
 
-                      <label className="block text-xs font-semibold text-slate-600 mb-1.5">
+                      <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
                         Mata Pelajaran
                       </label>
 
                       <input
                         type="text"
                         list="mapel-list"
-                        value={
-                          form.mapel
-                        }
+                        value={form.mapel}
                         onChange={(e) =>
                           setForm(
-                            (
-                              prev
-                            ) => ({
+                            (prev) => ({
                               ...prev,
                               mapel:
-                                e
-                                  .target
-                                  .value,
+                                e.target.value,
                             })
                           )
                         }
                         placeholder="Contoh: Matematika"
-                        className="w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#155DFC]/25 focus:border-[#155DFC]/50"
+                        className={`theme-input w-full rounded-lg border px-3 py-2.5 text-sm outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]`}
                       />
 
                       <datalist id="mapel-list">
 
                         {MAPEL_POOL.map(
-                          (
-                            item,
-                            idx
-                          ) => (
+                          (item, idx) => (
                             <option
                               key={`${item.mapel}-${idx}`}
-                              value={
-                                item.mapel
-                              }
+                              value={item.mapel}
                             />
                           )
                         )}
@@ -1539,45 +1524,34 @@ export default function JadwalPelajaranPage() {
 
                     <div>
 
-                      <label className="block text-xs font-semibold text-slate-600 mb-1.5">
+                      <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
                         Guru Pengampu
                       </label>
 
                       <input
                         type="text"
                         list="guru-list"
-                        value={
-                          form.guru
-                        }
+                        value={form.guru}
                         onChange={(e) =>
                           setForm(
-                            (
-                              prev
-                            ) => ({
+                            (prev) => ({
                               ...prev,
                               guru:
-                                e
-                                  .target
-                                  .value,
+                                e.target.value,
                             })
                           )
                         }
                         placeholder="Contoh: Andi Prasetyo, S.Pd"
-                        className="w-full px-3 py-2.5 rounded-lg border border-slate-200 bg-white text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-[#155DFC]/25 focus:border-[#155DFC]/50"
+                        className={`theme-input w-full rounded-lg border px-3 py-2.5 text-sm outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]`}
                       />
 
                       <datalist id="guru-list">
 
                         {MAPEL_POOL.map(
-                          (
-                            item,
-                            idx
-                          ) => (
+                          (item, idx) => (
                             <option
                               key={`${item.guru}-${idx}`}
-                              value={
-                                item.guru
-                              }
+                              value={item.guru}
                             />
                           )
                         )}
@@ -1597,31 +1571,22 @@ export default function JadwalPelajaranPage() {
                   <button
                     type="button"
                     onClick={() => {
-                      setShowModal(
-                        false
-                      );
-                      setEditingData(
-                        null
-                      );
+                      setShowModal(false);
+                      setEditingData(null);
                     }}
-                    className="px-4 py-2.5 rounded-lg border border-slate-200 text-slate-600 text-sm font-semibold hover:bg-slate-50"
+                    className={`theme-card ${themeNeutralBorder} theme-text-secondary rounded-lg border px-4 py-2.5 text-sm font-semibold transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]`}
                   >
                     Batal
                   </button>
 
                   <button
                     type="button"
-                    onClick={
-                      handleSave
-                    }
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-[#155DFC] to-[#0d47c9] text-white text-sm font-semibold hover:brightness-110"
+                    onClick={handleSave}
+                    className="theme-primary inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-[var(--color-card)] transition hover:brightness-110"
                   >
-                    <CheckCircle2
-                      size={15}
-                    />
+                    <CheckCircle2 size={15} />
 
-                    {editingData.mode ===
-                    "edit"
+                    {editingData.mode === "edit"
                       ? "Simpan Perubahan"
                       : "Tambah Jadwal"}
 
@@ -1651,25 +1616,45 @@ function StatCard({
   value,
 }) {
   return (
-    <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm">
+    <div
+      className={`theme-card rounded-xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}
+    >
 
       <div className="flex items-center gap-2">
 
         <Icon
           size={14}
-          className="text-[#155DFC]"
+          className={themePrimaryText}
         />
 
-        <p className="text-[11px] font-medium text-slate-500 tracking-wide">
+        <p className="theme-text-muted text-[11px] font-medium tracking-wide">
           {title}
         </p>
 
       </div>
 
-      <p className="text-2xl font-bold text-slate-900 mt-1.5">
+      <p className="theme-text mt-1.5 text-2xl font-bold">
         {value}
       </p>
 
+    </div>
+  );
+}
+
+/* =========================================================
+   LEGEND
+========================================================= */
+
+function LegendItem({
+  className,
+  label,
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <span
+        className={`h-3 w-3 rounded border ${className}`}
+      />
+      {label}
     </div>
   );
 }

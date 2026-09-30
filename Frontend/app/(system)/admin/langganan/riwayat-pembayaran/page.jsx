@@ -14,7 +14,6 @@ import {
   Eye,
   Filter,
   Search,
-  XCircle,
   CreditCard,
   Wallet,
   Receipt,
@@ -129,6 +128,25 @@ const PAYMENTS = [
 ];
 
 // ============================================================
+// THEME HELPERS
+// ============================================================
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]";
+
+const themePrimaryHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
+
+const themeTextHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themePrimaryShadow =
+  "shadow-[0_10px_25px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]";
+
+// ============================================================
 // FORMAT
 // ============================================================
 
@@ -148,26 +166,28 @@ function StatCard({
   value,
   description,
   icon: Icon,
-  iconClass = "text-[#155DFC]",
+  iconClass = "text-[var(--color-primary)]",
 }) {
   return (
-    <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm">
+    <div className="theme-card theme-border rounded-xl border p-4 shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)]">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[11px] font-medium text-slate-500 tracking-wide">
+          <p className="text-[11px] font-medium theme-text-muted tracking-wide">
             {title}
           </p>
 
-          <p className="mt-1.5 text-xl sm:text-2xl font-bold text-slate-900 truncate">
+          <p className="mt-1.5 text-xl sm:text-2xl font-bold theme-text truncate">
             {value}
           </p>
 
-          <p className="mt-1 text-[10px] sm:text-xs text-slate-400">
+          <p className="mt-1 text-[10px] sm:text-xs theme-text-placeholder">
             {description}
           </p>
         </div>
 
-        <div className="w-9 h-9 rounded-lg bg-slate-50 flex items-center justify-center shrink-0">
+        <div
+          className={`w-9 h-9 rounded-lg ${themePrimarySoft} flex items-center justify-center shrink-0`}
+        >
           <Icon size={17} className={iconClass} />
         </div>
       </div>
@@ -182,29 +202,33 @@ function StatCard({
 function PaymentStatus({ status }) {
   const styles = {
     Berhasil: {
-      className: "bg-emerald-50 text-emerald-600 border-emerald-200",
-      dot: "bg-emerald-500",
+      className: "theme-success",
+      dot: "bg-[var(--color-success)]",
     },
+
     Menunggu: {
-      className: "bg-amber-50 text-amber-600 border-amber-200",
-      dot: "bg-amber-500",
+      className: "theme-warning",
+      dot: "bg-[var(--color-warning)]",
     },
+
     Gagal: {
-      className: "bg-red-50 text-red-600 border-red-200",
-      dot: "bg-red-500",
+      className: "theme-danger",
+      dot: "bg-[var(--color-danger)]",
     },
   };
 
   const current = styles[status] || {
-    className: "bg-slate-100 text-slate-500 border-slate-200",
-    dot: "bg-slate-400",
+    className: "theme-text-muted theme-border",
+    dot: "bg-[var(--color-text-muted)]",
   };
 
   return (
     <span
       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border whitespace-nowrap ${current.className}`}
     >
-      <span className={`w-1.5 h-1.5 rounded-full ${current.dot}`} />
+      <span
+        className={`w-1.5 h-1.5 rounded-full ${current.dot}`}
+      />
       {status}
     </span>
   );
@@ -275,13 +299,11 @@ export default function RiwayatPembayaranPage() {
     (item) => item.status === "Menunggu"
   );
 
-  const failedPayments = PAYMENTS.filter(
-    (item) => item.status === "Gagal"
-  );
-
   return (
-    <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
-      {/* SIDEBAR */}
+    <div className="flex h-screen w-full theme-page overflow-hidden">
+      {/* ======================================================
+          SIDEBAR
+      ====================================================== */}
       <Sidebar
         active="riwayatPembayaran"
         setActive={() => {}}
@@ -290,7 +312,9 @@ export default function RiwayatPembayaranPage() {
         role="admin"
       />
 
-      {/* CONTENT */}
+      {/* ======================================================
+          CONTENT
+      ====================================================== */}
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         {/* HEADER */}
         <Header
@@ -303,21 +327,26 @@ export default function RiwayatPembayaranPage() {
           }}
         />
 
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto theme-page">
           <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-            {/* PAGE HEADER */}
+
+            {/* ==================================================
+                PAGE HEADER
+            ================================================== */}
             <div className="flex items-center justify-between gap-4 flex-wrap">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-gradient-to-br from-[#155DFC] to-[#0d47c9] text-white shadow-lg shadow-[#155DFC]/20">
+                <div
+                  className={`p-2.5 rounded-xl ${themePrimarySoft} ${themePrimarySoftBorder} border text-[var(--color-primary)] ${themePrimaryShadow}`}
+                >
                   <Receipt size={20} />
                 </div>
 
                 <div>
-                  <h1 className="text-2xl font-bold text-slate-800">
+                  <h1 className="text-2xl font-bold theme-text">
                     Riwayat Pembayaran
                   </h1>
 
-                  <p className="text-sm text-slate-500">
+                  <p className="text-sm theme-text-secondary">
                     Daftar pembayaran langganan yang telah dilakukan
                     oleh sekolah Anda.
                   </p>
@@ -327,14 +356,16 @@ export default function RiwayatPembayaranPage() {
               <button
                 type="button"
                 onClick={() => window.location.reload()}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-600 text-sm font-semibold hover:bg-slate-50 transition-colors"
+                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border theme-border theme-card theme-text-secondary text-sm font-semibold ${themeTextHover} transition-colors`}
               >
                 <RefreshCw size={15} />
                 Refresh
               </button>
             </div>
 
-            {/* SUMMARY */}
+            {/* ==================================================
+                SUMMARY
+            ================================================== */}
             <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
               <StatCard
                 title="Total Pembayaran"
@@ -348,7 +379,7 @@ export default function RiwayatPembayaranPage() {
                 value={successPayments.length}
                 description="Pembayaran selesai"
                 icon={CheckCircle2}
-                iconClass="text-emerald-500"
+                iconClass="text-[var(--color-success)]"
               />
 
               <StatCard
@@ -356,7 +387,7 @@ export default function RiwayatPembayaranPage() {
                 value={pendingPayments.length}
                 description="Menunggu pembayaran"
                 icon={Clock3}
-                iconClass="text-amber-500"
+                iconClass="text-[var(--color-warning)]"
               />
 
               <StatCard
@@ -367,29 +398,33 @@ export default function RiwayatPembayaranPage() {
               />
             </div>
 
-            {/* INFO */}
-            <section className="bg-white rounded-xl border border-slate-200/80 shadow-sm p-4">
+            {/* ==================================================
+                INFO
+            ================================================== */}
+            <section className="theme-card theme-border rounded-xl border shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)] p-4">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div className="flex items-start gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#eaf1ff] flex items-center justify-center shrink-0">
+                  <div
+                    className={`w-10 h-10 rounded-xl ${themePrimarySoft} flex items-center justify-center shrink-0`}
+                  >
                     <TrendingUp
                       size={18}
-                      className="text-[#155DFC]"
+                      className="text-[var(--color-primary)]"
                     />
                   </div>
 
                   <div>
-                    <p className="text-sm font-semibold text-slate-800">
+                    <p className="text-sm font-semibold theme-text">
                       Riwayat pembayaran sekolah
                     </p>
 
-                    <p className="text-xs text-slate-500 mt-1">
+                    <p className="text-xs theme-text-secondary mt-1">
                       Sekolah telah melakukan{" "}
-                      <span className="font-semibold text-slate-700">
+                      <span className="font-semibold theme-text">
                         {successPayments.length} pembayaran berhasil
                       </span>{" "}
                       dengan total{" "}
-                      <span className="font-semibold text-[#155DFC]">
+                      <span className="font-semibold text-[var(--color-primary)]">
                         {formatRupiah(successAmount)}
                       </span>
                       .
@@ -398,21 +433,26 @@ export default function RiwayatPembayaranPage() {
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                  <span className="text-xs font-medium text-slate-500">
+                  <span
+                    className="w-2 h-2 rounded-full bg-[var(--color-success)]"
+                  />
+
+                  <span className="text-xs font-medium theme-text-muted">
                     Pembayaran terverifikasi
                   </span>
                 </div>
               </div>
             </section>
 
-            {/* FILTER */}
-            <section className="bg-white rounded-xl border border-slate-200/80 shadow-sm p-4">
+            {/* ==================================================
+                FILTER
+            ================================================== */}
+            <section className="theme-card theme-border rounded-xl border shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)] p-4">
               <div className="flex flex-col lg:flex-row gap-3">
                 <div className="relative flex-1">
                   <Search
                     size={16}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                    className="absolute left-3 top-1/2 -translate-y-1/2 theme-text-placeholder"
                   />
 
                   <input
@@ -420,7 +460,7 @@ export default function RiwayatPembayaranPage() {
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Cari transaksi, invoice, paket..."
-                    className="w-full pl-9 pr-3 py-2.5 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#155DFC]/20 focus:border-[#155DFC]/50 text-slate-800"
+                    className={`w-full pl-9 pr-3 py-2.5 text-sm rounded-lg theme-input border theme-border theme-text ${themeTextHover} focus:outline-none focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]`}
                   />
                 </div>
 
@@ -430,7 +470,7 @@ export default function RiwayatPembayaranPage() {
                     onChange={(e) =>
                       setStatusFilter(e.target.value)
                     }
-                    className="text-sm rounded-lg border border-slate-200 px-3 py-2.5 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#155DFC]/20"
+                    className="text-sm rounded-lg theme-input border theme-border px-3 py-2.5 theme-text focus:outline-none focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]"
                   >
                     <option value="Semua">Semua Status</option>
                     <option value="Berhasil">Berhasil</option>
@@ -443,7 +483,7 @@ export default function RiwayatPembayaranPage() {
                     onChange={(e) =>
                       setMethodFilter(e.target.value)
                     }
-                    className="text-sm rounded-lg border border-slate-200 px-3 py-2.5 bg-white text-slate-700 focus:outline-none focus:ring-2 focus:ring-[#155DFC]/20"
+                    className="text-sm rounded-lg theme-input border theme-border px-3 py-2.5 theme-text focus:outline-none focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]"
                   >
                     <option value="Semua">Semua Metode</option>
                     <option value="Virtual Account">
@@ -457,7 +497,7 @@ export default function RiwayatPembayaranPage() {
 
                   <button
                     type="button"
-                    className="inline-flex items-center gap-2 px-3 py-2.5 rounded-lg border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50"
+                    className={`inline-flex items-center gap-2 px-3 py-2.5 rounded-lg border theme-border theme-card theme-text-secondary text-sm font-medium ${themeTextHover}`}
                   >
                     <Filter size={15} />
                     Filter
@@ -466,12 +506,14 @@ export default function RiwayatPembayaranPage() {
               </div>
             </section>
 
-            {/* TABLE */}
-            <section className="bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden">
+            {/* ==================================================
+                TABLE
+            ================================================== */}
+            <section className="theme-card theme-border rounded-xl border shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)] overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[1050px] text-sm border-collapse">
                   <thead>
-                    <tr className="bg-gradient-to-r from-[#155DFC] to-[#0d47c9] text-white">
+                    <tr className="theme-header">
                       <th className="text-center font-semibold px-4 py-3 w-[60px]">
                         No
                       </th>
@@ -511,34 +553,36 @@ export default function RiwayatPembayaranPage() {
                       filteredPayments.map((item, index) => (
                         <tr
                           key={item.id}
-                          className={`border-b border-slate-100 last:border-0 transition-colors hover:bg-[#eaf1ff] ${
+                          className={`border-b theme-border-soft last:border-0 transition-colors ${themePrimaryHover} ${
                             index % 2 === 0
-                              ? "bg-[#f7f9ff]"
-                              : "bg-white"
+                              ? "theme-card-soft"
+                              : "theme-card"
                           }`}
                         >
                           <td className="px-4 py-3 text-center">
-                            <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#eaf1ff] text-[#155DFC] border border-[#c7dbff] text-xs font-bold">
+                            <span
+                              className={`inline-flex items-center justify-center w-7 h-7 rounded-lg ${themePrimarySoft} text-[var(--color-primary)] ${themePrimarySoftBorder} border text-xs font-bold`}
+                            >
                               {index + 1}
                             </span>
                           </td>
 
                           <td className="px-4 py-3">
-                            <p className="font-semibold text-slate-800">
+                            <p className="font-semibold theme-text">
                               {item.id}
                             </p>
 
-                            <p className="text-[11px] text-slate-400 mt-1">
+                            <p className="text-[11px] theme-text-placeholder mt-1">
                               {item.invoice}
                             </p>
                           </td>
 
                           <td className="px-4 py-3">
-                            <span className="text-sm font-medium text-slate-700">
+                            <span className="text-sm font-medium theme-text-secondary">
                               {item.package}
                             </span>
 
-                            <p className="text-[11px] text-slate-400 mt-0.5">
+                            <p className="text-[11px] theme-text-placeholder mt-0.5">
                               {item.period}
                             </p>
                           </td>
@@ -547,29 +591,29 @@ export default function RiwayatPembayaranPage() {
                             <div className="flex items-center gap-2">
                               <CalendarDays
                                 size={14}
-                                className="text-[#155DFC]"
+                                className="text-[var(--color-primary)]"
                               />
 
-                              <span className="text-xs text-slate-600">
+                              <span className="text-xs theme-text-secondary">
                                 {item.date}
                               </span>
                             </div>
                           </td>
 
                           <td className="px-4 py-3">
-                            <p className="text-xs font-medium text-slate-700">
+                            <p className="text-xs font-medium theme-text-secondary">
                               {item.method}
                             </p>
 
                             {item.bank !== "-" && (
-                              <p className="text-[11px] text-slate-400 mt-0.5">
+                              <p className="text-[11px] theme-text-placeholder mt-0.5">
                                 {item.bank}
                               </p>
                             )}
                           </td>
 
                           <td className="px-4 py-3 text-right">
-                            <span className="text-sm font-bold text-slate-800">
+                            <span className="text-sm font-bold theme-text">
                               {formatRupiah(item.amount)}
                             </span>
                           </td>
@@ -587,7 +631,7 @@ export default function RiwayatPembayaranPage() {
                                     `/admin/langganan/riwayat-pembayaran/${item.id}`
                                   )
                                 }
-                                className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[#155DFC] bg-[#eaf1ff] border border-[#c7dbff] hover:bg-[#d6e6ff] text-xs font-medium transition-colors"
+                                className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[var(--color-primary)] ${themePrimarySoft} ${themePrimarySoftBorder} border ${themePrimaryHover} text-xs font-medium transition-colors`}
                               >
                                 <Eye size={13} />
                                 Detail
@@ -595,7 +639,7 @@ export default function RiwayatPembayaranPage() {
 
                               <button
                                 type="button"
-                                className="inline-flex items-center justify-center w-8 h-8 rounded-md border border-slate-200 text-slate-500 hover:bg-slate-50"
+                                className={`inline-flex items-center justify-center w-8 h-8 rounded-md border theme-border theme-card theme-text-muted ${themeTextHover} hover:text-[var(--color-primary)]`}
                               >
                                 <Download size={14} />
                               </button>
@@ -610,18 +654,20 @@ export default function RiwayatPembayaranPage() {
                           className="px-4 py-14 text-center"
                         >
                           <div className="flex flex-col items-center">
-                            <div className="w-12 h-12 rounded-full bg-[#eaf1ff] flex items-center justify-center">
+                            <div
+                              className={`w-12 h-12 rounded-full ${themePrimarySoft} flex items-center justify-center`}
+                            >
                               <Search
                                 size={20}
-                                className="text-[#155DFC]"
+                                className="text-[var(--color-primary)]"
                               />
                             </div>
 
-                            <p className="text-sm font-semibold text-slate-700 mt-3">
+                            <p className="text-sm font-semibold theme-text-secondary mt-3">
                               Pembayaran tidak ditemukan
                             </p>
 
-                            <p className="text-xs text-slate-400 mt-1">
+                            <p className="text-xs theme-text-placeholder mt-1">
                               Coba ubah kata kunci atau filter.
                             </p>
                           </div>
@@ -632,34 +678,48 @@ export default function RiwayatPembayaranPage() {
                 </table>
               </div>
 
-              {/* FOOTER */}
-              <div className="px-4 py-3 border-t border-slate-100 bg-slate-50/60 flex flex-col sm:flex-row items-center justify-between gap-3">
-                <p className="text-xs text-slate-500">
+              {/* ==================================================
+                  FOOTER
+              ================================================== */}
+              <div className="px-4 py-3 theme-border-soft border-t theme-card-soft flex flex-col sm:flex-row items-center justify-between gap-3">
+                <p className="text-xs theme-text-muted">
                   Menampilkan{" "}
-                  <span className="font-semibold text-slate-700">
+                  <span className="font-semibold theme-text-secondary">
                     {filteredPayments.length}
                   </span>{" "}
                   dari{" "}
-                  <span className="font-semibold text-slate-700">
+                  <span className="font-semibold theme-text-secondary">
                     {PAYMENTS.length}
                   </span>{" "}
                   transaksi
                 </p>
 
                 <div className="flex items-center gap-1.5">
-                  <button className="px-3 py-1.5 rounded-md border border-slate-200 bg-white text-xs text-slate-500 hover:bg-slate-50">
+                  <button
+                    type="button"
+                    className={`px-3 py-1.5 rounded-md border theme-border theme-card theme-text-muted text-xs ${themeTextHover}`}
+                  >
                     Sebelumnya
                   </button>
 
-                  <button className="w-8 h-8 rounded-md bg-[#155DFC] text-white text-xs font-bold">
+                  <button
+                    type="button"
+                    className="w-8 h-8 rounded-md bg-[var(--color-primary)] text-white text-xs font-bold"
+                  >
                     1
                   </button>
 
-                  <button className="w-8 h-8 rounded-md border border-slate-200 bg-white text-slate-500 text-xs">
+                  <button
+                    type="button"
+                    className={`w-8 h-8 rounded-md border theme-border theme-card theme-text-muted text-xs ${themeTextHover}`}
+                  >
                     2
                   </button>
 
-                  <button className="px-3 py-1.5 rounded-md border border-slate-200 bg-white text-xs text-slate-500 hover:bg-slate-50">
+                  <button
+                    type="button"
+                    className={`px-3 py-1.5 rounded-md border theme-border theme-card theme-text-muted text-xs ${themeTextHover}`}
+                  >
                     Berikutnya
                   </button>
                 </div>

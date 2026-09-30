@@ -3,9 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import Header from "../../../components/Header";
-import Sidebar from "../../../components/Sidebar";
-
 import {
   Package,
   Layers,
@@ -47,6 +44,73 @@ import {
 } from "../../../../services/paket.service";
 
 /* =========================================================
+   THEME HELPERS
+========================================================= */
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+
+const themeHeroSecondary =
+  "text-[color-mix(in_srgb,var(--color-card)_78%,transparent)]";
+
+const themeHeroSoft =
+  "bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)]";
+
+const themeHeroSoftBorder =
+  "border-[color-mix(in_srgb,var(--color-card)_22%,transparent)]";
+
+/* =========================================================
    ICON MODULE
 ========================================================= */
 
@@ -66,19 +130,24 @@ const ICON_MAP = {
 ========================================================= */
 
 const PACKAGE_THEMES = {
-  blue: {
-    card: "bg-blue-600",
-    button: "bg-blue-600 hover:bg-blue-700",
+  primary: {
+    card: themePrimaryGradient,
+    button:
+      "bg-[var(--color-primary)] hover:bg-[color-mix(in_srgb,var(--color-primary)_88%,var(--color-text))]",
   },
 
-  indigo: {
-    card: "bg-indigo-600",
-    button: "bg-indigo-600 hover:bg-indigo-700",
+  info: {
+    card:
+      "bg-[linear-gradient(135deg,var(--color-info),color-mix(in_srgb,var(--color-info)_72%,var(--color-primary)))]",
+    button:
+      "bg-[var(--color-info)] hover:bg-[color-mix(in_srgb,var(--color-info)_88%,var(--color-text))]",
   },
 
-  slate: {
-    card: "bg-slate-700",
-    button: "bg-slate-700 hover:bg-slate-800",
+  neutral: {
+    card:
+      "bg-[linear-gradient(135deg,var(--color-text),color-mix(in_srgb,var(--color-text)_78%,var(--color-text-muted)))]",
+    button:
+      "bg-[var(--color-text)] hover:bg-[color-mix(in_srgb,var(--color-text)_88%,var(--color-text-muted))]",
   },
 };
 
@@ -225,38 +294,18 @@ function getPaketFeatures(paket) {
     return [];
   }
 
-  /*
-    Response backend:
-
-    {
-      id,
-      nama,
-      deskripsi,
-      harga,
-      durasi,
-      fitur: [
-        {
-          id,
-          kode,
-          nama,
-          deskripsi,
-          ikon
-        }
-      ]
-    }
-  */
-
   if (Array.isArray(paket.fitur)) {
     return paket.fitur;
   }
 
-  /*
-    Fallback jika response menggunakan paketModul
-  */
-
   if (Array.isArray(paket.paketModul)) {
     return paket.paketModul
-      .map((item) => item?.modul || item?.fitur || null)
+      .map(
+        (item) =>
+          item?.modul ||
+          item?.fitur ||
+          null
+      )
       .filter(Boolean);
   }
 
@@ -304,7 +353,9 @@ function normalizeFeature(item, index) {
     item?.keterangan ??
     "";
 
-  const kode = String(item?.kode ?? "").toLowerCase();
+  const kode = String(
+    item?.kode ?? ""
+  ).toLowerCase();
 
   const namaKey = String(nama)
     .toLowerCase()
@@ -331,18 +382,19 @@ function normalizeFeature(item, index) {
 ========================================================= */
 
 function getPackageTheme(paket, index) {
-  const name = getPaketName(paket).toLowerCase();
+  const name =
+    getPaketName(paket).toLowerCase();
 
   if (
     name.includes("premium") ||
     name.includes("enterprise") ||
     name.includes("professional")
   ) {
-    return PACKAGE_THEMES.indigo;
+    return PACKAGE_THEMES.info;
   }
 
   if (name.includes("custom")) {
-    return PACKAGE_THEMES.blue;
+    return PACKAGE_THEMES.primary;
   }
 
   if (
@@ -350,13 +402,13 @@ function getPackageTheme(paket, index) {
     name.includes("starter") ||
     name.includes("trial")
   ) {
-    return PACKAGE_THEMES.slate;
+    return PACKAGE_THEMES.neutral;
   }
 
   const themes = [
-    PACKAGE_THEMES.blue,
-    PACKAGE_THEMES.indigo,
-    PACKAGE_THEMES.slate,
+    PACKAGE_THEMES.primary,
+    PACKAGE_THEMES.info,
+    PACKAGE_THEMES.neutral,
   ];
 
   return themes[index % themes.length];
@@ -367,7 +419,8 @@ function getPackageTheme(paket, index) {
 ========================================================= */
 
 function getPackageIcon(paket, index) {
-  const nama = getPaketName(paket).toLowerCase();
+  const nama =
+    getPaketName(paket).toLowerCase();
 
   if (
     nama.includes("enterprise") ||
@@ -411,9 +464,6 @@ function getPackageIcon(paket, index) {
 export default function PaketModulPage() {
   const router = useRouter();
 
-  const [activeMenu, setActiveMenu] = useState("paket-modul");
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-
   const [paketList, setPaketList] = useState([]);
   const [fiturList, setFiturList] = useState([]);
 
@@ -421,23 +471,9 @@ export default function PaketModulPage() {
   const [refreshing, setRefreshing] = useState(false);
 
   const [error, setError] = useState("");
-  const [confirmDelete, setConfirmDelete] = useState(null);
+  const [confirmDelete, setConfirmDelete] =
+    useState(null);
   const [search, setSearch] = useState("");
-
-  const notifications = [
-    {
-      id: 1,
-      title: "Pembaruan Sistem v2.0",
-      desc: "Dikirim 2 jam lalu",
-      read: false,
-    },
-    {
-      id: 2,
-      title: "Pengingat: Backup Data",
-      desc: "Dikirim 1 hari lalu",
-      read: false,
-    },
-  ];
 
   /* =======================================================
      LOAD DATA
@@ -453,14 +489,19 @@ export default function PaketModulPage() {
 
       setError("");
 
-      const [paketResponse, fiturResponse] =
-        await Promise.all([
-          getPaket(),
-          getFitur(),
-        ]);
+      const [
+        paketResponse,
+        fiturResponse,
+      ] = await Promise.all([
+        getPaket(),
+        getFitur(),
+      ]);
 
-      const paketData = getResponseData(paketResponse);
-      const fiturData = getResponseData(fiturResponse);
+      const paketData =
+        getResponseData(paketResponse);
+
+      const fiturData =
+        getResponseData(fiturResponse);
 
       console.log(
         "===================================="
@@ -853,56 +894,28 @@ export default function PaketModulPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex bg-slate-50">
-        <Sidebar
-          active={activeMenu}
-          setActive={setActiveMenu}
-          collapsed={!sidebarOpen}
-          setCollapsed={() =>
-            setSidebarOpen(
-              !sidebarOpen
-            )
-          }
-        />
-
-        <div className="flex-1 flex flex-col min-w-0">
-          <Header
-            toggleSidebar={() =>
-              setSidebarOpen(
-                !sidebarOpen
-              )
-            }
-            notifications={
-              notifications
-            }
-            user={{
-              name: "Sarah",
-              email:
-                "sarah@smartschool.com",
-              avatar: "SA",
-            }}
-          />
-
-          <main className="flex-1 flex items-center justify-center p-6">
-            <div className="flex flex-col items-center gap-4">
-              <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-600/20">
-                <Loader2
-                  size={24}
-                  className="animate-spin text-white"
-                />
-              </div>
-
-              <div className="text-center">
-                <p className="text-sm font-semibold text-slate-700">
-                  Memuat paket...
-                </p>
-
-                <p className="text-xs text-slate-400 mt-1">
-                  Menyiapkan data paket
-                </p>
-              </div>
+      <div className="theme-page theme-text min-h-full">
+        <div className="min-h-[60vh] flex items-center justify-center px-6">
+          <div className="flex flex-col items-center gap-4">
+            <div
+              className={`w-12 h-12 rounded-2xl ${themePrimaryGradient} ${themePrimaryShadow} flex items-center justify-center`}
+            >
+              <Loader2
+                size={24}
+                className="animate-spin text-[var(--color-card)]"
+              />
             </div>
-          </main>
+
+            <div className="text-center">
+              <p className="text-sm font-semibold theme-text">
+                Memuat paket...
+              </p>
+
+              <p className="text-xs theme-text-muted mt-1">
+                Menyiapkan data paket
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     );
@@ -913,291 +926,284 @@ export default function PaketModulPage() {
   ======================================================= */
 
   return (
-    <div className="min-h-screen flex bg-slate-50">
-      {/* SIDEBAR */}
+    <div className="theme-page theme-text min-h-full">
+      <div className="w-full max-w-[1500px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-6">
 
-      <Sidebar
-        active={activeMenu}
-        setActive={setActiveMenu}
-        collapsed={!sidebarOpen}
-        setCollapsed={() =>
-          setSidebarOpen(
-            !sidebarOpen
-          )
-        }
-      />
+        {/* =================================================
+            PAGE HEADER
+        ================================================= */}
 
-      {/* CONTENT */}
+        <section
+          className={`relative overflow-hidden rounded-2xl ${themePrimaryGradient} p-6 md:p-7 ${themePrimaryShadow}`}
+        >
+          <div
+            className={`absolute -right-10 -top-16 w-56 h-56 rounded-full ${themeHeroSoft} blur-2xl`}
+          />
 
-      <div className="flex-1 flex flex-col min-w-0">
-        <Header
-          toggleSidebar={() =>
-            setSidebarOpen(
-              !sidebarOpen
-            )
-          }
-          notifications={
-            notifications
-          }
-          user={{
-            name: "Sarah",
-            email:
-              "sarah@smartschool.com",
-            avatar: "SA",
-          }}
-        />
+          <div
+            className={`absolute right-24 bottom-[-80px] w-48 h-48 rounded-full ${themeHeroSoft} blur-2xl`}
+          />
 
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
-          <div className="max-w-[1500px] mx-auto space-y-6">
-            {/* PAGE HEADER */}
-
-            <section className="relative overflow-hidden rounded-2xl bg-slate-900 p-6 md:p-7 shadow-lg shadow-blue-900/10">
-              <div className="absolute -right-10 -top-16 w-56 h-56 rounded-full bg-blue-400/10 blur-2xl" />
-
-              <div className="absolute right-24 bottom-[-80px] w-48 h-48 rounded-full bg-blue-400/10 blur-2xl" />
-
-              <div className="relative flex flex-col xl:flex-row xl:items-center xl:justify-between gap-5">
-                <div>
-                  <div className="flex items-center gap-3">
-                    <div className="w-11 h-11 rounded-xl bg-white/10 border border-white/10 backdrop-blur-sm flex items-center justify-center">
-                      <Package
-                        size={21}
-                        className="text-white"
-                      />
-                    </div>
-
-                    <div>
-                      <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-blue-200">
-                        Product Management
-                      </p>
-
-                      <h1 className="text-2xl md:text-3xl font-bold text-white tracking-tight">
-                        Paket Langganan
-                      </h1>
-                    </div>
-                  </div>
-
-                  <p className="text-sm text-blue-100/80 mt-3 max-w-xl">
-                    Kelola paket
-                    langganan dan
-                    fitur yang
-                    tersedia untuk
-                    setiap sekolah.
-                  </p>
+          <div className="relative flex flex-col xl:flex-row xl:items-center xl:justify-between gap-5">
+            <div>
+              <div className="flex items-center gap-3">
+                <div
+                  className={`w-11 h-11 rounded-xl ${themeHeroSoft} border ${themeHeroSoftBorder} backdrop-blur-sm flex items-center justify-center`}
+                >
+                  <Package
+                    size={21}
+                    className="text-[var(--color-card)]"
+                  />
                 </div>
 
-                <div className="flex flex-wrap items-center gap-2">
-                  <button
-                    onClick={() =>
-                      loadData(false)
-                    }
-                    disabled={refreshing}
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/15 border border-white/15 text-white text-sm font-medium backdrop-blur-sm transition disabled:opacity-50"
+                <div>
+                  <p
+                    className={`text-[11px] font-semibold uppercase tracking-[0.18em] ${themeHeroSecondary}`}
                   >
-                    <RefreshCw
-                      size={15}
-                      className={
-                        refreshing
-                          ? "animate-spin"
-                          : ""
-                      }
-                    />
+                    Product Management
+                  </p>
 
-                    Refresh
-                  </button>
-
-                  <button
-                    onClick={
-                      navigateToTambah
-                    }
-                    className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white text-blue-700 hover:bg-blue-50 text-sm font-semibold shadow-lg transition"
-                  >
-                    <Plus size={16} />
-
-                    Tambah Paket
-                  </button>
+                  <h1 className="text-2xl md:text-3xl font-bold text-[var(--color-card)] tracking-tight">
+                    Paket Langganan
+                  </h1>
                 </div>
               </div>
-            </section>
 
-            {/* ERROR */}
+              <p
+                className={`text-sm ${themeHeroSecondary} mt-3 max-w-xl`}
+              >
+                Kelola paket langganan
+                dan fitur yang tersedia
+                untuk setiap sekolah.
+              </p>
+            </div>
 
-            {error && (
-              <div className="flex items-start gap-3 p-4 rounded-xl border border-rose-200 bg-rose-50">
-                <AlertCircle
-                  size={18}
-                  className="text-rose-500 mt-0.5"
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                onClick={() =>
+                  loadData(false)
+                }
+                disabled={refreshing}
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl ${themeHeroSoft} hover:bg-[color-mix(in_srgb,var(--color-card)_18%,transparent)] border ${themeHeroSoftBorder} text-[var(--color-card)] text-sm font-medium backdrop-blur-sm transition disabled:opacity-50`}
+              >
+                <RefreshCw
+                  size={15}
+                  className={
+                    refreshing
+                      ? "animate-spin"
+                      : ""
+                  }
                 />
 
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-rose-700">
-                    Terjadi kesalahan
-                  </p>
+                Refresh
+              </button>
 
-                  <p className="text-xs text-rose-600 mt-1 break-words">
-                    {error}
-                  </p>
-                </div>
+              <button
+                onClick={
+                  navigateToTambah
+                }
+                className={`flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--color-card)] hover:bg-[color-mix(in_srgb,var(--color-card)_92%,var(--color-primary))] ${themePrimaryText} text-sm font-semibold ${themeCardShadow} transition`}
+              >
+                <Plus size={16} />
 
-                <button
-                  onClick={() =>
-                    setError("")
-                  }
-                  className="text-rose-400 hover:text-rose-600"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-            )}
-
-            {/* STATS */}
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
-              <StatCard
-                icon={Package}
-                label="Total Paket"
-                value={totalPaket}
-                description="Paket tersedia"
-                theme="blue"
-              />
-
-              <StatCard
-                icon={BadgeCheck}
-                label="Paket Aktif"
-                value={paketAktif}
-                description="Sedang tersedia"
-                theme="emerald"
-              />
-
-              <StatCard
-                icon={Users}
-                label="Total Langganan"
-                value={totalLangganan}
-                description="Sekolah berlangganan"
-                theme="slate"
-              />
-
-              <StatCard
-                icon={CircleDollarSign}
-                label="Estimasi Pendapatan"
-                value={formatRupiah(
-                  totalPendapatan
-                )}
-                description="Per periode"
-                theme="blue"
-              />
+                Tambah Paket
+              </button>
             </div>
-
-            {/* SEARCH */}
-
-            <section className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-              <div>
-                <h2 className="text-base font-bold text-slate-800">
-                  Paket Tersedia
-                </h2>
-
-                <p className="text-xs text-slate-500 mt-0.5">
-                  Setiap paket
-                  menampilkan fitur
-                  yang didapatkan
-                  berdasarkan data
-                  backend.
-                </p>
-              </div>
-
-              <div className="flex items-center gap-3">
-                <div className="relative w-full md:w-72">
-                  <Search
-                    size={16}
-                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
-                  />
-
-                  <input
-                    value={search}
-                    onChange={(e) =>
-                      setSearch(
-                        e.target.value
-                      )
-                    }
-                    placeholder="Cari paket..."
-                    className="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border border-slate-200 bg-white shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition"
-                  />
-                </div>
-
-                <span className="hidden sm:flex items-center whitespace-nowrap px-3 py-2.5 rounded-xl bg-white border border-slate-200 text-xs font-medium text-slate-500">
-                  {filteredPaket.length}{" "}
-                  paket
-                </span>
-              </div>
-            </section>
-
-            {/* PACKAGE GRID */}
-
-            <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 items-stretch">
-              {filteredPaket.map(
-                (paket) => (
-                  <PaketCard
-                    key={paket.id}
-                    paket={paket}
-                    onEdit={() =>
-                      navigateToEdit(
-                        paket
-                      )
-                    }
-                    onDelete={() =>
-                      setConfirmDelete(
-                        paket
-                      )
-                    }
-                    onDuplicate={() =>
-                      duplikatPaket(
-                        paket
-                      )
-                    }
-                    onToggleStatus={() =>
-                      toggleStatus(
-                        paket
-                      )
-                    }
-                  />
-                )
-              )}
-
-              {filteredPaket.length ===
-                0 && (
-                <div className="md:col-span-2 xl:col-span-3 rounded-2xl border border-dashed border-slate-300 bg-white py-16 text-center">
-                  <div className="w-14 h-14 mx-auto rounded-2xl bg-slate-100 flex items-center justify-center">
-                    <Package
-                      size={25}
-                      className="text-slate-400"
-                    />
-                  </div>
-
-                  <p className="mt-4 text-sm font-semibold text-slate-600">
-                    Paket tidak
-                    ditemukan
-                  </p>
-
-                  <p className="text-xs text-slate-400 mt-1">
-                    Coba gunakan
-                    kata kunci
-                    pencarian lain.
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* MODULE MATRIX */}
-
-            <ModulMatrix
-              paketList={normalizedPaket}
-              fiturList={fiturList}
-            />
           </div>
-        </main>
+        </section>
+
+        {/* =================================================
+            ERROR
+        ================================================= */}
+
+        {error && (
+          <div
+            className={`flex items-start gap-3 p-4 rounded-xl border ${themeWarningBorder} ${themeWarningSurface}`}
+          >
+            <AlertCircle
+              size={18}
+              className="text-[var(--color-warning)] mt-0.5"
+            />
+
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-[var(--color-warning)]">
+                Terjadi kesalahan
+              </p>
+
+              <p className="text-xs theme-text-secondary mt-1 break-words">
+                {error}
+              </p>
+            </div>
+
+            <button
+              onClick={() =>
+                setError("")
+              }
+              className="text-[var(--color-warning)] hover:opacity-70 transition"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        )}
+
+        {/* =================================================
+            STATS
+        ================================================= */}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+          <StatCard
+            icon={Package}
+            label="Total Paket"
+            value={totalPaket}
+            description="Paket tersedia"
+            theme="primary"
+          />
+
+          <StatCard
+            icon={BadgeCheck}
+            label="Paket Aktif"
+            value={paketAktif}
+            description="Sedang tersedia"
+            theme="success"
+          />
+
+          <StatCard
+            icon={Users}
+            label="Total Langganan"
+            value={totalLangganan}
+            description="Sekolah berlangganan"
+            theme="neutral"
+          />
+
+          <StatCard
+            icon={CircleDollarSign}
+            label="Estimasi Pendapatan"
+            value={formatRupiah(
+              totalPendapatan
+            )}
+            description="Per periode"
+            theme="primary"
+          />
+        </div>
+
+        {/* =================================================
+            SEARCH
+        ================================================= */}
+
+        <section className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
+          <div>
+            <h2 className="text-base font-bold theme-text">
+              Paket Tersedia
+            </h2>
+
+            <p className="text-xs theme-text-muted mt-0.5">
+              Setiap paket menampilkan
+              fitur yang didapatkan
+              berdasarkan data backend.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-3">
+            <div className="relative w-full md:w-72">
+              <Search
+                size={16}
+                className="absolute left-3.5 top-1/2 -translate-y-1/2 theme-text-placeholder"
+              />
+
+              <input
+                value={search}
+                onChange={(e) =>
+                  setSearch(
+                    e.target.value
+                  )
+                }
+                placeholder="Cari paket..."
+                className={`w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border theme-border theme-input theme-text ${themeFocus} shadow-sm outline-none transition`}
+              />
+            </div>
+
+            <span
+              className={`hidden sm:flex items-center whitespace-nowrap px-3 py-2.5 rounded-xl ${themeNeutralSurface} border ${themeNeutralBorder} text-xs font-medium theme-text-muted`}
+            >
+              {filteredPaket.length}{" "}
+              paket
+            </span>
+          </div>
+        </section>
+
+        {/* =================================================
+            PACKAGE GRID
+        ================================================= */}
+
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 items-stretch">
+          {filteredPaket.map(
+            (paket) => (
+              <PaketCard
+                key={paket.id}
+                paket={paket}
+                onEdit={() =>
+                  navigateToEdit(
+                    paket
+                  )
+                }
+                onDelete={() =>
+                  setConfirmDelete(
+                    paket
+                  )
+                }
+                onDuplicate={() =>
+                  duplikatPaket(
+                    paket
+                  )
+                }
+                onToggleStatus={() =>
+                  toggleStatus(
+                    paket
+                  )
+                }
+              />
+            )
+          )}
+
+          {filteredPaket.length ===
+            0 && (
+            <div
+              className={`md:col-span-2 xl:col-span-3 rounded-2xl border border-dashed ${themeNeutralBorder} ${themeNeutralSurface} py-16 text-center`}
+            >
+              <div
+                className={`w-14 h-14 mx-auto rounded-2xl ${themeCardShadow} theme-card theme-border border flex items-center justify-center`}
+              >
+                <Package
+                  size={25}
+                  className="theme-text-muted"
+                />
+              </div>
+
+              <p className="mt-4 text-sm font-semibold theme-text-secondary">
+                Paket tidak ditemukan
+              </p>
+
+              <p className="text-xs theme-text-muted mt-1">
+                Coba gunakan kata kunci
+                pencarian lain.
+              </p>
+            </div>
+          )}
+        </div>
+
+        {/* =================================================
+            MODULE MATRIX
+        ================================================= */}
+
+        <ModulMatrix
+          paketList={normalizedPaket}
+          fiturList={fiturList}
+        />
       </div>
 
-      {/* DELETE MODAL */}
+      {/* ===================================================
+          DELETE MODAL
+      =================================================== */}
 
       {confirmDelete && (
         <ConfirmDeleteModal
@@ -1228,49 +1234,51 @@ function StatCard({
   theme,
 }) {
   const themes = {
-    blue: {
-      icon: "bg-blue-100 text-blue-700",
-      glow: "bg-blue-500/10",
+    primary: {
+      icon: `${themePrimarySoft} ${themePrimaryText} ${themePrimarySoftBorder}`,
+      glow: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
     },
 
-    emerald: {
-      icon: "bg-emerald-100 text-emerald-700",
-      glow: "bg-emerald-500/10",
+    success: {
+      icon: `${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder}`,
+      glow: "bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)]",
     },
 
-    slate: {
-      icon: "bg-slate-200 text-slate-700",
-      glow: "bg-slate-500/10",
+    neutral: {
+      icon: `${themeNeutralSurface} theme-text-secondary ${themeNeutralBorder}`,
+      glow: "bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]",
     },
   };
 
   const t =
     themes[theme] ||
-    themes.blue;
+    themes.primary;
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div
+      className={`relative overflow-hidden rounded-2xl border theme-border theme-card p-5 ${themeCardShadow}`}
+    >
       <div
         className={`absolute right-0 top-0 w-24 h-24 rounded-full blur-2xl ${t.glow}`}
       />
 
       <div className="relative flex items-center gap-4">
         <div
-          className={`w-11 h-11 rounded-xl flex items-center justify-center ${t.icon}`}
+          className={`w-11 h-11 rounded-xl border flex items-center justify-center ${t.icon}`}
         >
           <Icon size={19} />
         </div>
 
         <div className="min-w-0">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+          <p className="text-[10px] font-bold uppercase tracking-wider theme-text-muted">
             {label}
           </p>
 
-          <p className="text-xl font-bold text-slate-800 truncate mt-0.5">
+          <p className="text-xl font-bold theme-text truncate mt-0.5">
             {value}
           </p>
 
-          <p className="text-[11px] text-slate-400 mt-0.5">
+          <p className="text-[11px] theme-text-muted mt-0.5">
             {description}
           </p>
         </div>
@@ -1300,7 +1308,7 @@ function PaketCard({
 
   const theme =
     paket.theme ||
-    PACKAGE_THEMES.blue;
+    PACKAGE_THEMES.primary;
 
   const selectedFeatures =
     Array.isArray(paket.fitur)
@@ -1308,21 +1316,27 @@ function PaketCard({
       : [];
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm hover:shadow-md transition flex flex-col">
+    <div
+      className={`relative overflow-hidden rounded-2xl border theme-border theme-card ${themeCardShadow} hover:shadow-[0_10px_30px_color-mix(in_srgb,var(--color-text)_9%,transparent)] transition flex flex-col`}
+    >
       {/* HEADER */}
 
       <div
         className={`relative h-24 ${theme.card} overflow-hidden`}
       >
-        <div className="absolute -right-8 -top-12 w-32 h-32 rounded-full bg-white/10" />
+        <div
+          className={`absolute -right-8 -top-12 w-32 h-32 rounded-full ${themeHeroSoft}`}
+        />
 
-        <div className="absolute right-8 bottom-[-35px] w-24 h-24 rounded-full bg-white/5" />
+        <div className="absolute right-8 bottom-[-35px] w-24 h-24 rounded-full bg-[color-mix(in_srgb,var(--color-card)_7%,transparent)]" />
 
         <div className="relative flex items-center justify-between p-5">
-          <div className="w-11 h-11 rounded-xl bg-white/15 border border-white/20 backdrop-blur-sm flex items-center justify-center">
+          <div
+            className={`w-11 h-11 rounded-xl ${themeHeroSoft} border ${themeHeroSoftBorder} backdrop-blur-sm flex items-center justify-center`}
+          >
             <Icon
               size={21}
-              className="text-white"
+              className="text-[var(--color-card)]"
             />
           </div>
 
@@ -1334,7 +1348,7 @@ function PaketCard({
                     !value
                 )
               }
-              className="w-9 h-9 rounded-lg flex items-center justify-center text-white/80 hover:text-white hover:bg-white/10 transition"
+              className={`w-9 h-9 rounded-lg flex items-center justify-center ${themeHeroSecondary} hover:text-[var(--color-card)] hover:bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)] transition`}
             >
               <MoreHorizontal size={18} />
             </button>
@@ -1344,7 +1358,7 @@ function PaketCard({
                 onMouseLeave={() =>
                   setMenuOpen(false)
                 }
-                className="absolute right-0 top-10 w-44 rounded-xl border border-slate-200 bg-white shadow-xl py-1.5 z-30"
+                className={`absolute right-0 top-10 w-44 rounded-xl border theme-border theme-card ${themeCardShadow} py-1.5 z-30`}
               >
                 <MenuButton
                   icon={Pencil}
@@ -1408,18 +1422,20 @@ function PaketCard({
 
         <div>
           <div className="flex items-start justify-between gap-3">
-            <h3 className="text-lg font-bold text-slate-800 break-words">
+            <h3 className="text-lg font-bold theme-text break-words">
               {paket.nama}
             </h3>
 
             {paket.populer && (
-              <span className="shrink-0 px-2 py-1 rounded-lg bg-blue-50 text-blue-700 text-[9px] font-bold uppercase tracking-wide">
+              <span
+                className={`shrink-0 px-2 py-1 rounded-lg ${themePrimarySoft} ${themePrimaryText} border ${themePrimarySoftBorder} text-[9px] font-bold uppercase tracking-wide`}
+              >
                 Populer
               </span>
             )}
           </div>
 
-          <p className="text-xs leading-relaxed text-slate-400 mt-1.5 min-h-[36px]">
+          <p className="text-xs leading-relaxed theme-text-muted mt-1.5 min-h-[36px]">
             {paket.deskripsi ||
               "Paket layanan SmartSchool untuk kebutuhan sekolah."}
           </p>
@@ -1429,14 +1445,14 @@ function PaketCard({
 
         <div className="mt-5">
           <div className="flex items-end gap-1 flex-wrap">
-            <span className="text-2xl font-extrabold text-slate-800 tracking-tight">
+            <span className="text-2xl font-extrabold theme-text tracking-tight">
               {formatRupiah(
                 paket.harga
               )}
             </span>
 
             {paket.harga > 0 && (
-              <span className="text-xs text-slate-400 pb-1">
+              <span className="text-xs theme-text-muted pb-1">
                 / {paket.durasi} bulan
               </span>
             )}
@@ -1445,21 +1461,23 @@ function PaketCard({
 
         {/* STATUS */}
 
-        <div className="flex flex-wrap items-center justify-between gap-2 mt-4 pb-4 border-b border-slate-100">
+        <div
+          className={`flex flex-wrap items-center justify-between gap-2 mt-4 pb-4 border-b ${themeDivider}`}
+        >
           <span
             className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold ${
               paket.status ===
               "aktif"
-                ? "bg-emerald-50 text-emerald-600"
-                : "bg-slate-100 text-slate-500"
+                ? `${themeSuccessSurface} text-[var(--color-success)] border ${themeSuccessBorder}`
+                : `${themeNeutralSurface} theme-text-muted border ${themeNeutralBorder}`
             }`}
           >
             <span
               className={`w-1.5 h-1.5 rounded-full ${
                 paket.status ===
                 "aktif"
-                  ? "bg-emerald-500"
-                  : "bg-slate-400"
+                  ? "bg-[var(--color-success)]"
+                  : "bg-[var(--color-text-muted)]"
               }`}
             />
 
@@ -1469,7 +1487,7 @@ function PaketCard({
               : "Nonaktif"}
           </span>
 
-          <span className="flex items-center gap-1.5 text-xs text-slate-400">
+          <span className="flex items-center gap-1.5 text-xs theme-text-muted">
             <Users size={13} />
 
             {paket.langganan} sekolah
@@ -1480,11 +1498,13 @@ function PaketCard({
 
         <div className="mt-4 flex-1">
           <div className="flex items-center justify-between mb-3">
-            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+            <p className="text-[10px] font-bold uppercase tracking-wider theme-text-muted">
               Fitur yang didapat
             </p>
 
-            <span className="text-[10px] font-bold text-blue-600">
+            <span
+              className={`text-[10px] font-bold ${themePrimaryText}`}
+            >
               {selectedFeatures.length}{" "}
               fitur
             </span>
@@ -1542,20 +1562,22 @@ function PaketCard({
                       }
                       className="flex items-center gap-2.5 min-w-0"
                     >
-                      <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
+                      <div
+                        className={`w-8 h-8 rounded-lg ${themePrimarySoft} border ${themePrimarySoftBorder} flex items-center justify-center shrink-0`}
+                      >
                         <FeatureIcon
                           size={14}
-                          className="text-blue-600"
+                          className={themePrimaryText}
                         />
                       </div>
 
                       <div className="min-w-0 flex-1">
-                        <p className="text-xs font-semibold text-slate-700 truncate">
+                        <p className="text-xs font-semibold theme-text-secondary truncate">
                           {nama}
                         </p>
 
                         {deskripsi && (
-                          <p className="text-[10px] text-slate-400 truncate">
+                          <p className="text-[10px] theme-text-muted truncate">
                             {deskripsi}
                           </p>
                         )}
@@ -1563,7 +1585,7 @@ function PaketCard({
 
                       <Check
                         size={15}
-                        className="text-emerald-500 shrink-0"
+                        className="text-[var(--color-success)] shrink-0"
                       />
                     </div>
                   );
@@ -1571,24 +1593,28 @@ function PaketCard({
               )}
             </div>
           ) : (
-            <div className="rounded-xl border border-dashed border-slate-200 bg-slate-50 p-4">
+            <div
+              className={`rounded-xl border border-dashed ${themeNeutralBorder} ${themeNeutralSurface} p-4`}
+            >
               <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center shrink-0">
+                <div
+                  className={`w-8 h-8 rounded-lg theme-card border theme-border flex items-center justify-center shrink-0`}
+                >
                   <Layers
                     size={14}
-                    className="text-slate-300"
+                    className="theme-text-muted"
                   />
                 </div>
 
                 <div className="min-w-0">
-                  <p className="text-xs font-medium text-slate-500">
+                  <p className="text-xs font-medium theme-text-secondary">
                     Belum ada fitur
                   </p>
 
-                  <p className="text-[10px] text-slate-400 mt-0.5">
-                    Belum ada modul
-                    yang ditambahkan
-                    ke paket ini.
+                  <p className="text-[10px] theme-text-muted mt-0.5">
+                    Belum ada modul yang
+                    ditambahkan ke paket
+                    ini.
                   </p>
                 </div>
               </div>
@@ -1600,7 +1626,7 @@ function PaketCard({
 
         <button
           onClick={onEdit}
-          className={`group/btn mt-5 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white ${theme.button} shadow-sm transition`}
+          className={`group/btn mt-5 w-full flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-[var(--color-card)] ${theme.button} ${themeSmallShadow} transition`}
         >
           Kelola Paket
 
@@ -1629,8 +1655,8 @@ function MenuButton({
       onClick={onClick}
       className={`w-full flex items-center gap-2.5 px-3.5 py-2.5 text-xs transition ${
         danger
-          ? "text-rose-500 hover:bg-rose-50"
-          : "text-slate-600 hover:bg-slate-50"
+          ? "text-[var(--color-warning)] hover:bg-[color-mix(in_srgb,var(--color-warning)_8%,transparent)]"
+          : "theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)]"
       }`}
     >
       <Icon size={14} />
@@ -1649,21 +1675,27 @@ function ModulMatrix({
   fiturList,
 }) {
   return (
-    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+    <section
+      className={`overflow-hidden rounded-2xl border theme-border theme-card ${themeCardShadow}`}
+    >
       {/* HEADER */}
 
-      <div className="px-5 md:px-6 py-5 border-b border-slate-100 bg-slate-50">
+      <div
+        className={`px-5 md:px-6 py-5 border-b ${themeDivider} ${themeNeutralSurface}`}
+      >
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-blue-100 text-blue-700 flex items-center justify-center">
+          <div
+            className={`w-10 h-10 rounded-xl ${themePrimarySoft} border ${themePrimarySoftBorder} ${themePrimaryText} flex items-center justify-center`}
+          >
             <Layers size={18} />
           </div>
 
           <div>
-            <h3 className="text-sm font-bold text-slate-800">
+            <h3 className="text-sm font-bold theme-text">
               Matriks Fitur per Paket
             </h3>
 
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs theme-text-muted mt-0.5">
               Perbandingan fitur yang
               tersedia di setiap paket
               berdasarkan data backend.
@@ -1678,10 +1710,10 @@ function ModulMatrix({
         <div className="py-12 text-center">
           <Layers
             size={28}
-            className="mx-auto text-slate-300"
+            className="mx-auto theme-text-muted"
           />
 
-          <p className="text-sm text-slate-400 mt-3">
+          <p className="text-sm theme-text-muted mt-3">
             Belum ada data modul dari
             backend.
           </p>
@@ -1690,10 +1722,10 @@ function ModulMatrix({
         <div className="py-12 text-center">
           <Package
             size={28}
-            className="mx-auto text-slate-300"
+            className="mx-auto theme-text-muted"
           />
 
-          <p className="text-sm text-slate-400 mt-3">
+          <p className="text-sm theme-text-muted mt-3">
             Belum ada data paket.
           </p>
         </div>
@@ -1701,8 +1733,12 @@ function ModulMatrix({
         <div className="overflow-x-auto">
           <table className="w-full min-w-[700px] text-sm">
             <thead>
-              <tr className="bg-slate-50/70 text-left">
-                <th className="px-5 py-3 text-[10px] uppercase tracking-wider font-bold text-slate-400 sticky left-0 bg-slate-50 z-10">
+              <tr
+                className={`${themeNeutralSurface} text-left`}
+              >
+                <th
+                  className={`px-5 py-3 text-[10px] uppercase tracking-wider font-bold theme-text-muted sticky left-0 theme-card z-10`}
+                >
                   Fitur
                 </th>
 
@@ -1710,7 +1746,7 @@ function ModulMatrix({
                   (paket) => (
                     <th
                       key={paket.id}
-                      className="px-4 py-3 text-center text-[10px] uppercase tracking-wider font-bold text-slate-400"
+                      className="px-4 py-3 text-center text-[10px] uppercase tracking-wider font-bold theme-text-muted"
                     >
                       <div className="max-w-[130px] mx-auto truncate">
                         {paket.nama}
@@ -1731,26 +1767,30 @@ function ModulMatrix({
                   return (
                     <tr
                       key={fitur.id}
-                      className="border-t border-slate-100 hover:bg-blue-50/30 transition"
+                      className={`border-t ${themeDivider} hover:bg-[color-mix(in_srgb,var(--color-primary)_5%,transparent)] transition`}
                     >
                       {/* FEATURE */}
 
-                      <td className="px-5 py-3.5 sticky left-0 bg-white">
+                      <td
+                        className={`px-5 py-3.5 sticky left-0 theme-card`}
+                      >
                         <div className="flex items-center gap-3">
-                          <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
+                          <div
+                            className={`w-8 h-8 rounded-lg ${themeNeutralSurface} flex items-center justify-center shrink-0`}
+                          >
                             <Icon
                               size={14}
-                              className="text-slate-500"
+                              className="theme-text-secondary"
                             />
                           </div>
 
                           <div className="min-w-0">
-                            <p className="font-semibold text-xs text-slate-700 truncate">
+                            <p className="font-semibold text-xs theme-text-secondary truncate">
                               {fitur.nama}
                             </p>
 
                             {fitur.deskripsi && (
-                              <p className="text-[10px] text-slate-400 mt-0.5 truncate max-w-[250px]">
+                              <p className="text-[10px] theme-text-muted mt-0.5 truncate max-w-[250px]">
                                 {
                                   fitur.deskripsi
                                 }
@@ -1835,21 +1875,25 @@ function ModulMatrix({
                               className="px-4 py-3.5 text-center"
                             >
                               {active ? (
-                                <div className="w-7 h-7 mx-auto rounded-full bg-emerald-50 flex items-center justify-center">
+                                <div
+                                  className={`w-7 h-7 mx-auto rounded-full ${themeSuccessSurface} flex items-center justify-center`}
+                                >
                                   <Check
                                     size={
                                       14
                                     }
-                                    className="text-emerald-600"
+                                    className="text-[var(--color-success)]"
                                   />
                                 </div>
                               ) : (
-                                <div className="w-7 h-7 mx-auto rounded-full bg-slate-50 flex items-center justify-center">
+                                <div
+                                  className={`w-7 h-7 mx-auto rounded-full ${themeNeutralSurface} flex items-center justify-center`}
+                                >
                                   <X
                                     size={
                                       13
                                     }
-                                    className="text-slate-300"
+                                    className="theme-text-muted"
                                   />
                                 </div>
                               )}
@@ -1897,7 +1941,7 @@ function ConfirmDeleteModal({
       {/* BACKDROP */}
 
       <div
-        className="absolute inset-0 bg-slate-950/50 backdrop-blur-sm"
+        className="absolute inset-0 bg-[color-mix(in_srgb,var(--color-text)_48%,transparent)] backdrop-blur-sm"
         onClick={
           deleting
             ? undefined
@@ -1907,14 +1951,20 @@ function ConfirmDeleteModal({
 
       {/* MODAL */}
 
-      <div className="relative w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl">
+      <div
+        className={`relative w-full max-w-md overflow-hidden rounded-2xl theme-card ${themeCardShadow}`}
+      >
         {/* TOP */}
 
-        <div className="bg-rose-600 p-6 text-center">
-          <div className="w-14 h-14 mx-auto rounded-2xl bg-white/15 border border-white/20 flex items-center justify-center">
+        <div
+          className="bg-[var(--color-warning)] p-6 text-center"
+        >
+          <div
+            className={`w-14 h-14 mx-auto rounded-2xl bg-[color-mix(in_srgb,var(--color-card)_15%,transparent)] border ${themeHeroSoftBorder} flex items-center justify-center`}
+          >
             <Trash2
               size={24}
-              className="text-white"
+              className="text-[var(--color-card)]"
             />
           </div>
         </div>
@@ -1922,14 +1972,14 @@ function ConfirmDeleteModal({
         {/* CONTENT */}
 
         <div className="p-6">
-          <h3 className="text-center text-lg font-bold text-slate-800">
+          <h3 className="text-center text-lg font-bold theme-text">
             Hapus paket?
           </h3>
 
-          <p className="text-center text-sm text-slate-500 mt-2 leading-relaxed">
+          <p className="text-center text-sm theme-text-secondary mt-2 leading-relaxed">
             Kamu akan menghapus
             paket{" "}
-            <span className="font-semibold text-slate-700">
+            <span className="font-semibold theme-text">
               "{paket.nama}"
             </span>
             . Tindakan ini akan
@@ -1938,9 +1988,10 @@ function ConfirmDeleteModal({
           </p>
 
           {paket.langganan > 0 && (
-            <div className="mt-4 p-3 rounded-xl bg-amber-50 border border-amber-100 text-xs text-amber-700">
-              Paket ini masih
-              memiliki{" "}
+            <div
+              className={`mt-4 p-3 rounded-xl ${themeWarningSurface} border ${themeWarningBorder} text-xs text-[var(--color-warning)]`}
+            >
+              Paket ini masih memiliki{" "}
               <strong>
                 {paket.langganan} sekolah
               </strong>{" "}
@@ -1952,7 +2003,7 @@ function ConfirmDeleteModal({
             <button
               onClick={onCancel}
               disabled={deleting}
-              className="flex-1 py-2.5 rounded-xl border border-slate-200 text-sm font-semibold text-slate-600 hover:bg-slate-50 transition disabled:opacity-50"
+              className={`flex-1 py-2.5 rounded-xl border theme-border theme-text-secondary ${themeNeutralHover} text-sm font-semibold transition disabled:opacity-50`}
             >
               Batal
             </button>
@@ -1960,7 +2011,7 @@ function ConfirmDeleteModal({
             <button
               onClick={handleDelete}
               disabled={deleting}
-              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-sm font-semibold shadow-sm transition disabled:opacity-60"
+              className="flex-1 flex items-center justify-center gap-2 py-2.5 rounded-xl bg-[var(--color-warning)] hover:bg-[color-mix(in_srgb,var(--color-warning)_88%,var(--color-text))] text-[var(--color-card)] text-sm font-semibold shadow-sm transition disabled:opacity-60"
             >
               {deleting && (
                 <Loader2

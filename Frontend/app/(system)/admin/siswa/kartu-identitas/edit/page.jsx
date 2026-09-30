@@ -30,6 +30,51 @@ import {
 
 /*
 |--------------------------------------------------------------------------
+| THEME HELPERS
+|--------------------------------------------------------------------------
+*/
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+
+/*
+|--------------------------------------------------------------------------
 | CONFIG
 |--------------------------------------------------------------------------
 */
@@ -42,10 +87,6 @@ const PHOTO_KEY_PREFIX = "siswa_foto_";
 |--------------------------------------------------------------------------
 | DATA DUMMY SISWA
 |--------------------------------------------------------------------------
-|
-| Data ini hanya digunakan sebagai data awal.
-| Setelah diedit dan disimpan, data akan masuk ke localStorage.
-|
 */
 
 const MOCK_SISWA = [
@@ -261,19 +302,19 @@ function FotoPlaceholder() {
       <rect
         width="200"
         height="200"
-        fill="#c9ced6"
+        fill="var(--color-border-soft)"
       />
 
       <circle
         cx="100"
         cy="80"
         r="38"
-        fill="#f3f4f6"
+        fill="var(--color-card)"
       />
 
       <path
         d="M30 200c0-51.7 31.3-93.6 70-93.6s70 41.9 70 93.6H30z"
-        fill="#f3f4f6"
+        fill="var(--color-card)"
       />
     </svg>
   );
@@ -324,9 +365,14 @@ function FotoEditor({
       {/* FOTO */}
 
       <div className="relative w-24 h-24 sm:w-28 sm:h-28 shrink-0">
-
-        <div className="w-full h-full rounded-2xl overflow-hidden shadow-lg shadow-slate-900/10 border-2 border-white ring-1 ring-slate-200">
-
+        <div
+          className={`
+            w-full h-full rounded-2xl overflow-hidden
+            border-2 border-[var(--color-card)]
+            ring-1 ${themeNeutralBorder}
+            ${themeSmallShadow}
+          `}
+        >
           {foto ? (
             <img
               src={foto}
@@ -336,7 +382,6 @@ function FotoEditor({
           ) : (
             <FotoPlaceholder />
           )}
-
         </div>
 
         {/* CAMERA */}
@@ -345,7 +390,16 @@ function FotoEditor({
           type="button"
           onClick={handlePilihFoto}
           title="Ubah foto"
-          className="absolute -bottom-1.5 -right-1.5 w-8 h-8 rounded-full bg-[#155DFC] hover:bg-[#0d47c9] text-white flex items-center justify-center shadow-md transition-colors"
+          className={`
+            absolute -bottom-1.5 -right-1.5
+            w-8 h-8 rounded-full
+            ${themePrimaryGradient}
+            text-[var(--color-card)]
+            flex items-center justify-center
+            ${themePrimaryShadow}
+            hover:brightness-110
+            transition-all
+          `}
         >
           <Camera size={14} />
         </button>
@@ -357,18 +411,16 @@ function FotoEditor({
           onChange={handleFotoChange}
           className="hidden"
         />
-
       </div>
 
       {/* INFO FOTO */}
 
       <div className="space-y-1.5">
-
-        <p className="text-sm font-medium text-slate-700">
+        <p className="text-sm font-medium theme-text">
           Foto Profil Siswa
         </p>
 
-        <p className="text-xs text-slate-400 max-w-md">
+        <p className="text-xs theme-text-muted max-w-md">
           Format JPG atau PNG. Disarankan menggunakan foto
           dengan rasio 1:1 agar tampilan kartu identitas lebih
           rapi.
@@ -378,13 +430,18 @@ function FotoEditor({
           <button
             type="button"
             onClick={handleHapusFoto}
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-red-500 hover:text-red-600 transition-colors"
+            className="
+              inline-flex items-center gap-1.5
+              text-xs font-medium
+              theme-danger
+              hover:opacity-80
+              transition-colors
+            "
           >
             <X size={12} />
             Hapus foto
           </button>
         )}
-
       </div>
     </div>
   );
@@ -405,28 +462,24 @@ function FieldWrapper({
 }) {
   return (
     <div className={className}>
-
-      <label className="flex items-center gap-1.5 text-xs font-medium text-slate-500 mb-1.5">
-
+      <label className="flex items-center gap-1.5 text-xs font-medium theme-text-muted mb-1.5">
         {Icon && (
           <Icon
             size={13}
-            className="text-slate-400"
+            className="theme-text-muted"
           />
         )}
 
         {label}
 
         {required && (
-          <span className="text-red-400">
+          <span className="theme-danger">
             *
           </span>
         )}
-
       </label>
 
       {children}
-
     </div>
   );
 }
@@ -437,8 +490,16 @@ function FieldWrapper({
 |--------------------------------------------------------------------------
 */
 
-const inputClass =
-  "w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 placeholder:text-slate-400 bg-white focus:outline-none focus:ring-2 focus:ring-[#155DFC]/30 focus:border-[#155DFC] transition-colors";
+const inputClass = `
+  w-full px-3.5 py-2.5 rounded-xl
+  border ${themeNeutralBorder}
+  text-sm theme-text
+  placeholder:text-[var(--color-text-placeholder)]
+  ${themeNeutralSurface}
+  focus:outline-none
+  ${themeFocus}
+  transition-colors
+`;
 
 /*
 |--------------------------------------------------------------------------
@@ -453,42 +514,54 @@ function SectionCard({
   children,
 }) {
   return (
-    <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden">
-
+    <div
+      className={`
+        theme-card rounded-xl
+        border ${themeNeutralBorder}
+        ${themeCardShadow}
+        overflow-hidden
+      `}
+    >
       {/* HEADER */}
 
-      <div className="px-5 sm:px-6 py-4 border-b border-slate-100 flex items-start gap-2.5">
-
-        <div className="w-8 h-8 rounded-lg bg-[#eaf1ff] text-[#155DFC] flex items-center justify-center shrink-0">
-
+      <div
+        className={`
+          px-5 sm:px-6 py-4
+          border-b ${themeDivider}
+          flex items-start gap-2.5
+        `}
+      >
+        <div
+          className={`
+            w-8 h-8 rounded-lg
+            ${themePrimarySoft}
+            ${themePrimarySoftBorder}
+            text-[var(--color-primary)]
+            flex items-center justify-center
+            shrink-0
+          `}
+        >
           <Icon size={16} />
-
         </div>
 
         <div>
-
-          <h2 className="text-sm font-semibold text-slate-800">
+          <h2 className="text-sm font-semibold theme-text">
             {title}
           </h2>
 
           {description && (
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs theme-text-muted mt-0.5">
               {description}
             </p>
           )}
-
         </div>
-
       </div>
 
       {/* CONTENT */}
 
       <div className="p-5 sm:p-6">
-
         {children}
-
       </div>
-
     </div>
   );
 }
@@ -522,7 +595,6 @@ function EditContent() {
   */
 
   const siswaAsli = useMemo(() => {
-
     const id = Number(
       searchParams.get("id")
     );
@@ -533,16 +605,13 @@ function EditContent() {
      */
 
     if (typeof window !== "undefined") {
-
       try {
-
         const saved =
           window.localStorage.getItem(
             STORAGE_KEY
           );
 
         if (saved) {
-
           const data =
             JSON.parse(saved);
 
@@ -555,23 +624,18 @@ function EditContent() {
           if (found) {
             return found;
           }
-
         }
-
       } catch (error) {
-
         console.error(
           "Gagal membaca data siswa:",
           error
         );
-
       }
     }
 
     return MOCK_SISWA.find(
       (item) => item.id === id
     );
-
   }, [searchParams]);
 
   /*
@@ -581,7 +645,6 @@ function EditContent() {
   */
 
   useEffect(() => {
-
     if (!siswaAsli) return;
 
     setForm({
@@ -589,7 +652,6 @@ function EditContent() {
     });
 
     try {
-
       const savedFoto =
         window.localStorage.getItem(
           `${PHOTO_KEY_PREFIX}${siswaAsli.id}`
@@ -598,16 +660,12 @@ function EditContent() {
       if (savedFoto) {
         setFoto(savedFoto);
       }
-
     } catch (error) {
-
       console.error(
         "Gagal memuat foto siswa:",
         error
       );
-
     }
-
   }, [siswaAsli]);
 
   /*
@@ -618,7 +676,6 @@ function EditContent() {
 
   const updateField =
     (field) => (e) => {
-
       const value =
         e?.target
           ? e.target.value
@@ -628,7 +685,6 @@ function EditContent() {
         ...prev,
         [field]: value,
       }));
-
     };
 
   /*
@@ -638,11 +694,9 @@ function EditContent() {
   */
 
   const toggleSidebar = () => {
-
     setIsCollapsed(
       (prev) => !prev
     );
-
   };
 
   /*
@@ -652,21 +706,17 @@ function EditContent() {
   */
 
   const handleBack = () => {
-
     if (siswaAsli) {
-
       router.push(
         `/admin/siswa/${siswaAsli.id}`
       );
 
       return;
-
     }
 
     router.push(
       "/admin/siswa"
     );
-
   };
 
   /*
@@ -676,9 +726,7 @@ function EditContent() {
   */
 
   const handleBatal = () => {
-
     handleBack();
-
   };
 
   /*
@@ -688,7 +736,6 @@ function EditContent() {
   */
 
   const handleSimpan = (e) => {
-
     e.preventDefault();
 
     if (!form) return;
@@ -703,19 +750,16 @@ function EditContent() {
       !form.nisn?.trim() ||
       !form.kelas
     ) {
-
       alert(
         "Nama, NIS, NISN, dan kelas wajib diisi."
       );
 
       return;
-
     }
 
     setSaving(true);
 
     try {
-
       /*
        * Ambil data lama
        */
@@ -746,21 +790,17 @@ function EditContent() {
        */
 
       if (index !== -1) {
-
         data[index] = {
           ...data[index],
           ...form,
         };
-
       } else {
-
         /*
          * Kalau belum ada di localStorage,
          * tambahkan data siswa.
          */
 
         data.push(form);
-
       }
 
       /*
@@ -777,18 +817,14 @@ function EditContent() {
        */
 
       if (foto) {
-
         window.localStorage.setItem(
           `${PHOTO_KEY_PREFIX}${form.id}`,
           foto
         );
-
       } else {
-
         window.localStorage.removeItem(
           `${PHOTO_KEY_PREFIX}${form.id}`
         );
-
       }
 
       console.log(
@@ -801,17 +837,13 @@ function EditContent() {
        */
 
       setTimeout(() => {
-
         setSaving(false);
 
         router.push(
           `/admin/siswa/${form.id}`
         );
-
       }, 500);
-
     } catch (error) {
-
       console.error(
         "Gagal menyimpan data siswa:",
         error
@@ -822,9 +854,7 @@ function EditContent() {
       alert(
         "Gagal menyimpan perubahan data siswa."
       );
-
     }
-
   };
 
   /*
@@ -834,10 +864,8 @@ function EditContent() {
   */
 
   if (!siswaAsli) {
-
     return (
-      <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
-
+      <div className="flex h-screen w-full theme-page overflow-hidden">
         <Sidebar
           active="siswa"
           setActive={() => {}}
@@ -847,7 +875,6 @@ function EditContent() {
         />
 
         <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-
           <Header
             toggleSidebar={toggleSidebar}
             notifications={[]}
@@ -859,18 +886,28 @@ function EditContent() {
           />
 
           <main className="flex-1 overflow-y-auto">
-
             <div className="p-4 sm:p-6 lg:p-8">
-
-              <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm p-10 text-center">
-
-                <div className="mx-auto mb-4 w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center text-slate-400">
-
+              <div
+                className={`
+                  theme-card rounded-xl
+                  border ${themeNeutralBorder}
+                  ${themeCardShadow}
+                  p-10 text-center
+                `}
+              >
+                <div
+                  className={`
+                    mx-auto mb-4
+                    w-12 h-12 rounded-xl
+                    ${themeNeutralSurface}
+                    flex items-center justify-center
+                    theme-text-muted
+                  `}
+                >
                   <User size={22} />
-
                 </div>
 
-                <p className="text-sm text-slate-500 mb-4">
+                <p className="text-sm theme-text-secondary mb-4">
                   Data siswa tidak ditemukan.
                 </p>
 
@@ -881,23 +918,27 @@ function EditContent() {
                       "/admin/siswa"
                     )
                   }
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-[#155DFC] hover:bg-[#0d47c9] text-white rounded-xl text-sm font-medium transition-all"
+                  className={`
+                    inline-flex items-center gap-2
+                    px-4 py-2
+                    ${themePrimaryGradient}
+                    text-[var(--color-card)]
+                    rounded-xl
+                    text-sm font-medium
+                    ${themePrimaryShadow}
+                    hover:brightness-110
+                    transition-all
+                  `}
                 >
                   <ArrowLeft size={16} />
                   Kembali ke Data Siswa
                 </button>
-
               </div>
-
             </div>
-
           </main>
-
         </div>
-
       </div>
     );
-
   }
 
   /*
@@ -917,8 +958,7 @@ function EditContent() {
   */
 
   return (
-    <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
-
+    <div className="flex h-screen w-full theme-page overflow-hidden">
       {/* SIDEBAR */}
 
       <Sidebar
@@ -932,7 +972,6 @@ function EditContent() {
       {/* CONTENT AREA */}
 
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-
         {/* HEADER */}
 
         <Header
@@ -948,12 +987,10 @@ function EditContent() {
         {/* MAIN */}
 
         <main className="flex-1 overflow-y-auto">
-
           <form
             onSubmit={handleSimpan}
             className="p-4 sm:p-6 lg:p-8 space-y-6 pb-28"
           >
-
             {/* =====================================================
                 BACK
             ===================================================== */}
@@ -961,12 +998,18 @@ function EditContent() {
             <button
               type="button"
               onClick={handleBack}
-              className="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-[#155DFC] transition-colors w-fit"
+              className="
+                flex items-center gap-2
+                text-sm font-medium
+                theme-text-secondary
+                hover:text-[var(--color-primary)]
+                transition-colors
+                w-fit
+              "
             >
               <ArrowLeft size={16} />
 
               Kembali ke Detail Siswa
-
             </button>
 
             {/* =====================================================
@@ -974,33 +1017,33 @@ function EditContent() {
             ===================================================== */}
 
             <div>
-
               <div className="flex items-center gap-3">
-
-                <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-[#155DFC] to-[#0d47c9] text-white flex items-center justify-center shadow-lg shadow-slate-900/10">
-
+                <div
+                  className={`
+                    w-10 h-10 rounded-xl
+                    ${themePrimaryGradient}
+                    text-[var(--color-card)]
+                    flex items-center justify-center
+                    ${themePrimaryShadow}
+                  `}
+                >
                   <User size={19} />
-
                 </div>
 
                 <div>
-
-                  <h1 className="text-2xl font-bold text-slate-800">
+                  <h1 className="text-2xl font-bold theme-text">
                     Edit Data Siswa
                   </h1>
 
-                  <p className="text-sm text-slate-500">
+                  <p className="text-sm theme-text-secondary">
                     {siswaAsli.nama}{" "}
-                    â€¢{" "}
+                    •{" "}
                     <span className="font-mono">
                       {siswaAsli.nis}
                     </span>
                   </p>
-
                 </div>
-
               </div>
-
             </div>
 
             {/* =====================================================
@@ -1012,13 +1055,11 @@ function EditContent() {
               title="Foto Profil"
               description="Kelola foto profil siswa."
             >
-
               <FotoEditor
                 siswaId={form.id}
                 foto={foto}
                 onChange={setFoto}
               />
-
             </SectionCard>
 
             {/* =====================================================
@@ -1030,9 +1071,7 @@ function EditContent() {
               title="Informasi Utama"
               description="Informasi identitas utama siswa."
             >
-
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-
                 {/* NAMA */}
 
                 <FieldWrapper
@@ -1041,7 +1080,6 @@ function EditContent() {
                   required
                   className="sm:col-span-2"
                 >
-
                   <input
                     type="text"
                     value={form.nama || ""}
@@ -1050,7 +1088,6 @@ function EditContent() {
                     placeholder="Contoh: Ahmad Fauzan"
                     required
                   />
-
                 </FieldWrapper>
 
                 {/* NIS */}
@@ -1060,7 +1097,6 @@ function EditContent() {
                   label="NIS"
                   required
                 >
-
                   <input
                     type="text"
                     value={form.nis || ""}
@@ -1069,7 +1105,6 @@ function EditContent() {
                     placeholder="Nomor Induk Siswa"
                     required
                   />
-
                 </FieldWrapper>
 
                 {/* NISN */}
@@ -1079,7 +1114,6 @@ function EditContent() {
                   label="NISN"
                   required
                 >
-
                   <input
                     type="text"
                     value={form.nisn || ""}
@@ -1088,7 +1122,6 @@ function EditContent() {
                     placeholder="10 digit NISN"
                     required
                   />
-
                 </FieldWrapper>
 
                 {/* NIK */}
@@ -1097,7 +1130,6 @@ function EditContent() {
                   icon={Fingerprint}
                   label="NIK"
                 >
-
                   <input
                     type="text"
                     value={form.nik || ""}
@@ -1105,7 +1137,6 @@ function EditContent() {
                     className={`${inputClass} font-mono`}
                     placeholder="16 digit NIK"
                   />
-
                 </FieldWrapper>
 
                 {/* STATUS */}
@@ -1114,15 +1145,13 @@ function EditContent() {
                   icon={UserRound}
                   label="Status Siswa"
                 >
-
                   <select
                     value={
                       form.status || "Aktif"
                     }
                     onChange={updateField("status")}
-                    className={`${inputClass} bg-white`}
+                    className={inputClass}
                   >
-
                     {OPSI_STATUS.map(
                       (option) => (
                         <option
@@ -1133,13 +1162,9 @@ function EditContent() {
                         </option>
                       )
                     )}
-
                   </select>
-
                 </FieldWrapper>
-
               </div>
-
             </SectionCard>
 
             {/* =====================================================
@@ -1151,16 +1176,13 @@ function EditContent() {
               title="Data Diri"
               description="Informasi pribadi dan identitas siswa."
             >
-
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-
                 {/* TEMPAT LAHIR */}
 
                 <FieldWrapper
                   icon={MapPin}
                   label="Tempat Lahir"
                 >
-
                   <input
                     type="text"
                     value={
@@ -1172,7 +1194,6 @@ function EditContent() {
                     className={inputClass}
                     placeholder="Contoh: Depok"
                   />
-
                 </FieldWrapper>
 
                 {/* TANGGAL LAHIR */}
@@ -1181,7 +1202,6 @@ function EditContent() {
                   icon={Cake}
                   label="Tanggal Lahir"
                 >
-
                   <input
                     type="date"
                     value={
@@ -1192,7 +1212,6 @@ function EditContent() {
                     )}
                     className={inputClass}
                   />
-
                 </FieldWrapper>
 
                 {/* JENIS KELAMIN */}
@@ -1206,7 +1225,6 @@ function EditContent() {
                   }
                   label="Jenis Kelamin"
                 >
-
                   <select
                     value={
                       form.jenisKelamin ||
@@ -1215,9 +1233,8 @@ function EditContent() {
                     onChange={updateField(
                       "jenisKelamin"
                     )}
-                    className={`${inputClass} bg-white`}
+                    className={inputClass}
                   >
-
                     {OPSI_JENIS_KELAMIN.map(
                       (option) => (
                         <option
@@ -1228,9 +1245,7 @@ function EditContent() {
                         </option>
                       )
                     )}
-
                   </select>
-
                 </FieldWrapper>
 
                 {/* AGAMA */}
@@ -1239,7 +1254,6 @@ function EditContent() {
                   icon={BookOpen}
                   label="Agama"
                 >
-
                   <select
                     value={
                       form.agama || "Islam"
@@ -1247,9 +1261,8 @@ function EditContent() {
                     onChange={updateField(
                       "agama"
                     )}
-                    className={`${inputClass} bg-white`}
+                    className={inputClass}
                   >
-
                     {OPSI_AGAMA.map(
                       (option) => (
                         <option
@@ -1260,9 +1273,7 @@ function EditContent() {
                         </option>
                       )
                     )}
-
                   </select>
-
                 </FieldWrapper>
 
                 {/* STATUS KELUARGA */}
@@ -1271,7 +1282,6 @@ function EditContent() {
                   icon={Heart}
                   label="Status Dalam Keluarga"
                 >
-
                   <select
                     value={
                       form.statusKeluarga ||
@@ -1280,9 +1290,8 @@ function EditContent() {
                     onChange={updateField(
                       "statusKeluarga"
                     )}
-                    className={`${inputClass} bg-white`}
+                    className={inputClass}
                   >
-
                     {OPSI_STATUS_KELUARGA.map(
                       (option) => (
                         <option
@@ -1293,13 +1302,9 @@ function EditContent() {
                         </option>
                       )
                     )}
-
                   </select>
-
                 </FieldWrapper>
-
               </div>
-
             </SectionCard>
 
             {/* =====================================================
@@ -1311,9 +1316,7 @@ function EditContent() {
               title="Informasi Akademik"
               description="Informasi kelas dan riwayat pendidikan siswa."
             >
-
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-
                 {/* KELAS */}
 
                 <FieldWrapper
@@ -1321,7 +1324,6 @@ function EditContent() {
                   label="Kelas"
                   required
                 >
-
                   <select
                     value={
                       form.kelas || ""
@@ -1329,10 +1331,9 @@ function EditContent() {
                     onChange={updateField(
                       "kelas"
                     )}
-                    className={`${inputClass} bg-white`}
+                    className={inputClass}
                     required
                   >
-
                     <option value="">
                       Pilih kelas
                     </option>
@@ -1347,9 +1348,7 @@ function EditContent() {
                         </option>
                       )
                     )}
-
                   </select>
-
                 </FieldWrapper>
 
                 {/* TAHUN MASUK */}
@@ -1358,7 +1357,6 @@ function EditContent() {
                   icon={CalendarDays}
                   label="Tahun Masuk"
                 >
-
                   <input
                     type="text"
                     value={
@@ -1370,7 +1368,6 @@ function EditContent() {
                     className={inputClass}
                     placeholder="Contoh: 2024"
                   />
-
                 </FieldWrapper>
 
                 {/* SEKOLAH ASAL */}
@@ -1380,7 +1377,6 @@ function EditContent() {
                   label="Sekolah Asal"
                   className="sm:col-span-2"
                 >
-
                   <input
                     type="text"
                     value={
@@ -1392,7 +1388,6 @@ function EditContent() {
                     className={inputClass}
                     placeholder="Contoh: SMP Negeri 1 Depok"
                   />
-
                 </FieldWrapper>
 
                 {/* TANGGAL MASUK */}
@@ -1402,7 +1397,6 @@ function EditContent() {
                   label="Tanggal Masuk Sekolah"
                   className="sm:col-span-2"
                 >
-
                   <input
                     type="date"
                     value={
@@ -1413,11 +1407,8 @@ function EditContent() {
                     )}
                     className={inputClass}
                   />
-
                 </FieldWrapper>
-
               </div>
-
             </SectionCard>
 
             {/* =====================================================
@@ -1429,16 +1420,13 @@ function EditContent() {
               title="Orang Tua / Wali"
               description="Informasi orang tua atau wali siswa."
             >
-
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-
                 {/* AYAH */}
 
                 <FieldWrapper
                   icon={User}
                   label="Nama Ayah"
                 >
-
                   <input
                     type="text"
                     value={
@@ -1450,7 +1438,6 @@ function EditContent() {
                     className={inputClass}
                     placeholder="Nama lengkap ayah"
                   />
-
                 </FieldWrapper>
 
                 {/* PEKERJAAN AYAH */}
@@ -1459,7 +1446,6 @@ function EditContent() {
                   icon={BriefcaseIcon}
                   label="Pekerjaan Ayah"
                 >
-
                   <input
                     type="text"
                     value={
@@ -1471,7 +1457,6 @@ function EditContent() {
                     className={inputClass}
                     placeholder="Contoh: Karyawan Swasta"
                   />
-
                 </FieldWrapper>
 
                 {/* IBU */}
@@ -1480,7 +1465,6 @@ function EditContent() {
                   icon={User}
                   label="Nama Ibu"
                 >
-
                   <input
                     type="text"
                     value={
@@ -1492,7 +1476,6 @@ function EditContent() {
                     className={inputClass}
                     placeholder="Nama lengkap ibu"
                   />
-
                 </FieldWrapper>
 
                 {/* PEKERJAAN IBU */}
@@ -1501,7 +1484,6 @@ function EditContent() {
                   icon={BriefcaseIcon}
                   label="Pekerjaan Ibu"
                 >
-
                   <input
                     type="text"
                     value={
@@ -1513,7 +1495,6 @@ function EditContent() {
                     className={inputClass}
                     placeholder="Contoh: Guru"
                   />
-
                 </FieldWrapper>
 
                 {/* TELEPON ORTU */}
@@ -1523,7 +1504,6 @@ function EditContent() {
                   label="Nomor Telepon Orang Tua / Wali"
                   className="sm:col-span-2"
                 >
-
                   <input
                     type="tel"
                     value={
@@ -1535,11 +1515,8 @@ function EditContent() {
                     className={inputClass}
                     placeholder="Contoh: 0812-3456-7890"
                   />
-
                 </FieldWrapper>
-
               </div>
-
             </SectionCard>
 
             {/* =====================================================
@@ -1551,16 +1528,13 @@ function EditContent() {
               title="Kontak & Alamat"
               description="Informasi kontak siswa."
             >
-
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-
                 {/* TELEPON */}
 
                 <FieldWrapper
                   icon={Phone}
                   label="Nomor Telepon Siswa"
                 >
-
                   <input
                     type="tel"
                     value={
@@ -1572,7 +1546,6 @@ function EditContent() {
                     className={inputClass}
                     placeholder="Contoh: 0812-3456-7890"
                   />
-
                 </FieldWrapper>
 
                 {/* EMAIL */}
@@ -1581,7 +1554,6 @@ function EditContent() {
                   icon={Mail}
                   label="Email Siswa"
                 >
-
                   <input
                     type="email"
                     value={
@@ -1593,7 +1565,6 @@ function EditContent() {
                     className={inputClass}
                     placeholder="nama@student.sch.id"
                   />
-
                 </FieldWrapper>
 
                 {/* ALAMAT */}
@@ -1603,7 +1574,6 @@ function EditContent() {
                   label="Alamat Lengkap"
                   className="sm:col-span-2"
                 >
-
                   <textarea
                     value={
                       form.alamat || ""
@@ -1615,28 +1585,41 @@ function EditContent() {
                     className={`${inputClass} resize-none`}
                     placeholder="Masukkan alamat lengkap siswa"
                   />
-
                 </FieldWrapper>
-
               </div>
-
             </SectionCard>
-
           </form>
-
         </main>
 
         {/* =========================================================
             STICKY ACTION BAR
         ========================================================= */}
 
-        <div className="border-t border-slate-200 bg-white/90 backdrop-blur px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-end gap-2.5">
-
+        <div
+          className={`
+            border-t ${themeDivider}
+            bg-[color-mix(in_srgb,var(--color-card)_92%,transparent)]
+            backdrop-blur
+            px-4 sm:px-6 lg:px-8
+            py-3.5
+            flex items-center justify-end gap-2.5
+          `}
+        >
           <button
             type="button"
             onClick={handleBatal}
             disabled={saving}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 disabled:opacity-50 transition-colors"
+            className={`
+              inline-flex items-center gap-2
+              px-4 py-2.5 rounded-xl
+              border ${themeNeutralBorder}
+              theme-text-secondary
+              text-sm font-medium
+              ${themeNeutralHover}
+              hover:text-[var(--color-primary)]
+              disabled:opacity-50
+              transition-colors
+            `}
           >
             <X size={15} />
             Batal
@@ -1646,21 +1629,27 @@ function EditContent() {
             type="button"
             onClick={handleSimpan}
             disabled={saving}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#155DFC] to-[#0d47c9] text-white text-sm font-semibold hover:brightness-110 disabled:opacity-60 disabled:cursor-not-allowed transition-all"
+            className={`
+              inline-flex items-center gap-2
+              px-5 py-2.5 rounded-xl
+              ${themePrimaryGradient}
+              text-[var(--color-card)]
+              text-sm font-semibold
+              ${themePrimaryShadow}
+              hover:brightness-110
+              disabled:opacity-60
+              disabled:cursor-not-allowed
+              transition-all
+            `}
           >
-
             <Save size={15} />
 
             {saving
               ? "Menyimpan..."
               : "Simpan Perubahan"}
-
           </button>
-
         </div>
-
       </div>
-
     </div>
   );
 }
@@ -1669,10 +1658,6 @@ function EditContent() {
 |--------------------------------------------------------------------------
 | BRIEFCASE ICON
 |--------------------------------------------------------------------------
-|
-| Saya buat alias kecil supaya bagian pekerjaan orang tua
-| tetap menggunakan icon Briefcase.
-|
 */
 
 function BriefcaseIcon(props) {
@@ -1708,17 +1693,20 @@ function BriefcaseIcon(props) {
 */
 
 function EditSiswaPageContent() {
-
   return (
     <Suspense fallback={null}>
       <EditContent />
     </Suspense>
   );
-
 }
+
 export default function Edit() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-slate-50" />}>
+    <Suspense
+      fallback={
+        <div className="min-h-screen theme-page" />
+      }
+    >
       <EditContent />
     </Suspense>
   );

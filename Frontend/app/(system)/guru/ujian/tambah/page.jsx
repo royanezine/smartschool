@@ -29,6 +29,70 @@ import { getKelasMapel } from "../../../../../services/kelasMapel.service";
 import { createUjian } from "../../../../../services/ujian.service";
 
 /* =========================================================
+   THEME HELPERS
+========================================================= */
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+
+/* =========================================================
    HELPER
 ========================================================= */
 
@@ -511,7 +575,7 @@ export default function TambahUjianPage() {
   ========================================================= */
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-slate-50">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
       {/* =====================================================
           SIDEBAR
       ===================================================== */}
@@ -544,7 +608,7 @@ export default function TambahUjianPage() {
           }}
         />
 
-        <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
+        <main className="theme-page min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="mx-auto w-full max-w-[1400px] px-3 py-5 sm:px-5 sm:py-6 lg:px-7 lg:py-8">
 
             {/* =================================================
@@ -561,7 +625,7 @@ export default function TambahUjianPage() {
                     )
                   }
                   disabled={saving}
-                  className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+                  className={`theme-card flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${themeNeutralBorder} theme-text-secondary ${themeNeutralHover} ${themeSmallShadow} transition hover:border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)] hover:text-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-50`}
                   aria-label="Kembali"
                 >
                   <ArrowLeft size={18} />
@@ -569,18 +633,20 @@ export default function TambahUjianPage() {
 
                 <div className="min-w-0">
                   <div className="flex items-center gap-2.5">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                    <div
+                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText}`}
+                    >
                       <ClipboardList
                         size={19}
                       />
                     </div>
 
-                    <h1 className="truncate text-xl font-bold text-slate-800 sm:text-2xl lg:text-3xl">
+                    <h1 className="theme-text truncate text-xl font-bold sm:text-2xl lg:text-3xl">
                       Tambah Ujian
                     </h1>
                   </div>
 
-                  <p className="mt-1.5 max-w-2xl text-sm leading-6 text-slate-500">
+                  <p className="theme-text-secondary mt-1.5 max-w-2xl text-sm leading-6">
                     Buat dan atur ujian baru
                     untuk kelas dan mata
                     pelajaran yang kamu ajar.
@@ -589,16 +655,19 @@ export default function TambahUjianPage() {
               </div>
 
               {/* STATUS MINI */}
-              <div className="hidden shrink-0 items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 shadow-sm sm:flex">
+
+              <div
+                className={`theme-card hidden shrink-0 items-center gap-2 rounded-xl border ${themeNeutralBorder} px-3 py-2 ${themeSmallShadow} sm:flex`}
+              >
                 <div
                   className={`h-2 w-2 rounded-full ${
                     saving
-                      ? "bg-amber-400"
-                      : "bg-blue-500"
+                      ? "bg-[var(--color-warning)]"
+                      : "bg-[var(--color-primary)]"
                   }`}
                 />
 
-                <span className="text-xs font-semibold text-slate-600">
+                <span className="theme-text-secondary text-xs font-semibold">
                   {saving
                     ? "Menyimpan..."
                     : "Mode penyusunan"}
@@ -611,18 +680,20 @@ export default function TambahUjianPage() {
             ================================================= */}
 
             {error && (
-              <div className="mb-5 flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 p-4">
+              <div
+                className={`mb-5 flex items-start gap-3 rounded-xl border ${themeDangerBorder} ${themeDangerSurface} p-4 theme-danger`}
+              >
                 <AlertCircle
                   size={19}
-                  className="mt-0.5 shrink-0 text-rose-600"
+                  className="mt-0.5 shrink-0"
                 />
 
                 <div className="min-w-0">
-                  <p className="text-sm font-bold text-rose-800">
+                  <p className="text-sm font-bold">
                     Terjadi masalah
                   </p>
 
-                  <p className="mt-1 break-words text-sm leading-5 text-rose-700">
+                  <p className="theme-text-secondary mt-1 break-words text-sm leading-5">
                     {error}
                   </p>
                 </div>
@@ -630,18 +701,20 @@ export default function TambahUjianPage() {
             )}
 
             {success && (
-              <div className="mb-5 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+              <div
+                className={`mb-5 flex items-start gap-3 rounded-xl border ${themeSuccessBorder} ${themeSuccessSurface} p-4 text-[var(--color-success)]`}
+              >
                 <CheckCircle2
                   size={19}
-                  className="mt-0.5 shrink-0 text-emerald-600"
+                  className="mt-0.5 shrink-0"
                 />
 
                 <div>
-                  <p className="text-sm font-bold text-emerald-800">
+                  <p className="text-sm font-bold">
                     Berhasil
                   </p>
 
-                  <p className="mt-1 text-sm text-emerald-700">
+                  <p className="theme-text-secondary mt-1 text-sm">
                     {success}
                   </p>
                 </div>
@@ -670,21 +743,27 @@ export default function TambahUjianPage() {
                       INFORMASI DASAR
                   ================================================= */}
 
-                  <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                    <div className="border-b border-slate-100 px-4 py-4 sm:px-6">
+                  <section
+                    className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+                  >
+                    <div
+                      className={`border-b ${themeDivider} px-4 py-4 sm:px-6`}
+                    >
                       <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                        <div
+                          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
+                        >
                           <FileText
                             size={19}
                           />
                         </div>
 
                         <div>
-                          <h2 className="text-base font-bold text-slate-800 sm:text-lg">
+                          <h2 className="theme-text text-base font-bold sm:text-lg">
                             Informasi Ujian
                           </h2>
 
-                          <p className="mt-0.5 text-xs leading-5 text-slate-500 sm:text-sm">
+                          <p className="theme-text-secondary mt-0.5 text-xs leading-5 sm:text-sm">
                             Lengkapi informasi dasar
                             ujian.
                           </p>
@@ -699,10 +778,10 @@ export default function TambahUjianPage() {
                       <div className="md:col-span-2">
                         <label
                           htmlFor="kelasMapelId"
-                          className="mb-2 block text-sm font-semibold text-slate-800"
+                          className="theme-text mb-2 block text-sm font-semibold"
                         >
                           Kelas & Mata Pelajaran
-                          <span className="ml-1 text-rose-500">
+                          <span className="ml-1 theme-danger">
                             *
                           </span>
                         </label>
@@ -710,7 +789,7 @@ export default function TambahUjianPage() {
                         <div className="relative">
                           <BookOpen
                             size={17}
-                            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                            className="theme-text-muted pointer-events-none absolute left-3 top-1/2 -translate-y-1/2"
                           />
 
                           <select
@@ -727,7 +806,7 @@ export default function TambahUjianPage() {
                               saving
                             }
                             required
-                            className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-10 py-3 text-sm font-medium text-slate-800 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-400"
+                            className={`theme-input w-full appearance-none rounded-xl border px-10 py-3 text-sm font-medium outline-none transition ${themeNeutralBorder} ${themeFocus} disabled:cursor-not-allowed`}
                           >
                             <option value="">
                               {loadingKelasMapel
@@ -764,7 +843,7 @@ export default function TambahUjianPage() {
                           {loadingKelasMapel && (
                             <Loader2
                               size={17}
-                              className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-blue-500"
+                              className="absolute right-3 top-1/2 -translate-y-1/2 animate-spin text-[var(--color-primary)]"
                             />
                           )}
                         </div>
@@ -772,20 +851,22 @@ export default function TambahUjianPage() {
                         {!loadingKelasMapel &&
                           kelasMapel.length ===
                             0 && (
-                            <div className="mt-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                            <div
+                              className={`mt-3 rounded-xl border ${themeWarningBorder} ${themeWarningSurface} p-4`}
+                            >
                               <div className="flex items-start gap-3">
                                 <AlertCircle
                                   size={18}
-                                  className="mt-0.5 shrink-0 text-amber-600"
+                                  className="mt-0.5 shrink-0 text-[var(--color-warning)]"
                                 />
 
                                 <div>
-                                  <p className="text-sm font-bold text-amber-800">
+                                  <p className="text-[var(--color-warning)] text-sm font-bold">
                                     Penugasan belum
                                     tersedia
                                   </p>
 
-                                  <p className="mt-1 text-xs leading-5 text-amber-700">
+                                  <p className="theme-text-secondary mt-1 text-xs leading-5">
                                     Akun guru ini belum
                                     memiliki kelas dan
                                     mata pelajaran yang
@@ -801,7 +882,7 @@ export default function TambahUjianPage() {
                                     disabled={
                                       loadingKelasMapel
                                     }
-                                    className="mt-3 inline-flex items-center gap-2 rounded-lg bg-white px-3 py-2 text-xs font-semibold text-amber-800 ring-1 ring-amber-200 transition hover:bg-amber-100 disabled:opacity-50"
+                                    className={`theme-card mt-3 inline-flex items-center gap-2 rounded-lg border ${themeWarningBorder} px-3 py-2 text-xs font-semibold text-[var(--color-warning)] transition hover:bg-[color-mix(in_srgb,var(--color-warning)_7%,transparent)] disabled:opacity-50`}
                                   >
                                     <RefreshIcon />
 
@@ -813,13 +894,17 @@ export default function TambahUjianPage() {
                           )}
 
                         {selectedKelasMapel && (
-                          <div className="mt-3 rounded-xl bg-slate-50 p-3">
-                            <p className="mb-2 text-xs font-medium text-slate-500">
+                          <div
+                            className={`mt-3 rounded-xl ${themeNeutralSurface} p-3`}
+                          >
+                            <p className="theme-text-muted mb-2 text-xs font-medium">
                               Penugasan yang dipilih
                             </p>
 
                             <div className="flex flex-wrap gap-2">
-                              <span className="inline-flex items-center gap-1.5 rounded-full bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700">
+                              <span
+                                className={`inline-flex items-center gap-1.5 rounded-full border ${themePrimarySoftBorder} ${themePrimarySoft} px-3 py-1.5 text-xs font-semibold ${themePrimaryText}`}
+                              >
                                 <CheckCircle2
                                   size={13}
                                 />
@@ -827,7 +912,9 @@ export default function TambahUjianPage() {
                                 {selectedKelasName}
                               </span>
 
-                              <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700">
+                              <span
+                                className={`inline-flex items-center gap-1.5 rounded-full border ${themeInfoBorder} ${themeInfoSurface} px-3 py-1.5 text-xs font-semibold text-[var(--color-info)]`}
+                              >
                                 <CheckCircle2
                                   size={13}
                                 />
@@ -844,10 +931,10 @@ export default function TambahUjianPage() {
                       <div className="md:col-span-2">
                         <label
                           htmlFor="judul"
-                          className="mb-2 block text-sm font-semibold text-slate-800"
+                          className="theme-text mb-2 block text-sm font-semibold"
                         >
                           Judul Ujian
-                          <span className="ml-1 text-rose-500">
+                          <span className="ml-1 theme-danger">
                             *
                           </span>
                         </label>
@@ -867,16 +954,16 @@ export default function TambahUjianPage() {
                           maxLength={100}
                           disabled={saving}
                           placeholder="Contoh: UTS Matematika Kelas X"
-                          className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 disabled:bg-slate-50"
+                          className={`theme-input w-full rounded-xl border px-4 py-3 text-sm font-medium outline-none transition placeholder:text-[var(--color-text-placeholder)] ${themeNeutralBorder} ${themeFocus} disabled:cursor-not-allowed`}
                         />
 
                         <div className="mt-1.5 flex items-center justify-between gap-3">
-                          <p className="text-xs text-slate-400">
+                          <p className="theme-text-muted text-xs">
                             Minimal 3 dan maksimal
                             100 karakter.
                           </p>
 
-                          <span className="text-xs font-medium text-slate-400">
+                          <span className="theme-text-muted text-xs font-medium">
                             {form.judul.length}/100
                           </span>
                         </div>
@@ -887,7 +974,7 @@ export default function TambahUjianPage() {
                       <div className="md:col-span-2">
                         <label
                           htmlFor="deskripsi"
-                          className="mb-2 block text-sm font-semibold text-slate-800"
+                          className="theme-text mb-2 block text-sm font-semibold"
                         >
                           Deskripsi
                         </label>
@@ -904,7 +991,7 @@ export default function TambahUjianPage() {
                           rows={4}
                           disabled={saving}
                           placeholder="Tuliskan petunjuk atau informasi tambahan untuk siswa..."
-                          className="w-full resize-y rounded-xl border border-slate-200 px-4 py-3 text-sm leading-6 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 disabled:bg-slate-50"
+                          className={`theme-input w-full resize-y rounded-xl border px-4 py-3 text-sm leading-6 outline-none transition placeholder:text-[var(--color-text-placeholder)] ${themeNeutralBorder} ${themeFocus} disabled:cursor-not-allowed`}
                         />
                       </div>
 
@@ -913,10 +1000,10 @@ export default function TambahUjianPage() {
                       <div>
                         <label
                           htmlFor="jenis"
-                          className="mb-2 block text-sm font-semibold text-slate-800"
+                          className="theme-text mb-2 block text-sm font-semibold"
                         >
                           Jenis Ujian
-                          <span className="ml-1 text-rose-500">
+                          <span className="ml-1 theme-danger">
                             *
                           </span>
                         </label>
@@ -932,7 +1019,7 @@ export default function TambahUjianPage() {
                           }
                           disabled={saving}
                           required
-                          className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-800 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 disabled:bg-slate-50"
+                          className={`theme-input w-full rounded-xl border px-4 py-3 text-sm font-medium outline-none transition ${themeNeutralBorder} ${themeFocus} disabled:cursor-not-allowed`}
                         >
                           <option value="UTS">
                             UTS
@@ -961,10 +1048,10 @@ export default function TambahUjianPage() {
                       <div>
                         <label
                           htmlFor="durasi"
-                          className="mb-2 block text-sm font-semibold text-slate-800"
+                          className="theme-text mb-2 block text-sm font-semibold"
                         >
                           Durasi Ujian
-                          <span className="ml-1 text-rose-500">
+                          <span className="ml-1 theme-danger">
                             *
                           </span>
                         </label>
@@ -972,7 +1059,7 @@ export default function TambahUjianPage() {
                         <div className="relative">
                           <Clock3
                             size={16}
-                            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                            className="theme-text-muted pointer-events-none absolute left-3 top-1/2 -translate-y-1/2"
                           />
 
                           <input
@@ -989,10 +1076,10 @@ export default function TambahUjianPage() {
                             }
                             disabled={saving}
                             required
-                            className="w-full rounded-xl border border-slate-200 px-10 py-3 pr-16 text-sm font-medium text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 disabled:bg-slate-50"
+                            className={`theme-input w-full rounded-xl border px-10 py-3 pr-16 text-sm font-medium outline-none transition ${themeNeutralBorder} ${themeFocus} disabled:cursor-not-allowed`}
                           />
 
-                          <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-400">
+                          <span className="theme-text-muted pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-xs font-medium">
                             menit
                           </span>
                         </div>
@@ -1003,7 +1090,7 @@ export default function TambahUjianPage() {
                       <div>
                         <label
                           htmlFor="nilaiKelulusan"
-                          className="mb-2 block text-sm font-semibold text-slate-800"
+                          className="theme-text mb-2 block text-sm font-semibold"
                         >
                           Nilai Kelulusan
                         </label>
@@ -1023,10 +1110,10 @@ export default function TambahUjianPage() {
                           }
                           disabled={saving}
                           placeholder="75"
-                          className="w-full rounded-xl border border-slate-200 px-4 py-3 text-sm font-medium text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 disabled:bg-slate-50"
+                          className={`theme-input w-full rounded-xl border px-4 py-3 text-sm font-medium outline-none transition placeholder:text-[var(--color-text-placeholder)] ${themeNeutralBorder} ${themeFocus} disabled:cursor-not-allowed`}
                         />
 
-                        <p className="mt-1.5 text-xs text-slate-400">
+                        <p className="theme-text-muted mt-1.5 text-xs">
                           Nilai antara 0 sampai
                           100.
                         </p>
@@ -1037,7 +1124,7 @@ export default function TambahUjianPage() {
                       <div>
                         <label
                           htmlFor="modeUjian"
-                          className="mb-2 block text-sm font-semibold text-slate-800"
+                          className="theme-text mb-2 block text-sm font-semibold"
                         >
                           Mode Ujian
                         </label>
@@ -1045,7 +1132,7 @@ export default function TambahUjianPage() {
                         <div className="relative">
                           <Monitor
                             size={16}
-                            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                            className="theme-text-muted pointer-events-none absolute left-3 top-1/2 -translate-y-1/2"
                           />
 
                           <select
@@ -1058,7 +1145,7 @@ export default function TambahUjianPage() {
                               handleChange
                             }
                             disabled={saving}
-                            className="w-full rounded-xl border border-slate-200 bg-white px-10 py-3 text-sm font-medium text-slate-800 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 disabled:bg-slate-50"
+                            className={`theme-input w-full rounded-xl border px-10 py-3 text-sm font-medium outline-none transition ${themeNeutralBorder} ${themeFocus} disabled:cursor-not-allowed`}
                           >
                             <option value="standard">
                               Standard
@@ -1080,7 +1167,7 @@ export default function TambahUjianPage() {
                       <div>
                         <label
                           htmlFor="waktuMulai"
-                          className="mb-2 block text-sm font-semibold text-slate-800"
+                          className="theme-text mb-2 block text-sm font-semibold"
                         >
                           Waktu Mulai
                         </label>
@@ -1096,10 +1183,10 @@ export default function TambahUjianPage() {
                             handleChange
                           }
                           disabled={saving}
-                          className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm font-medium text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 disabled:bg-slate-50"
+                          className={`theme-input w-full rounded-xl border px-3 py-3 text-sm font-medium outline-none transition ${themeNeutralBorder} ${themeFocus} disabled:cursor-not-allowed`}
                         />
 
-                        <p className="mt-1.5 text-xs text-slate-400">
+                        <p className="theme-text-muted mt-1.5 text-xs">
                           Kosongkan jika tanpa
                           jadwal mulai.
                         </p>
@@ -1110,7 +1197,7 @@ export default function TambahUjianPage() {
                       <div>
                         <label
                           htmlFor="waktuSelesai"
-                          className="mb-2 block text-sm font-semibold text-slate-800"
+                          className="theme-text mb-2 block text-sm font-semibold"
                         >
                           Waktu Selesai
                         </label>
@@ -1126,10 +1213,10 @@ export default function TambahUjianPage() {
                             handleChange
                           }
                           disabled={saving}
-                          className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm font-medium text-slate-900 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 disabled:bg-slate-50"
+                          className={`theme-input w-full rounded-xl border px-3 py-3 text-sm font-medium outline-none transition ${themeNeutralBorder} ${themeFocus} disabled:cursor-not-allowed`}
                         />
 
-                        <p className="mt-1.5 text-xs text-slate-400">
+                        <p className="theme-text-muted mt-1.5 text-xs">
                           Harus lebih besar dari
                           waktu mulai.
                         </p>
@@ -1141,21 +1228,27 @@ export default function TambahUjianPage() {
                       PENGATURAN
                   ================================================= */}
 
-                  <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                    <div className="border-b border-slate-100 px-4 py-4 sm:px-6">
+                  <section
+                    className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+                  >
+                    <div
+                      className={`border-b ${themeDivider} px-4 py-4 sm:px-6`}
+                    >
                       <div className="flex items-center gap-3">
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                        <div
+                          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themeInfoSurface} text-[var(--color-info)]`}
+                        >
                           <ShieldCheck
                             size={19}
                           />
                         </div>
 
                         <div>
-                          <h2 className="text-base font-bold text-slate-800 sm:text-lg">
+                          <h2 className="theme-text text-base font-bold sm:text-lg">
                             Pengaturan Ujian
                           </h2>
 
-                          <p className="mt-0.5 text-xs leading-5 text-slate-500 sm:text-sm">
+                          <p className="theme-text-secondary mt-0.5 text-xs leading-5 sm:text-sm">
                             Tentukan status publikasi
                             dan metode penilaian.
                           </p>
@@ -1167,7 +1260,9 @@ export default function TambahUjianPage() {
 
                       {/* PUBLIKASI */}
 
-                      <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 p-4 transition hover:border-blue-200 hover:bg-blue-50/30">
+                      <label
+                        className={`flex cursor-pointer items-start gap-3 rounded-xl border ${themeNeutralBorder} p-4 transition hover:border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)] ${themeNeutralHover}`}
+                      >
                         <input
                           type="checkbox"
                           name="dipublikasikan"
@@ -1178,15 +1273,15 @@ export default function TambahUjianPage() {
                             handleChange
                           }
                           disabled={saving}
-                          className="mt-1 h-4 w-4 shrink-0 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                          className="mt-1 h-4 w-4 shrink-0 rounded border-[color-mix(in_srgb,var(--color-text)_20%,transparent)] text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
                         />
 
                         <div className="min-w-0">
-                          <p className="text-sm font-semibold text-slate-800">
+                          <p className="theme-text text-sm font-semibold">
                             Publikasikan ujian
                           </p>
 
-                          <p className="mt-1 text-xs leading-5 text-slate-500">
+                          <p className="theme-text-secondary mt-1 text-xs leading-5">
                             Jika aktif, ujian akan
                             berstatus dipublikasikan
                             setelah berhasil dibuat.
@@ -1196,7 +1291,9 @@ export default function TambahUjianPage() {
 
                       {/* PENILAIAN */}
 
-                      <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-slate-200 p-4 transition hover:border-indigo-200 hover:bg-indigo-50/30">
+                      <label
+                        className={`flex cursor-pointer items-start gap-3 rounded-xl border ${themeNeutralBorder} p-4 transition hover:border-[color-mix(in_srgb,var(--color-info)_25%,transparent)] hover:bg-[color-mix(in_srgb,var(--color-info)_5%,transparent)]`}
+                      >
                         <input
                           type="checkbox"
                           name="penilaianOtomatis"
@@ -1207,15 +1304,15 @@ export default function TambahUjianPage() {
                             handleChange
                           }
                           disabled={saving}
-                          className="mt-1 h-4 w-4 shrink-0 rounded border-slate-300 text-blue-600 focus:ring-blue-500"
+                          className="mt-1 h-4 w-4 shrink-0 rounded border-[color-mix(in_srgb,var(--color-text)_20%,transparent)] text-[var(--color-primary)] focus:ring-[var(--color-primary)]"
                         />
 
                         <div className="min-w-0">
-                          <p className="text-sm font-semibold text-slate-800">
+                          <p className="theme-text text-sm font-semibold">
                             Penilaian otomatis
                           </p>
 
-                          <p className="mt-1 text-xs leading-5 text-slate-500">
+                          <p className="theme-text-secondary mt-1 text-xs leading-5">
                             Membantu sistem menilai
                             soal pilihan ganda secara
                             otomatis.
@@ -1229,7 +1326,9 @@ export default function TambahUjianPage() {
                       ACTION
                   ================================================= */}
 
-                  <div className="flex flex-col-reverse gap-3 border-t border-slate-200 pt-5 sm:flex-row sm:justify-end">
+                  <div
+                    className={`flex flex-col-reverse gap-3 border-t ${themeDivider} pt-5 sm:flex-row sm:justify-end`}
+                  >
                     <button
                       type="button"
                       onClick={() =>
@@ -1238,7 +1337,7 @@ export default function TambahUjianPage() {
                         )
                       }
                       disabled={saving}
-                      className="w-full rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+                      className={`theme-card w-full rounded-xl border ${themeNeutralBorder} px-5 py-3 text-sm font-semibold theme-text-secondary ${themeNeutralHover} transition disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto`}
                     >
                       Batal
                     </button>
@@ -1250,7 +1349,7 @@ export default function TambahUjianPage() {
                         loadingKelasMapel ||
                         kelasMapel.length === 0
                       }
-                      className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+                      className={`inline-flex w-full items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-5 py-3 text-sm font-semibold text-[var(--color-card)] ${themePrimaryShadow} transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto`}
                     >
                       {saving ? (
                         <>
@@ -1283,35 +1382,43 @@ export default function TambahUjianPage() {
                     PREVIEW CARD
                 ================================================= */}
 
-                <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                  <div className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-blue-950 to-indigo-900 p-5">
-                    <div className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-blue-500/20 blur-2xl" />
+                <section
+                  className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+                >
+                  <div
+                    className={`relative overflow-hidden ${themePrimaryGradient} p-5`}
+                  >
+                    <div
+                      className="absolute -right-12 -top-12 h-32 w-32 rounded-full bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)] blur-2xl"
+                    />
 
-                    <div className="absolute -bottom-16 -left-10 h-32 w-32 rounded-full bg-indigo-500/20 blur-2xl" />
+                    <div
+                      className="absolute -bottom-16 -left-10 h-32 w-32 rounded-full bg-[color-mix(in_srgb,var(--color-info)_18%,transparent)] blur-2xl"
+                    />
 
                     <div className="relative">
                       <div className="mb-4 flex items-center justify-between">
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10 text-white ring-1 ring-white/10">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-[color-mix(in_srgb,var(--color-card)_16%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)] text-[var(--color-card)]">
                           <ClipboardList
                             size={19}
                           />
                         </div>
 
-                        <span className="rounded-full bg-white/10 px-3 py-1.5 text-[11px] font-semibold text-white/80 ring-1 ring-white/10">
+                        <span className="rounded-full border border-[color-mix(in_srgb,var(--color-card)_16%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)] px-3 py-1.5 text-[11px] font-semibold text-[color-mix(in_srgb,var(--color-card)_88%,transparent)]">
                           {form.jenis || "Ujian"}
                         </span>
                       </div>
 
-                      <p className="text-xs font-medium text-blue-200">
+                      <p className="text-xs font-medium text-[color-mix(in_srgb,var(--color-card)_78%,transparent)]">
                         Preview Ujian
                       </p>
 
-                      <h2 className="mt-1.5 break-words text-lg font-bold leading-7 text-white">
+                      <h2 className="mt-1.5 break-words text-lg font-bold leading-7 text-[var(--color-card)]">
                         {form.judul.trim() ||
                           "Judul ujian belum diisi"}
                       </h2>
 
-                      <p className="mt-2 line-clamp-3 text-xs leading-5 text-blue-100/70">
+                      <p className="mt-2 line-clamp-3 text-xs leading-5 text-[color-mix(in_srgb,var(--color-card)_72%,transparent)]">
                         {form.deskripsi.trim() ||
                           "Deskripsi ujian akan ditampilkan di bagian ini."}
                       </p>
@@ -1323,18 +1430,20 @@ export default function TambahUjianPage() {
                     {/* KELAS */}
 
                     <div className="flex items-start gap-3">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                      <div
+                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText}`}
+                      >
                         <GraduationCap
                           size={17}
                         />
                       </div>
 
                       <div className="min-w-0">
-                        <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
+                        <p className="theme-text-muted text-[11px] font-medium uppercase tracking-wide">
                           Kelas
                         </p>
 
-                        <p className="mt-1 truncate text-sm font-semibold text-slate-800">
+                        <p className="theme-text mt-1 truncate text-sm font-semibold">
                           {selectedKelasName}
                         </p>
                       </div>
@@ -1343,18 +1452,20 @@ export default function TambahUjianPage() {
                     {/* MAPEL */}
 
                     <div className="flex items-start gap-3">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+                      <div
+                        className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${themeInfoSurface} text-[var(--color-info)]`}
+                      >
                         <BookOpen
                           size={17}
                         />
                       </div>
 
                       <div className="min-w-0">
-                        <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
+                        <p className="theme-text-muted text-[11px] font-medium uppercase tracking-wide">
                           Mata Pelajaran
                         </p>
 
-                        <p className="mt-1 truncate text-sm font-semibold text-slate-800">
+                        <p className="theme-text mt-1 truncate text-sm font-semibold">
                           {selectedMapelName}
                         </p>
                       </div>
@@ -1363,18 +1474,20 @@ export default function TambahUjianPage() {
                     {/* GURU */}
 
                     <div className="flex items-start gap-3">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
+                      <div
+                        className={`theme-card flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${themeNeutralBorder} theme-text-secondary`}
+                      >
                         <Users
                           size={17}
                         />
                       </div>
 
                       <div className="min-w-0">
-                        <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
+                        <p className="theme-text-muted text-[11px] font-medium uppercase tracking-wide">
                           Pengajar
                         </p>
 
-                        <p className="mt-1 truncate text-sm font-semibold text-slate-800">
+                        <p className="theme-text mt-1 truncate text-sm font-semibold">
                           {selectedGuruName}
                         </p>
                       </div>
@@ -1386,18 +1499,22 @@ export default function TambahUjianPage() {
                     DETAIL CARD
                 ================================================= */}
 
-                <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <section
+                  className={`theme-card rounded-2xl border ${themeNeutralBorder} p-5 ${themeCardShadow}`}
+                >
                   <div className="mb-4 flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
+                    <div
+                      className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeNeutralSurface} theme-text-secondary`}
+                    >
                       <Info size={17} />
                     </div>
 
                     <div>
-                      <h3 className="text-sm font-bold text-slate-800">
+                      <h3 className="theme-text text-sm font-bold">
                         Ringkasan Pengaturan
                       </h3>
 
-                      <p className="text-xs text-slate-500">
+                      <p className="theme-text-secondary text-xs">
                         Detail yang sudah kamu tentukan
                       </p>
                     </div>
@@ -1407,8 +1524,10 @@ export default function TambahUjianPage() {
 
                     {/* DURASI */}
 
-                    <div className="flex items-center justify-between gap-3 border-b border-slate-100 pb-3">
-                      <div className="flex items-center gap-2 text-slate-500">
+                    <div
+                      className={`flex items-center justify-between gap-3 border-b ${themeDivider} pb-3`}
+                    >
+                      <div className="theme-text-secondary flex items-center gap-2">
                         <Clock3 size={15} />
 
                         <span className="text-xs">
@@ -1416,7 +1535,7 @@ export default function TambahUjianPage() {
                         </span>
                       </div>
 
-                      <span className="text-xs font-semibold text-slate-800">
+                      <span className="theme-text text-xs font-semibold">
                         {getDurationLabel(
                           form.durasi
                         )}
@@ -1425,8 +1544,10 @@ export default function TambahUjianPage() {
 
                     {/* NILAI */}
 
-                    <div className="flex items-center justify-between gap-3 border-b border-slate-100 pb-3">
-                      <div className="flex items-center gap-2 text-slate-500">
+                    <div
+                      className={`flex items-center justify-between gap-3 border-b ${themeDivider} pb-3`}
+                    >
+                      <div className="theme-text-secondary flex items-center gap-2">
                         <CheckCircle2
                           size={15}
                         />
@@ -1436,7 +1557,7 @@ export default function TambahUjianPage() {
                         </span>
                       </div>
 
-                      <span className="text-xs font-semibold text-slate-800">
+                      <span className="theme-text text-xs font-semibold">
                         {form.nilaiKelulusan ===
                         ""
                           ? "-"
@@ -1446,8 +1567,10 @@ export default function TambahUjianPage() {
 
                     {/* MODE */}
 
-                    <div className="flex items-center justify-between gap-3 border-b border-slate-100 pb-3">
-                      <div className="flex items-center gap-2 text-slate-500">
+                    <div
+                      className={`flex items-center justify-between gap-3 border-b ${themeDivider} pb-3`}
+                    >
+                      <div className="theme-text-secondary flex items-center gap-2">
                         <Monitor size={15} />
 
                         <span className="text-xs">
@@ -1455,7 +1578,9 @@ export default function TambahUjianPage() {
                         </span>
                       </div>
 
-                      <span className="rounded-md bg-slate-100 px-2 py-1 text-[11px] font-semibold capitalize text-slate-700">
+                      <span
+                        className={`rounded-md border ${themeNeutralBorder} ${themeNeutralSurface} px-2 py-1 text-[11px] font-semibold capitalize theme-text-secondary`}
+                      >
                         {form.modeUjian}
                       </span>
                     </div>
@@ -1463,7 +1588,7 @@ export default function TambahUjianPage() {
                     {/* STATUS */}
 
                     <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-2 text-slate-500">
+                      <div className="theme-text-secondary flex items-center gap-2">
                         <ShieldCheck
                           size={15}
                         />
@@ -1474,10 +1599,10 @@ export default function TambahUjianPage() {
                       </div>
 
                       <span
-                        className={`rounded-md px-2 py-1 text-[11px] font-semibold ${
+                        className={`rounded-md border px-2 py-1 text-[11px] font-semibold ${
                           form.dipublikasikan
-                            ? "bg-blue-50 text-blue-700"
-                            : "bg-slate-100 text-slate-600"
+                            ? `${themePrimarySoftBorder} ${themePrimarySoft} ${themePrimaryText}`
+                            : `${themeNeutralBorder} ${themeNeutralSurface} theme-text-secondary`
                         }`}
                       >
                         {form.dipublikasikan
@@ -1492,20 +1617,24 @@ export default function TambahUjianPage() {
                     JADWAL CARD
                 ================================================= */}
 
-                <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                <section
+                  className={`theme-card rounded-2xl border ${themeNeutralBorder} p-5 ${themeCardShadow}`}
+                >
                   <div className="mb-4 flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                    <div
+                      className={`flex h-9 w-9 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText}`}
+                    >
                       <CalendarDays
                         size={17}
                       />
                     </div>
 
                     <div>
-                      <h3 className="text-sm font-bold text-slate-800">
+                      <h3 className="theme-text text-sm font-bold">
                         Jadwal Ujian
                       </h3>
 
-                      <p className="text-xs text-slate-500">
+                      <p className="theme-text-secondary text-xs">
                         Waktu pelaksanaan
                       </p>
                     </div>
@@ -1513,24 +1642,28 @@ export default function TambahUjianPage() {
 
                   <div className="space-y-3">
 
-                    <div className="rounded-xl bg-slate-50 p-3">
-                      <p className="text-[11px] font-medium text-slate-400">
+                    <div
+                      className={`rounded-xl ${themeNeutralSurface} p-3`}
+                    >
+                      <p className="theme-text-muted text-[11px] font-medium">
                         Waktu mulai
                       </p>
 
-                      <p className="mt-1.5 text-xs font-semibold leading-5 text-slate-700">
+                      <p className="theme-text-secondary mt-1.5 text-xs font-semibold leading-5">
                         {formatDateTime(
                           form.waktuMulai
                         )}
                       </p>
                     </div>
 
-                    <div className="rounded-xl bg-slate-50 p-3">
-                      <p className="text-[11px] font-medium text-slate-400">
+                    <div
+                      className={`rounded-xl ${themeNeutralSurface} p-3`}
+                    >
+                      <p className="theme-text-muted text-[11px] font-medium">
                         Waktu selesai
                       </p>
 
-                      <p className="mt-1.5 text-xs font-semibold leading-5 text-slate-700">
+                      <p className="theme-text-secondary mt-1.5 text-xs font-semibold leading-5">
                         {formatDateTime(
                           form.waktuSelesai
                         )}
@@ -1543,16 +1676,20 @@ export default function TambahUjianPage() {
                     CHECKLIST CARD
                 ================================================= */}
 
-                <section className="rounded-2xl border border-blue-100 bg-blue-50/50 p-5">
+                <section
+                  className={`rounded-2xl border ${themePrimarySoftBorder} ${themePrimarySoft} p-5`}
+                >
                   <div className="flex items-start gap-3">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-blue-600 shadow-sm">
+                    <div
+                      className={`theme-card flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${themeNeutralBorder} ${themePrimaryText} ${themeSmallShadow}`}
+                    >
                       <CircleCheck
                         size={17}
                       />
                     </div>
 
                     <div>
-                      <h3 className="text-sm font-bold text-slate-800">
+                      <h3 className="theme-text text-sm font-bold">
                         Sebelum menyimpan
                       </h3>
 
@@ -1618,8 +1755,8 @@ function ChecklistItem({
       <div
         className={`flex h-4 w-4 shrink-0 items-center justify-center rounded-full ${
           active
-            ? "bg-blue-600 text-white"
-            : "border border-slate-300 bg-white"
+            ? `${themePrimaryGradient} text-[var(--color-card)]`
+            : `border ${themeNeutralBorder} theme-card`
         }`}
       >
         {active && (
@@ -1632,8 +1769,8 @@ function ChecklistItem({
       <span
         className={`text-xs ${
           active
-            ? "font-medium text-slate-700"
-            : "text-slate-400"
+            ? "theme-text-secondary font-medium"
+            : "theme-text-muted"
         }`}
       >
         {text}

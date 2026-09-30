@@ -173,24 +173,21 @@ export default function PagesPage() {
       value === "aktif"
     ) {
       return {
-        wrapper:
-          "border border-emerald-100 bg-emerald-50 text-emerald-700",
-        dot: "bg-emerald-500",
+        wrapper: "theme-success border",
+        dot: "bg-[var(--color-success)]",
       };
     }
 
     if (value === "draft") {
       return {
-        wrapper:
-          "border border-amber-100 bg-amber-50 text-amber-700",
-        dot: "bg-amber-500",
+        wrapper: "theme-warning border",
+        dot: "bg-[var(--color-warning)]",
       };
     }
 
     return {
-      wrapper:
-        "border border-slate-200 bg-slate-50 text-slate-600",
-      dot: "bg-slate-400",
+      wrapper: "theme-card-soft theme-text-secondary border",
+      dot: "bg-[var(--color-text-muted)]",
     };
   };
 
@@ -259,7 +256,7 @@ export default function PagesPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen w-full bg-[#f8fafc]">
+      <div className="theme-page flex min-h-screen w-full">
         <Sidebar
           active={active}
           setActive={setActive}
@@ -277,17 +274,17 @@ export default function PagesPage() {
             }}
           />
 
-          <main className="flex flex-1 items-center justify-center p-6">
+          <main className="theme-page flex flex-1 items-center justify-center p-6">
             <div className="flex flex-col items-center text-center">
-              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border border-blue-100 bg-blue-50">
-                <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+              <div className="theme-info mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border">
+                <Loader2 className="h-6 w-6 animate-spin" />
               </div>
 
-              <h2 className="text-sm font-bold text-slate-800">
+              <h2 className="theme-text text-sm font-bold">
                 Memuat halaman...
               </h2>
 
-              <p className="mt-1 text-xs text-slate-400">
+              <p className="theme-text-muted mt-1 text-xs">
                 Mengambil data halaman dari server.
               </p>
             </div>
@@ -302,7 +299,7 @@ export default function PagesPage() {
   // ============================================================
 
   return (
-    <div className="flex min-h-screen w-full bg-[#f8fafc]">
+    <div className="theme-page flex min-h-screen w-full">
       {/* ========================================================
           SIDEBAR
       ======================================================== */}
@@ -336,7 +333,7 @@ export default function PagesPage() {
             CONTENT
         ====================================================== */}
 
-        <main className="min-w-0 flex-1 overflow-y-auto">
+        <main className="theme-page min-w-0 flex-1 overflow-y-auto">
           <div className="w-full min-w-0 px-3 py-4 sm:px-5 sm:py-6 md:px-7 lg:px-9 xl:px-10">
             <div className="mx-auto w-full max-w-[1700px]">
 
@@ -347,16 +344,16 @@ export default function PagesPage() {
               <div className="mb-6 flex flex-col gap-4 lg:mb-7 lg:flex-row lg:items-center lg:justify-between">
                 <div className="min-w-0">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-blue-100 bg-blue-50">
-                      <LayoutTemplate className="h-5 w-5 text-blue-600" />
+                    <div className="theme-info flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border">
+                      <LayoutTemplate className="h-5 w-5" />
                     </div>
 
                     <div className="min-w-0">
-                      <h1 className="truncate text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+                      <h1 className="theme-text truncate text-2xl font-bold tracking-tight sm:text-3xl">
                         Halaman Statis
                       </h1>
 
-                      <p className="mt-0.5 text-xs text-slate-500 sm:text-sm">
+                      <p className="theme-text-secondary mt-0.5 text-xs sm:text-sm">
                         Kelola halaman informasi website sekolah.
                       </p>
                     </div>
@@ -368,7 +365,15 @@ export default function PagesPage() {
                     type="button"
                     onClick={() => fetchPages(true)}
                     disabled={refreshing}
-                    className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="
+                      theme-card theme-border theme-text-secondary
+                      inline-flex h-11 items-center justify-center gap-2
+                      rounded-xl border px-4 text-sm font-semibold shadow-sm
+                      transition
+                      hover:bg-[var(--color-header-hover)]
+                      hover:text-[var(--color-primary)]
+                      disabled:cursor-not-allowed disabled:opacity-60
+                    "
                   >
                     <RefreshCw
                       className={`h-4 w-4 ${
@@ -383,7 +388,7 @@ export default function PagesPage() {
 
                   <Link
                     href="/cmsAdmin/pages/tambah"
-                    className="inline-flex flex-1 items-center justify-center gap-2 rounded-xl bg-[#2563eb] px-5 py-3 text-sm font-semibold text-white shadow-lg shadow-blue-600/20 transition-all duration-200 hover:-translate-y-0.5 hover:bg-[#1d4ed8] hover:shadow-xl sm:flex-none"
+                    className="theme-primary inline-flex flex-1 items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold shadow-lg transition-all duration-200 hover:-translate-y-0.5 sm:flex-none"
                   >
                     <Plus className="h-4 w-4" />
                     Buat Halaman
@@ -396,17 +401,17 @@ export default function PagesPage() {
               ================================================== */}
 
               {success && (
-                <div className="mb-5 flex items-start gap-3 rounded-2xl border border-emerald-100 bg-emerald-50 p-4">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-100">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-600" />
+                <div className="theme-success mb-5 flex items-start gap-3 rounded-2xl border p-4">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-success)_15%,transparent)]">
+                    <CheckCircle2 className="h-4 w-4" />
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    <h3 className="text-sm font-bold text-emerald-800">
+                    <h3 className="text-sm font-bold">
                       Berhasil
                     </h3>
 
-                    <p className="mt-1 text-xs leading-5 text-emerald-600">
+                    <p className="mt-1 text-xs leading-5 opacity-90">
                       {success}
                     </p>
                   </div>
@@ -414,7 +419,7 @@ export default function PagesPage() {
                   <button
                     type="button"
                     onClick={() => setSuccess("")}
-                    className="text-emerald-400 transition hover:text-emerald-600"
+                    className="opacity-60 transition hover:opacity-100"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -426,17 +431,17 @@ export default function PagesPage() {
               ================================================== */}
 
               {error && (
-                <div className="mb-5 flex items-start gap-3 rounded-2xl border border-red-100 bg-red-50 p-4">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-red-100">
-                    <AlertCircle className="h-4 w-4 text-red-600" />
+                <div className="theme-danger mb-5 flex items-start gap-3 rounded-2xl border p-4">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-danger)_15%,transparent)]">
+                    <AlertCircle className="h-4 w-4" />
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    <h3 className="text-sm font-bold text-red-800">
+                    <h3 className="text-sm font-bold">
                       Terjadi kesalahan
                     </h3>
 
-                    <p className="mt-1 text-xs leading-5 text-red-600">
+                    <p className="mt-1 text-xs leading-5 opacity-90">
                       {error}
                     </p>
                   </div>
@@ -444,7 +449,7 @@ export default function PagesPage() {
                   <button
                     type="button"
                     onClick={() => setError("")}
-                    className="text-red-400 transition hover:text-red-600"
+                    className="opacity-60 transition hover:opacity-100"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -455,24 +460,45 @@ export default function PagesPage() {
                   HERO
               ================================================== */}
 
-              <section className="relative mb-6 overflow-hidden rounded-3xl bg-gradient-to-br from-[#0f172a] via-[#172554] to-[#081b4f] p-5 shadow-xl shadow-slate-300/30 sm:p-6 lg:p-7">
-                <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-blue-400/10 blur-3xl" />
+              <section
+                className="
+                  relative mb-6 overflow-hidden rounded-3xl p-5
+                  shadow-xl sm:p-6 lg:p-7
+                "
+                style={{
+                  background:
+                    "linear-gradient(135deg, var(--color-card-soft), var(--color-sidebar-active))",
+                }}
+              >
+                <div
+                  className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full blur-3xl"
+                  style={{
+                    background:
+                      "color-mix(in srgb, var(--color-primary) 15%, transparent)",
+                  }}
+                />
 
-                <div className="pointer-events-none absolute -bottom-28 left-1/3 h-72 w-72 rounded-full bg-cyan-400/10 blur-3xl" />
+                <div
+                  className="pointer-events-none absolute -bottom-28 left-1/3 h-72 w-72 rounded-full blur-3xl"
+                  style={{
+                    background:
+                      "color-mix(in srgb, var(--color-info) 10%, transparent)",
+                  }}
+                />
 
                 <div className="relative flex flex-col gap-6 xl:flex-row xl:items-center xl:justify-between">
                   <div className="min-w-0 max-w-2xl">
-                    <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-[11px] font-medium text-blue-100">
+                    <div className="theme-info mb-3 inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-medium">
                       <Globe2 className="h-3.5 w-3.5" />
 
                       Website Content
                     </div>
 
-                    <h2 className="text-xl font-bold tracking-tight text-white sm:text-2xl">
+                    <h2 className="theme-text text-xl font-bold tracking-tight sm:text-2xl">
                       Kelola halaman website sekolah
                     </h2>
 
-                    <p className="mt-2 max-w-xl text-xs leading-6 text-slate-300 sm:text-sm">
+                    <p className="theme-text-secondary mt-2 max-w-xl text-xs leading-6 sm:text-sm">
                       Buat dan kelola halaman seperti Tentang
                       Sekolah, Akademik, Kontak, Profil Sekolah,
                       dan halaman informasi lainnya.
@@ -485,60 +511,60 @@ export default function PagesPage() {
 
                     {/* TOTAL */}
 
-                    <div className="rounded-2xl border border-white/10 bg-white/[0.07] p-3 backdrop-blur-md sm:p-4">
+                    <div className="theme-card rounded-2xl border p-3 shadow-sm sm:p-4">
                       <div className="mb-2 flex items-center justify-between">
-                        <span className="text-[9px] font-medium uppercase tracking-wider text-slate-400 sm:text-[10px]">
+                        <span className="theme-text-muted text-[9px] font-medium uppercase tracking-wider sm:text-[10px]">
                           Total
                         </span>
 
-                        <File className="hidden h-4 w-4 text-blue-300 sm:block" />
+                        <File className="hidden h-4 w-4 text-[var(--color-primary)] sm:block" />
                       </div>
 
-                      <p className="text-xl font-bold text-white sm:text-2xl">
+                      <p className="theme-text text-xl font-bold sm:text-2xl">
                         {totalPages}
                       </p>
 
-                      <p className="mt-1 text-[9px] text-slate-400 sm:text-[11px]">
+                      <p className="theme-text-muted mt-1 text-[9px] sm:text-[11px]">
                         halaman
                       </p>
                     </div>
 
                     {/* PUBLISH */}
 
-                    <div className="rounded-2xl border border-white/10 bg-white/[0.07] p-3 backdrop-blur-md sm:p-4">
+                    <div className="theme-card rounded-2xl border p-3 shadow-sm sm:p-4">
                       <div className="mb-2 flex items-center justify-between">
-                        <span className="text-[9px] font-medium uppercase tracking-wider text-slate-400 sm:text-[10px]">
+                        <span className="theme-text-muted text-[9px] font-medium uppercase tracking-wider sm:text-[10px]">
                           Publish
                         </span>
 
-                        <CheckCircle2 className="hidden h-4 w-4 text-emerald-300 sm:block" />
+                        <CheckCircle2 className="hidden h-4 w-4 text-[var(--color-success)] sm:block" />
                       </div>
 
-                      <p className="text-xl font-bold text-white sm:text-2xl">
+                      <p className="theme-text text-xl font-bold sm:text-2xl">
                         {publishedCount}
                       </p>
 
-                      <p className="mt-1 text-[9px] text-slate-400 sm:text-[11px]">
+                      <p className="theme-text-muted mt-1 text-[9px] sm:text-[11px]">
                         aktif
                       </p>
                     </div>
 
                     {/* DRAFT */}
 
-                    <div className="rounded-2xl border border-white/10 bg-white/[0.07] p-3 backdrop-blur-md sm:p-4">
+                    <div className="theme-card rounded-2xl border p-3 shadow-sm sm:p-4">
                       <div className="mb-2 flex items-center justify-between">
-                        <span className="text-[9px] font-medium uppercase tracking-wider text-slate-400 sm:text-[10px]">
+                        <span className="theme-text-muted text-[9px] font-medium uppercase tracking-wider sm:text-[10px]">
                           Draft
                         </span>
 
-                        <FileText className="hidden h-4 w-4 text-amber-300 sm:block" />
+                        <FileText className="hidden h-4 w-4 text-[var(--color-warning)] sm:block" />
                       </div>
 
-                      <p className="text-xl font-bold text-white sm:text-2xl">
+                      <p className="theme-text text-xl font-bold sm:text-2xl">
                         {draftCount}
                       </p>
 
-                      <p className="mt-1 text-[9px] text-slate-400 sm:text-[11px]">
+                      <p className="theme-text-muted mt-1 text-[9px] sm:text-[11px]">
                         belum publish
                       </p>
                     </div>
@@ -552,11 +578,11 @@ export default function PagesPage() {
 
               <div className="mb-4 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
                 <div>
-                  <h2 className="text-base font-bold text-slate-800">
+                  <h2 className="theme-text text-base font-bold">
                     Daftar Halaman
                   </h2>
 
-                  <p className="mt-0.5 text-xs text-slate-500">
+                  <p className="theme-text-secondary mt-0.5 text-xs">
                     Data berikut diambil langsung dari CMS backend.
                   </p>
                 </div>
@@ -564,7 +590,7 @@ export default function PagesPage() {
                 {/* SEARCH */}
 
                 <div className="relative w-full xl:w-[360px]">
-                  <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                  <Search className="theme-text-muted absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2" />
 
                   <input
                     type="text"
@@ -573,14 +599,14 @@ export default function PagesPage() {
                     onChange={(e) =>
                       setSearchQuery(e.target.value)
                     }
-                    className="w-full rounded-xl border border-slate-200 bg-white py-3 pl-10 pr-10 text-sm text-slate-700 outline-none shadow-sm transition-all placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10"
+                    className="theme-input w-full rounded-xl border py-3 pl-10 pr-10 text-sm outline-none shadow-sm transition focus:border-[var(--color-primary)]"
                   />
 
                   {searchQuery && (
                     <button
                       type="button"
                       onClick={() => setSearchQuery("")}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-slate-700"
+                      className="theme-text-muted absolute right-3 top-1/2 -translate-y-1/2 transition hover:text-[var(--color-text)]"
                     >
                       <X className="h-4 w-4" />
                     </button>
@@ -592,25 +618,25 @@ export default function PagesPage() {
                   TABLE
               ================================================== */}
 
-              <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
-                <div className="flex flex-col gap-3 border-b border-slate-100 bg-gradient-to-r from-white to-slate-50/70 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+              <section className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
+                <div className="theme-card-soft theme-border flex flex-col gap-3 border-b px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50">
-                      <File className="h-4 w-4 text-blue-600" />
+                    <div className="theme-info flex h-9 w-9 items-center justify-center rounded-xl border">
+                      <File className="h-4 w-4" />
                     </div>
 
                     <div>
-                      <h3 className="text-sm font-bold text-slate-800">
+                      <h3 className="theme-text text-sm font-bold">
                         Semua Halaman
                       </h3>
 
-                      <p className="text-[11px] text-slate-400">
+                      <p className="theme-text-muted text-[11px]">
                         {filteredPages.length} halaman ditemukan
                       </p>
                     </div>
                   </div>
 
-                  <div className="inline-flex w-fit items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-[11px] font-semibold text-emerald-600">
+                  <div className="theme-success inline-flex w-fit items-center gap-2 rounded-full border px-3 py-1.5 text-[11px] font-semibold">
                     <CheckCircle2 className="h-3.5 w-3.5" />
 
                     Terhubung Backend
@@ -626,30 +652,30 @@ export default function PagesPage() {
                     <div className="hidden w-full overflow-x-auto md:block">
                       <table className="w-full min-w-[900px] border-collapse">
                         <thead>
-                          <tr className="border-b border-slate-100 bg-slate-50/70">
-                            <th className="px-6 py-3.5 text-left text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                          <tr className="theme-table-header border-b">
+                            <th className="px-6 py-3.5 text-left text-[10px] font-bold uppercase tracking-wider">
                               Halaman
                             </th>
 
-                            <th className="px-6 py-3.5 text-left text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            <th className="px-6 py-3.5 text-left text-[10px] font-bold uppercase tracking-wider">
                               URL / Slug
                             </th>
 
-                            <th className="px-6 py-3.5 text-left text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            <th className="px-6 py-3.5 text-left text-[10px] font-bold uppercase tracking-wider">
                               Status
                             </th>
 
-                            <th className="px-6 py-3.5 text-left text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            <th className="px-6 py-3.5 text-left text-[10px] font-bold uppercase tracking-wider">
                               Tipe
                             </th>
 
-                            <th className="px-6 py-3.5 text-right text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            <th className="px-6 py-3.5 text-right text-[10px] font-bold uppercase tracking-wider">
                               Aksi
                             </th>
                           </tr>
                         </thead>
 
-                        <tbody className="divide-y divide-slate-100">
+                        <tbody>
                           {filteredPages.map((page) => {
                             const statusStyle =
                               getStatusStyle(page?.status);
@@ -657,22 +683,22 @@ export default function PagesPage() {
                             return (
                               <tr
                                 key={page.id}
-                                className="group transition-colors hover:bg-blue-50/30"
+                                className="theme-table-hover theme-border-soft border-b transition-colors"
                               >
                                 {/* PAGE */}
 
                                 <td className="px-6 py-4">
                                   <div className="flex items-center gap-3">
-                                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 ring-1 ring-blue-100">
+                                    <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border">
                                       <File className="h-4 w-4" />
                                     </div>
 
                                     <div className="min-w-0">
-                                      <p className="max-w-[280px] truncate text-sm font-semibold text-slate-800">
+                                      <p className="theme-text max-w-[280px] truncate text-sm font-semibold">
                                         {getPageTitle(page)}
                                       </p>
 
-                                      <p className="mt-0.5 text-[11px] text-slate-400">
+                                      <p className="theme-text-muted mt-0.5 text-[11px]">
                                         Halaman statis
                                       </p>
                                     </div>
@@ -682,10 +708,10 @@ export default function PagesPage() {
                                 {/* SLUG */}
 
                                 <td className="px-6 py-4">
-                                  <div className="inline-flex max-w-[300px] items-center gap-1.5 rounded-lg bg-slate-50 px-2.5 py-1.5">
-                                    <Globe2 className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                                  <div className="theme-card-soft inline-flex max-w-[300px] items-center gap-1.5 rounded-lg border px-2.5 py-1.5">
+                                    <Globe2 className="theme-text-muted h-3.5 w-3.5 shrink-0" />
 
-                                    <span className="truncate text-xs text-slate-500">
+                                    <span className="theme-text-secondary truncate text-xs">
                                       /{getPageSlug(page)}
                                     </span>
                                   </div>
@@ -710,7 +736,7 @@ export default function PagesPage() {
                                 {/* TYPE */}
 
                                 <td className="px-6 py-4">
-                                  <span className="text-xs font-medium text-slate-500">
+                                  <span className="theme-text-secondary text-xs font-medium">
                                     Static Page
                                   </span>
                                 </td>
@@ -725,7 +751,7 @@ export default function PagesPage() {
                                     <Link
                                       href={`/cmsAdmin/pages/${page.id}`}
                                       title="Lihat detail"
-                                      className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-blue-50 hover:text-blue-600"
+                                      className="theme-text-muted flex h-9 w-9 items-center justify-center rounded-lg transition hover:bg-[var(--color-sidebar-active)] hover:text-[var(--color-primary)]"
                                     >
                                       <Eye className="h-4 w-4" />
                                     </Link>
@@ -735,7 +761,7 @@ export default function PagesPage() {
                                     <Link
                                       href={`/cmsAdmin/pages/${page.id}/edit`}
                                       title="Edit"
-                                      className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-blue-50 hover:text-blue-600"
+                                      className="theme-text-muted flex h-9 w-9 items-center justify-center rounded-lg transition hover:bg-[var(--color-sidebar-active)] hover:text-[var(--color-primary)]"
                                     >
                                       <Pencil className="h-4 w-4" />
                                     </Link>
@@ -748,7 +774,7 @@ export default function PagesPage() {
                                       onClick={() =>
                                         setDeleteTarget(page)
                                       }
-                                      className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-red-50 hover:text-red-500"
+                                      className="theme-text-muted flex h-9 w-9 items-center justify-center rounded-lg transition hover:bg-[var(--color-danger-background)] hover:text-[var(--color-danger)]"
                                     >
                                       <Trash2 className="h-4 w-4" />
                                     </button>
@@ -761,7 +787,7 @@ export default function PagesPage() {
                                       onClick={() =>
                                         setSelectedPage(page)
                                       }
-                                      className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                                      className="theme-text-muted flex h-9 w-9 items-center justify-center rounded-lg transition hover:bg-[var(--color-header-hover)] hover:text-[var(--color-text)]"
                                     >
                                       <MoreHorizontal className="h-4 w-4" />
                                     </button>
@@ -778,7 +804,7 @@ export default function PagesPage() {
                         MOBILE
                     ================================================== */}
 
-                    <div className="divide-y divide-slate-100 md:hidden">
+                    <div className="theme-border-soft divide-y md:hidden">
                       {filteredPages.map((page) => {
                         const statusStyle =
                           getStatusStyle(page?.status);
@@ -789,18 +815,18 @@ export default function PagesPage() {
                             className="p-4"
                           >
                             <div className="flex items-start gap-3">
-                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 ring-1 ring-blue-100">
+                              <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border">
                                 <File className="h-4 w-4" />
                               </div>
 
                               <div className="min-w-0 flex-1">
                                 <div className="flex flex-col gap-2">
                                   <div className="min-w-0">
-                                    <h3 className="truncate text-sm font-bold text-slate-800">
+                                    <h3 className="theme-text truncate text-sm font-bold">
                                       {getPageTitle(page)}
                                     </h3>
 
-                                    <p className="mt-0.5 truncate text-[11px] text-slate-400">
+                                    <p className="theme-text-muted mt-0.5 truncate text-[11px]">
                                       /{getPageSlug(page)}
                                     </p>
                                   </div>
@@ -819,7 +845,7 @@ export default function PagesPage() {
                                 </div>
 
                                 <div className="mt-4 flex items-center justify-between">
-                                  <span className="text-[11px] text-slate-400">
+                                  <span className="theme-text-muted text-[11px]">
                                     Static Page
                                   </span>
 
@@ -829,7 +855,7 @@ export default function PagesPage() {
 
                                     <Link
                                       href={`/cmsAdmin/pages/${page.id}`}
-                                      className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-blue-50 hover:text-blue-600"
+                                      className="theme-text-muted flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-[var(--color-sidebar-active)] hover:text-[var(--color-primary)]"
                                     >
                                       <Eye className="h-4 w-4" />
                                     </Link>
@@ -838,7 +864,7 @@ export default function PagesPage() {
 
                                     <Link
                                       href={`/cmsAdmin/pages/${page.id}/edit`}
-                                      className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-blue-50 hover:text-blue-600"
+                                      className="theme-text-muted flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-[var(--color-sidebar-active)] hover:text-[var(--color-primary)]"
                                     >
                                       <Pencil className="h-4 w-4" />
                                     </Link>
@@ -850,7 +876,7 @@ export default function PagesPage() {
                                       onClick={() =>
                                         setDeleteTarget(page)
                                       }
-                                      className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-red-50 hover:text-red-500"
+                                      className="theme-text-muted flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-[var(--color-danger-background)] hover:text-[var(--color-danger)]"
                                     >
                                       <Trash2 className="h-4 w-4" />
                                     </button>
@@ -870,17 +896,17 @@ export default function PagesPage() {
 
                   <div className="px-6 py-16 text-center">
                     <div className="mx-auto flex max-w-sm flex-col items-center">
-                      <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100">
-                        <File className="h-6 w-6 text-slate-400" />
+                      <div className="theme-card-soft theme-text-muted mb-4 flex h-14 w-14 items-center justify-center rounded-2xl border">
+                        <File className="h-6 w-6" />
                       </div>
 
-                      <h3 className="text-sm font-bold text-slate-700">
+                      <h3 className="theme-text-secondary text-sm font-bold">
                         {searchQuery
                           ? "Halaman tidak ditemukan"
                           : "Belum ada halaman"}
                       </h3>
 
-                      <p className="mt-1 text-xs leading-5 text-slate-400">
+                      <p className="theme-text-muted mt-1 text-xs leading-5">
                         {searchQuery
                           ? "Coba gunakan kata kunci pencarian yang berbeda."
                           : "Belum ada halaman statis yang dibuat melalui CMS."}
@@ -889,7 +915,7 @@ export default function PagesPage() {
                       {!searchQuery && (
                         <Link
                           href="/cmsAdmin/pages/tambah"
-                          className="mt-5 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-blue-700"
+                          className="theme-primary mt-5 inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition"
                         >
                           <Plus className="h-3.5 w-3.5" />
 
@@ -904,14 +930,14 @@ export default function PagesPage() {
                     FOOTER TABLE
                 ================================================== */}
 
-                <div className="flex flex-col gap-3 border-t border-slate-100 bg-slate-50/40 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-                  <p className="text-xs text-slate-400">
+                <div className="theme-card-soft theme-border flex flex-col gap-3 border-t px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                  <p className="theme-text-muted text-xs">
                     Menampilkan{" "}
-                    <span className="font-semibold text-slate-600">
+                    <span className="theme-text-secondary font-semibold">
                       {filteredPages.length}
                     </span>{" "}
                     dari{" "}
-                    <span className="font-semibold text-slate-600">
+                    <span className="theme-text-secondary font-semibold">
                       {totalPages}
                     </span>{" "}
                     halaman
@@ -919,7 +945,7 @@ export default function PagesPage() {
 
                   <Link
                     href="/cmsAdmin/pages/tambah"
-                    className="inline-flex w-fit items-center gap-2 text-xs font-semibold text-blue-600 transition hover:text-blue-700"
+                    className="inline-flex w-fit items-center gap-2 text-xs font-semibold text-[var(--color-primary)] transition hover:text-[var(--color-primary-hover)]"
                   >
                     <Plus className="h-3.5 w-3.5" />
 
@@ -938,16 +964,16 @@ export default function PagesPage() {
 
                 {/* CARD 1 */}
 
-                <div className="rounded-2xl border border-blue-100 bg-gradient-to-br from-blue-50 to-white p-5">
-                  <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-blue-100 text-blue-600">
+                <div className="theme-card theme-border rounded-2xl border p-5">
+                  <div className="theme-info mb-3 flex h-9 w-9 items-center justify-center rounded-xl border">
                     <LayoutTemplate className="h-4 w-4" />
                   </div>
 
-                  <h3 className="text-sm font-bold text-slate-800">
+                  <h3 className="theme-text text-sm font-bold">
                     Halaman Statis
                   </h3>
 
-                  <p className="mt-1 text-xs leading-5 text-slate-500">
+                  <p className="theme-text-secondary mt-1 text-xs leading-5">
                     Cocok digunakan untuk Tentang Sekolah,
                     Akademik, Kontak, Profil, dan informasi
                     lainnya.
@@ -956,16 +982,16 @@ export default function PagesPage() {
 
                 {/* CARD 2 */}
 
-                <div className="rounded-2xl border border-sky-100 bg-gradient-to-br from-sky-50 to-white p-5">
-                  <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-sky-100 text-sky-600">
+                <div className="theme-card theme-border rounded-2xl border p-5">
+                  <div className="theme-info mb-3 flex h-9 w-9 items-center justify-center rounded-xl border">
                     <Globe2 className="h-4 w-4" />
                   </div>
 
-                  <h3 className="text-sm font-bold text-slate-800">
+                  <h3 className="theme-text text-sm font-bold">
                     Slug Otomatis
                   </h3>
 
-                  <p className="mt-1 text-xs leading-5 text-slate-500">
+                  <p className="theme-text-secondary mt-1 text-xs leading-5">
                     Slug halaman berasal dari backend CMS sehingga
                     frontend tidak perlu membuat slug sendiri.
                   </p>
@@ -973,16 +999,16 @@ export default function PagesPage() {
 
                 {/* CARD 3 */}
 
-                <div className="rounded-2xl border border-emerald-100 bg-gradient-to-br from-emerald-50 to-white p-5">
-                  <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-100 text-emerald-600">
+                <div className="theme-card theme-border rounded-2xl border p-5">
+                  <div className="theme-success mb-3 flex h-9 w-9 items-center justify-center rounded-xl border">
                     <CheckCircle2 className="h-4 w-4" />
                   </div>
 
-                  <h3 className="text-sm font-bold text-slate-800">
+                  <h3 className="theme-text text-sm font-bold">
                     Terhubung Backend
                   </h3>
 
-                  <p className="mt-1 text-xs leading-5 text-slate-500">
+                  <p className="theme-text-secondary mt-1 text-xs leading-5">
                     Data halaman diambil langsung dari API CMS
                     sekolah yang sedang login.
                   </p>
@@ -994,7 +1020,7 @@ export default function PagesPage() {
               ================================================== */}
 
               <footer className="py-7 text-center">
-                <p className="text-[11px] text-slate-400">
+                <p className="theme-text-muted text-[11px]">
                   © 2026 SmartSchool • CMS Management
                 </p>
               </footer>
@@ -1009,22 +1035,22 @@ export default function PagesPage() {
 
       {selectedPage && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
-          <div className="max-h-[90vh] w-full max-w-3xl overflow-hidden rounded-3xl bg-white shadow-2xl">
+          <div className="theme-card theme-border max-h-[90vh] w-full max-w-3xl overflow-hidden rounded-3xl border shadow-2xl">
 
             {/* HEADER */}
 
-            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+            <div className="theme-border flex items-center justify-between border-b px-5 py-4">
               <div className="flex min-w-0 items-center gap-3">
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border">
                   <Eye className="h-4 w-4" />
                 </div>
 
                 <div className="min-w-0">
-                  <h3 className="text-sm font-bold text-slate-800">
+                  <h3 className="theme-text text-sm font-bold">
                     Preview Halaman
                   </h3>
 
-                  <p className="truncate text-[11px] text-slate-400">
+                  <p className="theme-text-muted truncate text-[11px]">
                     {getPageTitle(selectedPage)}
                   </p>
                 </div>
@@ -1033,7 +1059,7 @@ export default function PagesPage() {
               <button
                 type="button"
                 onClick={() => setSelectedPage(null)}
-                className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                className="theme-text-muted flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition hover:bg-[var(--color-header-hover)] hover:text-[var(--color-text)]"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -1046,11 +1072,11 @@ export default function PagesPage() {
               {/* TITLE */}
 
               <div className="mb-5">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                <p className="theme-text-muted text-[10px] font-bold uppercase tracking-wider">
                   Judul
                 </p>
 
-                <h4 className="mt-1 text-xl font-bold text-slate-900">
+                <h4 className="theme-text mt-1 text-xl font-bold">
                   {getPageTitle(selectedPage)}
                 </h4>
               </div>
@@ -1058,14 +1084,14 @@ export default function PagesPage() {
               {/* SLUG */}
 
               <div className="mb-5">
-                <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                <p className="theme-text-muted text-[10px] font-bold uppercase tracking-wider">
                   Slug
                 </p>
 
-                <div className="mt-2 flex items-center gap-2 rounded-xl bg-slate-50 px-3 py-3">
-                  <Globe2 className="h-4 w-4 shrink-0 text-blue-500" />
+                <div className="theme-card-soft theme-border mt-2 flex items-center gap-2 rounded-xl border px-3 py-3">
+                  <Globe2 className="h-4 w-4 shrink-0 text-[var(--color-primary)]" />
 
-                  <span className="break-all text-sm text-slate-600">
+                  <span className="theme-text-secondary break-all text-sm">
                     /{getPageSlug(selectedPage)}
                   </span>
                 </div>
@@ -1074,7 +1100,7 @@ export default function PagesPage() {
               {/* STATUS */}
 
               <div className="mb-5">
-                <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                <p className="theme-text-muted mb-2 text-[10px] font-bold uppercase tracking-wider">
                   Status
                 </p>
 
@@ -1102,48 +1128,62 @@ export default function PagesPage() {
               {/* CONTENT */}
 
               <div>
-                <p className="mb-2 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                <p className="theme-text-muted mb-2 text-[10px] font-bold uppercase tracking-wider">
                   Konten
                 </p>
 
-                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-5">
+                <div className="theme-card-soft theme-border rounded-2xl border p-5">
                   {selectedPage?.konten ? (
                     <div
                       className="
-                        text-sm leading-7 text-slate-600
+                        theme-text-secondary
+                        text-sm leading-7
+
                         [&_p]:mb-4
+
                         [&_h1]:mb-4
                         [&_h1]:text-2xl
                         [&_h1]:font-bold
-                        [&_h1]:text-slate-900
+                        [&_h1]:text-[var(--color-text)]
+
                         [&_h2]:mb-3
                         [&_h2]:text-xl
                         [&_h2]:font-bold
-                        [&_h2]:text-slate-900
+                        [&_h2]:text-[var(--color-text)]
+
                         [&_h3]:mb-2
                         [&_h3]:text-lg
                         [&_h3]:font-bold
-                        [&_h3]:text-slate-900
+                        [&_h3]:text-[var(--color-text)]
+
                         [&_ul]:mb-4
                         [&_ul]:list-disc
                         [&_ul]:pl-6
+
                         [&_ol]:mb-4
                         [&_ol]:list-decimal
                         [&_ol]:pl-6
+
                         [&_li]:mb-1
+
                         [&_strong]:font-bold
-                        [&_a]:text-blue-600
+                        [&_strong]:text-[var(--color-text)]
+
+                        [&_a]:text-[var(--color-primary)]
                         [&_a]:underline
+
                         [&_img]:my-4
                         [&_img]:max-w-full
                         [&_img]:rounded-xl
+                        [&_img]:border
+                        [&_img]:border-[var(--color-border)]
                       "
                       dangerouslySetInnerHTML={{
                         __html: selectedPage.konten,
                       }}
                     />
                   ) : (
-                    <div className="flex items-center gap-2 text-sm text-slate-400">
+                    <div className="theme-text-muted flex items-center gap-2 text-sm">
                       <FileText className="h-4 w-4" />
 
                       Belum ada konten.
@@ -1155,12 +1195,12 @@ export default function PagesPage() {
 
             {/* FOOTER */}
 
-            <div className="flex flex-col gap-2 border-t border-slate-100 bg-slate-50/50 p-4 sm:flex-row sm:justify-end">
+            <div className="theme-card-soft theme-border flex flex-col gap-2 border-t p-4 sm:flex-row sm:justify-end">
 
               <button
                 type="button"
                 onClick={() => setSelectedPage(null)}
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+                className="theme-card theme-border theme-text-secondary rounded-xl border px-4 py-2.5 text-sm font-medium transition hover:bg-[var(--color-header-hover)]"
               >
                 Tutup
               </button>
@@ -1169,7 +1209,7 @@ export default function PagesPage() {
                 <Link
                   href={getPageUrl(selectedPage)}
                   target="_blank"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+                  className="theme-card theme-border theme-text-secondary inline-flex items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition hover:border-[var(--color-primary)] hover:bg-[var(--color-sidebar-active)] hover:text-[var(--color-primary)]"
                 >
                   <ExternalLink className="h-4 w-4" />
 
@@ -1179,7 +1219,7 @@ export default function PagesPage() {
 
               <Link
                 href={`/cmsAdmin/pages/${selectedPage.id}/edit`}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+                className="theme-primary inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold shadow-sm transition"
               >
                 <Pencil className="h-4 w-4" />
 
@@ -1196,36 +1236,36 @@ export default function PagesPage() {
 
       {deleteTarget && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl">
+          <div className="theme-card theme-border w-full max-w-md overflow-hidden rounded-3xl border shadow-2xl">
 
             <div className="p-6">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50">
-                <Trash2 className="h-5 w-5 text-red-600" />
+              <div className="theme-danger flex h-12 w-12 items-center justify-center rounded-2xl">
+                <Trash2 className="h-5 w-5" />
               </div>
 
-              <h3 className="mt-4 text-lg font-bold text-slate-900">
+              <h3 className="theme-text mt-4 text-lg font-bold">
                 Hapus halaman?
               </h3>
 
-              <p className="mt-2 text-sm leading-6 text-slate-500">
+              <p className="theme-text-secondary mt-2 text-sm leading-6">
                 Kamu akan menghapus halaman{" "}
-                <span className="font-semibold text-slate-700">
+                <span className="theme-text font-semibold">
                   "{getPageTitle(deleteTarget)}"
                 </span>
                 .
               </p>
 
-              <p className="mt-2 text-xs leading-5 text-slate-400">
+              <p className="theme-text-muted mt-2 text-xs leading-5">
                 Data akan dihapus melalui endpoint CMS backend.
               </p>
             </div>
 
-            <div className="flex flex-col gap-2 border-t border-slate-100 bg-slate-50/50 p-4 sm:flex-row sm:justify-end">
+            <div className="theme-card-soft theme-border flex flex-col gap-2 border-t p-4 sm:flex-row sm:justify-end">
               <button
                 type="button"
                 disabled={deleting}
                 onClick={() => setDeleteTarget(null)}
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+                className="theme-card theme-border theme-text-secondary rounded-xl border px-4 py-2.5 text-sm font-medium transition hover:bg-[var(--color-header-hover)] disabled:opacity-50"
               >
                 Batal
               </button>
@@ -1234,7 +1274,7 @@ export default function PagesPage() {
                 type="button"
                 disabled={deleting}
                 onClick={handleDelete}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-danger)] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {deleting ? (
                   <>

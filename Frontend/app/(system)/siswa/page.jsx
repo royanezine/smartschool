@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import Sidebar from "../../components/Sidebar";
-import Header from "../../components/Header";
-
 import { getKelasMapel } from "../../../services/kelasMapel.service";
-import { getKelas, getKelasById } from "../../../services/kelas.service";
+import {
+  getKelas,
+  getKelasById,
+} from "../../../services/kelas.service";
 
 import {
   BookOpen,
@@ -38,67 +38,141 @@ const API_URL =
   process.env.NEXT_PUBLIC_API_URL ||
   "http://localhost:5000";
 
+/*
+ * API_URL tetap disiapkan karena kemungkinan digunakan
+ * oleh service / pengembangan berikutnya.
+ */
+void API_URL;
+
 /* =========================================================
-   COLOR MAP
+   GLOBAL THEME HELPERS
 ========================================================= */
 
-const colorMap = {
-  blue: {
-    icon: "from-[#155DFC] to-[#0D47C9]",
-    progress: "bg-[#155DFC]",
-    ring: "group-hover:ring-blue-100",
-    border: "group-hover:border-blue-200",
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+/* =========================================================
+   THEME MATA PELAJARAN
+========================================================= */
+
+const subjectThemes = [
+  {
+    surface:
+      "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
+
+    text:
+      "text-[var(--color-primary)]",
+
+    progress:
+      "bg-[var(--color-primary)]",
+
+    hover:
+      "group-hover:border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)] group-hover:ring-2 group-hover:ring-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]",
   },
 
-  rose: {
-    icon: "from-rose-500 to-rose-600",
-    progress: "bg-rose-500",
-    ring: "group-hover:ring-rose-100",
-    border: "group-hover:border-rose-200",
+  {
+    surface:
+      "bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)]",
+
+    text:
+      "text-[var(--color-success)]",
+
+    progress:
+      "bg-[var(--color-success)]",
+
+    hover:
+      "group-hover:border-[color-mix(in_srgb,var(--color-success)_25%,transparent)] group-hover:ring-2 group-hover:ring-[color-mix(in_srgb,var(--color-success)_12%,transparent)]",
   },
 
-  emerald: {
-    icon: "from-emerald-500 to-emerald-600",
-    progress: "bg-emerald-500",
-    ring: "group-hover:ring-emerald-100",
-    border: "group-hover:border-emerald-200",
+  {
+    surface:
+      "bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)]",
+
+    text:
+      "text-[var(--color-warning)]",
+
+    progress:
+      "bg-[var(--color-warning)]",
+
+    hover:
+      "group-hover:border-[color-mix(in_srgb,var(--color-warning)_25%,transparent)] group-hover:ring-2 group-hover:ring-[color-mix(in_srgb,var(--color-warning)_12%,transparent)]",
   },
 
-  amber: {
-    icon: "from-amber-500 to-amber-600",
-    progress: "bg-amber-500",
-    ring: "group-hover:ring-amber-100",
-    border: "group-hover:border-amber-200",
+  {
+    surface:
+      "bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)]",
+
+    text:
+      "text-[var(--color-info)]",
+
+    progress:
+      "bg-[var(--color-info)]",
+
+    hover:
+      "group-hover:border-[color-mix(in_srgb,var(--color-info)_25%,transparent)] group-hover:ring-2 group-hover:ring-[color-mix(in_srgb,var(--color-info)_12%,transparent)]",
   },
 
-  indigo: {
-    icon: "from-indigo-500 to-indigo-600",
-    progress: "bg-indigo-500",
-    ring: "group-hover:ring-indigo-100",
-    border: "group-hover:border-indigo-200",
+  {
+    surface:
+      "bg-[color-mix(in_srgb,var(--color-primary)_7%,transparent)]",
+
+    text:
+      "text-[var(--color-primary)]",
+
+    progress:
+      "bg-[color-mix(in_srgb,var(--color-primary)_78%,var(--color-info))]",
+
+    hover:
+      "group-hover:border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)] group-hover:ring-2 group-hover:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
   },
 
-  fuchsia: {
-    icon: "from-fuchsia-500 to-fuchsia-600",
-    progress: "bg-fuchsia-500",
-    ring: "group-hover:ring-fuchsia-100",
-    border: "group-hover:border-fuchsia-200",
-  },
+  {
+    surface:
+      "bg-[color-mix(in_srgb,var(--color-info)_7%,transparent)]",
 
-  cyan: {
-    icon: "from-cyan-500 to-cyan-600",
-    progress: "bg-cyan-500",
-    ring: "group-hover:ring-cyan-100",
-    border: "group-hover:border-cyan-200",
-  },
+    text:
+      "text-[var(--color-info)]",
 
-  orange: {
-    icon: "from-orange-500 to-orange-600",
-    progress: "bg-orange-500",
-    ring: "group-hover:ring-orange-100",
-    border: "group-hover:border-orange-200",
+    progress:
+      "bg-[color-mix(in_srgb,var(--color-info)_82%,var(--color-primary))]",
+
+    hover:
+      "group-hover:border-[color-mix(in_srgb,var(--color-info)_22%,transparent)] group-hover:ring-2 group-hover:ring-[color-mix(in_srgb,var(--color-info)_10%,transparent)]",
   },
-};
+];
 
 /* =========================================================
    ICON MATA PELAJARAN
@@ -174,22 +248,13 @@ function getMapelIcon(nama = "") {
 }
 
 /* =========================================================
-   WARNA MATA PELAJARAN
+   THEME MATA PELAJARAN
 ========================================================= */
 
-const colorNames = [
-  "blue",
-  "rose",
-  "emerald",
-  "amber",
-  "indigo",
-  "fuchsia",
-  "cyan",
-  "orange",
-];
-
-function getMapelColor(index) {
-  return colorNames[index % colorNames.length];
+function getMapelTheme(index) {
+  return subjectThemes[
+    index % subjectThemes.length
+  ];
 }
 
 /* =========================================================
@@ -253,7 +318,7 @@ function getUserId(user) {
 }
 
 /* =========================================================
-   AMBIL KELAS ID DARI USER
+   AMBIL KELAS ID
 ========================================================= */
 
 function getUserKelasId(user) {
@@ -277,7 +342,7 @@ function getUserKelasId(user) {
 }
 
 /* =========================================================
-   AMBIL NAMA KELAS USER
+   AMBIL NAMA KELAS
 ========================================================= */
 
 function getUserKelasName(user) {
@@ -303,37 +368,7 @@ function getUserKelasName(user) {
 }
 
 /* =========================================================
-   INITIAL AVATAR
-========================================================= */
-
-function getInitials(name) {
-  if (!name) {
-    return "S";
-  }
-
-  const words = String(name)
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean);
-
-  if (words.length === 0) {
-    return "S";
-  }
-
-  if (words.length === 1) {
-    return words[0]
-      .substring(0, 2)
-      .toUpperCase();
-  }
-
-  return (
-    words[0].charAt(0) +
-    words[words.length - 1].charAt(0)
-  ).toUpperCase();
-}
-
-/* =========================================================
-   NORMALIZE RESPONSE ARRAY
+   EXTRACT ARRAY
 ========================================================= */
 
 function extractArray(response) {
@@ -341,33 +376,23 @@ function extractArray(response) {
     return response;
   }
 
-  if (
-    Array.isArray(response?.data)
-  ) {
+  if (Array.isArray(response?.data)) {
     return response.data;
   }
 
-  if (
-    Array.isArray(response?.data?.data)
-  ) {
+  if (Array.isArray(response?.data?.data)) {
     return response.data.data;
   }
 
-  if (
-    Array.isArray(response?.data?.list)
-  ) {
+  if (Array.isArray(response?.data?.list)) {
     return response.data.list;
   }
 
-  if (
-    Array.isArray(response?.list)
-  ) {
+  if (Array.isArray(response?.list)) {
     return response.list;
   }
 
-  if (
-    Array.isArray(response?.items)
-  ) {
+  if (Array.isArray(response?.items)) {
     return response.items;
   }
 
@@ -375,7 +400,7 @@ function extractArray(response) {
 }
 
 /* =========================================================
-   NORMALIZE RESPONSE OBJECT
+   EXTRACT OBJECT
 ========================================================= */
 
 function extractObject(response) {
@@ -412,12 +437,15 @@ function getToken() {
   return (
     localStorage.getItem("token") ||
     localStorage.getItem("accessToken") ||
+    localStorage.getItem("access_token") ||
+    localStorage.getItem("authToken") ||
+    localStorage.getItem("jwt") ||
     ""
   );
 }
 
 /* =========================================================
-   FETCH DETAIL KELAS LANGSUNG
+   FETCH DETAIL KELAS
 ========================================================= */
 
 async function fetchKelasDetail(id) {
@@ -442,18 +470,17 @@ async function fetchKelasDetail(id) {
 }
 
 /* =========================================================
-   CARI KELAS SISWA BERDASARKAN USER ID
+   CARI KELAS SISWA
 ========================================================= */
 
 async function findStudentClass(
   userId,
   existingKelasId = ""
 ) {
-  /*
-   * PRIORITAS 1
-   * Kalau kelasId sudah ada di user login,
-   * langsung ambil detail kelas tersebut.
-   */
+  /* -------------------------------------------------------
+     PRIORITAS 1:
+     kelasId sudah tersedia di user
+  ------------------------------------------------------- */
 
   if (existingKelasId) {
     console.log(
@@ -471,10 +498,10 @@ async function findStudentClass(
     }
   }
 
-  /*
-   * PRIORITAS 2
-   * Ambil daftar kelas.
-   */
+  /* -------------------------------------------------------
+     PRIORITAS 2:
+     Ambil semua kelas
+  ------------------------------------------------------- */
 
   console.log(
     "[KELAS] kelasId belum tersedia."
@@ -506,11 +533,9 @@ async function findStudentClass(
     );
   }
 
-  /*
-   * Cari kelas yang memiliki
-   * anggota siswa dengan ID yang sama
-   * dengan user login.
-   */
+  /* -------------------------------------------------------
+     CARI SISWA DI SETIAP KELAS
+  ------------------------------------------------------- */
 
   for (
     const kelas of daftarKelas
@@ -535,13 +560,6 @@ async function findStudentClass(
         ? detail.anggota
         : [];
 
-    console.log(
-      `[KELAS] Cek kelas ${kelas.id}:`,
-      detail.nama,
-      "anggota:",
-      anggota
-    );
-
     const siswaDitemukan =
       anggota.some(
         (anggotaItem) => {
@@ -561,30 +579,8 @@ async function findStudentClass(
 
     if (siswaDitemukan) {
       console.log(
-        "=========================================="
-      );
-
-      console.log(
-        "[KELAS] SISWA DITEMUKAN"
-      );
-
-      console.log(
-        "[KELAS] USER ID:",
-        userId
-      );
-
-      console.log(
-        "[KELAS] KELAS ID:",
-        detail.id
-      );
-
-      console.log(
-        "[KELAS] NAMA KELAS:",
+        "[KELAS] SISWA DITEMUKAN:",
         detail.nama
-      );
-
-      console.log(
-        "=========================================="
       );
 
       return detail;
@@ -642,8 +638,8 @@ function normalizeKelasMapel(
         String(nama)
       ),
 
-    color:
-      getMapelColor(index),
+    theme:
+      getMapelTheme(index),
 
     progress: 0,
   };
@@ -695,15 +691,6 @@ export default function SiswaDashboardPage() {
       const storedUser =
         localStorage.getItem("user");
 
-      console.log(
-        "========== USER LOGIN =========="
-      );
-
-      console.log(
-        "localStorage.user:",
-        storedUser
-      );
-
       if (!storedUser) {
         console.warn(
           "localStorage user tidak ditemukan."
@@ -714,11 +701,6 @@ export default function SiswaDashboardPage() {
 
       const parsedUser =
         JSON.parse(storedUser);
-
-      console.log(
-        "Object user:",
-        parsedUser
-      );
 
       const username =
         getUsername(parsedUser);
@@ -748,50 +730,14 @@ export default function SiswaDashboardPage() {
           parsedUser
         );
 
-      const userData = {
+      setUser({
         username,
         email,
         userId,
         sekolahId,
         kelasId,
         kelasName,
-      };
-
-      setUser(userData);
-
-      console.log(
-        "USERNAME:",
-        username
-      );
-
-      console.log(
-        "EMAIL:",
-        email
-      );
-
-      console.log(
-        "USER ID:",
-        userId
-      );
-
-      console.log(
-        "SEKOLAH ID:",
-        sekolahId
-      );
-
-      console.log(
-        "KELAS ID:",
-        kelasId
-      );
-
-      console.log(
-        "NAMA KELAS:",
-        kelasName
-      );
-
-      console.log(
-        "================================"
-      );
+      });
     } catch (error) {
       console.error(
         "Gagal membaca user login:",
@@ -831,18 +777,10 @@ export default function SiswaDashboardPage() {
         }
 
         const parsedUser =
-          JSON.parse(
-            storedUser
-          );
-
-        /* =================================================
-           AMBIL USER ID SISWA LOGIN
-        ================================================= */
+          JSON.parse(storedUser);
 
         const userId =
-          getUserId(
-            parsedUser
-          );
+          getUserId(parsedUser);
 
         if (!userId) {
           throw new Error(
@@ -850,38 +788,14 @@ export default function SiswaDashboardPage() {
           );
         }
 
-        /*
-         * Kalau user sudah punya kelasId,
-         * gunakan langsung.
-         */
-
         const existingKelasId =
           getUserKelasId(
             parsedUser
           );
 
-        console.log(
-          "=========================================="
-        );
-
-        console.log(
-          "[MAPEL] USER LOGIN:",
-          parsedUser
-        );
-
-        console.log(
-          "[MAPEL] USER ID:",
-          userId
-        );
-
-        console.log(
-          "[MAPEL] KELAS ID DARI USER:",
-          existingKelasId
-        );
-
-        /* =================================================
+        /* -------------------------------------------------
            CARI KELAS SISWA
-        ================================================= */
+        ------------------------------------------------- */
 
         const kelasSiswa =
           await findStudentClass(
@@ -909,24 +823,9 @@ export default function SiswaDashboardPage() {
           kelasSiswa.namaKelas ||
           "Kelas siswa";
 
-        console.log(
-          "[MAPEL] KELAS SISWA:",
-          kelasSiswa
-        );
-
-        console.log(
-          "[MAPEL] KELAS ID FINAL:",
-          kelasId
-        );
-
-        console.log(
-          "[MAPEL] NAMA KELAS FINAL:",
-          kelasName
-        );
-
-        /* =================================================
-           UPDATE DATA USER
-        ================================================= */
+        /* -------------------------------------------------
+           UPDATE USER
+        ------------------------------------------------- */
 
         setUser(
           (previous) => ({
@@ -936,9 +835,9 @@ export default function SiswaDashboardPage() {
           })
         );
 
-        /* =================================================
-           AMBIL KELAS MAPEL
-        ================================================= */
+        /* -------------------------------------------------
+           AMBIL SEMUA KELAS MAPEL
+        ------------------------------------------------- */
 
         const kelasMapelResponse =
           await getKelasMapel();
@@ -946,11 +845,6 @@ export default function SiswaDashboardPage() {
         if (cancelled) {
           return;
         }
-
-        console.log(
-          "[MAPEL] SEMUA KELAS MAPEL:",
-          kelasMapelResponse
-        );
 
         if (
           !Array.isArray(
@@ -962,9 +856,9 @@ export default function SiswaDashboardPage() {
           );
         }
 
-        /* =================================================
-           FILTER MAPEL BERDASARKAN KELAS SISWA
-        ================================================= */
+        /* -------------------------------------------------
+           FILTER BERDASARKAN KELAS SISWA
+        ------------------------------------------------- */
 
         const filteredData =
           kelasMapelResponse.filter(
@@ -985,21 +879,9 @@ export default function SiswaDashboardPage() {
             }
           );
 
-        console.log(
-          "[MAPEL] MAPEL SESUAI KELAS:",
-          filteredData
-        );
-
-        /* =================================================
-           FALLBACK DARI DETAIL KELAS
-           
-           GET /api/kelas/:id
-           juga mengembalikan kelasMapel.
-           
-           Jadi kalau endpoint GET /api/kelas-mapel
-           tidak mengembalikan data yang sesuai,
-           kita tetap mengambil dari detail kelas.
-        ================================================= */
+        /* -------------------------------------------------
+           FALLBACK DETAIL KELAS
+        ------------------------------------------------- */
 
         let finalData =
           filteredData;
@@ -1010,10 +892,6 @@ export default function SiswaDashboardPage() {
             kelasSiswa?.kelasMapel
           )
         ) {
-          console.log(
-            "[MAPEL] Menggunakan kelasMapel dari detail kelas."
-          );
-
           finalData =
             kelasSiswa.kelasMapel.filter(
               (item) => {
@@ -1034,9 +912,9 @@ export default function SiswaDashboardPage() {
             );
         }
 
-        /* =================================================
-           NORMALISASI MAPEL
-        ================================================= */
+        /* -------------------------------------------------
+           NORMALISASI
+        ------------------------------------------------- */
 
         const normalizedData =
           finalData.map(
@@ -1046,11 +924,6 @@ export default function SiswaDashboardPage() {
                 index
               )
           );
-
-        console.log(
-          "[MAPEL] HASIL FINAL:",
-          normalizedData
-        );
 
         if (!cancelled) {
           setMataPelajaranList(
@@ -1066,10 +939,6 @@ export default function SiswaDashboardPage() {
             );
           }
         }
-
-        console.log(
-          "=========================================="
-        );
       } catch (error) {
         console.error(
           "[MAPEL] GAGAL:",
@@ -1110,9 +979,6 @@ export default function SiswaDashboardPage() {
     user.email ||
     "Akun siswa";
 
-  const avatar =
-    getInitials(username);
-
   /* =======================================================
      QUICK STATS
   ======================================================= */
@@ -1123,10 +989,12 @@ export default function SiswaDashboardPage() {
       value: "92%",
       description: "Bulan ini",
       icon: ClipboardCheck,
-      iconClass:
-        "bg-emerald-50 text-emerald-600",
-      valueClass:
-        "text-emerald-600",
+      iconSurface:
+        themeSuccessSurface,
+      iconText:
+        "text-[var(--color-success)]",
+      valueText:
+        "text-[var(--color-success)]",
     },
 
     {
@@ -1134,10 +1002,12 @@ export default function SiswaDashboardPage() {
       value: "3",
       description: "Perlu dikerjakan",
       icon: ClipboardList,
-      iconClass:
-        "bg-amber-50 text-amber-600",
-      valueClass:
-        "text-amber-600",
+      iconSurface:
+        themeWarningSurface,
+      iconText:
+        "text-[var(--color-warning)]",
+      valueText:
+        "text-[var(--color-warning)]",
     },
 
     {
@@ -1145,10 +1015,12 @@ export default function SiswaDashboardPage() {
       value: "2",
       description: "Dalam waktu dekat",
       icon: CalendarDays,
-      iconClass:
-        "bg-[#EAF1FF] text-[#155DFC]",
-      valueClass:
-        "text-[#155DFC]",
+      iconSurface:
+        themePrimarySoft,
+      iconText:
+        "text-[var(--color-primary)]",
+      valueText:
+        "text-[var(--color-primary)]",
     },
   ];
 
@@ -1157,698 +1029,1097 @@ export default function SiswaDashboardPage() {
   ======================================================= */
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[#F8FAFC]">
-
-      {/* =================================================
-          SIDEBAR
-      ================================================= */}
-
-      <Sidebar
-        role="siswa"
-        activeMenu="dashboard"
-      />
-
-      {/* =================================================
-          MAIN
-      ================================================= */}
-
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-
-        {/* =================================================
-            HEADER
-        ================================================= */}
-
-        <div className="shrink-0">
-          <Header
-            user={{
-              name: username,
-              email: email,
-              avatar: avatar,
-            }}
-          />
-        </div>
+    <div className="theme-page min-h-full w-full">
+      <div
+        className={`
+          mx-auto
+          w-full
+          max-w-[1600px]
+          space-y-6
+          p-4
+          transition-all
+          duration-700
+          sm:p-6
+          lg:p-8
+          ${
+            mounted
+              ? "translate-y-0 opacity-100"
+              : "translate-y-4 opacity-0"
+          }
+        `}
+      >
 
         {/* =================================================
-            CONTENT
+            HERO
         ================================================= */}
 
-        <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden p-4 sm:p-6 lg:p-8">
+        <section
+          className={`
+            theme-card
+            relative
+            isolate
+            overflow-hidden
+            rounded-2xl
+            border
+            ${themeNeutralBorder}
+            ${themeCardShadow}
+          `}
+        >
+          {/* BACKGROUND */}
 
           <div
-            className={`mx-auto w-full max-w-[1600px] space-y-6 transition-all duration-700 ${
-              mounted
-                ? "translate-y-0 opacity-100"
-                : "translate-y-4 opacity-0"
-            }`}
-          >
-
-            {/* =================================================
-                HERO
-            ================================================= */}
-
-            <section className="relative isolate overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-lg shadow-slate-200/50">
-
-              <div className="absolute inset-0 -z-30 bg-gradient-to-br from-white via-[#EAF1FF]/60 to-white" />
-
-              <div className="absolute -right-24 -top-28 -z-20 h-80 w-80 rounded-full bg-[#155DFC]/10 blur-3xl" />
-
-              <div className="absolute -bottom-32 right-[20%] -z-20 h-80 w-80 rounded-full bg-[#2563EB]/8 blur-3xl" />
-
-              <div className="absolute left-[10%] top-[-40%] -z-20 h-96 w-96 rounded-full bg-[#155DFC]/5 blur-3xl" />
-
-              {/* DECORATION */}
-
-              <div className="pointer-events-none absolute inset-0 overflow-hidden">
-
-                <div className="absolute -right-12 top-8 h-40 w-40 rounded-2xl border border-white/20 bg-white/20 shadow-2xl backdrop-blur-xl" />
-
-                <div className="absolute bottom-12 right-[30%] h-28 w-28 rounded-2xl border border-white/20 bg-white/20 shadow-2xl backdrop-blur-xl" />
-
-                <div className="absolute left-[15%] top-[60%] h-20 w-20 rounded-full border border-white/20 bg-white/20 shadow-2xl backdrop-blur-xl" />
-
-                <span className="absolute right-[35%] top-[20%] h-2 w-2 rounded-full bg-[#155DFC]/40" />
-
-                <span className="absolute right-[15%] top-[45%] h-3 w-3 rounded-full bg-[#2563EB]/30" />
-
-                <span className="absolute left-[25%] top-[30%] h-2 w-2 rounded-full bg-[#155DFC]/30" />
-
-                {/* SCHOOL BUILDING */}
-
-                <div className="absolute bottom-0 right-4 hidden h-[90%] w-[400px] lg:block">
-
-                  <div className="absolute bottom-0 left-0 h-4 w-full rounded-full bg-[#0D47C9]/5" />
-
-                  <div className="absolute bottom-0 left-10 h-[75%] w-[280px] rounded-t-xl border border-[#155DFC]/15 bg-white/80 shadow-[0_20px_60px_rgba(21,93,252,0.10)] backdrop-blur-md">
-
-                    <div className="absolute -top-7 left-[-16px] h-8 w-[312px] rounded-t-lg bg-gradient-to-r from-[#155DFC] to-[#0D47C9] shadow-lg" />
-
-                    <div className="absolute -top-2 left-0 h-1 w-full bg-white/30" />
-
-                    <div className="absolute left-1/2 top-3 -translate-x-1/2 rounded-md border border-[#155DFC]/10 bg-white/90 px-4 py-1.5 shadow-sm backdrop-blur">
-
-                      <div className="flex items-center gap-1.5">
-
-                        <School
-                          size={11}
-                          className="text-[#155DFC]"
-                        />
-
-                        <span className="whitespace-nowrap text-[8px] font-bold tracking-[0.18em] text-[#0D47C9]">
-                          SMART SCHOOL
-                        </span>
-
-                      </div>
-
-                    </div>
-
-                    <div className="absolute left-7 top-16 grid grid-cols-4 gap-5">
-
-                      {Array.from({
-                        length: 8,
-                      }).map(
-                        (_, index) => (
-                          <div
-                            key={index}
-                            className="h-9 w-8 rounded-md border border-[#155DFC]/10 bg-[#EAF1FF]/80 shadow-inner"
-                          >
-                            <div className="mx-auto mt-2 h-4 w-4 rounded-sm bg-[#155DFC]/15" />
-                          </div>
-                        )
-                      )}
-
-                    </div>
-
-                    <div className="absolute bottom-0 left-1/2 h-28 w-20 -translate-x-1/2 rounded-t-xl border-x border-t border-[#155DFC]/10 bg-[#EAF1FF]/80">
-
-                      <div className="absolute bottom-0 left-1/2 h-20 w-12 -translate-x-1/2 rounded-t-lg bg-[#155DFC]/15" />
-
-                      <div className="absolute bottom-9 left-1/2 h-1.5 w-1.5 -translate-x-1/2 rounded-full bg-[#155DFC]/60" />
-
-                    </div>
-
-                  </div>
-
-                  <div className="absolute bottom-0 right-0 h-[50%] w-20 rounded-t-lg border border-[#155DFC]/10 bg-white/70 backdrop-blur-sm">
-
-                    <div className="absolute -top-4 left-0 h-5 w-full rounded-t-md bg-[#155DFC]/70" />
-
-                    <div className="mt-8 grid gap-4 px-3">
-
-                      {Array.from({
-                        length: 3,
-                      }).map(
-                        (_, index) => (
-                          <div
-                            key={index}
-                            className="h-7 rounded border border-[#155DFC]/10 bg-[#EAF1FF]/60"
-                          />
-                        )
-                      )}
-
-                    </div>
-
-                  </div>
-
-                  <div className="absolute bottom-[75%] left-2">
-
-                    <div className="h-20 w-px bg-slate-400/60" />
-
-                    <div className="absolute left-0 top-0 h-7 w-11 rounded-r-sm bg-[#155DFC]/80" />
-
-                  </div>
-
-                  <div className="absolute bottom-0 left-0">
-
-                    <div className="mx-auto h-16 w-1.5 rounded-full bg-emerald-700/40" />
-
-                    <div className="-mt-12 h-16 w-16 rounded-full bg-emerald-100/80" />
-
-                  </div>
-
-                  <div className="absolute bottom-0 right-[-30px]">
-
-                    <div className="mx-auto h-14 w-1.5 rounded-full bg-emerald-700/35" />
-
-                    <div className="-mt-10 h-14 w-14 rounded-full bg-emerald-100/70" />
-
-                  </div>
-
-                </div>
-
-              </div>
-
-              {/* HERO CONTENT */}
-
-              <div className="relative z-10 px-5 py-7 sm:px-7 sm:py-8 lg:px-9 lg:py-10">
-
-                <div className="max-w-2xl">
-
-                  <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-white/95 px-3 py-1.5 shadow-sm backdrop-blur">
-
-                    <div className="flex h-6 w-6 items-center justify-center rounded-full bg-[#EAF1FF] text-[#155DFC]">
-
-                      <School size={14} />
-
-                    </div>
-
-                    <span className="text-xs font-semibold tracking-wide text-[#0D47C9]">
-                      SMARTSCHOOL STUDENT
-                    </span>
-
-                    <span className="h-1 w-1 rounded-full bg-[#155DFC]/40" />
-
-                    <span className="text-xs font-medium text-slate-500">
-                      Siswa
-                    </span>
-
-                  </div>
-
-                  <h1 className="text-2xl font-bold tracking-tight text-[#0F172A] sm:text-3xl lg:text-4xl">
-
-                    <span>
-                      Selamat datang kembali,
-                    </span>
-
-                    <span className="mt-1 block bg-gradient-to-r from-[#155DFC] to-[#0D47C9] bg-clip-text text-transparent">
-                      {username}
-                    </span>
-
-                  </h1>
-
-                  <p className="mt-3 max-w-xl text-sm leading-6 text-slate-500 sm:text-base">
-                    Pantau pembelajaran, tugas, kehadiran,
-                    dan perkembangan akademikmu dalam satu tempat.
-                  </p>
-
-                  <div className="mt-6 flex flex-wrap items-center gap-3">
-
-                    <div className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white/90 px-3 py-2 text-xs font-medium text-slate-600 shadow-sm">
-
-                      <GraduationCap
-                        size={15}
-                        className="text-[#155DFC]"
-                      />
-
-                      {user.kelasName
-                        ? `Kelas ${user.kelasName}`
-                        : "Kelas siswa"}
-
-                    </div>
-
-                    <div className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white/90 px-3 py-2 text-xs font-medium text-slate-600 shadow-sm">
-
-                      <GraduationCap
-                        size={15}
-                        className="text-[#155DFC]"
-                      />
-
-                      Tahun Ajaran 2026/2027
-
-                    </div>
-
-                    <div className="inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white/90 px-3 py-2 text-xs font-medium text-slate-600 shadow-sm">
-
-                      <Sparkles
-                        size={14}
-                        className="text-[#155DFC]"
-                      />
-
-                      Semangat belajar hari ini
-
-                    </div>
-
-                  </div>
-
-                </div>
-
-              </div>
-
-              <div className="absolute bottom-0 left-0 h-1 w-full bg-gradient-to-r from-[#0D47C9] via-[#155DFC] to-[#2563EB]" />
-
-            </section>
-
-            {/* =================================================
-                QUICK STATS
-            ================================================= */}
-
-            <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-
-              {quickStats.map(
-                (stat) => {
-                  const Icon =
-                    stat.icon;
-
-                  return (
-                    <div
-                      key={
-                        stat.title
-                      }
-                      className="group relative overflow-hidden rounded-xl border border-slate-200/80 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-blue-100 hover:shadow-lg"
-                    >
-
-                      <div className="flex items-start justify-between gap-4">
-
-                        <div className="min-w-0">
-
-                          <p className="text-sm font-medium text-slate-500">
-                            {stat.title}
-                          </p>
-
-                          <div className="mt-2 flex items-end gap-2">
-
-                            <span
-                              className={`text-2xl font-bold ${stat.valueClass}`}
-                            >
-                              {stat.value}
-                            </span>
-
-                            <span className="mb-1 text-xs font-medium text-slate-400">
-                              {stat.description}
-                            </span>
-
-                          </div>
-
-                        </div>
-
-                        <div
-                          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${stat.iconClass}`}
-                        >
-                          <Icon
-                            size={20}
-                          />
-                        </div>
-
-                      </div>
-
-                    </div>
-                  );
-                }
-              )}
-
-            </section>
-
-            {/* =================================================
-                MATA PELAJARAN
-            ================================================= */}
-
-            <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
-
-              {/* HEADER */}
-
-              <div className="border-b border-slate-100 px-5 py-5 sm:px-6">
-
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-
-                  <div className="flex items-center gap-3">
-
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#EAF1FF] text-[#155DFC]">
-
-                      <BookOpen
-                        size={19}
-                      />
-
-                    </div>
-
-                    <div>
-
-                      <h2 className="text-lg font-bold text-slate-800">
-                        Mata Pelajaran
-                      </h2>
-
-                      <p className="mt-0.5 text-xs text-slate-500">
-
-                        {user.kelasName
-                          ? `Mata pelajaran untuk kelas ${user.kelasName}`
-                          : "Mata pelajaran sesuai kelasmu"}
-
-                      </p>
-
-                    </div>
-
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      router.push(
-                        "/siswa/mataPelajaran"
-                      )
-                    }
-                    className="group inline-flex items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 py-2 text-sm font-semibold text-slate-600 transition-all hover:border-[#155DFC]/20 hover:bg-[#EAF1FF] hover:text-[#155DFC]"
-                  >
-
-                    Lihat semua
-
-                    <ArrowUpRight
-                      size={15}
-                      className="transition-transform group-hover:-translate-y-0.5 group-hover:translate-x-0.5"
+            className={`
+              absolute
+              inset-0
+              -z-30
+              ${themePrimarySoft}
+            `}
+          />
+
+          <div
+            className="
+              absolute
+              -right-24
+              -top-28
+              -z-20
+              h-80
+              w-80
+              rounded-full
+              bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
+              blur-3xl
+            "
+          />
+
+          <div
+            className="
+              absolute
+              -bottom-32
+              right-[20%]
+              -z-20
+              h-80
+              w-80
+              rounded-full
+              bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]
+              blur-3xl
+            "
+          />
+
+          <div
+            className="
+              absolute
+              left-[10%]
+              top-[-40%]
+              -z-20
+              h-96
+              w-96
+              rounded-full
+              bg-[color-mix(in_srgb,var(--color-primary)_5%,transparent)]
+              blur-3xl
+            "
+          />
+
+          {/* DECORATION */}
+
+          <div className="pointer-events-none absolute inset-0 overflow-hidden">
+
+            <div
+              className="
+                absolute
+                -right-12
+                top-8
+                h-40
+                w-40
+                rounded-2xl
+                border
+                border-[color-mix(in_srgb,var(--color-card)_25%,transparent)]
+                bg-[color-mix(in_srgb,var(--color-card)_20%,transparent)]
+                shadow-[0_20px_60px_color-mix(in_srgb,var(--color-text)_8%,transparent)]
+                backdrop-blur-xl
+              "
+            />
+
+            <div
+              className="
+                absolute
+                bottom-12
+                right-[30%]
+                h-28
+                w-28
+                rounded-2xl
+                border
+                border-[color-mix(in_srgb,var(--color-card)_25%,transparent)]
+                bg-[color-mix(in_srgb,var(--color-card)_20%,transparent)]
+                shadow-[0_20px_60px_color-mix(in_srgb,var(--color-text)_8%,transparent)]
+                backdrop-blur-xl
+              "
+            />
+
+            <div
+              className="
+                absolute
+                left-[15%]
+                top-[60%]
+                h-20
+                w-20
+                rounded-full
+                border
+                border-[color-mix(in_srgb,var(--color-card)_25%,transparent)]
+                bg-[color-mix(in_srgb,var(--color-card)_20%,transparent)]
+                shadow-[0_20px_60px_color-mix(in_srgb,var(--color-text)_8%,transparent)]
+                backdrop-blur-xl
+              "
+            />
+
+            <span
+              className="
+                absolute
+                right-[35%]
+                top-[20%]
+                h-2
+                w-2
+                rounded-full
+                bg-[color-mix(in_srgb,var(--color-primary)_40%,transparent)]
+              "
+            />
+
+            <span
+              className="
+                absolute
+                right-[15%]
+                top-[45%]
+                h-3
+                w-3
+                rounded-full
+                bg-[color-mix(in_srgb,var(--color-info)_30%,transparent)]
+              "
+            />
+
+            <span
+              className="
+                absolute
+                left-[25%]
+                top-[30%]
+                h-2
+                w-2
+                rounded-full
+                bg-[color-mix(in_srgb,var(--color-primary)_30%,transparent)]
+              "
+            />
+
+            {/* SCHOOL */}
+
+            <div className="absolute bottom-0 right-4 hidden h-[90%] w-[400px] lg:block">
+
+              <div
+                className="
+                  absolute
+                  bottom-0
+                  left-0
+                  h-4
+                  w-full
+                  rounded-full
+                  bg-[color-mix(in_srgb,var(--color-primary)_5%,transparent)]
+                "
+              />
+
+              <div
+                className="
+                  absolute
+                  bottom-0
+                  left-10
+                  h-[75%]
+                  w-[280px]
+                  rounded-t-xl
+                  border
+                  border-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]
+                  bg-[color-mix(in_srgb,var(--color-card)_80%,transparent)]
+                  shadow-[0_20px_60px_color-mix(in_srgb,var(--color-primary)_10%,transparent)]
+                  backdrop-blur-md
+                "
+              >
+
+                <div
+                  className={`
+                    absolute
+                    -top-7
+                    left-[-16px]
+                    h-8
+                    w-[312px]
+                    rounded-t-lg
+                    ${themePrimaryGradient}
+                  `}
+                />
+
+                <div
+                  className="
+                    absolute
+                    left-1/2
+                    top-3
+                    -translate-x-1/2
+                    rounded-md
+                    border
+                    border-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
+                    bg-[color-mix(in_srgb,var(--color-card)_90%,transparent)]
+                    px-4
+                    py-1.5
+                    shadow-sm
+                    backdrop-blur
+                  "
+                >
+                  <div className="flex items-center gap-1.5">
+                    <School
+                      size={11}
+                      className={themePrimaryText}
                     />
 
-                  </button>
+                    <span
+                      className="
+                        whitespace-nowrap
+                        text-[8px]
+                        font-bold
+                        tracking-[0.18em]
+                        text-[var(--color-primary)]
+                      "
+                    >
+                      SMART SCHOOL
+                    </span>
+                  </div>
+                </div>
 
+                <div className="absolute left-7 top-16 grid grid-cols-4 gap-5">
+                  {Array.from({
+                    length: 8,
+                  }).map((_, index) => (
+                    <div
+                      key={index}
+                      className="
+                        h-9
+                        w-8
+                        rounded-md
+                        border
+                        border-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
+                        bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]
+                        shadow-inner
+                      "
+                    >
+                      <div
+                        className="
+                          mx-auto
+                          mt-2
+                          h-4
+                          w-4
+                          rounded-sm
+                          bg-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]
+                        "
+                      />
+                    </div>
+                  ))}
+                </div>
+
+                <div
+                  className="
+                    absolute
+                    bottom-0
+                    left-1/2
+                    h-28
+                    w-20
+                    -translate-x-1/2
+                    rounded-t-xl
+                    border-x
+                    border-t
+                    border-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
+                    bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]
+                  "
+                >
+                  <div
+                    className="
+                      absolute
+                      bottom-0
+                      left-1/2
+                      h-20
+                      w-12
+                      -translate-x-1/2
+                      rounded-t-lg
+                      bg-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]
+                    "
+                  />
+                </div>
+              </div>
+
+              <div
+                className="
+                  absolute
+                  bottom-0
+                  right-0
+                  h-[50%]
+                  w-20
+                  rounded-t-lg
+                  border
+                  border-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
+                  bg-[color-mix(in_srgb,var(--color-card)_70%,transparent)]
+                  backdrop-blur-sm
+                "
+              >
+                <div
+                  className="
+                    absolute
+                    -top-4
+                    left-0
+                    h-5
+                    w-full
+                    rounded-t-md
+                    bg-[color-mix(in_srgb,var(--color-primary)_70%,transparent)]
+                  "
+                />
+
+                <div className="mt-8 grid gap-4 px-3">
+                  {Array.from({
+                    length: 3,
+                  }).map((_, index) => (
+                    <div
+                      key={index}
+                      className="
+                        h-7
+                        rounded
+                        border
+                        border-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
+                        bg-[color-mix(in_srgb,var(--color-primary)_6%,transparent)]
+                      "
+                    />
+                  ))}
+                </div>
+              </div>
+
+              <div className="absolute bottom-0 left-0">
+                <div
+                  className="
+                    mx-auto
+                    h-16
+                    w-1.5
+                    rounded-full
+                    bg-[color-mix(in_srgb,var(--color-success)_40%,transparent)]
+                  "
+                />
+
+                <div
+                  className="
+                    -mt-12
+                    h-16
+                    w-16
+                    rounded-full
+                    bg-[color-mix(in_srgb,var(--color-success)_12%,transparent)]
+                  "
+                />
+              </div>
+
+              <div className="absolute bottom-0 right-[-30px]">
+                <div
+                  className="
+                    mx-auto
+                    h-14
+                    w-1.5
+                    rounded-full
+                    bg-[color-mix(in_srgb,var(--color-success)_35%,transparent)]
+                  "
+                />
+
+                <div
+                  className="
+                    -mt-10
+                    h-14
+                    w-14
+                    rounded-full
+                    bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)]
+                  "
+                />
+              </div>
+
+            </div>
+          </div>
+
+          {/* HERO CONTENT */}
+
+          <div className="relative z-10 px-5 py-7 sm:px-7 sm:py-8 lg:px-9 lg:py-10">
+
+            <div className="max-w-2xl">
+
+              <div
+                className="
+                  mb-4
+                  inline-flex
+                  items-center
+                  gap-2
+                  rounded-full
+                  border
+                  border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
+                  bg-[color-mix(in_srgb,var(--color-card)_95%,transparent)]
+                  px-3
+                  py-1.5
+                  shadow-sm
+                  backdrop-blur
+                "
+              >
+                <div
+                  className={`
+                    flex
+                    h-6
+                    w-6
+                    items-center
+                    justify-center
+                    rounded-full
+                    ${themePrimarySoft}
+                    ${themePrimaryText}
+                  `}
+                >
+                  <School size={14} />
+                </div>
+
+                <span
+                  className="
+                    text-xs
+                    font-semibold
+                    tracking-wide
+                    text-[var(--color-primary)]
+                  "
+                >
+                  SMARTSCHOOL STUDENT
+                </span>
+
+                <span
+                  className="
+                    h-1
+                    w-1
+                    rounded-full
+                    bg-[color-mix(in_srgb,var(--color-primary)_40%,transparent)]
+                  "
+                />
+
+                <span className="theme-text-secondary text-xs font-medium">
+                  Siswa
+                </span>
+              </div>
+
+              <h1 className="theme-text text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
+                <span>
+                  Selamat datang kembali,
+                </span>
+
+                <span
+                  className="
+                    mt-1
+                    block
+                    bg-[linear-gradient(90deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_70%,var(--color-info)))]
+                    bg-clip-text
+                    text-transparent
+                  "
+                >
+                  {username}
+                </span>
+              </h1>
+
+              <p className="theme-text-secondary mt-3 max-w-xl text-sm leading-6 sm:text-base">
+                Pantau pembelajaran, tugas, kehadiran,
+                dan perkembangan akademikmu dalam satu tempat.
+              </p>
+
+              <div className="mt-6 flex flex-wrap items-center gap-3">
+
+                <div
+                  className={`
+                    inline-flex
+                    items-center
+                    gap-2
+                    rounded-lg
+                    border
+                    ${themeNeutralBorder}
+                    ${themeCardShadow}
+                    bg-[color-mix(in_srgb,var(--color-card)_90%,transparent)]
+                    px-3
+                    py-2
+                    text-xs
+                    font-medium
+                    theme-text-secondary
+                  `}
+                >
+                  <GraduationCap
+                    size={15}
+                    className={themePrimaryText}
+                  />
+
+                  {user.kelasName
+                    ? `Kelas ${user.kelasName}`
+                    : "Kelas siswa"}
+                </div>
+
+                <div
+                  className="
+                    theme-text-secondary
+                    inline-flex
+                    items-center
+                    gap-2
+                    rounded-lg
+                    border
+                    border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]
+                    bg-[color-mix(in_srgb,var(--color-card)_90%,transparent)]
+                    px-3
+                    py-2
+                    text-xs
+                    font-medium
+                    shadow-sm
+                  "
+                >
+                  <GraduationCap
+                    size={15}
+                    className={themePrimaryText}
+                  />
+
+                  Tahun Ajaran 2026/2027
+                </div>
+
+                <div
+                  className="
+                    theme-text-secondary
+                    inline-flex
+                    items-center
+                    gap-2
+                    rounded-lg
+                    border
+                    border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]
+                    bg-[color-mix(in_srgb,var(--color-card)_90%,transparent)]
+                    px-3
+                    py-2
+                    text-xs
+                    font-medium
+                    shadow-sm
+                  "
+                >
+                  <Sparkles
+                    size={14}
+                    className={themePrimaryText}
+                  />
+
+                  Semangat belajar hari ini
                 </div>
 
               </div>
+            </div>
+          </div>
 
-              {/* CONTENT */}
+          <div
+            className="
+              absolute
+              bottom-0
+              left-0
+              h-1
+              w-full
+              bg-[linear-gradient(90deg,var(--color-primary),var(--color-info))]
+            "
+          />
+        </section>
 
-              <div className="p-5 sm:p-6">
+        {/* =================================================
+            QUICK STATS
+        ================================================= */}
 
-                {/* LOADING */}
+        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
 
-                {loadingMapel && (
-                  <div className="flex min-h-[220px] flex-col items-center justify-center">
+          {quickStats.map(
+            (stat) => {
+              const Icon =
+                stat.icon;
 
-                    <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#EAF1FF]">
+              return (
+                <div
+                  key={stat.title}
+                  className={`
+                    theme-card
+                    group
+                    relative
+                    overflow-hidden
+                    rounded-xl
+                    border
+                    ${themeNeutralBorder}
+                    p-5
+                    ${themeCardShadow}
+                    transition-all
+                    duration-300
+                    hover:-translate-y-1
+                    hover:border-[color-mix(in_srgb,var(--color-primary)_18%,transparent)]
+                    hover:shadow-[0_10px_30px_color-mix(in_srgb,var(--color-text)_10%,transparent)]
+                  `}
+                >
+                  <div className="flex items-start justify-between gap-4">
 
-                      <Loader2
-                        size={22}
-                        className="animate-spin text-[#155DFC]"
-                      />
+                    <div className="min-w-0">
+                      <p className="theme-text-secondary text-sm font-medium">
+                        {stat.title}
+                      </p>
 
+                      <div className="mt-2 flex items-end gap-2">
+                        <span
+                          className={`text-2xl font-bold ${stat.valueText}`}
+                        >
+                          {stat.value}
+                        </span>
+
+                        <span className="theme-text-muted mb-1 text-xs font-medium">
+                          {stat.description}
+                        </span>
+                      </div>
                     </div>
 
-                    <p className="mt-4 text-sm font-medium text-slate-600">
-                      Memuat mata pelajaran...
-                    </p>
-
-                    <p className="mt-1 text-xs text-slate-400">
-                      Mencari kelas siswa dan mengambil mata pelajaran dari server
-                    </p>
+                    <div
+                      className={`
+                        flex
+                        h-11
+                        w-11
+                        shrink-0
+                        items-center
+                        justify-center
+                        rounded-xl
+                        ${stat.iconSurface}
+                        ${stat.iconText}
+                      `}
+                    >
+                      <Icon size={20} />
+                    </div>
 
                   </div>
-                )}
+                </div>
+              );
+            }
+          )}
 
-                {/* ERROR */}
+        </section>
 
-                {!loadingMapel &&
-                  mapelError &&
-                  mataPelajaranList.length ===
-                    0 && (
-                    <div className="flex min-h-[220px] flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50/60 px-5 text-center">
+        {/* =================================================
+            MATA PELAJARAN
+        ================================================= */}
 
-                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-50 text-amber-500">
+        <section
+          className={`
+            theme-card
+            overflow-hidden
+            rounded-2xl
+            border
+            ${themeNeutralBorder}
+            ${themeCardShadow}
+          `}
+        >
 
-                        <AlertCircle
-                          size={22}
-                        />
+          {/* HEADER */}
 
-                      </div>
+          <div
+            className={`
+              border-b
+              ${themeDivider}
+              px-5
+              py-5
+              sm:px-6
+            `}
+          >
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
-                      <h3 className="mt-4 text-sm font-bold text-slate-700">
-                        Data mata pelajaran belum tersedia
-                      </h3>
+              <div className="flex items-center gap-3">
 
-                      <p className="mt-1 max-w-md text-xs leading-5 text-slate-500">
-                        {mapelError}
-                      </p>
+                <div
+                  className={`
+                    flex
+                    h-10
+                    w-10
+                    shrink-0
+                    items-center
+                    justify-center
+                    rounded-xl
+                    ${themePrimarySoft}
+                    ${themePrimaryText}
+                  `}
+                >
+                  <BookOpen size={19} />
+                </div>
 
-                    </div>
-                  )}
+                <div>
+                  <h2 className="theme-text text-lg font-bold">
+                    Mata Pelajaran
+                  </h2>
 
-                {/* EMPTY */}
-
-                {!loadingMapel &&
-                  !mapelError &&
-                  mataPelajaranList.length ===
-                    0 && (
-                    <div className="flex min-h-[220px] flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 bg-slate-50/60 px-5 text-center">
-
-                      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-[#EAF1FF] text-[#155DFC]">
-
-                        <BookOpen
-                          size={22}
-                        />
-
-                      </div>
-
-                      <h3 className="mt-4 text-sm font-bold text-slate-700">
-                        Belum ada mata pelajaran
-                      </h3>
-
-                      <p className="mt-1 max-w-md text-xs leading-5 text-slate-500">
-                        Belum ada mata pelajaran yang terhubung dengan kelas kamu.
-                      </p>
-
-                    </div>
-                  )}
-
-                {/* MAPEL */}
-
-                {!loadingMapel &&
-                  mataPelajaranList.length >
-                    0 && (
-                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-
-                      {mataPelajaranList.map(
-                        (mapel) => {
-                          const Icon =
-                            mapel.icon;
-
-                          const colors =
-                            colorMap[
-                              mapel.color
-                            ] ||
-                            colorMap.blue;
-
-                          return (
-                            <button
-                              key={
-                                mapel.id
-                              }
-                              type="button"
-                              onClick={() =>
-                                router.push(
-                                  "/siswa/mataPelajaran"
-                                )
-                              }
-                              className={`
-                                group
-                                relative
-                                overflow-hidden
-                                rounded-xl
-                                border
-                                border-slate-200
-                                bg-white
-                                p-4
-                                text-left
-                                shadow-sm
-                                transition-all
-                                duration-300
-                                hover:-translate-y-1
-                                hover:shadow-xl
-                                hover:ring-4
-                                ${colors.ring}
-                                ${colors.border}
-                              `}
-                            >
-
-                              <div className="flex items-start justify-between gap-3">
-
-                                <div
-                                  className={`
-                                    flex
-                                    h-11
-                                    w-11
-                                    shrink-0
-                                    items-center
-                                    justify-center
-                                    rounded-xl
-                                    bg-gradient-to-br
-                                    text-white
-                                    shadow-md
-                                    transition-transform
-                                    duration-300
-                                    group-hover:scale-105
-                                    ${colors.icon}
-                                  `}
-                                >
-
-                                  <Icon
-                                    size={20}
-                                  />
-
-                                </div>
-
-                                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-slate-50 text-slate-400 transition-all group-hover:bg-[#EAF1FF] group-hover:text-[#155DFC]">
-
-                                  <ChevronRight
-                                    size={16}
-                                  />
-
-                                </div>
-
-                              </div>
-
-                              <div className="mt-5">
-
-                                <h3 className="truncate text-sm font-bold text-slate-800">
-                                  {mapel.nama}
-                                </h3>
-
-                                <p className="mt-1 truncate text-xs text-slate-500">
-                                  {mapel.guru}
-                                </p>
-
-                                {mapel.kode && (
-                                  <span className="mt-2 inline-flex rounded-md bg-slate-100 px-2 py-1 text-[10px] font-semibold text-slate-500">
-                                    {mapel.kode}
-                                  </span>
-                                )}
-
-                              </div>
-
-                              <div className="mt-5">
-
-                                <div className="mb-2 flex items-center justify-between">
-
-                                  <span className="text-[11px] font-medium text-slate-400">
-                                    Progress pembelajaran
-                                  </span>
-
-                                  <span className="text-xs font-bold text-slate-600">
-                                    {mapel.progress}%
-                                  </span>
-
-                                </div>
-
-                                <div className="h-1.5 overflow-hidden rounded-full bg-slate-100">
-
-                                  <div
-                                    className={`h-full rounded-full ${colors.progress}`}
-                                    style={{
-                                      width: `${mapel.progress}%`,
-                                    }}
-                                  />
-
-                                </div>
-
-                              </div>
-
-                            </button>
-                          );
-                        }
-                      )}
-
-                    </div>
-                  )}
-
-              </div>
-
-              {/* FOOTER */}
-
-              <div className="border-t border-slate-100 bg-slate-50/60 px-5 py-3.5 sm:px-6">
-
-                <div className="flex flex-col gap-1 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
-
-                  <span>
-                    Menampilkan{" "}
-                    <strong className="font-semibold text-slate-700">
-                      {
-                        mataPelajaranList.length
-                      }
-                    </strong>{" "}
-                    mata pelajaran
-                  </span>
-
-                  <span className="font-medium text-slate-400">
-
+                  <p className="theme-text-secondary mt-0.5 text-xs">
                     {user.kelasName
-                      ? `Kelas ${user.kelasName}`
-                      : "Data pembelajaran semester berjalan"}
-
-                  </span>
-
+                      ? `Mata pelajaran untuk kelas ${user.kelasName}`
+                      : "Mata pelajaran sesuai kelasmu"}
+                  </p>
                 </div>
 
               </div>
 
-            </section>
+              <button
+                type="button"
+                onClick={() =>
+                  router.push(
+                    "/siswa/mataPelajaran"
+                  )
+                }
+                className={`
+                  group
+                  inline-flex
+                  items-center
+                  justify-center
+                  gap-2
+                  rounded-lg
+                  border
+                  ${themeNeutralBorder}
+                  theme-card
+                  px-3.5
+                  py-2
+                  text-sm
+                  font-semibold
+                  theme-text-secondary
+                  transition-all
+                  ${themeNeutralHover}
+                  hover:border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]
+                  hover:text-[var(--color-primary)]
+                `}
+              >
+                Lihat semua
+
+                <ArrowUpRight
+                  size={15}
+                  className="
+                    transition-transform
+                    group-hover:-translate-y-0.5
+                    group-hover:translate-x-0.5
+                  "
+                />
+              </button>
+
+            </div>
+          </div>
+
+          {/* CONTENT */}
+
+          <div className="p-5 sm:p-6">
+
+            {/* LOADING */}
+
+            {loadingMapel && (
+              <div className="flex min-h-[220px] flex-col items-center justify-center">
+
+                <div
+                  className={`
+                    flex
+                    h-12
+                    w-12
+                    items-center
+                    justify-center
+                    rounded-full
+                    ${themePrimarySoft}
+                    ${themePrimaryText}
+                  `}
+                >
+                  <Loader2
+                    size={22}
+                    className="animate-spin"
+                  />
+                </div>
+
+                <p className="theme-text mt-4 text-sm font-medium">
+                  Memuat mata pelajaran...
+                </p>
+
+                <p className="theme-text-muted mt-1 text-center text-xs">
+                  Mencari kelas siswa dan mengambil mata pelajaran dari server
+                </p>
+              </div>
+            )}
+
+            {/* ERROR */}
+
+            {!loadingMapel &&
+              mapelError &&
+              mataPelajaranList.length === 0 && (
+                <div
+                  className={`
+                    flex
+                    min-h-[220px]
+                    flex-col
+                    items-center
+                    justify-center
+                    rounded-xl
+                    border
+                    border-dashed
+                    ${themeWarningBorder}
+                    ${themeWarningSurface}
+                    px-5
+                    text-center
+                  `}
+                >
+                  <div
+                    className="
+                      flex
+                      h-12
+                      w-12
+                      items-center
+                      justify-center
+                      rounded-full
+                      bg-[color-mix(in_srgb,var(--color-warning)_14%,transparent)]
+                      text-[var(--color-warning)]
+                    "
+                  >
+                    <AlertCircle size={22} />
+                  </div>
+
+                  <h3 className="theme-text mt-4 text-sm font-bold">
+                    Data mata pelajaran belum tersedia
+                  </h3>
+
+                  <p className="theme-text-secondary mt-1 max-w-md text-xs leading-5">
+                    {mapelError}
+                  </p>
+                </div>
+              )}
+
+            {/* EMPTY */}
+
+            {!loadingMapel &&
+              !mapelError &&
+              mataPelajaranList.length === 0 && (
+                <div
+                  className={`
+                    flex
+                    min-h-[220px]
+                    flex-col
+                    items-center
+                    justify-center
+                    rounded-xl
+                    border
+                    border-dashed
+                    ${themeNeutralBorder}
+                    ${themeNeutralSurface}
+                    px-5
+                    text-center
+                  `}
+                >
+                  <div
+                    className={`
+                      flex
+                      h-12
+                      w-12
+                      items-center
+                      justify-center
+                      rounded-full
+                      ${themePrimarySoft}
+                      ${themePrimaryText}
+                    `}
+                  >
+                    <BookOpen size={22} />
+                  </div>
+
+                  <h3 className="theme-text mt-4 text-sm font-bold">
+                    Belum ada mata pelajaran
+                  </h3>
+
+                  <p className="theme-text-secondary mt-1 max-w-md text-xs leading-5">
+                    Belum ada mata pelajaran yang terhubung dengan kelas kamu.
+                  </p>
+                </div>
+              )}
+
+            {/* MAPEL */}
+
+            {!loadingMapel &&
+              mataPelajaranList.length > 0 && (
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+
+                  {mataPelajaranList.map(
+                    (mapel) => {
+                      const Icon =
+                        mapel.icon;
+
+                      const theme =
+                        mapel.theme ||
+                        subjectThemes[0];
+
+                      return (
+                        <button
+                          key={mapel.id}
+                          type="button"
+                          onClick={() =>
+                            router.push(
+                              "/siswa/mataPelajaran"
+                            )
+                          }
+                          className={`
+                            theme-card
+                            group
+                            relative
+                            overflow-hidden
+                            rounded-xl
+                            border
+                            ${themeNeutralBorder}
+                            p-4
+                            text-left
+                            ${themeCardShadow}
+                            transition-all
+                            duration-300
+                            hover:-translate-y-1
+                            hover:shadow-[0_12px_30px_color-mix(in_srgb,var(--color-text)_10%,transparent)]
+                            ${theme.hover}
+                          `}
+                        >
+
+                          <div className="flex items-start justify-between gap-3">
+
+                            <div
+                              className={`
+                                flex
+                                h-11
+                                w-11
+                                shrink-0
+                                items-center
+                                justify-center
+                                rounded-xl
+                                ${theme.surface}
+                                ${theme.text}
+                                transition-transform
+                                duration-300
+                                group-hover:scale-105
+                              `}
+                            >
+                              <Icon size={20} />
+                            </div>
+
+                            <div
+                              className="
+                                flex
+                                h-8
+                                w-8
+                                items-center
+                                justify-center
+                                rounded-full
+                                bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]
+                                text-[var(--color-text-muted)]
+                                transition-all
+                                group-hover:bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]
+                                group-hover:text-[var(--color-primary)]
+                              "
+                            >
+                              <ChevronRight size={16} />
+                            </div>
+
+                          </div>
+
+                          <div className="mt-5">
+
+                            <h3 className="theme-text truncate text-sm font-bold">
+                              {mapel.nama}
+                            </h3>
+
+                            <p className="theme-text-secondary mt-1 truncate text-xs">
+                              {mapel.guru}
+                            </p>
+
+                            {mapel.kode && (
+                              <span
+                                className="
+                                  mt-2
+                                  inline-flex
+                                  rounded-md
+                                  bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]
+                                  px-2
+                                  py-1
+                                  text-[10px]
+                                  font-semibold
+                                  theme-text-muted
+                                "
+                              >
+                                {mapel.kode}
+                              </span>
+                            )}
+
+                          </div>
+
+                          <div className="mt-5">
+
+                            <div className="mb-2 flex items-center justify-between">
+
+                              <span className="theme-text-muted text-[11px] font-medium">
+                                Progress pembelajaran
+                              </span>
+
+                              <span className="theme-text-secondary text-xs font-bold">
+                                {mapel.progress}%
+                              </span>
+
+                            </div>
+
+                            <div
+                              className="
+                                h-1.5
+                                overflow-hidden
+                                rounded-full
+                                bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)]
+                              "
+                            >
+                              <div
+                                className={`
+                                  h-full
+                                  rounded-full
+                                  ${theme.progress}
+                                `}
+                                style={{
+                                  width: `${mapel.progress}%`,
+                                }}
+                              />
+                            </div>
+
+                          </div>
+
+                        </button>
+                      );
+                    }
+                  )}
+
+                </div>
+              )}
 
           </div>
 
-        </main>
+          {/* FOOTER */}
+
+          <div
+            className={`
+              border-t
+              ${themeDivider}
+              ${themeNeutralSurface}
+              px-5
+              py-3.5
+              sm:px-6
+            `}
+          >
+            <div className="flex flex-col gap-1 text-xs sm:flex-row sm:items-center sm:justify-between">
+
+              <span className="theme-text-secondary">
+                Menampilkan{" "}
+
+                <strong className="theme-text font-semibold">
+                  {mataPelajaranList.length}
+                </strong>{" "}
+
+                mata pelajaran
+              </span>
+
+              <span className="theme-text-muted font-medium">
+                {user.kelasName
+                  ? `Kelas ${user.kelasName}`
+                  : "Data pembelajaran semester berjalan"}
+              </span>
+
+            </div>
+          </div>
+
+        </section>
 
       </div>
-
-      {/* =================================================
-          ANIMATION
-      ================================================= */}
-
-      <style jsx global>{`
-        @keyframes float {
-          0%,
-          100% {
-            transform: translateY(0px);
-          }
-
-          50% {
-            transform: translateY(-12px);
-          }
-        }
-
-        @keyframes pulse {
-          0%,
-          100% {
-            opacity: 0.3;
-          }
-
-          50% {
-            opacity: 0.8;
-          }
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          *,
-          *::before,
-          *::after {
-            animation-duration: 0.01ms !important;
-            animation-iteration-count: 1 !important;
-            transition-duration: 0.01ms !important;
-          }
-        }
-      `}</style>
-
     </div>
   );
 }

@@ -34,6 +34,70 @@ import {
 } from "../../../../services/ujian.service";
 
 /* =========================================================
+   THEME HELPERS
+========================================================= */
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+
+/* =========================================================
    HELPER
 ========================================================= */
 
@@ -126,10 +190,6 @@ function getJenisLabel(jenis) {
 
 export default function UjianGuruPage() {
   const router = useRouter();
-
-  /* =======================================================
-     STATE
-  ======================================================= */
 
   const [isCollapsed, setIsCollapsed] = useState(false);
 
@@ -245,18 +305,6 @@ export default function UjianGuruPage() {
 
       const data = parseData(response);
 
-      /*
-       * Backend mengirim:
-       *
-       * _count: {
-       *   soalAsesmen: 2,
-       *   percobaanAsesmen: 1
-       * }
-       *
-       * Jadi kita pertahankan response BE
-       * dan gunakan nama field tersebut di FE.
-       */
-
       setUjian(data);
     } catch (err) {
       console.error(
@@ -337,11 +385,6 @@ export default function UjianGuruPage() {
 
     const draft = total - published;
 
-    /*
-     * FIX:
-     * Backend menggunakan soalAsesmen,
-     * bukan soalUjian.
-     */
     const totalQuestions =
       ujian.reduce(
         (sum, item) =>
@@ -352,11 +395,6 @@ export default function UjianGuruPage() {
         0
       );
 
-    /*
-     * FIX:
-     * Backend menggunakan percobaanAsesmen,
-     * bukan percobaanUjian.
-     */
     const totalAttempts =
       ujian.reduce(
         (sum, item) =>
@@ -437,18 +475,20 @@ export default function UjianGuruPage() {
     bgClass,
   }) {
     return (
-      <div className="group rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:border-blue-200 hover:shadow-md sm:p-5">
+      <div
+        className={`theme-card group rounded-2xl border ${themeNeutralBorder} p-4 ${themeCardShadow} transition duration-200 hover:-translate-y-0.5 hover:${themePrimaryText} sm:p-5`}
+      >
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-xs font-semibold text-slate-500">
+            <p className="theme-text-muted text-xs font-semibold">
               {label}
             </p>
 
-            <p className="mt-2 text-2xl font-bold tracking-tight text-slate-900">
+            <p className="theme-text mt-2 text-2xl font-bold tracking-tight">
               {value}
             </p>
 
-            <p className="mt-1 text-[11px] leading-5 text-slate-400">
+            <p className="theme-text-muted mt-1 text-[11px] leading-5">
               {description}
             </p>
           </div>
@@ -471,11 +511,9 @@ export default function UjianGuruPage() {
   ======================================================= */
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-slate-50">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
 
-      {/* ===================================================
-          SIDEBAR
-      =================================================== */}
+      {/* SIDEBAR */}
 
       <Sidebar
         active="ujian"
@@ -485,13 +523,9 @@ export default function UjianGuruPage() {
         role="guru"
       />
 
-      {/* ===================================================
-          MAIN
-      =================================================== */}
+      {/* MAIN */}
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-
-        {/* HEADER */}
 
         <Header
           toggleSidebar={() =>
@@ -508,46 +542,49 @@ export default function UjianGuruPage() {
           }}
         />
 
-        {/* MAIN */}
-
-        <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
+        <main className="theme-page min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="mx-auto w-full max-w-[1600px] space-y-6 p-4 sm:p-6 lg:p-8">
 
             {/* =================================================
                 PAGE HEADER
             ================================================= */}
 
-            <section className="relative overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
-
+            <section
+              className={`theme-card relative overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+            >
               <div className="pointer-events-none absolute inset-0">
-                <div className="absolute -right-24 -top-24 h-60 w-60 rounded-full bg-blue-100/50 blur-3xl" />
+                <div
+                  className={`absolute -right-24 -top-24 h-60 w-60 rounded-full ${themePrimarySoft} blur-3xl`}
+                />
 
-                <div className="absolute -bottom-28 left-1/3 h-52 w-52 rounded-full bg-indigo-100/40 blur-3xl" />
+                <div className="absolute -bottom-28 left-1/3 h-52 w-52 rounded-full bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)] blur-3xl" />
               </div>
 
               <div className="relative flex flex-col gap-5 p-5 sm:p-6 lg:flex-row lg:items-center lg:justify-between">
 
                 <div className="flex min-w-0 items-start gap-4">
 
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-600 text-white shadow-lg shadow-blue-200">
-                    <ClipboardList
-                      size={22}
-                    />
+                  <div
+                    className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
+                  >
+                    <ClipboardList size={22} />
                   </div>
 
                   <div className="min-w-0">
 
                     <div className="flex flex-wrap items-center gap-2">
-                      <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+                      <h1 className="theme-text text-2xl font-bold tracking-tight sm:text-3xl">
                         Ujian
                       </h1>
 
-                      <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-blue-700">
+                      <span
+                        className={`rounded-full ${themePrimarySoft} ${themePrimaryText} ${themePrimarySoftBorder} border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide`}
+                      >
                         Guru
                       </span>
                     </div>
 
-                    <p className="mt-1.5 max-w-2xl text-sm leading-6 text-slate-500">
+                    <p className="theme-text-secondary mt-1.5 max-w-2xl text-sm leading-6">
                       Kelola ujian, soal, jadwal,
                       dan publikasi berdasarkan
                       kelas serta mata pelajaran
@@ -557,20 +594,20 @@ export default function UjianGuruPage() {
                     {selectedData && (
                       <div className="mt-3 flex flex-wrap items-center gap-2">
 
-                        <span className="inline-flex items-center gap-1.5 rounded-lg border border-blue-100 bg-blue-50/70 px-2.5 py-1.5 text-xs font-semibold text-blue-700">
-                          <GraduationCap
-                            size={13}
-                          />
+                        <span
+                          className={`inline-flex items-center gap-1.5 rounded-lg border ${themePrimarySoftBorder} ${themePrimarySoft} ${themePrimaryText} px-2.5 py-1.5 text-xs font-semibold`}
+                        >
+                          <GraduationCap size={13} />
 
                           {selectedData?.kelas
                             ?.nama ||
                             "Kelas"}
                         </span>
 
-                        <span className="inline-flex items-center gap-1.5 rounded-lg border border-indigo-100 bg-indigo-50/70 px-2.5 py-1.5 text-xs font-semibold text-indigo-700">
-                          <BookOpen
-                            size={13}
-                          />
+                        <span
+                          className={`inline-flex items-center gap-1.5 rounded-lg border ${themeInfoBorder} ${themeInfoSurface} text-[var(--color-info)] px-2.5 py-1.5 text-xs font-semibold`}
+                        >
+                          <BookOpen size={13} />
 
                           {selectedData
                             ?.mataPelajaran
@@ -590,10 +627,9 @@ export default function UjianGuruPage() {
                       "/guru/ujian/tambah"
                     )
                   }
-                  className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 hover:shadow-md sm:w-auto"
+                  className={`inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-4 py-3 text-sm font-semibold text-[var(--color-card)] ${themePrimaryShadow} transition hover:opacity-90 sm:w-auto`}
                 >
                   <Plus size={17} />
-
                   Tambah Ujian
                 </button>
 
@@ -605,23 +641,24 @@ export default function UjianGuruPage() {
             ================================================= */}
 
             {error && (
-              <div className="flex flex-col gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 sm:flex-row sm:items-start sm:justify-between">
-
+              <div
+                className={`flex flex-col gap-3 rounded-2xl border ${themeDangerBorder} ${themeDangerSurface} p-4 sm:flex-row sm:items-start sm:justify-between`}
+              >
                 <div className="flex min-w-0 items-start gap-3">
 
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-rose-600 shadow-sm">
-                    <AlertCircle
-                      size={18}
-                    />
+                  <div
+                    className={`theme-card flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${themeNeutralBorder} theme-danger ${themeSmallShadow}`}
+                  >
+                    <AlertCircle size={18} />
                   </div>
 
                   <div className="min-w-0">
 
-                    <p className="text-sm font-bold text-rose-800">
+                    <p className="theme-danger text-sm font-bold">
                       Terjadi masalah
                     </p>
 
-                    <p className="mt-1 break-words text-xs leading-5 text-rose-700">
+                    <p className="theme-danger mt-1 break-words text-xs leading-5 opacity-80">
                       {error}
                     </p>
 
@@ -631,10 +668,8 @@ export default function UjianGuruPage() {
                 <button
                   type="button"
                   onClick={handleRetry}
-                  disabled={
-                    loadingKelasMapel
-                  }
-                  className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-white px-3 py-2 text-xs font-semibold text-rose-700 shadow-sm ring-1 ring-rose-200 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-50"
+                  disabled={loadingKelasMapel}
+                  className={`theme-card inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border ${themeNeutralBorder} px-3 py-2 text-xs font-semibold theme-text-secondary ${themeNeutralHover} transition disabled:cursor-not-allowed disabled:opacity-50`}
                 >
                   <RefreshCw
                     size={13}
@@ -644,7 +679,6 @@ export default function UjianGuruPage() {
                         : ""
                     }
                   />
-
                   Coba lagi
                 </button>
 
@@ -655,23 +689,24 @@ export default function UjianGuruPage() {
                 KELAS MAPEL
             ================================================= */}
 
-            <section className="rounded-2xl border border-slate-200/80 bg-white shadow-sm">
-
-              <div className="border-b border-slate-100 px-5 py-4 sm:px-6">
+            <section
+              className={`theme-card rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+            >
+              <div className={`border-b ${themeDivider} px-5 py-4 sm:px-6`}>
                 <div className="flex items-center gap-3">
 
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-                    <BookOpen
-                      size={17}
-                    />
+                  <div
+                    className={`flex h-9 w-9 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText}`}
+                  >
+                    <BookOpen size={17} />
                   </div>
 
                   <div>
-                    <h2 className="text-sm font-bold text-slate-800">
+                    <h2 className="theme-text text-sm font-bold">
                       Kelas & Mata Pelajaran
                     </h2>
 
-                    <p className="mt-0.5 text-xs text-slate-500">
+                    <p className="theme-text-secondary mt-0.5 text-xs">
                       Pilih penugasan guru untuk
                       melihat daftar ujian.
                     </p>
@@ -683,22 +718,25 @@ export default function UjianGuruPage() {
               <div className="p-5 sm:p-6">
 
                 {loadingKelasMapel ? (
-                  <div className="h-12 animate-pulse rounded-xl bg-slate-100" />
+                  <div
+                    className={`h-12 animate-pulse rounded-xl ${themeNeutralSurface}`}
+                  />
                 ) : kelasMapel.length === 0 ? (
 
-                  <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-5 py-10 text-center">
-
-                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-white text-slate-400 shadow-sm">
-                      <BookOpen
-                        size={24}
-                      />
+                  <div
+                    className={`rounded-xl border border-dashed ${themeNeutralBorder} ${themeNeutralSurface} px-5 py-10 text-center`}
+                  >
+                    <div
+                      className={`theme-card mx-auto flex h-12 w-12 items-center justify-center rounded-xl border ${themeNeutralBorder} theme-text-muted ${themeSmallShadow}`}
+                    >
+                      <BookOpen size={24} />
                     </div>
 
-                    <p className="mt-3 text-sm font-bold text-slate-700">
+                    <p className="theme-text mt-3 text-sm font-bold">
                       Belum ada penugasan
                     </p>
 
-                    <p className="mx-auto mt-1 max-w-md text-xs leading-5 text-slate-500">
+                    <p className="theme-text-secondary mx-auto mt-1 max-w-md text-xs leading-5">
                       Tidak ditemukan kelas dan mata
                       pelajaran yang ditugaskan kepada
                       akun guru ini.
@@ -706,18 +744,12 @@ export default function UjianGuruPage() {
 
                     <button
                       type="button"
-                      onClick={
-                        loadKelasMapel
-                      }
-                      className="mt-4 inline-flex items-center gap-2 rounded-lg bg-white px-3.5 py-2 text-xs font-semibold text-blue-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-blue-50"
+                      onClick={loadKelasMapel}
+                      className={`theme-card mt-4 inline-flex items-center gap-2 rounded-lg border ${themeNeutralBorder} px-3.5 py-2 text-xs font-semibold ${themePrimaryText} ${themeNeutralHover} transition`}
                     >
-                      <RefreshCw
-                        size={13}
-                      />
-
+                      <RefreshCw size={13} />
                       Muat ulang
                     </button>
-
                   </div>
 
                 ) : (
@@ -727,7 +759,7 @@ export default function UjianGuruPage() {
                     <div>
                       <label
                         htmlFor="kelasMapel"
-                        className="mb-2 block text-xs font-semibold text-slate-600"
+                        className="theme-text-secondary mb-2 block text-xs font-semibold"
                       >
                         Penugasan Guru
                       </label>
@@ -736,25 +768,19 @@ export default function UjianGuruPage() {
 
                         <select
                           id="kelasMapel"
-                          value={
-                            selectedKelasMapel
-                          }
+                          value={selectedKelasMapel}
                           onChange={(e) =>
                             setSelectedKelasMapel(
                               e.target.value
                             )
                           }
-                          className="w-full appearance-none rounded-xl border border-slate-200 bg-white px-4 py-3 pr-10 text-sm font-medium text-slate-800 outline-none transition hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                          className={`theme-input w-full appearance-none rounded-xl border px-4 py-3 pr-10 text-sm font-medium outline-none transition ${themeNeutralBorder} ${themeFocus}`}
                         >
                           {kelasMapel.map(
                             (item) => (
                               <option
-                                key={
-                                  item.id
-                                }
-                                value={
-                                  item.id
-                                }
+                                key={item.id}
+                                value={item.id}
                               >
                                 {item?.kelas
                                   ?.nama ||
@@ -771,7 +797,7 @@ export default function UjianGuruPage() {
 
                         <ChevronDown
                           size={17}
-                          className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+                          className="theme-text-muted pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
                         />
 
                       </div>
@@ -780,21 +806,20 @@ export default function UjianGuruPage() {
                     {selectedData && (
                       <div className="flex flex-wrap gap-2 lg:justify-end">
 
-                        <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-xs font-semibold text-blue-700">
-                          <Users
-                            size={13}
-                          />
+                        <span
+                          className={`inline-flex items-center gap-1.5 rounded-full border ${themePrimarySoftBorder} ${themePrimarySoft} ${themePrimaryText} px-3 py-1.5 text-xs font-semibold`}
+                        >
+                          <Users size={13} />
 
-                          {selectedData
-                            ?.kelas
+                          {selectedData?.kelas
                             ?.nama ||
                             "Kelas"}
                         </span>
 
-                        <span className="inline-flex items-center gap-1.5 rounded-full border border-indigo-100 bg-indigo-50 px-3 py-1.5 text-xs font-semibold text-indigo-700">
-                          <BookOpen
-                            size={13}
-                          />
+                        <span
+                          className={`inline-flex items-center gap-1.5 rounded-full border ${themeInfoBorder} ${themeInfoSurface} text-[var(--color-info)] px-3 py-1.5 text-xs font-semibold`}
+                        >
+                          <BookOpen size={13} />
 
                           {selectedData
                             ?.mataPelajaran
@@ -817,11 +842,11 @@ export default function UjianGuruPage() {
             <section>
 
               <div className="mb-3">
-                <h2 className="text-sm font-bold text-slate-800">
+                <h2 className="theme-text text-sm font-bold">
                   Ringkasan Ujian
                 </h2>
 
-                <p className="mt-0.5 text-xs text-slate-500">
+                <p className="theme-text-secondary mt-0.5 text-xs">
                   Statistik ujian pada penugasan
                   yang dipilih.
                 </p>
@@ -834,8 +859,8 @@ export default function UjianGuruPage() {
                   label="Total Ujian"
                   value={stats.total}
                   description="Semua ujian"
-                  iconClass="text-blue-600"
-                  bgClass="bg-blue-50"
+                  iconClass={themePrimaryText}
+                  bgClass={themePrimarySoft}
                 />
 
                 <StatCard
@@ -843,8 +868,8 @@ export default function UjianGuruPage() {
                   label="Dipublikasikan"
                   value={stats.published}
                   description="Ujian aktif"
-                  iconClass="text-emerald-600"
-                  bgClass="bg-emerald-50"
+                  iconClass="text-[var(--color-success)]"
+                  bgClass={themeSuccessSurface}
                 />
 
                 <StatCard
@@ -852,8 +877,8 @@ export default function UjianGuruPage() {
                   label="Draft"
                   value={stats.draft}
                   description="Belum dipublikasi"
-                  iconClass="text-amber-600"
-                  bgClass="bg-amber-50"
+                  iconClass="text-[var(--color-warning)]"
+                  bgClass={themeWarningSurface}
                 />
 
                 <StatCard
@@ -861,8 +886,8 @@ export default function UjianGuruPage() {
                   label="Total Soal"
                   value={stats.totalQuestions}
                   description="Semua soal ujian"
-                  iconClass="text-indigo-600"
-                  bgClass="bg-indigo-50"
+                  iconClass="text-[var(--color-info)]"
+                  bgClass={themeInfoSurface}
                 />
 
                 <StatCard
@@ -870,8 +895,8 @@ export default function UjianGuruPage() {
                   label="Percobaan"
                   value={stats.totalAttempts}
                   description="Total pengerjaan"
-                  iconClass="text-violet-600"
-                  bgClass="bg-violet-50"
+                  iconClass={themePrimaryText}
+                  bgClass={themePrimarySoft}
                 />
 
               </div>
@@ -881,16 +906,17 @@ export default function UjianGuruPage() {
                 SEARCH
             ================================================= */}
 
-            <section className="rounded-2xl border border-slate-200/80 bg-white p-4 shadow-sm sm:p-5">
-
+            <section
+              className={`theme-card rounded-2xl border ${themeNeutralBorder} p-4 ${themeCardShadow} sm:p-5`}
+            >
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
 
                 <div>
-                  <h2 className="text-sm font-bold text-slate-800">
+                  <h2 className="theme-text text-sm font-bold">
                     Daftar Ujian
                   </h2>
 
-                  <p className="mt-0.5 text-xs text-slate-500">
+                  <p className="theme-text-secondary mt-0.5 text-xs">
                     Cari dan kelola ujian yang
                     tersedia.
                   </p>
@@ -902,7 +928,7 @@ export default function UjianGuruPage() {
 
                     <Search
                       size={17}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                      className="theme-text-muted absolute left-3 top-1/2 -translate-y-1/2"
                     />
 
                     <input
@@ -914,18 +940,19 @@ export default function UjianGuruPage() {
                         )
                       }
                       placeholder="Cari judul, jenis, atau deskripsi..."
-                      className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                      className={`theme-input w-full rounded-xl border py-2.5 pl-10 pr-4 text-sm outline-none transition ${themeNeutralBorder} ${themeFocus} placeholder:text-[var(--color-text-placeholder)]`}
                     />
 
                   </div>
 
-                  <div className="flex shrink-0 items-center justify-between rounded-xl bg-slate-50 px-3.5 py-2.5 text-xs text-slate-500 ring-1 ring-slate-200">
-
+                  <div
+                    className={`flex shrink-0 items-center justify-between rounded-xl ${themeNeutralSurface} px-3.5 py-2.5 text-xs theme-text-secondary ring-1 ring-[color-mix(in_srgb,var(--color-text)_10%,transparent)]`}
+                  >
                     <span>
                       Menampilkan
                     </span>
 
-                    <span className="ml-1.5 font-bold text-slate-800">
+                    <span className="theme-text ml-1.5 font-bold">
                       {filteredUjian.length}
                     </span>
 
@@ -933,10 +960,9 @@ export default function UjianGuruPage() {
                       /
                     </span>
 
-                    <span className="font-semibold text-slate-700">
+                    <span className="theme-text-secondary font-semibold">
                       {ujian.length}
                     </span>
-
                   </div>
 
                 </div>
@@ -948,26 +974,28 @@ export default function UjianGuruPage() {
                 TABLE
             ================================================= */}
 
-            <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
+            <section
+              className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+            >
 
-              {/* TABLE TOP */}
-
-              <div className="flex flex-col gap-3 border-b border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+              <div
+                className={`flex flex-col gap-3 border-b ${themeDivider} px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6`}
+              >
 
                 <div className="flex items-center gap-3">
 
-                  <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
-                    <ListChecks
-                      size={17}
-                    />
+                  <div
+                    className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeNeutralSurface} theme-text-secondary`}
+                  >
+                    <ListChecks size={17} />
                   </div>
 
                   <div>
-                    <p className="text-sm font-bold text-slate-800">
+                    <p className="theme-text text-sm font-bold">
                       Data Ujian
                     </p>
 
-                    <p className="text-[11px] text-slate-500">
+                    <p className="theme-text-secondary text-[11px]">
                       Kelola soal, detail, edit,
                       dan hapus ujian.
                     </p>
@@ -976,13 +1004,13 @@ export default function UjianGuruPage() {
                 </div>
 
                 {selectedData && (
-                  <div className="flex items-center gap-2 text-xs text-slate-500">
+                  <div className="flex items-center gap-2 text-xs">
 
-                    <span className="hidden sm:inline">
+                    <span className="theme-text-muted hidden sm:inline">
                       Penugasan:
                     </span>
 
-                    <span className="font-semibold text-slate-700">
+                    <span className="theme-text-secondary font-semibold">
                       {selectedData?.kelas
                         ?.nama ||
                         "Kelas"}{" "}
@@ -1002,18 +1030,20 @@ export default function UjianGuruPage() {
 
                 <div className="px-6 py-16 text-center">
 
-                  <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50">
+                  <div
+                    className={`mx-auto flex h-11 w-11 items-center justify-center rounded-xl ${themePrimarySoft}`}
+                  >
                     <RefreshCw
                       size={20}
-                      className="animate-spin text-blue-600"
+                      className={`animate-spin ${themePrimaryText}`}
                     />
                   </div>
 
-                  <p className="mt-4 text-sm font-semibold text-slate-700">
+                  <p className="theme-text mt-4 text-sm font-semibold">
                     Mengambil data ujian...
                   </p>
 
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="theme-text-secondary mt-1 text-xs">
                     Mohon tunggu sebentar.
                   </p>
 
@@ -1025,53 +1055,47 @@ export default function UjianGuruPage() {
 
                   <table className="w-full min-w-[1180px] text-sm">
 
-                    {/* =================================================
-                        THEAD
-                    ================================================= */}
-
                     <thead>
 
-                      <tr className="border-b border-slate-200 bg-slate-50">
+                      <tr
+                        className={`border-b ${themeDivider} ${themeNeutralSurface}`}
+                      >
 
-                        <th className="w-14 px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-slate-500">
+                        <th className="theme-text-muted w-14 px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide">
                           No
                         </th>
 
-                        <th className="min-w-[300px] px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-slate-500">
+                        <th className="theme-text-muted min-w-[300px] px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide">
                           Judul Ujian
                         </th>
 
-                        <th className="w-28 px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-slate-500">
+                        <th className="theme-text-muted w-28 px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide">
                           Jenis
                         </th>
 
-                        <th className="w-32 px-4 py-3.5 text-center text-[11px] font-bold uppercase tracking-wide text-slate-500">
+                        <th className="theme-text-muted w-32 px-4 py-3.5 text-center text-[11px] font-bold uppercase tracking-wide">
                           Durasi
                         </th>
 
-                        <th className="min-w-[240px] px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide text-slate-500">
+                        <th className="theme-text-muted min-w-[240px] px-4 py-3.5 text-left text-[11px] font-bold uppercase tracking-wide">
                           Jadwal
                         </th>
 
-                        <th className="w-32 px-4 py-3.5 text-center text-[11px] font-bold uppercase tracking-wide text-slate-500">
+                        <th className="theme-text-muted w-32 px-4 py-3.5 text-center text-[11px] font-bold uppercase tracking-wide">
                           Status
                         </th>
 
-                        <th className="w-24 px-4 py-3.5 text-center text-[11px] font-bold uppercase tracking-wide text-slate-500">
+                        <th className="theme-text-muted w-24 px-4 py-3.5 text-center text-[11px] font-bold uppercase tracking-wide">
                           Soal
                         </th>
 
-                        <th className="w-48 px-4 py-3.5 text-center text-[11px] font-bold uppercase tracking-wide text-slate-500">
+                        <th className="theme-text-muted w-48 px-4 py-3.5 text-center text-[11px] font-bold uppercase tracking-wide">
                           Aksi
                         </th>
 
                       </tr>
 
                     </thead>
-
-                    {/* =================================================
-                        TBODY
-                    ================================================= */}
 
                     <tbody>
 
@@ -1081,15 +1105,6 @@ export default function UjianGuruPage() {
                           index
                         ) => {
 
-                          /*
-                           * FIX UTAMA:
-                           *
-                           * Backend:
-                           * _count.soalAsesmen
-                           *
-                           * BUKAN:
-                           * _count.soalUjian
-                           */
                           const jumlahSoal =
                             Number(
                               item?._count
@@ -1104,31 +1119,27 @@ export default function UjianGuruPage() {
                           return (
 
                             <tr
-                              key={
-                                item.id
-                              }
-                              className={`group relative border-b border-slate-100 transition hover:bg-blue-50/30 ${
+                              key={item.id}
+                              className={`group relative border-b ${themeDivider} transition ${themeNeutralHover} ${
                                 isPublished
-                                  ? "bg-white"
-                                  : "bg-amber-50/[0.18]"
+                                  ? ""
+                                  : themeWarningSurface
                               }`}
                             >
 
-                              {/* =================================================
-                                  NUMBER
-                              ================================================= */}
+                              {/* NUMBER */}
 
                               <td className="relative px-4 py-4">
 
                                 <div
                                   className={`absolute bottom-0 left-0 top-0 w-0.5 ${
                                     isPublished
-                                      ? "bg-emerald-400"
-                                      : "bg-amber-400"
+                                      ? "bg-[var(--color-success)]"
+                                      : "bg-[var(--color-warning)]"
                                   }`}
                                 />
 
-                                <span className="text-xs font-semibold text-slate-400">
+                                <span className="theme-text-muted text-xs font-semibold">
                                   {String(
                                     index + 1
                                   ).padStart(
@@ -1139,9 +1150,7 @@ export default function UjianGuruPage() {
 
                               </td>
 
-                              {/* =================================================
-                                  TITLE
-                              ================================================= */}
+                              {/* TITLE */}
 
                               <td className="px-4 py-4">
 
@@ -1150,26 +1159,26 @@ export default function UjianGuruPage() {
                                   <div
                                     className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
                                       isPublished
-                                        ? "bg-blue-50 text-blue-600"
-                                        : "bg-amber-50 text-amber-600"
+                                        ? themePrimarySoft
+                                        : themeWarningSurface
+                                    } ${
+                                      isPublished
+                                        ? themePrimaryText
+                                        : "text-[var(--color-warning)]"
                                     }`}
                                   >
-                                    <ClipboardList
-                                      size={
-                                        16
-                                      }
-                                    />
+                                    <ClipboardList size={16} />
                                   </div>
 
                                   <div className="min-w-0">
 
-                                    <p className="truncate font-semibold text-slate-900">
+                                    <p className="theme-text truncate font-semibold">
                                       {item?.judul ||
                                         "Tanpa judul"}
                                     </p>
 
                                     {item?.deskripsi && (
-                                      <p className="mt-1 max-w-[390px] truncate text-xs leading-5 text-slate-500">
+                                      <p className="theme-text-secondary mt-1 max-w-[390px] truncate text-xs leading-5">
                                         {
                                           item.deskripsi
                                         }
@@ -1178,9 +1187,11 @@ export default function UjianGuruPage() {
 
                                     {item?.modeUjian && (
                                       <div className="mt-2">
-                                        <span className="inline-flex items-center rounded-md bg-slate-100 px-2 py-1 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
+                                        <span
+                                          className={`inline-flex items-center rounded-md ${themeNeutralSurface} ${themeNeutralBorder} border px-2 py-1 text-[10px] font-semibold uppercase tracking-wide theme-text-muted`}
+                                        >
                                           Mode{" "}
-                                          <span className="mx-1 text-slate-300">
+                                          <span className="mx-1 theme-text-placeholder">
                                             ·
                                           </span>
                                           {
@@ -1195,13 +1206,13 @@ export default function UjianGuruPage() {
 
                               </td>
 
-                              {/* =================================================
-                                  TYPE
-                              ================================================= */}
+                              {/* TYPE */}
 
                               <td className="px-4 py-4">
 
-                                <span className="inline-flex items-center rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1.5 text-xs font-semibold text-slate-700">
+                                <span
+                                  className={`inline-flex items-center rounded-lg border ${themeNeutralBorder} ${themeNeutralSurface} px-2.5 py-1.5 text-xs font-semibold theme-text-secondary`}
+                                >
                                   {getJenisLabel(
                                     item?.jenis
                                   )}
@@ -1209,19 +1220,16 @@ export default function UjianGuruPage() {
 
                               </td>
 
-                              {/* =================================================
-                                  DURATION
-                              ================================================= */}
+                              {/* DURATION */}
 
                               <td className="px-4 py-4 text-center">
 
-                                <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-50 px-2.5 py-1.5 text-xs font-semibold text-slate-700">
-
+                                <span
+                                  className={`inline-flex items-center gap-1.5 rounded-lg ${themeNeutralSurface} px-2.5 py-1.5 text-xs font-semibold theme-text-secondary`}
+                                >
                                   <Clock3
-                                    size={
-                                      14
-                                    }
-                                    className="text-slate-400"
+                                    size={14}
+                                    className="theme-text-muted"
                                   />
 
                                   {Number(
@@ -1229,14 +1237,11 @@ export default function UjianGuruPage() {
                                       0
                                   )}{" "}
                                   menit
-
                                 </span>
 
                               </td>
 
-                              {/* =================================================
-                                  SCHEDULE
-                              ================================================= */}
+                              {/* SCHEDULE */}
 
                               <td className="px-4 py-4">
 
@@ -1246,11 +1251,13 @@ export default function UjianGuruPage() {
 
                                     <div className="flex items-start gap-2 text-xs">
 
-                                      <span className="w-12 shrink-0 rounded-md bg-blue-50 px-1.5 py-1 text-center text-[10px] font-bold text-blue-600">
+                                      <span
+                                        className={`w-12 shrink-0 rounded-md ${themePrimarySoft} px-1.5 py-1 text-center text-[10px] font-bold ${themePrimaryText}`}
+                                      >
                                         MULAI
                                       </span>
 
-                                      <span className="pt-0.5 text-slate-700">
+                                      <span className="theme-text-secondary pt-0.5">
                                         {formatTanggal(
                                           item.waktuMulai
                                         )}
@@ -1261,11 +1268,13 @@ export default function UjianGuruPage() {
                                     {item?.waktuSelesai && (
                                       <div className="flex items-start gap-2 text-xs">
 
-                                        <span className="w-12 shrink-0 rounded-md bg-slate-100 px-1.5 py-1 text-center text-[10px] font-bold text-slate-500">
+                                        <span
+                                          className={`w-12 shrink-0 rounded-md ${themeNeutralSurface} px-1.5 py-1 text-center text-[10px] font-bold theme-text-muted`}
+                                        >
                                           SELESAI
                                         </span>
 
-                                        <span className="pt-0.5 text-slate-600">
+                                        <span className="theme-text-secondary pt-0.5">
                                           {formatTanggal(
                                             item.waktuSelesai
                                           )}
@@ -1278,13 +1287,10 @@ export default function UjianGuruPage() {
 
                                 ) : (
 
-                                  <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-50 px-2.5 py-1.5 text-xs font-medium text-slate-400">
-                                    <Clock3
-                                      size={
-                                        13
-                                      }
-                                    />
-
+                                  <span
+                                    className={`inline-flex items-center gap-1.5 rounded-lg ${themeNeutralSurface} px-2.5 py-1.5 text-xs font-medium theme-text-muted`}
+                                  >
+                                    <Clock3 size={13} />
                                     Tidak dijadwalkan
                                   </span>
 
@@ -1292,55 +1298,41 @@ export default function UjianGuruPage() {
 
                               </td>
 
-                              {/* =================================================
-                                  STATUS
-                              ================================================= */}
+                              {/* STATUS */}
 
                               <td className="px-4 py-4 text-center">
 
                                 {isPublished ? (
 
-                                  <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-100 bg-emerald-50 px-3 py-1.5 text-[11px] font-bold text-emerald-700">
-
-                                    <CheckCircle2
-                                      size={
-                                        13
-                                      }
-                                    />
-
+                                  <span
+                                    className={`inline-flex items-center gap-1.5 rounded-full border ${themeSuccessBorder} ${themeSuccessSurface} px-3 py-1.5 text-[11px] font-bold text-[var(--color-success)]`}
+                                  >
+                                    <CheckCircle2 size={13} />
                                     Publikasi
-
                                   </span>
 
                                 ) : (
 
-                                  <span className="inline-flex items-center gap-1.5 rounded-full border border-amber-100 bg-amber-50 px-3 py-1.5 text-[11px] font-bold text-amber-700">
-
-                                    <XCircle
-                                      size={
-                                        13
-                                      }
-                                    />
-
+                                  <span
+                                    className={`inline-flex items-center gap-1.5 rounded-full border ${themeWarningBorder} ${themeWarningSurface} px-3 py-1.5 text-[11px] font-bold text-[var(--color-warning)]`}
+                                  >
+                                    <XCircle size={13} />
                                     Draft
-
                                   </span>
 
                                 )}
 
                               </td>
 
-                              {/* =================================================
-                                  QUESTIONS
-                              ================================================= */}
+                              {/* QUESTIONS */}
 
                               <td className="px-4 py-4 text-center">
 
                                 <span
                                   className={`inline-flex min-w-9 items-center justify-center rounded-lg px-2.5 py-1.5 text-xs font-bold ${
                                     jumlahSoal > 0
-                                      ? "border border-indigo-100 bg-indigo-50 text-indigo-700"
-                                      : "bg-slate-50 text-slate-400"
+                                      ? `${themeInfoBorder} ${themeInfoSurface} border text-[var(--color-info)]`
+                                      : `${themeNeutralSurface} theme-text-muted`
                                   }`}
                                 >
                                   {jumlahSoal}
@@ -1348,9 +1340,7 @@ export default function UjianGuruPage() {
 
                               </td>
 
-                              {/* =================================================
-                                  ACTIONS
-                              ================================================= */}
+                              {/* ACTIONS */}
 
                               <td className="px-4 py-4">
 
@@ -1366,15 +1356,11 @@ export default function UjianGuruPage() {
                                       )
                                     }
                                     title="Kelola soal"
-                                    className="inline-flex h-9 items-center gap-1.5 rounded-lg border border-emerald-100 bg-emerald-50 px-2.5 text-emerald-700 transition hover:border-emerald-200 hover:bg-emerald-100"
+                                    className={`inline-flex h-9 items-center gap-1.5 rounded-lg border ${themeSuccessBorder} ${themeSuccessSurface} px-2.5 text-[var(--color-success)] transition hover:brightness-95`}
                                   >
-                                    <ListChecks
-                                      size={
-                                        15
-                                      }
-                                    />
+                                    <ListChecks size={15} />
 
-                                    <span className="hidden 2xl:inline text-xs font-semibold">
+                                    <span className="hidden text-xs font-semibold 2xl:inline">
                                       Soal
                                     </span>
                                   </button>
@@ -1389,13 +1375,9 @@ export default function UjianGuruPage() {
                                       )
                                     }
                                     title="Edit ujian"
-                                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-blue-100 bg-blue-50 text-blue-600 transition hover:border-blue-200 hover:bg-blue-100"
+                                    className={`theme-card flex h-9 w-9 items-center justify-center rounded-lg border ${themePrimarySoftBorder} ${themePrimarySoft} ${themePrimaryText} transition hover:brightness-95`}
                                   >
-                                    <Pencil
-                                      size={
-                                        15
-                                      }
-                                    />
+                                    <Pencil size={15} />
                                   </button>
 
                                   {/* DETAIL */}
@@ -1408,13 +1390,9 @@ export default function UjianGuruPage() {
                                       )
                                     }
                                     title="Lihat detail"
-                                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-indigo-100 bg-indigo-50 text-indigo-600 transition hover:border-indigo-200 hover:bg-indigo-100"
+                                    className={`flex h-9 w-9 items-center justify-center rounded-lg border ${themeInfoBorder} ${themeInfoSurface} text-[var(--color-info)] transition hover:brightness-95`}
                                   >
-                                    <Eye
-                                      size={
-                                        15
-                                      }
-                                    />
+                                    <Eye size={15} />
                                   </button>
 
                                   {/* DELETE */}
@@ -1431,17 +1409,13 @@ export default function UjianGuruPage() {
                                       item.id
                                     }
                                     title="Hapus ujian"
-                                    className="flex h-9 w-9 items-center justify-center rounded-lg border border-rose-100 bg-rose-50 text-rose-600 transition hover:border-rose-200 hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-50"
+                                    className={`flex h-9 w-9 items-center justify-center rounded-lg border ${themeDangerBorder} ${themeDangerSurface} theme-danger transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50`}
                                   >
                                     {deleteLoading ===
                                     item.id ? (
-                                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-rose-600 border-t-transparent" />
+                                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
                                     ) : (
-                                      <Trash2
-                                        size={
-                                          15
-                                        }
-                                      />
+                                      <Trash2 size={15} />
                                     )}
                                   </button>
 
@@ -1450,48 +1424,36 @@ export default function UjianGuruPage() {
                               </td>
 
                             </tr>
-
                           );
                         }
                       )}
 
-                      {/* =================================================
-                          EMPTY STATE
-                      ================================================= */}
+                      {/* EMPTY STATE */}
 
-                      {filteredUjian.length ===
-                        0 && (
-
+                      {filteredUjian.length === 0 && (
                         <tr>
-
                           <td
                             colSpan={8}
                             className="px-6 py-16 text-center"
                           >
 
-                            <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+                            <div
+                              className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl ${themeNeutralSurface} theme-text-muted`}
+                            >
                               {search.trim() ? (
-                                <Search
-                                  size={
-                                    25
-                                  }
-                                />
+                                <Search size={25} />
                               ) : (
-                                <ClipboardList
-                                  size={
-                                    27
-                                  }
-                                />
+                                <ClipboardList size={27} />
                               )}
                             </div>
 
-                            <p className="mt-4 text-sm font-bold text-slate-700">
+                            <p className="theme-text mt-4 text-sm font-bold">
                               {search.trim()
                                 ? "Ujian tidak ditemukan"
                                 : "Belum ada ujian"}
                             </p>
 
-                            <p className="mx-auto mt-1 max-w-md text-xs leading-5 text-slate-500">
+                            <p className="theme-text-secondary mx-auto mt-1 max-w-md text-xs leading-5">
                               {search.trim()
                                 ? "Coba gunakan kata kunci pencarian yang berbeda."
                                 : "Belum ada ujian untuk kelas dan mata pelajaran yang dipilih."}
@@ -1501,18 +1463,11 @@ export default function UjianGuruPage() {
                               <button
                                 type="button"
                                 onClick={() =>
-                                  setSearch(
-                                    ""
-                                  )
+                                  setSearch("")
                                 }
-                                className="mt-4 inline-flex items-center gap-2 rounded-lg bg-white px-3.5 py-2 text-xs font-semibold text-slate-700 shadow-sm ring-1 ring-slate-200 transition hover:bg-slate-50"
+                                className={`theme-card mt-4 inline-flex items-center gap-2 rounded-lg border ${themeNeutralBorder} px-3.5 py-2 text-xs font-semibold theme-text-secondary ${themeNeutralHover} transition`}
                               >
-                                <RefreshCw
-                                  size={
-                                    13
-                                  }
-                                />
-
+                                <RefreshCw size={13} />
                                 Reset pencarian
                               </button>
                             )}
@@ -1526,28 +1481,19 @@ export default function UjianGuruPage() {
                                       "/guru/ujian/tambah"
                                     )
                                   }
-                                  className="mt-4 inline-flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white shadow-sm transition hover:bg-blue-700"
+                                  className={`mt-4 inline-flex items-center gap-2 rounded-lg ${themePrimaryGradient} px-4 py-2.5 text-xs font-semibold text-[var(--color-card)] ${themePrimaryShadow} transition hover:opacity-90`}
                                 >
-                                  <Plus
-                                    size={
-                                      14
-                                    }
-                                  />
-
+                                  <Plus size={14} />
                                   Buat Ujian
                                 </button>
                               )}
 
                           </td>
-
                         </tr>
-
                       )}
 
                     </tbody>
-
                   </table>
-
                 </div>
               )}
 
@@ -1557,12 +1503,13 @@ export default function UjianGuruPage() {
 
               {!loadingUjian &&
                 filteredUjian.length > 0 && (
-
-                  <div className="flex flex-col gap-2 border-t border-slate-100 bg-slate-50/60 px-5 py-3.5 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                  <div
+                    className={`flex flex-col gap-2 border-t ${themeDivider} ${themeNeutralSurface} px-5 py-3.5 text-xs theme-text-secondary sm:flex-row sm:items-center sm:justify-between sm:px-6`}
+                  >
 
                     <span>
                       Menampilkan{" "}
-                      <strong className="font-semibold text-slate-700">
+                      <strong className="theme-text font-semibold">
                         {filteredUjian.length}
                       </strong>{" "}
                       ujian
@@ -1571,21 +1518,20 @@ export default function UjianGuruPage() {
                     <div className="flex items-center gap-3">
 
                       <span className="inline-flex items-center gap-1.5">
-                        <span className="h-2 w-2 rounded-full bg-emerald-400" />
+                        <span className="h-2 w-2 rounded-full bg-[var(--color-success)]" />
                         {stats.published} dipublikasikan
                       </span>
 
-                      <span className="h-1 w-1 rounded-full bg-slate-300" />
+                      <span className="theme-text-placeholder h-1 w-1 rounded-full bg-current" />
 
                       <span className="inline-flex items-center gap-1.5">
-                        <span className="h-2 w-2 rounded-full bg-amber-400" />
+                        <span className="h-2 w-2 rounded-full bg-[var(--color-warning)]" />
                         {stats.draft} draft
                       </span>
 
                     </div>
 
                   </div>
-
                 )}
 
             </section>

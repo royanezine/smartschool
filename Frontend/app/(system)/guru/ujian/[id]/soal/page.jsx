@@ -33,6 +33,70 @@ import {
 } from "../../../../../services/soalUjian.service";
 
 /* =====================================================
+   THEME HELPERS
+===================================================== */
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+
+/* =====================================================
    HELPER
 ===================================================== */
 
@@ -463,10 +527,6 @@ export default function KelolaSoalUjianPage() {
     setError("");
     setSuccess("");
 
-    /* -----------------------------------------------
-       VALIDASI TEKS
-    ----------------------------------------------- */
-
     const teksSoal =
       String(
         form.teksSoal || ""
@@ -486,10 +546,6 @@ export default function KelolaSoalUjianPage() {
       return;
     }
 
-    /* -----------------------------------------------
-       VALIDASI POIN
-    ----------------------------------------------- */
-
     const poin =
       Number(form.poin);
 
@@ -502,10 +558,6 @@ export default function KelolaSoalUjianPage() {
       );
       return;
     }
-
-    /* -----------------------------------------------
-       VALIDASI NOMOR
-    ----------------------------------------------- */
 
     const nomorUrut =
       Number(form.nomorUrut);
@@ -522,17 +574,9 @@ export default function KelolaSoalUjianPage() {
       return;
     }
 
-    /* -----------------------------------------------
-       VARIABEL
-    ----------------------------------------------- */
-
     let pilihan = undefined;
 
     let jawabanBenar = undefined;
-
-    /* -----------------------------------------------
-       PILIHAN GANDA
-    ----------------------------------------------- */
 
     if (
       form.jenisSoal ===
@@ -601,10 +645,6 @@ export default function KelolaSoalUjianPage() {
       }
     }
 
-    /* -----------------------------------------------
-       ESAI
-    ----------------------------------------------- */
-
     if (
       form.jenisSoal ===
       "esai"
@@ -612,10 +652,6 @@ export default function KelolaSoalUjianPage() {
       pilihan = undefined;
       jawabanBenar = undefined;
     }
-
-    /* -----------------------------------------------
-       PAYLOAD
-    ----------------------------------------------- */
 
     const payload = {
       ujianId,
@@ -659,10 +695,6 @@ export default function KelolaSoalUjianPage() {
     console.log(
       "================================"
     );
-
-    /* -----------------------------------------------
-       SAVE
-    ----------------------------------------------- */
 
     try {
       setSaving(true);
@@ -777,7 +809,7 @@ export default function KelolaSoalUjianPage() {
 
   if (loading) {
     return (
-      <div className="flex h-screen w-full overflow-hidden bg-slate-50">
+      <div className="theme-page flex h-screen w-full overflow-hidden">
         <Sidebar
           active="ujian"
           setActive={() => {}}
@@ -804,14 +836,14 @@ export default function KelolaSoalUjianPage() {
             }}
           />
 
-          <main className="flex flex-1 items-center justify-center">
+          <main className="theme-page flex flex-1 items-center justify-center">
             <div className="text-center">
               <Loader2
                 size={32}
-                className="mx-auto animate-spin text-blue-600"
+                className={`mx-auto animate-spin ${themePrimaryText}`}
               />
 
-              <p className="mt-3 text-sm text-slate-500">
+              <p className="theme-text-secondary mt-3 text-sm">
                 Memuat data ujian...
               </p>
             </div>
@@ -826,7 +858,7 @@ export default function KelolaSoalUjianPage() {
   ===================================================== */
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-slate-50">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar
         active="ujian"
         setActive={() => {}}
@@ -853,7 +885,7 @@ export default function KelolaSoalUjianPage() {
           }}
         />
 
-        <main className="flex-1 overflow-y-auto">
+        <main className="theme-page flex-1 overflow-y-auto">
           <div className="mx-auto w-full max-w-[1500px] space-y-6 p-4 sm:p-6 lg:p-8">
 
             {/* =================================================
@@ -869,25 +901,27 @@ export default function KelolaSoalUjianPage() {
                       "/guru/ujian"
                     )
                   }
-                  className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:bg-slate-100"
+                  className={`theme-card theme-text-secondary mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${themeNeutralBorder} ${themeNeutralHover} transition`}
                 >
                   <ArrowLeft
                     size={18}
                   />
                 </button>
 
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-200">
+                <div
+                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
+                >
                   <ClipboardList
                     size={22}
                   />
                 </div>
 
                 <div className="min-w-0">
-                  <h1 className="truncate text-xl font-bold text-slate-900 sm:text-2xl">
+                  <h1 className="theme-text truncate text-xl font-bold sm:text-2xl">
                     Kelola Soal
                   </h1>
 
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="theme-text-secondary mt-1 text-sm">
                     Kelola pertanyaan dan
                     jawaban untuk ujian ini.
                   </p>
@@ -899,7 +933,7 @@ export default function KelolaSoalUjianPage() {
                 onClick={
                   handleOpenCreate
                 }
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+                className={`inline-flex items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-4 py-3 text-sm font-semibold text-[var(--color-card)] ${themePrimaryShadow} transition hover:brightness-95`}
               >
                 <Plus size={17} />
                 Tambah Soal
@@ -911,7 +945,9 @@ export default function KelolaSoalUjianPage() {
             ================================================= */}
 
             {error && (
-              <div className="flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+              <div
+                className={`flex items-start gap-3 rounded-xl border ${themeDangerBorder} ${themeDangerSurface} theme-danger px-4 py-3 text-sm`}
+              >
                 <AlertCircle
                   size={18}
                   className="mt-0.5 shrink-0"
@@ -932,7 +968,7 @@ export default function KelolaSoalUjianPage() {
                   onClick={() =>
                     setError("")
                   }
-                  className="ml-auto shrink-0"
+                  className="ml-auto shrink-0 transition-opacity hover:opacity-70"
                 >
                   <X size={17} />
                 </button>
@@ -944,7 +980,9 @@ export default function KelolaSoalUjianPage() {
             ================================================= */}
 
             {success && (
-              <div className="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+              <div
+                className={`flex items-start gap-3 rounded-xl border ${themeSuccessBorder} ${themeSuccessSurface} px-4 py-3 text-sm text-[var(--color-success)]`}
+              >
                 <CheckCircle2
                   size={18}
                   className="mt-0.5 shrink-0"
@@ -965,7 +1003,7 @@ export default function KelolaSoalUjianPage() {
                   onClick={() =>
                     setSuccess("")
                   }
-                  className="ml-auto"
+                  className="ml-auto transition-opacity hover:opacity-70"
                 >
                   <X size={17} />
                 </button>
@@ -977,33 +1015,39 @@ export default function KelolaSoalUjianPage() {
             ================================================= */}
 
             {ujian && (
-              <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm sm:p-6">
+              <section
+                className={`theme-card rounded-2xl border ${themeNeutralBorder} p-5 ${themeCardShadow} sm:p-6`}
+              >
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                   <div className="min-w-0">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h2 className="text-lg font-bold text-slate-900 sm:text-xl">
+                      <h2 className="theme-text text-lg font-bold sm:text-xl">
                         {ujian.judul}
                       </h2>
 
                       {ujian.dipublikasikan ? (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
+                        <span
+                          className={`inline-flex items-center gap-1 rounded-full ${themeSuccessSurface} ${themeSuccessBorder} border px-2.5 py-1 text-xs font-semibold text-[var(--color-success)]`}
+                        >
                           <CheckCircle2
                             size={12}
                           />
                           Dipublikasi
                         </span>
                       ) : (
-                        <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
+                        <span
+                          className={`inline-flex items-center gap-1 rounded-full ${themeWarningSurface} ${themeWarningBorder} border px-2.5 py-1 text-xs font-semibold text-[var(--color-warning)]`}
+                        >
                           Draft
                         </span>
                       )}
                     </div>
 
-                    <div className="mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm text-slate-500">
+                    <div className="theme-text-secondary mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm">
                       <span className="inline-flex items-center gap-1.5">
                         <BookOpen
                           size={15}
-                          className="text-blue-500"
+                          className={themePrimaryText}
                         />
 
                         {ujian.kelasMapel
@@ -1015,7 +1059,7 @@ export default function KelolaSoalUjianPage() {
                       <span className="inline-flex items-center gap-1.5">
                         <FileText
                           size={15}
-                          className="text-indigo-500"
+                          className="text-[var(--color-info)]"
                         />
 
                         {ujian.kelasMapel
@@ -1027,7 +1071,7 @@ export default function KelolaSoalUjianPage() {
                       <span className="inline-flex items-center gap-1.5">
                         <Clock3
                           size={15}
-                          className="text-slate-400"
+                          className="theme-text-muted"
                         />
 
                         {ujian.durasi ||
@@ -1045,58 +1089,66 @@ export default function KelolaSoalUjianPage() {
             ================================================= */}
 
             <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
+              <div
+                className={`theme-card rounded-2xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}
+              >
+                <div className="theme-text-secondary flex items-center gap-2 text-xs font-medium">
                   <ListChecks
                     size={15}
-                    className="text-blue-600"
+                    className={themePrimaryText}
                   />
                   Total Soal
                 </div>
 
-                <p className="mt-2 text-2xl font-bold text-slate-900">
+                <p className="theme-text mt-2 text-2xl font-bold">
                   {stats.total}
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
+              <div
+                className={`theme-card rounded-2xl border ${themeSuccessBorder} p-4 ${themeCardShadow}`}
+              >
+                <div className="theme-text-secondary flex items-center gap-2 text-xs font-medium">
                   <CheckCircle2
                     size={15}
-                    className="text-emerald-600"
+                    className="text-[var(--color-success)]"
                   />
                   Pilihan Ganda
                 </div>
 
-                <p className="mt-2 text-2xl font-bold text-slate-900">
+                <p className="theme-text mt-2 text-2xl font-bold">
                   {stats.pilihanGanda}
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
+              <div
+                className={`theme-card rounded-2xl border ${themeInfoBorder} p-4 ${themeCardShadow}`}
+              >
+                <div className="theme-text-secondary flex items-center gap-2 text-xs font-medium">
                   <FileText
                     size={15}
-                    className="text-indigo-600"
+                    className="text-[var(--color-info)]"
                   />
                   Esai
                 </div>
 
-                <p className="mt-2 text-2xl font-bold text-slate-900">
+                <p className="theme-text mt-2 text-2xl font-bold">
                   {stats.esai}
                 </p>
               </div>
 
-              <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-                <div className="flex items-center gap-2 text-xs font-medium text-slate-500">
+              <div
+                className={`theme-card rounded-2xl border ${themeWarningBorder} p-4 ${themeCardShadow}`}
+              >
+                <div className="theme-text-secondary flex items-center gap-2 text-xs font-medium">
                   <ClipboardList
                     size={15}
-                    className="text-amber-600"
+                    className="text-[var(--color-warning)]"
                   />
                   Total Poin
                 </div>
 
-                <p className="mt-2 text-2xl font-bold text-slate-900">
+                <p className="theme-text mt-2 text-2xl font-bold">
                   {formatPoin(
                     stats.totalPoin
                   )}
@@ -1108,14 +1160,18 @@ export default function KelolaSoalUjianPage() {
                 SOAL LIST
             ================================================= */}
 
-            <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-              <div className="border-b border-slate-100 px-5 py-4 sm:px-6">
+            <section
+              className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+            >
+              <div
+                className={`border-b ${themeDivider} px-5 py-4 sm:px-6`}
+              >
                 <div>
-                  <h2 className="text-base font-bold text-slate-900">
+                  <h2 className="theme-text text-base font-bold">
                     Daftar Soal
                   </h2>
 
-                  <p className="mt-1 text-xs text-slate-500 sm:text-sm">
+                  <p className="theme-text-secondary mt-1 text-xs sm:text-sm">
                     Urutan soal mengikuti nomor
                     yang ditentukan.
                   </p>
@@ -1124,17 +1180,19 @@ export default function KelolaSoalUjianPage() {
 
               {soal.length === 0 ? (
                 <div className="px-5 py-16 text-center sm:px-6">
-                  <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+                  <div
+                    className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl ${themePrimarySoft} ${themePrimaryText}`}
+                  >
                     <ClipboardList
                       size={26}
                     />
                   </div>
 
-                  <h3 className="mt-4 text-sm font-bold text-slate-800">
+                  <h3 className="theme-text mt-4 text-sm font-bold">
                     Belum ada soal
                   </h3>
 
-                  <p className="mx-auto mt-1 max-w-md text-xs leading-5 text-slate-500 sm:text-sm">
+                  <p className="theme-text-secondary mx-auto mt-1 max-w-md text-xs leading-5 sm:text-sm">
                     Tambahkan soal pertama
                     untuk mulai menyusun ujian
                     ini.
@@ -1145,31 +1203,33 @@ export default function KelolaSoalUjianPage() {
                     onClick={
                       handleOpenCreate
                     }
-                    className="mt-5 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-700"
+                    className={`mt-5 inline-flex items-center gap-2 rounded-xl ${themePrimaryGradient} px-4 py-2.5 text-sm font-semibold text-[var(--color-card)] ${themePrimaryShadow} transition hover:brightness-95`}
                   >
                     <Plus size={16} />
                     Tambah Soal
                   </button>
                 </div>
               ) : (
-                <div className="divide-y divide-slate-100">
+                <div>
                   {soal.map(
                     (item, index) => (
                       <div
                         key={item.id}
-                        className="p-5 transition hover:bg-slate-50/70 sm:p-6"
+                        className={`border-b ${themeDivider} p-5 last:border-b-0 transition ${themeNeutralHover} sm:p-6`}
                       >
                         <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
 
                           {/* NOMOR */}
 
                           <div className="flex shrink-0 items-center gap-3 lg:w-16 lg:flex-col lg:items-center">
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-sm font-bold text-blue-700">
+                            <div
+                              className={`flex h-10 w-10 items-center justify-center rounded-xl ${themePrimarySoft} text-sm font-bold ${themePrimaryText}`}
+                            >
                               {item.nomorUrut ||
                                 index + 1}
                             </div>
 
-                            <span className="text-xs font-medium text-slate-400 lg:hidden">
+                            <span className="theme-text-muted text-xs font-medium lg:hidden">
                               Nomor soal
                             </span>
                           </div>
@@ -1178,13 +1238,17 @@ export default function KelolaSoalUjianPage() {
 
                           <div className="min-w-0 flex-1">
                             <div className="flex flex-wrap items-center gap-2">
-                              <span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
+                              <span
+                                className={`rounded-full ${themeNeutralSurface} ${themeNeutralBorder} border px-2.5 py-1 text-xs font-semibold theme-text-secondary`}
+                              >
                                 {getJenisLabel(
                                   item.jenisSoal
                                 )}
                               </span>
 
-                              <span className="rounded-full bg-indigo-50 px-2.5 py-1 text-xs font-semibold text-indigo-700">
+                              <span
+                                className={`rounded-full ${themeInfoSurface} ${themeInfoBorder} border px-2.5 py-1 text-xs font-semibold text-[var(--color-info)]`}
+                              >
                                 {formatPoin(
                                   item.poin
                                 )}{" "}
@@ -1192,7 +1256,7 @@ export default function KelolaSoalUjianPage() {
                               </span>
                             </div>
 
-                            <p className="mt-3 whitespace-pre-wrap text-sm font-medium leading-6 text-slate-800">
+                            <p className="theme-text mt-3 whitespace-pre-wrap text-sm font-medium leading-6">
                               {item.teksSoal}
                             </p>
 
@@ -1224,11 +1288,17 @@ export default function KelolaSoalUjianPage() {
                                           key={`${item.id}-${pilihanIndex}`}
                                           className={`flex items-start gap-2 rounded-xl border px-3 py-2.5 text-sm ${
                                             isCorrect
-                                              ? "border-emerald-200 bg-emerald-50 text-emerald-800"
-                                              : "border-slate-200 bg-white text-slate-600"
+                                              ? `${themeSuccessBorder} ${themeSuccessSurface} text-[var(--color-success)]`
+                                              : `theme-card ${themeNeutralBorder} theme-text-secondary`
                                           }`}
                                         >
-                                          <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-xs font-bold">
+                                          <span
+                                            className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-lg ${
+                                              isCorrect
+                                                ? "bg-[color-mix(in_srgb,var(--color-success)_14%,transparent)]"
+                                                : themeNeutralSurface
+                                            } text-xs font-bold`}
+                                          >
                                             {getChoiceLetter(
                                               pilihanIndex
                                             )}
@@ -1243,7 +1313,7 @@ export default function KelolaSoalUjianPage() {
                                               size={
                                                 16
                                               }
-                                              className="ml-auto mt-0.5 shrink-0 text-emerald-600"
+                                              className="ml-auto mt-0.5 shrink-0"
                                             />
                                           )}
                                         </div>
@@ -1257,12 +1327,14 @@ export default function KelolaSoalUjianPage() {
 
                             {item.jenisSoal ===
                               "esai" && (
-                              <div className="mt-4 rounded-xl border border-indigo-100 bg-indigo-50 px-4 py-3">
-                                <p className="text-xs font-semibold text-indigo-700">
+                              <div
+                                className={`mt-4 rounded-xl border ${themeInfoBorder} ${themeInfoSurface} px-4 py-3`}
+                              >
+                                <p className="text-xs font-semibold text-[var(--color-info)]">
                                   Soal Esai
                                 </p>
 
-                                <p className="mt-1 text-xs text-indigo-600">
+                                <p className="theme-text-secondary mt-1 text-xs">
                                   Jawaban akan
                                   diperiksa oleh
                                   guru.
@@ -1282,7 +1354,7 @@ export default function KelolaSoalUjianPage() {
                                 )
                               }
                               title="Edit soal"
-                              className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600 transition hover:bg-blue-100"
+                              className={`inline-flex h-9 w-9 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText} transition hover:bg-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]`}
                             >
                               <Pencil
                                 size={15}
@@ -1301,7 +1373,7 @@ export default function KelolaSoalUjianPage() {
                                 item.id
                               }
                               title="Hapus soal"
-                              className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-rose-50 text-rose-600 transition hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-50"
+                              className={`inline-flex h-9 w-9 items-center justify-center rounded-lg ${themeDangerSurface} theme-danger transition hover:bg-[color-mix(in_srgb,var(--color-text)_9%,transparent)] disabled:cursor-not-allowed disabled:opacity-50`}
                             >
                               {deleting ===
                               item.id ? (
@@ -1332,20 +1404,24 @@ export default function KelolaSoalUjianPage() {
       ===================================================== */}
 
       {showForm && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-slate-950/40 p-0 backdrop-blur-[2px] sm:items-center sm:p-4">
-          <div className="flex max-h-[95vh] w-full max-w-3xl flex-col overflow-hidden rounded-t-2xl bg-white shadow-2xl sm:max-h-[90vh] sm:rounded-2xl">
+        <div className="fixed inset-0 z-50 flex items-end justify-center bg-[color-mix(in_srgb,var(--color-text)_55%,transparent)] p-0 backdrop-blur-[2px] sm:items-center sm:p-4">
+          <div
+            className={`theme-card flex max-h-[95vh] w-full max-w-3xl flex-col overflow-hidden rounded-t-2xl border ${themeNeutralBorder} ${themeCardShadow} sm:max-h-[90vh] sm:rounded-2xl`}
+          >
 
             {/* HEADER */}
 
-            <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4 sm:px-6">
+            <div
+              className={`flex items-center justify-between border-b ${themeDivider} px-5 py-4 sm:px-6`}
+            >
               <div>
-                <h2 className="text-lg font-bold text-slate-900">
+                <h2 className="theme-text text-lg font-bold">
                   {editingId
                     ? "Edit Soal"
                     : "Tambah Soal"}
                 </h2>
 
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="theme-text-secondary mt-1 text-xs">
                   Isi pertanyaan dan konfigurasi
                   jawaban soal.
                 </p>
@@ -1357,7 +1433,7 @@ export default function KelolaSoalUjianPage() {
                   handleCloseForm
                 }
                 disabled={saving}
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-700 disabled:opacity-50"
+                className={`theme-text-muted flex h-9 w-9 items-center justify-center rounded-lg transition ${themeNeutralHover} hover:text-[var(--color-primary)] disabled:opacity-50`}
               >
                 <X size={19} />
               </button>
@@ -1376,10 +1452,10 @@ export default function KelolaSoalUjianPage() {
                 <div>
                   <label
                     htmlFor="teksSoal"
-                    className="mb-2 block text-sm font-semibold text-slate-800"
+                    className="theme-text mb-2 block text-sm font-semibold"
                   >
                     Pertanyaan
-                    <span className="ml-1 text-rose-500">
+                    <span className="theme-danger ml-1">
                       *
                     </span>
                   </label>
@@ -1397,7 +1473,7 @@ export default function KelolaSoalUjianPage() {
                     required
                     disabled={saving}
                     placeholder="Contoh: Sebuah benda bermassa 5 kg diberi gaya sebesar 20 N. Berapakah percepatan benda tersebut?"
-                    className="w-full resize-y rounded-xl border border-slate-200 px-4 py-3 text-sm leading-6 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 disabled:bg-slate-50"
+                    className={`theme-input w-full resize-y rounded-xl border px-4 py-3 text-sm leading-6 outline-none transition ${themeFocus} placeholder:text-[var(--color-text-placeholder)] disabled:opacity-60`}
                   />
                 </div>
 
@@ -1408,7 +1484,7 @@ export default function KelolaSoalUjianPage() {
                   <div>
                     <label
                       htmlFor="jenisSoal"
-                      className="mb-2 block text-sm font-semibold text-slate-800"
+                      className="theme-text mb-2 block text-sm font-semibold"
                     >
                       Jenis Soal
                     </label>
@@ -1423,7 +1499,7 @@ export default function KelolaSoalUjianPage() {
                         handleJenisChange
                       }
                       disabled={saving}
-                      className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm font-medium text-slate-800 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                      className={`theme-input w-full rounded-xl border px-3 py-3 text-sm font-medium outline-none transition ${themeFocus}`}
                     >
                       <option value="pilihan_ganda">
                         Pilihan Ganda
@@ -1438,7 +1514,7 @@ export default function KelolaSoalUjianPage() {
                   <div>
                     <label
                       htmlFor="poin"
-                      className="mb-2 block text-sm font-semibold text-slate-800"
+                      className="theme-text mb-2 block text-sm font-semibold"
                     >
                       Poin
                     </label>
@@ -1456,14 +1532,14 @@ export default function KelolaSoalUjianPage() {
                         handleChange
                       }
                       disabled={saving}
-                      className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm font-medium text-slate-900 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                      className={`theme-input w-full rounded-xl border px-3 py-3 text-sm font-medium outline-none transition ${themeFocus}`}
                     />
                   </div>
 
                   <div>
                     <label
                       htmlFor="nomorUrut"
-                      className="mb-2 block text-sm font-semibold text-slate-800"
+                      className="theme-text mb-2 block text-sm font-semibold"
                     >
                       Nomor Urut
                     </label>
@@ -1481,7 +1557,7 @@ export default function KelolaSoalUjianPage() {
                         handleChange
                       }
                       disabled={saving}
-                      className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm font-medium text-slate-900 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                      className={`theme-input w-full rounded-xl border px-3 py-3 text-sm font-medium outline-none transition ${themeFocus}`}
                     />
                   </div>
                 </div>
@@ -1490,14 +1566,16 @@ export default function KelolaSoalUjianPage() {
 
                 {form.jenisSoal ===
                   "pilihan_ganda" && (
-                  <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:p-5">
+                  <div
+                    className={`rounded-2xl border ${themeNeutralBorder} ${themeNeutralSurface} p-4 sm:p-5`}
+                  >
                     <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                       <div>
-                        <h3 className="text-sm font-bold text-slate-800">
+                        <h3 className="theme-text text-sm font-bold">
                           Pilihan Jawaban
                         </h3>
 
-                        <p className="text-xs text-slate-500">
+                        <p className="theme-text-secondary text-xs">
                           Minimal 2 pilihan dan
                           maksimal 6 pilihan.
                         </p>
@@ -1511,7 +1589,7 @@ export default function KelolaSoalUjianPage() {
                             addChoice
                           }
                           disabled={saving}
-                          className="inline-flex items-center gap-1.5 self-start rounded-lg bg-white px-3 py-2 text-xs font-semibold text-blue-600 ring-1 ring-slate-200 transition hover:bg-blue-50"
+                          className={`theme-card ${themePrimaryText} ${themeNeutralBorder} inline-flex items-center gap-1.5 self-start rounded-lg border px-3 py-2 text-xs font-semibold transition hover:bg-[color-mix(in_srgb,var(--color-primary)_7%,transparent)] disabled:opacity-50`}
                         >
                           <Plus
                             size={14}
@@ -1537,7 +1615,9 @@ export default function KelolaSoalUjianPage() {
                               key={index}
                               className="flex items-center gap-2"
                             >
-                              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-sm font-bold text-slate-600 ring-1 ring-slate-200">
+                              <span
+                                className={`theme-card theme-text-secondary ${themeNeutralBorder} flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border text-sm font-bold`}
+                              >
                                 {letter}
                               </span>
 
@@ -1560,7 +1640,7 @@ export default function KelolaSoalUjianPage() {
                                   saving
                                 }
                                 placeholder={`Pilihan ${letter}`}
-                                className="min-w-0 flex-1 rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-800 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                                className={`theme-input min-w-0 flex-1 rounded-xl border px-3 py-2.5 text-sm outline-none transition ${themeFocus} placeholder:text-[var(--color-text-placeholder)]`}
                               />
 
                               {form
@@ -1577,7 +1657,7 @@ export default function KelolaSoalUjianPage() {
                                   disabled={
                                     saving
                                   }
-                                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-slate-400 transition hover:bg-rose-50 hover:text-rose-600"
+                                  className={`theme-text-muted flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)] hover:text-[var(--color-primary)] disabled:opacity-50`}
                                 >
                                   <X
                                     size={
@@ -1597,10 +1677,10 @@ export default function KelolaSoalUjianPage() {
                     <div className="mt-5">
                       <label
                         htmlFor="jawabanBenar"
-                        className="mb-2 block text-sm font-semibold text-slate-800"
+                        className="theme-text mb-2 block text-sm font-semibold"
                       >
                         Jawaban Benar
-                        <span className="ml-1 text-rose-500">
+                        <span className="theme-danger ml-1">
                           *
                         </span>
                       </label>
@@ -1617,7 +1697,7 @@ export default function KelolaSoalUjianPage() {
                         disabled={
                           saving
                         }
-                        className="w-full rounded-xl border border-slate-200 bg-white px-3 py-3 text-sm font-medium text-slate-800 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10"
+                        className={`theme-input w-full rounded-xl border px-3 py-3 text-sm font-medium outline-none transition ${themeFocus}`}
                       >
                         <option value="">
                           Pilih jawaban yang benar
@@ -1658,8 +1738,10 @@ export default function KelolaSoalUjianPage() {
 
                     {/* INFO */}
 
-                    <div className="mt-4 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3">
-                      <p className="text-xs leading-5 text-blue-700">
+                    <div
+                      className={`mt-4 rounded-xl border ${themeInfoBorder} ${themeInfoSurface} px-4 py-3`}
+                    >
+                      <p className="text-xs leading-5 text-[var(--color-info)]">
                         Kunci jawaban disimpan
                         berdasarkan teks pilihan.
                         Contoh: jika jawaban benar
@@ -1680,19 +1762,21 @@ export default function KelolaSoalUjianPage() {
 
                 {form.jenisSoal ===
                   "esai" && (
-                  <div className="rounded-2xl border border-indigo-100 bg-indigo-50 p-4">
+                  <div
+                    className={`rounded-2xl border ${themeInfoBorder} ${themeInfoSurface} p-4`}
+                  >
                     <div className="flex gap-3">
                       <FileText
                         size={19}
-                        className="mt-0.5 shrink-0 text-indigo-600"
+                        className="mt-0.5 shrink-0 text-[var(--color-info)]"
                       />
 
                       <div>
-                        <p className="text-sm font-semibold text-indigo-800">
+                        <p className="text-sm font-semibold text-[var(--color-info)]">
                           Soal Esai
                         </p>
 
-                        <p className="mt-1 text-xs leading-5 text-indigo-700">
+                        <p className="theme-text-secondary mt-1 text-xs leading-5">
                           Soal esai tidak memerlukan
                           pilihan jawaban maupun
                           kunci jawaban. Jawaban siswa
@@ -1708,14 +1792,16 @@ export default function KelolaSoalUjianPage() {
 
               {/* FOOTER */}
 
-              <div className="sticky bottom-0 flex flex-col-reverse gap-3 border-t border-slate-200 bg-white px-5 py-4 sm:flex-row sm:justify-end sm:px-6">
+              <div
+                className={`sticky bottom-0 flex flex-col-reverse gap-3 border-t ${themeDivider} theme-card px-5 py-4 sm:flex-row sm:justify-end sm:px-6`}
+              >
                 <button
                   type="button"
                   onClick={
                     handleCloseForm
                   }
                   disabled={saving}
-                  className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:opacity-50 sm:w-auto"
+                  className={`theme-card theme-text-secondary ${themeNeutralBorder} ${themeNeutralHover} w-full rounded-xl border px-4 py-2.5 text-sm font-semibold transition disabled:opacity-50 sm:w-auto`}
                 >
                   Batal
                 </button>
@@ -1723,7 +1809,7 @@ export default function KelolaSoalUjianPage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+                  className={`inline-flex w-full items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-4 py-2.5 text-sm font-semibold text-[var(--color-card)] ${themePrimaryShadow} transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto`}
                 >
                   {saving ? (
                     <>

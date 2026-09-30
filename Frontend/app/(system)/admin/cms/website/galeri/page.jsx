@@ -135,8 +135,7 @@ export default function GaleriPage() {
   // =====================================================
 
   return (
-    <div className="flex min-h-screen w-full bg-slate-50 overflow-x-hidden">
-
+    <div className="flex min-h-screen w-full theme-page overflow-x-hidden">
       {/* =================================================
           SIDEBAR
       ================================================= */}
@@ -152,8 +151,7 @@ export default function GaleriPage() {
           MAIN AREA
       ================================================= */}
 
-      <div className="flex-1 min-w-0 w-full">
-
+      <div className="flex-1 min-w-0 w-full theme-page">
         {/* =================================================
             HEADER
         ================================================= */}
@@ -167,8 +165,7 @@ export default function GaleriPage() {
             CONTENT
         ================================================= */}
 
-        <main className="w-full min-w-0 bg-slate-50">
-
+        <main className="w-full min-w-0 theme-page">
           <div
             className="
               w-full
@@ -183,7 +180,6 @@ export default function GaleriPage() {
               lg:py-8
             "
           >
-
             {/* =================================================
                 BREADCRUMB
             ================================================= */}
@@ -196,7 +192,7 @@ export default function GaleriPage() {
                 gap-1
                 text-xs
                 sm:text-sm
-                text-gray-500
+                theme-text-muted
                 mb-5
                 sm:mb-6
               "
@@ -204,27 +200,35 @@ export default function GaleriPage() {
             >
               <a
                 href="/cmsAdmin"
-                className="hover:text-indigo-600 transition"
+                className="
+                  theme-text-muted
+                  hover:text-[var(--color-primary)]
+                  transition
+                "
               >
                 Dashboard
               </a>
 
-              <span className="mx-1 text-gray-300">
+              <span className="mx-1 theme-text-placeholder">
                 /
               </span>
 
               <a
                 href="/cmsAdmin/website"
-                className="hover:text-indigo-600 transition"
+                className="
+                  theme-text-muted
+                  hover:text-[var(--color-primary)]
+                  transition
+                "
               >
                 Website
               </a>
 
-              <span className="mx-1 text-gray-300">
+              <span className="mx-1 theme-text-placeholder">
                 /
               </span>
 
-              <span className="text-indigo-600 font-medium">
+              <span className="theme-sidebar-text-active font-medium">
                 Galeri
               </span>
             </nav>
@@ -244,11 +248,9 @@ export default function GaleriPage() {
                 mb-6
               "
             >
-
               {/* TITLE */}
 
               <div className="flex items-center gap-3 min-w-0">
-
                 <div
                   className="
                     w-10
@@ -256,8 +258,7 @@ export default function GaleriPage() {
                     sm:w-11
                     sm:h-11
                     rounded-xl
-                    bg-indigo-50
-                    text-indigo-600
+                    theme-info
                     flex
                     items-center
                     justify-center
@@ -268,14 +269,13 @@ export default function GaleriPage() {
                 </div>
 
                 <div className="min-w-0">
-
                   <h1
                     className="
                       text-xl
                       sm:text-2xl
                       lg:text-3xl
                       font-bold
-                      text-gray-900
+                      theme-text
                     "
                   >
                     Manajemen Galeri
@@ -285,15 +285,13 @@ export default function GaleriPage() {
                     className="
                       text-xs
                       sm:text-sm
-                      text-gray-500
+                      theme-text-muted
                       mt-1
                     "
                   >
                     Kelola semua foto, album, dan kategori website
                   </p>
-
                 </div>
-
               </div>
 
               {/* =================================================
@@ -311,7 +309,6 @@ export default function GaleriPage() {
                   lg:w-auto
                 "
               >
-
                 <a
                   href="/cmsAdmin/website/galeri/tambah"
                   className="
@@ -320,14 +317,12 @@ export default function GaleriPage() {
                     justify-center
                     gap-2
                     rounded-xl
-                    bg-indigo-600
+                    theme-primary
                     px-4
                     py-2.5
                     text-sm
                     font-semibold
-                    text-white
                     shadow-sm
-                    hover:bg-indigo-700
                     hover:shadow-md
                     transition-all
                   "
@@ -345,16 +340,15 @@ export default function GaleriPage() {
                     gap-2
                     rounded-xl
                     border
-                    border-gray-200
-                    bg-white
+                    theme-border
+                    theme-card
                     px-4
                     py-2.5
                     text-sm
                     font-medium
-                    text-gray-700
+                    theme-text-secondary
                     shadow-sm
-                    hover:bg-gray-50
-                    hover:border-gray-300
+                    theme-header-hover
                     transition
                   "
                 >
@@ -371,25 +365,22 @@ export default function GaleriPage() {
                     gap-2
                     rounded-xl
                     border
-                    border-gray-200
-                    bg-white
+                    theme-border
+                    theme-card
                     px-4
                     py-2.5
                     text-sm
                     font-medium
-                    text-gray-700
+                    theme-text-secondary
                     shadow-sm
-                    hover:bg-gray-50
-                    hover:border-gray-300
+                    theme-header-hover
                     transition
                   "
                 >
                   <Tags className="w-4 h-4" />
                   Kategori
                 </a>
-
               </div>
-
             </div>
 
             {/* =================================================
@@ -407,43 +398,41 @@ export default function GaleriPage() {
                 mb-6
               "
             >
-
               <StatCard
                 icon={
-                  <ImageIcon className="w-5 h-5 text-blue-600" />
+                  <ImageIcon className="w-5 h-5 text-[var(--color-info)]" />
                 }
                 label="Total Foto"
                 value={galeri.length}
-                bg="bg-blue-50"
+                bg="theme-info"
               />
 
               <StatCard
                 icon={
-                  <Folder className="w-5 h-5 text-purple-600" />
+                  <Folder className="w-5 h-5 text-[var(--color-primary)]" />
                 }
                 label="Total Album"
                 value="4"
-                bg="bg-purple-50"
+                bg="theme-card-soft"
               />
 
               <StatCard
                 icon={
-                  <Tags className="w-5 h-5 text-orange-600" />
+                  <Tags className="w-5 h-5 text-[var(--color-warning)]" />
                 }
                 label="Kategori"
                 value="5"
-                bg="bg-orange-50"
+                bg="theme-warning"
               />
 
               <StatCard
                 icon={
-                  <LayoutGrid className="w-5 h-5 text-green-600" />
+                  <LayoutGrid className="w-5 h-5 text-[var(--color-success)]" />
                 }
                 label="Terbaru"
                 value="Hari ini"
-                bg="bg-green-50"
+                bg="theme-success"
               />
-
             </div>
 
             {/* =================================================
@@ -453,17 +442,16 @@ export default function GaleriPage() {
             <div
               className="
                 w-full
-                bg-white
+                theme-card
                 rounded-2xl
                 border
-                border-gray-100
+                theme-border
                 shadow-sm
                 p-3
                 sm:p-4
                 mb-6
               "
             >
-
               <div
                 className="
                   flex
@@ -474,7 +462,6 @@ export default function GaleriPage() {
                   md:justify-between
                 "
               >
-
                 {/* SEARCH */}
 
                 <div
@@ -485,7 +472,6 @@ export default function GaleriPage() {
                     md:max-w-xl
                   "
                 >
-
                   <Search
                     className="
                       absolute
@@ -494,7 +480,7 @@ export default function GaleriPage() {
                       -translate-y-1/2
                       w-4
                       h-4
-                      text-gray-400
+                      theme-text-muted
                     "
                   />
 
@@ -511,16 +497,11 @@ export default function GaleriPage() {
                       pr-10
                       py-2.5
                       border
-                      border-gray-200
+                      theme-input
                       rounded-xl
-                      bg-gray-50
                       text-sm
-                      text-gray-800
-                      placeholder:text-gray-400
                       focus:outline-none
-                      focus:ring-2
-                      focus:ring-indigo-500/20
-                      focus:border-indigo-500
+                      focus:border-[var(--color-primary)]
                       transition
                     "
                   />
@@ -534,14 +515,13 @@ export default function GaleriPage() {
                         right-3
                         top-1/2
                         -translate-y-1/2
-                        text-gray-400
-                        hover:text-gray-600
+                        theme-text-muted
+                        hover:text-[var(--color-text)]
                       "
                     >
                       <X className="w-4 h-4" />
                     </button>
                   )}
-
                 </div>
 
                 {/* FILTER */}
@@ -555,12 +535,11 @@ export default function GaleriPage() {
                     md:w-auto
                   "
                 >
-
                   <Filter
                     className="
                       w-4
                       h-4
-                      text-gray-400
+                      theme-text-muted
                       shrink-0
                     "
                   />
@@ -576,15 +555,11 @@ export default function GaleriPage() {
                       px-3
                       py-2.5
                       border
-                      border-gray-200
+                      theme-input
                       rounded-xl
-                      bg-gray-50
                       text-sm
-                      text-gray-700
                       focus:outline-none
-                      focus:ring-2
-                      focus:ring-indigo-500/20
-                      focus:border-indigo-500
+                      focus:border-[var(--color-primary)]
                     "
                   >
                     {albumList.map((album) => (
@@ -602,17 +577,14 @@ export default function GaleriPage() {
                       hidden
                       lg:block
                       text-xs
-                      text-gray-400
+                      theme-text-muted
                       whitespace-nowrap
                     "
                   >
                     {filteredGaleri.length} data
                   </span>
-
                 </div>
-
               </div>
-
             </div>
 
             {/* =================================================
@@ -628,15 +600,13 @@ export default function GaleriPage() {
                 mb-4
               "
             >
-
               <div>
-
                 <h2
                   className="
                     text-base
                     sm:text-lg
                     font-semibold
-                    text-gray-900
+                    theme-text
                   "
                 >
                   Semua Galeri
@@ -646,28 +616,26 @@ export default function GaleriPage() {
                   className="
                     text-xs
                     sm:text-sm
-                    text-gray-500
+                    theme-text-muted
                     mt-0.5
                   "
                 >
                   Menampilkan {filteredGaleri.length} foto
                 </p>
-
               </div>
 
               <div
                 className="
                   text-xs
-                  text-gray-400
+                  theme-text-muted
                   hidden
-                    sm:block
+                  sm:block
                 "
               >
                 {filterAlbum === "Semua"
                   ? "Semua album"
                   : filterAlbum}
               </div>
-
             </div>
 
             {/* =================================================
@@ -675,7 +643,6 @@ export default function GaleriPage() {
             ================================================= */}
 
             {filteredGaleri.length > 0 ? (
-
               <div
                 className="
                   grid
@@ -689,20 +656,14 @@ export default function GaleriPage() {
                   lg:gap-5
                 "
               >
-
                 {filteredGaleri.map((item) => (
-
                   <GalleryCard
                     key={item.id}
                     item={item}
                   />
-
                 ))}
-
               </div>
-
             ) : (
-
               /* =================================================
                   EMPTY STATE
               ================================================= */
@@ -710,17 +671,16 @@ export default function GaleriPage() {
               <div
                 className="
                   w-full
-                  bg-white
+                  theme-card
                   rounded-2xl
                   border
-                  border-gray-100
+                  theme-border
                   shadow-sm
                   p-8
                   sm:p-12
                   text-center
                 "
               >
-
                 <div
                   className="
                     inline-flex
@@ -728,13 +688,13 @@ export default function GaleriPage() {
                     justify-center
                     w-16
                     h-16
-                    bg-gray-100
+                    theme-card-soft
                     rounded-full
                     mb-4
                   "
                 >
                   <ImageIcon
-                    className="w-8 h-8 text-gray-400"
+                    className="w-8 h-8 theme-text-muted"
                   />
                 </div>
 
@@ -742,7 +702,7 @@ export default function GaleriPage() {
                   className="
                     text-lg
                     font-semibold
-                    text-gray-900
+                    theme-text
                   "
                 >
                   Tidak ada foto ditemukan
@@ -751,7 +711,7 @@ export default function GaleriPage() {
                 <p
                   className="
                     text-sm
-                    text-gray-500
+                    theme-text-muted
                     mt-1
                   "
                 >
@@ -767,16 +727,14 @@ export default function GaleriPage() {
                       mt-4
                       text-sm
                       font-medium
-                      text-indigo-600
-                      hover:text-indigo-700
+                      text-[var(--color-primary)]
+                      hover:text-[var(--color-primary-hover)]
                     "
                   >
                     Reset pencarian
                   </button>
                 )}
-
               </div>
-
             )}
 
             {/* =================================================
@@ -789,19 +747,16 @@ export default function GaleriPage() {
                 sm:mt-10
                 pt-5
                 border-t
-                border-gray-200
+                theme-border
                 text-center
                 text-xs
-                text-gray-400
+                theme-text-muted
               "
             >
               © 2026 SmartSchool CMS. All rights reserved.
             </div>
-
           </div>
-
         </main>
-
       </div>
     </div>
   );
@@ -825,7 +780,7 @@ function StatCard({
         min-w-0
         rounded-2xl
         border
-        border-gray-100
+        theme-border
         p-3
         sm:p-4
         shadow-sm
@@ -833,9 +788,7 @@ function StatCard({
         transition
       `}
     >
-
       <div className="flex items-center gap-2.5 sm:gap-3">
-
         <div
           className="
             w-9
@@ -843,7 +796,7 @@ function StatCard({
             sm:w-10
             sm:h-10
             rounded-xl
-            bg-white
+            theme-card
             flex
             items-center
             justify-center
@@ -855,12 +808,11 @@ function StatCard({
         </div>
 
         <div className="min-w-0">
-
           <p
             className="
               text-[10px]
               sm:text-xs
-              text-gray-500
+              theme-text-muted
               font-medium
               truncate
             "
@@ -873,17 +825,14 @@ function StatCard({
               text-lg
               sm:text-xl
               font-bold
-              text-gray-900
+              theme-text
               truncate
             "
           >
             {value}
           </p>
-
         </div>
-
       </div>
-
     </div>
   );
 }
@@ -900,11 +849,11 @@ function GalleryCard({ item }) {
         relative
         w-full
         min-w-0
-        bg-white
+        theme-card
         rounded-2xl
         shadow-sm
         border
-        border-gray-100
+        theme-border
         overflow-hidden
         hover:shadow-xl
         hover:-translate-y-1
@@ -912,7 +861,6 @@ function GalleryCard({ item }) {
         duration-300
       "
     >
-
       {/* =================================================
           IMAGE
       ================================================= */}
@@ -923,10 +871,9 @@ function GalleryCard({ item }) {
           w-full
           aspect-[4/3]
           overflow-hidden
-          bg-gray-100
+          theme-card-soft
         "
       >
-
         <img
           src={item.foto}
           alt={item.judul}
@@ -988,7 +935,6 @@ function GalleryCard({ item }) {
             gap-2
           "
         >
-
           <button
             type="button"
             title="Lihat Detail"
@@ -1019,10 +965,9 @@ function GalleryCard({ item }) {
               flex
               items-center
               justify-center
-              bg-indigo-600/90
-              backdrop-blur-sm
+              bg-[var(--color-primary)]
               rounded-full
-              hover:bg-indigo-600
+              hover:bg-[var(--color-primary-hover)]
               hover:scale-105
               transition
               text-white
@@ -1040,10 +985,9 @@ function GalleryCard({ item }) {
               flex
               items-center
               justify-center
-              bg-red-500/90
-              backdrop-blur-sm
+              bg-[var(--color-danger)]
               rounded-full
-              hover:bg-red-600
+              hover:opacity-90
               hover:scale-105
               transition
               text-white
@@ -1051,9 +995,7 @@ function GalleryCard({ item }) {
           >
             <Trash2 className="w-4 h-4" />
           </button>
-
         </div>
-
       </div>
 
       {/* =================================================
@@ -1061,15 +1003,12 @@ function GalleryCard({ item }) {
       ================================================= */}
 
       <div className="p-3 sm:p-4">
-
         <div className="flex items-start gap-2">
-
           <div className="flex-1 min-w-0">
-
             <h3
               className="
                 font-semibold
-                text-gray-900
+                theme-text
                 text-sm
                 truncate
                 mb-1
@@ -1083,7 +1022,7 @@ function GalleryCard({ item }) {
               className="
                 text-[9px]
                 sm:text-[10px]
-                text-gray-400
+                theme-text-muted
                 uppercase
                 tracking-wider
                 font-medium
@@ -1092,7 +1031,6 @@ function GalleryCard({ item }) {
             >
               {item.kategori}
             </p>
-
           </div>
 
           <button
@@ -1105,20 +1043,17 @@ function GalleryCard({ item }) {
               items-center
               justify-center
               rounded-lg
-              text-gray-400
-              hover:bg-gray-100
-              hover:text-gray-600
+              theme-text-muted
+              theme-header-hover
+              hover:text-[var(--color-text)]
               transition
               shrink-0
             "
           >
             <Plus className="w-4 h-4 rotate-45" />
           </button>
-
         </div>
-
       </div>
-
     </div>
   );
 }

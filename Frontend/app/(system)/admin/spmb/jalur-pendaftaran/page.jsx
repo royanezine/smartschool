@@ -25,35 +25,94 @@ import Sidebar from "../../../../components/Sidebar";
 import Header from "../../../../components/Header";
 import { getPendaftarPpdb } from "../../../../../services/ppdb.service";
 
+// ============================================================
+// THEME HELPERS
+// ============================================================
+
+const themePrimaryText = "text-[var(--color-primary)]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+// ============================================================
+// COLOR MAP
+// ============================================================
+
 const colorMap = {
   zonasi: {
-    bg: "bg-blue-50",
-    text: "text-blue-600",
-    border: "border-blue-200",
+    bg: themeInfoSurface,
+    text: "text-[var(--color-info)]",
+    border: themeInfoBorder,
     icon: MapPin,
   },
+
   prestasi: {
-    bg: "bg-amber-50",
-    text: "text-amber-600",
-    border: "border-amber-200",
+    bg: themeWarningSurface,
+    text: "text-[var(--color-warning)]",
+    border: themeWarningBorder,
     icon: Sparkles,
   },
+
   afirmasi: {
-    bg: "bg-emerald-50",
-    text: "text-emerald-600",
-    border: "border-emerald-200",
+    bg: themeSuccessSurface,
+    text: "text-[var(--color-success)]",
+    border: themeSuccessBorder,
     icon: Users,
   },
+
   pindahan: {
-    bg: "bg-rose-50",
-    text: "text-rose-600",
-    border: "border-rose-200",
+    bg: themePrimarySoft,
+    text: themePrimaryText,
+    border: themePrimarySoftBorder,
     icon: FileCheck2,
   },
+
   default: {
-    bg: "bg-slate-50",
-    text: "text-slate-600",
-    border: "border-slate-200",
+    bg: themeNeutralSurface,
+    text: "theme-text-secondary",
+    border: themeNeutralBorder,
     icon: Route,
   },
 };
@@ -83,6 +142,10 @@ function getColorByNama(nama) {
 
   return colorMap.default;
 }
+
+// ============================================================
+// HELPERS
+// ============================================================
 
 function formatTanggalLengkap(value) {
   if (!value) {
@@ -146,15 +209,13 @@ function getStatusInfo(item) {
   if (status === "aktif") {
     return {
       label: "Aktif",
-      className:
-        "border-emerald-200 bg-emerald-50 text-emerald-700",
+      className: `${themeSuccessBorder} ${themeSuccessSurface} text-[var(--color-success)]`,
     };
   }
 
   return {
     label: "Tidak Aktif",
-    className:
-      "border-slate-200 bg-slate-100 text-slate-600",
+    className: `${themeNeutralBorder} ${themeNeutralSurface} theme-text-secondary`,
   };
 }
 
@@ -173,15 +234,16 @@ function isPeriodeAktif(item) {
     return false;
   }
 
-  if (
-    selesai &&
-    !Number.isNaN(selesai.getTime())
-  ) {
+  if (selesai && !Number.isNaN(selesai.getTime())) {
     return now >= mulai && now <= selesai;
   }
 
   return now >= mulai;
 }
+
+// ============================================================
+// PAGE
+// ============================================================
 
 export default function JalurPendaftaranPage() {
   const router = useRouter();
@@ -197,6 +259,10 @@ export default function JalurPendaftaranPage() {
   const toggleSidebar = () => {
     setCollapsed((value) => !value);
   };
+
+  // ============================================================
+  // LOAD DATA
+  // ============================================================
 
   const loadData = useCallback(
     async (isRefresh = false) => {
@@ -262,10 +328,7 @@ export default function JalurPendaftaranPage() {
           return jalur[0]?.id || null;
         });
       } catch (err) {
-        console.error(
-          "GET JALUR PPDB ERROR:",
-          err
-        );
+        console.error("GET JALUR PPDB ERROR:", err);
 
         setError(
           err?.message ||
@@ -285,6 +348,10 @@ export default function JalurPendaftaranPage() {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  // ============================================================
+  // FILTER
+  // ============================================================
 
   const filteredData = useMemo(() => {
     const keyword = search.trim().toLowerCase();
@@ -309,6 +376,10 @@ export default function JalurPendaftaranPage() {
     });
   }, [data, search]);
 
+  // ============================================================
+  // STATS
+  // ============================================================
+
   const totalJalur = data.length;
 
   const totalKuota = data.reduce(
@@ -319,21 +390,23 @@ export default function JalurPendaftaranPage() {
 
   const jalurAktif = data.filter(
     (item) =>
-      String(
-        item?.status || ""
-      ).toLowerCase() === "aktif"
+      String(item?.status || "").toLowerCase() ===
+      "aktif"
   ).length;
 
   const jalurPeriodeAktif = data.filter(
     (item) =>
-      String(
-        item?.status || ""
-      ).toLowerCase() === "aktif" &&
+      String(item?.status || "").toLowerCase() ===
+        "aktif" &&
       isPeriodeAktif(item)
   ).length;
 
+  // ============================================================
+  // RENDER
+  // ============================================================
+
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-slate-50">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar
         collapsed={collapsed}
         setCollapsed={setCollapsed}
@@ -351,23 +424,31 @@ export default function JalurPendaftaranPage() {
           }}
         />
 
-        <main className="flex-1 overflow-y-auto">
+        <main className="theme-page flex-1 overflow-y-auto">
           <div className="w-full p-4 sm:p-6 lg:p-8">
+
+            {/* =====================================================
+                HEADER
+            ===================================================== */}
+
             <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
               <div>
-                <div className="mb-2 flex items-center gap-2 text-sm text-slate-500">
+                <div className="mb-2 flex items-center gap-2 text-sm theme-text-secondary">
                   <span>SPMB</span>
                   <span>/</span>
-                  <span className="font-medium text-blue-600">
+
+                  <span
+                    className={`font-medium ${themePrimaryText}`}
+                  >
                     Jalur Pendaftaran
                   </span>
                 </div>
 
-                <h1 className="text-2xl font-bold tracking-tight text-slate-900 md:text-3xl">
+                <h1 className="theme-text text-2xl font-bold tracking-tight md:text-3xl">
                   Jalur Pendaftaran
                 </h1>
 
-                <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-500 md:text-base">
+                <p className="theme-text-secondary mt-1 max-w-2xl text-sm leading-6 md:text-base">
                   Lihat informasi jalur pendaftaran,
                   kuota, periode, dan persyaratan SPMB.
                 </p>
@@ -377,7 +458,7 @@ export default function JalurPendaftaranPage() {
                 type="button"
                 onClick={() => loadData(true)}
                 disabled={refreshing}
-                className="inline-flex h-11 items-center justify-center gap-2 self-start rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 lg:self-auto"
+                className={`theme-card ${themeNeutralBorder} theme-text-secondary inline-flex h-11 items-center justify-center gap-2 self-start rounded-xl border px-4 text-sm font-semibold ${themeSmallShadow} transition ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-60 lg:self-auto`}
               >
                 {refreshing ? (
                   <Loader2
@@ -388,14 +469,18 @@ export default function JalurPendaftaranPage() {
                   <RefreshCw size={17} />
                 )}
 
-                {refreshing
-                  ? "Memuat..."
-                  : "Refresh"}
+                {refreshing ? "Memuat..." : "Refresh"}
               </button>
             </div>
 
+            {/* =====================================================
+                ERROR
+            ===================================================== */}
+
             {error && (
-              <div className="mb-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              <div
+                className={`theme-danger mb-5 flex items-start gap-3 rounded-xl border px-4 py-3 text-sm`}
+              >
                 <AlertCircle
                   size={19}
                   className="mt-0.5 shrink-0"
@@ -412,6 +497,10 @@ export default function JalurPendaftaranPage() {
                 </div>
               </div>
             )}
+
+            {/* =====================================================
+                STATISTICS
+            ===================================================== */}
 
             <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <StatCard
@@ -443,14 +532,20 @@ export default function JalurPendaftaranPage() {
               />
             </div>
 
-            <div className="mb-5 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+            {/* =====================================================
+                SEARCH
+            ===================================================== */}
+
+            <div
+              className={`theme-card ${themeNeutralBorder} mb-5 overflow-hidden rounded-2xl border ${themeCardShadow}`}
+            >
               <div className="flex flex-col gap-3 p-4 md:flex-row md:items-center md:justify-between md:p-5">
                 <div>
-                  <h2 className="text-sm font-semibold text-slate-800">
+                  <h2 className="theme-text text-sm font-semibold">
                     Daftar Jalur Pendaftaran
                   </h2>
 
-                  <p className="mt-0.5 text-xs text-slate-400">
+                  <p className="theme-text-muted mt-0.5 text-xs">
                     Klik jalur untuk melihat informasi lengkap.
                   </p>
                 </div>
@@ -458,50 +553,62 @@ export default function JalurPendaftaranPage() {
                 <div className="relative w-full md:max-w-sm">
                   <Search
                     size={17}
-                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                    className="theme-text-muted absolute left-3.5 top-1/2 -translate-y-1/2"
                   />
 
                   <input
                     type="text"
                     value={search}
                     onChange={(event) =>
-                      setSearch(
-                        event.target.value
-                      )
+                      setSearch(event.target.value)
                     }
                     placeholder="Cari nama jalur..."
-                    className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-100"
+                    className={`theme-input h-11 w-full rounded-xl border pl-10 pr-4 text-sm outline-none transition placeholder:text-[var(--color-text-placeholder)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]`}
                   />
                 </div>
               </div>
             </div>
 
+            {/* =====================================================
+                LOADING
+            ===================================================== */}
+
             {loading ? (
-              <div className="flex min-h-[380px] items-center justify-center rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <div
+                className={`theme-card ${themeNeutralBorder} flex min-h-[380px] items-center justify-center rounded-2xl border ${themeCardShadow}`}
+              >
                 <div className="flex flex-col items-center">
                   <Loader2
                     size={30}
-                    className="animate-spin text-blue-600"
+                    className={`${themePrimaryText} animate-spin`}
                   />
 
-                  <p className="mt-3 text-sm text-slate-500">
+                  <p className="theme-text-secondary mt-3 text-sm">
                     Memuat jalur pendaftaran...
                   </p>
                 </div>
               </div>
             ) : filteredData.length === 0 ? (
-              <div className="flex min-h-[380px] flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white px-6 text-center shadow-sm">
-                <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+              /* =====================================================
+                 EMPTY STATE
+              ===================================================== */
+
+              <div
+                className={`theme-card ${themeNeutralBorder} flex min-h-[380px] flex-col items-center justify-center rounded-2xl border px-6 text-center ${themeCardShadow}`}
+              >
+                <div
+                  className={`mb-4 flex h-16 w-16 items-center justify-center rounded-2xl ${themePrimarySoft} ${themePrimaryText}`}
+                >
                   <Route size={30} />
                 </div>
 
-                <h3 className="text-lg font-bold text-slate-900">
+                <h3 className="theme-text text-lg font-bold">
                   {data.length === 0
                     ? "Belum ada jalur pendaftaran"
                     : "Data tidak ditemukan"}
                 </h3>
 
-                <p className="mt-1 max-w-md text-sm leading-6 text-slate-500">
+                <p className="theme-text-secondary mt-1 max-w-md text-sm leading-6">
                   {data.length === 0
                     ? "Belum ada data jalur pendaftaran yang tersedia."
                     : "Coba gunakan kata kunci pencarian yang berbeda."}
@@ -513,7 +620,7 @@ export default function JalurPendaftaranPage() {
                     onClick={() =>
                       loadData(true)
                     }
-                    className="mt-5 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
+                    className={`${themePrimaryGradient} inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-[var(--color-card)] transition hover:opacity-90`}
                   >
                     <RefreshCw size={17} />
                     Muat Ulang
@@ -521,15 +628,17 @@ export default function JalurPendaftaranPage() {
                 )}
               </div>
             ) : (
+              /* =====================================================
+                 LIST
+              ===================================================== */
+
               <div className="space-y-4">
                 {filteredData.map((item) => {
                   const isOpen =
                     openId === item?.id;
 
                   const style =
-                    getColorByNama(
-                      item?.nama
-                    );
+                    getColorByNama(item?.nama);
 
                   const Icon = style.icon;
 
@@ -545,14 +654,15 @@ export default function JalurPendaftaranPage() {
                     isPeriodeAktif(item) &&
                     String(
                       item?.status || ""
-                    ).toLowerCase() ===
-                      "aktif";
+                    ).toLowerCase() === "aktif";
 
                   return (
                     <div
                       key={item?.id}
-                      className={`overflow-hidden rounded-2xl border bg-white shadow-sm transition ${style.border}`}
+                      className={`theme-card overflow-hidden rounded-2xl border ${style.border} ${themeCardShadow} transition`}
                     >
+                      {/* HEADER ACCORDION */}
+
                       <button
                         type="button"
                         onClick={() =>
@@ -562,7 +672,7 @@ export default function JalurPendaftaranPage() {
                               : item?.id
                           )
                         }
-                        className="flex w-full items-center gap-4 p-4 text-left sm:p-5"
+                        className="flex w-full items-center gap-4 p-4 text-left transition hover:bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)] sm:p-5"
                         aria-expanded={isOpen}
                       >
                         <div
@@ -573,7 +683,7 @@ export default function JalurPendaftaranPage() {
 
                         <div className="min-w-0 flex-1">
                           <div className="flex flex-wrap items-center gap-2">
-                            <p className="font-bold text-slate-900">
+                            <p className="theme-text font-bold">
                               {item?.nama || "-"}
                             </p>
 
@@ -584,18 +694,18 @@ export default function JalurPendaftaranPage() {
                             </span>
                           </div>
 
-                          <p className="mt-1 line-clamp-2 text-sm leading-5 text-slate-500">
+                          <p className="theme-text-secondary mt-1 line-clamp-2 text-sm leading-5">
                             {item?.deskripsi ||
                               "Tidak ada deskripsi jalur."}
                           </p>
                         </div>
 
                         <div className="hidden shrink-0 text-right sm:block">
-                          <p className="text-xs text-slate-400">
+                          <p className="theme-text-muted text-xs">
                             Kuota
                           </p>
 
-                          <p className="mt-0.5 text-sm font-bold text-slate-800">
+                          <p className="theme-text mt-0.5 text-sm font-bold">
                             {Number(
                               item?.kuota || 0
                             ).toLocaleString(
@@ -607,7 +717,7 @@ export default function JalurPendaftaranPage() {
 
                         <ChevronDown
                           size={18}
-                          className={`shrink-0 text-slate-400 transition-transform ${
+                          className={`theme-text-muted shrink-0 transition-transform ${
                             isOpen
                               ? "rotate-180"
                               : ""
@@ -615,8 +725,14 @@ export default function JalurPendaftaranPage() {
                         />
                       </button>
 
+                      {/* DETAIL */}
+
                       {isOpen && (
-                        <div className="border-t border-slate-100 px-4 pb-5 pt-5 sm:px-5 sm:pb-6">
+                        <div
+                          className={`${themeDivider} border-t px-4 pb-5 pt-5 sm:px-5 sm:pb-6`}
+                        >
+                          {/* INFO CARDS */}
+
                           <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                             <DetailCard
                               icon={Users}
@@ -647,12 +763,14 @@ export default function JalurPendaftaranPage() {
                             />
                           </div>
 
+                          {/* PERIOD */}
+
                           <div className="mt-4">
                             <span
                               className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-semibold ${
                                 periodeAktif
-                                  ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                                  : "border-slate-200 bg-slate-100 text-slate-600"
+                                  ? `${themeSuccessBorder} ${themeSuccessSurface} text-[var(--color-success)]`
+                                  : `${themeNeutralBorder} ${themeNeutralSurface} theme-text-secondary`
                               }`}
                             >
                               <CheckCircle2
@@ -665,19 +783,23 @@ export default function JalurPendaftaranPage() {
                             </span>
                           </div>
 
+                          {/* DESCRIPTION */}
+
                           <div className="mt-6">
-                            <p className="mb-2 text-xs font-bold uppercase tracking-wide text-slate-400">
+                            <p className="theme-text-muted mb-2 text-xs font-bold uppercase tracking-wide">
                               Deskripsi
                             </p>
 
-                            <p className="text-sm leading-6 text-slate-600">
+                            <p className="theme-text-secondary text-sm leading-6">
                               {item?.deskripsi ||
                                 "Tidak ada deskripsi jalur pendaftaran."}
                             </p>
                           </div>
 
+                          {/* DOCUMENT */}
+
                           <div className="mt-6">
-                            <p className="mb-3 text-xs font-bold uppercase tracking-wide text-slate-400">
+                            <p className="theme-text-muted mb-3 text-xs font-bold uppercase tracking-wide">
                               Dokumen Pendukung
                             </p>
 
@@ -689,14 +811,14 @@ export default function JalurPendaftaranPage() {
                                 ) => (
                                   <div
                                     key={index}
-                                    className="flex items-start gap-2.5 rounded-lg bg-slate-50 px-3.5 py-3"
+                                    className={`flex items-start gap-2.5 rounded-lg ${themeNeutralSurface} px-3.5 py-3`}
                                   >
                                     <FileCheck2
                                       size={15}
                                       className={`mt-0.5 shrink-0 ${style.text}`}
                                     />
 
-                                    <span className="text-sm text-slate-600">
+                                    <span className="theme-text-secondary text-sm">
                                       {
                                         dokumenItem
                                       }
@@ -707,31 +829,28 @@ export default function JalurPendaftaranPage() {
                             </div>
                           </div>
 
+                          {/* SYSTEM IDS */}
+
                           <div className="mt-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
-                            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                              <p className="text-xs font-semibold text-slate-400">
-                                ID Jalur
-                              </p>
+                            <SystemInfo
+                              label="ID Jalur"
+                              value={item?.id}
+                            />
 
-                              <p className="mt-1 break-all text-sm font-medium text-slate-700">
-                                {item?.id || "-"}
-                              </p>
-                            </div>
-
-                            <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
-                              <p className="text-xs font-semibold text-slate-400">
-                                ID Sekolah
-                              </p>
-
-                              <p className="mt-1 break-all text-sm font-medium text-slate-700">
-                                {item?.sekolahId ||
-                                  "-"}
-                              </p>
-                            </div>
+                            <SystemInfo
+                              label="ID Sekolah"
+                              value={
+                                item?.sekolahId
+                              }
+                            />
                           </div>
 
-                          <div className="mt-6 flex flex-col gap-3 border-t border-slate-100 pt-5 sm:flex-row sm:items-center sm:justify-between">
-                            <p className="text-xs leading-5 text-slate-400">
+                          {/* ACTION */}
+
+                          <div
+                            className={`${themeDivider} mt-6 flex flex-col gap-3 border-t pt-5 sm:flex-row sm:items-center sm:justify-between`}
+                          >
+                            <p className="theme-text-muted text-xs leading-5">
                               Data jalur berasal dari
                               sistem PPDB.
                             </p>
@@ -748,7 +867,7 @@ export default function JalurPendaftaranPage() {
                                 )
                               }
                               disabled={!item?.id}
-                              className="inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                              className={`${themeNeutralBorder} theme-card theme-text-secondary inline-flex shrink-0 items-center justify-center gap-1.5 rounded-lg border px-5 py-2.5 text-sm font-semibold transition ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-50`}
                             >
                               Lihat Detail
                               <ChevronRight
@@ -764,13 +883,19 @@ export default function JalurPendaftaranPage() {
               </div>
             )}
 
-            <div className="mt-5 flex items-start gap-2.5 rounded-xl border border-slate-200 bg-white p-4 text-xs text-slate-500 shadow-sm">
+            {/* =====================================================
+                INFO
+            ===================================================== */}
+
+            <div
+              className={`theme-card ${themeNeutralBorder} mt-5 flex items-start gap-2.5 rounded-xl border p-4 text-xs ${themeCardShadow}`}
+            >
               <Info
                 size={15}
-                className="mt-0.5 shrink-0 text-blue-500"
+                className={`mt-0.5 shrink-0 ${themePrimaryText}`}
               />
 
-              <p className="leading-5">
+              <p className="theme-text-secondary leading-5">
                 Data nama jalur, kuota, periode,
                 status, ID jalur, dan ID sekolah
                 ditampilkan berdasarkan data dari
@@ -778,17 +903,23 @@ export default function JalurPendaftaranPage() {
               </p>
             </div>
 
-            <footer className="mt-6 border-t border-slate-200/70 py-4 text-center">
+            {/* =====================================================
+                FOOTER
+            ===================================================== */}
+
+            <footer
+              className={`${themeDivider} mt-6 border-t py-4 text-center`}
+            >
               <div className="flex flex-col items-center justify-center gap-1 sm:flex-row sm:gap-2">
-                <span className="text-[10px] font-medium text-slate-400">
+                <span className="theme-text-muted text-[10px] font-medium">
                   © 2026 SmartSchool
                 </span>
 
-                <span className="hidden text-slate-300 sm:block">
+                <span className="theme-text-placeholder hidden sm:block">
                   •
                 </span>
 
-                <span className="text-[10px] text-slate-400">
+                <span className="theme-text-muted text-[10px]">
                   Dashboard Admin Sekolah
                 </span>
               </div>
@@ -800,30 +931,40 @@ export default function JalurPendaftaranPage() {
   );
 }
 
+// ============================================================
+// DETAIL CARD
+// ============================================================
+
 function DetailCard({
   icon: Icon,
   label,
   value,
 }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+    <div
+      className={`theme-card ${themeNeutralBorder} rounded-xl border p-4`}
+    >
       <div className="flex items-center gap-2">
         <Icon
           size={16}
-          className="text-slate-400"
+          className="theme-text-muted"
         />
 
-        <p className="text-xs font-semibold text-slate-500">
+        <p className="theme-text-secondary text-xs font-semibold">
           {label}
         </p>
       </div>
 
-      <p className="mt-2 text-sm font-bold text-slate-800">
+      <p className="theme-text mt-2 text-sm font-bold">
         {value}
       </p>
     </div>
   );
 }
+
+// ============================================================
+// STAT CARD
+// ============================================================
 
 function StatCard({
   title,
@@ -832,28 +973,52 @@ function StatCard({
   description,
 }) {
   return (
-    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+    <div
+      className={`theme-card ${themeNeutralBorder} rounded-2xl border p-5 ${themeCardShadow}`}
+    >
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm font-medium text-slate-500">
+          <p className="theme-text-secondary text-sm font-medium">
             {title}
           </p>
 
-          <p className="mt-2 text-2xl font-bold tracking-tight text-slate-900">
+          <p className="theme-text mt-2 text-2xl font-bold tracking-tight">
             {Number(
               value || 0
             ).toLocaleString("id-ID")}
           </p>
 
-          <p className="mt-1 text-xs text-slate-400">
+          <p className="theme-text-muted mt-1 text-xs">
             {description}
           </p>
         </div>
 
-        <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+        <div
+          className={`flex h-11 w-11 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
+        >
           <Icon size={21} />
         </div>
       </div>
+    </div>
+  );
+}
+
+// ============================================================
+// SYSTEM INFO
+// ============================================================
+
+function SystemInfo({ label, value }) {
+  return (
+    <div
+      className={`${themeNeutralSurface} ${themeNeutralBorder} rounded-xl border p-4`}
+    >
+      <p className="theme-text-muted text-xs font-semibold">
+        {label}
+      </p>
+
+      <p className="theme-text-secondary mt-1 break-all text-sm font-medium">
+        {value || "-"}
+      </p>
     </div>
   );
 }

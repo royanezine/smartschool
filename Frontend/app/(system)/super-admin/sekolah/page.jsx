@@ -3,9 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import Sidebar from "../../../components/Sidebar";
-import Header from "../../../components/Header";
-
 import {
   getSekolahBinaan,
   getYayasanSummary,
@@ -26,64 +23,127 @@ import {
   ArrowUp,
   ArrowDown,
   SlidersHorizontal,
-  LayoutGrid,
   Database,
 } from "lucide-react";
 
-// ============================================================
-// STATUS STYLE
-// ============================================================
+/* ============================================================
+   THEME HELPERS
+============================================================ */
+
+const themeCardShadow =
+  "shadow-[0_3px_14px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_10px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themePrimarySurface =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimaryBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_9%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeInfoText =
+  "text-[var(--color-info)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeSuccessText =
+  "text-[var(--color-success)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeWarningText =
+  "text-[var(--color-warning)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
+
+const themePrimaryButton =
+  "bg-[var(--color-primary)] hover:bg-[color-mix(in_srgb,var(--color-primary)_88%,var(--color-text))] text-[var(--color-card)]";
+
+/* ============================================================
+   STATUS STYLE
+============================================================ */
 
 const statusColorMap = {
   Aktif: {
-    bg: "bg-emerald-50",
-    text: "text-emerald-700",
-    border: "border-emerald-200",
-    dot: "bg-emerald-500",
+    bg: themeSuccessSurface,
+    text: themeSuccessText,
+    border: themeSuccessBorder,
+    dot: "bg-[var(--color-success)]",
   },
 
   Trial: {
-    bg: "bg-amber-50",
-    text: "text-amber-700",
-    border: "border-amber-200",
-    dot: "bg-amber-500",
+    bg: themeWarningSurface,
+    text: themeWarningText,
+    border: themeWarningBorder,
+    dot: "bg-[var(--color-warning)]",
   },
 
   Nonaktif: {
-    bg: "bg-rose-50",
-    text: "text-rose-700",
-    border: "border-rose-200",
-    dot: "bg-rose-500",
+    bg: themeNeutralSurface,
+    text: "theme-text-secondary",
+    border: themeNeutralBorder,
+    dot: "bg-[var(--color-text-muted)]",
   },
 };
 
-// ============================================================
-// PAKET STYLE
-// ============================================================
+/* ============================================================
+   PAKET STYLE
+============================================================ */
 
 const paketColorMap = {
   Enterprise: {
-    bg: "bg-violet-50",
-    text: "text-violet-700",
-    border: "border-violet-200",
+    bg: themeInfoSurface,
+    text: themeInfoText,
+    border: themeInfoBorder,
   },
 
   Professional: {
-    bg: "bg-blue-50",
-    text: "text-blue-700",
-    border: "border-blue-200",
+    bg: themePrimarySurface,
+    text: themePrimaryText,
+    border: themePrimaryBorder,
   },
 
   Starter: {
-    bg: "bg-slate-50",
-    text: "text-slate-600",
-    border: "border-slate-200",
+    bg: themeNeutralSurface,
+    text: "theme-text-secondary",
+    border: themeNeutralBorder,
   },
 };
 
-// ============================================================
-// HELPER RESPONSE API
-// ============================================================
+/* ============================================================
+   HELPER RESPONSE API
+============================================================ */
 
 function unwrapArrayResponse(result) {
   if (Array.isArray(result)) {
@@ -165,9 +225,9 @@ function unwrapObjectResponse(result) {
   return result;
 }
 
-// ============================================================
-// HELPER VALUE
-// ============================================================
+/* ============================================================
+   HELPER VALUE
+============================================================ */
 
 function firstValue(...values) {
   for (const value of values) {
@@ -321,34 +381,40 @@ function normalizeSchool(item, index) {
       item?.logo
     ),
 
-    totalGuru: Number(
-      firstValue(
-        item?.totalGuru,
-        item?.jumlahGuru,
-        0
-      )
-    ) || 0,
+    totalGuru:
+      Number(
+        firstValue(
+          item?.totalGuru,
+          item?.jumlahGuru,
+          0
+        )
+      ) || 0,
 
-    totalSiswa: Number(
-      firstValue(
-        item?.totalSiswa,
-        item?.jumlahSiswa,
-        0
-      )
-    ) || 0,
+    totalSiswa:
+      Number(
+        firstValue(
+          item?.totalSiswa,
+          item?.jumlahSiswa,
+          0
+        )
+      ) || 0,
 
-    totalKelas: Number(
-      firstValue(
-        item?.totalKelas,
-        item?.jumlahKelas,
-        0
-      )
-    ) || 0,
+    totalKelas:
+      Number(
+        firstValue(
+          item?.totalKelas,
+          item?.jumlahKelas,
+          0
+        )
+      ) || 0,
 
-    tanggalMulai: langganan?.tanggalMulai || null,
+    tanggalMulai:
+      langganan?.tanggalMulai ||
+      null,
 
     tanggalBerakhir:
-      langganan?.tanggalBerakhir || null,
+      langganan?.tanggalBerakhir ||
+      null,
 
     createdAt:
       item?.dibuatPada ||
@@ -357,9 +423,9 @@ function normalizeSchool(item, index) {
   };
 }
 
-// ============================================================
-// SORT CONTROL
-// ============================================================
+/* ============================================================
+   SORT CONTROL
+============================================================ */
 
 function SortControl({
   sortField,
@@ -399,32 +465,31 @@ function SortControl({
             sortOrder
           )
         }
-        className="
+        className={`
           h-9
           rounded-xl
           border
-          border-slate-200
-          bg-slate-50
+          theme-border
+          theme-input
           px-3
           text-xs
           font-medium
-          text-slate-600
+          theme-text-secondary
           outline-none
           transition-all
-          focus:border-blue-400
-          focus:bg-white
-          focus:ring-4
-          focus:ring-blue-500/10
-        "
+          ${themeFocus}
+        `}
       >
-        {sortOptions.map((option) => (
-          <option
-            key={option.value}
-            value={option.value}
-          >
-            {option.label}
-          </option>
-        ))}
+        {sortOptions.map(
+          (option) => (
+            <option
+              key={option.value}
+              value={option.value}
+            >
+              {option.label}
+            </option>
+          )
+        )}
       </select>
 
       <button
@@ -437,7 +502,7 @@ function SortControl({
               : "asc"
           )
         }
-        className="
+        className={`
           flex
           h-9
           w-9
@@ -445,13 +510,13 @@ function SortControl({
           justify-center
           rounded-xl
           border
-          border-slate-200
-          bg-slate-50
-          text-slate-500
+          theme-border
+          ${themeNeutralSurface}
+          theme-text-muted
           transition-all
-          hover:border-slate-300
-          hover:bg-slate-100
-        "
+          ${themeNeutralHover}
+          hover:border-[color-mix(in_srgb,var(--color-primary)_20%,var(--color-border))]
+        `}
         title={
           sortOrder === "asc"
             ? "Urutkan menurun"
@@ -461,12 +526,12 @@ function SortControl({
         {sortOrder === "asc" ? (
           <ArrowUp
             size={16}
-            className="text-blue-500"
+            className={themePrimaryText}
           />
         ) : (
           <ArrowDown
             size={16}
-            className="text-blue-500"
+            className={themePrimaryText}
           />
         )}
       </button>
@@ -474,43 +539,31 @@ function SortControl({
   );
 }
 
-// ============================================================
-// PAGE
-// ============================================================
+/* ============================================================
+   PAGE
+============================================================ */
 
 export default function DataSekolahPage() {
   const router = useRouter();
 
-  const [activeMenu, setActiveMenu] =
-    useState("sekolah");
-
-  const [sidebarOpen, setSidebarOpen] =
-    useState(true);
-
   const [sekolahData, setSekolahData] =
     useState([]);
 
-  const [stats, setStats] = useState({
-    total: 0,
-    aktif: 0,
-    nonaktif: 0,
-    trial: 0,
-    totalGuru: 0,
-    totalSiswa: 0,
-  });
+  const [stats, setStats] =
+    useState({
+      total: 0,
+      aktif: 0,
+      nonaktif: 0,
+      trial: 0,
+      totalGuru: 0,
+      totalSiswa: 0,
+    });
 
   const [loading, setLoading] =
     useState(true);
 
   const [error, setError] =
     useState("");
-
-  const [currentUser, setCurrentUser] =
-    useState({
-      name: "Super Admin",
-      email: "",
-      avatar: "SA",
-    });
 
   const [searchQuery, setSearchQuery] =
     useState("");
@@ -535,77 +588,9 @@ export default function DataSekolahPage() {
 
   const itemsPerPage = 5;
 
-  // ==========================================================
-  // NOTIFICATIONS
-  // ==========================================================
-
-  const notifications = [
-    {
-      id: 1,
-      title: "Pembaruan Sistem v2.0",
-      desc: "Dikirim 2 jam lalu",
-      read: false,
-    },
-    {
-      id: 2,
-      title: "Pengingat: Backup Data",
-      desc: "Dikirim 1 hari lalu",
-      read: false,
-    },
-  ];
-
-  // ==========================================================
-  // LOAD USER
-  // ==========================================================
-
-  useEffect(() => {
-    try {
-      const savedUser =
-        localStorage.getItem("user");
-
-      if (!savedUser) {
-        return;
-      }
-
-      const parsedUser =
-        JSON.parse(savedUser);
-
-      const name =
-        parsedUser?.namaLengkap ||
-        parsedUser?.nama ||
-        parsedUser?.name ||
-        parsedUser?.username ||
-        "Super Admin";
-
-      const email =
-        parsedUser?.email || "";
-
-      const avatar =
-        name
-          .split(" ")
-          .filter(Boolean)
-          .slice(0, 2)
-          .map((word) =>
-            word.charAt(0).toUpperCase()
-          )
-          .join("") || "SA";
-
-      setCurrentUser({
-        name,
-        email,
-        avatar,
-      });
-    } catch (err) {
-      console.error(
-        "Gagal membaca user localStorage:",
-        err
-      );
-    }
-  }, []);
-
-  // ==========================================================
-  // RESPONSIVE
-  // ==========================================================
+  /* ==========================================================
+     RESPONSIVE
+  ========================================================== */
 
   useEffect(() => {
     const handleResize = () => {
@@ -628,9 +613,9 @@ export default function DataSekolahPage() {
       );
   }, []);
 
-  // ==========================================================
-  // FETCH DATA
-  // ==========================================================
+  /* ==========================================================
+     FETCH DATA
+  ========================================================== */
 
   const loadData = async () => {
     try {
@@ -645,29 +630,9 @@ export default function DataSekolahPage() {
         getYayasanSummary(),
       ]);
 
-      // ======================================================
-      // DEBUG RESPONSE
-      // ======================================================
-
-      console.log(
-        "================================="
-      );
-
       console.log(
         "RAW SEKOLAH RESPONSE:",
         sekolahResponse
-      );
-
-      console.log(
-        "RAW SEKOLAH RESPONSE TYPE:",
-        typeof sekolahResponse
-      );
-
-      console.log(
-        "RAW SEKOLAH IS ARRAY:",
-        Array.isArray(
-          sekolahResponse
-        )
       );
 
       console.log(
@@ -675,28 +640,10 @@ export default function DataSekolahPage() {
         summaryResponse
       );
 
-      console.log(
-        "================================="
-      );
-
-      // ======================================================
-      // NORMALIZE SCHOOL RESPONSE
-      // ======================================================
-
       const rawSchools =
         unwrapArrayResponse(
           sekolahResponse
         );
-
-      console.log(
-        "NORMALIZED SCHOOL ARRAY:",
-        rawSchools
-      );
-
-      console.log(
-        "NORMALIZED SCHOOL COUNT:",
-        rawSchools.length
-      );
 
       const normalizedSchools =
         rawSchools.map(
@@ -707,19 +654,10 @@ export default function DataSekolahPage() {
         normalizedSchools
       );
 
-      // ======================================================
-      // SUMMARY
-      // ======================================================
-
       const summary =
         unwrapObjectResponse(
           summaryResponse
         );
-
-      console.log(
-        "NORMALIZED SUMMARY:",
-        summary
-      );
 
       const total =
         Number(
@@ -748,7 +686,8 @@ export default function DataSekolahPage() {
           ? aktifFromSummary
           : normalizedSchools.filter(
               (item) =>
-                item.status === "Aktif"
+                item.status ===
+                "Aktif"
             ).length;
 
       const trial =
@@ -759,7 +698,8 @@ export default function DataSekolahPage() {
           ? trialFromSummary
           : normalizedSchools.filter(
               (item) =>
-                item.status === "Trial"
+                item.status ===
+                "Trial"
             ).length;
 
       const nonaktif =
@@ -830,130 +770,143 @@ export default function DataSekolahPage() {
     loadData();
   }, []);
 
-  // ==========================================================
-  // FILTER OPTIONS
-  // ==========================================================
+  /* ==========================================================
+     FILTER OPTIONS
+  ========================================================== */
 
-  const jenjangOptions = useMemo(() => {
-    const values =
-      sekolahData
-        .map(
-          (item) => item.jenjang
-        )
-        .filter(
-          (value) =>
-            value &&
-            value !== "-"
-        );
+  const jenjangOptions =
+    useMemo(() => {
+      const values =
+        sekolahData
+          .map(
+            (item) =>
+              item.jenjang
+          )
+          .filter(
+            (value) =>
+              value &&
+              value !== "-"
+          );
 
-    return [
-      "Semua",
-      ...Array.from(
-        new Set(values)
-      ).sort(),
-    ];
-  }, [sekolahData]);
+      return [
+        "Semua",
+        ...Array.from(
+          new Set(values)
+        ).sort(),
+      ];
+    }, [sekolahData]);
 
-  // ==========================================================
-  // FILTER
-  // ==========================================================
+  /* ==========================================================
+     FILTER
+  ========================================================== */
 
-  const filteredData = useMemo(() => {
-    const keyword =
-      searchQuery
-        .trim()
-        .toLowerCase();
+  const filteredData =
+    useMemo(() => {
+      const keyword =
+        searchQuery
+          .trim()
+          .toLowerCase();
 
-    return sekolahData.filter(
-      (item) => {
-        const matchesSearch =
-          !keyword ||
-          [
-            item.nama,
-            item.npsn,
-            item.jenjang,
-            item.yayasan,
-            item.paket,
-            item.status,
-            item.subdomain,
-            item.email,
-          ]
-            .join(" ")
-            .toLowerCase()
-            .includes(keyword);
+      return sekolahData.filter(
+        (item) => {
+          const matchesSearch =
+            !keyword ||
+            [
+              item.nama,
+              item.npsn,
+              item.jenjang,
+              item.yayasan,
+              item.paket,
+              item.status,
+              item.subdomain,
+              item.email,
+            ]
+              .join(" ")
+              .toLowerCase()
+              .includes(keyword);
 
-        const matchesJenjang =
-          selectedJenjang === "Semua" ||
-          item.jenjang ===
-            selectedJenjang;
+          const matchesJenjang =
+            selectedJenjang ===
+              "Semua" ||
+            item.jenjang ===
+              selectedJenjang;
 
-        const matchesStatus =
-          selectedStatus === "Semua" ||
-          item.status ===
-            selectedStatus;
+          const matchesStatus =
+            selectedStatus ===
+              "Semua" ||
+            item.status ===
+              selectedStatus;
 
-        return (
-          matchesSearch &&
-          matchesJenjang &&
-          matchesStatus
-        );
-      }
+          return (
+            matchesSearch &&
+            matchesJenjang &&
+            matchesStatus
+          );
+        }
+      );
+    }, [
+      sekolahData,
+      searchQuery,
+      selectedJenjang,
+      selectedStatus,
+    ]);
+
+  /* ==========================================================
+     SORT
+  ========================================================== */
+
+  const sortedData =
+    useMemo(() => {
+      const data = [
+        ...filteredData,
+      ];
+
+      data.sort((a, b) => {
+        const first =
+          String(
+            a?.[sortField] ??
+              ""
+          ).toLowerCase();
+
+        const second =
+          String(
+            b?.[sortField] ??
+              ""
+          ).toLowerCase();
+
+        if (first < second) {
+          return sortOrder ===
+            "asc"
+            ? -1
+            : 1;
+        }
+
+        if (first > second) {
+          return sortOrder ===
+            "asc"
+            ? 1
+            : -1;
+        }
+
+        return 0;
+      });
+
+      return data;
+    }, [
+      filteredData,
+      sortField,
+      sortOrder,
+    ]);
+
+  /* ==========================================================
+     PAGINATION
+  ========================================================== */
+
+  const totalPages =
+    Math.ceil(
+      sortedData.length /
+        itemsPerPage
     );
-  }, [
-    sekolahData,
-    searchQuery,
-    selectedJenjang,
-    selectedStatus,
-  ]);
-
-  // ==========================================================
-  // SORT
-  // ==========================================================
-
-  const sortedData = useMemo(() => {
-    const data = [
-      ...filteredData,
-    ];
-
-    data.sort((a, b) => {
-      const first = String(
-        a?.[sortField] ?? ""
-      ).toLowerCase();
-
-      const second = String(
-        b?.[sortField] ?? ""
-      ).toLowerCase();
-
-      if (first < second) {
-        return sortOrder === "asc"
-          ? -1
-          : 1;
-      }
-
-      if (first > second) {
-        return sortOrder === "asc"
-          ? 1
-          : -1;
-      }
-
-      return 0;
-    });
-
-    return data;
-  }, [
-    filteredData,
-    sortField,
-    sortOrder,
-  ]);
-
-  // ==========================================================
-  // PAGINATION
-  // ==========================================================
-
-  const totalPages = Math.ceil(
-    sortedData.length /
-      itemsPerPage
-  );
 
   const safeTotalPages =
     Math.max(
@@ -978,9 +931,9 @@ export default function DataSekolahPage() {
         itemsPerPage
     );
 
-  // ==========================================================
-  // RESET PAGE WHEN FILTER CHANGES
-  // ==========================================================
+  /* ==========================================================
+     RESET PAGE WHEN FILTER CHANGES
+  ========================================================== */
 
   useEffect(() => {
     setCurrentPage(1);
@@ -990,9 +943,9 @@ export default function DataSekolahPage() {
     selectedStatus,
   ]);
 
-  // ==========================================================
-  // SORT
-  // ==========================================================
+  /* ==========================================================
+     SORT
+  ========================================================== */
 
   const handleSort = (
     field,
@@ -1017,27 +970,28 @@ export default function DataSekolahPage() {
       return (
         <ArrowUp
           size={12}
-          className="text-slate-300"
+          className="theme-text-muted opacity-40"
         />
       );
     }
 
-    return sortOrder === "asc" ? (
+    return sortOrder ===
+      "asc" ? (
       <ArrowUp
         size={12}
-        className="text-blue-500"
+        className={themePrimaryText}
       />
     ) : (
       <ArrowDown
         size={12}
-        className="text-blue-500"
+        className={themePrimaryText}
       />
     );
   };
 
-  // ==========================================================
-  // DELETE
-  // ==========================================================
+  /* ==========================================================
+     DELETE
+  ========================================================== */
 
   const handleDelete = (
     item
@@ -1047,1202 +1001,1124 @@ export default function DataSekolahPage() {
     );
   };
 
-  // ==========================================================
-  // PAGE
-  // ==========================================================
+  /* ==========================================================
+     PAGE
+  ========================================================== */
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <div className="flex min-h-screen">
-
-        {/* ==================================================
-            SIDEBAR
-        ================================================== */}
-
-        <Sidebar
-          active={activeMenu}
-          setActive={setActiveMenu}
-          collapsed={!sidebarOpen}
-          setCollapsed={() =>
-            setSidebarOpen(
-              !sidebarOpen
-            )
-          }
-        />
-
-        <div className="flex min-w-0 flex-1 flex-col">
+    <div className="theme-page theme-text min-h-full">
+      <main className="w-full p-3 sm:p-5 lg:p-7 xl:p-8">
+        <div className="mx-auto w-full max-w-[1600px] space-y-5 sm:space-y-6">
 
           {/* ==================================================
-              HEADER
+              PAGE HEADER
           ================================================== */}
 
-          <Header
-            toggleSidebar={() =>
-              setSidebarOpen(
-                !sidebarOpen
-              )
-            }
-            notifications={
-              notifications
-            }
-            user={currentUser}
-          />
-
-          {/* ==================================================
-              MAIN
-          ================================================== */}
-
-          <main className="flex-1 p-3 sm:p-5 lg:p-7 xl:p-8">
-
-            <div className="mx-auto w-full max-w-[1600px] space-y-5 sm:space-y-6">
-
-              {/* ==================================================
-                  PAGE HEADER
-              ================================================== */}
-
-              <section
-                className="
-                  relative
-                  overflow-hidden
-                  rounded-2xl
-                  border
-                  border-slate-200
-                  bg-white
-                  p-5
-                  shadow-[0_3px_14px_rgba(15,23,42,0.05)]
-                  sm:p-6
-                "
-              >
-
-                <div className="relative z-10 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
-
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <div
-                        className="
-                          flex
-                          h-10
-                          w-10
-                          items-center
-                          justify-center
-                          rounded-xl
-                          bg-blue-50
-                          text-blue-600
-                        "
-                      >
-                        <Building2
-                          size={20}
-                          strokeWidth={1.9}
-                        />
-                      </div>
-
-                      <div>
-                        <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-blue-600">
-                          Super Admin
-                        </p>
-
-                        <h1 className="text-xl font-semibold tracking-tight text-slate-800 sm:text-2xl">
-                          Data Sekolah
-                        </h1>
-                      </div>
-                    </div>
-
-                    <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-500">
-                      Kelola dan pantau seluruh
-                      data sekolah yang terdaftar
-                      pada platform SmartSchool.
-                    </p>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      router.push(
-                        "/super-admin/sekolah/tambah"
-                      )
-                    }
-                    className="
-                      inline-flex
+          <section
+            className={`
+              relative
+              overflow-hidden
+              rounded-2xl
+              border
+              theme-border
+              theme-card
+              p-5
+              ${themeCardShadow}
+              sm:p-6
+            `}
+          >
+            <div className="relative z-10 flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+              <div>
+                <div className="flex items-center gap-2">
+                  <div
+                    className={`
+                      flex
                       h-10
+                      w-10
                       items-center
                       justify-center
-                      gap-2
                       rounded-xl
-                      bg-blue-600
-                      px-4
-                      text-sm
-                      font-semibold
-                      text-white
-                      shadow-[0_5px_15px_rgba(37,99,235,0.22)]
-                      transition-all
-                      hover:bg-blue-700
-                      active:scale-[0.98]
-                    "
+                      border
+                      ${themePrimaryBorder}
+                      ${themePrimarySurface}
+                      ${themePrimaryText}
+                    `}
                   >
-                    <Plus size={17} />
-                    Tambah Sekolah
-                  </button>
-
-                </div>
-
-              </section>
-
-              {/* ==================================================
-                  STATISTICS
-              ================================================== */}
-
-              <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
-
-                <StatCard
-                  label="Total Sekolah"
-                  value={stats.total}
-                  icon={Building2}
-                  color="blue"
-                />
-
-                <StatCard
-                  label="Sekolah Aktif"
-                  value={stats.aktif}
-                  icon={CheckCircle}
-                  color="emerald"
-                />
-
-                <StatCard
-                  label="Trial"
-                  value={stats.trial}
-                  icon={Clock3}
-                  color="amber"
-                />
-
-                <StatCard
-                  label="Nonaktif"
-                  value={stats.nonaktif}
-                  icon={XCircle}
-                  color="rose"
-                />
-
-                <StatCard
-                  label="Total Guru"
-                  value={stats.totalGuru}
-                  icon={Users}
-                  color="violet"
-                />
-
-                <StatCard
-                  label="Total Siswa"
-                  value={stats.totalSiswa}
-                  icon={GraduationCap}
-                  color="teal"
-                />
-
-              </section>
-
-              {/* ==================================================
-                  FILTER
-              ================================================== */}
-
-              <section
-                className="
-                  rounded-2xl
-                  border
-                  border-slate-200
-                  bg-white
-                  p-4
-                  shadow-[0_3px_14px_rgba(15,23,42,0.05)]
-                  sm:p-5
-                "
-              >
-
-                <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-
-                  <div className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row">
-
-                    {/* SEARCH */}
-
-                    <div className="relative min-w-0 flex-1">
-                      <Search
-                        size={17}
-                        className="
-                          pointer-events-none
-                          absolute
-                          left-3
-                          top-1/2
-                          -translate-y-1/2
-                          text-slate-400
-                        "
-                      />
-
-                      <input
-                        type="text"
-                        value={
-                          searchQuery
-                        }
-                        onChange={(e) =>
-                          setSearchQuery(
-                            e.target.value
-                          )
-                        }
-                        placeholder="Cari nama sekolah, NPSN, yayasan..."
-                        className="
-                          h-10
-                          w-full
-                          rounded-xl
-                          border
-                          border-slate-200
-                          bg-slate-50
-                          pl-10
-                          pr-3
-                          text-sm
-                          text-slate-700
-                          outline-none
-                          transition-all
-                          placeholder:text-slate-400
-                          hover:border-slate-300
-                          focus:border-blue-400
-                          focus:bg-white
-                          focus:ring-4
-                          focus:ring-blue-500/10
-                        "
-                      />
-                    </div>
-
-                    {/* JENJANG */}
-
-                    <div className="w-full sm:w-[170px]">
-                      <FilterSelect
-                        value={
-                          selectedJenjang
-                        }
-                        onChange={
-                          setSelectedJenjang
-                        }
-                        options={
-                          jenjangOptions
-                        }
-                      />
-                    </div>
-
-                    {/* STATUS */}
-
-                    <div className="w-full sm:w-[160px]">
-                      <FilterSelect
-                        value={
-                          selectedStatus
-                        }
-                        onChange={
-                          setSelectedStatus
-                        }
-                        options={[
-                          "Semua",
-                          "Aktif",
-                          "Trial",
-                          "Nonaktif",
-                        ]}
-                      />
-                    </div>
-
-                  </div>
-
-                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-
-                    <div className="flex items-center gap-2 text-xs text-slate-400">
-                      <SlidersHorizontal
-                        size={14}
-                      />
-
-                      <span>
-                        {sortedData.length}{" "}
-                        data ditemukan
-                      </span>
-                    </div>
-
-                    <SortControl
-                      sortField={
-                        sortField
-                      }
-                      sortOrder={
-                        sortOrder
-                      }
-                      onSort={
-                        handleSort
-                      }
+                    <Building2
+                      size={20}
+                      strokeWidth={1.9}
                     />
-
                   </div>
 
+                  <div>
+                    <p
+                      className={`text-[10px] font-semibold uppercase tracking-[0.1em] ${themePrimaryText}`}
+                    >
+                      Super Admin
+                    </p>
+
+                    <h1 className="text-xl font-semibold tracking-tight theme-text sm:text-2xl">
+                      Data Sekolah
+                    </h1>
+                  </div>
                 </div>
 
-                {(searchQuery ||
-                  selectedJenjang !==
-                    "Semua" ||
-                  selectedStatus !==
-                    "Semua" ||
-                  sortField !== "nama" ||
-                  sortOrder !==
-                    "asc") && (
-                  <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-slate-100 pt-4">
+                <p className="mt-3 max-w-2xl text-sm leading-6 theme-text-secondary">
+                  Kelola dan pantau seluruh
+                  data sekolah yang terdaftar
+                  pada platform SmartSchool.
+                </p>
+              </div>
 
-                    <span className="text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-400">
-                      Filter aktif:
-                    </span>
+              <button
+                type="button"
+                onClick={() =>
+                  router.push(
+                    "/super-admin/sekolah/tambah"
+                  )
+                }
+                className={`
+                  inline-flex
+                  h-10
+                  items-center
+                  justify-center
+                  gap-2
+                  rounded-xl
+                  px-4
+                  text-sm
+                  font-semibold
+                  ${themePrimaryButton}
+                  shadow-[0_5px_15px_color-mix(in_srgb,var(--color-primary)_22%,transparent)]
+                  transition-all
+                  hover:shadow-[0_7px_20px_color-mix(in_srgb,var(--color-primary)_28%,transparent)]
+                  active:scale-[0.98]
+                `}
+              >
+                <Plus size={17} />
+                Tambah Sekolah
+              </button>
+            </div>
+          </section>
 
-                    {searchQuery && (
-                      <span className="rounded-lg border border-blue-100 bg-blue-50 px-2.5 py-1 text-[10px] font-medium text-blue-700">
-                        "{searchQuery}"
-                      </span>
-                    )}
+          {/* ==================================================
+              STATISTICS
+          ================================================== */}
 
-                    {selectedJenjang !==
-                      "Semua" && (
-                      <span className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-medium text-slate-600">
-                        {selectedJenjang}
-                      </span>
-                    )}
+          <section className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+            <StatCard
+              label="Total Sekolah"
+              value={stats.total}
+              icon={Building2}
+              color="primary"
+            />
 
-                    {selectedStatus !==
-                      "Semua" && (
-                      <span className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-medium text-slate-600">
-                        {selectedStatus}
-                      </span>
-                    )}
+            <StatCard
+              label="Sekolah Aktif"
+              value={stats.aktif}
+              icon={CheckCircle}
+              color="success"
+            />
 
-                    {(sortField !==
-                      "nama" ||
-                      sortOrder !==
-                        "asc") && (
-                      <span className="rounded-lg border border-violet-100 bg-violet-50 px-2.5 py-1 text-[10px] font-medium text-violet-700">
-                        Sort:{" "}
-                        {sortField}{" "}
-                        {sortOrder ===
-                        "asc"
-                          ? "↑"
-                          : "↓"}
-                      </span>
-                    )}
+            <StatCard
+              label="Trial"
+              value={stats.trial}
+              icon={Clock3}
+              color="warning"
+            />
 
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSearchQuery(
-                          ""
-                        );
-                        setSelectedJenjang(
-                          "Semua"
-                        );
-                        setSelectedStatus(
-                          "Semua"
-                        );
-                        resetSort();
-                      }}
-                      className="ml-auto text-[10px] text-slate-400 transition-colors hover:text-slate-600 hover:underline"
-                    >
-                      Reset Filter
-                    </button>
+            <StatCard
+              label="Nonaktif"
+              value={stats.nonaktif}
+              icon={XCircle}
+              color="neutral"
+            />
 
-                  </div>
+            <StatCard
+              label="Total Guru"
+              value={stats.totalGuru}
+              icon={Users}
+              color="info"
+            />
+
+            <StatCard
+              label="Total Siswa"
+              value={stats.totalSiswa}
+              icon={GraduationCap}
+              color="primary"
+            />
+          </section>
+
+          {/* ==================================================
+              FILTER
+          ================================================== */}
+
+          <section
+            className={`
+              rounded-2xl
+              border
+              theme-border
+              theme-card
+              p-4
+              ${themeCardShadow}
+              sm:p-5
+            `}
+          >
+            <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
+              <div className="flex min-w-0 flex-1 flex-col gap-3 sm:flex-row">
+
+                {/* SEARCH */}
+
+                <div className="relative min-w-0 flex-1">
+                  <Search
+                    size={17}
+                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 theme-text-muted"
+                  />
+
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) =>
+                      setSearchQuery(
+                        e.target.value
+                      )
+                    }
+                    placeholder="Cari nama sekolah, NPSN, yayasan..."
+                    className={`
+                      h-10
+                      w-full
+                      rounded-xl
+                      border
+                      theme-border
+                      theme-input
+                      pl-10
+                      pr-3
+                      text-sm
+                      theme-text
+                      outline-none
+                      transition-all
+                      placeholder:text-[var(--color-text-placeholder)]
+                      ${themeFocus}
+                    `}
+                  />
+                </div>
+
+                {/* JENJANG */}
+
+                <div className="w-full sm:w-[170px]">
+                  <FilterSelect
+                    value={
+                      selectedJenjang
+                    }
+                    onChange={
+                      setSelectedJenjang
+                    }
+                    options={
+                      jenjangOptions
+                    }
+                  />
+                </div>
+
+                {/* STATUS */}
+
+                <div className="w-full sm:w-[160px]">
+                  <FilterSelect
+                    value={
+                      selectedStatus
+                    }
+                    onChange={
+                      setSelectedStatus
+                    }
+                    options={[
+                      "Semua",
+                      "Aktif",
+                      "Trial",
+                      "Nonaktif",
+                    ]}
+                  />
+                </div>
+              </div>
+
+              <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                <div className="flex items-center gap-2 text-xs theme-text-muted">
+                  <SlidersHorizontal
+                    size={14}
+                  />
+
+                  <span>
+                    {sortedData.length}{" "}
+                    data ditemukan
+                  </span>
+                </div>
+
+                <SortControl
+                  sortField={
+                    sortField
+                  }
+                  sortOrder={
+                    sortOrder
+                  }
+                  onSort={
+                    handleSort
+                  }
+                />
+              </div>
+            </div>
+
+            {(searchQuery ||
+              selectedJenjang !==
+                "Semua" ||
+              selectedStatus !==
+                "Semua" ||
+              sortField !== "nama" ||
+              sortOrder !== "asc") && (
+              <div
+                className={`
+                  mt-4
+                  flex
+                  flex-wrap
+                  items-center
+                  gap-2
+                  border-t
+                  ${themeDivider}
+                  pt-4
+                `}
+              >
+                <span className="text-[10px] font-semibold uppercase tracking-[0.08em] theme-text-muted">
+                  Filter aktif:
+                </span>
+
+                {searchQuery && (
+                  <span
+                    className={`
+                      rounded-lg
+                      border
+                      ${themePrimaryBorder}
+                      ${themePrimarySurface}
+                      px-2.5
+                      py-1
+                      text-[10px]
+                      font-medium
+                      ${themePrimaryText}
+                    `}
+                  >
+                    "{searchQuery}"
+                  </span>
                 )}
 
-              </section>
+                {selectedJenjang !==
+                  "Semua" && (
+                  <span
+                    className={`
+                      rounded-lg
+                      border
+                      ${themeNeutralBorder}
+                      ${themeNeutralSurface}
+                      px-2.5
+                      py-1
+                      text-[10px]
+                      font-medium
+                      theme-text-secondary
+                    `}
+                  >
+                    {selectedJenjang}
+                  </span>
+                )}
 
-              {/* ==================================================
-                  TABLE
-              ================================================== */}
+                {selectedStatus !==
+                  "Semua" && (
+                  <span
+                    className={`
+                      rounded-lg
+                      border
+                      ${themeNeutralBorder}
+                      ${themeNeutralSurface}
+                      px-2.5
+                      py-1
+                      text-[10px]
+                      font-medium
+                      theme-text-secondary
+                    `}
+                  >
+                    {selectedStatus}
+                  </span>
+                )}
 
-              <section
-                className="
-                  overflow-hidden
-                  rounded-2xl
-                  border
-                  border-slate-200
-                  bg-white
-                  shadow-[0_3px_14px_rgba(15,23,42,0.05)]
-                "
+                {(sortField !==
+                  "nama" ||
+                  sortOrder !==
+                    "asc") && (
+                  <span
+                    className={`
+                      rounded-lg
+                      border
+                      ${themeInfoBorder}
+                      ${themeInfoSurface}
+                      px-2.5
+                      py-1
+                      text-[10px]
+                      font-medium
+                      ${themeInfoText}
+                    `}
+                  >
+                    Sort:{" "}
+                    {sortField}{" "}
+                    {sortOrder ===
+                    "asc"
+                      ? "↑"
+                      : "↓"}
+                  </span>
+                )}
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    setSearchQuery(
+                      ""
+                    );
+                    setSelectedJenjang(
+                      "Semua"
+                    );
+                    setSelectedStatus(
+                      "Semua"
+                    );
+                    resetSort();
+                  }}
+                  className="ml-auto text-[10px] theme-text-muted transition-colors hover:text-[var(--color-primary)] hover:underline"
+                >
+                  Reset Filter
+                </button>
+              </div>
+            )}
+          </section>
+
+          {/* ==================================================
+              TABLE / MOBILE
+          ================================================== */}
+
+          <section
+            className={`
+              overflow-hidden
+              rounded-2xl
+              border
+              theme-border
+              theme-card
+              ${themeCardShadow}
+            `}
+          >
+            {loading ? (
+              <LoadingState />
+            ) : error ? (
+              <ErrorState
+                message={error}
+              />
+            ) : isMobile ? (
+              /* ================= MOBILE ================= */
+
+              <div
+                className={`divide-y ${themeDivider}`}
               >
+                {paginatedData.length ===
+                0 ? (
+                  <EmptyState />
+                ) : (
+                  paginatedData.map(
+                    (
+                      item,
+                      index
+                    ) => (
+                      <MobileSchoolCard
+                        key={
+                          item.id
+                        }
+                        item={
+                          item
+                        }
+                        number={
+                          startIndex +
+                          index +
+                          1
+                        }
+                        router={
+                          router
+                        }
+                        onDelete={
+                          handleDelete
+                        }
+                        sortField={
+                          sortField
+                        }
+                        sortOrder={
+                          sortOrder
+                        }
+                      />
+                    )
+                  )
+                )}
+              </div>
+            ) : (
+              /* ================= DESKTOP ================= */
 
-                {loading ? (
-                  <LoadingState />
-                ) : error ? (
-                  <ErrorState
-                    message={error}
-                  />
-                ) : isMobile ? (
+              <div className="w-full overflow-x-auto">
+                <table className="w-full min-w-[1080px] border-collapse">
+                  <colgroup>
+                    <col className="w-[60px]" />
+                    <col className="w-[280px]" />
+                    <col className="w-[120px]" />
+                    <col className="w-[100px]" />
+                    <col className="w-[180px]" />
+                    <col className="w-[140px]" />
+                    <col className="w-[140px]" />
+                    <col className="w-[120px]" />
+                  </colgroup>
 
-                  /* ================= MOBILE ================= */
+                  <thead>
+                    <tr
+                      className={`
+                        border-b
+                        ${themeDivider}
+                        ${themeNeutralSurface}
+                      `}
+                    >
+                      <TableHead>
+                        No
+                      </TableHead>
 
-                  <div className="divide-y divide-slate-100">
+                      <TableHead
+                        sortable
+                        onClick={() =>
+                          handleSort(
+                            "nama",
+                            sortField ===
+                              "nama" &&
+                              sortOrder ===
+                                "asc"
+                              ? "desc"
+                              : "asc"
+                          )
+                        }
+                      >
+                        <span className="flex items-center gap-1">
+                          Nama Sekolah
+                          {renderSortIcon(
+                            "nama"
+                          )}
+                        </span>
+                      </TableHead>
 
+                      <TableHead
+                        sortable
+                        onClick={() =>
+                          handleSort(
+                            "npsn",
+                            sortField ===
+                              "npsn" &&
+                              sortOrder ===
+                                "asc"
+                              ? "desc"
+                              : "asc"
+                          )
+                        }
+                      >
+                        <span className="flex items-center gap-1">
+                          NPSN
+                          {renderSortIcon(
+                            "npsn"
+                          )}
+                        </span>
+                      </TableHead>
+
+                      <TableHead
+                        sortable
+                        onClick={() =>
+                          handleSort(
+                            "jenjang",
+                            sortField ===
+                              "jenjang" &&
+                              sortOrder ===
+                                "asc"
+                              ? "desc"
+                              : "asc"
+                          )
+                        }
+                      >
+                        <span className="flex items-center gap-1">
+                          Jenjang
+                          {renderSortIcon(
+                            "jenjang"
+                          )}
+                        </span>
+                      </TableHead>
+
+                      <TableHead>
+                        Yayasan
+                      </TableHead>
+
+                      <TableHead
+                        sortable
+                        onClick={() =>
+                          handleSort(
+                            "paket",
+                            sortField ===
+                              "paket" &&
+                              sortOrder ===
+                                "asc"
+                              ? "desc"
+                              : "asc"
+                          )
+                        }
+                      >
+                        <span className="flex items-center gap-1">
+                          Paket
+                          {renderSortIcon(
+                            "paket"
+                          )}
+                        </span>
+                      </TableHead>
+
+                      <TableHead
+                        sortable
+                        onClick={() =>
+                          handleSort(
+                            "status",
+                            sortField ===
+                              "status" &&
+                              sortOrder ===
+                                "asc"
+                              ? "desc"
+                              : "asc"
+                          )
+                        }
+                      >
+                        <span className="flex items-center gap-1">
+                          Status
+                          {renderSortIcon(
+                            "status"
+                          )}
+                        </span>
+                      </TableHead>
+
+                      <TableHead align="right">
+                        Aksi
+                      </TableHead>
+                    </tr>
+                  </thead>
+
+                  <tbody
+                    className={`divide-y ${themeDivider}`}
+                  >
                     {paginatedData.length ===
                     0 ? (
-                      <EmptyState />
+                      <tr>
+                        <td
+                          colSpan={8}
+                          className="px-6 py-16"
+                        >
+                          <EmptyState />
+                        </td>
+                      </tr>
                     ) : (
                       paginatedData.map(
                         (
                           item,
                           index
-                        ) => (
-                          <MobileSchoolCard
-                            key={
-                              item.id
-                            }
-                            item={
-                              item
-                            }
-                            number={
-                              startIndex +
-                              index +
-                              1
-                            }
-                            router={
-                              router
-                            }
-                            onDelete={
-                              handleDelete
-                            }
-                            sortField={
-                              sortField
-                            }
-                            sortOrder={
-                              sortOrder
-                            }
-                          />
-                        )
-                      )
-                    )}
+                        ) => {
+                          const statusStyle =
+                            statusColorMap[
+                              item.status
+                            ] ||
+                            statusColorMap.Nonaktif;
 
-                  </div>
+                          const paketStyle =
+                            paketColorMap[
+                              item.paket
+                            ] ||
+                            paketColorMap.Starter;
 
-                ) : (
-
-                  /* ================= DESKTOP ================= */
-
-                  <div className="w-full overflow-x-auto">
-
-                    <table className="w-full min-w-[1080px] border-collapse">
-
-                      <colgroup>
-                        <col className="w-[60px]" />
-                        <col className="w-[280px]" />
-                        <col className="w-[120px]" />
-                        <col className="w-[100px]" />
-                        <col className="w-[180px]" />
-                        <col className="w-[140px]" />
-                        <col className="w-[140px]" />
-                        <col className="w-[120px]" />
-                      </colgroup>
-
-                      <thead>
-
-                        <tr className="border-b border-slate-200 bg-slate-50/80">
-
-                          <TableHead>
-                            No
-                          </TableHead>
-
-                          <TableHead
-                            sortable
-                            onClick={() =>
-                              handleSort(
-                                "nama",
-                                sortField ===
-                                  "nama" &&
-                                  sortOrder ===
-                                    "asc"
-                                  ? "desc"
-                                  : "asc"
-                              )
-                            }
-                          >
-                            <span className="flex items-center gap-1">
-                              Nama Sekolah
-                              {renderSortIcon(
-                                "nama"
-                              )}
-                            </span>
-                          </TableHead>
-
-                          <TableHead
-                            sortable
-                            onClick={() =>
-                              handleSort(
-                                "npsn",
-                                sortField ===
-                                  "npsn" &&
-                                  sortOrder ===
-                                    "asc"
-                                  ? "desc"
-                                  : "asc"
-                              )
-                            }
-                          >
-                            <span className="flex items-center gap-1">
-                              NPSN
-                              {renderSortIcon(
-                                "npsn"
-                              )}
-                            </span>
-                          </TableHead>
-
-                          <TableHead
-                            sortable
-                            onClick={() =>
-                              handleSort(
-                                "jenjang",
-                                sortField ===
-                                  "jenjang" &&
-                                  sortOrder ===
-                                    "asc"
-                                  ? "desc"
-                                  : "asc"
-                              )
-                            }
-                          >
-                            <span className="flex items-center gap-1">
-                              Jenjang
-                              {renderSortIcon(
-                                "jenjang"
-                              )}
-                            </span>
-                          </TableHead>
-
-                          <TableHead>
-                            Yayasan
-                          </TableHead>
-
-                          <TableHead
-                            sortable
-                            onClick={() =>
-                              handleSort(
-                                "paket",
-                                sortField ===
-                                  "paket" &&
-                                  sortOrder ===
-                                    "asc"
-                                  ? "desc"
-                                  : "asc"
-                              )
-                            }
-                          >
-                            <span className="flex items-center gap-1">
-                              Paket
-                              {renderSortIcon(
-                                "paket"
-                              )}
-                            </span>
-                          </TableHead>
-
-                          <TableHead
-                            sortable
-                            onClick={() =>
-                              handleSort(
-                                "status",
-                                sortField ===
-                                  "status" &&
-                                  sortOrder ===
-                                    "asc"
-                                  ? "desc"
-                                  : "asc"
-                              )
-                            }
-                          >
-                            <span className="flex items-center gap-1">
-                              Status
-                              {renderSortIcon(
-                                "status"
-                              )}
-                            </span>
-                          </TableHead>
-
-                          <TableHead align="right">
-                            Aksi
-                          </TableHead>
-
-                        </tr>
-
-                      </thead>
-
-                      <tbody className="divide-y divide-slate-100">
-
-                        {paginatedData.length ===
-                        0 ? (
-                          <tr>
-                            <td
-                              colSpan={8}
-                              className="px-6 py-16"
+                          return (
+                            <tr
+                              key={
+                                item.id
+                              }
+                              className={`
+                                group
+                                h-[88px]
+                                transition-colors
+                                ${themeNeutralHover}
+                              `}
                             >
-                              <EmptyState />
-                            </td>
-                          </tr>
-                        ) : (
-                          paginatedData.map(
-                            (
-                              item,
-                              index
-                            ) => {
+                              {/* NO */}
 
-                              const statusStyle =
-                                statusColorMap[
-                                  item
-                                    .status
-                                ] ||
-                                statusColorMap
-                                  .Nonaktif;
+                              <td className="px-5 py-4 text-center text-sm theme-text-muted">
+                                {startIndex +
+                                  index +
+                                  1}
+                              </td>
 
-                              const paketStyle =
-                                paketColorMap[
-                                  item
-                                    .paket
-                                ] ||
-                                paketColorMap
-                                  .Starter;
+                              {/* NAMA */}
 
-                              return (
-                                <tr
-                                  key={
-                                    item.id
-                                  }
-                                  className="
-                                    group
-                                    h-[88px]
-                                    transition-colors
-                                    hover:bg-slate-50/70
-                                  "
-                                >
-
-                                  {/* NO */}
-
-                                  <td
-                                    className="
-                                      px-5
-                                      py-4
-                                      text-center
-                                      text-sm
-                                      text-slate-400
-                                    "
+                              <td className="px-4 py-4">
+                                <div className="flex items-center gap-3">
+                                  <div
+                                    className={`
+                                      flex
+                                      h-11
+                                      w-11
+                                      shrink-0
+                                      items-center
+                                      justify-center
+                                      rounded-xl
+                                      border
+                                      ${themePrimaryBorder}
+                                      ${themePrimarySurface}
+                                      ${themePrimaryText}
+                                      transition-all
+                                      group-hover:border-[color-mix(in_srgb,var(--color-primary)_35%,transparent)]
+                                    `}
                                   >
-                                    {startIndex +
-                                      index +
-                                      1}
-                                  </td>
-
-                                  {/* NAMA */}
-
-                                  <td className="px-4 py-4">
-
-                                    <div className="flex items-center gap-3">
-
-                                      <div
-                                        className="
-                                          flex
-                                          h-11
-                                          w-11
-                                          shrink-0
-                                          items-center
-                                          justify-center
-                                          rounded-xl
-                                          border
-                                          border-blue-100
-                                          bg-blue-50
-                                          text-blue-600
-                                          transition-all
-                                          group-hover:border-blue-200
-                                          group-hover:bg-blue-100
-                                        "
-                                      >
-                                        <Building2
-                                          size={20}
-                                          strokeWidth={
-                                            1.9
-                                          }
-                                        />
-                                      </div>
-
-                                      <div className="min-w-0">
-
-                                        <p className="truncate text-sm font-semibold text-slate-800">
-                                          {
-                                            item.nama
-                                          }
-                                        </p>
-
-                                        <p className="mt-1 text-xs text-slate-400">
-                                          {
-                                            item.statusSekolah
-                                          }
-                                        </p>
-
-                                      </div>
-
-                                    </div>
-
-                                  </td>
-
-                                  {/* NPSN */}
-
-                                  <td className="px-4 py-4">
-
-                                    <span
-                                      className="
-                                        font-mono
-                                        text-xs
-                                        font-medium
-                                        tracking-wide
-                                        text-slate-500
-                                      "
-                                    >
-                                      {
-                                        item.npsn
+                                    <Building2
+                                      size={20}
+                                      strokeWidth={
+                                        1.9
                                       }
-                                    </span>
+                                    />
+                                  </div>
 
-                                  </td>
-
-                                  {/* JENJANG */}
-
-                                  <td className="px-4 py-4">
-
-                                    <span
-                                      className="
-                                        inline-flex
-                                        items-center
-                                        rounded-lg
-                                        border
-                                        border-slate-200
-                                        bg-slate-50
-                                        px-2.5
-                                        py-1
-                                        text-xs
-                                        font-medium
-                                        text-slate-600
-                                      "
-                                    >
+                                  <div className="min-w-0">
+                                    <p className="truncate text-sm font-semibold theme-text">
                                       {
-                                        item.jenjang
-                                      }
-                                    </span>
-
-                                  </td>
-
-                                  {/* YAYASAN */}
-
-                                  <td className="px-4 py-4">
-
-                                    <p
-                                      className="
-                                        max-w-[160px]
-                                        truncate
-                                        text-sm
-                                        text-slate-500
-                                      "
-                                      title={
-                                        item.yayasan
-                                      }
-                                    >
-                                      {
-                                        item.yayasan
+                                        item.nama
                                       }
                                     </p>
 
-                                  </td>
-
-                                  {/* PAKET */}
-
-                                  <td className="px-4 py-4">
-
-                                    <span
-                                      className={`
-                                        inline-flex
-                                        items-center
-                                        rounded-lg
-                                        border
-                                        px-2.5
-                                        py-1
-                                        text-xs
-                                        font-medium
-                                        ${paketStyle.bg}
-                                        ${paketStyle.text}
-                                        ${paketStyle.border}
-                                      `}
-                                    >
+                                    <p className="mt-1 text-xs theme-text-muted">
                                       {
-                                        item.paket
+                                        item.statusSekolah
                                       }
-                                    </span>
+                                    </p>
+                                  </div>
+                                </div>
+                              </td>
 
-                                  </td>
+                              {/* NPSN */}
 
-                                  {/* STATUS */}
-
-                                  <td className="px-4 py-4">
-
-                                    <span
-                                      className={`
-                                        inline-flex
-                                        items-center
-                                        gap-1.5
-                                        rounded-full
-                                        border
-                                        px-2.5
-                                        py-1
-                                        text-xs
-                                        font-medium
-                                        ${statusStyle.bg}
-                                        ${statusStyle.text}
-                                        ${statusStyle.border}
-                                      `}
-                                    >
-
-                                      <span
-                                        className={`
-                                          h-1.5
-                                          w-1.5
-                                          rounded-full
-                                          ${statusStyle.dot}
-                                        `}
-                                      />
-
-                                      {
-                                        item.status
-                                      }
-
-                                    </span>
-
-                                  </td>
-
-                                  {/* ACTION */}
-
-                                  <td className="px-4 py-4">
-
-                                    <div className="flex items-center justify-end gap-1">
-
-                                      <ActionButton
-                                        title="Lihat detail"
-                                        onClick={() =>
-                                          router.push(
-                                            `/super-admin/sekolah/${item.id}`
-                                          )
-                                        }
-                                      >
-                                        <Eye
-                                          size={
-                                            16
-                                          }
-                                        />
-                                      </ActionButton>
-
-                                      <ActionButton
-                                        title="Edit sekolah"
-                                        hover="amber"
-                                        onClick={() =>
-                                          router.push(
-                                            `/super-admin/sekolah/edit/${item.id}`
-                                          )
-                                        }
-                                      >
-                                        <Edit
-                                          size={
-                                            16
-                                          }
-                                        />
-                                      </ActionButton>
-
-                                      <ActionButton
-                                        title="Hapus sekolah"
-                                        hover="rose"
-                                        onClick={() =>
-                                          handleDelete(
-                                            item
-                                          )
-                                        }
-                                      >
-                                        <Trash2
-                                          size={
-                                            16
-                                          }
-                                        />
-                                      </ActionButton>
-
-                                    </div>
-
-                                  </td>
-
-                                </tr>
-                              );
-                            }
-                          )
-                        )}
-
-                      </tbody>
-
-                    </table>
-
-                  </div>
-                )}
-
-                {/* ==================================================
-                    PAGINATION
-                ================================================== */}
-
-                {!loading &&
-                  !error && (
-                    <div
-                      className="
-                        flex
-                        flex-col
-                        gap-3
-                        border-t
-                        border-slate-200
-                        px-4
-                        py-4
-                        sm:flex-row
-                        sm:items-center
-                        sm:justify-between
-                        sm:px-5
-                      "
-                    >
-
-                      <p className="text-xs text-slate-500">
-
-                        Menampilkan{" "}
-
-                        <span className="font-semibold text-slate-700">
-                          {paginatedData.length ===
-                          0
-                            ? 0
-                            : startIndex +
-                              1}
-                        </span>
-
-                        {" – "}
-
-                        <span className="font-semibold text-slate-700">
-                          {Math.min(
-                            startIndex +
-                              paginatedData.length,
-                            sortedData.length
-                          )}
-                        </span>
-
-                        {" dari "}
-
-                        <span className="font-semibold text-slate-700">
-                          {
-                            sortedData.length
-                          }
-                        </span>
-
-                        {" data"}
-
-                      </p>
-
-                      <div className="flex items-center justify-center gap-1">
-
-                        {/* PREVIOUS */}
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setCurrentPage(
-                              Math.max(
-                                1,
-                                safeCurrentPage -
-                                  1
-                              )
-                            )
-                          }
-                          disabled={
-                            safeCurrentPage ===
-                            1
-                          }
-                          className="
-                            flex
-                            h-9
-                            w-9
-                            items-center
-                            justify-center
-                            rounded-lg
-                            border
-                            border-slate-200
-                            bg-white
-                            text-slate-400
-                            transition-all
-                            hover:bg-slate-50
-                            disabled:cursor-not-allowed
-                            disabled:opacity-40
-                          "
-                        >
-                          <ArrowUp
-                            size={14}
-                            className="-rotate-90"
-                          />
-                        </button>
-
-                        {/* PAGE NUMBERS */}
-
-                        {[
-                          ...Array(
-                            Math.min(
-                              safeTotalPages,
-                              5
-                            )
-                          ),
-                        ].map(
-                          (_, index) => {
-                            const page =
-                              index + 1;
-
-                            return (
-                              <button
-                                type="button"
-                                key={
-                                  page
-                                }
-                                onClick={() =>
-                                  setCurrentPage(
-                                    page
-                                  )
-                                }
-                                className={`
-                                  flex
-                                  h-9
-                                  w-9
-                                  items-center
-                                  justify-center
-                                  rounded-lg
-                                  text-xs
-                                  font-semibold
-                                  transition-all
-                                  ${
-                                    safeCurrentPage ===
-                                    page
-                                      ? "bg-blue-600 text-white shadow-[0_4px_10px_rgba(37,99,235,0.25)]"
-                                      : "text-slate-500 hover:bg-slate-100"
+                              <td className="px-4 py-4">
+                                <span className="font-mono text-xs font-medium tracking-wide theme-text-secondary">
+                                  {
+                                    item.npsn
                                   }
-                                `}
-                              >
-                                {
-                                  page
-                                }
-                              </button>
-                            );
-                          }
-                        )}
+                                </span>
+                              </td>
 
-                        {safeTotalPages >
-                          5 && (
-                          <>
-                            <span className="px-0.5 text-slate-400">
-                              …
-                            </span>
+                              {/* JENJANG */}
 
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setCurrentPage(
-                                  safeTotalPages
-                                )
+                              <td className="px-4 py-4">
+                                <span
+                                  className={`
+                                    inline-flex
+                                    items-center
+                                    rounded-lg
+                                    border
+                                    ${themeNeutralBorder}
+                                    ${themeNeutralSurface}
+                                    px-2.5
+                                    py-1
+                                    text-xs
+                                    font-medium
+                                    theme-text-secondary
+                                  `}
+                                >
+                                  {
+                                    item.jenjang
+                                  }
+                                </span>
+                              </td>
+
+                              {/* YAYASAN */}
+
+                              <td className="px-4 py-4">
+                                <p
+                                  className="max-w-[160px] truncate text-sm theme-text-secondary"
+                                  title={
+                                    item.yayasan
+                                  }
+                                >
+                                  {
+                                    item.yayasan
+                                  }
+                                </p>
+                              </td>
+
+                              {/* PAKET */}
+
+                              <td className="px-4 py-4">
+                                <span
+                                  className={`
+                                    inline-flex
+                                    items-center
+                                    rounded-lg
+                                    border
+                                    px-2.5
+                                    py-1
+                                    text-xs
+                                    font-medium
+                                    ${paketStyle.bg}
+                                    ${paketStyle.text}
+                                    ${paketStyle.border}
+                                  `}
+                                >
+                                  {
+                                    item.paket
+                                  }
+                                </span>
+                              </td>
+
+                              {/* STATUS */}
+
+                              <td className="px-4 py-4">
+                                <span
+                                  className={`
+                                    inline-flex
+                                    items-center
+                                    gap-1.5
+                                    rounded-full
+                                    border
+                                    px-2.5
+                                    py-1
+                                    text-xs
+                                    font-medium
+                                    ${statusStyle.bg}
+                                    ${statusStyle.text}
+                                    ${statusStyle.border}
+                                  `}
+                                >
+                                  <span
+                                    className={`
+                                      h-1.5
+                                      w-1.5
+                                      rounded-full
+                                      ${statusStyle.dot}
+                                    `}
+                                  />
+
+                                  {
+                                    item.status
+                                  }
+                                </span>
+                              </td>
+
+                              {/* ACTION */}
+
+                              <td className="px-4 py-4">
+                                <div className="flex items-center justify-end gap-1">
+                                  <ActionButton
+                                    title="Lihat detail"
+                                    onClick={() =>
+                                      router.push(
+                                        `/super-admin/sekolah/${item.id}`
+                                      )
+                                    }
+                                  >
+                                    <Eye
+                                      size={
+                                        16
+                                      }
+                                    />
+                                  </ActionButton>
+
+                                  <ActionButton
+                                    title="Edit sekolah"
+                                    hover="primary"
+                                    onClick={() =>
+                                      router.push(
+                                        `/super-admin/sekolah/edit/${item.id}`
+                                      )
+                                    }
+                                  >
+                                    <Edit
+                                      size={
+                                        16
+                                      }
+                                    />
+                                  </ActionButton>
+
+                                  <ActionButton
+                                    title="Hapus sekolah"
+                                    hover="warning"
+                                    onClick={() =>
+                                      handleDelete(
+                                        item
+                                      )
+                                    }
+                                  >
+                                    <Trash2
+                                      size={
+                                        16
+                                      }
+                                    />
+                                  </ActionButton>
+                                </div>
+                              </td>
+                            </tr>
+                          );
+                        }
+                      )
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            )}
+
+            {/* ==================================================
+                PAGINATION
+            ================================================== */}
+
+            {!loading &&
+              !error && (
+                <div
+                  className={`
+                    flex
+                    flex-col
+                    gap-3
+                    border-t
+                    ${themeDivider}
+                    px-4
+                    py-4
+                    sm:flex-row
+                    sm:items-center
+                    sm:justify-between
+                    sm:px-5
+                  `}
+                >
+                  <p className="text-xs theme-text-secondary">
+                    Menampilkan{" "}
+                    <span className="font-semibold theme-text">
+                      {paginatedData.length ===
+                      0
+                        ? 0
+                        : startIndex +
+                          1}
+                    </span>{" "}
+                    –{" "}
+                    <span className="font-semibold theme-text">
+                      {Math.min(
+                        startIndex +
+                          paginatedData.length,
+                        sortedData.length
+                      )}
+                    </span>{" "}
+                    dari{" "}
+                    <span className="font-semibold theme-text">
+                      {
+                        sortedData.length
+                      }
+                    </span>{" "}
+                    data
+                  </p>
+
+                  <div className="flex items-center justify-center gap-1">
+                    {/* PREVIOUS */}
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setCurrentPage(
+                          Math.max(
+                            1,
+                            safeCurrentPage -
+                              1
+                          )
+                        )
+                      }
+                      disabled={
+                        safeCurrentPage ===
+                        1
+                      }
+                      className={`
+                        flex
+                        h-9
+                        w-9
+                        items-center
+                        justify-center
+                        rounded-lg
+                        border
+                        ${themeNeutralBorder}
+                        ${themeNeutralSurface}
+                        theme-text-muted
+                        transition-all
+                        ${themeNeutralHover}
+                        disabled:cursor-not-allowed
+                        disabled:opacity-40
+                      `}
+                    >
+                      <ArrowUp
+                        size={14}
+                        className="-rotate-90"
+                      />
+                    </button>
+
+                    {/* PAGE NUMBERS */}
+
+                    {[
+                      ...Array(
+                        Math.min(
+                          safeTotalPages,
+                          5
+                        )
+                      ),
+                    ].map(
+                      (_, index) => {
+                        const page =
+                          index + 1;
+
+                        return (
+                          <button
+                            type="button"
+                            key={
+                              page
+                            }
+                            onClick={() =>
+                              setCurrentPage(
+                                page
+                              )
+                            }
+                            className={`
+                              flex
+                              h-9
+                              w-9
+                              items-center
+                              justify-center
+                              rounded-lg
+                              text-xs
+                              font-semibold
+                              transition-all
+                              ${
+                                safeCurrentPage ===
+                                page
+                                  ? `${themePrimaryButton} shadow-[0_4px_10px_color-mix(in_srgb,var(--color-primary)_25%,transparent)]`
+                                  : `theme-text-secondary ${themeNeutralHover}`
                               }
-                              className={`
-                                flex
-                                h-9
-                                w-9
-                                items-center
-                                justify-center
-                                rounded-lg
-                                text-xs
-                                font-semibold
-                                transition-all
-                                ${
-                                  safeCurrentPage ===
-                                  safeTotalPages
-                                    ? "bg-blue-600 text-white"
-                                    : "text-slate-500 hover:bg-slate-100"
-                                }
-                              `}
-                            >
-                              {
-                                safeTotalPages
-                              }
-                            </button>
-                          </>
-                        )}
+                            `}
+                          >
+                            {
+                              page
+                            }
+                          </button>
+                        );
+                      }
+                    )}
 
-                        {/* NEXT */}
+                    {safeTotalPages >
+                      5 && (
+                      <>
+                        <span className="px-0.5 theme-text-muted">
+                          …
+                        </span>
 
                         <button
                           type="button"
                           onClick={() =>
                             setCurrentPage(
-                              Math.min(
-                                safeTotalPages,
-                                safeCurrentPage +
-                                  1
-                              )
+                              safeTotalPages
                             )
                           }
-                          disabled={
-                            safeCurrentPage ===
-                              safeTotalPages ||
-                            safeTotalPages ===
-                              0
-                          }
-                          className="
+                          className={`
                             flex
                             h-9
                             w-9
                             items-center
                             justify-center
                             rounded-lg
-                            border
-                            border-slate-200
-                            bg-white
-                            text-slate-400
+                            text-xs
+                            font-semibold
                             transition-all
-                            hover:bg-slate-50
-                            disabled:cursor-not-allowed
-                            disabled:opacity-40
-                          "
+                            ${
+                              safeCurrentPage ===
+                              safeTotalPages
+                                ? themePrimaryButton
+                                : `theme-text-secondary ${themeNeutralHover}`
+                            }
+                          `}
                         >
-                          <ArrowDown
-                            size={14}
-                            className="-rotate-90"
-                          />
+                          {
+                            safeTotalPages
+                          }
                         </button>
+                      </>
+                    )}
 
-                      </div>
+                    {/* NEXT */}
 
-                    </div>
-                  )}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setCurrentPage(
+                          Math.min(
+                            safeTotalPages,
+                            safeCurrentPage +
+                              1
+                          )
+                        )
+                      }
+                      disabled={
+                        safeCurrentPage ===
+                          safeTotalPages ||
+                        safeTotalPages ===
+                          0
+                      }
+                      className={`
+                        flex
+                        h-9
+                        w-9
+                        items-center
+                        justify-center
+                        rounded-lg
+                        border
+                        ${themeNeutralBorder}
+                        ${themeNeutralSurface}
+                        theme-text-muted
+                        transition-all
+                        ${themeNeutralHover}
+                        disabled:cursor-not-allowed
+                        disabled:opacity-40
+                      `}
+                    >
+                      <ArrowDown
+                        size={14}
+                        className="-rotate-90"
+                      />
+                    </button>
+                  </div>
+                </div>
+              )}
+          </section>
 
-              </section>
+          {/* ==================================================
+              FOOTER
+          ================================================== */}
 
-              {/* ==================================================
-                  FOOTER
-              ================================================== */}
-
-              <div className="border-t border-slate-200/70 pt-5 text-center">
-
-                <p className="text-xs text-slate-400">
-                  © 2026 SmartSchool • Data
-                  Sekolah terakhir
-                  diperbarui hari ini
-                </p>
-
-              </div>
-
-            </div>
-
-          </main>
-
+          <div
+            className={`
+              border-t
+              ${themeDivider}
+              pt-5
+              text-center
+            `}
+          >
+            <p className="text-xs theme-text-muted">
+              © 2026 SmartSchool • Data
+              Sekolah terakhir
+              diperbarui hari ini
+            </p>
+          </div>
         </div>
-
-      </div>
+      </main>
     </div>
   );
 }
 
-// ============================================================
-// TABLE HEAD
-// ============================================================
+/* ============================================================
+   TABLE HEAD
+============================================================ */
 
 function TableHead({
   children,
@@ -2260,7 +2136,7 @@ function TableHead({
         font-semibold
         uppercase
         tracking-[0.08em]
-        text-slate-400
+        theme-text-muted
         ${
           align === "right"
             ? "text-right"
@@ -2268,7 +2144,7 @@ function TableHead({
         }
         ${
           sortable
-            ? "cursor-pointer select-none hover:text-blue-600"
+            ? "cursor-pointer select-none hover:text-[var(--color-primary)]"
             : ""
         }
       `}
@@ -2291,9 +2167,9 @@ function TableHead({
   );
 }
 
-// ============================================================
-// FILTER SELECT
-// ============================================================
+/* ============================================================
+   FILTER SELECT
+============================================================ */
 
 function FilterSelect({
   value,
@@ -2308,24 +2184,20 @@ function FilterSelect({
           e.target.value
         )
       }
-      className="
+      className={`
         h-10
         w-full
         rounded-xl
         border
-        border-slate-200
-        bg-slate-50
+        theme-border
+        theme-input
         px-3
         text-sm
-        text-slate-600
+        theme-text-secondary
         outline-none
         transition-all
-        hover:border-slate-300
-        focus:border-blue-400
-        focus:bg-white
-        focus:ring-4
-        focus:ring-blue-500/10
-      "
+        ${themeFocus}
+      `}
     >
       {options.map(
         (option) => (
@@ -2341,25 +2213,22 @@ function FilterSelect({
   );
 }
 
-// ============================================================
-// ACTION BUTTON
-// ============================================================
+/* ============================================================
+   ACTION BUTTON
+============================================================ */
 
 function ActionButton({
   children,
   onClick,
   title,
-  hover = "blue",
+  hover = "primary",
 }) {
   const hoverClass = {
-    blue:
-      "hover:bg-blue-50 hover:text-blue-600",
+    primary:
+      "hover:bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)] hover:text-[var(--color-primary)]",
 
-    amber:
-      "hover:bg-amber-50 hover:text-amber-600",
-
-    rose:
-      "hover:bg-rose-50 hover:text-rose-600",
+    warning:
+      "hover:bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)] hover:text-[var(--color-warning)]",
   };
 
   return (
@@ -2374,9 +2243,9 @@ function ActionButton({
         items-center
         justify-center
         rounded-lg
-        text-slate-400
+        theme-text-muted
         transition-all
-        ${hoverClass[hover]}
+        ${hoverClass[hover] || hoverClass.primary}
       `}
     >
       {children}
@@ -2384,9 +2253,9 @@ function ActionButton({
   );
 }
 
-// ============================================================
-// MOBILE SCHOOL CARD
-// ============================================================
+/* ============================================================
+   MOBILE SCHOOL CARD
+============================================================ */
 
 function MobileSchoolCard({
   item,
@@ -2409,20 +2278,25 @@ function MobileSchoolCard({
     paketColorMap.Starter;
 
   return (
-    <div className="p-4 transition-colors hover:bg-slate-50/50">
-
+    <div
+      className={`
+        p-4
+        transition-colors
+        ${themeNeutralHover}
+      `}
+    >
       <div className="flex items-start gap-3">
 
         {/* NUMBER */}
 
-        <span className="w-5 pt-2 text-xs font-medium text-slate-400">
+        <span className="w-5 pt-2 text-xs font-medium theme-text-muted">
           {number}
         </span>
 
         {/* ICON */}
 
         <div
-          className="
+          className={`
             flex
             h-11
             w-11
@@ -2431,10 +2305,10 @@ function MobileSchoolCard({
             justify-center
             rounded-xl
             border
-            border-blue-100
-            bg-blue-50
-            text-blue-600
-          "
+            ${themePrimaryBorder}
+            ${themePrimarySurface}
+            ${themePrimaryText}
+          `}
         >
           <Building2
             size={20}
@@ -2445,7 +2319,6 @@ function MobileSchoolCard({
         {/* INFORMATION */}
 
         <div className="min-w-0 flex-1">
-
           <p
             className={`
               truncate
@@ -2454,8 +2327,8 @@ function MobileSchoolCard({
               ${
                 sortField ===
                 "nama"
-                  ? "text-blue-700"
-                  : "text-slate-800"
+                  ? themePrimaryText
+                  : "theme-text"
               }
             `}
           >
@@ -2463,19 +2336,18 @@ function MobileSchoolCard({
           </p>
 
           <div className="mt-1 flex flex-wrap items-center gap-1.5 text-xs">
-
             <span
               className={
                 sortField ===
                 "npsn"
-                  ? "font-semibold text-blue-600"
-                  : "text-slate-400"
+                  ? `font-semibold ${themePrimaryText}`
+                  : "theme-text-muted"
               }
             >
               {item.npsn}
             </span>
 
-            <span className="text-slate-300">
+            <span className="theme-text-muted opacity-50">
               •
             </span>
 
@@ -2483,14 +2355,14 @@ function MobileSchoolCard({
               className={
                 sortField ===
                 "jenjang"
-                  ? "font-semibold text-blue-600"
-                  : "text-slate-400"
+                  ? `font-semibold ${themePrimaryText}`
+                  : "theme-text-muted"
               }
             >
               {item.jenjang}
             </span>
 
-            <span className="text-slate-300">
+            <span className="theme-text-muted opacity-50">
               •
             </span>
 
@@ -2498,21 +2370,18 @@ function MobileSchoolCard({
               className={
                 sortField ===
                 "status"
-                  ? "font-semibold text-blue-600"
-                  : "text-slate-400"
+                  ? `font-semibold ${themePrimaryText}`
+                  : "theme-text-muted"
               }
             >
               {item.status}
             </span>
-
           </div>
-
         </div>
 
         {/* ACTION */}
 
         <div className="flex items-center gap-1">
-
           <ActionButton
             title="Detail"
             onClick={() =>
@@ -2526,7 +2395,7 @@ function MobileSchoolCard({
 
           <ActionButton
             title="Edit"
-            hover="amber"
+            hover="primary"
             onClick={() =>
               router.push(
                 `/super-admin/sekolah/edit/${item.id}`
@@ -2538,36 +2407,33 @@ function MobileSchoolCard({
 
           <ActionButton
             title="Hapus"
-            hover="rose"
+            hover="warning"
             onClick={() =>
               onDelete(item)
             }
           >
             <Trash2 size={15} />
           </ActionButton>
-
         </div>
-
       </div>
 
       {/* BADGES */}
 
       <div className="ml-8 mt-3 flex flex-wrap items-center gap-1.5">
-
         <span
           className={`
             rounded-lg
             border
+            ${
+              sortField ===
+              "jenjang"
+                ? `${themePrimaryBorder} ${themePrimarySurface} ${themePrimaryText}`
+                : `${themeNeutralBorder} ${themeNeutralSurface} theme-text-secondary`
+            }
             px-2.5
             py-1
             text-[10px]
             font-medium
-            ${
-              sortField ===
-              "jenjang"
-                ? "border-blue-300 bg-blue-50 text-blue-700"
-                : "border-slate-200 bg-slate-50 text-slate-600"
-            }
           `}
         >
           {item.jenjang}
@@ -2577,16 +2443,16 @@ function MobileSchoolCard({
           className={`
             rounded-lg
             border
+            ${
+              sortField ===
+              "paket"
+                ? `${themePrimaryBorder} ${themePrimarySurface} ${themePrimaryText}`
+                : `${paketStyle.bg} ${paketStyle.text} ${paketStyle.border}`
+            }
             px-2.5
             py-1
             text-[10px]
             font-medium
-            ${
-              sortField ===
-              "paket"
-                ? "border-blue-300 bg-blue-50 text-blue-700"
-                : `${paketStyle.bg} ${paketStyle.text} ${paketStyle.border}`
-            }
           `}
         >
           {item.paket}
@@ -2599,16 +2465,16 @@ function MobileSchoolCard({
             gap-1
             rounded-full
             border
+            ${
+              sortField ===
+              "status"
+                ? `${themePrimaryBorder} ${themePrimarySurface} ${themePrimaryText}`
+                : `${statusStyle.bg} ${statusStyle.text} ${statusStyle.border}`
+            }
             px-2.5
             py-1
             text-[10px]
             font-medium
-            ${
-              sortField ===
-              "status"
-                ? "border-blue-300 bg-blue-50 text-blue-700"
-                : `${statusStyle.bg} ${statusStyle.text} ${statusStyle.border}`
-            }
           `}
         >
           <span
@@ -2619,7 +2485,7 @@ function MobileSchoolCard({
               ${
                 sortField ===
                 "status"
-                  ? "bg-blue-500"
+                  ? "bg-[var(--color-primary)]"
                   : statusStyle.dot
               }
             `}
@@ -2629,114 +2495,131 @@ function MobileSchoolCard({
         </span>
 
         {sortField && (
-          <span className="ml-auto text-[10px] text-slate-300">
+          <span className="ml-auto text-[10px] theme-text-muted opacity-50">
             {sortOrder ===
             "asc"
               ? "↑"
               : "↓"}
           </span>
         )}
-
       </div>
-
     </div>
   );
 }
 
-// ============================================================
-// LOADING
-// ============================================================
+/* ============================================================
+   LOADING
+============================================================ */
 
 function LoadingState() {
   return (
     <div className="flex min-h-[280px] flex-col items-center justify-center px-6 py-16 text-center">
+      <div
+        className={`
+          h-10
+          w-10
+          animate-spin
+          rounded-full
+          border-4
+          ${themeNeutralBorder}
+          border-t-[var(--color-primary)]
+        `}
+      />
 
-      <div className="h-10 w-10 animate-spin rounded-full border-4 border-slate-200 border-t-blue-600" />
-
-      <p className="mt-4 text-sm font-semibold text-slate-700">
+      <p className="mt-4 text-sm font-semibold theme-text">
         Memuat data sekolah...
       </p>
 
-      <p className="mt-1 text-xs text-slate-400">
+      <p className="mt-1 text-xs theme-text-muted">
         Mengambil data terbaru dari
         server SmartSchool.
       </p>
-
     </div>
   );
 }
 
-// ============================================================
-// ERROR
-// ============================================================
+/* ============================================================
+   ERROR
+============================================================ */
 
 function ErrorState({
   message,
 }) {
   return (
     <div className="flex min-h-[280px] flex-col items-center justify-center px-6 py-16 text-center">
-
-      <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-50 text-rose-500">
-        <XCircle size={25} />
-      </div>
-
-      <p className="mt-4 text-sm font-semibold text-slate-700">
-        Gagal memuat data sekolah
-      </p>
-
-      <p className="mt-1 max-w-md text-xs leading-5 text-slate-400">
-        {message}
-      </p>
-
-      <p className="mt-3 text-xs text-slate-400">
-        Pastikan backend berjalan dan
-        akun memiliki izin
-        yayasan.view.
-      </p>
-
-    </div>
-  );
-}
-
-// ============================================================
-// EMPTY STATE
-// ============================================================
-
-function EmptyState() {
-  return (
-    <div className="flex flex-col items-center justify-center py-12 text-center">
-
       <div
-        className="
+        className={`
           flex
           h-14
           w-14
           items-center
           justify-center
           rounded-2xl
-          bg-slate-100
-          text-slate-400
-        "
+          border
+          ${themeWarningBorder}
+          ${themeWarningSurface}
+          ${themeWarningText}
+        `}
       >
-        <Database size={24} />
+        <XCircle size={25} />
       </div>
 
-      <p className="mt-4 text-sm font-semibold text-slate-700">
-        Tidak ada data ditemukan
+      <p className="mt-4 text-sm font-semibold theme-text">
+        Gagal memuat data sekolah
       </p>
 
-      <p className="mt-1 text-xs text-slate-400">
-        Coba ubah kata kunci atau
-        filter pencarian.
+      <p className="mt-1 max-w-md text-xs leading-5 theme-text-muted">
+        {message}
       </p>
 
+      <p className="mt-3 text-xs theme-text-muted">
+        Pastikan backend berjalan dan
+        akun memiliki izin
+        yayasan.view.
+      </p>
     </div>
   );
 }
 
-// ============================================================
-// STAT CARD
-// ============================================================
+/* ============================================================
+   EMPTY STATE
+============================================================ */
+
+function EmptyState() {
+  return (
+    <div className="flex flex-col items-center justify-center py-12 text-center">
+      <div
+        className={`
+          flex
+          h-14
+          w-14
+          items-center
+          justify-center
+          rounded-2xl
+          border
+          ${themeNeutralBorder}
+          ${themeNeutralSurface}
+          theme-text-muted
+        `}
+      >
+        <Database size={24} />
+      </div>
+
+      <p className="mt-4 text-sm font-semibold theme-text">
+        Tidak ada data ditemukan
+      </p>
+
+      <p className="mt-1 text-xs theme-text-muted">
+        Coba ubah kata kunci atau
+        filter pencarian.
+      </p>
+    </div>
+  );
+}
+
+/* ============================================================
+   STAT CARD
+============================================================ */
 
 function StatCard({
   label,
@@ -2745,60 +2628,58 @@ function StatCard({
   color,
 }) {
   const colorMap = {
-    blue: {
-      bg: "bg-blue-50",
-      text: "text-blue-600",
+    primary: {
+      bg: themePrimarySurface,
+      text: themePrimaryText,
+      border: themePrimaryBorder,
     },
 
-    emerald: {
-      bg: "bg-emerald-50",
-      text: "text-emerald-600",
+    success: {
+      bg: themeSuccessSurface,
+      text: themeSuccessText,
+      border: themeSuccessBorder,
     },
 
-    amber: {
-      bg: "bg-amber-50",
-      text: "text-amber-600",
+    warning: {
+      bg: themeWarningSurface,
+      text: themeWarningText,
+      border: themeWarningBorder,
     },
 
-    rose: {
-      bg: "bg-rose-50",
-      text: "text-rose-600",
+    neutral: {
+      bg: themeNeutralSurface,
+      text: "theme-text-secondary",
+      border: themeNeutralBorder,
     },
 
-    violet: {
-      bg: "bg-violet-50",
-      text: "text-violet-600",
-    },
-
-    teal: {
-      bg: "bg-teal-50",
-      text: "text-teal-600",
+    info: {
+      bg: themeInfoSurface,
+      text: themeInfoText,
+      border: themeInfoBorder,
     },
   };
 
   const styles =
     colorMap[color] ||
-    colorMap.blue;
+    colorMap.primary;
 
   return (
     <div
-      className="
+      className={`
         group
         rounded-2xl
         border
-        border-slate-200
-        bg-white
+        theme-border
+        theme-card
         p-3.5
-        shadow-[0_2px_10px_rgba(15,23,42,0.04)]
+        ${themeSmallShadow}
         transition-all
         hover:-translate-y-0.5
-        hover:shadow-[0_7px_20px_rgba(15,23,42,0.08)]
+        hover:shadow-[0_7px_20px_color-mix(in_srgb,var(--color-text)_8%,transparent)]
         sm:p-4
-      "
+      `}
     >
-
       <div className="flex items-center gap-3">
-
         <div
           className={`
             flex
@@ -2808,7 +2689,9 @@ function StatCard({
             items-center
             justify-center
             rounded-xl
+            border
             ${styles.bg}
+            ${styles.border}
             ${styles.text}
           `}
         >
@@ -2819,29 +2702,11 @@ function StatCard({
         </div>
 
         <div className="min-w-0">
-
-          <p
-            className="
-              truncate
-              text-[10px]
-              font-semibold
-              uppercase
-              tracking-[0.06em]
-              text-slate-400
-            "
-          >
+          <p className="truncate text-[10px] font-semibold uppercase tracking-[0.06em] theme-text-muted">
             {label}
           </p>
 
-          <p
-            className="
-              mt-0.5
-              text-xl
-              font-semibold
-              tracking-tight
-              text-slate-800
-            "
-          >
+          <p className="mt-0.5 text-xl font-semibold tracking-tight theme-text">
             {typeof value ===
             "number"
               ? value.toLocaleString(
@@ -2849,11 +2714,8 @@ function StatCard({
                 )
               : value}
           </p>
-
         </div>
-
       </div>
-
     </div>
   );
 }

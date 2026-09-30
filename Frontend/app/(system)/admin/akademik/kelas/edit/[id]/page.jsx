@@ -81,41 +81,29 @@ export default function AdminKelasEditPage() {
     ? params.id[0]
     : params?.id;
 
-  const [isCollapsed, setIsCollapsed] =
-    useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
-  const [pageLoading, setPageLoading] =
-    useState(true);
+  const [pageLoading, setPageLoading] = useState(true);
 
-  const [loading, setLoading] =
-    useState(false);
+  const [loading, setLoading] = useState(false);
 
-  const [loadingTahun, setLoadingTahun] =
-    useState(true);
+  const [loadingTahun, setLoadingTahun] = useState(true);
 
-  const [loadingGedung, setLoadingGedung] =
-    useState(true);
+  const [loadingGedung, setLoadingGedung] = useState(true);
 
-  const [loadingLantai, setLoadingLantai] =
-    useState(false);
+  const [loadingLantai, setLoadingLantai] = useState(false);
 
-  const [tahunAjaranList, setTahunAjaranList] =
-    useState([]);
+  const [tahunAjaranList, setTahunAjaranList] = useState([]);
 
-  const [gedungList, setGedungList] =
-    useState([]);
+  const [gedungList, setGedungList] = useState([]);
 
-  const [lantaiList, setLantaiList] =
-    useState([]);
+  const [lantaiList, setLantaiList] = useState([]);
 
-  const [jumlahSiswa, setJumlahSiswa] =
-    useState(0);
+  const [jumlahSiswa, setJumlahSiswa] = useState(0);
 
-  const [error, setError] =
-    useState("");
+  const [error, setError] = useState("");
 
-  const [success, setSuccess] =
-    useState("");
+  const [success, setSuccess] = useState("");
 
   const [form, setForm] = useState({
     nama: "",
@@ -155,8 +143,7 @@ export default function AdminKelasEditPage() {
     try {
       setLoadingTahun(true);
 
-      const response =
-        await getTahunAjaran();
+      const response = await getTahunAjaran();
 
       const list = unwrapData(response);
 
@@ -195,10 +182,12 @@ export default function AdminKelasEditPage() {
     }
   }
 
-  async function loadLantai(gedungId, selectedLantaiId = "") {
+  async function loadLantai(
+    gedungId,
+    selectedLantaiId = ""
+  ) {
     if (!gedungId) {
       setLantaiList([]);
-
       return;
     }
 
@@ -206,9 +195,7 @@ export default function AdminKelasEditPage() {
       setLoadingLantai(true);
 
       const response =
-        await getLantaiByGedung(
-          gedungId
-        );
+        await getLantaiByGedung(gedungId);
 
       const list = unwrapData(response);
 
@@ -343,8 +330,6 @@ export default function AdminKelasEditPage() {
           : 0
       );
 
-      // Jika kelas sudah punya lantai,
-      // langsung load daftar lantai gedung tersebut.
       if (gedungId) {
         await loadLantai(
           gedungId,
@@ -452,9 +437,7 @@ export default function AdminKelasEditPage() {
     const kapasitas =
       Number(form.kapasitas);
 
-    if (
-      !Number.isFinite(kapasitas)
-    ) {
+    if (!Number.isFinite(kapasitas)) {
       setError(
         "Kapasitas harus berupa angka."
       );
@@ -563,7 +546,7 @@ export default function AdminKelasEditPage() {
 
   if (pageLoading) {
     return (
-      <div className="flex h-screen w-full overflow-hidden bg-slate-50">
+      <div className="theme-page flex h-screen w-full overflow-hidden">
         <Sidebar
           active="kelas"
           setActive={() => {}}
@@ -587,14 +570,14 @@ export default function AdminKelasEditPage() {
             }}
           />
 
-          <main className="flex min-h-0 flex-1 items-center justify-center">
+          <main className="theme-page flex min-h-0 flex-1 items-center justify-center">
             <div className="flex flex-col items-center gap-3">
               <Loader2
                 size={30}
-                className="animate-spin text-blue-600"
+                className="animate-spin theme-sidebar-text-active"
               />
 
-              <p className="text-sm font-medium text-slate-500">
+              <p className="theme-text-muted text-sm font-medium">
                 Memuat data kelas...
               </p>
             </div>
@@ -617,7 +600,7 @@ export default function AdminKelasEditPage() {
     );
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-slate-50">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar
         active="kelas"
         setActive={() => {}}
@@ -641,7 +624,7 @@ export default function AdminKelasEditPage() {
           }}
         />
 
-        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
+        <main className="theme-page min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="w-full px-3 py-4 sm:px-5 sm:py-5 md:px-6 lg:px-8 xl:px-10">
             <div className="mx-auto w-full max-w-[1200px]">
 
@@ -655,7 +638,7 @@ export default function AdminKelasEditPage() {
                       `/admin/akademik/kelas/${id}`
                     )
                   }
-                  className="group inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-blue-700"
+                  className="theme-text-muted theme-sidebar-hover group inline-flex items-center gap-2 rounded-lg px-2 py-1 text-sm font-medium transition"
                 >
                   <ArrowLeft
                     size={17}
@@ -669,16 +652,16 @@ export default function AdminKelasEditPage() {
               {/* HEADER */}
 
               <div className="mb-6 flex min-w-0 items-center gap-3 sm:gap-4">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-md shadow-blue-200 sm:h-12 sm:w-12">
+                <div className="theme-primary flex h-11 w-11 shrink-0 items-center justify-center rounded-xl shadow-md sm:h-12 sm:w-12">
                   <Edit3 size={21} />
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <h1 className="truncate text-xl font-bold tracking-tight text-slate-800 sm:text-2xl">
+                  <h1 className="theme-text truncate text-xl font-bold tracking-tight sm:text-2xl">
                     Edit Kelas
                   </h1>
 
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="theme-text-muted mt-1 text-sm">
                     Perbarui informasi kelas
                     termasuk lokasi gedung dan lantai.
                   </p>
@@ -688,20 +671,17 @@ export default function AdminKelasEditPage() {
               {/* ERROR */}
 
               {error && (
-                <div className="mb-5 flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-rose-100">
-                    <AlertCircle
-                      size={18}
-                      className="text-rose-600"
-                    />
+                <div className="theme-danger mb-5 flex items-start gap-3 rounded-2xl border p-4">
+                  <div className="theme-danger flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
+                    <AlertCircle size={18} />
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-rose-800">
+                    <p className="text-sm font-semibold">
                       Gagal memuat / menyimpan data
                     </p>
 
-                    <p className="mt-1 break-words text-sm leading-6 text-rose-700">
+                    <p className="mt-1 break-words text-sm leading-6">
                       {error}
                     </p>
                   </div>
@@ -711,7 +691,7 @@ export default function AdminKelasEditPage() {
                     onClick={() =>
                       setError("")
                     }
-                    className="rounded-lg p-1 text-rose-400 hover:bg-rose-100 hover:text-rose-600"
+                    className="theme-header-hover rounded-lg p-1 transition"
                   >
                     <X size={16} />
                   </button>
@@ -721,20 +701,17 @@ export default function AdminKelasEditPage() {
               {/* SUCCESS */}
 
               {success && (
-                <div className="mb-5 flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-100">
-                    <CheckCircle
-                      size={18}
-                      className="text-emerald-600"
-                    />
+                <div className="theme-success mb-5 flex items-start gap-3 rounded-2xl border p-4">
+                  <div className="theme-success flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
+                    <CheckCircle size={18} />
                   </div>
 
                   <div>
-                    <p className="text-sm font-semibold text-emerald-800">
+                    <p className="text-sm font-semibold">
                       Berhasil
                     </p>
 
-                    <p className="mt-1 text-sm leading-6 text-emerald-700">
+                    <p className="mt-1 text-sm leading-6">
                       {success}
                     </p>
                   </div>
@@ -745,20 +722,20 @@ export default function AdminKelasEditPage() {
 
               <form
                 onSubmit={handleSubmit}
-                className="w-full overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm"
+                className="theme-card theme-border w-full overflow-hidden rounded-2xl border shadow-sm"
               >
-                <div className="border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white px-4 py-4 sm:px-6 md:px-7">
+                <div className="theme-card-soft theme-border-soft border-b px-4 py-4 sm:px-6 md:px-7">
                   <div className="flex items-start gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                    <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
                       <School size={19} />
                     </div>
 
                     <div>
-                      <h2 className="text-sm font-bold text-slate-800">
+                      <h2 className="theme-text text-sm font-bold">
                         Informasi Kelas
                       </h2>
 
-                      <p className="mt-1 text-xs leading-5 text-slate-500">
+                      <p className="theme-text-muted mt-1 text-xs leading-5">
                         Perbarui data kelas dan lokasi
                         ruangannya.
                       </p>
@@ -772,9 +749,9 @@ export default function AdminKelasEditPage() {
                     {/* NAMA */}
 
                     <div className="min-w-0 md:col-span-2">
-                      <label className="mb-1.5 block text-xs font-semibold text-slate-600">
+                      <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
                         Nama Kelas
-                        <span className="ml-1 text-rose-500">
+                        <span className="ml-1 text-[var(--color-danger)]">
                           *
                         </span>
                       </label>
@@ -782,7 +759,7 @@ export default function AdminKelasEditPage() {
                       <div className="relative">
                         <GraduationCap
                           size={17}
-                          className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                          className="theme-text-placeholder pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2"
                         />
 
                         <input
@@ -792,7 +769,7 @@ export default function AdminKelasEditPage() {
                           onChange={handleChange}
                           disabled={loading}
                           placeholder="Contoh: X RPL 1"
-                          className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
+                          className="theme-input h-11 w-full rounded-xl border pl-10 pr-3 text-sm outline-none transition disabled:opacity-60"
                         />
                       </div>
                     </div>
@@ -800,9 +777,9 @@ export default function AdminKelasEditPage() {
                     {/* TINGKAT */}
 
                     <div>
-                      <label className="mb-1.5 block text-xs font-semibold text-slate-600">
+                      <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
                         Tingkat
-                        <span className="ml-1 text-rose-500">
+                        <span className="ml-1 text-[var(--color-danger)]">
                           *
                         </span>
                       </label>
@@ -810,7 +787,7 @@ export default function AdminKelasEditPage() {
                       <div className="relative">
                         <School
                           size={17}
-                          className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                          className="theme-text-placeholder pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2"
                         />
 
                         <select
@@ -818,7 +795,7 @@ export default function AdminKelasEditPage() {
                           value={form.tingkat}
                           onChange={handleChange}
                           disabled={loading}
-                          className="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-10 text-sm text-slate-700 outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
+                          className="theme-input h-11 w-full appearance-none rounded-xl border pl-10 pr-10 text-sm outline-none disabled:opacity-60"
                         >
                           <option value="">
                             Pilih tingkat
@@ -838,7 +815,7 @@ export default function AdminKelasEditPage() {
 
                         <ChevronDown
                           size={16}
-                          className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                          className="theme-text-placeholder pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2"
                         />
                       </div>
                     </div>
@@ -846,9 +823,9 @@ export default function AdminKelasEditPage() {
                     {/* TAHUN AJARAN */}
 
                     <div>
-                      <label className="mb-1.5 block text-xs font-semibold text-slate-600">
+                      <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
                         Tahun Ajaran
-                        <span className="ml-1 text-rose-500">
+                        <span className="ml-1 text-[var(--color-danger)]">
                           *
                         </span>
                       </label>
@@ -856,7 +833,7 @@ export default function AdminKelasEditPage() {
                       <div className="relative">
                         <CalendarDays
                           size={17}
-                          className="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 text-slate-400"
+                          className="theme-text-placeholder pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2"
                         />
 
                         <select
@@ -871,7 +848,7 @@ export default function AdminKelasEditPage() {
                             loading ||
                             loadingTahun
                           }
-                          className="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-10 text-sm text-slate-700 outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
+                          className="theme-input h-11 w-full appearance-none rounded-xl border pl-10 pr-10 text-sm outline-none disabled:opacity-60"
                         >
                           <option value="">
                             {loadingTahun
@@ -898,7 +875,7 @@ export default function AdminKelasEditPage() {
 
                         <ChevronDown
                           size={16}
-                          className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                          className="theme-text-placeholder pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2"
                         />
                       </div>
                     </div>
@@ -906,9 +883,9 @@ export default function AdminKelasEditPage() {
                     {/* KAPASITAS */}
 
                     <div>
-                      <label className="mb-1.5 block text-xs font-semibold text-slate-600">
+                      <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
                         Kapasitas Kelas
-                        <span className="ml-1 text-rose-500">
+                        <span className="ml-1 text-[var(--color-danger)]">
                           *
                         </span>
                       </label>
@@ -916,7 +893,7 @@ export default function AdminKelasEditPage() {
                       <div className="relative">
                         <Users
                           size={17}
-                          className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                          className="theme-text-placeholder pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2"
                         />
 
                         <input
@@ -930,7 +907,7 @@ export default function AdminKelasEditPage() {
                             handleChange
                           }
                           disabled={loading}
-                          className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-3 text-sm text-slate-800 outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
+                          className="theme-input h-11 w-full rounded-xl border pl-10 pr-3 text-sm outline-none disabled:opacity-60"
                         />
                       </div>
                     </div>
@@ -938,21 +915,21 @@ export default function AdminKelasEditPage() {
                     {/* JUMLAH SISWA */}
 
                     <div>
-                      <label className="mb-1.5 block text-xs font-semibold text-slate-600">
+                      <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
                         Jumlah Siswa
                       </label>
 
                       <div className="relative">
                         <Users
                           size={17}
-                          className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                          className="theme-text-placeholder pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2"
                         />
 
                         <input
                           type="text"
                           value={jumlahSiswa}
                           readOnly
-                          className="h-11 w-full rounded-xl border border-slate-200 bg-slate-100 pl-10 pr-3 text-sm font-semibold text-slate-700 outline-none"
+                          className="theme-input theme-card-soft h-11 w-full rounded-xl border pl-10 pr-3 text-sm font-semibold outline-none"
                         />
                       </div>
                     </div>
@@ -960,14 +937,14 @@ export default function AdminKelasEditPage() {
                     {/* GEDUNG */}
 
                     <div>
-                      <label className="mb-1.5 block text-xs font-semibold text-slate-600">
+                      <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
                         Gedung
                       </label>
 
                       <div className="relative">
                         <Building2
                           size={17}
-                          className="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 text-slate-400"
+                          className="theme-text-placeholder pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2"
                         />
 
                         <select
@@ -982,7 +959,7 @@ export default function AdminKelasEditPage() {
                             loading ||
                             loadingGedung
                           }
-                          className="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-10 text-sm text-slate-700 outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 disabled:opacity-60"
+                          className="theme-input h-11 w-full appearance-none rounded-xl border pl-10 pr-10 text-sm outline-none disabled:opacity-60"
                         >
                           <option value="">
                             {loadingGedung
@@ -1007,7 +984,7 @@ export default function AdminKelasEditPage() {
 
                         <ChevronDown
                           size={16}
-                          className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                          className="theme-text-placeholder pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2"
                         />
                       </div>
                     </div>
@@ -1015,14 +992,14 @@ export default function AdminKelasEditPage() {
                     {/* LANTAI */}
 
                     <div>
-                      <label className="mb-1.5 block text-xs font-semibold text-slate-600">
+                      <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
                         Lantai
                       </label>
 
                       <div className="relative">
                         <Layers3
                           size={17}
-                          className="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 text-slate-400"
+                          className="theme-text-placeholder pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2"
                         />
 
                         <select
@@ -1038,7 +1015,7 @@ export default function AdminKelasEditPage() {
                             !form.gedungId ||
                             loadingLantai
                           }
-                          className="h-11 w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-10 text-sm text-slate-700 outline-none focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-60"
+                          className="theme-input h-11 w-full appearance-none rounded-xl border pl-10 pr-10 text-sm outline-none disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           <option value="">
                             {loadingLantai
@@ -1065,7 +1042,7 @@ export default function AdminKelasEditPage() {
 
                         <ChevronDown
                           size={16}
-                          className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                          className="theme-text-placeholder pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2"
                         />
                       </div>
                     </div>
@@ -1073,21 +1050,18 @@ export default function AdminKelasEditPage() {
 
                   {/* LOCATION PREVIEW */}
 
-                  <div className="mt-6 rounded-xl border border-blue-100 bg-blue-50/60 p-4">
+                  <div className="theme-info mt-6 rounded-xl border p-4">
                     <div className="flex items-start gap-3">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-100">
-                        <Info
-                          size={16}
-                          className="text-blue-700"
-                        />
+                      <div className="theme-info flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
+                        <Info size={16} />
                       </div>
 
                       <div className="min-w-0">
-                        <p className="text-sm font-semibold text-blue-800">
+                        <p className="text-sm font-semibold">
                           Lokasi Kelas
                         </p>
 
-                        <p className="mt-1 text-xs leading-5 text-blue-700">
+                        <p className="mt-1 text-xs leading-5">
                           {selectedGedung
                             ? selectedGedung.nama
                             : "Gedung belum dipilih"}
@@ -1097,7 +1071,7 @@ export default function AdminKelasEditPage() {
                             : ""}
                         </p>
 
-                        <p className="mt-1 text-xs text-blue-600">
+                        <p className="mt-1 text-xs opacity-80">
                           Lokasi disimpan melalui
                           relasi{" "}
                           <b>Kelas.lantaiId</b>.
@@ -1109,59 +1083,58 @@ export default function AdminKelasEditPage() {
                   {/* INFO */}
 
                   <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                    <div className="flex min-w-0 items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white">
+                    <div className="theme-card-soft theme-border flex min-w-0 items-center gap-3 rounded-xl border p-4">
+                      <div className="theme-card theme-border flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border">
                         <Users
                           size={17}
-                          className="text-slate-600"
+                          className="theme-text-secondary"
                         />
                       </div>
 
                       <div>
-                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        <p className="theme-text-muted text-xs font-semibold uppercase tracking-wide">
                           Siswa
                         </p>
 
-                        <p className="mt-0.5 text-sm text-slate-700">
+                        <p className="theme-text-secondary mt-0.5 text-sm">
                           {jumlahSiswa} siswa
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex min-w-0 items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white">
+                    <div className="theme-card-soft theme-border flex min-w-0 items-center gap-3 rounded-xl border p-4">
+                      <div className="theme-card theme-border flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border">
                         <Building2
                           size={17}
-                          className="text-slate-600"
+                          className="theme-text-secondary"
                         />
                       </div>
 
                       <div className="min-w-0">
-                        <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        <p className="theme-text-muted text-xs font-semibold uppercase tracking-wide">
                           Gedung
                         </p>
 
-                        <p className="mt-0.5 truncate text-sm text-slate-700">
+                        <p className="theme-text-secondary mt-0.5 truncate text-sm">
                           {selectedGedung?.nama ||
                             "Belum dipilih"}
                         </p>
                       </div>
                     </div>
 
-                    <div className="flex min-w-0 items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white">
+                    <div className="theme-success flex min-w-0 items-center gap-3 rounded-xl border p-4">
+                      <div className="theme-card theme-border flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border">
                         <CheckCircle
                           size={17}
-                          className="text-emerald-600"
                         />
                       </div>
 
                       <div className="min-w-0">
-                        <p className="text-xs font-semibold uppercase tracking-wide text-emerald-600">
+                        <p className="text-xs font-semibold uppercase tracking-wide">
                           Lantai
                         </p>
 
-                        <p className="mt-0.5 truncate text-sm text-emerald-700">
+                        <p className="mt-0.5 truncate text-sm">
                           {selectedLantai?.nama ||
                             "Belum dipilih"}
                         </p>
@@ -1171,7 +1144,7 @@ export default function AdminKelasEditPage() {
 
                   {/* ACTION */}
 
-                  <div className="mt-7 flex w-full flex-col-reverse gap-3 border-t border-slate-100 pt-6 sm:flex-row sm:items-center sm:justify-end">
+                  <div className="theme-border-soft mt-7 flex w-full flex-col-reverse gap-3 border-t pt-6 sm:flex-row sm:items-center sm:justify-end">
                     <button
                       type="button"
                       onClick={() =>
@@ -1180,7 +1153,7 @@ export default function AdminKelasEditPage() {
                         )
                       }
                       disabled={loading}
-                      className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 hover:text-slate-800 disabled:opacity-50 sm:w-auto"
+                      className="theme-card theme-border theme-text-secondary theme-header-hover inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl border px-6 py-2.5 text-sm font-medium transition disabled:opacity-50 sm:w-auto"
                     >
                       <X size={17} />
                       Batal
@@ -1193,7 +1166,7 @@ export default function AdminKelasEditPage() {
                         loadingTahun ||
                         loadingGedung
                       }
-                      className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-7 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+                      className="theme-primary inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-xl px-7 py-2.5 text-sm font-semibold shadow-sm transition hover:shadow-md disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
                     >
                       {loading ? (
                         <>
@@ -1216,7 +1189,7 @@ export default function AdminKelasEditPage() {
                 </div>
               </form>
 
-              <p className="py-6 text-center text-[11px] text-slate-400">
+              <p className="theme-text-placeholder py-6 text-center text-[11px]">
                 SmartSchool • Administrasi Kelas
               </p>
             </div>

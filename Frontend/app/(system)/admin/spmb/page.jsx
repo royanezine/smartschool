@@ -14,7 +14,6 @@ import {
   FileText,
   CheckCircle2,
   Clock3,
-  XCircle,
   Eye,
   Edit3,
   CalendarDays,
@@ -23,7 +22,6 @@ import {
   ChevronRight,
   ChevronLeft,
   X,
-  Filter,
   RefreshCw,
   GraduationCap,
   ClipboardCheck,
@@ -33,11 +31,76 @@ import {
   Phone,
   Mail,
   School,
-  ArrowUpRight,
   TrendingUp,
   TrendingDown,
-  AlertCircle,
 } from "lucide-react";
+
+/* =========================================================
+   GLOBAL THEME HELPERS
+========================================================= */
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_9%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+const themeDangerText =
+  "theme-danger";
 
 /* =========================================================
    MOCK DATA
@@ -180,24 +243,24 @@ const PENDAFTAR_DATA = [
 
 const STATUS_CONFIG = {
   Terverifikasi: {
-    bg: "bg-emerald-50",
-    text: "text-emerald-700",
-    border: "border-emerald-100",
-    dot: "bg-emerald-500",
+    bg: themeSuccessSurface,
+    text: "text-[var(--color-success)]",
+    border: themeSuccessBorder,
+    dot: "bg-[var(--color-success)]",
   },
 
   "Menunggu Verifikasi": {
-    bg: "bg-amber-50",
-    text: "text-amber-700",
-    border: "border-amber-100",
-    dot: "bg-amber-500",
+    bg: themeWarningSurface,
+    text: "text-[var(--color-warning)]",
+    border: themeWarningBorder,
+    dot: "bg-[var(--color-warning)]",
   },
 
   Ditolak: {
-    bg: "bg-red-50",
-    text: "text-red-700",
-    border: "border-red-100",
-    dot: "bg-red-500",
+    bg: themeDangerSurface,
+    text: themeDangerText,
+    border: themeDangerBorder,
+    dot: "bg-[var(--color-text)]",
   },
 };
 
@@ -234,8 +297,8 @@ function PaymentBadge({ status }) {
     <span
       className={`inline-flex rounded-md border px-2 py-1 text-[10px] font-medium ${
         isPaid
-          ? "border-emerald-100 bg-emerald-50 text-emerald-700"
-          : "border-red-100 bg-red-50 text-red-700"
+          ? `${themeSuccessBorder} ${themeSuccessSurface} text-[var(--color-success)]`
+          : `${themeDangerBorder} ${themeDangerSurface} ${themeDangerText}`
       }`}
     >
       {status}
@@ -257,15 +320,17 @@ function StatCard({
   trend,
 }) {
   return (
-    <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-sm">
+    <div
+      className={`theme-card rounded-xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}
+    >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-xs font-medium text-slate-500">
+          <p className="theme-text-muted text-xs font-medium">
             {title}
           </p>
 
           <div className="mt-1 flex items-center gap-2">
-            <p className="text-2xl font-bold tracking-tight text-slate-800">
+            <p className="theme-text text-2xl font-bold tracking-tight">
               {value}
             </p>
 
@@ -273,8 +338,8 @@ function StatCard({
               <span
                 className={`inline-flex items-center gap-0.5 text-[10px] font-semibold ${
                   trend.type === "up"
-                    ? "text-emerald-600"
-                    : "text-red-500"
+                    ? "text-[var(--color-success)]"
+                    : themeDangerText
                 }`}
               >
                 {trend.type === "up" ? (
@@ -288,7 +353,7 @@ function StatCard({
             )}
           </div>
 
-          <p className="mt-1 truncate text-xs text-slate-400">
+          <p className="theme-text-placeholder mt-1 truncate text-xs">
             {description}
           </p>
         </div>
@@ -430,7 +495,7 @@ export default function SPMBPage() {
   ];
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-slate-50">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
       {/* =====================================================
           SIDEBAR
       ===================================================== */}
@@ -475,19 +540,21 @@ export default function SPMBPage() {
             <div className="mb-4 shrink-0">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex min-w-0 items-center gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#eaf1ff]">
+                  <div
+                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft}`}
+                  >
                     <UserPlus
                       size={20}
-                      className="text-[#155DFC]"
+                      className={themePrimaryText}
                     />
                   </div>
 
                   <div className="min-w-0">
-                    <h1 className="truncate text-lg font-bold tracking-tight text-slate-800 sm:text-xl">
+                    <h1 className="theme-text truncate text-lg font-bold tracking-tight sm:text-xl">
                       Penerimaan SPMB
                     </h1>
 
-                    <p className="truncate text-xs text-slate-500">
+                    <p className="theme-text-secondary truncate text-xs">
                       Kelola proses penerimaan dan
                       pendaftaran siswa baru
                     </p>
@@ -500,7 +567,7 @@ export default function SPMBPage() {
                       "/admin/spmb/pendaftar/tambah"
                     )
                   }
-                  className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[#155DFC] to-[#0d47c9] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:shadow-md"
+                  className={`inline-flex shrink-0 items-center justify-center gap-2 rounded-lg ${themePrimaryGradient} px-4 py-2.5 text-sm font-semibold text-[var(--color-card)] ${themePrimaryShadow} transition hover:brightness-95`}
                 >
                   <Plus size={17} />
                   Tambah Pendaftar
@@ -518,8 +585,8 @@ export default function SPMBPage() {
                 value="248"
                 description="Seluruh pendaftar"
                 icon={Users}
-                iconBg="bg-[#eaf1ff]"
-                iconColor="text-[#155DFC]"
+                iconBg={themePrimarySoft}
+                iconColor={themePrimaryText}
                 trend={{
                   type: "up",
                   value: "18%",
@@ -531,8 +598,8 @@ export default function SPMBPage() {
                 value="186"
                 description="75% dari total"
                 icon={UserCheck}
-                iconBg="bg-emerald-50"
-                iconColor="text-emerald-600"
+                iconBg={themeSuccessSurface}
+                iconColor="text-[var(--color-success)]"
                 trend={{
                   type: "up",
                   value: "12%",
@@ -544,8 +611,8 @@ export default function SPMBPage() {
                 value="47"
                 description="Perlu ditinjau"
                 icon={Clock3}
-                iconBg="bg-amber-50"
-                iconColor="text-amber-600"
+                iconBg={themeWarningSurface}
+                iconColor="text-[var(--color-warning)]"
               />
 
               <StatCard
@@ -553,8 +620,8 @@ export default function SPMBPage() {
                 value="152"
                 description="Dari total 400 kursi"
                 icon={GraduationCap}
-                iconBg="bg-violet-50"
-                iconColor="text-violet-600"
+                iconBg={themeInfoSurface}
+                iconColor="text-[var(--color-info)]"
               />
             </div>
 
@@ -596,7 +663,9 @@ export default function SPMBPage() {
                 TABS
             ================================================= */}
 
-            <div className="mb-4 shrink-0 overflow-x-auto rounded-xl border border-slate-200/80 bg-white shadow-sm">
+            <div
+              className={`mb-4 shrink-0 overflow-x-auto rounded-xl border ${themeNeutralBorder} theme-card ${themeSmallShadow}`}
+            >
               <div className="flex min-w-max">
                 {tabs.map((tab) => {
                   const Icon = tab.icon;
@@ -613,8 +682,8 @@ export default function SPMBPage() {
                       }}
                       className={`relative flex items-center gap-2 px-5 py-3 text-xs font-semibold transition ${
                         isActive
-                          ? "text-[#155DFC]"
-                          : "text-slate-500 hover:text-slate-700"
+                          ? themePrimaryText
+                          : "theme-text-secondary hover:text-[var(--color-primary)]"
                       }`}
                     >
                       <Icon size={15} />
@@ -622,7 +691,9 @@ export default function SPMBPage() {
                       {tab.label}
 
                       {isActive && (
-                        <span className="absolute bottom-0 left-3 right-3 h-0.5 rounded-full bg-[#155DFC]" />
+                        <span
+                          className="absolute bottom-0 left-3 right-3 h-0.5 rounded-full bg-[var(--color-primary)]"
+                        />
                       )}
                     </button>
                   );
@@ -636,17 +707,21 @@ export default function SPMBPage() {
 
             {activeTab === "pendaftar" && (
               <div className="min-h-0 flex-1">
-                <div className="flex h-full min-h-0 flex-col rounded-xl border border-slate-200/80 bg-white shadow-sm">
+                <div
+                  className={`theme-card flex h-full min-h-0 flex-col rounded-xl border ${themeNeutralBorder} ${themeCardShadow}`}
+                >
                   {/* FILTER BAR */}
 
-                  <div className="shrink-0 border-b border-slate-100 p-3 sm:p-4">
+                  <div
+                    className={`shrink-0 border-b ${themeDivider} p-3 sm:p-4`}
+                  >
                     <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
                       {/* SEARCH */}
 
                       <div className="relative min-w-0 flex-1">
                         <Search
                           size={17}
-                          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                          className="theme-text-placeholder pointer-events-none absolute left-3 top-1/2 -translate-y-1/2"
                         />
 
                         <input
@@ -659,7 +734,7 @@ export default function SPMBPage() {
                             setCurrentPage(1);
                           }}
                           placeholder="Cari nama, NISN, nomor pendaftaran, atau asal sekolah..."
-                          className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50/50 pl-9 pr-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#8bb4ff] focus:bg-white focus:ring-2 focus:ring-[#155DFC]/10"
+                          className={`theme-input h-10 w-full rounded-lg pl-9 pr-3 text-sm outline-none transition ${themeFocus} placeholder:text-[var(--color-text-placeholder)]`}
                         />
                       </div>
 
@@ -674,14 +749,16 @@ export default function SPMBPage() {
                             );
                             setCurrentPage(1);
                           }}
-                          className="h-10 min-w-[145px] rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 outline-none focus:border-[#8bb4ff] focus:ring-2 focus:ring-[#155DFC]/10"
+                          className={`theme-input h-10 min-w-[145px] rounded-lg px-3 text-xs font-medium outline-none ${themeFocus}`}
                         >
                           <option value="Semua">
                             Semua Gelombang
                           </option>
+
                           <option value="Gelombang 1">
                             Gelombang 1
                           </option>
+
                           <option value="Gelombang 2">
                             Gelombang 2
                           </option>
@@ -695,17 +772,20 @@ export default function SPMBPage() {
                             );
                             setCurrentPage(1);
                           }}
-                          className="h-10 min-w-[155px] rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 outline-none focus:border-[#8bb4ff] focus:ring-2 focus:ring-[#155DFC]/10"
+                          className={`theme-input h-10 min-w-[155px] rounded-lg px-3 text-xs font-medium outline-none ${themeFocus}`}
                         >
                           <option value="Semua">
                             Semua Status
                           </option>
+
                           <option value="Terverifikasi">
                             Terverifikasi
                           </option>
+
                           <option value="Menunggu Verifikasi">
                             Menunggu Verifikasi
                           </option>
+
                           <option value="Ditolak">
                             Ditolak
                           </option>
@@ -713,7 +793,7 @@ export default function SPMBPage() {
 
                         <button
                           onClick={resetFilters}
-                          className="inline-flex h-10 items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-500 transition hover:bg-slate-50"
+                          className={`theme-card inline-flex h-10 items-center justify-center gap-1.5 rounded-lg border ${themeNeutralBorder} px-3 text-xs font-medium theme-text-secondary transition ${themeNeutralHover}`}
                         >
                           <RefreshCw size={14} />
                           Reset
@@ -726,64 +806,57 @@ export default function SPMBPage() {
 
                   <div className="min-h-0 flex-1 overflow-auto">
                     <table className="w-full min-w-[1100px] border-collapse">
-                      <thead className="sticky top-0 z-10 bg-slate-50">
-                        <tr className="border-b border-slate-200">
-                          <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                            Pendaftar
-                          </th>
+                      <thead className="theme-card sticky top-0 z-10">
+                        <tr
+                          className={`border-b ${themeDivider}`}
+                        >
+                          {[
+                            "Pendaftar",
+                            "Asal Sekolah",
+                            "Pilihan",
+                            "Gelombang",
+                            "Tanggal",
+                            "Pembayaran",
+                            "Status",
+                          ].map((label) => (
+                            <th
+                              key={label}
+                              className="theme-text-secondary px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider"
+                            >
+                              {label}
+                            </th>
+                          ))}
 
-                          <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                            Asal Sekolah
-                          </th>
-
-                          <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                            Pilihan
-                          </th>
-
-                          <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                            Gelombang
-                          </th>
-
-                          <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                            Tanggal
-                          </th>
-
-                          <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                            Pembayaran
-                          </th>
-
-                          <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
-                            Status
-                          </th>
-
-                          <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                          <th className="theme-text-secondary px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wider">
                             Aksi
                           </th>
                         </tr>
                       </thead>
 
-                      <tbody className="divide-y divide-slate-100">
+                      <tbody>
                         {paginatedData.length > 0 ? (
                           paginatedData.map(
                             (item) => (
                               <tr
                                 key={item.id}
-                                className="transition hover:bg-slate-50/70"
+                                className={`border-b ${themeDivider} transition ${themeNeutralHover}`}
                               >
                                 {/* SISWA */}
 
                                 <td className="px-4 py-3">
                                   <div className="flex items-center gap-3">
-                                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#eaf1ff] text-xs font-bold text-[#155DFC]">
+                                    <div
+                                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${themePrimarySoft} text-xs font-bold ${themePrimaryText}`}
+                                    >
                                       {item.avatar}
                                     </div>
 
                                     <div className="min-w-0">
-                                      <p className="truncate text-sm font-semibold text-slate-700">
+                                      <p className="theme-text truncate text-sm font-semibold">
                                         {item.nama}
                                       </p>
 
-                                      <p className="mt-0.5 text-[10px] text-slate-400">
+                                      <p className="theme-text-placeholder mt-0.5 text-[10px]">
                                         {item.nomor}
                                       </p>
                                     </div>
@@ -793,11 +866,11 @@ export default function SPMBPage() {
                                 {/* ASAL SEKOLAH */}
 
                                 <td className="px-4 py-3">
-                                  <p className="max-w-[190px] truncate text-xs font-medium text-slate-700">
+                                  <p className="theme-text max-w-[190px] truncate text-xs font-medium">
                                     {item.asalSekolah}
                                   </p>
 
-                                  <p className="mt-0.5 text-[10px] text-slate-400">
+                                  <p className="theme-text-placeholder mt-0.5 text-[10px]">
                                     NISN {item.nisn}
                                   </p>
                                 </td>
@@ -805,7 +878,9 @@ export default function SPMBPage() {
                                 {/* PILIHAN */}
 
                                 <td className="px-4 py-3">
-                                  <span className="rounded-md border border-blue-100 bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">
+                                  <span
+                                    className={`rounded-md border ${themePrimarySoftBorder} ${themePrimarySoft} px-2.5 py-1 text-xs font-medium ${themePrimaryText}`}
+                                  >
                                     {item.pilihan}
                                   </span>
                                 </td>
@@ -813,7 +888,7 @@ export default function SPMBPage() {
                                 {/* GELOMBANG */}
 
                                 <td className="px-4 py-3">
-                                  <span className="text-xs font-medium text-slate-600">
+                                  <span className="theme-text-secondary text-xs font-medium">
                                     {item.gelombang}
                                   </span>
                                 </td>
@@ -821,10 +896,10 @@ export default function SPMBPage() {
                                 {/* TANGGAL */}
 
                                 <td className="px-4 py-3">
-                                  <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                                  <div className="theme-text-secondary flex items-center gap-1.5 text-xs">
                                     <CalendarDays
                                       size={13}
-                                      className="text-slate-400"
+                                      className="theme-text-placeholder"
                                     />
 
                                     {item.tanggalDaftar}
@@ -859,12 +934,10 @@ export default function SPMBPage() {
                                           item
                                         )
                                       }
-                                      className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-[#eaf1ff] hover:text-[#155DFC]"
+                                      className={`theme-text-placeholder flex h-8 w-8 items-center justify-center rounded-lg transition ${themePrimarySoft} hover:text-[var(--color-primary)]`}
                                       title="Lihat detail"
                                     >
-                                      <Eye
-                                        size={16}
-                                      />
+                                      <Eye size={16} />
                                     </button>
 
                                     <button
@@ -873,12 +946,10 @@ export default function SPMBPage() {
                                           item
                                         )
                                       }
-                                      className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-[#eaf1ff] hover:text-[#155DFC]"
+                                      className={`theme-text-placeholder flex h-8 w-8 items-center justify-center rounded-lg transition ${themePrimarySoft} hover:text-[var(--color-primary)]`}
                                       title="Edit"
                                     >
-                                      <Edit3
-                                        size={16}
-                                      />
+                                      <Edit3 size={16} />
                                     </button>
                                   </div>
                                 </td>
@@ -892,18 +963,20 @@ export default function SPMBPage() {
                               className="px-4 py-16 text-center"
                             >
                               <div className="flex flex-col items-center justify-center">
-                                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100">
+                                <div
+                                  className={`flex h-12 w-12 items-center justify-center rounded-xl ${themeNeutralSurface}`}
+                                >
                                   <Users
                                     size={21}
-                                    className="text-slate-400"
+                                    className="theme-text-placeholder"
                                   />
                                 </div>
 
-                                <p className="mt-3 text-sm font-semibold text-slate-700">
+                                <p className="theme-text mt-3 text-sm font-semibold">
                                   Data tidak ditemukan
                                 </p>
 
-                                <p className="mt-1 text-xs text-slate-400">
+                                <p className="theme-text-placeholder mt-1 text-xs">
                                   Coba ubah kata kunci
                                   atau filter
                                 </p>
@@ -917,19 +990,20 @@ export default function SPMBPage() {
 
                   {/* PAGINATION */}
 
-                  <div className="flex shrink-0 flex-col gap-2 border-t border-slate-100 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-                    <p className="text-xs text-slate-400">
+                  <div
+                    className={`flex shrink-0 flex-col gap-2 border-t ${themeDivider} px-4 py-3 sm:flex-row sm:items-center sm:justify-between`}
+                  >
+                    <p className="theme-text-placeholder text-xs">
                       Menampilkan{" "}
-                      <span className="font-medium text-slate-600">
-                        {filteredData.length ===
-                        0
+                      <span className="theme-text-secondary font-medium">
+                        {filteredData.length === 0
                           ? 0
                           : (safeCurrentPage - 1) *
                               itemsPerPage +
                             1}
                       </span>{" "}
                       -{" "}
-                      <span className="font-medium text-slate-600">
+                      <span className="theme-text-secondary font-medium">
                         {Math.min(
                           safeCurrentPage *
                             itemsPerPage,
@@ -937,7 +1011,7 @@ export default function SPMBPage() {
                         )}
                       </span>{" "}
                       dari{" "}
-                      <span className="font-medium text-slate-600">
+                      <span className="theme-text-secondary font-medium">
                         {filteredData.length}
                       </span>{" "}
                       data
@@ -953,7 +1027,7 @@ export default function SPMBPage() {
                             Math.max(1, prev - 1)
                           )
                         }
-                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-50 disabled:opacity-40"
+                        className={`theme-card theme-text-secondary flex h-8 w-8 items-center justify-center rounded-lg border ${themeNeutralBorder} transition ${themeNeutralHover} disabled:opacity-40`}
                       >
                         <ChevronLeft size={15} />
                       </button>
@@ -970,10 +1044,9 @@ export default function SPMBPage() {
                             setCurrentPage(page)
                           }
                           className={`flex h-8 min-w-8 items-center justify-center rounded-lg px-2 text-xs font-medium ${
-                            safeCurrentPage ===
-                            page
-                              ? "bg-[#155DFC] text-white"
-                              : "text-slate-500 hover:bg-slate-100"
+                            safeCurrentPage === page
+                              ? `${themePrimaryGradient} text-[var(--color-card)]`
+                              : `theme-text-secondary ${themeNeutralHover}`
                           }`}
                         >
                           {page}
@@ -993,7 +1066,7 @@ export default function SPMBPage() {
                             )
                           )
                         }
-                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-50 disabled:opacity-40"
+                        className={`theme-card theme-text-secondary flex h-8 w-8 items-center justify-center rounded-lg border ${themeNeutralBorder} transition ${themeNeutralHover} disabled:opacity-40`}
                       >
                         <ChevronRight size={15} />
                       </button>
@@ -1011,14 +1084,18 @@ export default function SPMBPage() {
               <div className="grid min-h-0 flex-1 gap-4 lg:grid-cols-3">
                 {/* ACTIVE GELOMBANG */}
 
-                <div className="flex min-h-0 flex-col rounded-xl border border-[#c7dbff] bg-white shadow-sm lg:col-span-2">
-                  <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-4 py-3">
+                <div
+                  className={`theme-card flex min-h-0 flex-col rounded-xl border ${themePrimarySoftBorder} ${themeCardShadow} lg:col-span-2`}
+                >
+                  <div
+                    className={`flex shrink-0 items-center justify-between border-b ${themeDivider} px-4 py-3`}
+                  >
                     <div>
-                      <h3 className="text-sm font-bold text-slate-800">
+                      <h3 className="theme-text text-sm font-bold">
                         Gelombang Pendaftaran
                       </h3>
 
-                      <p className="mt-0.5 text-[10px] text-slate-400">
+                      <p className="theme-text-placeholder mt-0.5 text-[10px]">
                         Periode penerimaan siswa baru
                       </p>
                     </div>
@@ -1029,7 +1106,7 @@ export default function SPMBPage() {
                           "/admin/spmb/gelombang/tambah"
                         )
                       }
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-[#155DFC] px-3 py-2 text-xs font-semibold text-white hover:bg-[#0d47c9]"
+                      className={`inline-flex items-center gap-1.5 rounded-lg ${themePrimaryGradient} px-3 py-2 text-xs font-semibold text-[var(--color-card)] transition hover:brightness-95`}
                     >
                       <Plus size={14} />
                       Tambah
@@ -1068,33 +1145,39 @@ export default function SPMBPage() {
 
                 {/* SUMMARY */}
 
-                <div className="flex min-h-0 flex-col rounded-xl border border-slate-200/80 bg-white shadow-sm">
-                  <div className="shrink-0 border-b border-slate-100 px-4 py-3">
-                    <h3 className="text-sm font-bold text-slate-800">
+                <div
+                  className={`theme-card flex min-h-0 flex-col rounded-xl border ${themeNeutralBorder} ${themeCardShadow}`}
+                >
+                  <div
+                    className={`shrink-0 border-b ${themeDivider} px-4 py-3`}
+                  >
+                    <h3 className="theme-text text-sm font-bold">
                       Ringkasan Kuota
                     </h3>
 
-                    <p className="mt-0.5 text-[10px] text-slate-400">
+                    <p className="theme-text-placeholder mt-0.5 text-[10px]">
                       Kapasitas penerimaan
                     </p>
                   </div>
 
                   <div className="min-h-0 flex-1 overflow-auto p-4">
-                    <div className="rounded-xl bg-[#f5f8ff] p-4">
+                    <div
+                      className={`rounded-xl ${themePrimarySoft} p-4`}
+                    >
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="text-[10px] text-slate-400">
+                          <p className="theme-text-placeholder text-[10px]">
                             Total Kuota
                           </p>
 
-                          <p className="mt-1 text-2xl font-bold text-slate-800">
+                          <p className="theme-text mt-1 text-2xl font-bold">
                             400
                           </p>
                         </div>
 
                         <GraduationCap
                           size={25}
-                          className="text-[#155DFC]"
+                          className={themePrimaryText}
                         />
                       </div>
                     </div>
@@ -1131,7 +1214,7 @@ export default function SPMBPage() {
                           "/admin/spmb/gelombang"
                         )
                       }
-                      className="mt-5 flex w-full items-center justify-between rounded-lg border border-slate-200 px-3 py-2.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-50"
+                      className={`theme-card theme-text-secondary mt-5 flex w-full items-center justify-between rounded-lg border ${themeNeutralBorder} px-3 py-2.5 text-xs font-semibold transition ${themeNeutralHover}`}
                     >
                       Kelola Gelombang
 
@@ -1232,17 +1315,21 @@ export default function SPMBPage() {
       ========================================================= */}
 
       {selectedPendaftar && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-[2px]">
-          <div className="w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[color-mix(in_srgb,var(--color-text)_42%,transparent)] p-4 backdrop-blur-[2px]">
+          <div
+            className={`theme-card w-full max-w-2xl overflow-hidden rounded-2xl ${themeCardShadow}`}
+          >
             {/* HEADER */}
 
-            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+            <div
+              className={`flex items-center justify-between border-b ${themeDivider} px-5 py-4`}
+            >
               <div>
-                <h2 className="text-base font-bold text-slate-800">
+                <h2 className="theme-text text-base font-bold">
                   Detail Pendaftar
                 </h2>
 
-                <p className="mt-0.5 text-xs text-slate-400">
+                <p className="theme-text-placeholder mt-0.5 text-xs">
                   Informasi lengkap calon siswa
                 </p>
               </div>
@@ -1251,7 +1338,7 @@ export default function SPMBPage() {
                 onClick={() =>
                   setSelectedPendaftar(null)
                 }
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100"
+                className={`theme-text-placeholder flex h-8 w-8 items-center justify-center rounded-lg transition ${themeNeutralHover}`}
               >
                 <X size={18} />
               </button>
@@ -1262,17 +1349,21 @@ export default function SPMBPage() {
             <div className="max-h-[75vh] overflow-y-auto p-5">
               {/* PROFILE */}
 
-              <div className="flex flex-col gap-3 rounded-xl border border-[#c7dbff] bg-[#f5f8ff] p-4 sm:flex-row sm:items-center">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-sm font-bold text-[#155DFC]">
+              <div
+                className={`flex flex-col gap-3 rounded-xl border ${themePrimarySoftBorder} ${themePrimarySoft} p-4 sm:flex-row sm:items-center`}
+              >
+                <div
+                  className={`theme-card flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-sm font-bold ${themePrimaryText}`}
+                >
                   {selectedPendaftar.avatar}
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-base font-bold text-slate-800">
+                  <h3 className="theme-text text-base font-bold">
                     {selectedPendaftar.nama}
                   </h3>
 
-                  <p className="mt-0.5 text-xs text-slate-400">
+                  <p className="theme-text-placeholder mt-0.5 text-xs">
                     {selectedPendaftar.nomor}
                   </p>
                 </div>
@@ -1287,7 +1378,7 @@ export default function SPMBPage() {
               {/* DATA */}
 
               <div className="mt-4">
-                <p className="mb-3 text-xs font-bold text-slate-700">
+                <p className="theme-text mb-3 text-xs font-bold">
                   Informasi Pendaftaran
                 </p>
 
@@ -1376,14 +1467,16 @@ export default function SPMBPage() {
 
               {/* VERIFICATION */}
 
-              <div className="mt-5 rounded-xl border border-slate-200 p-4">
+              <div
+                className={`mt-5 rounded-xl border ${themeNeutralBorder} p-4`}
+              >
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-xs font-bold text-slate-700">
+                    <p className="theme-text text-xs font-bold">
                       Status Verifikasi
                     </p>
 
-                    <p className="mt-0.5 text-[10px] text-slate-400">
+                    <p className="theme-text-placeholder mt-0.5 text-[10px]">
                       Status pemeriksaan data calon
                       siswa
                     </p>
@@ -1396,16 +1489,18 @@ export default function SPMBPage() {
                   />
                 </div>
 
-                <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
+                <div
+                  className={`mt-4 h-2 overflow-hidden rounded-full ${themeNeutralSurface}`}
+                >
                   <div
                     className={`h-full rounded-full ${
                       selectedPendaftar.status ===
                       "Terverifikasi"
-                        ? "w-full bg-emerald-500"
+                        ? "w-full bg-[var(--color-success)]"
                         : selectedPendaftar.status ===
                           "Ditolak"
-                        ? "w-full bg-red-500"
-                        : "w-2/3 bg-amber-500"
+                        ? "w-full bg-[var(--color-text)]"
+                        : "w-2/3 bg-[var(--color-warning)]"
                     }`}
                   />
                 </div>
@@ -1414,12 +1509,14 @@ export default function SPMBPage() {
 
             {/* FOOTER */}
 
-            <div className="flex flex-col-reverse gap-2 border-t border-slate-100 px-5 py-4 sm:flex-row sm:justify-end">
+            <div
+              className={`flex flex-col-reverse gap-2 border-t ${themeDivider} px-5 py-4 sm:flex-row sm:justify-end`}
+            >
               <button
                 onClick={() =>
                   setSelectedPendaftar(null)
                 }
-                className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+                className={`theme-card theme-text-secondary rounded-lg border ${themeNeutralBorder} px-4 py-2 text-sm font-medium transition ${themeNeutralHover}`}
               >
                 Tutup
               </button>
@@ -1427,11 +1524,12 @@ export default function SPMBPage() {
               <button
                 onClick={() => {
                   setSelectedPendaftar(null);
+
                   router.push(
                     `/admin/spmb/pendaftar/${selectedPendaftar.id}/edit`
                   );
                 }}
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#155DFC] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#0d47c9]"
+                className={`inline-flex items-center justify-center gap-2 rounded-lg ${themePrimaryGradient} px-4 py-2 text-sm font-semibold text-[var(--color-card)] transition hover:brightness-95`}
               >
                 <Edit3 size={15} />
                 Edit Data
@@ -1455,25 +1553,29 @@ function MiniStat({
   description,
 }) {
   return (
-    <div className="rounded-xl border border-slate-200/80 bg-white p-3 shadow-sm">
+    <div
+      className={`theme-card rounded-xl border ${themeNeutralBorder} p-3 ${themeSmallShadow}`}
+    >
       <div className="flex items-center gap-3">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-50">
+        <div
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${themeNeutralSurface}`}
+        >
           <Icon
             size={17}
-            className="text-slate-500"
+            className="theme-text-secondary"
           />
         </div>
 
         <div className="min-w-0">
-          <p className="truncate text-[10px] font-medium text-slate-400">
+          <p className="theme-text-placeholder truncate text-[10px] font-medium">
             {label}
           </p>
 
-          <p className="truncate text-sm font-bold text-slate-800">
+          <p className="theme-text truncate text-sm font-bold">
             {value}
           </p>
 
-          <p className="truncate text-[10px] text-slate-400">
+          <p className="theme-text-placeholder truncate text-[10px]">
             {description}
           </p>
         </div>
@@ -1506,25 +1608,27 @@ function WaveCard({
     <div
       className={`rounded-xl border p-4 transition ${
         active
-          ? "border-[#c7dbff] bg-[#f8faff]"
-          : "border-slate-200 bg-white"
+          ? `${themePrimarySoftBorder} ${themePrimarySoft}`
+          : `${themeNeutralBorder} theme-card`
       }`}
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <div className="flex items-center gap-2">
-            <h4 className="text-sm font-bold text-slate-800">
+            <h4 className="theme-text text-sm font-bold">
               {title}
             </h4>
 
             {active && (
-              <span className="rounded-md border border-emerald-100 bg-emerald-50 px-2 py-1 text-[9px] font-semibold text-emerald-700">
+              <span
+                className={`rounded-md border ${themeSuccessBorder} ${themeSuccessSurface} px-2 py-1 text-[9px] font-semibold text-[var(--color-success)]`}
+              >
                 Aktif
               </span>
             )}
           </div>
 
-          <div className="mt-1 flex items-center gap-1.5 text-[11px] text-slate-400">
+          <div className="theme-text-placeholder mt-1 flex items-center gap-1.5 text-[11px]">
             <CalendarDays size={12} />
             {date}
           </div>
@@ -1533,10 +1637,10 @@ function WaveCard({
         <span
           className={`rounded-md border px-2.5 py-1 text-[10px] font-medium ${
             status === "Aktif"
-              ? "border-blue-100 bg-blue-50 text-blue-700"
+              ? `${themePrimarySoftBorder} ${themePrimarySoft} ${themePrimaryText}`
               : status === "Selesai"
-              ? "border-slate-200 bg-slate-100 text-slate-500"
-              : "border-amber-100 bg-amber-50 text-amber-700"
+              ? `${themeNeutralBorder} ${themeNeutralSurface} theme-text-secondary`
+              : `${themeWarningBorder} ${themeWarningSurface} text-[var(--color-warning)]`
           }`}
         >
           {status}
@@ -1545,18 +1649,20 @@ function WaveCard({
 
       <div className="mt-4">
         <div className="mb-1.5 flex items-center justify-between">
-          <span className="text-[10px] font-medium text-slate-500">
+          <span className="theme-text-secondary text-[10px] font-medium">
             Pendaftar
           </span>
 
-          <span className="text-[10px] font-semibold text-slate-700">
+          <span className="theme-text text-[10px] font-semibold">
             {registered} / {quota}
           </span>
         </div>
 
-        <div className="h-1.5 overflow-hidden rounded-full bg-slate-100">
+        <div
+          className={`h-1.5 overflow-hidden rounded-full ${themeNeutralSurface}`}
+        >
           <div
-            className="h-full rounded-full bg-[#155DFC]"
+            className="h-full rounded-full bg-[var(--color-primary)]"
             style={{
               width: `${Math.min(
                 percentage,
@@ -1587,18 +1693,20 @@ function QuotaRow({
   return (
     <div>
       <div className="mb-1.5 flex items-center justify-between">
-        <span className="text-xs font-medium text-slate-600">
+        <span className="theme-text-secondary text-xs font-medium">
           {label}
         </span>
 
-        <span className="text-[10px] font-semibold text-slate-500">
+        <span className="theme-text-muted text-[10px] font-semibold">
           {filled} / {total}
         </span>
       </div>
 
-      <div className="h-1.5 overflow-hidden rounded-full bg-slate-100">
+      <div
+        className={`h-1.5 overflow-hidden rounded-full ${themeNeutralSurface}`}
+      >
         <div
-          className="h-full rounded-full bg-[#155DFC]"
+          className="h-full rounded-full bg-[var(--color-primary)]"
           style={{
             width: `${percentage}%`,
           }}
@@ -1622,32 +1730,36 @@ function SettingCard({
   return (
     <button
       onClick={onClick}
-      className="group flex items-center gap-4 rounded-xl border border-slate-200/80 bg-white p-4 text-left shadow-sm transition hover:border-[#c7dbff] hover:bg-[#f8faff]"
+      className={`theme-card group flex items-center gap-4 rounded-xl border ${themeNeutralBorder} p-4 text-left ${themeCardShadow} transition hover:border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)] hover:bg-[color-mix(in_srgb,var(--color-primary)_6%,transparent)]`}
     >
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[#eaf1ff]">
+      <div
+        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${themePrimarySoft}`}
+      >
         <Icon
           size={18}
-          className="text-[#155DFC]"
+          className={themePrimaryText}
         />
       </div>
 
       <div className="min-w-0 flex-1">
-        <h3 className="text-sm font-bold text-slate-800">
+        <h3 className="theme-text text-sm font-bold">
           {title}
         </h3>
 
-        <p className="mt-0.5 text-xs text-slate-400">
+        <p className="theme-text-placeholder mt-0.5 text-xs">
           {description}
         </p>
 
-        <p className="mt-2 text-[11px] font-semibold text-[#155DFC]">
+        <p
+          className={`mt-2 text-[11px] font-semibold ${themePrimaryText}`}
+        >
           {value}
         </p>
       </div>
 
       <ChevronRight
         size={16}
-        className="shrink-0 text-slate-300 transition group-hover:text-[#155DFC]"
+        className="theme-text-placeholder shrink-0 transition group-hover:text-[var(--color-primary)]"
       />
     </button>
   );
@@ -1663,21 +1775,23 @@ function DetailItem({
   value,
 }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+    <div
+      className={`rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} p-3`}
+    >
       <div className="flex items-start gap-2.5">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white">
+        <div className="theme-card flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
           <Icon
             size={14}
-            className="text-slate-400"
+            className="theme-text-placeholder"
           />
         </div>
 
         <div className="min-w-0">
-          <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+          <p className="theme-text-placeholder text-[10px] font-medium uppercase tracking-wide">
             {label}
           </p>
 
-          <p className="mt-0.5 break-words text-xs font-semibold text-slate-700">
+          <p className="theme-text mt-0.5 break-words text-xs font-semibold">
             {value}
           </p>
         </div>

@@ -13,145 +13,402 @@ import {
   SlidersHorizontal,
 } from "lucide-react";
 
-// Dummy data fasilitas. Ganti dengan data asli dari API kalau sudah ada.
+// ============================================================
+// DUMMY DATA FASILITAS
+// ============================================================
 const fasilitasList = [
-  { id: "fs-001", nama: "Lapangan Basket", lokasi: "Area Belakang", kategori: "Olahraga", kondisi: "Baik", kapasitas: "30 orang", foto: null },
-  { id: "fs-002", nama: "Aula Sekolah", lokasi: "Gedung Utama Lt. 1", kategori: "Umum", kondisi: "Baik", kapasitas: "300 orang", foto: null },
-  { id: "fs-003", nama: "Lab Komputer", lokasi: "Gedung B Lt. 2", kategori: "Laboratorium", kondisi: "Rusak Ringan", kapasitas: "40 orang", foto: null },
-  { id: "fs-004", nama: "Perpustakaan", lokasi: "Gedung A Lt. 1", kategori: "Umum", kondisi: "Baik", kapasitas: "60 orang", foto: null },
-  { id: "fs-005", nama: "Lab IPA", lokasi: "Gedung B Lt. 1", kategori: "Laboratorium", kondisi: "Rusak Berat", kapasitas: "35 orang", foto: null },
-  { id: "fs-006", nama: "Musala", lokasi: "Area Tengah", kategori: "Ibadah", kondisi: "Baik", kapasitas: "100 orang", foto: null },
+  {
+    id: "fs-001",
+    nama: "Lapangan Basket",
+    lokasi: "Area Belakang",
+    kategori: "Olahraga",
+    kondisi: "Baik",
+    kapasitas: "30 orang",
+    foto: null,
+  },
+  {
+    id: "fs-002",
+    nama: "Aula Sekolah",
+    lokasi: "Gedung Utama Lt. 1",
+    kategori: "Umum",
+    kondisi: "Baik",
+    kapasitas: "300 orang",
+    foto: null,
+  },
+  {
+    id: "fs-003",
+    nama: "Lab Komputer",
+    lokasi: "Gedung B Lt. 2",
+    kategori: "Laboratorium",
+    kondisi: "Rusak Ringan",
+    kapasitas: "40 orang",
+    foto: null,
+  },
+  {
+    id: "fs-004",
+    nama: "Perpustakaan",
+    lokasi: "Gedung A Lt. 1",
+    kategori: "Umum",
+    kondisi: "Baik",
+    kapasitas: "60 orang",
+    foto: null,
+  },
+  {
+    id: "fs-005",
+    nama: "Lab IPA",
+    lokasi: "Gedung B Lt. 1",
+    kategori: "Laboratorium",
+    kondisi: "Rusak Berat",
+    kapasitas: "35 orang",
+    foto: null,
+  },
+  {
+    id: "fs-006",
+    nama: "Musala",
+    lokasi: "Area Tengah",
+    kategori: "Ibadah",
+    kondisi: "Baik",
+    kapasitas: "100 orang",
+    foto: null,
+  },
 ];
 
+// ============================================================
+// THEME CONFIG KONDISI
+// ============================================================
 const kondisiStyle = {
-  Baik: "text-emerald-700 bg-emerald-50 border-emerald-200",
-  "Rusak Ringan": "text-amber-700 bg-amber-50 border-amber-200",
-  "Rusak Berat": "text-rose-700 bg-rose-50 border-rose-200",
+  Baik: {
+    text: "theme-success",
+    background:
+      "bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)]",
+    border:
+      "border-[color-mix(in_srgb,var(--color-success)_25%,transparent)]",
+  },
+
+  "Rusak Ringan": {
+    text: "theme-warning",
+    background:
+      "bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)]",
+    border:
+      "border-[color-mix(in_srgb,var(--color-warning)_25%,transparent)]",
+  },
+
+  "Rusak Berat": {
+    text: "theme-danger",
+    background:
+      "bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]",
+    border:
+      "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]",
+  },
 };
 
-const kategoriOptions = ["Semua", "Olahraga", "Umum", "Laboratorium", "Ibadah"];
+// ============================================================
+// KATEGORI
+// ============================================================
+const kategoriOptions = [
+  "Semua",
+  "Olahraga",
+  "Umum",
+  "Laboratorium",
+  "Ibadah",
+];
 
+// ============================================================
+// THEME HELPERS
+// ============================================================
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]";
+
+const themePrimarySoftHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+
+const themePrimaryBorderHover =
+  "hover:border-[color-mix(in_srgb,var(--color-primary)_30%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themePrimaryShadow =
+  "shadow-[0_7px_18px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_2px_10px_color-mix(in_srgb,var(--color-text)_6%,transparent)]";
+
+const themeCardHoverShadow =
+  "hover:shadow-[0_7px_20px_color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimaryGradientHover =
+  "hover:brightness-95";
+
+const themeSoftSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+// ============================================================
+// PAGE
+// ============================================================
 export default function FasilitasPage() {
   const router = useRouter();
+
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [search, setSearch] = useState("");
-  const [kategoriFilter, setKategoriFilter] = useState("Semua");
+  const [kategoriFilter, setKategoriFilter] =
+    useState("Semua");
 
   const notifications = [
-    { id: 1, title: "Lab IPA dilaporkan rusak berat", desc: "Dikirim 2 jam lalu", read: false },
+    {
+      id: 1,
+      title: "Lab IPA dilaporkan rusak berat",
+      desc: "Dikirim 2 jam lalu",
+      read: false,
+    },
   ];
 
+  // ============================================================
+  // FILTER
+  // ============================================================
   const filteredList = fasilitasList.filter((f) => {
     const matchSearch =
-      f.nama.toLowerCase().includes(search.toLowerCase()) ||
-      f.lokasi.toLowerCase().includes(search.toLowerCase());
-    const matchKategori = kategoriFilter === "Semua" || f.kategori === kategoriFilter;
+      f.nama
+        .toLowerCase()
+        .includes(search.toLowerCase()) ||
+      f.lokasi
+        .toLowerCase()
+        .includes(search.toLowerCase());
+
+    const matchKategori =
+      kategoriFilter === "Semua" ||
+      f.kategori === kategoriFilter;
+
     return matchSearch && matchKategori;
   });
 
+  // ============================================================
+  // DETAIL
+  // ============================================================
   const handleOpenDetail = (id) => {
     router.push(`/adminSarpras/fasilitas/${id}`);
   };
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="theme-page flex min-h-screen">
       <Sidebar
         role="adminSarpras"
         active="fasilitas"
         setActive={() => {}}
         collapsed={!sidebarOpen}
-        setCollapsed={() => setSidebarOpen(!sidebarOpen)}
+        setCollapsed={() =>
+          setSidebarOpen(!sidebarOpen)
+        }
       />
-      <div className="flex-1 flex flex-col min-w-0">
+
+      <div className="flex min-w-0 flex-1 flex-col">
         <Header
-          toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+          toggleSidebar={() =>
+            setSidebarOpen(!sidebarOpen)
+          }
           notifications={notifications}
-          user={{ name: "Admin Sarpras", email: "adminsarpras@smartschool.com", avatar: "SP" }}
+          user={{
+            name: "Admin Sarpras",
+            email: "adminsarpras@smartschool.com",
+            avatar: "SP",
+          }}
         />
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
+
+        <main className="theme-page flex-1 p-4 sm:p-6 lg:p-8">
           <div className="w-full space-y-6">
 
-            {/* PAGE HEADER */}
-            <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+            {/* ==================================================
+                PAGE HEADER
+            ================================================== */}
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
+
               <div className="min-w-0">
-                <p className="text-xs font-medium text-blue-600 uppercase tracking-wide">Sarana & Prasarana</p>
-                <h1 className="text-2xl sm:text-[28px] font-bold text-slate-900 mt-1 tracking-tight">
+                <p className="theme-primary text-xs font-medium uppercase tracking-wide">
+                  Sarana & Prasarana
+                </p>
+
+                <h1 className="theme-text mt-1 text-2xl font-bold tracking-tight sm:text-[28px]">
                   Fasilitas
                 </h1>
-                <p className="text-sm text-slate-500 mt-1">
+
+                <p className="theme-text-secondary mt-1 text-sm">
                   Kelola data fasilitas sekolah beserta kondisi dan lokasinya.
                 </p>
               </div>
+
+              {/* TAMBAH */}
               <button
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium shadow-sm transition-colors flex-shrink-0"
+                onClick={() =>
+                  router.push(
+                    "/adminSarpras/fasilitas/tambah"
+                  )
+                }
+                className={`inline-flex flex-shrink-0 items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-medium transition-all ${themePrimaryGradient} ${themePrimaryGradientHover} ${themePrimaryShadow}`}
               >
-                <Plus size={16} />
-                Tambah Fasilitas
+                <Plus
+                  size={16}
+                  className="text-[var(--color-card)]"
+                />
+
+                <span className="text-[var(--color-card)]">
+                  Tambah Fasilitas
+                </span>
               </button>
             </div>
 
-            {/* SEARCH & FILTER */}
-            <div className="bg-white rounded-2xl border border-slate-200/70 shadow-sm p-4 flex flex-col sm:flex-row gap-3">
+            {/* ==================================================
+                SEARCH & FILTER
+            ================================================== */}
+            <div
+              className={`theme-card theme-border flex flex-col gap-3 rounded-2xl border p-4 sm:flex-row ${themeCardShadow}`}
+            >
+
+              {/* SEARCH */}
               <div className="relative flex-1">
-                <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Search
+                  size={16}
+                  className="theme-text-muted absolute left-3.5 top-1/2 -translate-y-1/2"
+                />
+
                 <input
                   type="text"
                   value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  onChange={(e) =>
+                    setSearch(e.target.value)
+                  }
                   placeholder="Cari nama atau lokasi fasilitas..."
-                  className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-colors"
+                  className={`theme-input theme-text w-full rounded-xl border px-10 py-2.5 text-sm outline-none transition-colors ${themeFocus}`}
                 />
               </div>
+
+              {/* FILTER */}
               <div className="relative">
-                <SlidersHorizontal size={14} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                <SlidersHorizontal
+                  size={14}
+                  className="theme-text-muted pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2"
+                />
+
                 <select
                   value={kategoriFilter}
-                  onChange={(e) => setKategoriFilter(e.target.value)}
-                  className="pl-9 pr-8 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 transition-colors appearance-none"
+                  onChange={(e) =>
+                    setKategoriFilter(e.target.value)
+                  }
+                  className={`theme-input theme-text min-w-[160px] appearance-none rounded-xl border py-2.5 pl-9 pr-8 text-sm outline-none transition-colors ${themeFocus}`}
                 >
                   {kategoriOptions.map((k) => (
-                    <option key={k} value={k}>{k}</option>
+                    <option key={k} value={k}>
+                      {k}
+                    </option>
                   ))}
                 </select>
               </div>
             </div>
 
-            {/* GRID FASILITAS */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredList.map((f) => (
-                <button
-                  key={f.id}
-                  onClick={() => handleOpenDetail(f.id)}
-                  className="group text-left bg-white rounded-2xl border border-slate-200 hover:border-blue-200 shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden"
-                >
-                  <div className="h-32 bg-gradient-to-br from-blue-50 to-indigo-50 flex items-center justify-center">
-                    <Building2 size={32} className="text-blue-300" />
-                  </div>
-                  <div className="p-4">
-                    <div className="flex items-start justify-between gap-2">
-                      <h3 className="text-sm font-semibold text-slate-800 truncate">{f.nama}</h3>
-                      <ChevronRight
-                        size={16}
-                        className="text-slate-300 group-hover:text-slate-500 group-hover:translate-x-0.5 transition-all duration-300 flex-shrink-0 mt-0.5"
-                      />
-                    </div>
-                    <div className="flex items-center gap-1.5 mt-1.5 text-xs text-slate-500">
-                      <MapPin size={12} className="flex-shrink-0" />
-                      <span className="truncate">{f.lokasi}</span>
-                    </div>
-                    <div className="flex items-center justify-between mt-3">
-                      <span className="text-[11px] text-slate-400">{f.kapasitas}</span>
-                      <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${kondisiStyle[f.kondisi]}`}>
-                        {f.kondisi}
-                      </span>
-                    </div>
-                  </div>
-                </button>
-              ))}
+            {/* ==================================================
+                GRID FASILITAS
+            ================================================== */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
 
+              {filteredList.map((f) => {
+                const kondisi =
+                  kondisiStyle[f.kondisi] ||
+                  kondisiStyle.Baik;
+
+                return (
+                  <button
+                    key={f.id}
+                    onClick={() =>
+                      handleOpenDetail(f.id)
+                    }
+                    className={`theme-card theme-border group overflow-hidden rounded-2xl border text-left transition-all duration-300 ${themePrimaryBorderHover} ${themeCardShadow} ${themeCardHoverShadow}`}
+                  >
+
+                    {/* ==================================================
+                        IMAGE / COVER
+                    ================================================== */}
+                    <div
+                      className={`flex h-32 items-center justify-center transition-colors ${themePrimarySoft} ${themePrimarySoftHover}`}
+                    >
+                      <div
+                        className={`rounded-2xl p-3 ${themeSoftSurface}`}
+                      >
+                        <Building2
+                          size={32}
+                          className="theme-primary"
+                        />
+                      </div>
+                    </div>
+
+                    {/* ==================================================
+                        CONTENT
+                    ================================================== */}
+                    <div className="p-4">
+
+                      <div className="flex items-start justify-between gap-2">
+
+                        <h3 className="theme-text truncate text-sm font-semibold">
+                          {f.nama}
+                        </h3>
+
+                        <ChevronRight
+                          size={16}
+                          className="theme-text-muted mt-0.5 flex-shrink-0 transition-all duration-300 group-hover:translate-x-0.5 group-hover:text-[var(--color-primary)]"
+                        />
+                      </div>
+
+                      {/* LOKASI */}
+                      <div className="theme-text-secondary mt-1.5 flex items-center gap-1.5 text-xs">
+                        <MapPin
+                          size={12}
+                          className="flex-shrink-0"
+                        />
+
+                        <span className="truncate">
+                          {f.lokasi}
+                        </span>
+                      </div>
+
+                      {/* FOOTER CARD */}
+                      <div className="mt-3 flex items-center justify-between">
+
+                        <span className="theme-text-muted text-[11px]">
+                          {f.kapasitas}
+                        </span>
+
+                        <span
+                          className={`rounded-full border px-2 py-0.5 text-[11px] font-medium ${kondisi.text} ${kondisi.background} ${kondisi.border}`}
+                        >
+                          {f.kondisi}
+                        </span>
+                      </div>
+                    </div>
+                  </button>
+                );
+              })}
+
+              {/* ==================================================
+                  EMPTY STATE
+              ================================================== */}
               {filteredList.length === 0 && (
-                <div className="col-span-full text-center py-12 text-sm text-slate-400">
-                  Tidak ada fasilitas yang cocok dengan pencarian.
+                <div className="col-span-full py-12 text-center">
+                  <div
+                    className={`mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full ${themePrimarySoft}`}
+                  >
+                    <Building2
+                      size={22}
+                      className="theme-primary"
+                    />
+                  </div>
+
+                  <p className="theme-text-secondary text-sm">
+                    Tidak ada fasilitas yang cocok dengan pencarian.
+                  </p>
                 </div>
               )}
             </div>

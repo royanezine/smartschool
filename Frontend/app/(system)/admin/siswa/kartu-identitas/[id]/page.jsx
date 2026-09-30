@@ -156,6 +156,51 @@ const MOCK_SISWA = [
   },
 ];
 
+/* =========================================================
+   THEME HELPERS
+========================================================= */
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
 
 /* =========================================================
    HELPERS
@@ -171,7 +216,6 @@ function getInitials(nama) {
     .toUpperCase();
 }
 
-
 /* =========================================================
    BADGES
 ========================================================= */
@@ -183,13 +227,15 @@ function StatusBadge({ status }) {
     <span
       className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${
         isActive
-          ? "bg-emerald-50 text-emerald-600 border border-emerald-200"
-          : "bg-slate-100 text-slate-500 border border-slate-200"
+          ? `${themeSuccessSurface} theme-success ${themeSuccessBorder}`
+          : `${themeNeutralSurface} theme-text-muted ${themeNeutralBorder}`
       }`}
     >
       <span
         className={`w-1.5 h-1.5 rounded-full ${
-          isActive ? "bg-emerald-500" : "bg-slate-400"
+          isActive
+            ? "bg-[var(--color-success)]"
+            : "bg-[color-mix(in_srgb,var(--color-text)_40%,transparent)]"
         }`}
       />
 
@@ -198,7 +244,6 @@ function StatusBadge({ status }) {
   );
 }
 
-
 function JenisKelaminBadge({ jenisKelamin }) {
   const isPria = jenisKelamin === "L";
 
@@ -206,15 +251,14 @@ function JenisKelaminBadge({ jenisKelamin }) {
     <span
       className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-semibold ${
         isPria
-          ? "bg-[#eaf1ff] text-[#155DFC] border border-[#c7dbff]"
-          : "bg-pink-50 text-pink-600 border border-pink-200"
+          ? `${themePrimarySoft} ${themePrimaryText} ${themePrimarySoftBorder}`
+          : `${themeNeutralSurface} theme-text-secondary ${themeNeutralBorder}`
       }`}
     >
       {isPria ? "Laki-laki" : "Perempuan"}
     </span>
   );
 }
-
 
 /* =========================================================
    INFO ITEM
@@ -223,16 +267,18 @@ function JenisKelaminBadge({ jenisKelamin }) {
 function InfoItem({ label, value, icon }) {
   return (
     <div className="flex gap-3">
-      <div className="w-9 h-9 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 flex-shrink-0">
+      <div
+        className={`w-9 h-9 rounded-lg ${themeNeutralSurface} ${themeNeutralBorder} border flex items-center justify-center theme-text-muted flex-shrink-0`}
+      >
         {icon}
       </div>
 
       <div className="min-w-0">
-        <p className="text-xs text-slate-400 mb-0.5">
+        <p className="text-xs theme-text-muted mb-0.5">
           {label}
         </p>
 
-        <p className="text-sm font-semibold text-slate-800 break-words">
+        <p className="text-sm font-semibold theme-text break-words">
           {value || "-"}
         </p>
       </div>
@@ -240,25 +286,28 @@ function InfoItem({ label, value, icon }) {
   );
 }
 
-
 /* =========================================================
    SECTION HEADER
 ========================================================= */
 
 function SectionHeader({ icon, title, subtitle }) {
   return (
-    <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-3">
-      <div className="w-9 h-9 rounded-lg bg-[#eaf1ff] text-[#155DFC] flex items-center justify-center">
+    <div
+      className={`px-5 py-4 border-b ${themeDivider} flex items-center gap-3`}
+    >
+      <div
+        className={`w-9 h-9 rounded-lg ${themePrimarySoft} ${themePrimarySoftBorder} border ${themePrimaryText} flex items-center justify-center`}
+      >
         {icon}
       </div>
 
       <div>
-        <h2 className="text-sm font-bold text-slate-800">
+        <h2 className="text-sm font-bold theme-text">
           {title}
         </h2>
 
         {subtitle && (
-          <p className="text-xs text-slate-500 mt-0.5">
+          <p className="text-xs theme-text-secondary mt-0.5">
             {subtitle}
           </p>
         )}
@@ -266,7 +315,6 @@ function SectionHeader({ icon, title, subtitle }) {
     </div>
   );
 }
-
 
 /* =========================================================
    MAIN PAGE
@@ -288,14 +336,13 @@ export default function DetailSiswaPage() {
     setIsCollapsed(!isCollapsed);
   };
 
-
   /* =======================================================
      DATA TIDAK DITEMUKAN
   ======================================================= */
 
   if (!siswa) {
     return (
-      <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
+      <div className="flex h-screen w-full theme-page overflow-hidden">
         <Sidebar
           active="siswaKartuIdentitas"
           setActive={() => {}}
@@ -317,15 +364,17 @@ export default function DetailSiswaPage() {
 
           <main className="flex-1 flex items-center justify-center p-6">
             <div className="text-center">
-              <div className="w-16 h-16 mx-auto rounded-full bg-slate-100 flex items-center justify-center text-slate-400 mb-4">
+              <div
+                className={`w-16 h-16 mx-auto rounded-full ${themeNeutralSurface} ${themeNeutralBorder} border flex items-center justify-center theme-text-muted mb-4`}
+              >
                 <User size={28} />
               </div>
 
-              <h1 className="text-lg font-bold text-slate-800">
+              <h1 className="text-lg font-bold theme-text">
                 Data siswa tidak ditemukan
               </h1>
 
-              <p className="text-sm text-slate-500 mt-1 mb-5">
+              <p className="text-sm theme-text-secondary mt-1 mb-5">
                 Siswa dengan ID tersebut tidak tersedia.
               </p>
 
@@ -335,7 +384,7 @@ export default function DetailSiswaPage() {
                     "/admin/siswa/kartu-identitas"
                   )
                 }
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#155DFC] text-white text-sm font-semibold hover:bg-[#0d47c9] transition"
+                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg ${themePrimaryGradient} text-[var(--color-card)] text-sm font-semibold ${themePrimaryShadow} hover:brightness-105 transition`}
               >
                 <ArrowLeft size={16} />
                 Kembali ke Daftar Siswa
@@ -347,14 +396,12 @@ export default function DetailSiswaPage() {
     );
   }
 
-
   /* =======================================================
      DETAIL
   ======================================================= */
 
   return (
-    <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
-
+    <div className="flex h-screen w-full theme-page overflow-hidden">
       {/* SIDEBAR */}
       <Sidebar
         active="siswaKartuIdentitas"
@@ -364,10 +411,8 @@ export default function DetailSiswaPage() {
         role="admin"
       />
 
-
       {/* CONTENT */}
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-
         {/* HEADER */}
         <Header
           toggleSidebar={toggleSidebar}
@@ -379,10 +424,8 @@ export default function DetailSiswaPage() {
           }}
         />
 
-
         {/* MAIN */}
         <main className="flex-1 overflow-y-auto">
-
           <div className="p-4 sm:p-6 lg:p-8 space-y-6">
 
             {/* =================================================
@@ -390,9 +433,7 @@ export default function DetailSiswaPage() {
             ================================================= */}
 
             <div className="flex items-center justify-between gap-4 flex-wrap">
-
               <div className="flex items-center gap-3">
-
                 <button
                   type="button"
                   onClick={() =>
@@ -400,28 +441,25 @@ export default function DetailSiswaPage() {
                       "/admin/siswa/kartu-identitas"
                     )
                   }
-                  className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-500 hover:text-[#155DFC] hover:bg-[#f5f8ff] transition"
+                  className={`w-10 h-10 rounded-xl theme-card border ${themeNeutralBorder} flex items-center justify-center theme-text-secondary ${themePrimaryHover} hover:text-[var(--color-primary)] transition`}
                   title="Kembali"
                 >
                   <ArrowLeft size={18} />
                 </button>
 
                 <div>
-                  <h1 className="text-2xl font-bold text-slate-800">
+                  <h1 className="text-2xl font-bold theme-text">
                     Detail Siswa
                   </h1>
 
-                  <p className="text-sm text-slate-500 mt-0.5">
+                  <p className="text-sm theme-text-secondary mt-0.5">
                     Informasi lengkap identitas dan data siswa.
                   </p>
                 </div>
-
               </div>
-
 
               {/* ACTION */}
               <div className="flex items-center gap-2">
-
                 <button
                   type="button"
                   onClick={() =>
@@ -429,7 +467,7 @@ export default function DetailSiswaPage() {
                       `/admin/siswa/kartu-identitas/card?id=${siswa.id}`
                     )
                   }
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-600 text-sm font-semibold hover:bg-slate-50 hover:text-[#155DFC] transition"
+                  className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border ${themeNeutralBorder} theme-card theme-text-secondary text-sm font-semibold ${themeNeutralHover} hover:text-[var(--color-primary)] transition`}
                 >
                   <CreditCard size={16} />
                   ID Card
@@ -442,53 +480,49 @@ export default function DetailSiswaPage() {
                       `/admin/siswa/kartu-identitas/edit?id=${siswa.id}`
                     )
                   }
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-[#155DFC] to-[#0d47c9] text-white text-sm font-semibold shadow-lg shadow-[#155DFC]/20 hover:brightness-105 transition"
+                  className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg ${themePrimaryGradient} text-[var(--color-card)] text-sm font-semibold ${themePrimaryShadow} hover:brightness-105 transition`}
                 >
                   <Edit size={16} />
                   Edit Siswa
                 </button>
-
               </div>
             </div>
-
 
             {/* =================================================
                 PROFILE SUMMARY
             ================================================= */}
 
-            <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden">
-
+            <div
+              className={`theme-card rounded-xl border ${themeNeutralBorder} ${themeCardShadow} overflow-hidden`}
+            >
               <div className="p-5 sm:p-6">
-
                 <div className="flex flex-col sm:flex-row sm:items-center gap-5">
 
                   {/* AVATAR */}
-                  <div className="w-24 h-24 rounded-2xl bg-gradient-to-br from-[#155DFC] to-[#0d47c9] text-white flex items-center justify-center text-3xl font-bold shadow-lg shadow-[#155DFC]/20 flex-shrink-0">
+                  <div
+                    className={`w-24 h-24 rounded-2xl ${themePrimaryGradient} text-[var(--color-card)] flex items-center justify-center text-3xl font-bold ${themePrimaryShadow} flex-shrink-0`}
+                  >
                     {getInitials(siswa.nama)}
                   </div>
 
-
                   {/* NAME */}
                   <div className="flex-1">
-
                     <div className="flex items-center gap-2 flex-wrap">
-
-                      <h2 className="text-xl sm:text-2xl font-bold text-slate-900">
+                      <h2 className="text-xl sm:text-2xl font-bold theme-text">
                         {siswa.nama}
                       </h2>
 
                       <StatusBadge status={siswa.status} />
-
                     </div>
 
-                    <p className="text-sm text-slate-500 mt-1">
+                    <p className="text-sm theme-text-secondary mt-1">
                       NISN {siswa.nisn}
                     </p>
 
-
                     <div className="flex items-center gap-2 mt-3 flex-wrap">
-
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[#eaf1ff] border border-[#c7dbff] text-[#155DFC] text-xs font-bold">
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg ${themePrimarySoft} ${themePrimarySoftBorder} border ${themePrimaryText} text-xs font-bold`}
+                      >
                         <School size={13} />
                         Kelas {siswa.kelas}
                       </span>
@@ -497,28 +531,25 @@ export default function DetailSiswaPage() {
                         jenisKelamin={siswa.jenisKelamin}
                       />
 
-                      <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-50 border border-slate-200 text-slate-600 text-xs font-semibold">
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg ${themeNeutralSurface} ${themeNeutralBorder} border theme-text-secondary text-xs font-semibold`}
+                      >
                         <CalendarDays size={13} />
                         Masuk {siswa.tahunMasuk}
                       </span>
-
                     </div>
-
                   </div>
-
                 </div>
-
               </div>
-
             </div>
-
 
             {/* =================================================
                 IDENTITAS
             ================================================= */}
 
-            <section className="bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden">
-
+            <section
+              className={`theme-card rounded-xl border ${themeNeutralBorder} ${themeCardShadow} overflow-hidden`}
+            >
               <SectionHeader
                 icon={<User size={18} />}
                 title="Data Identitas Siswa"
@@ -526,7 +557,6 @@ export default function DetailSiswaPage() {
               />
 
               <div className="p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-
                 <InfoItem
                   label="Nama Lengkap"
                   value={siswa.nama}
@@ -591,38 +621,34 @@ export default function DetailSiswaPage() {
 
                 {/* ALAMAT */}
                 <div className="sm:col-span-2 lg:col-span-3">
-
                   <div className="flex gap-3">
-
-                    <div className="w-9 h-9 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400 flex-shrink-0">
+                    <div
+                      className={`w-9 h-9 rounded-lg ${themeNeutralSurface} ${themeNeutralBorder} border flex items-center justify-center theme-text-muted flex-shrink-0`}
+                    >
                       <MapPin size={16} />
                     </div>
 
                     <div>
-                      <p className="text-xs text-slate-400 mb-0.5">
+                      <p className="text-xs theme-text-muted mb-0.5">
                         Alamat
                       </p>
 
-                      <p className="text-sm font-semibold text-slate-800">
+                      <p className="text-sm font-semibold theme-text">
                         {siswa.alamat}
                       </p>
                     </div>
-
                   </div>
-
                 </div>
-
               </div>
-
             </section>
-
 
             {/* =================================================
                 DATA AKADEMIK
             ================================================= */}
 
-            <section className="bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden">
-
+            <section
+              className={`theme-card rounded-xl border ${themeNeutralBorder} ${themeCardShadow} overflow-hidden`}
+            >
               <SectionHeader
                 icon={<GraduationCap size={18} />}
                 title="Data Akademik"
@@ -630,7 +656,6 @@ export default function DetailSiswaPage() {
               />
 
               <div className="p-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-
                 <InfoItem
                   label="Kelas"
                   value={siswa.kelas}
@@ -664,18 +689,16 @@ export default function DetailSiswaPage() {
                   }
                   icon={<CheckCircle2 size={16} />}
                 />
-
               </div>
-
             </section>
-
 
             {/* =================================================
                 ORANG TUA / WALI
             ================================================= */}
 
-            <section className="bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden">
-
+            <section
+              className={`theme-card rounded-xl border ${themeNeutralBorder} ${themeCardShadow} overflow-hidden`}
+            >
               <SectionHeader
                 icon={<Users size={18} />}
                 title="Data Orang Tua / Wali"
@@ -683,7 +706,6 @@ export default function DetailSiswaPage() {
               />
 
               <div className="p-5 grid grid-cols-1 sm:grid-cols-2 gap-6">
-
                 <InfoItem
                   label="Nama Orang Tua / Wali"
                   value={siswa.namaOrtu}
@@ -707,18 +729,14 @@ export default function DetailSiswaPage() {
                   value={siswa.alamatOrtu}
                   icon={<MapPin size={16} />}
                 />
-
               </div>
-
             </section>
-
 
             {/* =================================================
                 FOOTER ACTION
             ================================================= */}
 
             <div className="flex items-center justify-between gap-3 pb-4">
-
               <button
                 type="button"
                 onClick={() =>
@@ -726,15 +744,13 @@ export default function DetailSiswaPage() {
                     "/admin/siswa/kartu-identitas"
                   )
                 }
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-600 text-sm font-semibold hover:bg-slate-50 transition"
+                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border ${themeNeutralBorder} theme-card theme-text-secondary text-sm font-semibold ${themeNeutralHover} transition`}
               >
                 <ArrowLeft size={16} />
                 Kembali
               </button>
 
-
               <div className="flex items-center gap-2">
-
                 <button
                   type="button"
                   onClick={() =>
@@ -742,7 +758,7 @@ export default function DetailSiswaPage() {
                       `/admin/siswa/kartu-identitas/card?id=${siswa.id}`
                     )
                   }
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-600 text-sm font-semibold hover:bg-slate-50 hover:text-[#155DFC] transition"
+                  className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border ${themeNeutralBorder} theme-card theme-text-secondary text-sm font-semibold ${themeNeutralHover} hover:text-[var(--color-primary)] transition`}
                 >
                   <CreditCard size={16} />
                   Lihat ID Card
@@ -755,18 +771,15 @@ export default function DetailSiswaPage() {
                       `/admin/siswa/kartu-identitas/edit?id=${siswa.id}`
                     )
                   }
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-[#155DFC] to-[#0d47c9] text-white text-sm font-semibold shadow-lg shadow-[#155DFC]/20 hover:brightness-105 transition"
+                  className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-lg ${themePrimaryGradient} text-[var(--color-card)] text-sm font-semibold ${themePrimaryShadow} hover:brightness-105 transition`}
                 >
                   <Edit size={16} />
                   Edit Siswa
                 </button>
-
               </div>
-
             </div>
 
           </div>
-
         </main>
       </div>
     </div>

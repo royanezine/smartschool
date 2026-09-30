@@ -1,8 +1,5 @@
 "use client";
 
-import { useState } from "react";
-import Sidebar from "../../../../components/Sidebar";
-import Header from "../../../../components/Header";
 import {
   BarChart3,
   ArrowLeft,
@@ -10,107 +7,232 @@ import {
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 
+// ============================================================
+// THEME HELPERS
+// ============================================================
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
 export default function MonitoringAkademikNilaiPage() {
   const router = useRouter();
-  const [collapsed, setCollapsed] = useState(false);
+
+  const handleBack = () => {
+    router.push("/yayasan/monitoringAkademik");
+  };
 
   return (
-    <div className="flex min-h-screen w-full bg-slate-50">
-      <div className="shrink-0">
-        <Sidebar
-          active={"monitoring-akademik"}
-          setActive={() => {}}
-          collapsed={collapsed}
-          setCollapsed={setCollapsed}
-        />
-      </div>
+    <div className="theme-page theme-text min-h-full">
+      <div className="w-full max-w-[1500px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <Header
-          user={{
-            name: "Yayasan",
-            email: "yayasan@smartschool.com",
-            avatar: "YA",
-          }}
-        />
+        {/* ======================================================
+            BACK BUTTON
+        ====================================================== */}
 
-        <main className="min-w-0 flex-1">
-          <div className="w-full px-3 py-4 sm:px-5 sm:py-6 md:px-7 lg:px-8 xl:px-10">
-            <div className="mx-auto w-full max-w-[1500px]">
-              <div className="mb-5 flex items-center">
-                <button
-                  type="button"
-                  onClick={() =>
-                    router.push(
-                      "/yayasan/monitoringAkademik"
-                    )
-                  }
-                  className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-semibold text-slate-600 shadow-sm transition-all hover:-translate-x-0.5 hover:border-indigo-200 hover:bg-indigo-50 hover:text-indigo-600"
-                >
-                  <ArrowLeft className="h-4 w-4" />
+        <div className="mb-5 flex items-center">
+          <button
+            type="button"
+            onClick={handleBack}
+            className={`
+              inline-flex items-center gap-2
+              rounded-xl
+              border theme-border
+              theme-card
+              px-3.5 py-2.5
+              text-sm font-semibold
+              theme-text-secondary
+              ${themeCardShadow}
+              transition-all
+              hover:-translate-x-0.5
+              hover:border-[color-mix(in_srgb,var(--color-primary)_28%,transparent)]
+              hover:text-[var(--color-primary)]
+              ${themeNeutralHover}
+            `}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            <span>Kembali</span>
+          </button>
+        </div>
 
-                  <span>Kembali</span>
-                </button>
+        {/* ======================================================
+            HERO
+        ====================================================== */}
+
+        <section
+          className={`
+            relative mb-6 overflow-hidden rounded-2xl
+            border ${themePrimarySoftBorder}
+            ${themePrimaryGradient}
+            ${themePrimaryShadow}
+          `}
+        >
+          {/* Decorative background */}
+          <div
+            className="
+              pointer-events-none
+              absolute
+              -right-20
+              -top-24
+              h-64
+              w-64
+              rounded-full
+              bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)]
+              blur-3xl
+            "
+          />
+
+          <div className="relative p-5 sm:p-6 md:p-8">
+            <div className="flex items-start gap-4">
+
+              {/* ICON */}
+              <div
+                className="
+                  flex
+                  h-12
+                  w-12
+                  shrink-0
+                  items-center
+                  justify-center
+                  rounded-2xl
+                  border
+                  border-[color-mix(in_srgb,var(--color-card)_22%,transparent)]
+                  bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)]
+                  text-[var(--color-card)]
+                  shadow-[0_4px_16px_color-mix(in_srgb,var(--color-text)_12%,transparent)]
+                  backdrop-blur-md
+                  sm:h-14
+                  sm:w-14
+                "
+              >
+                <BarChart3 className="h-6 w-6 sm:h-7 sm:w-7" />
               </div>
 
-              <section className="relative mb-6 overflow-hidden rounded-2xl border border-indigo-100 bg-gradient-to-br from-slate-950 via-indigo-950 to-indigo-800 shadow-xl shadow-indigo-900/10">
-                <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-indigo-400/15 blur-3xl" />
-
-                <div className="relative p-5 sm:p-6 md:p-8">
-                  <div className="flex items-start gap-4">
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/10 shadow-inner backdrop-blur-md sm:h-14 sm:w-14">
-                      <BarChart3 className="h-6 w-6 text-white sm:h-7 sm:w-7" />
-                    </div>
-
-                    <div className="min-w-0">
-                      <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-indigo-200 sm:text-xs">
-                        Monitoring Akademik
-                      </p>
-
-                      <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl lg:text-4xl">
-                        Monitoring Nilai
-                      </h1>
-
-                      <p className="mt-1.5 max-w-2xl text-xs leading-relaxed text-indigo-100 sm:text-sm">
-                        Pantau perkembangan nilai siswa di
-                        seluruh sekolah jenjang.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </section>
-
-              <div className="flex flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white px-6 py-16 text-center shadow-sm">
-                <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-50 text-amber-600">
-                  <Construction className="h-6 w-6" />
-                </div>
-
-                <h3 className="mt-4 text-sm font-bold text-slate-800">
-                  Halaman dalam pengembangan
-                </h3>
-
-                <p className="mt-1 max-w-sm text-sm leading-relaxed text-slate-400">
-                  Fitur monitoring nilai per sekolah dan
-                  per mata pelajaran belum tersedia saat ini.
+              {/* TITLE */}
+              <div className="min-w-0">
+                <p
+                  className="
+                    mb-1
+                    text-[10px]
+                    font-semibold
+                    uppercase
+                    tracking-[0.18em]
+                    text-[color-mix(in_srgb,var(--color-card)_78%,transparent)]
+                    sm:text-xs
+                  "
+                >
+                  Monitoring Akademik
                 </p>
 
-                <button
-                  type="button"
-                  onClick={() =>
-                    router.push(
-                      "/yayasan/monitoringAkademik"
-                    )
-                  }
-                  className="mt-5 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-semibold text-white shadow-md shadow-indigo-600/20 transition hover:bg-indigo-700"
-                >
-                  <ArrowLeft className="h-4 w-4" />
+                <h1 className="text-2xl font-bold tracking-tight text-[var(--color-card)] sm:text-3xl lg:text-4xl">
+                  Monitoring Nilai
+                </h1>
 
-                  Kembali ke Monitoring
-                </button>
+                <p
+                  className="
+                    mt-1.5
+                    max-w-2xl
+                    text-xs
+                    leading-relaxed
+                    text-[color-mix(in_srgb,var(--color-card)_78%,transparent)]
+                    sm:text-sm
+                  "
+                >
+                  Pantau perkembangan nilai siswa di seluruh
+                  sekolah jenjang.
+                </p>
               </div>
             </div>
           </div>
-        </main>
+        </section>
+
+        {/* ======================================================
+            DEVELOPMENT CARD
+        ====================================================== */}
+
+        <div
+          className={`
+            theme-card
+            flex
+            flex-col
+            items-center
+            justify-center
+            rounded-2xl
+            border theme-border
+            px-6
+            py-16
+            text-center
+            ${themeCardShadow}
+          `}
+        >
+          {/* ICON */}
+          <div
+            className={`
+              flex
+              h-14
+              w-14
+              items-center
+              justify-center
+              rounded-2xl
+              border
+              ${themePrimarySoftBorder}
+              ${themePrimarySoft}
+              text-[var(--color-primary)]
+            `}
+          >
+            <Construction className="h-6 w-6" />
+          </div>
+
+          {/* TITLE */}
+          <h3 className="mt-4 text-sm font-bold theme-text">
+            Halaman dalam pengembangan
+          </h3>
+
+          {/* DESCRIPTION */}
+          <p className="mt-1 max-w-sm text-sm leading-relaxed theme-text-muted">
+            Fitur monitoring nilai per sekolah dan per mata
+            pelajaran belum tersedia saat ini.
+          </p>
+
+          {/* BACK BUTTON */}
+          <button
+            type="button"
+            onClick={handleBack}
+            className={`
+              mt-5
+              inline-flex
+              items-center
+              gap-2
+              rounded-xl
+              bg-[var(--color-primary)]
+              px-4
+              py-2.5
+              text-xs
+              font-semibold
+              text-[var(--color-card)]
+              ${themePrimaryShadow}
+              transition-all
+              hover:opacity-90
+            `}
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Kembali ke Monitoring
+          </button>
+        </div>
       </div>
     </div>
   );

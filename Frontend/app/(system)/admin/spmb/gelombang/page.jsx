@@ -15,10 +15,47 @@ import {
   Eye,
   CheckCircle2,
   Clock3,
-  XCircle,
   MoreHorizontal,
   X,
 } from "lucide-react";
+
+// ============================================================
+// THEME HELPERS
+// ============================================================
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+// ============================================================
+// DATA
+// ============================================================
 
 const GELOMBANG = [
   {
@@ -56,6 +93,10 @@ const GELOMBANG = [
   },
 ];
 
+// ============================================================
+// PAGE
+// ============================================================
+
 export default function GelombangPage() {
   const router = useRouter();
 
@@ -63,7 +104,7 @@ export default function GelombangPage() {
   const [selected, setSelected] = useState(null);
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-slate-50">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar
         active="spmb"
         setActive={() => {}}
@@ -87,42 +128,50 @@ export default function GelombangPage() {
 
         <main className="min-h-0 flex-1 overflow-hidden">
           <div className="flex h-full min-h-0 flex-col p-4 sm:p-5 lg:p-6">
-            {/* HEADER */}
+
+            {/* ==================================================
+                HEADER
+            ================================================== */}
 
             <div className="mb-5 flex shrink-0 flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#eaf1ff]">
+                <div
+                  className={`flex h-10 w-10 items-center justify-center rounded-xl ${themePrimarySoft}`}
+                >
                   <CalendarDays
                     size={20}
-                    className="text-[#155DFC]"
+                    className={themePrimaryText}
                   />
                 </div>
 
                 <div>
-                  <h1 className="text-xl font-bold text-slate-800">
+                  <h1 className="theme-text text-xl font-bold">
                     Gelombang Pendaftaran
                   </h1>
 
-                  <p className="text-xs text-slate-500">
+                  <p className="theme-text-muted text-xs">
                     Kelola periode dan kuota setiap gelombang
                   </p>
                 </div>
               </div>
 
               <button
+                type="button"
                 onClick={() =>
                   router.push(
                     "/admin/spmb/gelombang/tambah"
                   )
                 }
-                className="inline-flex items-center justify-center gap-2 rounded-lg bg-[#155DFC] px-4 py-2.5 text-xs font-semibold text-white shadow-sm hover:bg-[#0d47c9]"
+                className={`${themePrimaryGradient} inline-flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-xs font-semibold text-[var(--color-card)] ${themeSmallShadow} transition hover:brightness-95`}
               >
                 <Plus size={16} />
                 Tambah Gelombang
               </button>
             </div>
 
-            {/* SUMMARY */}
+            {/* ==================================================
+                SUMMARY
+            ================================================== */}
 
             <div className="mb-5 grid shrink-0 grid-cols-2 gap-3 lg:grid-cols-4">
               <Summary
@@ -135,6 +184,7 @@ export default function GelombangPage() {
                 title="Gelombang Aktif"
                 value="1"
                 icon={CheckCircle2}
+                tone="success"
               />
 
               <Summary
@@ -147,10 +197,13 @@ export default function GelombangPage() {
                 title="Total Pendaftar"
                 value="248"
                 icon={Clock3}
+                tone="warning"
               />
             </div>
 
-            {/* CONTENT */}
+            {/* ==================================================
+                CONTENT
+            ================================================== */}
 
             <div className="min-h-0 flex-1 overflow-auto">
               <div className="grid gap-4 xl:grid-cols-3">
@@ -164,78 +217,93 @@ export default function GelombangPage() {
                         )
                       : 0;
 
+                  const isActive =
+                    item.status === "Aktif";
+
                   return (
                     <div
                       key={item.id}
-                      className={`rounded-xl border bg-white p-5 shadow-sm ${
-                        item.status === "Aktif"
-                          ? "border-[#c7dbff]"
-                          : "border-slate-200/80"
+                      className={`theme-card rounded-xl border p-5 ${themeCardShadow} ${
+                        isActive
+                          ? themePrimarySoftBorder
+                          : themeNeutralBorder
                       }`}
                     >
+                      {/* CARD HEADER */}
+
                       <div className="flex items-start justify-between">
                         <div>
                           <div className="flex items-center gap-2">
-                            <h2 className="text-sm font-bold text-slate-800">
+                            <h2 className="theme-text text-sm font-bold">
                               {item.nama}
                             </h2>
 
-                            {item.status ===
-                              "Aktif" && (
-                              <span className="rounded-md bg-emerald-50 px-2 py-1 text-[9px] font-semibold text-emerald-700">
+                            {isActive && (
+                              <span className="rounded-md border border-[color-mix(in_srgb,var(--color-success)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)] px-2 py-1 text-[9px] font-semibold text-[var(--color-success)]">
                                 AKTIF
                               </span>
                             )}
                           </div>
 
-                          <p className="mt-1 text-[10px] text-slate-400">
+                          <p className="theme-text-muted mt-1 text-[10px]">
                             {item.keterangan}
                           </p>
                         </div>
 
-                        <button className="text-slate-400 hover:text-slate-600">
+                        <button
+                          type="button"
+                          className="theme-text-muted transition hover:text-[var(--color-text)]"
+                        >
                           <MoreHorizontal size={17} />
                         </button>
                       </div>
 
-                      <div className="mt-5 rounded-lg bg-slate-50 p-3">
+                      {/* PERIOD */}
+
+                      <div
+                        className={`mt-5 rounded-lg border ${themeNeutralBorder} ${themeNeutralSurface} p-3`}
+                      >
                         <div className="flex items-center gap-2">
                           <CalendarDays
                             size={15}
-                            className="text-[#155DFC]"
+                            className={themePrimaryText}
                           />
 
                           <div>
-                            <p className="text-[10px] text-slate-400">
+                            <p className="theme-text-muted text-[10px]">
                               Periode
                             </p>
 
-                            <p className="text-xs font-semibold text-slate-700">
+                            <p className="theme-text-secondary text-xs font-semibold">
                               {item.mulai}
                             </p>
 
-                            <p className="text-[10px] text-slate-400">
+                            <p className="theme-text-muted text-[10px]">
                               sampai {item.selesai}
                             </p>
                           </div>
                         </div>
                       </div>
 
+                      {/* QUOTA */}
+
                       <div className="mt-4">
                         <div className="mb-2 flex items-center justify-between">
-                          <span className="text-xs text-slate-500">
+                          <span className="theme-text-secondary text-xs">
                             Penggunaan Kuota
                           </span>
 
-                          <span className="text-xs font-bold text-slate-700">
+                          <span className="theme-text text-xs font-bold">
                             {item.pendaftar}/
                             {item.kuota}
                           </span>
                         </div>
 
-                        <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+                        <div
+                          className={`h-2 overflow-hidden rounded-full ${themeNeutralSurface}`}
+                        >
                           <div
-                            className="h-full rounded-full bg-[#155DFC]"
+                            className={`${themePrimaryGradient} h-full rounded-full`}
                             style={{
                               width: `${Math.min(
                                 percent,
@@ -245,48 +313,47 @@ export default function GelombangPage() {
                           />
                         </div>
 
-                        <p className="mt-1 text-right text-[10px] text-slate-400">
+                        <p className="theme-text-muted mt-1 text-right text-[10px]">
                           {percent}% terisi
                         </p>
                       </div>
 
-                      <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4">
-                        <span
-                          className={`rounded-md border px-2.5 py-1 text-[10px] font-semibold ${
-                            item.status ===
-                            "Aktif"
-                              ? "border-emerald-100 bg-emerald-50 text-emerald-700"
-                              : item.status ===
-                                "Selesai"
-                              ? "border-slate-200 bg-slate-100 text-slate-500"
-                              : "border-amber-100 bg-amber-50 text-amber-700"
-                          }`}
-                        >
-                          {item.status}
-                        </span>
+                      {/* FOOTER */}
+
+                      <div
+                        className={`mt-5 flex items-center justify-between border-t ${themeDivider} pt-4`}
+                      >
+                        <StatusBadge
+                          status={item.status}
+                        />
 
                         <div className="flex gap-1">
                           <button
+                            type="button"
                             onClick={() =>
                               setSelected(item)
                             }
-                            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-[#eaf1ff] hover:text-[#155DFC]"
+                            className="theme-text-muted flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)] hover:text-[var(--color-primary)]"
                           >
                             <Eye size={15} />
                           </button>
 
                           <button
+                            type="button"
                             onClick={() =>
                               router.push(
                                 `/admin/spmb/gelombang/${item.id}/edit`
                               )
                             }
-                            className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-[#eaf1ff] hover:text-[#155DFC]"
+                            className="theme-text-muted flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)] hover:text-[var(--color-primary)]"
                           >
                             <Edit3 size={15} />
                           </button>
 
-                          <button className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-red-50 hover:text-red-600">
+                          <button
+                            type="button"
+                            className="theme-text-muted flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-[color-mix(in_srgb,var(--color-danger)_9%,transparent)] hover:text-[var(--color-danger)]"
+                          >
                             <Trash2 size={15} />
                           </button>
                         </div>
@@ -300,36 +367,52 @@ export default function GelombangPage() {
         </main>
       </div>
 
-      {/* DETAIL MODAL */}
+      {/* ======================================================
+          DETAIL MODAL
+      ====================================================== */}
 
       {selected && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[color-mix(in_srgb,var(--color-text)_42%,transparent)] p-4 backdrop-blur-sm">
+          <div
+            className={`theme-card w-full max-w-lg overflow-hidden rounded-2xl ${themeCardShadow}`}
+          >
+            {/* MODAL HEADER */}
+
+            <div
+              className={`flex items-center justify-between border-b ${themeDivider} px-5 py-4`}
+            >
               <div>
-                <h2 className="text-base font-bold text-slate-800">
+                <h2 className="theme-text text-base font-bold">
                   Detail Gelombang
                 </h2>
-                <p className="text-xs text-slate-400">
+
+                <p className="theme-text-muted text-xs">
                   Informasi periode penerimaan
                 </p>
               </div>
 
               <button
-                onClick={() => setSelected(null)}
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100"
+                type="button"
+                onClick={() =>
+                  setSelected(null)
+                }
+                className="theme-text-muted flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)] hover:text-[var(--color-text)]"
               >
                 <X size={17} />
               </button>
             </div>
 
+            {/* MODAL CONTENT */}
+
             <div className="space-y-4 p-5">
-              <div className="rounded-xl bg-[#f5f8ff] p-4">
-                <p className="text-lg font-bold text-slate-800">
+              <div
+                className={`rounded-xl border ${themePrimarySoftBorder} ${themePrimarySoft} p-4`}
+              >
+                <p className="theme-text text-lg font-bold">
                   {selected.nama}
                 </p>
 
-                <p className="mt-1 text-xs text-slate-400">
+                <p className="theme-text-muted mt-1 text-xs">
                   {selected.mulai} — {selected.selesai}
                 </p>
               </div>
@@ -361,10 +444,17 @@ export default function GelombangPage() {
               </div>
             </div>
 
-            <div className="flex justify-end border-t border-slate-100 px-5 py-4">
+            {/* MODAL FOOTER */}
+
+            <div
+              className={`flex justify-end border-t ${themeDivider} px-5 py-4`}
+            >
               <button
-                onClick={() => setSelected(null)}
-                className="rounded-lg border border-slate-200 px-4 py-2 text-xs font-semibold text-slate-600"
+                type="button"
+                onClick={() =>
+                  setSelected(null)
+                }
+                className={`theme-neutral-border theme-text-secondary rounded-lg border px-4 py-2 text-xs font-semibold transition ${themeNeutralHover}`}
               >
                 Tutup
               </button>
@@ -376,24 +466,94 @@ export default function GelombangPage() {
   );
 }
 
-function Summary({ title, value, icon: Icon }) {
+// ============================================================
+// STATUS BADGE
+// ============================================================
+
+function StatusBadge({ status }) {
+  if (status === "Aktif") {
+    return (
+      <span className="rounded-md border border-[color-mix(in_srgb,var(--color-success)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)] px-2.5 py-1 text-[10px] font-semibold text-[var(--color-success)]">
+        {status}
+      </span>
+    );
+  }
+
+  if (status === "Selesai") {
+    return (
+      <span
+        className={`theme-neutral-border theme-text-muted ${themeNeutralSurface} rounded-md border px-2.5 py-1 text-[10px] font-semibold`}
+      >
+        {status}
+      </span>
+    );
+  }
+
   return (
-    <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-sm">
+    <span className="rounded-md border border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)] bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)] px-2.5 py-1 text-[10px] font-semibold text-[var(--color-warning)]">
+      {status}
+    </span>
+  );
+}
+
+// ============================================================
+// SUMMARY
+// ============================================================
+
+function Summary({
+  title,
+  value,
+  icon: Icon,
+  tone = "primary",
+}) {
+  const toneConfig = {
+    primary: {
+      surface:
+        "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]",
+      text:
+        "text-[var(--color-primary)]",
+    },
+
+    success: {
+      surface:
+        "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]",
+      text:
+        "text-[var(--color-success)]",
+    },
+
+    warning: {
+      surface:
+        "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]",
+      text:
+        "text-[var(--color-warning)]",
+    },
+  };
+
+  const current =
+    toneConfig[tone] ||
+    toneConfig.primary;
+
+  return (
+    <div
+      className={`theme-card ${themeNeutralBorder} rounded-xl border p-4 ${themeSmallShadow}`}
+    >
       <div className="flex items-center justify-between">
         <div>
-          <p className="text-xs text-slate-500">
+          <p className="theme-text-muted text-xs">
             {title}
           </p>
 
-          <p className="mt-1 text-2xl font-bold text-slate-800">
+          <p className="theme-text mt-1 text-2xl font-bold">
             {value}
           </p>
         </div>
 
-        <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[#eaf1ff]">
+        <div
+          className={`flex h-10 w-10 items-center justify-center rounded-lg ${current.surface}`}
+        >
           <Icon
             size={18}
-            className="text-[#155DFC]"
+            className={current.text}
           />
         </div>
       </div>
@@ -401,14 +561,20 @@ function Summary({ title, value, icon: Icon }) {
   );
 }
 
+// ============================================================
+// INFO
+// ============================================================
+
 function Info({ label, value }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-      <p className="text-[10px] uppercase text-slate-400">
+    <div
+      className={`theme-neutral-border ${themeNeutralSurface} rounded-lg border p-3`}
+    >
+      <p className="theme-text-muted text-[10px] uppercase">
         {label}
       </p>
 
-      <p className="mt-1 text-xs font-bold text-slate-700">
+      <p className="theme-text-secondary mt-1 text-xs font-bold">
         {value}
       </p>
     </div>

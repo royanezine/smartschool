@@ -15,7 +15,6 @@ import {
   TrendingDown,
   AlertTriangle,
   History,
-  Pencil,
   Save,
   BarChart3,
   RefreshCw,
@@ -29,46 +28,113 @@ import {
   getTugasGuru,
   getPengumpulanByTugas,
   beriNilaiTugas,
-} from "../../../../services/tugas.service";
+} from "../../../../../services/tugas.service";
 
 const KKM = 75;
 
+// ============================================================
+// THEME
+// ============================================================
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+
+// ============================================================
+// PREDIKAT
+// ============================================================
+
 const colorClasses = {
   emerald: {
-    badge:
-      "bg-emerald-50 text-emerald-600 border-emerald-200",
-    bar: "bg-emerald-500",
-    text: "text-emerald-600",
+    badge: `${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder}`,
+    bar: "bg-[var(--color-success)]",
+    text: "text-[var(--color-success)]",
   },
 
   blue: {
-    badge:
-      "bg-blue-50 text-blue-600 border-blue-200",
-    bar: "bg-blue-500",
-    text: "text-blue-600",
+    badge: `${themeInfoSurface} text-[var(--color-info)] ${themeInfoBorder}`,
+    bar: "bg-[var(--color-info)]",
+    text: "text-[var(--color-info)]",
   },
 
   amber: {
-    badge:
-      "bg-amber-50 text-amber-600 border-amber-200",
-    bar: "bg-amber-500",
-    text: "text-amber-600",
+    badge: `${themeWarningSurface} text-[var(--color-warning)] ${themeWarningBorder}`,
+    bar: "bg-[var(--color-warning)]",
+    text: "text-[var(--color-warning)]",
   },
 
   rose: {
-    badge:
-      "bg-rose-50 text-rose-600 border-rose-200",
-    bar: "bg-rose-500",
-    text: "text-rose-600",
+    badge: `${themeDangerSurface} theme-danger ${themeDangerBorder}`,
+    bar: "bg-[var(--color-text-muted)]",
+    text: "theme-danger",
   },
 
   slate: {
-    badge:
-      "bg-slate-100 text-slate-500 border-slate-200",
-    bar: "bg-slate-300",
-    text: "text-slate-500",
+    badge: `${themeNeutralSurface} theme-text-secondary ${themeNeutralBorder}`,
+    bar: "bg-[var(--color-text-muted)]",
+    text: "theme-text-secondary",
   },
 };
+
+// ============================================================
+// HELPERS
+// ============================================================
 
 function getPredikat(nilai) {
   if (
@@ -139,6 +205,10 @@ function getJam(value) {
   });
 }
 
+// ============================================================
+// PAGE
+// ============================================================
+
 export default function GuruNilaiTugasPage() {
   const [sidebarOpen, setSidebarOpen] =
     useState(true);
@@ -191,11 +261,10 @@ export default function GuruNilaiTugasPage() {
     },
   ]);
 
-  /*
-   * ==========================================
-   * AMBIL SEMUA TUGAS GURU
-   * ==========================================
-   */
+  // ============================================================
+  // AMBIL SEMUA TUGAS GURU
+  // ============================================================
+
   const loadTugas = async () => {
     try {
       setLoading(true);
@@ -235,11 +304,10 @@ export default function GuruNilaiTugasPage() {
     loadTugas();
   }, []);
 
-  /*
-   * ==========================================
-   * FILTER KELAS-MAPEL
-   * ==========================================
-   */
+  // ============================================================
+  // FILTER KELAS MAPEL
+  // ============================================================
+
   const kelasMapelOptions = useMemo(() => {
     const map = new Map();
 
@@ -262,11 +330,10 @@ export default function GuruNilaiTugasPage() {
     return Array.from(map.values());
   }, [tugasList]);
 
-  /*
-   * ==========================================
-   * TUGAS UNTUK KELAS-MAPEL TERPILIH
-   * ==========================================
-   */
+  // ============================================================
+  // TUGAS KELAS TERPILIH
+  // ============================================================
+
   const tugasKelasIni = useMemo(() => {
     return tugasList
       .filter(
@@ -296,11 +363,10 @@ export default function GuruNilaiTugasPage() {
     selectedKelasMapelId,
   ]);
 
-  /*
-   * ==========================================
-   * TUGAS YANG SEDANG DIPILIH
-   * ==========================================
-   */
+  // ============================================================
+  // TUGAS TERPILIH
+  // ============================================================
+
   const selectedTugas = useMemo(() => {
     return (
       tugasList.find(
@@ -313,11 +379,10 @@ export default function GuruNilaiTugasPage() {
     selectedTugasId,
   ]);
 
-  /*
-   * ==========================================
-   * AMBIL PENGUMPULAN
-   * ==========================================
-   */
+  // ============================================================
+  // AMBIL PENGUMPULAN
+  // ============================================================
+
   const loadPengumpulan = async (
     tugasId
   ) => {
@@ -388,11 +453,10 @@ export default function GuruNilaiTugasPage() {
     }
   }, [selectedTugasId]);
 
-  /*
-   * ==========================================
-   * KETIKA KELAS-MAPEL BERUBAH
-   * ==========================================
-   */
+  // ============================================================
+  // KELAS MAPEL CHANGE
+  // ============================================================
+
   const handleKelasMapelChange = (
     value
   ) => {
@@ -412,11 +476,10 @@ export default function GuruNilaiTugasPage() {
     setError("");
   };
 
-  /*
-   * ==========================================
-   * KETIKA TUGAS BERUBAH
-   * ==========================================
-   */
+  // ============================================================
+  // TUGAS CHANGE
+  // ============================================================
+
   const handleTugasChange = (
     value
   ) => {
@@ -425,11 +488,10 @@ export default function GuruNilaiTugasPage() {
     setError("");
   };
 
-  /*
-   * ==========================================
-   * INPUT NILAI
-   * ==========================================
-   */
+  // ============================================================
+  // INPUT NILAI
+  // ============================================================
+
   const setNilaiSiswa = (
     pengumpulanId,
     value
@@ -452,11 +514,10 @@ export default function GuruNilaiTugasPage() {
     }));
   };
 
-  /*
-   * ==========================================
-   * INPUT CATATAN
-   * ==========================================
-   */
+  // ============================================================
+  // INPUT CATATAN
+  // ============================================================
+
   const setCatatanSiswa = (
     pengumpulanId,
     value
@@ -467,11 +528,10 @@ export default function GuruNilaiTugasPage() {
     }));
   };
 
-  /*
-   * ==========================================
-   * REKAP
-   * ==========================================
-   */
+  // ============================================================
+  // REKAP
+  // ============================================================
+
   const nilaiTerisi = useMemo(() => {
     return Object.values(
       nilaiForm
@@ -527,11 +587,10 @@ export default function GuruNilaiTugasPage() {
     };
   }, [nilaiTerisi]);
 
-  /*
-   * ==========================================
-   * SIMPAN SEMUA NILAI
-   * ==========================================
-   */
+  // ============================================================
+  // SIMPAN SEMUA NILAI
+  // ============================================================
+
   const simpanSemuaNilai =
     async () => {
       const dataYangDinilai =
@@ -599,11 +658,10 @@ export default function GuruNilaiTugasPage() {
       }
     };
 
-  /*
-   * ==========================================
-   * REFRESH
-   * ==========================================
-   */
+  // ============================================================
+  // REFRESH
+  // ============================================================
+
   const refreshData = async () => {
     setSuccess("");
     setError("");
@@ -624,8 +682,12 @@ export default function GuruNilaiTugasPage() {
         selectedKelasMapelId
     );
 
+  // ============================================================
+  // RENDER
+  // ============================================================
+
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden">
+    <div className="theme-page flex h-screen overflow-hidden">
       <Sidebar
         active="nilaiTugas"
         setActive={() => {}}
@@ -637,7 +699,7 @@ export default function GuruNilaiTugasPage() {
         }
       />
 
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex flex-1 flex-col min-w-0">
         <Header
           toggleSidebar={() =>
             setSidebarOpen(
@@ -658,25 +720,30 @@ export default function GuruNilaiTugasPage() {
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="w-full space-y-6">
 
-            {/* HEADER */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            {/* ==================================================
+                HEADER
+            ================================================== */}
+
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
               <div className="min-w-0">
                 <div className="flex items-center gap-2.5">
-                  <div className="p-2 rounded-lg bg-blue-600 text-white shadow-sm">
+                  <div
+                    className={`rounded-lg p-2 ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
+                  >
                     <GraduationCap
                       size={18}
                     />
                   </div>
 
-                  <h1 className="text-xl sm:text-2xl font-semibold text-slate-800">
+                  <h1 className="theme-text text-xl font-semibold sm:text-2xl">
                     Nilai Tugas
                   </h1>
                 </div>
 
-                <p className="text-sm text-slate-500 mt-1 ml-[42px] flex items-center gap-1.5">
+                <p className="theme-text-secondary mt-1 ml-[42px] flex items-center gap-1.5 text-sm">
                   <Sparkles
                     size={14}
-                    className="text-slate-400"
+                    className="theme-text-muted"
                   />
 
                   <span>
@@ -691,7 +758,7 @@ export default function GuruNilaiTugasPage() {
               <button
                 onClick={refreshData}
                 disabled={loading}
-                className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-50"
+                className={`flex items-center justify-center gap-2 rounded-lg border px-4 py-2.5 text-sm font-medium transition-colors disabled:cursor-not-allowed disabled:opacity-50 ${themeCardShadow} ${themeNeutralBorder} theme-card theme-text-secondary ${themeNeutralHover} hover:border-[color-mix(in_srgb,var(--color-primary)_30%,transparent)] hover:text-[var(--color-primary)]`}
               >
                 <RefreshCw
                   size={15}
@@ -706,46 +773,63 @@ export default function GuruNilaiTugasPage() {
               </button>
             </div>
 
-            {/* ERROR */}
+            {/* ==================================================
+                ERROR
+            ================================================== */}
+
             {error && (
-              <div className="flex items-start gap-3 p-4 rounded-xl border border-rose-200 bg-rose-50 text-rose-700">
+              <div
+                className={`flex items-start gap-3 rounded-xl border p-4 ${themeDangerSurface} ${themeDangerBorder}`}
+              >
                 <XCircle
                   size={18}
-                  className="flex-shrink-0 mt-0.5"
+                  className="theme-danger mt-0.5 flex-shrink-0"
                 />
 
                 <div>
-                  <p className="text-sm font-semibold">
+                  <p className="theme-text text-sm font-semibold">
                     Terjadi kesalahan
                   </p>
 
-                  <p className="text-xs mt-1">
+                  <p className="theme-text-secondary mt-1 text-xs">
                     {error}
                   </p>
                 </div>
               </div>
             )}
 
-            {/* SUCCESS */}
+            {/* ==================================================
+                SUCCESS
+            ================================================== */}
+
             {success && (
-              <div className="flex items-center gap-3 p-4 rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700">
+              <div
+                className={`flex items-center gap-3 rounded-xl border p-4 ${themeSuccessSurface} ${themeSuccessBorder}`}
+              >
                 <CheckCircle2
                   size={18}
+                  className="text-[var(--color-success)]"
                 />
 
-                <p className="text-sm font-medium">
+                <p className="text-[var(--color-success)] text-sm font-medium">
                   {success}
                 </p>
               </div>
             )}
 
-            {/* SELECTOR */}
-            <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm">
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* ==================================================
+                SELECTOR
+            ================================================== */}
+
+            <div
+              className={`theme-card rounded-xl border p-4 ${themeNeutralBorder} ${themeCardShadow}`}
+            >
+              <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
 
                 {/* KELAS MAPEL */}
+
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-2">
+                  <label className="theme-text-secondary mb-2 block text-xs font-semibold">
                     Kelas & Mata Pelajaran
                   </label>
 
@@ -764,7 +848,7 @@ export default function GuruNilaiTugasPage() {
                         kelasMapelOptions.length ===
                           0
                       }
-                      className="w-full appearance-none pl-3 pr-9 py-2.5 text-sm font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-lg hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 disabled:opacity-50"
+                      className={`theme-input theme-text w-full appearance-none rounded-lg border px-3 py-2.5 pr-9 text-sm font-medium outline-none transition ${themeFocus} ${themeNeutralBorder} disabled:cursor-not-allowed disabled:opacity-50`}
                     >
                       {kelasMapelOptions.length ===
                       0 ? (
@@ -794,14 +878,15 @@ export default function GuruNilaiTugasPage() {
 
                     <ChevronDown
                       size={14}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+                      className="theme-text-muted pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
                     />
                   </div>
                 </div>
 
                 {/* TUGAS */}
+
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 mb-2">
+                  <label className="theme-text-secondary mb-2 block text-xs font-semibold">
                     Tugas / Penilaian
                   </label>
 
@@ -819,7 +904,7 @@ export default function GuruNilaiTugasPage() {
                         tugasKelasIni.length ===
                         0
                       }
-                      className="w-full appearance-none pl-3 pr-9 py-2.5 text-sm font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-lg hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 disabled:opacity-50"
+                      className={`theme-input theme-text w-full appearance-none rounded-lg border px-3 py-2.5 pr-9 text-sm font-medium outline-none transition ${themeFocus} ${themeNeutralBorder} disabled:cursor-not-allowed disabled:opacity-50`}
                     >
                       {tugasKelasIni.length ===
                       0 ? (
@@ -842,31 +927,36 @@ export default function GuruNilaiTugasPage() {
 
                     <ChevronDown
                       size={14}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+                      className="theme-text-muted pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
                     />
                   </div>
                 </div>
               </div>
             </div>
 
-            {/* DETAIL TUGAS */}
+            {/* ==================================================
+                DETAIL TUGAS
+            ================================================== */}
+
             {selectedTugas && (
-              <div className="bg-white rounded-xl border border-slate-200/80 p-4 sm:p-5 shadow-sm">
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+              <div
+                className={`theme-card rounded-xl border p-4 sm:p-5 ${themeNeutralBorder} ${themeCardShadow}`}
+              >
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
 
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
                       <FileText
                         size={17}
-                        className="text-blue-500"
+                        className={themePrimaryText}
                       />
 
-                      <h2 className="text-sm font-semibold text-slate-800 truncate">
+                      <h2 className="theme-text truncate text-sm font-semibold">
                         {selectedTugas.judul}
                       </h2>
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-slate-400">
+                    <div className="theme-text-muted mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
                       <span>
                         Kelas{" "}
                         {selectedTugas.kelasNama}
@@ -905,13 +995,17 @@ export default function GuruNilaiTugasPage() {
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <span className="px-2.5 py-1.5 rounded-full border border-blue-200 bg-blue-50 text-blue-600 text-xs font-medium">
+                    <span
+                      className={`rounded-full border px-2.5 py-1.5 text-xs font-medium ${themeInfoSurface} text-[var(--color-info)] ${themeInfoBorder}`}
+                    >
                       {pengumpulanList.length}{" "}
                       pengumpulan
                     </span>
 
                     {kelasTerpilih && (
-                      <span className="px-2.5 py-1.5 rounded-full border border-slate-200 bg-slate-50 text-slate-500 text-xs font-medium">
+                      <span
+                        className={`theme-text-secondary rounded-full border px-2.5 py-1.5 text-xs font-medium ${themeNeutralSurface} ${themeNeutralBorder}`}
+                      >
                         Kelas{" "}
                         {kelasTerpilih.kelasNama}
                       </span>
@@ -921,115 +1015,157 @@ export default function GuruNilaiTugasPage() {
               </div>
             )}
 
-            {/* SUMMARY */}
-            <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+            {/* ==================================================
+                SUMMARY
+            ================================================== */}
 
-              <div className="bg-white rounded-xl border border-slate-200/80 p-3.5 shadow-sm flex items-center gap-3">
-                <div className="p-2 rounded-lg border bg-slate-100 text-slate-500 border-slate-200">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+
+              {/* Pengumpulan */}
+
+              <div
+                className={`theme-card flex items-center gap-3 rounded-xl border p-3.5 ${themeNeutralBorder} ${themeCardShadow}`}
+              >
+                <div
+                  className={`theme-text-secondary rounded-lg border p-2 ${themeNeutralSurface} ${themeNeutralBorder}`}
+                >
                   <Users size={16} />
                 </div>
 
                 <div>
-                  <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
+                  <p className="theme-text-muted text-[11px] font-medium uppercase tracking-wider">
                     Pengumpulan
                   </p>
 
-                  <p className="text-lg font-bold text-slate-800">
+                  <p className="theme-text text-lg font-bold">
                     {pengumpulanList.length}
                   </p>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl border border-slate-200/80 p-3.5 shadow-sm flex items-center gap-3">
-                <div className="p-2 rounded-lg border bg-blue-50 text-blue-600 border-blue-200">
+              {/* Rata-rata */}
+
+              <div
+                className={`theme-card flex items-center gap-3 rounded-xl border p-3.5 ${themeNeutralBorder} ${themeCardShadow}`}
+              >
+                <div
+                  className={`rounded-lg border p-2 ${themeInfoSurface} text-[var(--color-info)] ${themeInfoBorder}`}
+                >
                   <BarChart3
                     size={16}
                   />
                 </div>
 
                 <div>
-                  <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
+                  <p className="theme-text-muted text-[11px] font-medium uppercase tracking-wider">
                     Rata-rata
                   </p>
 
-                  <p className="text-lg font-bold text-slate-800">
+                  <p className="theme-text text-lg font-bold">
                     {rekap.rataRata ||
                       "-"}
                   </p>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl border border-slate-200/80 p-3.5 shadow-sm flex items-center gap-3">
-                <div className="p-2 rounded-lg border bg-emerald-50 text-emerald-600 border-emerald-200">
+              {/* Tertinggi */}
+
+              <div
+                className={`theme-card flex items-center gap-3 rounded-xl border p-3.5 ${themeNeutralBorder} ${themeCardShadow}`}
+              >
+                <div
+                  className={`rounded-lg border p-2 ${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder}`}
+                >
                   <TrendingUp
                     size={16}
                   />
                 </div>
 
                 <div>
-                  <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
+                  <p className="theme-text-muted text-[11px] font-medium uppercase tracking-wider">
                     Tertinggi
                   </p>
 
-                  <p className="text-lg font-bold text-slate-800">
+                  <p className="theme-text text-lg font-bold">
                     {rekap.tertinggi ||
                       "-"}
                   </p>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl border border-slate-200/80 p-3.5 shadow-sm flex items-center gap-3">
-                <div className="p-2 rounded-lg border bg-rose-50 text-rose-600 border-rose-200">
+              {/* Terendah */}
+
+              <div
+                className={`theme-card flex items-center gap-3 rounded-xl border p-3.5 ${themeNeutralBorder} ${themeCardShadow}`}
+              >
+                <div
+                  className={`theme-danger rounded-lg border p-2 ${themeDangerSurface} ${themeDangerBorder}`}
+                >
                   <TrendingDown
                     size={16}
                   />
                 </div>
 
                 <div>
-                  <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
+                  <p className="theme-text-muted text-[11px] font-medium uppercase tracking-wider">
                     Terendah
                   </p>
 
-                  <p className="text-lg font-bold text-slate-800">
+                  <p className="theme-text text-lg font-bold">
                     {rekap.terendah ||
                       "-"}
                   </p>
                 </div>
               </div>
 
-              <div className="bg-white rounded-xl border border-slate-200/80 p-3.5 shadow-sm flex items-center gap-3">
-                <div className="p-2 rounded-lg border bg-amber-50 text-amber-600 border-amber-200">
+              {/* Belum Tuntas */}
+
+              <div
+                className={`theme-card flex items-center gap-3 rounded-xl border p-3.5 ${themeNeutralBorder} ${themeCardShadow}`}
+              >
+                <div
+                  className={`rounded-lg border p-2 ${themeWarningSurface} text-[var(--color-warning)] ${themeWarningBorder}`}
+                >
                   <AlertTriangle
                     size={16}
                   />
                 </div>
 
                 <div>
-                  <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
+                  <p className="theme-text-muted text-[11px] font-medium uppercase tracking-wider">
                     Belum Tuntas
                   </p>
 
-                  <p className="text-lg font-bold text-slate-800">
+                  <p className="theme-text text-lg font-bold">
                     {rekap.belumTuntas}
                   </p>
                 </div>
               </div>
             </div>
 
-            {/* CONTENT */}
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+            {/* ==================================================
+                CONTENT
+            ================================================== */}
 
-              {/* FORM NILAI */}
-              <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden">
+            <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
 
-                <div className="p-4 sm:p-5 border-b border-slate-100">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              {/* ==================================================
+                  FORM NILAI
+              ================================================== */}
+
+              <div
+                className={`theme-card lg:col-span-2 overflow-hidden rounded-xl border ${themeNeutralBorder} ${themeCardShadow}`}
+              >
+                <div
+                  className={`border-b p-4 sm:p-5 ${themeDivider}`}
+                >
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                     <div>
-                      <h2 className="text-sm font-semibold text-slate-800">
+                      <h2 className="theme-text text-sm font-semibold">
                         Daftar Nilai Siswa
                       </h2>
 
-                      <p className="text-xs text-slate-400 mt-1">
+                      <p className="theme-text-muted mt-1 text-xs">
                         Nilai 0–100 · KKM{" "}
                         {KKM}
                       </p>
@@ -1042,7 +1178,7 @@ export default function GuruNilaiTugasPage() {
                           simpanSemuaNilai
                         }
                         disabled={saving}
-                        className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-600 disabled:opacity-50 transition-colors"
+                        className={`flex items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all disabled:cursor-not-allowed disabled:opacity-50 ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow} hover:opacity-90`}
                       >
                         {saving ? (
                           <RefreshCw
@@ -1063,40 +1199,50 @@ export default function GuruNilaiTugasPage() {
                   </div>
                 </div>
 
+                {/* LOADING */}
+
                 {loadingPengumpulan ? (
-                  <div className="p-10 flex flex-col items-center justify-center text-center">
+                  <div className="flex flex-col items-center justify-center p-10 text-center">
                     <RefreshCw
                       size={24}
-                      className="text-blue-500 animate-spin"
+                      className={`${themePrimaryText} animate-spin`}
                     />
 
-                    <p className="text-sm text-slate-500 mt-3">
+                    <p className="theme-text-secondary mt-3 text-sm">
                       Mengambil data
                       pengumpulan siswa...
                     </p>
                   </div>
                 ) : pengumpulanList.length ===
                   0 ? (
+
+                  /* EMPTY */
+
                   <div className="p-10 text-center">
-                    <div className="mx-auto w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center">
+                    <div
+                      className={`mx-auto flex h-12 w-12 items-center justify-center rounded-xl ${themeNeutralSurface}`}
+                    >
                       <Users
                         size={20}
-                        className="text-slate-400"
+                        className="theme-text-muted"
                       />
                     </div>
 
-                    <h3 className="text-sm font-semibold text-slate-700 mt-4">
+                    <h3 className="theme-text-secondary mt-4 text-sm font-semibold">
                       Belum ada pengumpulan
                     </h3>
 
-                    <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
+                    <p className="theme-text-muted mx-auto mt-1 max-w-sm text-xs">
                       Belum ada siswa yang
                       mengumpulkan tugas
                       ini.
                     </p>
                   </div>
                 ) : (
-                  <div className="divide-y divide-slate-100">
+
+                  /* LIST */
+
+                  <div>
                     {pengumpulanList.map(
                       (
                         item,
@@ -1119,26 +1265,28 @@ export default function GuruNilaiTugasPage() {
                         return (
                           <div
                             key={item.id}
-                            className="p-4 sm:px-5 sm:py-4 hover:bg-slate-50/60 transition-colors"
+                            className={`border-b p-4 transition-colors last:border-b-0 sm:px-5 sm:py-4 ${themeDivider} ${themeNeutralHover}`}
                           >
                             <div className="flex flex-col gap-3">
 
-                              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+                              {/* IDENTITAS + NILAI */}
 
-                                <div className="flex items-center gap-3 min-w-0 flex-1">
-                                  <span className="w-6 text-xs font-medium text-slate-400">
+                              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+
+                                <div className="flex min-w-0 flex-1 items-center gap-3">
+                                  <span className="theme-text-muted w-6 text-xs font-medium">
                                     {index +
                                       1}
                                     .
                                   </span>
 
                                   <div className="min-w-0">
-                                    <p className="text-sm font-medium text-slate-800 truncate">
+                                    <p className="theme-text truncate text-sm font-medium">
                                       {siswa.namaLengkap ||
                                         "Nama siswa"}
                                     </p>
 
-                                    <p className="text-[11px] text-slate-400">
+                                    <p className="theme-text-muted text-[11px]">
                                       NISN{" "}
                                       {siswa.nisn ||
                                         "-"}
@@ -1165,11 +1313,11 @@ export default function GuruNilaiTugasPage() {
                                       )
                                     }
                                     placeholder="0-100"
-                                    className="w-20 px-3 py-1.5 text-sm text-slate-700 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+                                    className={`theme-input theme-text w-20 rounded-lg border px-3 py-1.5 text-sm outline-none transition placeholder:text-[var(--color-text-placeholder)] ${themeFocus} ${themeNeutralBorder}`}
                                   />
 
                                   <span
-                                    className={`inline-flex items-center justify-center w-8 h-8 text-xs font-semibold rounded-lg border ${
+                                    className={`inline-flex h-8 w-8 items-center justify-center rounded-lg border text-xs font-semibold ${
                                       predikat
                                         ? colorClasses[
                                             predikat
@@ -1186,6 +1334,8 @@ export default function GuruNilaiTugasPage() {
                                   </span>
                                 </div>
                               </div>
+
+                              {/* CATATAN */}
 
                               <input
                                 type="text"
@@ -1205,20 +1355,26 @@ export default function GuruNilaiTugasPage() {
                                   )
                                 }
                                 placeholder="Catatan / feedback untuk siswa (opsional)"
-                                className="w-full px-3 py-2 text-xs text-slate-700 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500"
+                                className={`theme-input theme-text w-full rounded-lg border px-3 py-2 text-xs outline-none transition placeholder:text-[var(--color-text-placeholder)] ${themeFocus} ${themeNeutralBorder}`}
                               />
+
+                              {/* STATUS */}
 
                               <div className="flex flex-wrap items-center gap-2">
                                 {item.status ===
                                   "dinilai" ? (
-                                  <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-full bg-emerald-50 text-emerald-600 border border-emerald-200">
+                                  <span
+                                    className={`inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[10px] font-medium ${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder}`}
+                                  >
                                     <CheckCircle2
                                       size={11}
                                     />
                                     Sudah dinilai
                                   </span>
                                 ) : (
-                                  <span className="inline-flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-full bg-amber-50 text-amber-600 border border-amber-200">
+                                  <span
+                                    className={`inline-flex items-center gap-1 rounded-full border px-2 py-1 text-[10px] font-medium ${themeWarningSurface} text-[var(--color-warning)] ${themeWarningBorder}`}
+                                  >
                                     <Clock
                                       size={11}
                                     />
@@ -1233,7 +1389,7 @@ export default function GuruNilaiTugasPage() {
                                     }
                                     target="_blank"
                                     rel="noreferrer"
-                                    className="text-[10px] font-medium px-2 py-1 rounded-full bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100"
+                                    className={`rounded-full border px-2 py-1 text-[10px] font-medium transition-colors ${themeInfoSurface} text-[var(--color-info)] ${themeInfoBorder} hover:opacity-80`}
                                   >
                                     Lihat pengumpulan
                                   </a>
@@ -1247,11 +1403,15 @@ export default function GuruNilaiTugasPage() {
                   </div>
                 )}
 
+                {/* FOOTER FORM */}
+
                 {pengumpulanList.length >
                   0 && (
-                  <div className="p-4 sm:p-5 border-t border-slate-100 bg-slate-50/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div
+                    className={`flex flex-col gap-3 border-t p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5 ${themeDivider} ${themeNeutralSurface}`}
+                  >
                     <div>
-                      <p className="text-xs text-slate-500">
+                      <p className="theme-text-secondary text-xs">
                         {rekap.sudahDinilai} dari{" "}
                         {
                           pengumpulanList.length
@@ -1260,7 +1420,7 @@ export default function GuruNilaiTugasPage() {
                         memiliki nilai.
                       </p>
 
-                      <p className="text-[11px] text-slate-400 mt-1">
+                      <p className="theme-text-muted mt-1 text-[11px]">
                         Perubahan akan
                         disimpan ke database
                         SmartSchool.
@@ -1272,7 +1432,7 @@ export default function GuruNilaiTugasPage() {
                         simpanSemuaNilai
                       }
                       disabled={saving}
-                      className="w-full sm:w-auto flex items-center justify-center gap-2 px-5 py-2.5 text-sm font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-600 disabled:opacity-50 transition-colors"
+                      className={`flex w-full items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-medium transition-all disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow} hover:opacity-90`}
                     >
                       {saving ? (
                         <RefreshCw
@@ -1293,47 +1453,59 @@ export default function GuruNilaiTugasPage() {
                 )}
               </div>
 
-              {/* SIDEBAR KANAN */}
+              {/* ==================================================
+                  SIDEBAR KANAN
+              ================================================== */}
+
               <div className="space-y-6">
 
-                {/* STATISTIK */}
-                <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm p-4 sm:p-5">
-                  <div className="flex items-center gap-2 mb-4">
+                {/* ==================================================
+                    STATISTIK
+                ================================================== */}
+
+                <div
+                  className={`theme-card rounded-xl border p-4 sm:p-5 ${themeNeutralBorder} ${themeCardShadow}`}
+                >
+                  <div className="mb-4 flex items-center gap-2">
                     <Award
                       size={16}
-                      className="text-slate-400"
+                      className="theme-text-muted"
                     />
 
-                    <h2 className="text-sm font-semibold text-slate-800">
+                    <h2 className="theme-text text-sm font-semibold">
                       Statistik
                     </h2>
                   </div>
 
                   {nilaiTerisi.length ===
                   0 ? (
-                    <p className="text-xs text-slate-400">
+                    <p className="theme-text-muted text-xs">
                       Belum ada nilai yang
                       diinput.
                     </p>
                   ) : (
                     <div className="space-y-4">
 
+                      {/* RATA-RATA */}
+
                       <div>
-                        <div className="flex items-center justify-between mb-1.5">
-                          <span className="text-xs text-slate-400">
+                        <div className="mb-1.5 flex items-center justify-between">
+                          <span className="theme-text-muted text-xs">
                             Rata-rata
                           </span>
 
-                          <span className="text-lg font-bold text-slate-800">
+                          <span className="theme-text text-lg font-bold">
                             {
                               rekap.rataRata
                             }
                           </span>
                         </div>
 
-                        <div className="w-full h-2 rounded-full bg-slate-100 overflow-hidden">
+                        <div
+                          className={`h-2 w-full overflow-hidden rounded-full ${themeNeutralSurface}`}
+                        >
                           <div
-                            className="h-full rounded-full bg-blue-500 transition-all"
+                            className={`h-full rounded-full ${colorClasses.blue.bar} transition-all`}
                             style={{
                               width: `${Math.min(
                                 rekap.rataRata,
@@ -1344,25 +1516,31 @@ export default function GuruNilaiTugasPage() {
                         </div>
                       </div>
 
+                      {/* MAX MIN */}
+
                       <div className="grid grid-cols-2 gap-3">
-                        <div className="p-3 rounded-lg bg-emerald-50 border border-emerald-100">
-                          <p className="text-[11px] text-emerald-600">
+                        <div
+                          className={`rounded-lg border p-3 ${themeSuccessSurface} ${themeSuccessBorder}`}
+                        >
+                          <p className="text-[var(--color-success)] text-[11px]">
                             Tertinggi
                           </p>
 
-                          <p className="text-lg font-bold text-emerald-700 mt-1">
+                          <p className="text-[var(--color-success)] mt-1 text-lg font-bold">
                             {
                               rekap.tertinggi
                             }
                           </p>
                         </div>
 
-                        <div className="p-3 rounded-lg bg-rose-50 border border-rose-100">
-                          <p className="text-[11px] text-rose-600">
+                        <div
+                          className={`theme-danger rounded-lg border p-3 ${themeDangerSurface} ${themeDangerBorder}`}
+                        >
+                          <p className="text-xs theme-danger">
                             Terendah
                           </p>
 
-                          <p className="text-lg font-bold text-rose-700 mt-1">
+                          <p className="theme-danger mt-1 text-lg font-bold">
                             {
                               rekap.terendah
                             }
@@ -1370,19 +1548,23 @@ export default function GuruNilaiTugasPage() {
                         </div>
                       </div>
 
-                      <div className="p-3 rounded-lg bg-amber-50 border border-amber-100">
+                      {/* KKM */}
+
+                      <div
+                        className={`rounded-lg border p-3 ${themeWarningSurface} ${themeWarningBorder}`}
+                      >
                         <div className="flex items-center gap-2">
                           <AlertTriangle
                             size={14}
-                            className="text-amber-500"
+                            className="text-[var(--color-warning)]"
                           />
 
-                          <span className="text-xs font-medium text-amber-700">
+                          <span className="text-[var(--color-warning)] text-xs font-medium">
                             Di bawah KKM
                           </span>
                         </div>
 
-                        <p className="text-lg font-bold text-amber-700 mt-1">
+                        <p className="text-[var(--color-warning)] mt-1 text-lg font-bold">
                           {
                             rekap.belumTuntas
                           }{" "}
@@ -1393,15 +1575,22 @@ export default function GuruNilaiTugasPage() {
                   )}
                 </div>
 
-                {/* DAFTAR TUGAS */}
-                <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden">
-                  <div className="flex items-center gap-2 p-4 sm:p-5 border-b border-slate-100">
+                {/* ==================================================
+                    RIWAYAT TUGAS
+                ================================================== */}
+
+                <div
+                  className={`theme-card overflow-hidden rounded-xl border ${themeNeutralBorder} ${themeCardShadow}`}
+                >
+                  <div
+                    className={`flex items-center gap-2 border-b p-4 sm:p-5 ${themeDivider}`}
+                  >
                     <History
                       size={16}
-                      className="text-slate-400"
+                      className="theme-text-muted"
                     />
 
-                    <h2 className="text-sm font-semibold text-slate-800">
+                    <h2 className="theme-text text-sm font-semibold">
                       Riwayat Tugas
                     </h2>
                   </div>
@@ -1409,13 +1598,13 @@ export default function GuruNilaiTugasPage() {
                   {tugasKelasIni.length ===
                   0 ? (
                     <div className="p-6 text-center">
-                      <p className="text-xs text-slate-400">
+                      <p className="theme-text-muted text-xs">
                         Belum ada tugas pada
                         kelas ini.
                       </p>
                     </div>
                   ) : (
-                    <div className="divide-y divide-slate-100 max-h-[500px] overflow-y-auto">
+                    <div className="max-h-[500px] overflow-y-auto">
                       {tugasKelasIni.map(
                         (tugas) => {
                           const aktif =
@@ -1432,18 +1621,21 @@ export default function GuruNilaiTugasPage() {
                                   tugas.id
                                 )
                               }
-                              className={`w-full text-left p-4 hover:bg-slate-50 transition-colors ${
+                              className={`w-full border-b p-4 text-left transition-colors last:border-b-0 ${themeDivider} ${
                                 aktif
-                                  ? "bg-blue-50/60"
-                                  : ""
+                                  ? `${themePrimarySoft} border-l-2 border-l-[var(--color-primary)]`
+                                  : `${themeNeutralHover}`
                               }`}
                             >
                               <div className="flex items-start gap-3">
+
+                                {/* ICON */}
+
                                 <div
-                                  className={`p-2 rounded-lg flex-shrink-0 ${
+                                  className={`flex-shrink-0 rounded-lg p-2 ${
                                     aktif
-                                      ? "bg-blue-100 text-blue-600"
-                                      : "bg-slate-100 text-slate-500"
+                                      ? `${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`
+                                      : `${themeNeutralSurface} theme-text-secondary`
                                   }`}
                                 >
                                   <FileText
@@ -1453,12 +1645,14 @@ export default function GuruNilaiTugasPage() {
                                   />
                                 </div>
 
+                                {/* CONTENT */}
+
                                 <div className="min-w-0 flex-1">
                                   <p
-                                    className={`text-xs font-medium truncate ${
+                                    className={`truncate text-xs font-medium ${
                                       aktif
-                                        ? "text-blue-700"
-                                        : "text-slate-700"
+                                        ? themePrimaryText
+                                        : "theme-text"
                                     }`}
                                   >
                                     {
@@ -1466,14 +1660,16 @@ export default function GuruNilaiTugasPage() {
                                     }
                                   </p>
 
-                                  <p className="text-[11px] text-slate-400 mt-1">
+                                  <p className="theme-text-muted mt-1 text-[11px]">
                                     {getTanggal(
                                       tugas.batasWaktu
                                     )}
                                   </p>
 
-                                  <div className="flex items-center gap-2 mt-2">
-                                    <span className="text-[10px] px-1.5 py-0.5 rounded-full border bg-slate-50 text-slate-500 border-slate-200">
+                                  <div className="mt-2 flex items-center gap-2">
+                                    <span
+                                      className={`rounded-full border px-1.5 py-0.5 text-[10px] theme-text-secondary ${themeNeutralSurface} ${themeNeutralBorder}`}
+                                    >
                                       {
                                         tugas.jumlahPengumpulan ??
                                         0
@@ -1482,7 +1678,9 @@ export default function GuruNilaiTugasPage() {
                                     </span>
 
                                     {aktif && (
-                                      <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-blue-100 text-blue-600">
+                                      <span
+                                        className={`rounded-full px-1.5 py-0.5 text-[10px] font-medium ${themePrimarySoft} ${themePrimaryText}`}
+                                      >
                                         Dibuka
                                       </span>
                                     )}
@@ -1498,7 +1696,6 @@ export default function GuruNilaiTugasPage() {
                 </div>
               </div>
             </div>
-
           </div>
         </main>
       </div>

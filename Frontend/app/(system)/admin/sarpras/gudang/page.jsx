@@ -44,6 +44,73 @@ import {
 } from "../../../../../services/sarpras.service";
 
 // =====================================================
+// THEME HELPERS
+// =====================================================
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+
+// =====================================================
 // HELPER
 // =====================================================
 
@@ -142,28 +209,29 @@ const stokStatusConfig = {
   aman: {
     label: "Aman",
     icon: CheckCircle,
-    textClassName: "text-emerald-700",
-    bgClassName: "bg-emerald-50",
-    borderClassName: "border-emerald-100",
-    barClassName: "bg-emerald-500",
+    textClassName: "theme-success",
+    bgClassName: themeSuccessSurface,
+    borderClassName: themeSuccessBorder,
+    barClassName: "bg-[var(--color-success)]",
   },
 
   menipis: {
     label: "Menipis",
     icon: AlertTriangle,
-    textClassName: "text-amber-700",
-    bgClassName: "bg-amber-50",
-    borderClassName: "border-amber-100",
-    barClassName: "bg-amber-500",
+    textClassName: "theme-warning",
+    bgClassName: themeWarningSurface,
+    borderClassName: themeWarningBorder,
+    barClassName: "bg-[var(--color-warning)]",
   },
 
   habis: {
     label: "Habis",
     icon: XCircle,
-    textClassName: "text-rose-700",
-    bgClassName: "bg-rose-50",
-    borderClassName: "border-rose-100",
-    barClassName: "bg-rose-500",
+    textClassName: "theme-danger",
+    bgClassName: themeDangerSurface,
+    borderClassName: themeDangerBorder,
+    barClassName:
+      "bg-[color-mix(in_srgb,var(--color-text)_55%,transparent)]",
   },
 };
 
@@ -272,9 +340,11 @@ export default function AdminSarprasGudangPage() {
         const nama = String(item?.nama || "").toLowerCase();
         const kode = String(item?.kode || "").toLowerCase();
         const lokasi = String(item?.lokasi || "").toLowerCase();
+
         const namaKategori = String(
           item?.kategoriAset?.nama || ""
         ).toLowerCase();
+
         const namaGudang = String(
           item?.gudang?.nama || ""
         ).toLowerCase();
@@ -635,15 +705,17 @@ export default function AdminSarprasGudangPage() {
       <div className="mb-1.5 flex items-center gap-2">
         <Icon
           size={14}
-          className="text-slate-400"
+          className="theme-text-muted"
         />
 
-        <span className="text-[11px] font-semibold uppercase tracking-wide text-slate-400">
+        <span className="theme-text-muted text-[11px] font-semibold uppercase tracking-wide">
           {label}
         </span>
       </div>
 
-      <div className="min-h-[42px] rounded-lg border border-slate-100 bg-slate-50 px-3 py-2.5 text-sm leading-5 text-slate-700">
+      <div
+        className={`theme-card min-h-[42px] rounded-lg border ${themeNeutralBorder} px-3 py-2.5 text-sm leading-5 theme-text`}
+      >
         {value || "-"}
       </div>
     </div>
@@ -651,10 +723,10 @@ export default function AdminSarprasGudangPage() {
 
   // ===================================================
   // RENDER
-  // ===================================================
+  // =====================================================
 
   return (
-    <div className="h-screen overflow-hidden bg-[#F8FAFC]">
+    <div className="theme-page h-screen overflow-hidden">
 
       {/* =================================================
           SIDEBAR
@@ -685,7 +757,7 @@ export default function AdminSarprasGudangPage() {
             HEADER
         ================================================= */}
 
-        <header className="relative z-50 flex h-[72px] flex-shrink-0 items-center border-b border-slate-200 bg-white">
+        <header className="theme-header relative z-50 flex h-[72px] flex-shrink-0 border-b theme-divider">
           <div className="w-full min-w-0">
             <Header
               toggleSidebar={toggleSidebar}
@@ -711,19 +783,20 @@ export default function AdminSarprasGudangPage() {
 
               <div className="mx-auto w-full max-w-[1800px] space-y-5">
 
-                
-
                 {/* =================================================
                     PAGE HEADER
                 ================================================= */}
 
-                <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm md:p-6">
-
+                <section
+                  className={`theme-card rounded-2xl border ${themeNeutralBorder} p-5 ${themeCardShadow} md:p-6`}
+                >
                   <div className="flex flex-col gap-5 xl:flex-row xl:items-center xl:justify-between">
 
                     <div className="flex min-w-0 items-center gap-4">
 
-                      <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 ring-1 ring-blue-100">
+                      <div
+                        className={`flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText} ring-1 ${themePrimarySoftBorder}`}
+                      >
                         <Boxes size={23} />
                       </div>
 
@@ -731,17 +804,19 @@ export default function AdminSarprasGudangPage() {
 
                         <div className="flex flex-wrap items-center gap-2">
 
-                          <h1 className="text-xl font-bold tracking-tight text-slate-900 md:text-2xl">
+                          <h1 className="theme-text text-xl font-bold tracking-tight md:text-2xl">
                             Data Aset
                           </h1>
 
-                          <span className="rounded-full bg-blue-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-blue-600">
+                          <span
+                            className={`rounded-full ${themePrimarySoft} px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ${themePrimaryText}`}
+                          >
                             Sarpras
                           </span>
 
                         </div>
 
-                        <p className="mt-1 max-w-2xl text-sm leading-5 text-slate-500">
+                        <p className="theme-text-secondary mt-1 max-w-2xl text-sm leading-5">
                           Kelola data aset, stok,
                           kondisi, lokasi,
                           perawatan, dan informasi
@@ -759,7 +834,7 @@ export default function AdminSarprasGudangPage() {
                           loadData(true)
                         }
                         disabled={refreshing}
-                        className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                        className={`theme-card inline-flex h-10 items-center justify-center gap-2 rounded-xl border ${themeNeutralBorder} px-4 text-sm font-semibold theme-text-secondary ${themeNeutralHover} ${themeSmallShadow} transition disabled:cursor-not-allowed disabled:opacity-60`}
                       >
                         <RefreshCw
                           size={16}
@@ -782,7 +857,7 @@ export default function AdminSarprasGudangPage() {
                             "/admin/sarpras/gudang/tambah"
                           )
                         }
-                        className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 hover:shadow-md"
+                        className={`${themePrimaryGradient} inline-flex h-10 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold text-[var(--color-card)] ${themePrimaryShadow} transition hover:brightness-95`}
                       >
                         <Plus size={17} />
                         Tambah Aset
@@ -798,19 +873,21 @@ export default function AdminSarprasGudangPage() {
                 ================================================= */}
 
                 {error && (
-                  <div className="flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 p-4">
-
+                  <div
+                    className={`flex items-start gap-3 rounded-xl border ${themeDangerBorder} ${themeDangerSurface} p-4`}
+                  >
                     <XCircle
                       size={19}
-                      className="mt-0.5 flex-shrink-0 text-rose-500"
+                      className="theme-danger mt-0.5 flex-shrink-0"
                     />
 
                     <div className="min-w-0">
-                      <p className="text-sm font-semibold text-rose-700">
+
+                      <p className="theme-danger text-sm font-semibold">
                         Gagal memuat data
                       </p>
 
-                      <p className="mt-1 text-sm text-rose-600">
+                      <p className="theme-text-secondary mt-1 text-sm">
                         {error}
                       </p>
 
@@ -819,12 +896,12 @@ export default function AdminSarprasGudangPage() {
                         onClick={() =>
                           loadData()
                         }
-                        className="mt-2 text-sm font-semibold text-rose-700 underline underline-offset-2"
+                        className="theme-danger mt-2 text-sm font-semibold underline underline-offset-2"
                       >
                         Coba lagi
                       </button>
-                    </div>
 
+                    </div>
                   </div>
                 )}
 
@@ -835,26 +912,33 @@ export default function AdminSarprasGudangPage() {
                 <section className="grid grid-cols-2 gap-3 lg:grid-cols-4 xl:grid-cols-5">
 
                   {/* TOTAL ASET */}
-                  <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+
+                  <div
+                    className={`theme-card rounded-2xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}
+                  >
                     <div className="flex items-start justify-between gap-3">
 
                       <div className="min-w-0">
-                        <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+
+                        <p className="theme-text-muted text-[10px] font-bold uppercase tracking-wide">
                           Total Aset
                         </p>
 
-                        <p className="mt-2 text-2xl font-bold text-slate-900">
+                        <p className="theme-text mt-2 text-2xl font-bold">
                           {formatNumber(
                             totalBarang
                           )}
                         </p>
 
-                        <p className="mt-1 text-xs text-slate-400">
+                        <p className="theme-text-muted mt-1 text-xs">
                           Jenis barang
                         </p>
+
                       </div>
 
-                      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                      <div
+                        className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
+                      >
                         <Boxes size={19} />
                       </div>
 
@@ -862,26 +946,33 @@ export default function AdminSarprasGudangPage() {
                   </div>
 
                   {/* TOTAL UNIT */}
-                  <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+
+                  <div
+                    className={`theme-card rounded-2xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}
+                  >
                     <div className="flex items-start justify-between gap-3">
 
                       <div className="min-w-0">
-                        <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+
+                        <p className="theme-text-muted text-[10px] font-bold uppercase tracking-wide">
                           Total Unit
                         </p>
 
-                        <p className="mt-2 text-2xl font-bold text-slate-900">
+                        <p className="theme-text mt-2 text-2xl font-bold">
                           {formatNumber(
                             totalUnit
                           )}
                         </p>
 
-                        <p className="mt-1 text-xs text-slate-400">
+                        <p className="theme-text-muted mt-1 text-xs">
                           Jumlah keseluruhan
                         </p>
+
                       </div>
 
-                      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                      <div
+                        className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl ${themeInfoSurface} text-[var(--color-info)]`}
+                      >
                         <Package size={19} />
                       </div>
 
@@ -889,26 +980,33 @@ export default function AdminSarprasGudangPage() {
                   </div>
 
                   {/* STOK AMAN */}
-                  <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+
+                  <div
+                    className={`theme-card rounded-2xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}
+                  >
                     <div className="flex items-start justify-between gap-3">
 
                       <div className="min-w-0">
-                        <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+
+                        <p className="theme-text-muted text-[10px] font-bold uppercase tracking-wide">
                           Stok Aman
                         </p>
 
-                        <p className="mt-2 text-2xl font-bold text-emerald-600">
+                        <p className="theme-success mt-2 text-2xl font-bold">
                           {formatNumber(
                             stokAman
                           )}
                         </p>
 
-                        <p className="mt-1 text-xs text-slate-400">
+                        <p className="theme-text-muted mt-1 text-xs">
                           Di atas minimum
                         </p>
+
                       </div>
 
-                      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                      <div
+                        className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl ${themeSuccessSurface} theme-success`}
+                      >
                         <CheckCircle size={19} />
                       </div>
 
@@ -916,26 +1014,33 @@ export default function AdminSarprasGudangPage() {
                   </div>
 
                   {/* STOK MENIPIS */}
-                  <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+
+                  <div
+                    className={`theme-card rounded-2xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}
+                  >
                     <div className="flex items-start justify-between gap-3">
 
                       <div className="min-w-0">
-                        <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+
+                        <p className="theme-text-muted text-[10px] font-bold uppercase tracking-wide">
                           Stok Menipis
                         </p>
 
-                        <p className="mt-2 text-2xl font-bold text-amber-600">
+                        <p className="theme-warning mt-2 text-2xl font-bold">
                           {formatNumber(
                             stokMenipis
                           )}
                         </p>
 
-                        <p className="mt-1 text-xs text-slate-400">
+                        <p className="theme-text-muted mt-1 text-xs">
                           Perlu restok
                         </p>
+
                       </div>
 
-                      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+                      <div
+                        className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl ${themeWarningSurface} theme-warning`}
+                      >
                         <AlertTriangle size={19} />
                       </div>
 
@@ -943,26 +1048,33 @@ export default function AdminSarprasGudangPage() {
                   </div>
 
                   {/* PERBAIKAN */}
-                  <div className="col-span-2 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm lg:col-span-1">
+
+                  <div
+                    className={`theme-card col-span-2 rounded-2xl border ${themeNeutralBorder} p-4 ${themeCardShadow} lg:col-span-1`}
+                  >
                     <div className="flex items-start justify-between gap-3">
 
                       <div className="min-w-0">
-                        <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+
+                        <p className="theme-text-muted text-[10px] font-bold uppercase tracking-wide">
                           Perlu Perbaikan
                         </p>
 
-                        <p className="mt-2 text-2xl font-bold text-rose-600">
+                        <p className="theme-danger mt-2 text-2xl font-bold">
                           {formatNumber(
                             perluPerbaikan
                           )}
                         </p>
 
-                        <p className="mt-1 text-xs text-slate-400">
+                        <p className="theme-text-muted mt-1 text-xs">
                           Rusak / perbaikan
                         </p>
+
                       </div>
 
-                      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-rose-50 text-rose-600">
+                      <div
+                        className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl ${themeDangerSurface} theme-danger`}
+                      >
                         <Wrench size={19} />
                       </div>
 
@@ -975,8 +1087,9 @@ export default function AdminSarprasGudangPage() {
                     SEARCH + FILTER
                 ================================================= */}
 
-                <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-
+                <section
+                  className={`theme-card rounded-2xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}
+                >
                   <div className="flex flex-col gap-3">
 
                     <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
@@ -985,7 +1098,7 @@ export default function AdminSarprasGudangPage() {
 
                         <Search
                           size={17}
-                          className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                          className="theme-text-muted absolute left-3.5 top-1/2 -translate-y-1/2"
                         />
 
                         <input
@@ -997,7 +1110,7 @@ export default function AdminSarprasGudangPage() {
                             )
                           }
                           placeholder="Cari nama, kode, kategori, gudang, atau lokasi..."
-                          className="h-11 w-full rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-400 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
+                          className={`theme-input h-11 w-full rounded-xl border pl-10 pr-4 text-sm outline-none transition ${themeFocus}`}
                         />
 
                       </div>
@@ -1014,8 +1127,8 @@ export default function AdminSarprasGudangPage() {
                           showFilter ||
                           activeFilterCount >
                             0
-                            ? "border-blue-200 bg-blue-50 text-blue-700"
-                            : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                            ? `${themePrimarySoftBorder} ${themePrimarySoft} ${themePrimaryText}`
+                            : `theme-card ${themeNeutralBorder} theme-text-secondary ${themeNeutralHover}`
                         }`}
                       >
                         <Filter size={17} />
@@ -1024,7 +1137,9 @@ export default function AdminSarprasGudangPage() {
 
                         {activeFilterCount >
                           0 && (
-                          <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-blue-600 px-1.5 text-[10px] font-bold text-white">
+                          <span
+                            className={`${themePrimaryGradient} flex h-5 min-w-5 items-center justify-center rounded-full px-1.5 text-[10px] font-bold text-[var(--color-card)]`}
+                          >
                             {
                               activeFilterCount
                             }
@@ -1035,11 +1150,15 @@ export default function AdminSarprasGudangPage() {
                     </div>
 
                     {showFilter && (
-                      <div className="grid grid-cols-1 gap-3 border-t border-slate-100 pt-3 sm:grid-cols-2 xl:grid-cols-4">
+                      <div
+                        className={`grid grid-cols-1 gap-3 border-t ${themeDivider} pt-3 sm:grid-cols-2 xl:grid-cols-4`}
+                      >
 
                         {/* KATEGORI */}
+
                         <div>
-                          <label className="mb-1.5 block text-xs font-semibold text-slate-500">
+
+                          <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
                             Kategori Aset
                           </label>
 
@@ -1052,7 +1171,7 @@ export default function AdminSarprasGudangPage() {
                                 e.target.value
                               )
                             }
-                            className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10"
+                            className={`theme-input h-10 w-full rounded-xl border px-3 text-sm outline-none ${themeFocus}`}
                           >
                             <option value="Semua">
                               Semua Kategori
@@ -1073,11 +1192,14 @@ export default function AdminSarprasGudangPage() {
                               )
                             )}
                           </select>
+
                         </div>
 
                         {/* GUDANG */}
+
                         <div>
-                          <label className="mb-1.5 block text-xs font-semibold text-slate-500">
+
+                          <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
                             Gudang
                           </label>
 
@@ -1090,7 +1212,7 @@ export default function AdminSarprasGudangPage() {
                                 e.target.value
                               )
                             }
-                            className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10"
+                            className={`theme-input h-10 w-full rounded-xl border px-3 text-sm outline-none ${themeFocus}`}
                           >
                             <option value="Semua">
                               Semua Gudang
@@ -1111,11 +1233,14 @@ export default function AdminSarprasGudangPage() {
                               )
                             )}
                           </select>
+
                         </div>
 
                         {/* STOK */}
+
                         <div>
-                          <label className="mb-1.5 block text-xs font-semibold text-slate-500">
+
+                          <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
                             Status Stok
                           </label>
 
@@ -1128,26 +1253,32 @@ export default function AdminSarprasGudangPage() {
                                 e.target.value
                               )
                             }
-                            className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10"
+                            className={`theme-input h-10 w-full rounded-xl border px-3 text-sm outline-none ${themeFocus}`}
                           >
                             <option value="Semua">
                               Semua Status
                             </option>
+
                             <option value="aman">
                               Aman
                             </option>
+
                             <option value="menipis">
                               Menipis
                             </option>
+
                             <option value="habis">
                               Habis
                             </option>
                           </select>
+
                         </div>
 
                         {/* KONDISI */}
+
                         <div>
-                          <label className="mb-1.5 block text-xs font-semibold text-slate-500">
+
+                          <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
                             Kondisi
                           </label>
 
@@ -1160,36 +1291,43 @@ export default function AdminSarprasGudangPage() {
                                 e.target.value
                               )
                             }
-                            className="h-10 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10"
+                            className={`theme-input h-10 w-full rounded-xl border px-3 text-sm outline-none ${themeFocus}`}
                           >
                             <option value="Semua">
                               Semua Kondisi
                             </option>
+
                             <option value="baik">
                               Baik
                             </option>
+
                             <option value="rusak">
                               Rusak
                             </option>
+
                             <option value="rusak_ringan">
                               Rusak Ringan
                             </option>
+
                             <option value="rusak_berat">
                               Rusak Berat
                             </option>
                           </select>
+
                         </div>
 
                         <div className="flex items-end sm:col-span-2 xl:col-span-4">
+
                           <button
                             type="button"
                             onClick={
                               handleResetFilter
                             }
-                            className="text-sm font-semibold text-slate-500 transition hover:text-blue-600"
+                            className={`theme-text-muted text-sm font-semibold transition hover:text-[var(--color-primary)]`}
                           >
                             Reset semua filter
                           </button>
+
                         </div>
 
                       </div>
@@ -1202,46 +1340,58 @@ export default function AdminSarprasGudangPage() {
                     TABLE
                 ================================================= */}
 
-                <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <section
+                  className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+                >
 
                   {/* TABLE HEADER */}
 
-                  <div className="flex flex-col gap-3 border-b border-slate-200 px-5 py-4 md:flex-row md:items-center md:justify-between">
+                  <div
+                    className={`flex flex-col gap-3 border-b ${themeDivider} px-5 py-4 md:flex-row md:items-center md:justify-between`}
+                  >
 
                     <div>
+
                       <div className="flex items-center gap-2">
-                        <h2 className="text-base font-bold text-slate-900">
+
+                        <h2 className="theme-text text-base font-bold">
                           Daftar Aset
                         </h2>
 
-                        <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] font-bold text-slate-500">
+                        <span
+                          className={`${themeNeutralSurface} theme-text-muted rounded-full px-2 py-0.5 text-[10px] font-bold`}
+                        >
                           {filtered.length}
                         </span>
+
                       </div>
 
-                      <p className="mt-1 text-xs text-slate-500">
+                      <p className="theme-text-secondary mt-1 text-xs">
                         Data aset sarana dan
                         prasarana sekolah
                       </p>
+
                     </div>
 
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-400">
+                    <div className="theme-text-muted flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
 
                       <span className="inline-flex items-center gap-1.5">
-                        <Warehouse
-                          size={14}
-                        />
+                        <Warehouse size={14} />
                         {gudangList.length} gudang
                       </span>
 
-                      <span className="hidden h-1 w-1 rounded-full bg-slate-300 sm:block" />
+                      <span
+                        className={`${themeNeutralSurface} hidden h-1 w-1 rounded-full sm:block`}
+                      />
 
                       <span className="inline-flex items-center gap-1.5">
                         <Tag size={14} />
                         {kategori.length} kategori
                       </span>
 
-                      <span className="hidden h-1 w-1 rounded-full bg-slate-300 sm:block" />
+                      <span
+                        className={`${themeNeutralSurface} hidden h-1 w-1 rounded-full sm:block`}
+                      />
 
                       <span>
                         {formatNumber(
@@ -1262,52 +1412,56 @@ export default function AdminSarprasGudangPage() {
 
                       <table className="w-full min-w-[1120px] border-collapse text-sm">
 
-                        {/* =================================================
-                            THEAD
-                        ================================================= */}
+                        {/* THEAD */}
 
                         <thead className="sticky top-0 z-30">
 
-                          <tr className="border-b border-slate-200 bg-slate-50">
+                          <tr
+                            className={`border-b ${themeDivider} ${themeNeutralSurface}`}
+                          >
 
-                            <th className="sticky left-0 z-40 w-[280px] min-w-[280px] border-r border-slate-200 bg-slate-50 px-5 py-3.5 text-left">
-                              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                            <th
+                              className={`sticky left-0 z-40 w-[280px] min-w-[280px] border-r ${themeDivider} ${themeNeutralSurface} px-5 py-3.5 text-left`}
+                            >
+                              <span className="theme-text-muted text-[10px] font-bold uppercase tracking-wider">
                                 Aset
                               </span>
                             </th>
 
                             <th className="w-[220px] min-w-[220px] px-4 py-3.5 text-left">
-                              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                              <span className="theme-text-muted text-[10px] font-bold uppercase tracking-wider">
                                 Kategori & Gudang
                               </span>
                             </th>
 
                             <th className="w-[150px] min-w-[150px] px-4 py-3.5 text-left">
-                              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                              <span className="theme-text-muted text-[10px] font-bold uppercase tracking-wider">
                                 Lokasi
                               </span>
                             </th>
 
                             <th className="w-[125px] min-w-[125px] px-4 py-3.5 text-left">
-                              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                              <span className="theme-text-muted text-[10px] font-bold uppercase tracking-wider">
                                 Kondisi
                               </span>
                             </th>
 
                             <th className="w-[210px] min-w-[210px] px-4 py-3.5 text-left">
-                              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                              <span className="theme-text-muted text-[10px] font-bold uppercase tracking-wider">
                                 Stok
                               </span>
                             </th>
 
                             <th className="w-[180px] min-w-[180px] px-4 py-3.5 text-left">
-                              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                              <span className="theme-text-muted text-[10px] font-bold uppercase tracking-wider">
                                 Informasi
                               </span>
                             </th>
 
-                            <th className="sticky right-0 z-40 w-[180px] min-w-[180px] border-l border-slate-200 bg-slate-50 px-4 py-3.5 text-center">
-                              <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500">
+                            <th
+                              className={`sticky right-0 z-40 w-[180px] min-w-[180px] border-l ${themeDivider} ${themeNeutralSurface} px-4 py-3.5 text-center`}
+                            >
+                              <span className="theme-text-muted text-[10px] font-bold uppercase tracking-wider">
                                 Aksi
                               </span>
                             </th>
@@ -1316,9 +1470,7 @@ export default function AdminSarprasGudangPage() {
 
                         </thead>
 
-                        {/* =================================================
-                            TBODY
-                        ================================================= */}
+                        {/* TBODY */}
 
                         <tbody>
 
@@ -1332,18 +1484,20 @@ export default function AdminSarprasGudangPage() {
                               >
                                 <div className="flex flex-col items-center">
 
-                                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50">
+                                  <div
+                                    className={`flex h-12 w-12 items-center justify-center rounded-xl ${themePrimarySoft}`}
+                                  >
                                     <Loader2
                                       size={24}
-                                      className="animate-spin text-blue-600"
+                                      className={`animate-spin ${themePrimaryText}`}
                                     />
                                   </div>
 
-                                  <p className="mt-4 text-sm font-semibold text-slate-700">
+                                  <p className="theme-text mt-4 text-sm font-semibold">
                                     Memuat data aset...
                                   </p>
 
-                                  <p className="mt-1 text-xs text-slate-400">
+                                  <p className="theme-text-muted mt-1 text-xs">
                                     Mengambil data dari server
                                   </p>
 
@@ -1361,17 +1515,19 @@ export default function AdminSarprasGudangPage() {
                               >
                                 <div className="flex flex-col items-center">
 
-                                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+                                  <div
+                                    className={`flex h-14 w-14 items-center justify-center rounded-2xl ${themeNeutralSurface} theme-text-muted`}
+                                  >
                                     <Warehouse
                                       size={25}
                                     />
                                   </div>
 
-                                  <p className="mt-4 text-sm font-bold text-slate-700">
+                                  <p className="theme-text mt-4 text-sm font-bold">
                                     Tidak ada data aset
                                   </p>
 
-                                  <p className="mt-1 max-w-sm text-xs leading-5 text-slate-400">
+                                  <p className="theme-text-muted mt-1 max-w-sm text-xs leading-5">
                                     Tidak ditemukan
                                     aset yang sesuai
                                     dengan pencarian
@@ -1386,7 +1542,7 @@ export default function AdminSarprasGudangPage() {
                                       onClick={
                                         handleResetFilter
                                       }
-                                      className="mt-4 rounded-lg bg-blue-50 px-3 py-2 text-xs font-semibold text-blue-600 transition hover:bg-blue-100"
+                                      className={`${themePrimarySoft} ${themePrimaryText} mt-4 rounded-lg px-3 py-2 text-xs font-semibold transition ${themePrimaryHover}`}
                                     >
                                       Reset pencarian
                                     </button>
@@ -1471,23 +1627,25 @@ export default function AdminSarprasGudangPage() {
                                     key={
                                       item.id
                                     }
-                                    className={`group border-b border-slate-100 transition last:border-b-0 hover:bg-blue-50/40 ${
+                                    className={`group border-b ${themeDivider} transition last:border-b-0 hover:bg-[color-mix(in_srgb,var(--color-primary)_4%,transparent)] ${
                                       index % 2 ===
                                       0
-                                        ? "bg-white"
-                                        : "bg-slate-50/30"
+                                        ? "theme-card"
+                                        : themeNeutralSurface
                                     }`}
                                   >
 
-                                    {/* =========================================
-                                        ASET
-                                    ========================================= */}
+                                    {/* ASET */}
 
-                                    <td className="sticky left-0 z-20 border-r border-slate-100 bg-white px-5 py-4 group-hover:bg-blue-50/40">
+                                    <td
+                                      className={`sticky left-0 z-20 border-r ${themeDivider} theme-card px-5 py-4 group-hover:bg-[color-mix(in_srgb,var(--color-primary)_4%,transparent)]`}
+                                    >
 
                                       <div className="flex items-center gap-3">
 
-                                        <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600 ring-1 ring-blue-100">
+                                        <div
+                                          className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText} ring-1 ${themePrimarySoftBorder}`}
+                                        >
                                           <Package
                                             size={18}
                                           />
@@ -1496,7 +1654,7 @@ export default function AdminSarprasGudangPage() {
                                         <div className="min-w-0">
 
                                           <p
-                                            className="truncate text-sm font-bold text-slate-900"
+                                            className="theme-text truncate text-sm font-bold"
                                             title={
                                               item?.nama
                                             }
@@ -1507,7 +1665,9 @@ export default function AdminSarprasGudangPage() {
 
                                           <div className="mt-1 flex items-center gap-2">
 
-                                            <span className="rounded-md bg-slate-100 px-2 py-0.5 font-mono text-[10px] font-semibold text-slate-500">
+                                            <span
+                                              className={`${themeNeutralSurface} theme-text-muted rounded-md px-2 py-0.5 font-mono text-[10px] font-semibold`}
+                                            >
                                               {item?.kode ||
                                                 "-"}
                                             </span>
@@ -1520,9 +1680,7 @@ export default function AdminSarprasGudangPage() {
 
                                     </td>
 
-                                    {/* =========================================
-                                        KATEGORI + GUDANG
-                                    ========================================= */}
+                                    {/* KATEGORI + GUDANG */}
 
                                     <td className="px-4 py-4">
 
@@ -1530,7 +1688,9 @@ export default function AdminSarprasGudangPage() {
 
                                         <div className="flex min-w-0 items-center gap-2">
 
-                                          <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                                          <div
+                                            className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText}`}
+                                          >
                                             <Tag
                                               size={
                                                 13
@@ -1539,7 +1699,7 @@ export default function AdminSarprasGudangPage() {
                                           </div>
 
                                           <span
-                                            className="truncate text-xs font-semibold text-slate-700"
+                                            className="theme-text truncate text-xs font-semibold"
                                             title={
                                               item
                                                 ?.kategoriAset
@@ -1556,7 +1716,9 @@ export default function AdminSarprasGudangPage() {
 
                                         <div className="flex min-w-0 items-center gap-2">
 
-                                          <div className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+                                          <div
+                                            className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg ${themeNeutralSurface} theme-text-muted`}
+                                          >
                                             <Warehouse
                                               size={
                                                 13
@@ -1565,7 +1727,7 @@ export default function AdminSarprasGudangPage() {
                                           </div>
 
                                           <span
-                                            className="truncate text-xs text-slate-500"
+                                            className="theme-text-secondary truncate text-xs"
                                             title={
                                               item
                                                 ?.gudang
@@ -1584,9 +1746,7 @@ export default function AdminSarprasGudangPage() {
 
                                     </td>
 
-                                    {/* =========================================
-                                        LOKASI
-                                    ========================================= */}
+                                    {/* LOKASI */}
 
                                     <td className="px-4 py-4">
 
@@ -1594,11 +1754,11 @@ export default function AdminSarprasGudangPage() {
 
                                         <MapPin
                                           size={15}
-                                          className="flex-shrink-0 text-slate-400"
+                                          className="theme-text-muted flex-shrink-0"
                                         />
 
                                         <span
-                                          className="truncate text-xs font-medium text-slate-600"
+                                          className="theme-text-secondary truncate text-xs font-medium"
                                           title={
                                             item?.lokasi
                                           }
@@ -1611,9 +1771,7 @@ export default function AdminSarprasGudangPage() {
 
                                     </td>
 
-                                    {/* =========================================
-                                        KONDISI
-                                    ========================================= */}
+                                    {/* KONDISI */}
 
                                     <td className="px-4 py-4">
 
@@ -1622,8 +1780,8 @@ export default function AdminSarprasGudangPage() {
                                         <span
                                           className={`inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-xs font-semibold ${
                                             kondisiBaik
-                                              ? "border-emerald-100 bg-emerald-50 text-emerald-700"
-                                              : "border-rose-100 bg-rose-50 text-rose-700"
+                                              ? `${themeSuccessBorder} ${themeSuccessSurface} theme-success`
+                                              : `${themeDangerBorder} ${themeDangerSurface} theme-danger`
                                           }`}
                                         >
                                           {kondisiBaik ? (
@@ -1646,9 +1804,9 @@ export default function AdminSarprasGudangPage() {
                                         </span>
 
                                         {item?.status && (
-                                          <span className="text-[10px] text-slate-400">
+                                          <span className="theme-text-muted text-[10px]">
                                             Status:{" "}
-                                            <span className="font-medium text-slate-500">
+                                            <span className="theme-text-secondary font-medium">
                                               {formatText(
                                                 item.status
                                               )}
@@ -1660,9 +1818,7 @@ export default function AdminSarprasGudangPage() {
 
                                     </td>
 
-                                    {/* =========================================
-                                        STOK
-                                    ========================================= */}
+                                    {/* STOK */}
 
                                     <td className="px-4 py-4">
 
@@ -1672,13 +1828,13 @@ export default function AdminSarprasGudangPage() {
 
                                           <div className="flex items-baseline gap-1.5">
 
-                                            <span className="text-base font-bold text-slate-900">
+                                            <span className="theme-text text-base font-bold">
                                               {formatNumber(
                                                 currentStock
                                               )}
                                             </span>
 
-                                            <span className="text-[10px] text-slate-400">
+                                            <span className="theme-text-muted text-[10px]">
                                               /{" "}
                                               {formatNumber(
                                                 totalJumlah
@@ -1695,20 +1851,20 @@ export default function AdminSarprasGudangPage() {
 
                                         </div>
 
-                                        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-100">
-
+                                        <div
+                                          className={`theme-neutral-surface mt-2 h-1.5 overflow-hidden rounded-full ${themeNeutralSurface}`}
+                                        >
                                           <div
                                             className={`h-full rounded-full transition-all ${config.barClassName}`}
                                             style={{
                                               width: `${stockPercentage}%`,
                                             }}
                                           />
-
                                         </div>
 
                                         <div className="mt-1.5 flex items-center justify-between">
 
-                                          <span className="text-[10px] text-slate-400">
+                                          <span className="theme-text-muted text-[10px]">
                                             Minimum{" "}
                                             {formatNumber(
                                               minimumStock
@@ -1734,9 +1890,7 @@ export default function AdminSarprasGudangPage() {
 
                                     </td>
 
-                                    {/* =========================================
-                                        INFORMASI
-                                    ========================================= */}
+                                    {/* INFORMASI */}
 
                                     <td className="px-4 py-4">
 
@@ -1748,16 +1902,16 @@ export default function AdminSarprasGudangPage() {
                                             size={
                                               14
                                             }
-                                            className="flex-shrink-0 text-slate-400"
+                                            className="theme-text-muted flex-shrink-0"
                                           />
 
                                           <div className="min-w-0">
 
-                                            <p className="text-[10px] text-slate-400">
+                                            <p className="theme-text-muted text-[10px]">
                                               Pembelian
                                             </p>
 
-                                            <p className="text-xs font-medium text-slate-600">
+                                            <p className="theme-text-secondary text-xs font-medium">
                                               {formatDate(
                                                 item?.tanggalPembelian
                                               )}
@@ -1773,16 +1927,16 @@ export default function AdminSarprasGudangPage() {
                                             size={
                                               14
                                             }
-                                            className="flex-shrink-0 text-slate-400"
+                                            className="theme-text-muted flex-shrink-0"
                                           />
 
                                           <div className="min-w-0">
 
-                                            <p className="text-[10px] text-slate-400">
+                                            <p className="theme-text-muted text-[10px]">
                                               Perawatan
                                             </p>
 
-                                            <p className="text-xs font-medium text-slate-600">
+                                            <p className="theme-text-secondary text-xs font-medium">
                                               {formatDate(
                                                 item?.perawatanTerakhir
                                               )}
@@ -1799,8 +1953,8 @@ export default function AdminSarprasGudangPage() {
                                                 item.statusPerbaikan
                                               ).toLowerCase() ===
                                               "selesai"
-                                                ? "bg-emerald-50 text-emerald-700"
-                                                : "bg-amber-50 text-amber-700"
+                                                ? `${themeSuccessSurface} theme-success`
+                                                : `${themeWarningSurface} theme-warning`
                                             }`}
                                           >
                                             <span className="truncate">
@@ -1815,15 +1969,16 @@ export default function AdminSarprasGudangPage() {
 
                                     </td>
 
-                                    {/* =========================================
-                                        AKSI
-                                    ========================================= */}
+                                    {/* AKSI */}
 
-                                    <td className="sticky right-0 z-20 border-l border-slate-100 bg-white px-3 py-4 group-hover:bg-blue-50/40">
+                                    <td
+                                      className={`sticky right-0 z-20 border-l ${themeDivider} theme-card px-3 py-4 group-hover:bg-[color-mix(in_srgb,var(--color-primary)_4%,transparent)]`}
+                                    >
 
                                       <div className="flex items-center justify-center gap-1">
 
                                         {/* KURANG */}
+
                                         <button
                                           type="button"
                                           disabled={
@@ -1838,7 +1993,7 @@ export default function AdminSarprasGudangPage() {
                                             )
                                           }
                                           title="Kurangi stok"
-                                          className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-rose-50 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-30"
+                                          className={`theme-text-muted flex h-8 w-8 items-center justify-center rounded-lg transition ${themeDangerSurface} hover:theme-danger disabled:cursor-not-allowed disabled:opacity-30`}
                                         >
                                           {isUpdatingStock ? (
                                             <Loader2
@@ -1857,6 +2012,7 @@ export default function AdminSarprasGudangPage() {
                                         </button>
 
                                         {/* TAMBAH */}
+
                                         <button
                                           type="button"
                                           disabled={
@@ -1871,7 +2027,7 @@ export default function AdminSarprasGudangPage() {
                                             )
                                           }
                                           title="Tambah stok"
-                                          className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-emerald-50 hover:text-emerald-600 disabled:cursor-not-allowed disabled:opacity-30"
+                                          className={`theme-text-muted flex h-8 w-8 items-center justify-center rounded-lg transition ${themeSuccessSurface} hover:theme-success disabled:cursor-not-allowed disabled:opacity-30`}
                                         >
                                           <PackagePlus
                                             size={
@@ -1880,9 +2036,12 @@ export default function AdminSarprasGudangPage() {
                                           />
                                         </button>
 
-                                        <div className="mx-0.5 h-5 w-px bg-slate-200" />
+                                        <div
+                                          className={`mx-0.5 h-5 w-px ${themeNeutralSurface}`}
+                                        />
 
                                         {/* DETAIL */}
+
                                         <button
                                           type="button"
                                           onClick={() =>
@@ -1891,7 +2050,7 @@ export default function AdminSarprasGudangPage() {
                                             )
                                           }
                                           title="Lihat detail"
-                                          className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-blue-50 hover:text-blue-600"
+                                          className={`theme-text-muted flex h-8 w-8 items-center justify-center rounded-lg transition ${themePrimaryHover} hover:text-[var(--color-primary)]`}
                                         >
                                           <Eye
                                             size={
@@ -1901,6 +2060,7 @@ export default function AdminSarprasGudangPage() {
                                         </button>
 
                                         {/* EDIT */}
+
                                         <button
                                           type="button"
                                           disabled={
@@ -1912,7 +2072,7 @@ export default function AdminSarprasGudangPage() {
                                             )
                                           }
                                           title="Edit aset"
-                                          className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-amber-50 hover:text-amber-600 disabled:cursor-not-allowed disabled:opacity-40"
+                                          className={`theme-text-muted flex h-8 w-8 items-center justify-center rounded-lg transition ${themeWarningSurface} hover:theme-warning disabled:cursor-not-allowed disabled:opacity-40`}
                                         >
                                           <Edit
                                             size={
@@ -1922,6 +2082,7 @@ export default function AdminSarprasGudangPage() {
                                         </button>
 
                                         {/* DELETE */}
+
                                         <button
                                           type="button"
                                           disabled={
@@ -1935,7 +2096,7 @@ export default function AdminSarprasGudangPage() {
                                             )
                                           }
                                           title="Hapus aset"
-                                          className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-rose-50 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-40"
+                                          className={`theme-text-muted flex h-8 w-8 items-center justify-center rounded-lg transition ${themeDangerSurface} hover:theme-danger disabled:cursor-not-allowed disabled:opacity-40`}
                                         >
                                           {isDeleting ? (
                                             <Loader2
@@ -1971,22 +2132,22 @@ export default function AdminSarprasGudangPage() {
 
                   </div>
 
-                  {/* =================================================
-                      TABLE FOOTER
-                  ================================================= */}
+                  {/* TABLE FOOTER */}
 
                   {!loading &&
                     filtered.length >
                       0 && (
-                      <div className="flex flex-col gap-2 border-t border-slate-100 bg-slate-50/60 px-5 py-3 text-xs text-slate-400 sm:flex-row sm:items-center sm:justify-between">
+                      <div
+                        className={`flex flex-col gap-2 border-t ${themeDivider} ${themeNeutralSurface} px-5 py-3 text-xs theme-text-muted sm:flex-row sm:items-center sm:justify-between`}
+                      >
 
                         <span>
                           Menampilkan{" "}
-                          <strong className="text-slate-600">
+                          <strong className="theme-text-secondary">
                             {filtered.length}
                           </strong>{" "}
                           dari{" "}
-                          <strong className="text-slate-600">
+                          <strong className="theme-text-secondary">
                             {aset.length}
                           </strong>{" "}
                           aset
@@ -1996,7 +2157,7 @@ export default function AdminSarprasGudangPage() {
 
                           <span>
                             Total unit:{" "}
-                            <strong className="text-slate-600">
+                            <strong className="theme-text-secondary">
                               {formatNumber(
                                 totalUnit
                               )}
@@ -2005,7 +2166,7 @@ export default function AdminSarprasGudangPage() {
 
                           <span>
                             Stok tersedia:{" "}
-                            <strong className="text-slate-600">
+                            <strong className="theme-text-secondary">
                               {formatNumber(
                                 totalStok
                               )}
@@ -2023,7 +2184,7 @@ export default function AdminSarprasGudangPage() {
                     FOOTER
                 ================================================= */}
 
-                <div className="pb-4 text-center text-[11px] text-slate-400">
+                <div className="theme-text-muted pb-4 text-center text-[11px]">
                   © 2026 SmartSchool • Sarana &
                   Prasarana
                 </div>
@@ -2039,27 +2200,33 @@ export default function AdminSarprasGudangPage() {
       ===================================================== */}
 
       {selectedAset && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[color-mix(in_srgb,var(--color-text)_42%,transparent)] p-4 backdrop-blur-sm">
 
-          <div className="flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+          <div
+            className={`theme-card flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden rounded-2xl ${themeCardShadow}`}
+          >
 
             {/* MODAL HEADER */}
 
-            <div className="flex flex-shrink-0 items-center justify-between border-b border-slate-200 px-5 py-4">
+            <div
+              className={`flex flex-shrink-0 items-center justify-between border-b ${themeDivider} px-5 py-4`}
+            >
 
               <div className="flex min-w-0 items-center gap-3">
 
-                <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                <div
+                  className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
+                >
                   <Package size={19} />
                 </div>
 
                 <div className="min-w-0">
 
-                  <h3 className="truncate text-base font-bold text-slate-900">
+                  <h3 className="theme-text truncate text-base font-bold">
                     Detail Aset
                   </h3>
 
-                  <p className="truncate text-xs text-slate-400">
+                  <p className="theme-text-muted truncate text-xs">
                     Informasi lengkap aset
                   </p>
 
@@ -2072,7 +2239,7 @@ export default function AdminSarprasGudangPage() {
                 onClick={() =>
                   setSelectedAset(null)
                 }
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                className={`theme-text-muted flex h-9 w-9 items-center justify-center rounded-lg transition ${themeNeutralHover} hover:text-[var(--color-text)]`}
               >
                 <X size={18} />
               </button>
@@ -2091,11 +2258,13 @@ export default function AdminSarprasGudangPage() {
 
                   <div className="mb-3 flex items-center gap-2">
 
-                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                    <div
+                      className={`flex h-7 w-7 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText}`}
+                    >
                       <Database size={14} />
                     </div>
 
-                    <h4 className="text-sm font-bold text-slate-900">
+                    <h4 className="theme-text text-sm font-bold">
                       Identitas Aset
                     </h4>
 
@@ -2167,11 +2336,13 @@ export default function AdminSarprasGudangPage() {
 
                   <div className="mb-3 flex items-center gap-2">
 
-                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
+                    <div
+                      className={`flex h-7 w-7 items-center justify-center rounded-lg ${themeSuccessSurface} theme-success`}
+                    >
                       <Boxes size={14} />
                     </div>
 
-                    <h4 className="text-sm font-bold text-slate-900">
+                    <h4 className="theme-text text-sm font-bold">
                       Stok & Kondisi
                     </h4>
 
@@ -2221,11 +2392,13 @@ export default function AdminSarprasGudangPage() {
 
                   <div className="mb-3 flex items-center gap-2">
 
-                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-50 text-indigo-600">
+                    <div
+                      className={`flex h-7 w-7 items-center justify-center rounded-lg ${themeInfoSurface} text-[var(--color-info)]`}
+                    >
                       <CalendarDays size={14} />
                     </div>
 
-                    <h4 className="text-sm font-bold text-slate-900">
+                    <h4 className="theme-text text-sm font-bold">
                       Informasi Tanggal
                     </h4>
 
@@ -2267,11 +2440,13 @@ export default function AdminSarprasGudangPage() {
 
                   <div className="mb-3 flex items-center gap-2">
 
-                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
+                    <div
+                      className={`flex h-7 w-7 items-center justify-center rounded-lg ${themeWarningSurface} theme-warning`}
+                    >
                       <Wrench size={14} />
                     </div>
 
-                    <h4 className="text-sm font-bold text-slate-900">
+                    <h4 className="theme-text text-sm font-bold">
                       Kerusakan & Perbaikan
                     </h4>
 
@@ -2314,17 +2489,21 @@ export default function AdminSarprasGudangPage() {
 
                   <div className="mb-3 flex items-center gap-2">
 
-                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
+                    <div
+                      className={`flex h-7 w-7 items-center justify-center rounded-lg ${themeNeutralSurface} theme-text-secondary`}
+                    >
                       <FileText size={14} />
                     </div>
 
-                    <h4 className="text-sm font-bold text-slate-900">
+                    <h4 className="theme-text text-sm font-bold">
                       Catatan
                     </h4>
 
                   </div>
 
-                  <div className="rounded-xl border border-slate-100 bg-slate-50 p-4 text-sm leading-6 text-slate-600">
+                  <div
+                    className={`rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} p-4 text-sm leading-6 theme-text-secondary`}
+                  >
                     {selectedAset.catatan ||
                       "Tidak ada catatan."}
                   </div>
@@ -2337,11 +2516,13 @@ export default function AdminSarprasGudangPage() {
 
                   <div className="mb-3 flex items-center gap-2">
 
-                    <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
+                    <div
+                      className={`flex h-7 w-7 items-center justify-center rounded-lg ${themeNeutralSurface} theme-text-secondary`}
+                    >
                       <Clock3 size={14} />
                     </div>
 
-                    <h4 className="text-sm font-bold text-slate-900">
+                    <h4 className="theme-text text-sm font-bold">
                       Audit Data
                     </h4>
 
@@ -2389,22 +2570,24 @@ export default function AdminSarprasGudangPage() {
 
                 <section>
 
-                  <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                  <div
+                    className={`rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} p-4`}
+                  >
 
                     <div className="flex items-center gap-2">
 
                       <Database
                         size={15}
-                        className="text-slate-400"
+                        className="theme-text-muted"
                       />
 
-                      <span className="text-xs font-bold uppercase tracking-wide text-slate-400">
+                      <span className="theme-text-muted text-xs font-bold uppercase tracking-wide">
                         Database ID
                       </span>
 
                     </div>
 
-                    <p className="mt-2 break-all font-mono text-xs text-slate-600">
+                    <p className="theme-text-secondary mt-2 break-all font-mono text-xs">
                       {selectedAset.id ||
                         "-"}
                     </p>
@@ -2412,55 +2595,55 @@ export default function AdminSarprasGudangPage() {
                     <div className="mt-3 grid gap-3 md:grid-cols-2">
 
                       <div>
-                        <p className="text-[10px] font-semibold uppercase text-slate-400">
+                        <p className="theme-text-muted text-[10px] font-semibold uppercase">
                           Sekolah ID
                         </p>
 
-                        <p className="mt-1 break-all font-mono text-xs text-slate-600">
+                        <p className="theme-text-secondary mt-1 break-all font-mono text-xs">
                           {selectedAset.sekolahId ||
                             "-"}
                         </p>
                       </div>
 
                       <div>
-                        <p className="text-[10px] font-semibold uppercase text-slate-400">
+                        <p className="theme-text-muted text-[10px] font-semibold uppercase">
                           Kategori Aset ID
                         </p>
 
-                        <p className="mt-1 break-all font-mono text-xs text-slate-600">
+                        <p className="theme-text-secondary mt-1 break-all font-mono text-xs">
                           {selectedAset.kategoriAsetId ||
                             "-"}
                         </p>
                       </div>
 
                       <div>
-                        <p className="text-[10px] font-semibold uppercase text-slate-400">
+                        <p className="theme-text-muted text-[10px] font-semibold uppercase">
                           Gudang ID
                         </p>
 
-                        <p className="mt-1 break-all font-mono text-xs text-slate-600">
+                        <p className="theme-text-secondary mt-1 break-all font-mono text-xs">
                           {selectedAset.gudangId ||
                             "-"}
                         </p>
                       </div>
 
                       <div>
-                        <p className="text-[10px] font-semibold uppercase text-slate-400">
+                        <p className="theme-text-muted text-[10px] font-semibold uppercase">
                           Dihapus Oleh
                         </p>
 
-                        <p className="mt-1 break-all font-mono text-xs text-slate-600">
+                        <p className="theme-text-secondary mt-1 break-all font-mono text-xs">
                           {selectedAset.dihapusOleh ||
                             "-"}
                         </p>
                       </div>
 
                       <div>
-                        <p className="text-[10px] font-semibold uppercase text-slate-400">
+                        <p className="theme-text-muted text-[10px] font-semibold uppercase">
                           Dihapus Pada
                         </p>
 
-                        <p className="mt-1 font-mono text-xs text-slate-600">
+                        <p className="theme-text-secondary mt-1 font-mono text-xs">
                           {formatDateTime(
                             selectedAset.dihapusPada
                           )}
@@ -2479,14 +2662,16 @@ export default function AdminSarprasGudangPage() {
 
             {/* MODAL FOOTER */}
 
-            <div className="flex flex-shrink-0 items-center justify-end gap-2 border-t border-slate-200 bg-slate-50 px-5 py-3">
+            <div
+              className={`flex flex-shrink-0 items-center justify-end gap-2 border-t ${themeDivider} ${themeNeutralSurface} px-5 py-3`}
+            >
 
               <button
                 type="button"
                 onClick={() =>
                   setSelectedAset(null)
                 }
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:bg-slate-100"
+                className={`theme-card theme-text-secondary rounded-xl border ${themeNeutralBorder} px-4 py-2 text-sm font-semibold transition ${themeNeutralHover}`}
               >
                 Tutup
               </button>
@@ -2503,7 +2688,7 @@ export default function AdminSarprasGudangPage() {
                     `/admin/sarpras/gudang/edit/${id}`
                   );
                 }}
-                className="inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
+                className={`${themePrimaryGradient} inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold text-[var(--color-card)] transition hover:brightness-95`}
               >
                 <Edit size={15} />
                 Edit Aset

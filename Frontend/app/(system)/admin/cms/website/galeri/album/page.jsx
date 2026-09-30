@@ -67,20 +67,21 @@ export default function AlbumPage() {
   // ==============================
   const colorMap = {
     blue: {
-      wrapper: "bg-blue-50 border-blue-100",
-      icon: "text-blue-600",
+      wrapper: "theme-info",
+      icon: "text-[var(--color-info)]",
     },
     indigo: {
-      wrapper: "bg-indigo-50 border-indigo-100",
-      icon: "text-indigo-600",
+      wrapper: "theme-info",
+      icon: "text-[var(--color-info)]",
     },
     purple: {
-      wrapper: "bg-purple-50 border-purple-100",
-      icon: "text-purple-600",
+      wrapper:
+        "bg-[color:var(--color-primary)]/10 border-[var(--color-primary)]/20",
+      icon: "text-[var(--color-primary)]",
     },
     green: {
-      wrapper: "bg-green-50 border-green-100",
-      icon: "text-green-600",
+      wrapper: "theme-success",
+      icon: "text-[var(--color-success)]",
     },
   };
 
@@ -93,7 +94,7 @@ export default function AlbumPage() {
   );
 
   return (
-    <div className="flex min-h-screen w-full overflow-x-hidden bg-slate-50">
+    <div className="flex min-h-screen w-full overflow-x-hidden theme-page">
       {/* =====================================================
           SIDEBAR
       ===================================================== */}
@@ -114,7 +115,7 @@ export default function AlbumPage() {
           w-full
           overflow-x-hidden
           overflow-y-auto
-          bg-slate-50
+          theme-page
           transition-all
           duration-300
         "
@@ -163,7 +164,7 @@ export default function AlbumPage() {
                   items-center
                   gap-1.5
                   text-xs
-                  text-gray-500
+                  theme-text-muted
                   sm:text-sm
                 "
               >
@@ -173,14 +174,14 @@ export default function AlbumPage() {
                     className="
                       whitespace-nowrap
                       transition-colors
-                      hover:text-indigo-600
+                      hover:text-[var(--color-primary)]
                     "
                   >
                     Dashboard
                   </a>
                 </li>
 
-                <li className="text-gray-300">/</li>
+                <li className="theme-text-placeholder">/</li>
 
                 <li>
                   <a
@@ -188,20 +189,20 @@ export default function AlbumPage() {
                     className="
                       whitespace-nowrap
                       transition-colors
-                      hover:text-indigo-600
+                      hover:text-[var(--color-primary)]
                     "
                   >
                     Galeri
                   </a>
                 </li>
 
-                <li className="text-gray-300">/</li>
+                <li className="theme-text-placeholder">/</li>
 
                 <li
                   className="
                     whitespace-nowrap
                     font-medium
-                    text-indigo-600
+                    text-[var(--color-primary)]
                   "
                   aria-current="page"
                 >
@@ -236,8 +237,7 @@ export default function AlbumPage() {
                     items-center
                     justify-center
                     rounded-xl
-                    bg-indigo-50
-                    text-indigo-600
+                    theme-info
                     sm:h-12
                     sm:w-12
                   "
@@ -252,7 +252,7 @@ export default function AlbumPage() {
                       text-xl
                       font-bold
                       tracking-tight
-                      text-gray-900
+                      theme-text
                       sm:text-2xl
                       lg:text-3xl
                     "
@@ -266,7 +266,7 @@ export default function AlbumPage() {
                       hidden
                       truncate
                       text-sm
-                      text-gray-500
+                      theme-text-muted
                       sm:block
                     "
                   >
@@ -288,16 +288,14 @@ export default function AlbumPage() {
                   justify-center
                   gap-2
                   rounded-xl
-                  bg-indigo-600
+                  theme-primary
                   px-4
                   py-2.5
                   text-sm
                   font-semibold
-                  text-white
                   shadow-sm
                   transition-all
                   duration-200
-                  hover:bg-indigo-700
                   hover:shadow-md
                   active:scale-[0.98]
                   sm:w-auto
@@ -329,8 +327,8 @@ export default function AlbumPage() {
                   min-w-0
                   rounded-2xl
                   border
-                  border-gray-100
-                  bg-white
+                  theme-border
+                  theme-card
                   p-4
                   shadow-sm
                   transition-shadow
@@ -347,19 +345,18 @@ export default function AlbumPage() {
                       items-center
                       justify-center
                       rounded-xl
-                      bg-blue-50
-                      text-blue-600
+                      theme-info
                     "
                   >
                     <Folder className="h-5 w-5" />
                   </div>
 
                   <div className="min-w-0">
-                    <p className="truncate text-xs font-medium text-gray-500">
+                    <p className="truncate text-xs font-medium theme-text-muted">
                       Total Album
                     </p>
 
-                    <p className="text-xl font-bold text-gray-900">
+                    <p className="text-xl font-bold theme-text">
                       {albums.length}
                     </p>
                   </div>
@@ -372,8 +369,8 @@ export default function AlbumPage() {
                   min-w-0
                   rounded-2xl
                   border
-                  border-gray-100
-                  bg-white
+                  theme-border
+                  theme-card
                   p-4
                   shadow-sm
                   transition-shadow
@@ -390,19 +387,18 @@ export default function AlbumPage() {
                       items-center
                       justify-center
                       rounded-xl
-                      bg-indigo-50
-                      text-indigo-600
+                      theme-info
                     "
                   >
                     <ImageIcon className="h-5 w-5" />
                   </div>
 
                   <div className="min-w-0">
-                    <p className="truncate text-xs font-medium text-gray-500">
+                    <p className="truncate text-xs font-medium theme-text-muted">
                       Total Foto
                     </p>
 
-                    <p className="text-xl font-bold text-gray-900">
+                    <p className="text-xl font-bold theme-text">
                       {totalPhotos}
                     </p>
                   </div>
@@ -415,8 +411,8 @@ export default function AlbumPage() {
                   min-w-0
                   rounded-2xl
                   border
-                  border-gray-100
-                  bg-white
+                  theme-border
+                  theme-card
                   p-4
                   shadow-sm
                   transition-shadow
@@ -433,19 +429,18 @@ export default function AlbumPage() {
                       items-center
                       justify-center
                       rounded-xl
-                      bg-purple-50
-                      text-purple-600
+                      theme-info
                     "
                   >
                     <LayoutGrid className="h-5 w-5" />
                   </div>
 
                   <div className="min-w-0">
-                    <p className="truncate text-xs font-medium text-gray-500">
+                    <p className="truncate text-xs font-medium theme-text-muted">
                       Album Utama
                     </p>
 
-                    <p className="text-xl font-bold text-gray-900">
+                    <p className="text-xl font-bold theme-text">
                       2
                     </p>
                   </div>
@@ -458,8 +453,8 @@ export default function AlbumPage() {
                   min-w-0
                   rounded-2xl
                   border
-                  border-gray-100
-                  bg-white
+                  theme-border
+                  theme-card
                   p-4
                   shadow-sm
                   transition-shadow
@@ -476,19 +471,18 @@ export default function AlbumPage() {
                       items-center
                       justify-center
                       rounded-xl
-                      bg-green-50
-                      text-green-600
+                      theme-success
                     "
                   >
                     <Pencil className="h-5 w-5" />
                   </div>
 
                   <div className="min-w-0">
-                    <p className="truncate text-xs font-medium text-gray-500">
+                    <p className="truncate text-xs font-medium theme-text-muted">
                       Terakhir Edit
                     </p>
 
-                    <p className="truncate text-sm font-bold text-gray-900">
+                    <p className="truncate text-sm font-bold theme-text">
                       Hari ini
                     </p>
                   </div>
@@ -504,8 +498,8 @@ export default function AlbumPage() {
                 w-full
                 rounded-2xl
                 border
-                border-gray-100
-                bg-white
+                theme-border
+                theme-card
                 p-3
                 shadow-sm
                 sm:p-4
@@ -520,7 +514,7 @@ export default function AlbumPage() {
                     h-4
                     w-4
                     -translate-y-1/2
-                    text-gray-400
+                    theme-text-muted
                   "
                 />
 
@@ -532,23 +526,17 @@ export default function AlbumPage() {
                     setSearchTerm(e.target.value)
                   }
                   className="
+                    theme-input
                     h-10
                     w-full
                     rounded-xl
                     border
-                    border-gray-200
-                    bg-gray-50/70
                     pl-10
                     pr-4
                     text-sm
-                    text-gray-900
                     outline-none
                     transition-all
-                    placeholder:text-gray-400
-                    focus:border-indigo-500
-                    focus:bg-white
-                    focus:ring-4
-                    focus:ring-indigo-500/10
+                    focus:border-[var(--color-primary)]
                   "
                 />
               </div>
@@ -584,8 +572,8 @@ export default function AlbumPage() {
                         overflow-hidden
                         rounded-2xl
                         border
-                        border-gray-100
-                        bg-white
+                        theme-border
+                        theme-card
                         shadow-sm
                         transition-all
                         duration-300
@@ -628,13 +616,13 @@ export default function AlbumPage() {
                                 truncate
                                 text-base
                                 font-semibold
-                                text-gray-900
+                                theme-text
                               "
                             >
                               {album.name}
                             </h3>
 
-                            <p className="mt-1 text-xs font-medium text-gray-400">
+                            <p className="mt-1 text-xs font-medium theme-text-muted">
                               {album.count} Foto
                             </p>
                           </div>
@@ -653,10 +641,10 @@ export default function AlbumPage() {
                               className="
                                 rounded-lg
                                 p-1.5
-                                text-gray-400
+                                theme-text-muted
                                 transition-colors
-                                hover:bg-indigo-50
-                                hover:text-indigo-600
+                                hover:bg-[var(--color-sidebar-active)]
+                                hover:text-[var(--color-primary)]
                               "
                               title="Edit Album"
                             >
@@ -668,10 +656,10 @@ export default function AlbumPage() {
                               className="
                                 rounded-lg
                                 p-1.5
-                                text-gray-400
+                                theme-text-muted
                                 transition-colors
-                                hover:bg-red-50
-                                hover:text-red-600
+                                hover:bg-[var(--color-danger-background)]
+                                hover:text-[var(--color-danger)]
                               "
                               title="Hapus Album"
                             >
@@ -688,7 +676,7 @@ export default function AlbumPage() {
                             items-center
                             justify-between
                             border-t
-                            border-gray-100
+                            theme-border
                             pt-3
                           "
                         >
@@ -702,18 +690,27 @@ export default function AlbumPage() {
                               gap-1
                               text-xs
                               font-semibold
-                              text-indigo-600
+                              text-[var(--color-primary)]
                               transition-colors
-                              hover:text-indigo-800
+                              hover:text-[var(--color-primary-hover)]
                             "
                           >
                             Lihat Foto
+
                             <span className="transition-transform group-hover:translate-x-0.5">
                               →
                             </span>
                           </a>
 
-                          <span className="text-[10px] font-medium uppercase tracking-wider text-gray-300">
+                          <span
+                            className="
+                              text-[10px]
+                              font-medium
+                              uppercase
+                              tracking-wider
+                              theme-text-placeholder
+                            "
+                          >
                             Album
                           </span>
                         </div>
@@ -736,8 +733,8 @@ export default function AlbumPage() {
                   justify-center
                   rounded-2xl
                   border
-                  border-gray-100
-                  bg-white
+                  theme-border
+                  theme-card
                   px-5
                   py-12
                   text-center
@@ -753,17 +750,17 @@ export default function AlbumPage() {
                     items-center
                     justify-center
                     rounded-full
-                    bg-gray-100
+                    theme-card-soft
                   "
                 >
-                  <Folder className="h-8 w-8 text-gray-400" />
+                  <Folder className="h-8 w-8 theme-text-muted" />
                 </div>
 
-                <h3 className="text-base font-semibold text-gray-900 sm:text-lg">
+                <h3 className="text-base font-semibold theme-text sm:text-lg">
                   Album tidak ditemukan
                 </h3>
 
-                <p className="mt-1 max-w-sm text-sm text-gray-500">
+                <p className="mt-1 max-w-sm text-sm theme-text-muted">
                   Coba ubah kata kunci pencarian Anda.
                 </p>
 
@@ -775,8 +772,8 @@ export default function AlbumPage() {
                       mt-4
                       text-sm
                       font-semibold
-                      text-indigo-600
-                      hover:text-indigo-800
+                      text-[var(--color-primary)]
+                      hover:text-[var(--color-primary-hover)]
                     "
                   >
                     Reset pencarian
