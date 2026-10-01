@@ -31,7 +31,10 @@ export const getAuditLogs = async (
         take: limit,
         include: {
           pengguna: {
-            select: { namaLengkap: true, peran: { select: { nama: true } } },
+            select: {
+              namaLengkap: true,
+              peran: { select: { nama: true } },
+            },
           },
         },
         orderBy: { waktu: "desc" },
