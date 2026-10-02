@@ -19,10 +19,10 @@ import {
   FileCheck2,
 } from "lucide-react";
 
-import PpdbHeader from "../../../components/ppdb/PpdbHeader";
-import PpdbFooter from "../../../components/ppdb/PpdbFooter";
+import PpdbHeader from "../../../../components/ppdb/PpdbHeader";
+import PpdbFooter from "../../../../components/ppdb/PpdbFooter";
 
-import { uploadBerkasPpdb } from "../../../../services/ppdb.service";
+import { uploadBerkasPpdb } from "../../../../../services/ppdb.service";
 
 /* =========================================================
    DOKUMEN SESUAI BACKEND

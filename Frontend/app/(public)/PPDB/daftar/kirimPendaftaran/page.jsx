@@ -10,9 +10,9 @@ import {
   Hash,
 } from "lucide-react";
 
-import PpdbHeader from "../../../components/ppdb/PpdbHeader";
-import PpdbFooter from "../../../components/ppdb/PpdbFooter";
-import PpdbStepper from "../../../components/ppdb/PpdbStepper";
+import PpdbHeader from "../../../../components/ppdb/PpdbHeader";
+import PpdbFooter from "../../../../components/ppdb/PpdbFooter";
+import PpdbStepper from "../../../../components/ppdb/PpdbStepper";
 
 function KirimPendaftaranPageContent() {
   const router = useRouter();
