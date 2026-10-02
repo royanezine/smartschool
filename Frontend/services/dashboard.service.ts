@@ -9,7 +9,7 @@ const API_URL =
   "http://localhost:5000";
 
 const BASE_ENDPOINT =
-  "/api/v1/dashboard";
+  "/api/dashboard";
 
 /* =========================================================
    INTERFACE

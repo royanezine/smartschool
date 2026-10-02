@@ -150,7 +150,7 @@ async function loadSchoolTheme() {
 
   try {
     const response = await fetch(
-      `${API_URL}/api/v1/cms/tema`,
+      `${API_URL}/api/cms/tema`,
       {
         method: "GET",
         headers: {

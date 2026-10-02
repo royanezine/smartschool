@@ -12,7 +12,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 
-import { getTenantStatus } from "../../../services/tenant.service";
+import { getTenantStatus } from "../../../../services/tenant.service";
 
 export default function WaitingActivationPage() {
   // ==========================================

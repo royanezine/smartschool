@@ -28,7 +28,7 @@ export interface KelasSaya {
 export async function createSiswa(
   data: CreateSiswaData
 ) {
-  return apiFetch("/api/v1/siswa", {
+  return apiFetch("/api/siswa", {
     method: "POST",
     body: JSON.stringify(data),
   });
@@ -38,7 +38,7 @@ export async function createSiswa(
  * Mengambil kelas siswa yang sedang login.
  */
 export async function getKelasSaya() {
-  const response = await apiFetch("/api/v1/siswa/me", {
+  const response = await apiFetch("/api/siswa/me", {
     method: "GET",
   });
 

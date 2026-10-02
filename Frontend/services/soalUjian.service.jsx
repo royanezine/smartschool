@@ -10,7 +10,7 @@ export async function getSoalByUjian(ujianId) {
   }
 
   return apiFetch(
-    `/api/v1/soal-ujian/ujian/${ujianId}`,
+    `/api/soal-ujian/ujian/${ujianId}`,
     {
       method: "GET",
     }
@@ -27,7 +27,7 @@ export async function getSoalById(id) {
   }
 
   return apiFetch(
-    `/api/v1/soal-ujian/${id}`,
+    `/api/soal-ujian/${id}`,
     {
       method: "GET",
     }
@@ -82,7 +82,7 @@ export async function createSoal(payload) {
   }
 
   return apiFetch(
-    "/api/v1/soal-ujian",
+    "/api/soal-ujian",
     {
       method: "POST",
       body: JSON.stringify({
@@ -140,7 +140,7 @@ export async function updateSoal(id, payload) {
   }
 
   return apiFetch(
-    `/api/v1/soal-ujian/${id}`,
+    `/api/soal-ujian/${id}`,
     {
       method: "PUT",
       body: JSON.stringify({
@@ -177,7 +177,7 @@ export async function deleteSoal(id) {
   }
 
   return apiFetch(
-    `/api/v1/soal-ujian/${id}`,
+    `/api/soal-ujian/${id}`,
     {
       method: "DELETE",
     }

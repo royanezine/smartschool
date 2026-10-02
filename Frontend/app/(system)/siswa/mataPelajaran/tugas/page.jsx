@@ -34,7 +34,7 @@ const API_URL = (
 ).replace(/\/$/, "");
 
 const KELAS_BASE_URL = `${API_URL}/api/kelas`;
-const TASK_BASE_URL = `${API_URL}/api/v1/tugas`;
+const TASK_BASE_URL = `${API_URL}/api/tugas`;
 
 /* =========================================================
    THEME HELPERS

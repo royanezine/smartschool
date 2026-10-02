@@ -64,7 +64,7 @@ export async function exportRekapNilai(
   const query = searchParams.toString();
 
   const url =
-    `${API_BASE}/v1/nilai/export` +
+    `${API_BASE}/nilai/export` +
     (query ? `?${query}` : "");
 
   console.log("[NILAI API] Export Request:", {

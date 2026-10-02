@@ -111,7 +111,7 @@ export default function WebsiteHomePage() {
         const apiBaseUrl = getApiBaseUrl();
 
         const endpoint =
-          `${apiBaseUrl}/api/v1/publik/` +
+          `${apiBaseUrl}/api/publik/` +
           `${encodeURIComponent(subdomain)}/artikel`;
 
         console.log("=================================");

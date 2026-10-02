@@ -12,21 +12,9 @@ import {
   ChevronRight,
 } from "lucide-react";
 
-import PpdbNavbar from "../../components/ppdb/PpdbNavbar";
+import PpdbNavbar from "../../../components/ppdb/PpdbNavbar";
 
-// ============================================================================
-// INFORMASI ALUR PPDB
-// ============================================================================
-// BE saat ini belum menyediakan endpoint untuk mengambil data tahapan/alur PPDB.
-// Karena itu data berikut hanya digunakan sebagai informasi statis pada halaman
-// publik dan TIDAK dikirim/fetch ke backend.
-//
-// Endpoint BE yang tersedia saat ini:
-// - POST /api/v1/ppdb/daftar
-// - POST /api/v1/ppdb/:id/berkas
-// - PATCH /api/v1/ppdb/:id/verifikasi
-// - CRUD /api/v1/jalur-ppdb (khusus admin_sekolah)
-// ============================================================================
+
 
 const langkahPendaftaran = [
   {

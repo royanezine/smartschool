@@ -47,7 +47,7 @@ export default function ArticlesPage() {
       }
 
       const url =
-        `${apiBaseUrl}/api/v1/publik/` +
+        `${apiBaseUrl}/api/publik/` +
         `${encodeURIComponent(SUBDOMAIN)}/artikel`;
 
       const response = await fetch(url, {
@@ -371,7 +371,7 @@ export default function ArticlesPage() {
                   </p>
 
                   <p className="mt-2 break-all font-mono text-xs text-slate-600">
-                    {API_URL}/api/v1/publik/{SUBDOMAIN}/artikel
+                    {API_URL}/api/publik/{SUBDOMAIN}/artikel
                   </p>
                 </div>
 

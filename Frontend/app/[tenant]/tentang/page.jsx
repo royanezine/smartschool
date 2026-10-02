@@ -100,7 +100,7 @@ export default function TentangPage() {
         }
 
         const url =
-          `${API_URL.replace(/\/$/, "")}/api/v1/publik/` +
+          `${API_URL.replace(/\/$/, "")}/api/publik/` +
           `${encodeURIComponent(subdomain)}/halaman/` +
           `${encodeURIComponent(SLUG_TENTANG)}`;
 

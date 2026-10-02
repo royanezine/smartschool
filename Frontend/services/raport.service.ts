@@ -143,7 +143,7 @@ export const getRaportSiswa = async (
   }
 
   return apiFetch(
-    `v1/raport/${encodeURIComponent(
+    `/raport/${encodeURIComponent(
       siswaId,
     )}/tahun-ajaran/${encodeURIComponent(
       tahunAjaranId,

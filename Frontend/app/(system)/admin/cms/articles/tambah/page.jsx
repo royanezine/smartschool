@@ -51,7 +51,7 @@ export default function TambahArtikelPage() {
       setLoadingCategories(true);
 
       const data = await apiFetch(
-        "/api/v1/cms/kategori-artikel"
+        "/api/cms/kategori-artikel"
       );
 
       setCategories(extractList(data));
@@ -129,7 +129,7 @@ export default function TambahArtikelPage() {
       );
 
       await apiFetch(
-        "/api/v1/cms/artikel",
+        "/api/cms/artikel",
         {
           method: "POST",
           body: JSON.stringify(payload),

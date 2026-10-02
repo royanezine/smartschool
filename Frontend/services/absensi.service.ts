@@ -46,6 +46,8 @@ export interface CreateAbsensiData {
   snapshot?: Blob | File | null;
 }
 
+
+
 const RAW_API_URL =
   process.env.NEXT_PUBLIC_API_URL ||
   "http://localhost:5000";
@@ -53,16 +55,16 @@ const RAW_API_URL =
 const API_URL = (() => {
   const base = RAW_API_URL.replace(/\/+$/, "");
 
-  if (/\/api\/v1$/i.test(base)) {
+  if (/\/api$/i.test(base)) {
     return base;
   }
 
-  if (/\/api$/i.test(base)) {
-    return `${base}/v1`;
-  }
-
-  return `${base}/api/v1`;
+  return `${base}/api`;
 })();
+
+/* =========================================================
+   TOKEN
+========================================================= */
 
 function getToken(): string | null {
   if (typeof window === "undefined") {
@@ -77,6 +79,10 @@ function getToken(): string | null {
     localStorage.getItem("jwt")
   );
 }
+
+/* =========================================================
+   REQUEST
+========================================================= */
 
 async function request<T>(
   endpoint: string,
@@ -172,6 +178,7 @@ async function request<T>(
 
 /* =========================================================
    GET ABSENSI SAYA
+   GET /api/absensi/saya
 ========================================================= */
 
 export async function getAbsensiSaya(): Promise<
@@ -187,6 +194,7 @@ export async function getAbsensiSaya(): Promise<
 
 /* =========================================================
    GET ABSENSI KELAS
+   GET /api/absensi/kelas/:kelasId
 ========================================================= */
 
 export async function getAbsensiKelas(
@@ -220,6 +228,7 @@ export async function getAbsensiKelas(
 
 /* =========================================================
    CREATE ABSENSI
+   POST /api/absensi
 ========================================================= */
 
 export async function createAbsensi(
@@ -237,9 +246,9 @@ export async function createAbsensi(
     );
   }
 
-  /* =========================
-     FACE
-  ========================= */
+  /* =====================================================
+     FACE ABSENSI
+  ===================================================== */
 
   if (data.metode === "face") {
     if (!data.snapshot) {
@@ -325,9 +334,9 @@ export async function createAbsensi(
     );
   }
 
-  /* =========================
-     NON FACE
-  ========================= */
+  /* =====================================================
+     ABSENSI NON FACE
+  ===================================================== */
 
   const body: Record<
     string,
@@ -373,7 +382,7 @@ export async function createAbsensi(
 }
 
 /* =========================================================
-   ABSEN LOKASI
+   ABSEN DENGAN LOKASI
 ========================================================= */
 
 export async function absenDenganLokasi(
@@ -410,20 +419,25 @@ export async function absenDenganLokasi(
 
   return createAbsensi({
     kelasId: data.kelasId,
+
     status:
       data.status || "hadir",
+
     metode: "lokasi",
+
     keterangan:
       data.keterangan,
+
     lintang:
       position.coords.latitude,
+
     bujur:
       position.coords.longitude,
   });
 }
 
 /* =========================================================
-   ABSEN BARCODE
+   ABSEN DENGAN BARCODE
 ========================================================= */
 
 export async function absenDenganBarcode(
@@ -448,18 +462,22 @@ export async function absenDenganBarcode(
 
   return createAbsensi({
     kelasId: data.kelasId,
+
     status:
       data.status || "hadir",
+
     metode: "barcode",
+
     barcodeData:
       data.barcodeData,
+
     keterangan:
       data.keterangan,
   });
 }
 
 /* =========================================================
-   ABSEN FACE
+   ABSEN DENGAN FACE
 ========================================================= */
 
 export async function absenDenganFace(
@@ -495,15 +513,21 @@ export async function absenDenganFace(
 
   return createAbsensi({
     kelasId: data.kelasId,
+
     status:
       data.status || "hadir",
+
     metode: "face",
+
     keterangan:
       data.keterangan,
+
     lintang:
       data.lintang,
+
     bujur:
       data.bujur,
+
     snapshot:
       data.snapshot,
   });
@@ -516,11 +540,13 @@ export async function absenDenganFace(
 export async function absenManual(
   data: {
     kelasId: string;
+
     status:
       | "izin"
       | "sakit"
       | "alpha"
       | "hadir";
+
     keterangan?: string;
   }
 ): Promise<Absensi> {
@@ -538,12 +564,54 @@ export async function absenManual(
 
   return createAbsensi({
     kelasId: data.kelasId,
+
     status: data.status,
+
     metode: "manual",
+
     keterangan:
       data.keterangan,
   });
 }
+
+/* =========================================================
+   KELAS SAYA
+   GET /api/siswa/me
+========================================================= */
+
+export interface KelasSaya {
+  kelasId: string;
+  nama: string;
+  tingkat: string;
+  tahunAjaranId: string;
+}
+
+export async function getKelasSaya(): Promise<KelasSaya> {
+  const response = await request<any>(
+    "/siswa/me",
+    {
+      method: "GET",
+    }
+  );
+
+  return {
+    kelasId:
+      response?.kelasId ?? null,
+
+    nama:
+      response?.kelas?.nama ?? "",
+
+    tingkat:
+      response?.kelas?.tingkat ?? "",
+
+    tahunAjaranId:
+      response?.tahunAjaranId ?? "",
+  };
+}
+
+/* =========================================================
+   SERVICE
+========================================================= */
 
 const absensiService = {
   getAbsensiSaya,
@@ -553,26 +621,7 @@ const absensiService = {
   absenDenganBarcode,
   absenDenganFace,
   absenManual,
+  getKelasSaya,
 };
-
-export interface KelasSaya {
-  kelasId: string;
-  nama: string;
-  tingkat: string;
-  tahunAjaranId: string;
-}
-
-export async function getKelasSaya() {
-  const response = await apiFetch("/api/v1/siswa/me", {
-    method: "GET",
-  });
-
-  return {
-    kelasId: response.data?.kelasId ?? null,
-    nama: response.data?.kelas?.nama ?? "",
-    tingkat: response.data?.kelas?.tingkat ?? "",
-    tahunAjaranId: response.data?.tahunAjaranId ?? "",
-  };
-}
 
 export default absensiService;

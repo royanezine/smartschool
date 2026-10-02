@@ -281,13 +281,7 @@ function DaftarPageContent() {
     );
   };
 
-  /*
-   * ============================================================
-   * SUBMIT KE BACKEND
-   * ============================================================
-   *
-   * POST /api/v1/ppdb/daftar
-   */
+ 
 
   const handleSubmit = async () => {
     if (!validateForm()) {

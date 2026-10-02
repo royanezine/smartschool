@@ -953,7 +953,7 @@ export default function GuruNilaiIndexPage() {
                             text-[var(--color-info)]
                           `}
                         >
-                          GET /api/v1/nilai/export
+                          GET /api/nilai/export
                         </code>
 
                       </div>

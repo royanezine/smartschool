@@ -33,7 +33,7 @@ export default function DetailArtikelPage() {
         setError("");
 
         const response = await fetch(
-          `${API_URL}/api/v1/publik/${SUBDOMAIN}/artikel`
+          `${API_URL}/api/publik/${SUBDOMAIN}/artikel`
         );
 
         if (!response.ok) {

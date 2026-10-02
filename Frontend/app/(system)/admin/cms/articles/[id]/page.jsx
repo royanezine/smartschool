@@ -124,15 +124,8 @@ export default function ArticleDetailPage() {
       setLoading(true);
       setError("");
 
-      /*
-       * Backend belum menyediakan:
-       *
-       * GET /api/v1/cms/artikel/:id
-       *
-       * Jadi ambil semua artikel lalu cari berdasarkan ID.
-       */
       const data = await apiFetch(
-        "/api/v1/cms/artikel"
+        "/api/cms/artikel"
       );
 
       const articles = extractList(data);
@@ -177,7 +170,7 @@ export default function ArticleDetailPage() {
       setDeleting(true);
 
       await apiFetch(
-        `/api/v1/cms/artikel/${article.id}`,
+        `/api/cms/artikel/${article.id}`,
         {
           method: "DELETE",
         }

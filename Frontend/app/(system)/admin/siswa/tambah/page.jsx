@@ -256,10 +256,7 @@ export default function TambahSiswaPage() {
         payload
       );
 
-      // ---------------------------------------------
-      // POST KE BACKEND
-      // /api/v1/siswa
-      // ---------------------------------------------
+      
 
       const response =
         await createSiswa(payload);

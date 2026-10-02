@@ -345,7 +345,7 @@ export default function LanggananSekolahPage() {
 
       console.log(
         "Endpoint:",
-        "/api/v1/langganan/sekolah"
+        "/api/langganan/sekolah"
       );
 
       console.log(
@@ -707,7 +707,7 @@ export default function LanggananSekolahPage() {
               <div className="flex items-center gap-2 text-xs theme-text-placeholder">
                 <FileText size={15} />
 
-                GET /api/v1/langganan/sekolah
+                GET /api/langganan/sekolah
               </div>
             </div>
 
@@ -992,7 +992,7 @@ export default function LanggananSekolahPage() {
                   Halaman ini menggunakan endpoint
                   khusus Super Admin:
                   <span className="ml-1 font-semibold theme-text-secondary">
-                    GET /api/v1/langganan/sekolah
+                    GET /api/langganan/sekolah
                   </span>
                 </p>
               </div>

@@ -366,7 +366,7 @@ function UjianPageInner() {
             <h1
               className={`mt-1 text-2xl font-bold tracking-tight ${themeText} sm:text-[28px]`}
             >
-              Ujian
+              Quiz
             </h1>
 
             <p

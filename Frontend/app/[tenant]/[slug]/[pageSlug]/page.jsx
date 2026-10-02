@@ -65,7 +65,7 @@ export default function PublicCmsPage() {
         const apiBaseUrl = getApiBaseUrl();
 
         const endpoint =
-          `${apiBaseUrl}/api/v1/publik/` +
+          `${apiBaseUrl}/api/publik/` +
           `${encodeURIComponent(subdomain)}/halaman/` +
           `${encodeURIComponent(pageSlug)}`;
 

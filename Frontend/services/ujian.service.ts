@@ -295,7 +295,7 @@ export async function getUjianByKelasMapel(
   }
 
   return apiFetch(
-    `/api/v1/ujian/kelas-mapel/${kelasMapelId}`,
+    `/api/ujian/kelas-mapel/${kelasMapelId}`,
     {
       method: "GET",
     }
@@ -316,7 +316,7 @@ export async function getUjianById(
   }
 
   return apiFetch(
-    `/api/v1/ujian/${id}`,
+    `/api/ujian/${id}`,
     {
       method: "GET",
     }
@@ -374,7 +374,7 @@ export async function createUjian(
   }
 
   return apiFetch(
-    "/api/v1/ujian",
+    "/api/ujian",
     {
       method: "POST",
 
@@ -444,7 +444,7 @@ export async function updateUjian(
   }
 
   return apiFetch(
-    `/api/v1/ujian/${id}`,
+    `/api/ujian/${id}`,
     {
       method: "PUT",
 
@@ -535,7 +535,7 @@ export async function deleteUjian(
   }
 
   return apiFetch(
-    `/api/v1/ujian/${id}`,
+    `/api/ujian/${id}`,
     {
       method: "DELETE",
     }
@@ -580,7 +580,7 @@ export async function getSoalUjian(
   }
 
   return apiFetch(
-    `/api/v1/ujian/${ujianId}/soal`,
+    `/api/ujian/${ujianId}/soal`,
     {
       method: "GET",
     }
@@ -623,7 +623,7 @@ export async function createSoalUjian(
   }
 
   return apiFetch(
-    `/api/v1/ujian/${ujianId}/soal`,
+    `/api/ujian/${ujianId}/soal`,
     {
       method: "POST",
 
@@ -674,7 +674,7 @@ export async function updateSoalUjian(
   }
 
   return apiFetch(
-    `/api/v1/ujian/${ujianId}/soal/${soalId}`,
+    `/api/ujian/${ujianId}/soal/${soalId}`,
     {
       method: "PUT",
 
@@ -742,7 +742,7 @@ export async function deleteSoalUjian(
   }
 
   return apiFetch(
-    `/api/v1/ujian/${ujianId}/soal/${soalId}`,
+    `/api/ujian/${ujianId}/soal/${soalId}`,
     {
       method: "DELETE",
     }
@@ -770,7 +770,7 @@ export async function mulaiUjian(
   }
 
   return apiFetch(
-    `/api/v1/ujian/${ujianId}/mulai`,
+    `/api/ujian/${ujianId}/mulai`,
     {
       method: "POST",
 
@@ -811,7 +811,7 @@ export async function submitUjian(
   }
 
   return apiFetch(
-    `/api/v1/ujian/sesi/${sesiId}/submit`,
+    `/api/ujian/sesi/${sesiId}/submit`,
     {
       method: "POST",
 

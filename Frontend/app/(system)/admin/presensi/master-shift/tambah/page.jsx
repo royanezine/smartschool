@@ -132,10 +132,7 @@ export default function TambahMasterShiftPage() {
       return;
     }
 
-    // =====================================================
-    // NANTI DI SINI POST KE BE
-    // POST /api/v1/shifts
-    // =====================================================
+    
 
     alert("Shift berhasil ditambahkan.");
     router.push("/admin/presensi/master-shift");

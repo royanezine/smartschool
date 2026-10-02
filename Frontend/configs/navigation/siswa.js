@@ -147,7 +147,7 @@ export const siswaSidebarConfig = {
         {
           key: "ujianMataPelajaran",
           icon: ClipboardCheck,
-          label: "Ujian",
+          label: "Quiz",
           path: "/siswa/mataPelajaran/ujian",
         },
       ],

@@ -57,7 +57,7 @@ export async function getAuditLogs(
   }
 
   const response = await apiFetch(
-    `/api/v1/audit-log?${query.toString()}`,
+    `/api/audit-log?${query.toString()}`,
     {
       method: "GET",
     }

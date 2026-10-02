@@ -134,7 +134,7 @@ export default function CreatePagePage() {
         status: data.status,
       };
 
-      const result = await apiFetch("/api/v1/cms/halaman", {
+      const result = await apiFetch("/api/cms/halaman", {
         method: "POST",
         body: JSON.stringify(payload),
       });

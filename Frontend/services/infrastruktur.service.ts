@@ -31,7 +31,7 @@ export async function getGedung() {
     };
 
     const response = await fetch(
-      `${API_URL}/api/v1/infrastruktur/gedung`,
+      `${API_URL}/api/infrastruktur/gedung`,
       {
         method: "GET",
         headers,
@@ -87,7 +87,7 @@ export async function getGedung() {
 
 export async function createGedung(data) {
   return apiFetch(
-    "/api/v1/infrastruktur/gedung",
+    "/api/infrastruktur/gedung",
     {
       method: "POST",
       body: JSON.stringify(data),
@@ -100,7 +100,7 @@ export async function updateGedung(
   data
 ) {
   return apiFetch(
-    `/api/v1/infrastruktur/gedung/${id}`,
+    `/api/infrastruktur/gedung/${id}`,
     {
       method: "PUT",
       body: JSON.stringify(data),
@@ -110,7 +110,7 @@ export async function updateGedung(
 
 export async function deleteGedung(id) {
   return apiFetch(
-    `/api/v1/infrastruktur/gedung/${id}`,
+    `/api/infrastruktur/gedung/${id}`,
     {
       method: "DELETE",
     }
@@ -121,7 +121,7 @@ export async function getLantaiByGedung(
   gedungId
 ) {
   return apiFetch(
-    `/api/v1/infrastruktur/lantai/gedung/${gedungId}`,
+    `/api/infrastruktur/lantai/gedung/${gedungId}`,
     {
       method: "GET",
     }
@@ -130,7 +130,7 @@ export async function getLantaiByGedung(
 
 export async function createLantai(data) {
   return apiFetch(
-    "/api/v1/infrastruktur/lantai",
+    "/api/infrastruktur/lantai",
     {
       method: "POST",
       body: JSON.stringify(data),
@@ -143,7 +143,7 @@ export async function updateLantai(
   data
 ) {
   return apiFetch(
-    `/api/v1/infrastruktur/lantai/${id}`,
+    `/api/infrastruktur/lantai/${id}`,
     {
       method: "PUT",
       body: JSON.stringify(data),
@@ -153,7 +153,7 @@ export async function updateLantai(
 
 export async function deleteLantai(id) {
   return apiFetch(
-    `/api/v1/infrastruktur/lantai/${id}`,
+    `/api/infrastruktur/lantai/${id}`,
     {
       method: "DELETE",
     }

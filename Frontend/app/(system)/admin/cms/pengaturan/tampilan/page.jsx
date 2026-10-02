@@ -239,14 +239,11 @@ export default function TampilanPage() {
 
   const apiUrl = API_BASE_URL.replace(/\/$/, "");
 
-  /* ==========================================================
-     API URL
-     Menghindari /api/api/v1 jika env sudah punya /api
-  ========================================================== */
+
 
   const themeApiUrl = apiUrl.endsWith("/api")
     ? `${apiUrl}/v1/cms/tema`
-    : `${apiUrl}/api/v1/cms/tema`;
+    : `${apiUrl}/api/cms/tema`;
 
   /* ==========================================================
      TOKEN

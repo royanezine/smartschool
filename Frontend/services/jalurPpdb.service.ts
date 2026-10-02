@@ -1,6 +1,6 @@
 import { apiFetch } from "../lib/api";
 
-const ENDPOINT = "/api/v1/jalur-ppdb";
+const ENDPOINT = "/api/jalur-ppdb";
 
 export interface JalurPpdb {
   id: string;

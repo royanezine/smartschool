@@ -691,10 +691,7 @@ export default function FaceIdPage() {
       process.env
         .NEXT_PUBLIC_API_URL || "";
 
-    /*
-     * Static uploads biasanya berada
-     * di root backend, bukan di /api/v1.
-     */
+   
 
     const base = apiBase
       .replace(

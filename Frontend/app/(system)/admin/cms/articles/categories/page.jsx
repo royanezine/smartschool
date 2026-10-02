@@ -187,7 +187,7 @@ export default function ArticleCategoriesPage() {
       setLoading(true);
 
       const response = await apiFetch(
-        "/api/v1/cms/kategori-artikel"
+        "/api/cms/kategori-artikel"
       );
 
       const data = extractList(response);
@@ -294,7 +294,7 @@ export default function ArticleCategoriesPage() {
 
       if (editingCategory) {
         await apiFetch(
-          `/api/v1/cms/kategori-artikel/${editingCategory.id}`,
+          `/api/cms/kategori-artikel/${editingCategory.id}`,
           {
             method: "PUT",
             body: JSON.stringify(payload),
@@ -310,7 +310,7 @@ export default function ArticleCategoriesPage() {
 
       else {
         await apiFetch(
-          "/api/v1/cms/kategori-artikel",
+          "/api/cms/kategori-artikel",
           {
             method: "POST",
             body: JSON.stringify(payload),
@@ -353,7 +353,7 @@ export default function ArticleCategoriesPage() {
       setDeleting(true);
 
       await apiFetch(
-        `/api/v1/cms/kategori-artikel/${deleteTarget.id}`,
+        `/api/cms/kategori-artikel/${deleteTarget.id}`,
         {
           method: "DELETE",
         }

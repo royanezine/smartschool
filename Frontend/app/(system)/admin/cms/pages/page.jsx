@@ -59,7 +59,7 @@ export default function PagesPage() {
         setLoading(true);
       }
 
-      const result = await apiFetch("/api/v1/cms/halaman");
+      const result = await apiFetch("/api/cms/halaman");
 
       const responseData = result?.data;
 
@@ -218,7 +218,7 @@ export default function PagesPage() {
       setSuccess("");
 
       await apiFetch(
-        `/api/v1/cms/halaman/${deleteTarget.id}`,
+        `/api/cms/halaman/${deleteTarget.id}`,
         {
           method: "DELETE",
         }

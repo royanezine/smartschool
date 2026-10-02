@@ -80,7 +80,7 @@ export default function EditArticlePage() {
       ===================================================== */
 
       const artikelResponse = await apiFetch(
-        "/api/v1/cms/artikel"
+        "/api/cms/artikel"
       );
 
       let artikelList = [];
@@ -118,7 +118,7 @@ export default function EditArticlePage() {
       ===================================================== */
 
       const kategoriResponse = await apiFetch(
-        "/api/v1/cms/kategori-artikel"
+        "/api/cms/kategori-artikel"
       );
 
       let kategoriList = [];
@@ -227,7 +227,7 @@ export default function EditArticlePage() {
       };
 
       await apiFetch(
-        `/api/v1/cms/artikel/${id}`,
+        `/api/cms/artikel/${id}`,
         {
           method: "PUT",
           body: JSON.stringify(payload),

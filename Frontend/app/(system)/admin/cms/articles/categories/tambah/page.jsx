@@ -67,7 +67,7 @@ export default function TambahKategoriPage() {
       };
 
       await apiFetch(
-        "/api/v1/cms/kategori-artikel",
+        "/api/cms/kategori-artikel",
         {
           method: "POST",
           body: JSON.stringify(payload),

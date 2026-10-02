@@ -58,7 +58,7 @@ export default function EditPageCms() {
       setError("");
       setSuccess("");
 
-      const result = await apiFetch("/api/v1/cms/halaman");
+      const result = await apiFetch("/api/cms/halaman");
 
       const responseData = result?.data;
 
@@ -150,7 +150,7 @@ export default function EditPageCms() {
     try {
       setSaving(true);
 
-      await apiFetch(`/api/v1/cms/halaman/${id}`, {
+      await apiFetch(`/api/cms/halaman/${id}`, {
         method: "PUT",
         body: JSON.stringify({
           judul,

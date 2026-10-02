@@ -14,7 +14,7 @@ export default function PublicTheme({ tenant }) {
       try {
         const apiBase = API_URL.endsWith("/api")
           ? `${API_URL}/v1/publik`
-          : `${API_URL}/api/v1/publik`;
+          : `${API_URL}/api/publik`;
 
         const response = await fetch(
           `${apiBase}/${encodeURIComponent(tenant)}/tema`,

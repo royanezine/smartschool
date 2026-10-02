@@ -1,11 +1,8 @@
 import { apiFetch } from "../lib/api";
 
-// ============================================================
-// GET SUMMARY YAYASAN
-// GET /api/v1/yayasan/summary
-// ============================================================
+
 export const getYayasanSummary = async () => {
-  const result = await apiFetch("/api/v1/yayasan/summary", {
+  const result = await apiFetch("/api/yayasan/summary", {
     method: "GET",
     cache: "no-store",
   });
@@ -15,12 +12,9 @@ export const getYayasanSummary = async () => {
   return result;
 };
 
-// ============================================================
-// GET SEKOLAH BINAAN
-// GET /api/v1/yayasan/sekolah
-// ============================================================
+
 export const getSekolahBinaan = async () => {
-  const result = await apiFetch("/api/v1/yayasan/sekolah", {
+  const result = await apiFetch("/api/yayasan/sekolah", {
     method: "GET",
     cache: "no-store",
   });
@@ -30,16 +24,13 @@ export const getSekolahBinaan = async () => {
   return result;
 };
 
-// ============================================================
-// GET DETAIL SEKOLAH BINAAN
-// GET /api/v1/yayasan/sekolah/:id
-// ============================================================
+
 export const getDetailSekolahBinaan = async (id: string) => {
   if (!id) {
     throw new Error("ID sekolah tidak ditemukan.");
   }
 
-  const result = await apiFetch(`/api/v1/yayasan/sekolah/${id}`, {
+  const result = await apiFetch(`/api/yayasan/sekolah/${id}`, {
     method: "GET",
     cache: "no-store",
   });

@@ -94,7 +94,7 @@ export default function ArtikelPage() {
       setLoading(true);
       setError("");
 
-      const response = await apiFetch("/api/v1/cms/artikel");
+      const response = await apiFetch("/api/cms/artikel");
 
       const data =
         response?.data ||
@@ -126,7 +126,7 @@ export default function ArtikelPage() {
       setLoadingCategory(true);
 
       const response = await apiFetch(
-        "/api/v1/cms/kategori-artikel"
+        "/api/cms/kategori-artikel"
       );
 
       const data =
@@ -176,7 +176,7 @@ export default function ArtikelPage() {
       setDeletingId(id);
 
       await apiFetch(
-        `/api/v1/cms/artikel/${id}`,
+        `/api/cms/artikel/${id}`,
         {
           method: "DELETE",
         }

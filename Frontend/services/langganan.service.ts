@@ -75,7 +75,7 @@ export async function createPayment(
   }
 
   const response = await apiFetch(
-    "/api/v1/langganan/sekolah/bayar",
+    "/api/langganan/sekolah/bayar",
     {
       method: "POST",
 
@@ -109,7 +109,7 @@ export async function getPendingPayments(): Promise<
   LanggananData[]
 > {
   const response = await apiFetch(
-    "/api/v1/langganan/sekolah/pending",
+    "/api/langganan/sekolah/pending",
     {
       method: "GET",
     },
@@ -145,7 +145,7 @@ export async function getAllLangganan(): Promise<
   LanggananData[]
 > {
   const response = await apiFetch(
-    "/api/v1/langganan/sekolah",
+    "/api/langganan/sekolah",
     {
       method: "GET",
     },

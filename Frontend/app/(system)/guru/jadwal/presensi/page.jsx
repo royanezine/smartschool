@@ -570,7 +570,7 @@ export default function PresensiGuruPage() {
           jadwalResponse,
         ] = await Promise.all([
           fetch(
-            `${API_URL}/api/v1/absensi/saya`,
+            `${API_URL}/api/absensi/saya`,
             {
               method: "GET",
               headers,
@@ -579,7 +579,7 @@ export default function PresensiGuruPage() {
           ),
 
           fetch(
-            `${API_URL}/api/v1/jadwal-mengajar`,
+            `${API_URL}/api/jadwal-mengajar`,
             {
               method: "GET",
               headers,
@@ -1163,7 +1163,7 @@ export default function PresensiGuruPage() {
 
         const response =
           await fetch(
-            `${API_URL}/api/v1/absensi/`,
+            `${API_URL}/api/absensi/`,
             {
               method: "POST",
 

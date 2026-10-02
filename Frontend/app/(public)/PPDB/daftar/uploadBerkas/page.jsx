@@ -281,16 +281,7 @@ function UploadBerkasPageContent() {
     return true;
   };
 
-  /* =======================================================
-     SUBMIT
-
-     Backend:
-     POST /api/v1/ppdb/:id/berkas
-
-     Field:
-     file
-     namaBerkas
-  ======================================================= */
+  
 
   const handleSubmit = async () => {
     if (!validate()) {

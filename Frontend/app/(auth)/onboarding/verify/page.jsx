@@ -238,10 +238,7 @@ export default function VerifyPage() {
     try {
       setLoading(true);
 
-      // =================================================
-      // CALL BE
-      // POST /api/v1/tenant/verify
-      // =================================================
+      
 
       const result =
         await verifyTenant(

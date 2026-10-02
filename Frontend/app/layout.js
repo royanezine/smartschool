@@ -14,7 +14,8 @@ const geistMono = Geist_Mono({
 
 export const metadata = {
   title: "smartschool",
-  description: "SmartSchool - All-in-One School Management System",
+  description:
+    "SmartSchool - All-in-One School Management System",
 };
 
 export default function RootLayout({ children }) {

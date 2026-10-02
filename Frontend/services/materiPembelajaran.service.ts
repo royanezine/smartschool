@@ -564,7 +564,7 @@ export async function getMateriPembelajaran() {
 
     data: MateriPembelajaran[];
   }>(
-    "/v1/materi-pembelajaran"
+    "/materi-pembelajaran"
   );
 }
 
@@ -588,7 +588,7 @@ export async function getMateriPembelajaranById(
 
     data: MateriPembelajaran;
   }>(
-    `/v1/materi-pembelajaran/${encodeURIComponent(
+    `/materi-pembelajaran/${encodeURIComponent(
       id
     )}`
   );
@@ -643,7 +643,7 @@ export async function createMateriDenganLink(
 
     data: MateriPembelajaran;
   }>(
-    "/v1/materi-pembelajaran",
+    "/materi-pembelajaran",
     {
       method: "POST",
 
@@ -817,7 +817,7 @@ export async function createMateriDenganFile(
 
     data: MateriPembelajaran;
   }>(
-    "/v1/materi-pembelajaran",
+    "/materi-pembelajaran",
     formData,
     "POST"
   );
@@ -865,7 +865,7 @@ export async function updateMateriDenganLink(
 
     data: MateriPembelajaran;
   }>(
-    `/v1/materi-pembelajaran/${encodeURIComponent(
+    `/materi-pembelajaran/${encodeURIComponent(
       id
     )}`,
     {
@@ -1042,7 +1042,7 @@ export async function updateMateriDenganFile(
 
     data: MateriPembelajaran;
   }>(
-    `/v1/materi-pembelajaran/${encodeURIComponent(
+    `/materi-pembelajaran/${encodeURIComponent(
       id
     )}`,
     formData,
@@ -1092,7 +1092,7 @@ export async function updateMateriTanpaSumber(
 
     data: MateriPembelajaran;
   }>(
-    `/v1/materi-pembelajaran/${encodeURIComponent(
+    `/materi-pembelajaran/${encodeURIComponent(
       id
     )}`,
     {
@@ -1137,7 +1137,7 @@ export async function deleteMateriPembelajaran(
 
     message?: string;
   }>(
-    `/v1/materi-pembelajaran/${encodeURIComponent(
+    `/materi-pembelajaran/${encodeURIComponent(
       id
     )}`,
     {

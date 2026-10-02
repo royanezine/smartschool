@@ -61,19 +61,9 @@ export default function PageDetail() {
         setLoading(true);
       }
 
-      /*
-       * Backend yang tersedia:
-       *
-       * GET /api/v1/cms/halaman
-       *
-       * Belum ada:
-       * GET /api/v1/cms/halaman/:id
-       *
-       * Jadi detail mengambil semua halaman,
-       * lalu mencari berdasarkan ID.
-       */
+     
 
-      const result = await apiFetch("/api/v1/cms/halaman");
+      const result = await apiFetch("/api/cms/halaman");
 
       const responseData = result?.data;
 
@@ -214,15 +204,7 @@ export default function PageDetail() {
     }
   };
 
-  /*
-   * URL website publik.
-   *
-   * Backend publik:
-   * /api/v1/publik/:subdomain/halaman/:slug
-   *
-   * Frontend website menggunakan route halaman
-   * sesuai kebutuhan website sekolah.
-   */
+  
 
   const getWebsiteUrl = () => {
     const slug = String(page?.slug || "").toLowerCase();
@@ -261,7 +243,7 @@ export default function PageDetail() {
       setError("");
 
       await apiFetch(
-        `/api/v1/cms/halaman/${page.id}`,
+        `/api/cms/halaman/${page.id}`,
         {
           method: "DELETE",
         }

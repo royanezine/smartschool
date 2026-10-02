@@ -7,20 +7,7 @@ export async function getKelasMapelGuru() {
   return apiFetch("/api/kelas-mapel");
 }
 
-/**
- * Buat tugas baru
- *
- * Backend:
- * POST /api/v1/tugas
- *
- * Body:
- * {
- *   kelasMapelId: string,
- *   judul: string,
- *   deskripsi?: string | null,
- *   batasWaktu: string
- * }
- */
+
 export async function createTugas(data) {
   if (!data?.kelasMapelId) {
     throw new Error("kelasMapelId wajib diisi");
@@ -34,7 +21,7 @@ export async function createTugas(data) {
     throw new Error("Batas waktu tugas wajib diisi");
   }
 
-  return apiFetch("/api/v1/tugas", {
+  return apiFetch("/api/tugas", {
     method: "POST",
     body: JSON.stringify({
       kelasMapelId: data.kelasMapelId,
@@ -57,32 +44,22 @@ export async function getTugasByKelasMapel(
   }
 
   return apiFetch(
-    `/api/v1/tugas/kelas-mapel/${kelasMapelId}`
+    `/api/tugas/kelas-mapel/${kelasMapelId}`
   );
 }
 
-/**
- * Ambil detail tugas
- *
- * Backend:
- * GET /api/v1/tugas/:id
- */
+
 export async function getDetailTugas(tugasId) {
   if (!tugasId) {
     throw new Error("ID tugas wajib diisi");
   }
 
   return apiFetch(
-    `/api/v1/tugas/${tugasId}`
+    `/api/tugas/${tugasId}`
   );
 }
 
-/**
- * Update tugas
- *
- * Backend:
- * PUT /api/v1/tugas/:id
- */
+
 export async function updateTugas(
   tugasId,
   data
@@ -92,7 +69,7 @@ export async function updateTugas(
   }
 
   return apiFetch(
-    `/api/v1/tugas/${tugasId}`,
+    `/api/tugas/${tugasId}`,
     {
       method: "PUT",
       body: JSON.stringify({
@@ -112,37 +89,21 @@ export async function updateTugas(
   );
 }
 
-/**
- * Hapus tugas
- *
- * Backend:
- * DELETE /api/v1/tugas/:id
- */
+
 export async function deleteTugas(tugasId) {
   if (!tugasId) {
     throw new Error("ID tugas wajib diisi");
   }
 
   return apiFetch(
-    `/api/v1/tugas/${tugasId}`,
+    `/api/tugas/${tugasId}`,
     {
       method: "DELETE",
     }
   );
 }
 
-/**
- * Submit tugas siswa
- *
- * Backend:
- * POST /api/v1/tugas/:id/submit
- *
- * Body:
- * {
- *   urlFile: string,
- *   keterangan?: string | null
- * }
- */
+
 export async function submitTugas(
   tugasId,
   data
@@ -156,7 +117,7 @@ export async function submitTugas(
   }
 
   return apiFetch(
-    `/api/v1/tugas/${tugasId}/submit`,
+    `/api/tugas/${tugasId}/submit`,
     {
       method: "POST",
       body: JSON.stringify({
@@ -168,12 +129,7 @@ export async function submitTugas(
   );
 }
 
-/**
- * Ambil pengumpulan siswa dari sebuah tugas
- *
- * Guru:
- * GET /api/v1/tugas/:id/pengumpulan
- */
+
 export async function getPengumpulanByTugas(
   tugasId
 ) {
@@ -182,16 +138,11 @@ export async function getPengumpulanByTugas(
   }
 
   return apiFetch(
-    `/api/v1/tugas/${tugasId}/pengumpulan`
+    `/api/tugas/${tugasId}/pengumpulan`
   );
 }
 
-/**
- * Simpan nilai tugas siswa
- *
- * Guru:
- * PATCH /api/v1/tugas/pengumpulan/:pengumpulanId/nilai
- */
+
 export async function beriNilaiTugas(
   pengumpulanId,
   data
@@ -203,7 +154,7 @@ export async function beriNilaiTugas(
   }
 
   return apiFetch(
-    `/api/v1/tugas/pengumpulan/${pengumpulanId}/nilai`,
+    `/api/tugas/pengumpulan/${pengumpulanId}/nilai`,
     {
       method: "PATCH",
       body: JSON.stringify({

@@ -1,11 +1,11 @@
 import { apiFetch } from "../lib/api";
 
-const ROLE_BASE_URL = "/api/v1/role";
+const ROLE_BASE_URL = "/api/role";
 
 /**
  * =====================================================
  * GET SEMUA ROLE
- * GET /api/v1/role
+ * GET /api/role
  * =====================================================
  */
 export async function getRoles() {
@@ -17,7 +17,7 @@ export async function getRoles() {
 /**
  * =====================================================
  * GET DETAIL ROLE
- * GET /api/v1/role/:id
+ * GET /api/role/:id
  * =====================================================
  */
 export async function getRoleById(id) {
@@ -35,7 +35,7 @@ export async function getRoleById(id) {
 /**
  * =====================================================
  * GET SEMUA IZIN / PERMISSION
- * GET /api/v1/role/izin
+ * GET /api/role/izin
  * =====================================================
  */
 export async function getPermissions() {
@@ -49,14 +49,17 @@ export async function getPermissions() {
 /**
  * =====================================================
  * CREATE ROLE
- * POST /api/v1/role
+ * POST /api/role
  * =====================================================
  */
 export async function createRole(payload) {
-  const response = await apiFetch(ROLE_BASE_URL, {
-    method: "POST",
-    body: JSON.stringify(payload),
-  });
+  const response = await apiFetch(
+    ROLE_BASE_URL,
+    {
+      method: "POST",
+      body: JSON.stringify(payload),
+    }
+  );
 
   return response?.data || null;
 }
@@ -64,10 +67,13 @@ export async function createRole(payload) {
 /**
  * =====================================================
  * UPDATE ROLE
- * PUT /api/v1/role/:id
+ * PUT /api/role/:id
  * =====================================================
  */
-export async function updateRole(id, payload) {
+export async function updateRole(
+  id,
+  payload
+) {
   if (!id) {
     throw new Error("ID role wajib diisi.");
   }
@@ -86,7 +92,7 @@ export async function updateRole(id, payload) {
 /**
  * =====================================================
  * DELETE ROLE
- * DELETE /api/v1/role/:id
+ * DELETE /api/role/:id
  *
  * Backend menggunakan soft delete.
  * =====================================================

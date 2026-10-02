@@ -478,7 +478,7 @@ export default function SiswaAbsensiPage() {
       try {
         const siswaResponse =
           await apiFetch(
-            "/api/v1/siswa/me",
+            "/api/siswa/me",
             {
               method: "GET",
             }

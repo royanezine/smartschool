@@ -1,6 +1,6 @@
 import { apiFetch } from "../lib/api";
 
-const ENDPOINT = "/api/v1/ppdb";
+const ENDPOINT = "/api/ppdb";
 
 export interface DaftarPpdbPayload {
   sekolahId: string;

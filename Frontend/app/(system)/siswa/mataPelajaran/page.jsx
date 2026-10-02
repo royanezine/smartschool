@@ -574,7 +574,7 @@ export default function MataPelajaranPage() {
 
         const response =
           await fetch(
-            `${API_URL}/api/v1/notifikasi`,
+            `${API_URL}/api/notifikasi`,
             {
               method: "GET",
               headers: getHeaders(),
@@ -656,7 +656,7 @@ export default function MataPelajaranPage() {
 
           const response =
             await fetch(
-              `${API_URL}/api/v1/tugas/kelas-mapel/${kelasMapelId}`,
+              `${API_URL}/api/tugas/kelas-mapel/${kelasMapelId}`,
               {
                 method: "GET",
                 headers: getHeaders(),
@@ -740,7 +740,7 @@ export default function MataPelajaranPage() {
       try {
         const response =
           await fetch(
-            `${API_URL}/api/v1/materi-pembelajaran`,
+            `${API_URL}/api/materi-pembelajaran`,
             {
               method: "GET",
               headers: getHeaders(),

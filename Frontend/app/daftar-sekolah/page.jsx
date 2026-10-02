@@ -95,7 +95,7 @@ export default function DaftarSekolahPage() {
         setLoadingPaket(true);
 
         const response = await fetch(
-          `${API_URL}/api/v1/paket`
+          `${API_URL}/api/paket`
         );
 
         const result = await response.json();

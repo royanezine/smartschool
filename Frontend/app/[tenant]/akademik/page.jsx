@@ -64,7 +64,7 @@ export default function AkademikPage() {
       setError("");
 
       const url =
-        `${API_URL}/api/v1/publik/` +
+        `${API_URL}/api/publik/` +
         `${encodeURIComponent(subdomain)}/halaman/` +
         `${encodeURIComponent(SLUG_AKADEMIK)}`;
 

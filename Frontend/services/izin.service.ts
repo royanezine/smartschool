@@ -72,7 +72,7 @@ export async function ajukanIzin(
   }
 
   const response = await apiFetch(
-    "/api/v1/permohonan-izin",
+    "/api/permohonan-izin",
     {
       method: "POST",
       body: formData,
@@ -84,7 +84,7 @@ export async function ajukanIzin(
 
 export async function getDaftarIzin(): Promise<any> {
   const response = await apiFetch(
-    "/api/v1/permohonan-izin",
+    "/api/permohonan-izin",
     {
       method: "GET",
     }
@@ -104,7 +104,7 @@ export async function verifikasiIzin(
   }
 
   const response = await apiFetch(
-    `/api/v1/permohonan-izin/${id}/verifikasi`,
+    `/api/permohonan-izin/${id}/verifikasi`,
     {
       method: "PATCH",
       body: JSON.stringify({
@@ -137,7 +137,7 @@ export async function verifikasiPengajuan(
   }
 
   const response = await apiFetch(
-    `/api/v1/permohonan-izin/${id}/verifikasi-pengajuan`,
+    `/api/permohonan-izin/${id}/verifikasi-pengajuan`,
     {
       method: "PATCH",
       body: JSON.stringify({

@@ -1,6 +1,6 @@
 import { apiFetch } from "../lib/api";
 
-const API_ENDPOINT = "/api/v1/sarpras";
+const API_ENDPOINT = "/api/sarpras";
 
 // =====================================================
 // GUDANG
@@ -198,10 +198,7 @@ export async function deleteAset(id) {
   });
 }
 
-// =====================================================
-// PEMINJAMAN - GURU
-// POST /api/v1/sarpras/peminjaman
-// =====================================================
+
 
 export async function ajukanPeminjaman(data) {
   if (!data?.asetId) {
@@ -318,24 +315,7 @@ export async function getDetailPeminjaman(id) {
   );
 }
 
-// =====================================================
-// VERIFIKASI / PERSETUJUAN
-//
-// BE:
-// PATCH /api/v1/sarpras/peminjaman/:id/persetujuan
-//
-// Body:
-// {
-//   status: "disetujui"
-// }
-//
-// atau:
-//
-// {
-//   status: "ditolak",
-//   catatanPenolakan: "..."
-// }
-// =====================================================
+
 
 export async function verifikasiPeminjaman(
   id,
@@ -371,25 +351,7 @@ export async function verifikasiPeminjaman(
   );
 }
 
-// =====================================================
-// SERAHKAN ASET KE SISWA
-//
-// BE:
-// PATCH /api/v1/sarpras/peminjaman/:id/ambil
-//
-// Body:
-// {
-//   siswaPengambilId,
-//   namaSiswaPengambil,
-//   kondisiSaatPinjam
-// }
-//
-// BE akan:
-// - validasi siswa
-// - mengurangi stok
-// - mengubah status menjadi "dipinjam"
-// - menyimpan tanggalPinjam
-// =====================================================
+
 
 export async function serahkanPeminjaman(
   id,
@@ -422,25 +384,7 @@ export async function serahkanPeminjaman(
   );
 }
 
-// =====================================================
-// KEMBALIKAN ASET
-//
-// BE:
-// PATCH /api/v1/sarpras/peminjaman/:id/kembali
-//
-// Body:
-// {
-//   siswaPengembaliId,
-//   namaSiswaPengembali,
-//   items: [
-//     {
-//       asetId,
-//       kondisiSaatKembali,
-//       catatanKembali
-//     }
-//   ]
-// }
-// =====================================================
+
 
 export async function kembalikanPeminjaman(
   id,

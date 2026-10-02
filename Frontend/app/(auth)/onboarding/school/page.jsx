@@ -16,8 +16,8 @@ import {
   CheckCircle2,
 } from "lucide-react";
 
-import { getPaketById } from "../../../services/paket.service";
-import { registerTenant } from "../../../services/tenant.service";
+import { getPaketById } from "../../../../services/paket.service";
+import { registerTenant } from "../../../../services/tenant.service";
 
 export default function SchoolOnboardingPage() {
   const [paket, setPaket] = useState(null);

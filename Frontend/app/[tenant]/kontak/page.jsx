@@ -52,7 +52,7 @@ export default function KontakPage() {
         }
 
         const response = await fetch(
-          `${API_URL}/api/v1/publik/${SUBDOMAIN}/halaman/${SLUG_KONTAK}`,
+          `${API_URL}/api/publik/${SUBDOMAIN}/halaman/${SLUG_KONTAK}`,
           {
             method: "GET",
             headers: {

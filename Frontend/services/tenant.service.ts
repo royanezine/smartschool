@@ -96,14 +96,12 @@ export interface RegisterTenantResponse {
   data?: any;
 }
 
-/**
- * POST /api/v1/tenant/register
- */
+
 export async function registerTenant(
   data: RegisterTenantData
 ): Promise<RegisterTenantResponse> {
   const response = await fetch(
-    `${getApiUrl()}/api/v1/tenant/register`,
+    `${getApiUrl()}/api/tenant/register`,
     {
       method: "POST",
 
@@ -190,33 +188,7 @@ export interface VerifyTenantResponse {
   };
 }
 
-/**
- * ============================================================
- * VERIFY TENANT
- * ============================================================
- *
- * POST /api/v1/tenant/verify
- *
- * Paket berbayar:
- * {
- *   success: true,
- *   message: "...",
- *   data: {
- *     payment_url: "...",
- *     is_trial: false,
- *     order_id: "..."
- *   }
- * }
- *
- * Paket trial:
- * {
- *   success: true,
- *   message: "...",
- *   data: {
- *     is_trial: true
- *   }
- * }
- */
+
 export async function verifyTenant(
   email: string,
   kodeOtp: string,
@@ -249,7 +221,7 @@ export async function verifyTenant(
   );
 
   const response = await fetch(
-    `${getApiUrl()}/api/v1/tenant/verify`,
+    `${getApiUrl()}/api/tenant/verify`,
     {
       method: "POST",
 
@@ -324,19 +296,7 @@ export async function verifyTenant(
   return result;
 }
 
-/**
- * ============================================================
- * GET TENANT STATUS
- * ============================================================
- *
- * GET /api/v1/tenant/status
- *
- * Opsi response:
- * {
- *   success: true,
- *   data: { status: "waiting" | "active" | "failed" }
- * }
- */
+
 export interface GetTenantStatusResponse {
   success: boolean;
   message?: string;
@@ -348,7 +308,7 @@ export interface GetTenantStatusResponse {
 export async function getTenantStatus(): Promise<GetTenantStatusResponse> {
   try {
     const response = await fetch(
-      `${getApiUrl()}/api/v1/tenant/status`,
+      `${getApiUrl()}/api/tenant/status`,
       {
         method: "GET",
         headers: {

@@ -168,7 +168,7 @@ function formatDecimal(value) {
 async function getUjianById(id) {
   if (!id) throw new Error("ID ujian tidak ditemukan.");
 
-  return apiFetch(`/api/v1/ujian/${id}`, {
+  return apiFetch(`/api/ujian/${id}`, {
     method: "GET",
   });
 }
@@ -176,7 +176,7 @@ async function getUjianById(id) {
 async function getSoalByUjian(ujianId) {
   if (!ujianId) throw new Error("ID ujian tidak ditemukan.");
 
-  return apiFetch(`/api/v1/soal-ujian/ujian/${ujianId}`, {
+  return apiFetch(`/api/soal-ujian/ujian/${ujianId}`, {
     method: "GET",
   });
 }
@@ -188,7 +188,7 @@ async function mulaiUjian(ujianId, token) {
     throw new Error("Token ujian wajib diisi.");
   }
 
-  return apiFetch(`/api/v1/ujian/${ujianId}/mulai`, {
+  return apiFetch(`/api/ujian/${ujianId}/mulai`, {
     method: "POST",
     body: JSON.stringify({
       token: token.trim().toUpperCase(),
@@ -201,7 +201,7 @@ async function submitUjian(sesiId, jawaban) {
     throw new Error("ID sesi ujian tidak ditemukan.");
   }
 
-  return apiFetch(`/api/v1/ujian/sesi/${sesiId}/submit`, {
+  return apiFetch(`/api/ujian/sesi/${sesiId}/submit`, {
     method: "POST",
     body: JSON.stringify({
       jawaban,

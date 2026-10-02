@@ -96,7 +96,7 @@ async function getUjianById(id) {
       : null;
 
   const response = await fetch(
-    `${API_URL}/api/v1/ujian/${id}`,
+    `${API_URL}/api/ujian/${id}`,
     {
       method: "GET",
       headers: {

@@ -61,7 +61,7 @@ function getPublicApiBase() {
     return `${API_URL}/v1/publik`;
   }
 
-  return `${API_URL}/api/v1/publik`;
+  return `${API_URL}/api/publik`;
 }
 
 /* =========================================================

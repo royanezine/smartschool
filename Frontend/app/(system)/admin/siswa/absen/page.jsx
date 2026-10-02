@@ -41,9 +41,9 @@ const RAW_API_URL =
 
 const API_URL = RAW_API_URL.replace(/\/$/, "");
 
-const API_BASE = API_URL.endsWith("/api/v1")
+const API_BASE = API_URL.endsWith("/api")
   ? API_URL
-  : `${API_URL}/api/v1`;
+  : `${API_URL}/api`;
 
 /* =========================================================
    BACKEND HELPERS

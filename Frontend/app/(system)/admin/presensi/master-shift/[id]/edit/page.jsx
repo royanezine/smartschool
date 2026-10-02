@@ -71,8 +71,7 @@ export default function EditMasterShiftPage() {
 
   const shiftId = Number(params.id);
 
-  // Dummy sementara.
-  // Nanti diganti GET /api/v1/shifts/:id
+  
   const shift =
     shiftId === initialShift.id ? initialShift : null;
 
@@ -171,10 +170,7 @@ export default function EditMasterShiftPage() {
       return;
     }
 
-    // =====================================================
-    // NANTI DI SINI PUT/PATCH KE BE
-    // PATCH /api/v1/shifts/:id
-    // =====================================================
+    
 
     alert("Perubahan shift berhasil disimpan.");
 
