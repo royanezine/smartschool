@@ -87,7 +87,7 @@ export default function TambahGaleri() {
   };
 
   return (
-    <div className="flex min-h-screen w-full bg-slate-50 overflow-x-hidden">
+    <div className="flex min-h-screen w-full theme-page overflow-x-hidden">
       {/* ================= SIDEBAR ================= */}
       <Sidebar
         active={active}
@@ -104,7 +104,7 @@ export default function TambahGaleri() {
           w-full
           overflow-x-hidden
           overflow-y-auto
-          bg-slate-50
+          theme-page
           transition-all
           duration-300
         "
@@ -162,32 +162,40 @@ export default function TambahGaleri() {
                     whitespace-nowrap
                     text-xs
                     sm:text-sm
-                    text-gray-500
+                    theme-text-muted
                   "
                 >
                   <li>
                     <a
                       href="/cmsAdmin"
-                      className="hover:text-indigo-600 transition-colors"
+                      className="
+                        theme-text-muted
+                        hover:text-[var(--color-primary)]
+                        transition-colors
+                      "
                     >
                       Dashboard
                     </a>
                   </li>
 
-                  <li className="text-gray-300">/</li>
+                  <li className="theme-text-placeholder">/</li>
 
                   <li>
                     <a
                       href="/cmsAdmin/website/galeri"
-                      className="hover:text-indigo-600 transition-colors"
+                      className="
+                        theme-text-muted
+                        hover:text-[var(--color-primary)]
+                        transition-colors
+                      "
                     >
                       Galeri
                     </a>
                   </li>
 
-                  <li className="text-gray-300">/</li>
+                  <li className="theme-text-placeholder">/</li>
 
-                  <li className="font-medium text-indigo-600">
+                  <li className="font-medium theme-sidebar-text-active">
                     Tambah Baru
                   </li>
                 </ol>
@@ -205,8 +213,8 @@ export default function TambahGaleri() {
                   text-xs
                   sm:text-sm
                   font-medium
-                  text-gray-600
-                  hover:text-indigo-600
+                  theme-text-secondary
+                  hover:text-[var(--color-primary)]
                   transition-colors
                 "
               >
@@ -219,11 +227,11 @@ export default function TambahGaleri() {
             <div
               className="
                 w-full
-                bg-white
+                theme-card
                 rounded-xl
                 sm:rounded-2xl
                 border
-                border-gray-100
+                theme-border
                 shadow-sm
                 overflow-hidden
               "
@@ -232,8 +240,8 @@ export default function TambahGaleri() {
               <div
                 className="
                   border-b
-                  border-gray-100
-                  bg-gray-50/70
+                  theme-border
+                  theme-card-soft
                   px-4
                   py-4
                   sm:px-6
@@ -248,8 +256,7 @@ export default function TambahGaleri() {
                       shrink-0
                       p-2
                       sm:p-2.5
-                      bg-indigo-50
-                      text-indigo-600
+                      theme-info
                       rounded-lg
                       sm:rounded-xl
                     "
@@ -263,7 +270,7 @@ export default function TambahGaleri() {
                         text-base
                         sm:text-lg
                         font-bold
-                        text-gray-900
+                        theme-text
                       "
                     >
                       Form Tambah Foto
@@ -274,7 +281,7 @@ export default function TambahGaleri() {
                         mt-0.5
                         text-xs
                         sm:text-sm
-                        text-gray-500
+                        theme-text-muted
                         leading-relaxed
                       "
                     >
@@ -319,14 +326,14 @@ export default function TambahGaleri() {
                           block
                           text-sm
                           font-medium
-                          text-gray-700
+                          theme-text-secondary
                         "
                       >
                         Upload Foto{" "}
-                        <span className="text-red-500">*</span>
+                        <span className="text-[var(--color-danger)]">*</span>
                       </label>
 
-                      <p className="mt-1 text-xs text-gray-400">
+                      <p className="mt-1 text-xs theme-text-muted">
                         Pilih gambar untuk ditampilkan di galeri
                       </p>
                     </div>
@@ -348,8 +355,8 @@ export default function TambahGaleri() {
                         transition-all
                         ${
                           preview
-                            ? "border-indigo-300 bg-indigo-50/30"
-                            : "border-gray-300 hover:border-indigo-400 hover:bg-indigo-50/30"
+                            ? "border-[var(--color-primary)] bg-[var(--color-primary)]/10"
+                            : "theme-border hover:border-[var(--color-primary)] hover:bg-[var(--color-primary)]/10"
                         }
                       `}
                     >
@@ -386,10 +393,10 @@ export default function TambahGaleri() {
                               onClick={clearImage}
                               className="
                                 p-3
-                                bg-white
+                                theme-card
                                 rounded-full
-                                hover:bg-red-50
-                                text-red-500
+                                hover:bg-[var(--color-danger-background)]
+                                text-[var(--color-danger)]
                                 transition-colors
                                 shadow-lg
                               "
@@ -421,7 +428,7 @@ export default function TambahGaleri() {
                             className="
                               p-3
                               sm:p-4
-                              bg-indigo-50
+                              theme-info
                               rounded-full
                               mb-3
                             "
@@ -432,7 +439,6 @@ export default function TambahGaleri() {
                                 h-7
                                 sm:w-8
                                 sm:h-8
-                                text-indigo-600
                               "
                             />
                           </div>
@@ -441,7 +447,7 @@ export default function TambahGaleri() {
                             className="
                               text-sm
                               font-semibold
-                              text-gray-700
+                              theme-text-secondary
                             "
                           >
                             Klik untuk upload gambar
@@ -450,7 +456,7 @@ export default function TambahGaleri() {
                           <p
                             className="
                               text-xs
-                              text-gray-400
+                              theme-text-muted
                               mt-1
                               max-w-[220px]
                               leading-relaxed
@@ -480,9 +486,9 @@ export default function TambahGaleri() {
                           items-center
                           gap-2
                           p-3
-                          bg-gray-50
+                          theme-card-soft
                           border
-                          border-gray-100
+                          theme-border
                           rounded-xl
                           min-w-0
                         "
@@ -491,7 +497,7 @@ export default function TambahGaleri() {
                           className="
                             w-4
                             h-4
-                            text-indigo-500
+                            text-[var(--color-primary)]
                             shrink-0
                           "
                         />
@@ -499,7 +505,7 @@ export default function TambahGaleri() {
                         <span
                           className="
                             text-xs
-                            text-gray-600
+                            theme-text-secondary
                             truncate
                             min-w-0
                           "
@@ -513,8 +519,8 @@ export default function TambahGaleri() {
                           className="
                             ml-auto
                             shrink-0
-                            text-gray-400
-                            hover:text-red-500
+                            theme-text-muted
+                            hover:text-[var(--color-danger)]
                           "
                           aria-label="Hapus file"
                         >
@@ -548,12 +554,12 @@ export default function TambahGaleri() {
                             block
                             text-sm
                             font-medium
-                            text-gray-700
+                            theme-text-secondary
                             mb-1.5
                           "
                         >
                           Judul Foto{" "}
-                          <span className="text-red-500">*</span>
+                          <span className="text-[var(--color-danger)]">*</span>
                         </label>
 
                         <input
@@ -571,17 +577,12 @@ export default function TambahGaleri() {
                             sm:px-4
                             py-2.5
                             border
-                            text-gray-900
-                            border-gray-200
+                            theme-input
                             rounded-lg
                             sm:rounded-xl
-                            bg-gray-50/50
                             text-sm
-                            placeholder:text-gray-400
                             focus:outline-none
-                            focus:ring-2
-                            focus:ring-indigo-500/20
-                            focus:border-indigo-500
+                            focus:border-[var(--color-primary)]
                             transition-all
                           "
                         />
@@ -595,12 +596,12 @@ export default function TambahGaleri() {
                             block
                             text-sm
                             font-medium
-                            text-gray-700
+                            theme-text-secondary
                             mb-1.5
                           "
                         >
                           Album{" "}
-                          <span className="text-red-500">*</span>
+                          <span className="text-[var(--color-danger)]">*</span>
                         </label>
 
                         <div className="relative">
@@ -612,7 +613,7 @@ export default function TambahGaleri() {
                               -translate-y-1/2
                               w-4
                               h-4
-                              text-gray-400
+                              theme-text-muted
                               pointer-events-none
                             "
                           />
@@ -630,16 +631,12 @@ export default function TambahGaleri() {
                               pr-8
                               py-2.5
                               border
-                              text-gray-900
-                              border-gray-200
+                              theme-input
                               rounded-lg
                               sm:rounded-xl
-                              bg-gray-50/50
                               text-sm
                               focus:outline-none
-                              focus:ring-2
-                              focus:ring-indigo-500/20
-                              focus:border-indigo-500
+                              focus:border-[var(--color-primary)]
                               transition-all
                               appearance-none
                             "
@@ -669,7 +666,7 @@ export default function TambahGaleri() {
                             block
                             text-sm
                             font-medium
-                            text-gray-700
+                            theme-text-secondary
                             mb-1.5
                           "
                         >
@@ -685,7 +682,7 @@ export default function TambahGaleri() {
                               -translate-y-1/2
                               w-4
                               h-4
-                              text-gray-400
+                              theme-text-muted
                               pointer-events-none
                             "
                           />
@@ -702,16 +699,12 @@ export default function TambahGaleri() {
                               pr-8
                               py-2.5
                               border
-                              text-gray-900
-                              border-gray-200
+                              theme-input
                               rounded-lg
                               sm:rounded-xl
-                              bg-gray-50/50
                               text-sm
                               focus:outline-none
-                              focus:ring-2
-                              focus:ring-indigo-500/20
-                              focus:border-indigo-500
+                              focus:border-[var(--color-primary)]
                               transition-all
                               appearance-none
                             "
@@ -743,7 +736,7 @@ export default function TambahGaleri() {
                             block
                             text-sm
                             font-medium
-                            text-gray-700
+                            theme-text-secondary
                             mb-1.5
                           "
                         >
@@ -764,17 +757,12 @@ export default function TambahGaleri() {
                             sm:px-4
                             py-2.5
                             border
-                            text-gray-900
-                            border-gray-200
+                            theme-input
                             rounded-lg
                             sm:rounded-xl
-                            bg-gray-50/50
                             text-sm
-                            placeholder:text-gray-400
                             focus:outline-none
-                            focus:ring-2
-                            focus:ring-indigo-500/20
-                            focus:border-indigo-500
+                            focus:border-[var(--color-primary)]
                             transition-all
                             resize-none
                           "
@@ -788,7 +776,7 @@ export default function TambahGaleri() {
                 <div
                   className="
                     border-t
-                    border-gray-100
+                    theme-border
                     pt-5
                     sm:pt-6
                     flex
@@ -810,12 +798,12 @@ export default function TambahGaleri() {
                       rounded-lg
                       sm:rounded-xl
                       border
-                      border-gray-200
-                      bg-white
-                      text-gray-700
+                      theme-border
+                      theme-card
+                      theme-text-secondary
                       font-medium
                       text-sm
-                      hover:bg-gray-50
+                      theme-header-hover
                       transition-colors
                     "
                   >
@@ -836,12 +824,10 @@ export default function TambahGaleri() {
                       py-2.5
                       rounded-lg
                       sm:rounded-xl
-                      bg-indigo-600
-                      text-white
+                      theme-primary
                       font-medium
                       text-sm
                       shadow-sm
-                      hover:bg-indigo-700
                       hover:shadow-md
                       transition-all
                       duration-200

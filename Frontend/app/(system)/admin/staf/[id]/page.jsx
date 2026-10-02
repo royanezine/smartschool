@@ -23,6 +23,63 @@ import {
 } from "lucide-react";
 
 // ======================================================
+// THEME HELPERS
+// ======================================================
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+// ======================================================
 // DUMMY DATA
 // ======================================================
 const dummyStaf = [
@@ -161,20 +218,20 @@ export default function DetailStafPage() {
     if (status === "aktif") {
       return {
         label: "Aktif",
-        bg: "bg-emerald-50",
-        text: "text-emerald-700",
-        border: "border-emerald-200",
-        dot: "bg-emerald-500",
+        bg: themeSuccessSurface,
+        text: "text-[var(--color-success)]",
+        border: themeSuccessBorder,
+        dot: "bg-[var(--color-success)]",
         icon: CheckCircle,
       };
     }
 
     return {
       label: "Nonaktif",
-      bg: "bg-slate-100",
-      text: "text-slate-600",
-      border: "border-slate-200",
-      dot: "bg-slate-400",
+      bg: themeNeutralSurface,
+      text: "theme-text-secondary",
+      border: themeNeutralBorder,
+      dot: "bg-[var(--color-text-muted)]",
       icon: XCircle,
     };
   };
@@ -184,7 +241,7 @@ export default function DetailStafPage() {
   // ======================================================
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex">
+      <div className="min-h-screen theme-page flex">
         <Sidebar
           active="staf"
           setActive={() => {}}
@@ -207,10 +264,10 @@ export default function DetailStafPage() {
             <div className="text-center">
               <Loader2
                 size={30}
-                className="animate-spin text-blue-600 mx-auto mb-3"
+                className={`${themePrimaryText} animate-spin mx-auto mb-3`}
               />
 
-              <p className="text-sm text-slate-500">
+              <p className="text-sm theme-text-muted">
                 Memuat data staf...
               </p>
             </div>
@@ -225,7 +282,7 @@ export default function DetailStafPage() {
   // ======================================================
   if (error || !staf) {
     return (
-      <div className="min-h-screen bg-slate-50 flex">
+      <div className="min-h-screen theme-page flex">
         <Sidebar
           active="staf"
           setActive={() => {}}
@@ -246,24 +303,26 @@ export default function DetailStafPage() {
 
           <main className="flex-1 flex items-center justify-center p-6">
             <div className="text-center max-w-sm">
-              <div className="w-12 h-12 mx-auto mb-4 rounded-full bg-rose-50 flex items-center justify-center">
+              <div
+                className={`w-12 h-12 mx-auto mb-4 rounded-full ${themeDangerSurface} flex items-center justify-center`}
+              >
                 <AlertCircle
                   size={24}
-                  className="text-rose-500"
+                  className="theme-danger"
                 />
               </div>
 
-              <h2 className="text-base font-semibold text-slate-800">
+              <h2 className="text-base font-semibold theme-text">
                 Data tidak ditemukan
               </h2>
 
-              <p className="text-sm text-slate-500 mt-1 mb-5">
+              <p className="text-sm theme-text-muted mt-1 mb-5">
                 {error || "Data staf yang Anda cari tidak tersedia."}
               </p>
 
               <button
                 onClick={goBack}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700 transition"
+                className={`inline-flex items-center gap-2 px-4 py-2.5 rounded-lg ${themePrimaryGradient} text-[var(--color-card)] text-sm font-medium hover:opacity-90 transition`}
               >
                 <ArrowLeft size={16} />
                 Kembali ke Daftar Staf
@@ -282,7 +341,7 @@ export default function DetailStafPage() {
   // MAIN PAGE
   // ======================================================
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div className="min-h-screen theme-page flex">
       {/* SIDEBAR */}
       <Sidebar
         active="staf"
@@ -312,7 +371,7 @@ export default function DetailStafPage() {
             <div className="mb-6">
               <button
                 onClick={goBack}
-                className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-blue-600 transition mb-4"
+                className={`inline-flex items-center gap-2 text-sm theme-text-secondary hover:text-[var(--color-primary)] transition mb-4`}
               >
                 <ArrowLeft size={17} />
                 Kembali ke Daftar Staf
@@ -321,19 +380,21 @@ export default function DetailStafPage() {
               <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-4">
                 <div>
                   <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-blue-600 flex items-center justify-center shrink-0">
+                    <div
+                      className={`w-10 h-10 rounded-lg ${themePrimaryGradient} flex items-center justify-center shrink-0`}
+                    >
                       <User
                         size={20}
-                        className="text-white"
+                        className="text-[var(--color-card)]"
                       />
                     </div>
 
                     <div>
-                      <h1 className="text-xl sm:text-2xl font-semibold text-slate-800">
+                      <h1 className="text-xl sm:text-2xl font-semibold theme-text">
                         Detail Staf
                       </h1>
 
-                      <p className="text-sm text-slate-500 mt-0.5">
+                      <p className="text-sm theme-text-secondary mt-0.5">
                         Informasi lengkap staf yang terdaftar di SmartSchool.
                       </p>
                     </div>
@@ -345,32 +406,41 @@ export default function DetailStafPage() {
             {/* ==================================================
                 PROFILE CARD
             ================================================== */}
-            <section className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+            <section
+              className={`theme-card border ${themeNeutralBorder} rounded-xl ${themeCardShadow} overflow-hidden`}
+            >
 
               {/* PROFILE HEADER */}
-              <div className="px-5 sm:px-6 lg:px-7 py-6 border-b border-slate-200">
+              <div
+                className={`px-5 sm:px-6 lg:px-7 py-6 border-b ${themeDivider}`}
+              >
                 <div className="flex flex-col xl:flex-row xl:items-center xl:justify-between gap-5">
 
                   <div className="flex items-center gap-4 min-w-0">
+
                     {/* AVATAR */}
-                    <div className="w-16 h-16 sm:w-18 sm:h-18 rounded-full bg-blue-50 border border-blue-100 flex items-center justify-center shrink-0">
+                    <div
+                      className={`w-16 h-16 sm:w-[72px] sm:h-[72px] rounded-full ${themePrimarySoft} ${themePrimarySoftBorder} border flex items-center justify-center shrink-0`}
+                    >
                       <User
                         size={28}
-                        className="text-blue-600"
+                        className={themePrimaryText}
                         strokeWidth={1.8}
                       />
                     </div>
 
                     {/* NAME */}
                     <div className="min-w-0">
-                      <h2 className="text-lg sm:text-xl font-semibold text-slate-800 break-words">
+                      <h2 className="text-lg sm:text-xl font-semibold theme-text break-words">
                         {staf.nama}
                       </h2>
 
                       <div className="flex flex-wrap items-center gap-2 mt-2">
 
                         {/* ROLE */}
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 border border-slate-200 text-xs font-medium text-slate-600">
+                        <span
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md ${themeNeutralSurface} border ${themeNeutralBorder} text-xs font-medium theme-text-secondary`}
+                        >
                           <Briefcase size={13} />
                           {staf.role}
                         </span>
@@ -397,7 +467,7 @@ export default function DetailStafPage() {
                           `/admin/staf/edit/${staf.id}`
                         )
                       }
-                      className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-amber-200 bg-amber-50 text-amber-700 text-sm font-medium hover:bg-amber-100 transition"
+                      className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border ${themeWarningBorder} ${themeWarningSurface} text-[var(--color-warning)] text-sm font-medium hover:opacity-80 transition`}
                     >
                       <Edit size={16} />
                       Edit
@@ -405,7 +475,7 @@ export default function DetailStafPage() {
 
                     <button
                       onClick={handleDelete}
-                      className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border border-rose-200 bg-rose-50 text-rose-700 text-sm font-medium hover:bg-rose-100 transition"
+                      className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg border ${themeDangerBorder} ${themeDangerSurface} theme-danger text-sm font-medium hover:opacity-80 transition`}
                     >
                       <Trash2 size={16} />
                       Hapus
@@ -421,11 +491,11 @@ export default function DetailStafPage() {
 
                 {/* SECTION TITLE */}
                 <div className="mb-4">
-                  <h3 className="text-sm font-semibold text-slate-800">
+                  <h3 className="text-sm font-semibold theme-text">
                     Informasi Kontak & Unit
                   </h3>
 
-                  <p className="text-xs text-slate-400 mt-1">
+                  <p className="text-xs theme-text-muted mt-1">
                     Informasi dasar mengenai staf.
                   </p>
                 </div>
@@ -461,14 +531,14 @@ export default function DetailStafPage() {
                 {/* ==================================================
                     DATA PERSONAL
                 ================================================== */}
-                <div className="mt-7 pt-6 border-t border-slate-200">
+                <div className={`mt-7 pt-6 border-t ${themeDivider}`}>
 
                   <div className="mb-4">
-                    <h3 className="text-sm font-semibold text-slate-800">
+                    <h3 className="text-sm font-semibold theme-text">
                       Data Personal
                     </h3>
 
-                    <p className="text-xs text-slate-400 mt-1">
+                    <p className="text-xs theme-text-muted mt-1">
                       Informasi identitas dan kepegawaian.
                     </p>
                   </div>
@@ -505,36 +575,42 @@ export default function DetailStafPage() {
                 {/* ==================================================
                     PENDIDIKAN
                 ================================================== */}
-                <div className="mt-7 pt-6 border-t border-slate-200">
+                <div className={`mt-7 pt-6 border-t ${themeDivider}`}>
 
                   <div className="mb-4">
-                    <h3 className="text-sm font-semibold text-slate-800">
+                    <h3 className="text-sm font-semibold theme-text">
                       Pendidikan & Keahlian
                     </h3>
 
-                    <p className="text-xs text-slate-400 mt-1">
+                    <p className="text-xs theme-text-muted mt-1">
                       Riwayat pendidikan dan bidang spesialisasi.
                     </p>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
 
-                    <div className="p-4 rounded-lg border border-blue-100 bg-blue-50/50">
-                      <p className="text-xs font-medium text-blue-600 mb-1">
+                    <div
+                      className={`p-4 rounded-lg border ${themePrimarySoftBorder} ${themePrimarySoft}`}
+                    >
+                      <p
+                        className={`text-xs font-medium ${themePrimaryText} mb-1`}
+                      >
                         Pendidikan Terakhir
                       </p>
 
-                      <p className="text-sm font-semibold text-slate-700">
+                      <p className="text-sm font-semibold theme-text">
                         {staf.pendidikan}
                       </p>
                     </div>
 
-                    <div className="p-4 rounded-lg border border-slate-200 bg-slate-50">
-                      <p className="text-xs font-medium text-slate-500 mb-1">
+                    <div
+                      className={`p-4 rounded-lg border ${themeNeutralBorder} ${themeNeutralSurface}`}
+                    >
+                      <p className="text-xs font-medium theme-text-muted mb-1">
                         Spesialisasi
                       </p>
 
-                      <p className="text-sm font-semibold text-slate-700">
+                      <p className="text-sm font-semibold theme-text">
                         {staf.spesialisasi}
                       </p>
                     </div>
@@ -545,21 +621,23 @@ export default function DetailStafPage() {
                     CATATAN
                 ================================================== */}
                 {staf.catatan && (
-                  <div className="mt-7 pt-6 border-t border-slate-200">
-                    <div className="p-4 rounded-lg border border-amber-200 bg-amber-50/50">
+                  <div className={`mt-7 pt-6 border-t ${themeDivider}`}>
+                    <div
+                      className={`p-4 rounded-lg border ${themeWarningBorder} ${themeWarningSurface}`}
+                    >
                       <div className="flex items-start gap-3">
 
                         <AlertCircle
                           size={17}
-                          className="text-amber-600 mt-0.5 shrink-0"
+                          className="text-[var(--color-warning)] mt-0.5 shrink-0"
                         />
 
                         <div className="min-w-0">
-                          <p className="text-xs font-semibold text-amber-700">
+                          <p className="text-xs font-semibold text-[var(--color-warning)]">
                             Catatan
                           </p>
 
-                          <p className="text-sm text-slate-600 mt-1 leading-relaxed">
+                          <p className="text-sm theme-text-secondary mt-1 leading-relaxed">
                             {staf.catatan}
                           </p>
                         </div>
@@ -571,7 +649,9 @@ export default function DetailStafPage() {
                 {/* ==================================================
                     FOOTER STATUS
                 ================================================== */}
-                <div className="mt-7 pt-5 border-t border-slate-200 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div
+                  className={`mt-7 pt-5 border-t ${themeDivider} flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3`}
+                >
 
                   <div className="flex items-center gap-2">
                     <StatusIcon
@@ -579,7 +659,7 @@ export default function DetailStafPage() {
                       className={statusStyle.text}
                     />
 
-                    <span className="text-sm text-slate-600">
+                    <span className="text-sm theme-text-secondary">
                       Status staf:
                     </span>
 
@@ -592,7 +672,7 @@ export default function DetailStafPage() {
 
                   <button
                     onClick={goBack}
-                    className="inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-slate-200 bg-white text-sm font-medium text-slate-600 hover:bg-slate-50 transition"
+                    className={`inline-flex items-center justify-center gap-2 px-4 py-2 rounded-lg border ${themeNeutralBorder} theme-card text-sm font-medium theme-text-secondary ${themeNeutralHover} transition`}
                   >
                     <ArrowLeft size={16} />
                     Kembali
@@ -612,22 +692,26 @@ export default function DetailStafPage() {
 // ======================================================
 function InfoCard({ icon: Icon, label, value }) {
   return (
-    <div className="min-w-0 p-4 rounded-lg border border-slate-200 bg-slate-50/70 hover:bg-slate-50 transition">
+    <div
+      className={`min-w-0 p-4 rounded-lg border ${themeNeutralBorder} ${themeNeutralSurface} ${themeNeutralHover} transition`}
+    >
       <div className="flex items-start gap-3">
 
-        <div className="w-8 h-8 rounded-md bg-white border border-slate-200 flex items-center justify-center shrink-0">
+        <div
+          className={`w-8 h-8 rounded-md theme-card border ${themeNeutralBorder} flex items-center justify-center shrink-0`}
+        >
           <Icon
             size={16}
-            className="text-slate-500"
+            className="theme-text-muted"
           />
         </div>
 
         <div className="min-w-0 flex-1">
-          <p className="text-xs text-slate-400 mb-1">
+          <p className="text-xs theme-text-muted mb-1">
             {label}
           </p>
 
-          <p className="text-sm font-medium text-slate-700 break-words leading-relaxed">
+          <p className="text-sm font-medium theme-text break-words leading-relaxed">
             {value}
           </p>
         </div>
@@ -648,20 +732,22 @@ function DetailItem({
   return (
     <div className="flex items-start gap-3 min-w-0">
 
-      <div className="w-8 h-8 rounded-md bg-slate-100 flex items-center justify-center shrink-0">
+      <div
+        className={`w-8 h-8 rounded-md ${themeNeutralSurface} flex items-center justify-center shrink-0`}
+      >
         <Icon
           size={15}
-          className="text-slate-500"
+          className="theme-text-muted"
         />
       </div>
 
       <div className="min-w-0">
-        <p className="text-xs text-slate-400 mb-1">
+        <p className="text-xs theme-text-muted mb-1">
           {label}
         </p>
 
         <p
-          className={`text-sm font-medium text-slate-700 break-words ${
+          className={`text-sm font-medium theme-text break-words ${
             mono ? "font-mono text-xs sm:text-sm" : ""
           }`}
         >

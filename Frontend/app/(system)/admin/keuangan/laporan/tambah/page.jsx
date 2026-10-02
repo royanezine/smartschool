@@ -4,14 +4,13 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
-  Save,
+  Plus,
   Calendar,
   CreditCard,
   FileText,
   AlertCircle,
   CheckCircle,
   XCircle,
-  Plus,
 } from "lucide-react";
 
 import Header from "../../../../../components/Header";
@@ -29,7 +28,7 @@ const DUMMY_DATA = [
     status: "Lunas",
   },
   {
-    id: 2,
+    id: 2,  
     tanggal: "2026-09-02",
     deskripsi: "Pembelian Alat Tulis",
     kategori: "Pengeluaran",
@@ -86,6 +85,7 @@ const DUMMY_DATA = [
 
 export default function TambahLaporanPage() {
   const router = useRouter();
+
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
@@ -104,13 +104,19 @@ export default function TambahLaporanPage() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
     setError("");
     setSuccess("");
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+
     setSaving(true);
     setError("");
     setSuccess("");
@@ -121,11 +127,13 @@ export default function TambahLaporanPage() {
       setSaving(false);
       return;
     }
+
     if (!formData.deskripsi.trim()) {
       setError("Deskripsi harus diisi");
       setSaving(false);
       return;
     }
+
     if (!formData.jumlah || parseInt(formData.jumlah) <= 0) {
       setError("Jumlah harus diisi dengan angka positif");
       setSaving(false);
@@ -134,9 +142,10 @@ export default function TambahLaporanPage() {
 
     setTimeout(() => {
       // Tambahkan ke DUMMY_DATA
-      const newId = DUMMY_DATA.length > 0
-        ? Math.max(...DUMMY_DATA.map((d) => d.id)) + 1
-        : 1;
+      const newId =
+        DUMMY_DATA.length > 0
+          ? Math.max(...DUMMY_DATA.map((d) => d.id)) + 1
+          : 1;
 
       DUMMY_DATA.push({
         id: newId,
@@ -148,7 +157,7 @@ export default function TambahLaporanPage() {
         status: formData.status,
       });
 
-      setSuccess("✅ Transaksi berhasil ditambahkan!");
+      setSuccess("Transaksi berhasil ditambahkan!");
       setSaving(false);
 
       setTimeout(() => {
@@ -162,7 +171,7 @@ export default function TambahLaporanPage() {
   };
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-slate-50">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar
         active="laporanKeuangan"
         setActive={() => {}}
@@ -181,25 +190,70 @@ export default function TambahLaporanPage() {
           }}
         />
 
-        <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden bg-gradient-to-br from-slate-50 via-white to-slate-50/50">
+        <main className="theme-page min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6 lg:px-8">
+
             {/* HEADER */}
-            <div className="mb-6 flex flex-col gap-4 rounded-2xl bg-gradient-to-r from-[#0F172A] to-[#1E293B] p-6 sm:p-8">
+            <div
+              className="
+                mb-6 flex flex-col gap-4 rounded-2xl p-6
+                sm:p-8
+              "
+              style={{
+                background:
+                  "linear-gradient(135deg, var(--color-sidebar), var(--color-card-soft))",
+                border: "1px solid var(--color-sidebar-border)",
+              }}
+            >
               <div className="flex items-center gap-4">
                 <button
+                  type="button"
                   onClick={handleCancel}
-                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white transition hover:bg-white/20"
+                  className="
+                    flex h-12 w-12 shrink-0 items-center justify-center
+                    rounded-xl
+                    transition
+                  "
+                  style={{
+                    background: "var(--color-sidebar-hover)",
+                    color: "var(--color-sidebar-text)",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background =
+                      "var(--color-sidebar-active)";
+                    e.currentTarget.style.color =
+                      "var(--color-sidebar-text-active)";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background =
+                      "var(--color-sidebar-hover)";
+                    e.currentTarget.style.color =
+                      "var(--color-sidebar-text)";
+                  }}
+                  aria-label="Kembali"
                 >
                   <ArrowLeft size={24} />
                 </button>
+
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-blue-300">
+                  <p
+                    className="text-xs font-semibold uppercase tracking-wider"
+                    style={{ color: "var(--color-sidebar-text-active)" }}
+                  >
                     Tambah Transaksi
                   </p>
-                  <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
+
+                  <h1
+                    className="text-2xl font-bold tracking-tight sm:text-3xl"
+                    style={{ color: "var(--color-sidebar-text)" }}
+                  >
                     Tambah Transaksi Baru
                   </h1>
-                  <p className="mt-1 text-sm text-slate-300">
+
+                  <p
+                    className="mt-1 text-sm"
+                    style={{ color: "var(--color-sidebar-text-muted)" }}
+                  >
                     Masukkan data transaksi keuangan baru
                   </p>
                 </div>
@@ -208,96 +262,196 @@ export default function TambahLaporanPage() {
 
             {/* FORM */}
             <form onSubmit={handleSubmit} className="space-y-6">
+
+              {/* ERROR */}
               {error && (
-                <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
-                  <AlertCircle size={20} className="mt-0.5 shrink-0" />
+                <div
+                  className="
+                    flex items-start gap-3 rounded-xl
+                    border p-4
+                  "
+                  style={{
+                    color: "var(--color-danger)",
+                    background: "var(--color-danger-background)",
+                    borderColor: "var(--color-danger)",
+                  }}
+                >
+                  <AlertCircle
+                    size={20}
+                    className="mt-0.5 shrink-0"
+                  />
+
                   <p className="text-sm">{error}</p>
                 </div>
               )}
 
+              {/* SUCCESS */}
               {success && (
-                <div className="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-700">
-                  <CheckCircle size={20} className="mt-0.5 shrink-0" />
+                <div
+                  className="
+                    flex items-start gap-3 rounded-xl
+                    border p-4
+                  "
+                  style={{
+                    color: "var(--color-success)",
+                    background: "var(--color-success-background)",
+                    borderColor: "var(--color-success)",
+                  }}
+                >
+                  <CheckCircle
+                    size={20}
+                    className="mt-0.5 shrink-0"
+                  />
+
                   <p className="text-sm">{success}</p>
                 </div>
               )}
 
-              <div className="grid grid-cols-1 gap-5 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm sm:p-8">
-                {/* Tanggal */}
+              {/* FORM CARD */}
+              <div className="theme-card grid grid-cols-1 gap-5 rounded-2xl border p-6 shadow-sm sm:p-8">
+
+                {/* TANGGAL */}
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                    Tanggal Transaksi <span className="text-red-500">*</span>
+                  <label className="theme-text-secondary mb-1.5 block text-sm font-medium">
+                    Tanggal Transaksi{" "}
+                    <span style={{ color: "var(--color-danger)" }}>*</span>
                   </label>
+
                   <div className="relative">
                     <Calendar
                       size={18}
-                      className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                      className="
+                        absolute left-3.5 top-1/2
+                        -translate-y-1/2
+                      "
+                      style={{ color: "var(--color-text-muted)" }}
                     />
+
                     <input
                       type="date"
                       name="tanggal"
                       value={formData.tanggal}
                       onChange={handleChange}
-                      className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-700 outline-none transition focus:border-[#155DFC] focus:ring-4 focus:ring-[#155DFC]/10"
+                      className="
+                        theme-input
+                        w-full rounded-xl border
+                        py-2.5 pl-10 pr-4 text-sm
+                        outline-none transition
+                        focus:border-[var(--color-primary)]
+                        focus:ring-4
+                        focus:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
+                      "
                       required
                     />
                   </div>
                 </div>
 
-                {/* Deskripsi */}
+                {/* DESKRIPSI */}
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                    Deskripsi <span className="text-red-500">*</span>
+                  <label className="theme-text-secondary mb-1.5 block text-sm font-medium">
+                    Deskripsi{" "}
+                    <span style={{ color: "var(--color-danger)" }}>*</span>
                   </label>
+
                   <div className="relative">
                     <FileText
                       size={18}
-                      className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                      className="
+                        absolute left-3.5 top-1/2
+                        -translate-y-1/2
+                      "
+                      style={{ color: "var(--color-text-muted)" }}
                     />
+
                     <input
                       type="text"
                       name="deskripsi"
                       value={formData.deskripsi}
                       onChange={handleChange}
                       placeholder="Masukkan deskripsi transaksi"
-                      className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#155DFC] focus:ring-4 focus:ring-[#155DFC]/10"
+                      className="
+                        theme-input
+                        w-full rounded-xl border
+                        py-2.5 pl-10 pr-4 text-sm
+                        outline-none transition
+                        placeholder:text-[var(--color-text-placeholder)]
+                        focus:border-[var(--color-primary)]
+                        focus:ring-4
+                        focus:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
+                      "
                       required
                     />
                   </div>
                 </div>
 
-                {/* Kategori & Jumlah */}
+                {/* KATEGORI & JUMLAH */}
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+
+                  {/* KATEGORI */}
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                      Kategori <span className="text-red-500">*</span>
+                    <label className="theme-text-secondary mb-1.5 block text-sm font-medium">
+                      Kategori{" "}
+                      <span style={{ color: "var(--color-danger)" }}>*</span>
                     </label>
+
                     <select
                       name="kategori"
                       value={formData.kategori}
                       onChange={handleChange}
-                      className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none transition focus:border-[#155DFC] focus:ring-4 focus:ring-[#155DFC]/10"
+                      className="
+                        theme-input
+                        w-full rounded-xl border
+                        px-4 py-2.5 text-sm
+                        outline-none transition
+                        focus:border-[var(--color-primary)]
+                        focus:ring-4
+                        focus:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
+                      "
                     >
-                      <option value="Pemasukan">📈 Pemasukan</option>
-                      <option value="Pengeluaran">📉 Pengeluaran</option>
+                      <option value="Pemasukan">
+                        📈 Pemasukan
+                      </option>
+                      <option value="Pengeluaran">
+                        📉 Pengeluaran
+                      </option>
                     </select>
                   </div>
 
+                  {/* JUMLAH */}
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                      Jumlah (Rp) <span className="text-red-500">*</span>
+                    <label className="theme-text-secondary mb-1.5 block text-sm font-medium">
+                      Jumlah (Rp){" "}
+                      <span style={{ color: "var(--color-danger)" }}>*</span>
                     </label>
+
                     <div className="relative">
-                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+                      <span
+                        className="
+                          absolute left-3.5 top-1/2
+                          -translate-y-1/2
+                          text-sm
+                        "
+                        style={{ color: "var(--color-text-muted)" }}
+                      >
                         Rp
                       </span>
+
                       <input
                         type="number"
                         name="jumlah"
                         value={formData.jumlah}
                         onChange={handleChange}
                         placeholder="0"
-                        className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#155DFC] focus:ring-4 focus:ring-[#155DFC]/10"
+                        className="
+                          theme-input
+                          w-full rounded-xl border
+                          py-2.5 pl-10 pr-4 text-sm
+                          outline-none transition
+                          placeholder:text-[var(--color-text-placeholder)]
+                          focus:border-[var(--color-primary)]
+                          focus:ring-4
+                          focus:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
+                        "
                         required
                         min="1"
                       />
@@ -305,50 +459,91 @@ export default function TambahLaporanPage() {
                   </div>
                 </div>
 
-                {/* Metode & Status */}
+                {/* METODE & STATUS */}
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+
+                  {/* METODE */}
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                    <label className="theme-text-secondary mb-1.5 block text-sm font-medium">
                       Metode Pembayaran
                     </label>
+
                     <div className="relative">
                       <CreditCard
                         size={18}
-                        className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                        className="
+                          absolute left-3.5 top-1/2
+                          -translate-y-1/2
+                        "
+                        style={{ color: "var(--color-text-muted)" }}
                       />
+
                       <select
                         name="metode"
                         value={formData.metode}
                         onChange={handleChange}
-                        className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-700 outline-none transition focus:border-[#155DFC] focus:ring-4 focus:ring-[#155DFC]/10"
+                        className="
+                          theme-input
+                          w-full rounded-xl border
+                          py-2.5 pl-10 pr-4 text-sm
+                          outline-none transition
+                          focus:border-[var(--color-primary)]
+                          focus:ring-4
+                          focus:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
+                        "
                       >
-                        <option value="Transfer">💳 Transfer</option>
-                        <option value="Tunai">💵 Tunai</option>
-                        <option value="Kartu Kredit">💳 Kartu Kredit</option>
-                        <option value="E-Wallet">📱 E-Wallet</option>
+                        <option value="Transfer">
+                          💳 Transfer
+                        </option>
+                        <option value="Tunai">
+                          💵 Tunai
+                        </option>
+                        <option value="Kartu Kredit">
+                          💳 Kartu Kredit
+                        </option>
+                        <option value="E-Wallet">
+                          📱 E-Wallet
+                        </option>
                       </select>
                     </div>
                   </div>
 
+                  {/* STATUS */}
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                    <label className="theme-text-secondary mb-1.5 block text-sm font-medium">
                       Status
                     </label>
+
                     <select
                       name="status"
                       value={formData.status}
                       onChange={handleChange}
-                      className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none transition focus:border-[#155DFC] focus:ring-4 focus:ring-[#155DFC]/10"
+                      className="
+                        theme-input
+                        w-full rounded-xl border
+                        px-4 py-2.5 text-sm
+                        outline-none transition
+                        focus:border-[var(--color-primary)]
+                        focus:ring-4
+                        focus:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
+                      "
                     >
-                      <option value="Lunas">✅ Lunas</option>
-                      <option value="Pending">⏳ Pending</option>
-                      <option value="Batal">❌ Batal</option>
+                      <option value="Lunas">
+                        ✅ Lunas
+                      </option>
+                      <option value="Pending">
+                        ⏳ Pending
+                      </option>
+                      <option value="Batal">
+                        ❌ Batal
+                      </option>
                     </select>
                   </div>
                 </div>
 
-                <div className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">
-                  <p className="text-xs text-slate-400">
+                {/* INFO FIELD */}
+                <div className="theme-card-soft rounded-xl p-4">
+                  <p className="theme-text-muted text-xs">
                     * Field bertanda wajib diisi
                   </p>
                 </div>
@@ -357,22 +552,55 @@ export default function TambahLaporanPage() {
               {/* BUTTONS */}
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex gap-3">
+
+                  {/* BATAL */}
                   <button
                     type="button"
                     onClick={handleCancel}
-                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+                    className="
+                      theme-card
+                      inline-flex items-center gap-2
+                      rounded-xl border
+                      px-6 py-2.5 text-sm font-medium
+                      transition
+                      hover:bg-[var(--color-input-hover)]
+                    "
+                    style={{
+                      color: "var(--color-text-secondary)",
+                    }}
                   >
                     <XCircle size={18} />
                     Batal
                   </button>
+
+                  {/* SIMPAN */}
                   <button
                     type="submit"
                     disabled={saving}
-                    className="inline-flex items-center gap-2 rounded-xl bg-[#155DFC] px-6 py-2.5 text-sm font-medium text-white shadow-lg shadow-blue-500/25 transition hover:bg-[#0d47c9] disabled:opacity-60"
+                    className="
+                      theme-primary
+                      inline-flex items-center gap-2
+                      rounded-xl
+                      px-6 py-2.5
+                      text-sm font-medium
+                      shadow-lg
+                      transition
+                      disabled:cursor-not-allowed
+                      disabled:opacity-60
+                    "
                   >
                     {saving ? (
                       <>
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                        <div
+                          className="
+                            h-4 w-4 animate-spin
+                            rounded-full border-2
+                          "
+                          style={{
+                            borderColor: "#ffffff",
+                            borderTopColor: "transparent",
+                          }}
+                        />
                         Menyimpan...
                       </>
                     ) : (
@@ -386,7 +614,17 @@ export default function TambahLaporanPage() {
               </div>
             </form>
 
-            <footer className="mt-8 border-t border-slate-200/50 pt-6 text-center text-xs text-slate-400">
+            {/* FOOTER */}
+            <footer
+              className="
+                mt-8 border-t
+                pt-6 text-center text-xs
+              "
+              style={{
+                borderColor: "var(--color-border-soft)",
+                color: "var(--color-text-placeholder)",
+              }}
+            >
               © 2026 SmartSchool • Tambah Laporan Keuangan
             </footer>
           </div>
@@ -395,3 +633,4 @@ export default function TambahLaporanPage() {
     </div>
   );
 }
+

@@ -97,6 +97,21 @@ export default function ModulClassPage() {
 
   const notifications = [];
 
+  const themePrimarySoft =
+    "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
+
+  const themePrimarySoftBorder =
+    "border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]";
+
+  const themePrimaryHover =
+    "hover:bg-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
+
+  const themeTextHover =
+    "hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+  const themePrimaryShadow =
+    "shadow-[0_10px_25px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]";
+
   const filteredClasses = useMemo(() => {
     return classes.filter((item) => {
       const keyword = search.toLowerCase();
@@ -115,12 +130,15 @@ export default function ModulClassPage() {
   }, [classes, search, filterStatus]);
 
   const totalClasses = classes.length;
+
   const activeClasses = classes.filter(
     (item) => item.status === "Aktif"
   ).length;
+
   const inactiveClasses = classes.filter(
     (item) => item.status === "Nonaktif"
   ).length;
+
   const totalStudents = classes.reduce(
     (total, item) => total + Number(item.jumlahSiswa || 0),
     0
@@ -149,6 +167,7 @@ export default function ModulClassPage() {
 
   const openEditModal = (item) => {
     setSelectedClass(item);
+
     setForm({
       namaKelas: item.namaKelas,
       tingkat: item.tingkat,
@@ -160,6 +179,7 @@ export default function ModulClassPage() {
       status: item.status,
       deskripsi: item.deskripsi,
     });
+
     setModalType("edit");
     setShowModal(true);
   };
@@ -201,7 +221,9 @@ export default function ModulClassPage() {
   };
 
   const handleDelete = (id) => {
-    const item = classes.find((classItem) => classItem.id === id);
+    const item = classes.find(
+      (classItem) => classItem.id === id
+    );
 
     if (!item) return;
 
@@ -211,7 +233,9 @@ export default function ModulClassPage() {
 
     if (!confirmed) return;
 
-    setClasses((prev) => prev.filter((classItem) => classItem.id !== id));
+    setClasses((prev) =>
+      prev.filter((classItem) => classItem.id !== id)
+    );
   };
 
   const toggleStatus = (id) => {
@@ -220,7 +244,10 @@ export default function ModulClassPage() {
         item.id === id
           ? {
               ...item,
-              status: item.status === "Aktif" ? "Nonaktif" : "Aktif",
+              status:
+                item.status === "Aktif"
+                  ? "Nonaktif"
+                  : "Aktif",
             }
           : item
       )
@@ -228,7 +255,7 @@ export default function ModulClassPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div className="theme-page min-h-screen flex">
       <Sidebar />
 
       <div className="flex-1 min-w-0 flex flex-col">
@@ -236,11 +263,18 @@ export default function ModulClassPage() {
 
         <main className="flex-1 overflow-y-auto">
           <div className="p-5 md:p-7 lg:p-8">
+
             {/* Breadcrumb */}
             <div className="flex items-center gap-2 text-sm mb-3">
-              <span className="text-slate-400">LMS & CBT</span>
-              <span className="text-slate-300">/</span>
-              <span className="text-slate-700 font-medium">
+              <span className="theme-text-muted">
+                LMS & CBT
+              </span>
+
+              <span className="theme-text-placeholder">
+                /
+              </span>
+
+              <span className="theme-text font-medium">
                 Modul LMS & Class
               </span>
             </div>
@@ -248,15 +282,21 @@ export default function ModulClassPage() {
             {/* Header */}
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5 mb-7">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-500/20">
-                  <MonitorPlay size={24} className="text-white" />
+                <div
+                  className={`w-12 h-12 rounded-xl bg-[var(--color-primary)] flex items-center justify-center ${themePrimaryShadow}`}
+                >
+                  <MonitorPlay
+                    size={24}
+                    className="text-white"
+                  />
                 </div>
 
                 <div>
-                  <h1 className="text-2xl md:text-3xl font-bold text-slate-900">
+                  <h1 className="text-2xl md:text-3xl font-bold theme-text">
                     Modul LMS & Class
                   </h1>
-                  <p className="text-sm text-slate-500 mt-1">
+
+                  <p className="text-sm theme-text-secondary mt-1">
                     Kelola kelas pembelajaran dan peserta LMS.
                   </p>
                 </div>
@@ -264,7 +304,7 @@ export default function ModulClassPage() {
 
               <button
                 onClick={openAddModal}
-                className="flex items-center justify-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold shadow-lg shadow-blue-500/20 transition-all"
+                className={`flex items-center justify-center gap-2 px-5 py-2.5 bg-[var(--color-primary)] hover:brightness-95 text-white rounded-xl text-sm font-semibold ${themePrimaryShadow} transition-all`}
               >
                 <Plus size={18} />
                 Tambah Kelas
@@ -303,43 +343,56 @@ export default function ModulClassPage() {
             </div>
 
             {/* Main Card */}
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="theme-card rounded-2xl border theme-border overflow-hidden shadow-[0_6px_24px_color-mix(in_srgb,var(--color-text)_6%,transparent)]">
+
               {/* Toolbar */}
-              <div className="p-4 md:p-5 border-b border-slate-100">
+              <div className="p-4 md:p-5 border-b theme-border-soft">
                 <div className="flex flex-col md:flex-row gap-3 md:items-center md:justify-between">
+
                   <div className="relative flex-1 max-w-xl">
                     <Search
                       size={18}
-                      className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                      className="absolute left-3.5 top-1/2 -translate-y-1/2 theme-text-placeholder"
                     />
 
                     <input
                       type="text"
                       value={search}
-                      onChange={(e) => setSearch(e.target.value)}
+                      onChange={(e) =>
+                        setSearch(e.target.value)
+                      }
                       placeholder="Cari nama kelas, guru, mapel..."
-                      className="w-full pl-10 pr-4 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                      className="theme-input w-full pl-10 pr-4 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] focus:border-[var(--color-primary)]"
                     />
                   </div>
 
                   <div className="relative">
                     <button
-                      onClick={() => setShowFilter(!showFilter)}
-                      className="w-full md:w-auto flex items-center justify-center gap-2 px-4 py-2.5 border border-slate-200 rounded-xl text-sm font-medium text-slate-600 hover:bg-slate-50 transition"
+                      onClick={() =>
+                        setShowFilter(!showFilter)
+                      }
+                      className={`w-full md:w-auto flex items-center justify-center gap-2 px-4 py-2.5 border theme-border rounded-xl text-sm font-medium theme-text-secondary ${themeTextHover} transition`}
                     >
                       <Filter size={16} />
                       Filter
+
                       <ChevronDown
                         size={15}
                         className={`transition-transform ${
-                          showFilter ? "rotate-180" : ""
+                          showFilter
+                            ? "rotate-180"
+                            : ""
                         }`}
                       />
                     </button>
 
                     {showFilter && (
-                      <div className="absolute right-0 mt-2 w-44 bg-white border border-slate-200 rounded-xl shadow-xl z-20 p-1.5">
-                        {["Semua", "Aktif", "Nonaktif"].map((status) => (
+                      <div className="absolute right-0 mt-2 w-44 theme-card border theme-border rounded-xl shadow-xl z-20 p-1.5">
+                        {[
+                          "Semua",
+                          "Aktif",
+                          "Nonaktif",
+                        ].map((status) => (
                           <button
                             key={status}
                             onClick={() => {
@@ -348,8 +401,8 @@ export default function ModulClassPage() {
                             }}
                             className={`w-full text-left px-3 py-2 rounded-lg text-sm transition ${
                               filterStatus === status
-                                ? "bg-blue-50 text-blue-600 font-medium"
-                                : "text-slate-600 hover:bg-slate-50"
+                                ? `${themePrimarySoft} text-[var(--color-primary)] font-medium`
+                                : `theme-text-secondary ${themeTextHover}`
                             }`}
                           >
                             {status}
@@ -364,56 +417,67 @@ export default function ModulClassPage() {
               {/* Table */}
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[1000px]">
+
                   <thead>
-                    <tr className="bg-slate-50/80 border-b border-slate-100">
-                      <th className="text-left px-5 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                    <tr className="theme-card-soft border-b theme-border-soft">
+                      <th className="text-left px-5 py-4 text-xs font-semibold theme-text-muted uppercase tracking-wider">
                         Kelas
                       </th>
-                      <th className="text-left px-5 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+
+                      <th className="text-left px-5 py-4 text-xs font-semibold theme-text-muted uppercase tracking-wider">
                         Guru Pengampu
                       </th>
-                      <th className="text-left px-5 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+
+                      <th className="text-left px-5 py-4 text-xs font-semibold theme-text-muted uppercase tracking-wider">
                         Mata Pelajaran
                       </th>
-                      <th className="text-center px-5 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+
+                      <th className="text-center px-5 py-4 text-xs font-semibold theme-text-muted uppercase tracking-wider">
                         Siswa
                       </th>
-                      <th className="text-left px-5 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+
+                      <th className="text-left px-5 py-4 text-xs font-semibold theme-text-muted uppercase tracking-wider">
                         Tahun Ajaran
                       </th>
-                      <th className="text-center px-5 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+
+                      <th className="text-center px-5 py-4 text-xs font-semibold theme-text-muted uppercase tracking-wider">
                         Status
                       </th>
-                      <th className="text-right px-5 py-4 text-xs font-semibold text-slate-500 uppercase tracking-wider">
+
+                      <th className="text-right px-5 py-4 text-xs font-semibold theme-text-muted uppercase tracking-wider">
                         Aksi
                       </th>
                     </tr>
                   </thead>
 
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y theme-border-soft">
                     {filteredClasses.length > 0 ? (
                       filteredClasses.map((item) => (
                         <tr
                           key={item.id}
-                          className="hover:bg-slate-50/70 transition"
+                          className={`${themePrimaryHover} transition`}
                         >
                           {/* Kelas */}
                           <td className="px-5 py-4">
                             <div className="flex items-center gap-3">
-                              <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
+
+                              <div
+                                className={`w-10 h-10 rounded-xl ${themePrimarySoft} flex items-center justify-center`}
+                              >
                                 <GraduationCap
                                   size={19}
-                                  className="text-blue-600"
+                                  className="text-[var(--color-primary)]"
                                 />
                               </div>
 
                               <div>
-                                <p className="font-semibold text-sm text-slate-800">
+                                <p className="font-semibold text-sm theme-text">
                                   {item.namaKelas}
                                 </p>
 
-                                <p className="text-xs text-slate-400 mt-0.5">
-                                  {item.tingkat} • {item.jurusan}
+                                <p className="text-xs theme-text-muted mt-0.5">
+                                  {item.tingkat} •{" "}
+                                  {item.jurusan}
                                 </p>
                               </div>
                             </div>
@@ -422,14 +486,15 @@ export default function ModulClassPage() {
                           {/* Guru */}
                           <td className="px-5 py-4">
                             <div className="flex items-center gap-2.5">
-                              <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center">
+
+                              <div className="w-8 h-8 rounded-lg theme-success flex items-center justify-center">
                                 <UserCheck
                                   size={15}
-                                  className="text-emerald-600"
+                                  className="text-[var(--color-success)]"
                                 />
                               </div>
 
-                              <span className="text-sm text-slate-600">
+                              <span className="text-sm theme-text-secondary">
                                 {item.guru}
                               </span>
                             </div>
@@ -440,9 +505,10 @@ export default function ModulClassPage() {
                             <div className="flex items-center gap-2">
                               <BookOpen
                                 size={15}
-                                className="text-slate-400"
+                                className="theme-text-muted"
                               />
-                              <span className="text-sm text-slate-600">
+
+                              <span className="text-sm theme-text-secondary">
                                 {item.mataPelajaran}
                               </span>
                             </div>
@@ -450,15 +516,19 @@ export default function ModulClassPage() {
 
                           {/* Siswa */}
                           <td className="px-5 py-4 text-center">
-                            <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-slate-700">
-                              <Users size={15} className="text-blue-500" />
+                            <span className="inline-flex items-center gap-1.5 text-sm font-semibold theme-text">
+                              <Users
+                                size={15}
+                                className="text-[var(--color-primary)]"
+                              />
+
                               {item.jumlahSiswa}
                             </span>
                           </td>
 
                           {/* Tahun */}
                           <td className="px-5 py-4">
-                            <span className="text-sm text-slate-600">
+                            <span className="text-sm theme-text-secondary">
                               {item.tahunAjaran}
                             </span>
                           </td>
@@ -466,20 +536,23 @@ export default function ModulClassPage() {
                           {/* Status */}
                           <td className="px-5 py-4 text-center">
                             <button
-                              onClick={() => toggleStatus(item.id)}
+                              onClick={() =>
+                                toggleStatus(item.id)
+                              }
                               className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium transition ${
                                 item.status === "Aktif"
-                                  ? "bg-emerald-50 text-emerald-600 hover:bg-emerald-100"
-                                  : "bg-slate-100 text-slate-500 hover:bg-slate-200"
+                                  ? "theme-success hover:brightness-95"
+                                  : "theme-card-soft theme-text-muted hover:brightness-95"
                               }`}
                             >
                               <span
                                 className={`w-1.5 h-1.5 rounded-full ${
                                   item.status === "Aktif"
-                                    ? "bg-emerald-500"
-                                    : "bg-slate-400"
+                                    ? "bg-[var(--color-success)]"
+                                    : "bg-[var(--color-text-muted)]"
                                 }`}
                               />
+
                               {item.status}
                             </button>
                           </td>
@@ -487,33 +560,44 @@ export default function ModulClassPage() {
                           {/* Action */}
                           <td className="px-5 py-4">
                             <div className="flex items-center justify-end gap-1">
+
+                              {/* Detail */}
                               <button
-                                onClick={() => openDetailModal(item)}
+                                onClick={() =>
+                                  openDetailModal(item)
+                                }
                                 title="Lihat detail"
-                                className="p-2 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition"
+                                className={`p-2 rounded-lg theme-text-muted hover:text-[var(--color-primary)] ${themePrimarySoft} transition`}
                               >
                                 <Eye size={16} />
                               </button>
 
+                              {/* Edit */}
                               <button
-                                onClick={() => openEditModal(item)}
+                                onClick={() =>
+                                  openEditModal(item)
+                                }
                                 title="Edit"
-                                className="p-2 rounded-lg text-slate-400 hover:text-amber-600 hover:bg-amber-50 transition"
+                                className="p-2 rounded-lg theme-text-muted hover:text-[var(--color-warning)] hover:bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)] transition"
                               >
                                 <Edit3 size={16} />
                               </button>
 
+                              {/* Delete */}
                               <button
-                                onClick={() => handleDelete(item.id)}
+                                onClick={() =>
+                                  handleDelete(item.id)
+                                }
                                 title="Hapus"
-                                className="p-2 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition"
+                                className="p-2 rounded-lg theme-text-muted theme-danger hover:brightness-95 transition"
                               >
                                 <Trash2 size={16} />
                               </button>
 
+                              {/* More */}
                               <button
                                 title="Menu lainnya"
-                                className="p-2 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition"
+                                className={`p-2 rounded-lg theme-text-muted ${themeTextHover} transition`}
                               >
                                 <MoreVertical size={16} />
                               </button>
@@ -523,20 +607,26 @@ export default function ModulClassPage() {
                       ))
                     ) : (
                       <tr>
-                        <td colSpan={7} className="px-5 py-14 text-center">
+                        <td
+                          colSpan={7}
+                          className="px-5 py-14 text-center"
+                        >
                           <div className="flex flex-col items-center">
-                            <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center mb-3">
+
+                            <div
+                              className={`w-14 h-14 rounded-2xl ${themePrimarySoft} flex items-center justify-center mb-3`}
+                            >
                               <MonitorPlay
                                 size={25}
-                                className="text-slate-400"
+                                className="theme-text-muted"
                               />
                             </div>
 
-                            <p className="font-semibold text-slate-700">
+                            <p className="font-semibold theme-text">
                               Tidak ada kelas ditemukan
                             </p>
 
-                            <p className="text-sm text-slate-400 mt-1">
+                            <p className="text-sm theme-text-muted mt-1">
                               Coba ubah kata pencarian atau filter.
                             </p>
                           </div>
@@ -548,22 +638,23 @@ export default function ModulClassPage() {
               </div>
 
               {/* Footer */}
-              <div className="px-5 py-4 border-t border-slate-100 flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
-                <p className="text-xs text-slate-400">
+              <div className="px-5 py-4 border-t theme-border-soft flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
+
+                <p className="text-xs theme-text-muted">
                   Menampilkan{" "}
-                  <span className="font-semibold text-slate-600">
+                  <span className="font-semibold theme-text-secondary">
                     {filteredClasses.length}
                   </span>{" "}
                   dari{" "}
-                  <span className="font-semibold text-slate-600">
+                  <span className="font-semibold theme-text-secondary">
                     {classes.length}
                   </span>{" "}
                   kelas
                 </p>
 
-                <div className="text-xs text-slate-400">
+                <div className="text-xs theme-text-muted">
                   Total peserta:{" "}
-                  <span className="font-semibold text-slate-600">
+                  <span className="font-semibold theme-text-secondary">
                     {totalStudents} siswa
                   </span>
                 </div>
@@ -576,16 +667,19 @@ export default function ModulClassPage() {
       {/* MODAL */}
       {showModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+
           <div
-            className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+            className="absolute inset-0 bg-[color-mix(in_srgb,var(--color-text)_45%,transparent)] backdrop-blur-sm"
             onClick={() => setShowModal(false)}
           />
 
-          <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white rounded-2xl shadow-2xl">
+          <div className="relative w-full max-w-2xl max-h-[90vh] overflow-y-auto theme-card rounded-2xl border theme-border shadow-2xl">
+
             {/* Modal Header */}
-            <div className="sticky top-0 bg-white z-10 px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+            <div className="sticky top-0 theme-card z-10 px-6 py-4 border-b theme-border-soft flex items-center justify-between">
+
               <div>
-                <h2 className="text-lg font-bold text-slate-800">
+                <h2 className="text-lg font-bold theme-text">
                   {modalType === "add"
                     ? "Tambah Kelas LMS"
                     : modalType === "edit"
@@ -593,7 +687,7 @@ export default function ModulClassPage() {
                     : "Detail Kelas LMS"}
                 </h2>
 
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="text-xs theme-text-muted mt-1">
                   {modalType === "detail"
                     ? "Informasi lengkap kelas LMS."
                     : "Lengkapi informasi kelas pembelajaran."}
@@ -602,7 +696,7 @@ export default function ModulClassPage() {
 
               <button
                 onClick={() => setShowModal(false)}
-                className="p-2 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-600 transition"
+                className={`p-2 rounded-lg theme-text-muted ${themeTextHover} transition`}
               >
                 <X size={18} />
               </button>
@@ -611,8 +705,11 @@ export default function ModulClassPage() {
             {/* Detail */}
             {modalType === "detail" && selectedClass ? (
               <div className="p-6">
-                <div className="flex items-center gap-4 p-4 rounded-xl bg-blue-50 border border-blue-100 mb-5">
-                  <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center">
+
+                <div
+                  className={`flex items-center gap-4 p-4 rounded-xl ${themePrimarySoft} border ${themePrimarySoftBorder} mb-5`}
+                >
+                  <div className="w-12 h-12 rounded-xl bg-[var(--color-primary)] flex items-center justify-center">
                     <GraduationCap
                       size={24}
                       className="text-white"
@@ -620,16 +717,19 @@ export default function ModulClassPage() {
                   </div>
 
                   <div>
-                    <h3 className="font-bold text-slate-800 text-lg">
+                    <h3 className="font-bold theme-text text-lg">
                       {selectedClass.namaKelas}
                     </h3>
-                    <p className="text-sm text-slate-500">
-                      {selectedClass.tingkat} • {selectedClass.jurusan}
+
+                    <p className="text-sm theme-text-secondary">
+                      {selectedClass.tingkat} •{" "}
+                      {selectedClass.jurusan}
                     </p>
                   </div>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
                   <DetailItem
                     label="Guru Pengampu"
                     value={selectedClass.guru}
@@ -662,19 +762,22 @@ export default function ModulClassPage() {
                 </div>
 
                 <div className="mt-5">
-                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+
+                  <p className="text-xs font-semibold theme-text-muted uppercase tracking-wider mb-2">
                     Deskripsi
                   </p>
 
-                  <div className="p-4 rounded-xl bg-slate-50 text-sm text-slate-600 leading-relaxed">
-                    {selectedClass.deskripsi || "Tidak ada deskripsi."}
+                  <div className="p-4 rounded-xl theme-card-soft text-sm theme-text-secondary leading-relaxed border theme-border-soft">
+                    {selectedClass.deskripsi ||
+                      "Tidak ada deskripsi."}
                   </div>
                 </div>
 
                 <div className="flex justify-end mt-6">
+
                   <button
                     onClick={() => setShowModal(false)}
-                    className="px-5 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-sm font-medium text-slate-700 transition"
+                    className={`px-5 py-2.5 rounded-xl theme-card-soft border theme-border ${themeTextHover} text-sm font-medium theme-text-secondary transition`}
                   >
                     Tutup
                   </button>
@@ -682,13 +785,20 @@ export default function ModulClassPage() {
               </div>
             ) : (
               /* Form */
-              <form onSubmit={handleSubmit} className="p-6">
+              <form
+                onSubmit={handleSubmit}
+                className="p-6"
+              >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
                   <FormInput
                     label="Nama Kelas"
                     value={form.namaKelas}
                     onChange={(value) =>
-                      setForm({ ...form, namaKelas: value })
+                      setForm({
+                        ...form,
+                        namaKelas: value,
+                      })
                     }
                     placeholder="Contoh: X PPLG 1"
                     required
@@ -698,7 +808,10 @@ export default function ModulClassPage() {
                     label="Tingkat"
                     value={form.tingkat}
                     onChange={(value) =>
-                      setForm({ ...form, tingkat: value })
+                      setForm({
+                        ...form,
+                        tingkat: value,
+                      })
                     }
                     options={["X", "XI", "XII"]}
                     placeholder="Pilih tingkat"
@@ -709,7 +822,10 @@ export default function ModulClassPage() {
                     label="Jurusan"
                     value={form.jurusan}
                     onChange={(value) =>
-                      setForm({ ...form, jurusan: value })
+                      setForm({
+                        ...form,
+                        jurusan: value,
+                      })
                     }
                     placeholder="Contoh: PPLG"
                     required
@@ -719,7 +835,10 @@ export default function ModulClassPage() {
                     label="Guru Pengampu"
                     value={form.guru}
                     onChange={(value) =>
-                      setForm({ ...form, guru: value })
+                      setForm({
+                        ...form,
+                        guru: value,
+                      })
                     }
                     placeholder="Nama guru"
                     required
@@ -778,13 +897,16 @@ export default function ModulClassPage() {
                         status: value,
                       })
                     }
-                    options={["Aktif", "Nonaktif"]}
+                    options={[
+                      "Aktif",
+                      "Nonaktif",
+                    ]}
                     required
                   />
                 </div>
 
                 <div className="mt-4">
-                  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+                  <label className="block text-sm font-medium theme-text mb-1.5">
                     Deskripsi
                   </label>
 
@@ -798,22 +920,23 @@ export default function ModulClassPage() {
                     }
                     rows={4}
                     placeholder="Deskripsi kelas..."
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 resize-none"
+                    className="theme-input w-full px-3.5 py-2.5 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] focus:border-[var(--color-primary)]"
                   />
                 </div>
 
-                <div className="flex items-center justify-end gap-3 mt-6 pt-5 border-t border-slate-100">
+                <div className="flex items-center justify-end gap-3 mt-6 pt-5 border-t theme-border-soft">
+
                   <button
                     type="button"
                     onClick={() => setShowModal(false)}
-                    className="px-5 py-2.5 rounded-xl border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 transition"
+                    className={`px-5 py-2.5 rounded-xl border theme-border theme-text-secondary ${themeTextHover} text-sm font-medium transition`}
                   >
                     Batal
                   </button>
 
                   <button
                     type="submit"
-                    className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold transition shadow-lg shadow-blue-500/20"
+                    className={`px-5 py-2.5 rounded-xl bg-[var(--color-primary)] hover:brightness-95 text-white text-sm font-semibold transition ${themePrimaryShadow}`}
                   >
                     {modalType === "edit"
                       ? "Simpan Perubahan"
@@ -840,22 +963,30 @@ function StatCard({
   icon: Icon,
 }) {
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-5">
+    <div className="theme-card rounded-2xl border theme-border shadow-[0_6px_24px_color-mix(in_srgb,var(--color-text)_6%,transparent)] p-5">
       <div className="flex items-start justify-between">
-        <div>
-          <p className="text-sm text-slate-500">{title}</p>
 
-          <p className="text-2xl font-bold text-slate-900 mt-2">
+        <div>
+          <p className="text-sm theme-text-secondary">
+            {title}
+          </p>
+
+          <p className="text-2xl font-bold theme-text mt-2">
             {value}
           </p>
 
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs theme-text-muted mt-1">
             {description}
           </p>
         </div>
 
-        <div className="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center">
-          <Icon size={20} className="text-blue-600" />
+        <div
+          className={`w-11 h-11 rounded-xl ${"bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]"} flex items-center justify-center`}
+        >
+          <Icon
+            size={20}
+            className="text-[var(--color-primary)]"
+          />
         </div>
       </div>
     </div>
@@ -876,20 +1007,25 @@ function FormInput({
 }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-slate-700 mb-1.5">
+      <label className="block text-sm font-medium theme-text mb-1.5">
         {label}
+
         {required && (
-          <span className="text-red-500 ml-1">*</span>
+          <span className="theme-danger ml-1">
+            *
+          </span>
         )}
       </label>
 
       <input
         type={type}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) =>
+          onChange(e.target.value)
+        }
         placeholder={placeholder}
         required={required}
-        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"
+        className="theme-input w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] focus:border-[var(--color-primary)] transition"
       />
     </div>
   );
@@ -909,25 +1045,35 @@ function FormSelect({
 }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-slate-700 mb-1.5">
+      <label className="block text-sm font-medium theme-text mb-1.5">
         {label}
+
         {required && (
-          <span className="text-red-500 ml-1">*</span>
+          <span className="theme-danger ml-1">
+            *
+          </span>
         )}
       </label>
 
       <select
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) =>
+          onChange(e.target.value)
+        }
         required={required}
-        className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 bg-slate-50/50 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition"
+        className="theme-input w-full px-3.5 py-2.5 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] focus:border-[var(--color-primary)] transition"
       >
         {placeholder && !value && (
-          <option value="">{placeholder}</option>
+          <option value="">
+            {placeholder}
+          </option>
         )}
 
         {options.map((option) => (
-          <option key={option} value={option}>
+          <option
+            key={option}
+            value={option}
+          >
             {option}
           </option>
         ))}
@@ -940,14 +1086,17 @@ function FormSelect({
    DETAIL ITEM
 ============================================================ */
 
-function DetailItem({ label, value }) {
+function DetailItem({
+  label,
+  value,
+}) {
   return (
-    <div className="p-3.5 rounded-xl border border-slate-100 bg-slate-50/60">
-      <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wide">
+    <div className="p-3.5 rounded-xl border theme-border-soft theme-card-soft">
+      <p className="text-[11px] font-medium theme-text-muted uppercase tracking-wide">
         {label}
       </p>
 
-      <p className="text-sm font-semibold text-slate-700 mt-1">
+      <p className="text-sm font-semibold theme-text mt-1">
         {value}
       </p>
     </div>

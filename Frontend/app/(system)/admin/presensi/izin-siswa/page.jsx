@@ -124,23 +124,20 @@ const INITIAL_IZIN_SISWA = [
 const STATUS_CONFIG = {
   menunggu: {
     label: "Menunggu",
-    className:
-      "bg-amber-50 text-amber-700 border-amber-200",
-    dot: "bg-amber-500",
+    className: "theme-warning border",
+    dot: "bg-[var(--color-warning)]",
   },
 
   disetujui: {
     label: "Disetujui",
-    className:
-      "bg-emerald-50 text-emerald-700 border-emerald-200",
-    dot: "bg-emerald-500",
+    className: "theme-success border",
+    dot: "bg-[var(--color-success)]",
   },
 
   ditolak: {
     label: "Ditolak",
-    className:
-      "bg-red-50 text-red-700 border-red-200",
-    dot: "bg-red-500",
+    className: "theme-danger border",
+    dot: "bg-[var(--color-danger)]",
   },
 };
 
@@ -153,9 +150,7 @@ export default function IzinSiswaPage() {
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  const [data, setData] = useState(
-    INITIAL_IZIN_SISWA
-  );
+  const [data, setData] = useState(INITIAL_IZIN_SISWA);
 
   const [search, setSearch] = useState("");
 
@@ -172,9 +167,7 @@ export default function IzinSiswaPage() {
     useState(INITIAL_IZIN_SISWA[0].id);
 
   /* ==========================================================
-     IMPORTANT:
-     Header.jsx membutuhkan notifications ARRAY.
-     Jangan ubah menjadi object/string.
+     NOTIFICATIONS
   ========================================================== */
 
   const notifications = [
@@ -197,22 +190,14 @@ export default function IzinSiswaPage() {
   ========================================================== */
 
   const filteredData = useMemo(() => {
-    const keyword = search
-      .toLowerCase()
-      .trim();
+    const keyword = search.toLowerCase().trim();
 
     return data.filter((item) => {
       const matchesSearch =
         !keyword ||
-        item.nama
-          .toLowerCase()
-          .includes(keyword) ||
-        item.nisn
-          .toLowerCase()
-          .includes(keyword) ||
-        item.kelas
-          .toLowerCase()
-          .includes(keyword);
+        item.nama.toLowerCase().includes(keyword) ||
+        item.nisn.toLowerCase().includes(keyword) ||
+        item.kelas.toLowerCase().includes(keyword);
 
       const matchesStatus =
         statusFilter === "semua" ||
@@ -305,7 +290,8 @@ export default function IzinSiswaPage() {
   };
 
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden">
+    <div className="flex h-screen theme-page overflow-hidden">
+
       {/* ======================================================
           SIDEBAR
       ====================================================== */}
@@ -325,6 +311,7 @@ export default function IzinSiswaPage() {
       ====================================================== */}
 
       <div className="flex-1 flex flex-col min-w-0">
+
         <Header
           toggleSidebar={() =>
             setSidebarOpen(!sidebarOpen)
@@ -338,6 +325,7 @@ export default function IzinSiswaPage() {
         />
 
         <main className="flex-1 overflow-y-auto">
+
           <div className="w-full max-w-[1550px] mx-auto p-4 sm:p-6 lg:p-8">
 
             {/* ==================================================
@@ -345,6 +333,7 @@ export default function IzinSiswaPage() {
             ================================================== */}
 
             <div className="flex flex-col gap-5 mb-7">
+
               <div className="flex items-start justify-between gap-4">
 
                 <div className="flex items-start gap-3 min-w-0">
@@ -352,45 +341,72 @@ export default function IzinSiswaPage() {
                   <button
                     type="button"
                     onClick={() =>
-                      router.push(
-                        "/admin/presensi"
-                      )
+                      router.push("/admin/presensi")
                     }
-                    className="w-10 h-10 rounded-xl bg-white border border-slate-200 flex items-center justify-center text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-all shadow-sm flex-shrink-0"
+                    className="
+                      w-10 h-10 rounded-xl
+                      theme-card theme-border
+                      border
+                      flex items-center justify-center
+                      theme-text-secondary
+                      hover:theme-sidebar-hover
+                      hover:theme-sidebar-text-active
+                      transition-all
+                      shadow-sm
+                      flex-shrink-0
+                    "
                   >
                     <ArrowLeft size={18} />
                   </button>
 
                   <div className="min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="w-2 h-2 rounded-full bg-blue-600" />
 
-                      <p className="text-xs font-bold uppercase tracking-wider text-blue-600">
+                    <div className="flex items-center gap-2 mb-1">
+
+                      <span className="w-2 h-2 rounded-full bg-[var(--color-primary)]" />
+
+                      <p className="text-xs font-bold uppercase tracking-wider theme-sidebar-text-active">
                         Presensi & Kehadiran
                       </p>
+
                     </div>
 
-                    <h1 className="text-2xl sm:text-3xl font-bold text-slate-900 tracking-tight">
+                    <h1 className="text-2xl sm:text-3xl font-bold theme-text tracking-tight">
                       Izin Siswa
                     </h1>
 
-                    <p className="text-sm text-slate-500 mt-1.5">
+                    <p className="text-sm theme-text-muted mt-1.5">
                       Kelola pengajuan izin dan sakit
                       siswa dengan mudah.
                     </p>
+
                   </div>
                 </div>
 
                 <div className="hidden sm:flex items-center gap-2">
+
                   <button
                     type="button"
                     onClick={handleRefresh}
-                    className="h-10 px-3.5 rounded-xl bg-white border border-slate-200 text-sm font-semibold text-slate-600 hover:text-blue-600 hover:bg-blue-50 transition-all shadow-sm inline-flex items-center gap-2"
+                    className="
+                      h-10 px-3.5 rounded-xl
+                      theme-card theme-border
+                      border
+                      text-sm font-semibold
+                      theme-text-secondary
+                      hover:theme-sidebar-hover
+                      hover:theme-sidebar-text-active
+                      transition-all
+                      shadow-sm
+                      inline-flex items-center gap-2
+                    "
                   >
                     <RefreshCw size={15} />
                     Refresh
                   </button>
+
                 </div>
+
               </div>
             </div>
 
@@ -405,7 +421,7 @@ export default function IzinSiswaPage() {
                 label="Total Pengajuan"
                 value={total}
                 description="Seluruh pengajuan"
-                iconClass="bg-blue-50 text-blue-600"
+                iconClass="theme-info"
               />
 
               <StatCard
@@ -413,7 +429,7 @@ export default function IzinSiswaPage() {
                 label="Menunggu"
                 value={menunggu}
                 description="Perlu ditinjau"
-                iconClass="bg-amber-50 text-amber-600"
+                iconClass="theme-warning"
               />
 
               <StatCard
@@ -421,7 +437,7 @@ export default function IzinSiswaPage() {
                 label="Disetujui"
                 value={disetujui}
                 description="Pengajuan diterima"
-                iconClass="bg-emerald-50 text-emerald-600"
+                iconClass="theme-success"
               />
 
               <StatCard
@@ -429,7 +445,7 @@ export default function IzinSiswaPage() {
                 label="Ditolak"
                 value={ditolak}
                 description="Pengajuan ditolak"
-                iconClass="bg-red-50 text-red-600"
+                iconClass="theme-danger"
               />
 
             </div>
@@ -438,7 +454,15 @@ export default function IzinSiswaPage() {
                 FILTER
             ================================================== */}
 
-            <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm p-4 mb-6">
+            <div className="
+              theme-card
+              theme-border
+              border
+              rounded-2xl
+              shadow-sm
+              p-4
+              mb-6
+            ">
 
               <div className="flex flex-col xl:flex-row gap-3">
 
@@ -448,7 +472,11 @@ export default function IzinSiswaPage() {
 
                   <CalendarDays
                     size={16}
-                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                    className="
+                      absolute left-3.5 top-1/2
+                      -translate-y-1/2
+                      theme-text-muted
+                    "
                   />
 
                   <input
@@ -457,7 +485,17 @@ export default function IzinSiswaPage() {
                     onChange={(e) =>
                       setTanggal(e.target.value)
                     }
-                    className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-3 text-sm text-slate-700 outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
+                    className="
+                      w-full h-11 rounded-xl
+                      theme-input
+                      border
+                      pl-10 pr-3
+                      text-sm
+                      outline-none
+                      focus:border-[var(--color-primary)]
+                      focus:ring-4
+                      focus:ring-[color:var(--color-primary)/.12]
+                    "
                   />
 
                 </div>
@@ -468,7 +506,11 @@ export default function IzinSiswaPage() {
 
                   <Search
                     size={17}
-                    className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                    className="
+                      absolute left-3.5 top-1/2
+                      -translate-y-1/2
+                      theme-text-muted
+                    "
                   />
 
                   <input
@@ -478,7 +520,18 @@ export default function IzinSiswaPage() {
                       setSearch(e.target.value)
                     }
                     placeholder="Cari nama siswa, NISN, atau kelas..."
-                    className="w-full h-11 rounded-xl border border-slate-200 bg-slate-50 pl-10 pr-4 text-sm text-slate-800 placeholder:text-slate-400 outline-none focus:bg-white focus:border-blue-500 focus:ring-4 focus:ring-blue-50 transition-all"
+                    className="
+                      w-full h-11 rounded-xl
+                      theme-input
+                      border
+                      pl-10 pr-4
+                      text-sm
+                      outline-none
+                      focus:border-[var(--color-primary)]
+                      focus:ring-4
+                      focus:ring-[color:var(--color-primary)/.12]
+                      transition-all
+                    "
                   />
 
                 </div>
@@ -487,14 +540,19 @@ export default function IzinSiswaPage() {
 
                 <div className="flex items-center gap-2 overflow-x-auto pb-1 xl:pb-0">
 
-                  <div className="hidden sm:flex w-10 h-10 rounded-xl bg-slate-50 items-center justify-center text-slate-500 flex-shrink-0">
+                  <div className="
+                    hidden sm:flex
+                    w-10 h-10 rounded-xl
+                    theme-card-soft
+                    items-center justify-center
+                    theme-text-muted
+                    flex-shrink-0
+                  ">
                     <Filter size={16} />
                   </div>
 
                   <FilterButton
-                    active={
-                      statusFilter === "semua"
-                    }
+                    active={statusFilter === "semua"}
                     onClick={() =>
                       setStatusFilter("semua")
                     }
@@ -503,9 +561,7 @@ export default function IzinSiswaPage() {
                   </FilterButton>
 
                   <FilterButton
-                    active={
-                      statusFilter === "menunggu"
-                    }
+                    active={statusFilter === "menunggu"}
                     onClick={() =>
                       setStatusFilter("menunggu")
                     }
@@ -514,22 +570,16 @@ export default function IzinSiswaPage() {
                   </FilterButton>
 
                   <FilterButton
-                    active={
-                      statusFilter === "disetujui"
-                    }
+                    active={statusFilter === "disetujui"}
                     onClick={() =>
-                      setStatusFilter(
-                        "disetujui"
-                      )
+                      setStatusFilter("disetujui")
                     }
                   >
                     Disetujui
                   </FilterButton>
 
                   <FilterButton
-                    active={
-                      statusFilter === "ditolak"
-                    }
+                    active={statusFilter === "ditolak"}
                     onClick={() =>
                       setStatusFilter("ditolak")
                     }
@@ -542,16 +592,21 @@ export default function IzinSiswaPage() {
 
               {/* JENIS FILTER */}
 
-              <div className="flex flex-wrap gap-2 mt-3 pt-3 border-t border-slate-100">
+              <div className="
+                flex flex-wrap gap-2 mt-3 pt-3
+                border-t theme-border-soft
+              ">
 
-                <span className="text-xs font-semibold text-slate-500 flex items-center mr-1">
+                <span className="
+                  text-xs font-semibold
+                  theme-text-muted
+                  flex items-center mr-1
+                ">
                   Jenis:
                 </span>
 
                 <SmallFilter
-                  active={
-                    jenisFilter === "semua"
-                  }
+                  active={jenisFilter === "semua"}
                   onClick={() =>
                     setJenisFilter("semua")
                   }
@@ -560,9 +615,7 @@ export default function IzinSiswaPage() {
                 </SmallFilter>
 
                 <SmallFilter
-                  active={
-                    jenisFilter === "Izin"
-                  }
+                  active={jenisFilter === "Izin"}
                   onClick={() =>
                     setJenisFilter("Izin")
                   }
@@ -571,9 +624,7 @@ export default function IzinSiswaPage() {
                 </SmallFilter>
 
                 <SmallFilter
-                  active={
-                    jenisFilter === "Sakit"
-                  }
+                  active={jenisFilter === "Sakit"}
                   onClick={() =>
                     setJenisFilter("Sakit")
                   }
@@ -588,206 +639,301 @@ export default function IzinSiswaPage() {
                 CONTENT
             ================================================== */}
 
-            <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_360px] gap-6 items-start">
+            <div className="
+              grid grid-cols-1
+              xl:grid-cols-[minmax(0,1fr)_360px]
+              gap-6
+              items-start
+            ">
 
               {/* =================================================
                   TABLE
               ================================================= */}
 
-              <section className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden min-w-0">
+              <section className="
+                theme-card
+                theme-border
+                border
+                rounded-2xl
+                shadow-sm
+                overflow-hidden
+                min-w-0
+              ">
 
-                <div className="px-5 sm:px-6 py-4 border-b border-slate-100 flex items-center justify-between gap-4">
+                <div className="
+                  px-5 sm:px-6 py-4
+                  border-b theme-border-soft
+                  flex items-center justify-between
+                  gap-4
+                ">
 
                   <div>
-                    <h2 className="text-sm sm:text-base font-bold text-slate-800">
+
+                    <h2 className="
+                      text-sm sm:text-base
+                      font-bold
+                      theme-text
+                    ">
                       Daftar Pengajuan
                     </h2>
 
-                    <p className="text-xs text-slate-500 mt-0.5">
+                    <p className="
+                      text-xs
+                      theme-text-muted
+                      mt-0.5
+                    ">
                       {filteredData.length} pengajuan
                       ditampilkan
                     </p>
+
                   </div>
 
-                  <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+                  <div className="
+                    w-9 h-9 rounded-xl
+                    theme-info
+                    flex items-center justify-center
+                    flex-shrink-0
+                  ">
                     <CalendarDays size={17} />
                   </div>
 
                 </div>
 
                 {filteredData.length > 0 ? (
+
                   <div className="overflow-x-auto">
 
                     <table className="w-full min-w-[850px]">
 
                       <thead>
-                        <tr className="bg-slate-50/80 border-b border-slate-100">
 
-                          <th className="text-left px-5 py-3.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                        <tr className="
+                          theme-table-header
+                          border-b theme-border
+                        ">
+
+                          <th className="
+                            text-left px-5 py-3.5
+                            text-[11px] font-bold
+                            uppercase tracking-wider
+                            theme-text-muted
+                          ">
                             Siswa
                           </th>
 
-                          <th className="text-left px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                          <th className="
+                            text-left px-4 py-3.5
+                            text-[11px] font-bold
+                            uppercase tracking-wider
+                            theme-text-muted
+                          ">
                             Jenis
                           </th>
 
-                          <th className="text-left px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                          <th className="
+                            text-left px-4 py-3.5
+                            text-[11px] font-bold
+                            uppercase tracking-wider
+                            theme-text-muted
+                          ">
                             Tanggal
                           </th>
 
-                          <th className="text-left px-4 py-3.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                          <th className="
+                            text-left px-4 py-3.5
+                            text-[11px] font-bold
+                            uppercase tracking-wider
+                            theme-text-muted
+                          ">
                             Status
                           </th>
 
-                          <th className="text-right px-5 py-3.5 text-[11px] font-bold uppercase tracking-wider text-slate-400">
+                          <th className="
+                            text-right px-5 py-3.5
+                            text-[11px] font-bold
+                            uppercase tracking-wider
+                            theme-text-muted
+                          ">
                             Detail
                           </th>
 
                         </tr>
+
                       </thead>
 
-                      <tbody className="divide-y divide-slate-100">
+                      <tbody className="divide-y theme-border-soft">
 
-                        {filteredData.map(
-                          (item) => {
-                            const selected =
-                              selectedIzin?.id ===
-                              item.id;
+                        {filteredData.map((item) => {
 
-                            return (
-                              <tr
-                                key={item.id}
-                                onClick={() =>
-                                  setSelectedId(
-                                    item.id
-                                  )
-                                }
-                                className={`cursor-pointer transition-colors ${
+                          const selected =
+                            selectedIzin?.id === item.id;
+
+                          return (
+                            <tr
+                              key={item.id}
+                              onClick={() =>
+                                setSelectedId(item.id)
+                              }
+                              className={`
+                                cursor-pointer
+                                transition-colors
+                                ${
                                   selected
-                                    ? "bg-blue-50/60"
-                                    : "hover:bg-slate-50"
-                                }`}
-                              >
+                                    ? "theme-sidebar-active"
+                                    : "theme-table-hover"
+                                }
+                              `}
+                            >
 
-                                {/* SISWA */}
+                              {/* SISWA */}
 
-                                <td className="px-5 py-4">
+                              <td className="px-5 py-4">
 
-                                  <div className="flex items-center gap-3">
+                                <div className="flex items-center gap-3">
 
-                                    <div
-                                      className={`w-10 h-10 rounded-xl flex items-center justify-center text-xs font-bold flex-shrink-0 ${
+                                  <div
+                                    className={`
+                                      w-10 h-10 rounded-xl
+                                      flex items-center justify-center
+                                      text-xs font-bold
+                                      flex-shrink-0
+                                      ${
                                         selected
-                                          ? "bg-blue-600 text-white"
-                                          : "bg-blue-50 text-blue-700"
-                                      }`}
-                                    >
-                                      {getInitials(
-                                        item.nama
-                                      )}
-                                    </div>
-
-                                    <div className="min-w-0">
-
-                                      <p className="text-sm font-bold text-slate-800 truncate max-w-[250px]">
-                                        {item.nama}
-                                      </p>
-
-                                      <p className="text-xs text-slate-500 mt-0.5">
-                                        {item.nisn} • Kelas{" "}
-                                        {item.kelas}
-                                      </p>
-
-                                    </div>
+                                          ? "theme-primary"
+                                          : "theme-info"
+                                      }
+                                    `}
+                                  >
+                                    {getInitials(item.nama)}
                                   </div>
 
-                                </td>
+                                  <div className="min-w-0">
 
-                                {/* JENIS */}
+                                    <p className="
+                                      text-sm font-bold
+                                      theme-text
+                                      truncate
+                                      max-w-[250px]
+                                    ">
+                                      {item.nama}
+                                    </p>
 
-                                <td className="px-4 py-4">
+                                    <p className="
+                                      text-xs
+                                      theme-text-muted
+                                      mt-0.5
+                                    ">
+                                      {item.nisn} • Kelas{" "}
+                                      {item.kelas}
+                                    </p>
 
-                                  <span
-                                    className={`inline-flex items-center px-2.5 py-1 rounded-full text-[11px] font-semibold ${
-                                      item.jenis ===
-                                      "Sakit"
-                                        ? "bg-violet-50 text-violet-700 border border-violet-200"
-                                        : "bg-blue-50 text-blue-700 border border-blue-200"
-                                    }`}
-                                  >
-                                    {item.jenis}
-                                  </span>
+                                  </div>
 
-                                </td>
+                                </div>
 
-                                {/* TANGGAL */}
+                              </td>
 
-                                <td className="px-4 py-4">
+                              {/* JENIS */}
 
-                                  <p className="text-sm font-semibold text-slate-700">
-                                    {formatDate(
-                                      item.tanggal
-                                    )}
-                                  </p>
+                              <td className="px-4 py-4">
 
-                                  <p className="text-xs text-slate-400 mt-0.5">
-                                    Diajukan{" "}
-                                    {item.diajukan}
-                                  </p>
-
-                                </td>
-
-                                {/* STATUS */}
-
-                                <td className="px-4 py-4">
-                                  <StatusBadge
-                                    status={
-                                      item.status
+                                <span
+                                  className={`
+                                    inline-flex items-center
+                                    px-2.5 py-1 rounded-full
+                                    text-[11px] font-semibold
+                                    border
+                                    ${
+                                      item.jenis === "Sakit"
+                                        ? "theme-warning"
+                                        : "theme-info"
                                     }
-                                  />
-                                </td>
+                                  `}
+                                >
+                                  {item.jenis}
+                                </span>
 
-                                {/* DETAIL */}
+                              </td>
 
-                                <td className="px-5 py-4 text-right">
+                              {/* TANGGAL */}
 
-                                  <button
-                                    type="button"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setSelectedId(
-                                        item.id
-                                      );
-                                    }}
-                                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700"
-                                  >
-                                    <Eye size={14} />
-                                    Lihat
-                                  </button>
+                              <td className="px-4 py-4">
 
-                                </td>
+                                <p className="
+                                  text-sm font-semibold
+                                  theme-text-secondary
+                                ">
+                                  {formatDate(item.tanggal)}
+                                </p>
 
-                              </tr>
-                            );
-                          }
-                        )}
+                                <p className="
+                                  text-xs
+                                  theme-text-muted
+                                  mt-0.5
+                                ">
+                                  Diajukan {item.diajukan}
+                                </p>
+
+                              </td>
+
+                              {/* STATUS */}
+
+                              <td className="px-4 py-4">
+
+                                <StatusBadge
+                                  status={item.status}
+                                />
+
+                              </td>
+
+                              {/* DETAIL */}
+
+                              <td className="
+                                px-5 py-4
+                                text-right
+                              ">
+
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setSelectedId(item.id);
+                                  }}
+                                  className="
+                                    inline-flex
+                                    items-center
+                                    gap-1.5
+                                    text-xs font-semibold
+                                    theme-sidebar-text-active
+                                    hover:opacity-80
+                                  "
+                                >
+                                  <Eye size={14} />
+                                  Lihat
+                                </button>
+
+                              </td>
+
+                            </tr>
+                          );
+                        })}
 
                       </tbody>
+
                     </table>
 
                   </div>
+
                 ) : (
+
                   <EmptyState
                     onReset={() => {
                       setSearch("");
-                      setStatusFilter(
-                        "semua"
-                      );
-                      setJenisFilter(
-                        "semua"
-                      );
+                      setStatusFilter("semua");
+                      setJenisFilter("semua");
                     }}
                   />
+
                 )}
 
               </section>
@@ -799,30 +945,41 @@ export default function IzinSiswaPage() {
               <aside className="xl:sticky xl:top-6">
 
                 {selectedIzin ? (
+
                   <DetailCard
                     data={selectedIzin}
                     onApprove={() =>
-                      handleApprove(
-                        selectedIzin.id
-                      )
+                      handleApprove(selectedIzin.id)
                     }
                     onReject={() =>
-                      handleReject(
-                        selectedIzin.id
-                      )
+                      handleReject(selectedIzin.id)
                     }
                   />
+
                 ) : (
-                  <div className="bg-white border border-slate-200 rounded-2xl p-8 text-center">
+
+                  <div className="
+                    theme-card
+                    theme-border
+                    border
+                    rounded-2xl
+                    p-8
+                    text-center
+                  ">
                     <Users
                       size={25}
-                      className="mx-auto text-slate-300"
+                      className="mx-auto theme-text-muted"
                     />
 
-                    <p className="text-sm font-semibold text-slate-700 mt-3">
+                    <p className="
+                      text-sm font-semibold
+                      theme-text
+                      mt-3
+                    ">
                       Belum ada data
                     </p>
                   </div>
+
                 )}
 
               </aside>
@@ -836,7 +993,18 @@ export default function IzinSiswaPage() {
             <button
               type="button"
               onClick={handleRefresh}
-              className="sm:hidden w-full h-11 mt-5 rounded-xl bg-white border border-slate-200 text-sm font-semibold text-slate-600 flex items-center justify-center gap-2"
+              className="
+                sm:hidden
+                w-full h-11 mt-5
+                rounded-xl
+                theme-card
+                theme-border
+                border
+                text-sm font-semibold
+                theme-text-secondary
+                flex items-center
+                justify-center gap-2
+              "
             >
               <RefreshCw size={15} />
               Refresh Data
@@ -845,9 +1013,14 @@ export default function IzinSiswaPage() {
             {/* FOOTER */}
 
             <div className="py-8 text-center">
-              <p className="text-xs text-slate-400">
+
+              <p className="
+                text-xs
+                theme-text-muted
+              ">
                 SmartSchool Admin • Izin Siswa
               </p>
+
             </div>
 
           </div>
@@ -869,34 +1042,63 @@ function StatCard({
   iconClass,
 }) {
   return (
-    <div className="bg-white border border-slate-200/80 rounded-2xl p-4 sm:p-5 shadow-sm">
+    <div className="
+      theme-card
+      theme-border
+      border
+      rounded-2xl
+      p-4 sm:p-5
+      shadow-sm
+    ">
 
-      <div className="flex items-start justify-between gap-3">
+      <div className="
+        flex items-start
+        justify-between
+        gap-3
+      ">
 
         <div className="min-w-0">
 
-          <p className="text-xs sm:text-sm text-slate-500 font-medium truncate">
+          <p className="
+            text-xs sm:text-sm
+            theme-text-secondary
+            font-medium
+            truncate
+          ">
             {label}
           </p>
 
-          <p className="text-2xl sm:text-3xl font-bold text-slate-900 mt-1.5">
+          <p className="
+            text-2xl sm:text-3xl
+            font-bold
+            theme-text
+            mt-1.5
+          ">
             {value}
           </p>
 
-          <p className="text-[11px] sm:text-xs text-slate-400 mt-1">
+          <p className="
+            text-[11px] sm:text-xs
+            theme-text-muted
+            mt-1
+          ">
             {description}
           </p>
 
         </div>
 
         <div
-          className={`w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0 ${iconClass}`}
+          className={`
+            w-10 h-10 rounded-xl
+            flex items-center justify-center
+            flex-shrink-0
+            ${iconClass}
+          `}
         >
           <Icon size={18} />
         </div>
 
       </div>
-
     </div>
   );
 }
@@ -914,11 +1116,18 @@ function FilterButton({
     <button
       type="button"
       onClick={onClick}
-      className={`h-10 px-3.5 rounded-xl text-xs sm:text-sm font-semibold whitespace-nowrap transition-all ${
-        active
-          ? "bg-blue-600 text-white shadow-sm"
-          : "bg-slate-50 text-slate-600 hover:bg-blue-50 hover:text-blue-600"
-      }`}
+      className={`
+        h-10 px-3.5 rounded-xl
+        text-xs sm:text-sm
+        font-semibold
+        whitespace-nowrap
+        transition-all
+        ${
+          active
+            ? "theme-primary shadow-sm"
+            : "theme-card-soft theme-text-secondary hover:theme-sidebar-active hover:theme-sidebar-text-active"
+        }
+      `}
     >
       {children}
     </button>
@@ -938,11 +1147,18 @@ function SmallFilter({
     <button
       type="button"
       onClick={onClick}
-      className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-        active
-          ? "bg-blue-100 text-blue-700"
-          : "bg-slate-50 text-slate-500 hover:bg-blue-50 hover:text-blue-600"
-      }`}
+      className={`
+        px-3 py-1.5
+        rounded-lg
+        text-xs
+        font-semibold
+        transition-all
+        ${
+          active
+            ? "theme-sidebar-active theme-sidebar-text-active"
+            : "theme-card-soft theme-text-muted hover:theme-sidebar-active hover:theme-sidebar-text-active"
+        }
+      `}
     >
       {children}
     </button>
@@ -960,10 +1176,24 @@ function StatusBadge({ status }) {
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[11px] font-semibold whitespace-nowrap ${config.className}`}
+      className={`
+        inline-flex items-center
+        gap-1.5
+        px-2.5 py-1
+        rounded-full
+        border
+        text-[11px]
+        font-semibold
+        whitespace-nowrap
+        ${config.className}
+      `}
     >
       <span
-        className={`w-1.5 h-1.5 rounded-full ${config.dot}`}
+        className={`
+          w-1.5 h-1.5
+          rounded-full
+          ${config.dot}
+        `}
       />
 
       {config.label}
@@ -981,21 +1211,55 @@ function DetailCard({
   onReject,
 }) {
   return (
-    <div className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
+    <div className="
+      theme-card
+      theme-border
+      border
+      rounded-2xl
+      shadow-sm
+      overflow-hidden
+    ">
 
       {/* HEADER */}
 
-      <div className="relative bg-[#155DFC] p-5 sm:p-6 text-white overflow-hidden">
+      <div className="
+        relative
+        theme-primary
+        p-5 sm:p-6
+        overflow-hidden
+      ">
 
-        <div className="absolute -right-10 -top-12 w-36 h-36 rounded-full bg-white/10" />
+        <div className="
+          absolute -right-10 -top-12
+          w-36 h-36
+          rounded-full
+          bg-white/10
+        " />
 
-        <div className="absolute right-10 -bottom-20 w-32 h-32 rounded-full bg-white/10" />
+        <div className="
+          absolute right-10 -bottom-20
+          w-32 h-32
+          rounded-full
+          bg-white/10
+        " />
 
         <div className="relative">
 
-          <div className="flex items-center justify-between gap-3">
+          <div className="
+            flex items-center
+            justify-between
+            gap-3
+          ">
 
-            <div className="w-12 h-12 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center font-bold">
+            <div className="
+              w-12 h-12
+              rounded-xl
+              bg-white/15
+              border border-white/20
+              flex items-center
+              justify-center
+              font-bold
+            ">
               {getInitials(data.nama)}
             </div>
 
@@ -1005,11 +1269,19 @@ function DetailCard({
 
           </div>
 
-          <h2 className="text-lg font-bold mt-4">
+          <h2 className="
+            text-lg
+            font-bold
+            mt-4
+          ">
             {data.nama}
           </h2>
 
-          <p className="text-xs text-blue-100 mt-1">
+          <p className="
+            text-xs
+            text-white/75
+            mt-1
+          ">
             Kelas {data.kelas} • {data.nisn}
           </p>
 
@@ -1039,9 +1311,7 @@ function DetailCard({
           <DetailRow
             icon={CalendarDays}
             label="Tanggal"
-            value={formatDate(
-              data.tanggal
-            )}
+            value={formatDate(data.tanggal)}
           />
 
           <DetailRow
@@ -1064,15 +1334,34 @@ function DetailCard({
 
         {/* ALASAN */}
 
-        <div className="mt-6 pt-5 border-t border-slate-100">
+        <div className="
+          mt-6 pt-5
+          border-t
+          theme-border-soft
+        ">
 
-          <p className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+          <p className="
+            text-xs font-bold
+            uppercase tracking-wider
+            theme-text-muted
+            mb-2
+          ">
             Alasan Pengajuan
           </p>
 
-          <div className="rounded-xl bg-slate-50 border border-slate-100 p-3.5">
+          <div className="
+            rounded-xl
+            theme-card-soft
+            theme-border-soft
+            border
+            p-3.5
+          ">
 
-            <p className="text-sm leading-6 text-slate-600">
+            <p className="
+              text-sm
+              leading-6
+              theme-text-secondary
+            ">
               {data.alasan}
             </p>
 
@@ -1083,12 +1372,29 @@ function DetailCard({
         {/* ACTION */}
 
         {data.status === "menunggu" && (
-          <div className="mt-5 grid grid-cols-2 gap-2.5">
+
+          <div className="
+            mt-5
+            grid grid-cols-2
+            gap-2.5
+          ">
 
             <button
               type="button"
               onClick={onReject}
-              className="h-10 rounded-xl border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+              className="
+                h-10
+                rounded-xl
+                theme-danger
+                border
+                text-xs
+                font-semibold
+                flex items-center
+                justify-center
+                gap-1.5
+                transition-colors
+                hover:opacity-90
+              "
             >
               <XCircle size={15} />
               Tolak
@@ -1097,7 +1403,18 @@ function DetailCard({
             <button
               type="button"
               onClick={onApprove}
-              className="h-10 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+              className="
+                h-10
+                rounded-xl
+                theme-primary
+                text-white
+                text-xs
+                font-semibold
+                flex items-center
+                justify-center
+                gap-1.5
+                transition-colors
+              "
             >
               <CheckCircle2 size={15} />
               Setujui
@@ -1107,40 +1424,90 @@ function DetailCard({
         )}
 
         {data.status === "disetujui" && (
-          <div className="mt-5 rounded-xl bg-emerald-50 border border-emerald-100 p-3.5 flex items-center gap-3">
 
-            <div className="w-9 h-9 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center flex-shrink-0">
+          <div className="
+            mt-5
+            rounded-xl
+            theme-success
+            border
+            p-3.5
+            flex items-center
+            gap-3
+          ">
+
+            <div className="
+              w-9 h-9
+              rounded-lg
+              theme-success
+              flex items-center
+              justify-center
+              flex-shrink-0
+            ">
               <CheckCircle2 size={17} />
             </div>
 
             <div>
-              <p className="text-xs font-bold text-emerald-700">
+
+              <p className="
+                text-xs
+                font-bold
+              ">
                 Pengajuan disetujui
               </p>
 
-              <p className="text-[11px] text-emerald-600 mt-0.5">
+              <p className="
+                text-[11px]
+                mt-0.5
+                opacity-80
+              ">
                 Izin siswa telah diterima.
               </p>
+
             </div>
 
           </div>
         )}
 
         {data.status === "ditolak" && (
-          <div className="mt-5 rounded-xl bg-red-50 border border-red-100 p-3.5 flex items-center gap-3">
 
-            <div className="w-9 h-9 rounded-lg bg-red-100 text-red-600 flex items-center justify-center flex-shrink-0">
+          <div className="
+            mt-5
+            rounded-xl
+            theme-danger
+            border
+            p-3.5
+            flex items-center
+            gap-3
+          ">
+
+            <div className="
+              w-9 h-9
+              rounded-lg
+              theme-danger
+              flex items-center
+              justify-center
+              flex-shrink-0
+            ">
               <XCircle size={17} />
             </div>
 
             <div>
-              <p className="text-xs font-bold text-red-700">
+
+              <p className="
+                text-xs
+                font-bold
+              ">
                 Pengajuan ditolak
               </p>
 
-              <p className="text-[11px] text-red-600 mt-0.5">
+              <p className="
+                text-[11px]
+                mt-0.5
+                opacity-80
+              ">
                 Pengajuan izin tidak disetujui.
               </p>
+
             </div>
 
           </div>
@@ -1161,19 +1528,44 @@ function DetailRow({
   value,
 }) {
   return (
-    <div className="flex items-center gap-3">
+    <div className="
+      flex items-center
+      gap-3
+    ">
 
-      <div className="w-9 h-9 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-500 flex-shrink-0">
+      <div className="
+        w-9 h-9
+        rounded-lg
+        theme-card-soft
+        theme-border-soft
+        border
+        flex items-center
+        justify-center
+        theme-text-muted
+        flex-shrink-0
+      ">
         <Icon size={15} />
       </div>
 
-      <div className="min-w-0 flex-1">
+      <div className="
+        min-w-0
+        flex-1
+      ">
 
-        <p className="text-[11px] text-slate-400">
+        <p className="
+          text-[11px]
+          theme-text-muted
+        ">
           {label}
         </p>
 
-        <p className="text-sm font-semibold text-slate-700 truncate mt-0.5">
+        <p className="
+          text-sm
+          font-semibold
+          theme-text-secondary
+          truncate
+          mt-0.5
+        ">
           {value}
         </p>
 
@@ -1188,17 +1580,37 @@ function DetailRow({
 
 function EmptyState({ onReset }) {
   return (
-    <div className="px-6 py-16 text-center">
+    <div className="
+      px-6 py-16
+      text-center
+    ">
 
-      <div className="w-14 h-14 mx-auto rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center">
+      <div className="
+        w-14 h-14
+        mx-auto
+        rounded-2xl
+        theme-card-soft
+        theme-text-muted
+        flex items-center
+        justify-center
+      ">
         <Search size={23} />
       </div>
 
-      <h3 className="text-sm font-bold text-slate-800 mt-4">
+      <h3 className="
+        text-sm
+        font-bold
+        theme-text
+        mt-4
+      ">
         Data tidak ditemukan
       </h3>
 
-      <p className="text-xs text-slate-500 mt-1">
+      <p className="
+        text-xs
+        theme-text-muted
+        mt-1
+      ">
         Tidak ada pengajuan yang sesuai
         dengan filter.
       </p>
@@ -1206,7 +1618,18 @@ function EmptyState({ onReset }) {
       <button
         type="button"
         onClick={onReset}
-        className="mt-5 inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold"
+        className="
+          mt-5
+          inline-flex
+          items-center
+          gap-2
+          px-4 py-2.5
+          rounded-xl
+          theme-primary
+          text-white
+          text-xs
+          font-semibold
+        "
       >
         <RefreshCw size={14} />
         Reset Filter

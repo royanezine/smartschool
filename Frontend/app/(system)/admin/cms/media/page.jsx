@@ -110,37 +110,29 @@ export default function MediaPage() {
       image: {
         label: "Gambar",
         icon: ImageIcon,
-        badge:
-          "bg-indigo-50 text-indigo-600 border-indigo-100",
-        iconBg:
-          "bg-indigo-50 text-indigo-600",
+        badge: "theme-info",
+        iconBg: "theme-info",
       },
 
       video: {
         label: "Video",
         icon: Video,
-        badge:
-          "bg-violet-50 text-violet-600 border-violet-100",
-        iconBg:
-          "bg-violet-50 text-violet-600",
+        badge: "theme-card-soft theme-text",
+        iconBg: "theme-card-soft theme-text",
       },
 
       pdf: {
         label: "PDF",
         icon: FileText,
-        badge:
-          "bg-rose-50 text-rose-600 border-rose-100",
-        iconBg:
-          "bg-rose-50 text-rose-600",
+        badge: "theme-danger",
+        iconBg: "theme-danger",
       },
 
       default: {
         label: "File",
         icon: File,
-        badge:
-          "bg-slate-50 text-slate-600 border-slate-200",
-        iconBg:
-          "bg-slate-100 text-slate-500",
+        badge: "theme-card-soft theme-text-muted",
+        iconBg: "theme-card-soft theme-text-muted",
       },
     };
 
@@ -178,45 +170,65 @@ export default function MediaPage() {
       label: "Total Media",
       value: totalMedia,
       icon: HardDrive,
-      gradient: "from-slate-900 to-slate-700",
-      light: "bg-slate-50",
-      text: "text-slate-700",
+      type: "total",
     },
 
     {
       label: "Gambar",
       value: totalImages,
       icon: Images,
-      gradient: "from-indigo-500 to-blue-500",
-      light: "bg-indigo-50",
-      text: "text-indigo-600",
+      type: "image",
     },
 
     {
       label: "Video",
       value: totalVideos,
       icon: Film,
-      gradient: "from-violet-500 to-purple-500",
-      light: "bg-violet-50",
-      text: "text-violet-600",
+      type: "video",
     },
 
     {
       label: "Dokumen PDF",
       value: totalPdf,
       icon: FileType2,
-      gradient: "from-rose-500 to-pink-500",
-      light: "bg-rose-50",
-      text: "text-rose-600",
+      type: "pdf",
     },
   ];
+
+  /* =========================================================
+     STAT THEME
+  ========================================================= */
+
+  const getStatTheme = (type) => {
+    switch (type) {
+      case "image":
+        return {
+          icon: "theme-info",
+        };
+
+      case "video":
+        return {
+          icon: "theme-card-soft theme-text",
+        };
+
+      case "pdf":
+        return {
+          icon: "theme-danger",
+        };
+
+      default:
+        return {
+          icon: "theme-card-soft theme-text-secondary",
+        };
+    }
+  };
 
   /* =========================================================
      RENDER
   ========================================================= */
 
   return (
-    <div className="flex min-h-screen w-full bg-slate-50">
+    <div className="theme-page flex min-h-screen w-full">
 
       {/* =====================================================
           SIDEBAR
@@ -236,7 +248,7 @@ export default function MediaPage() {
       <div className="flex min-w-0 flex-1 flex-col">
 
         {/* ===================================================
-            HEADER - akan menampilkan CMS Admin otomatis
+            HEADER
         =================================================== */}
 
         <Header
@@ -261,18 +273,33 @@ export default function MediaPage() {
                   BREADCRUMB
               ================================================= */}
 
-              <div className="mb-5 flex items-center gap-2 overflow-hidden text-xs text-slate-400 sm:text-sm">
+              <div
+                className="
+                  mb-5
+                  flex
+                  items-center
+                  gap-2
+                  overflow-hidden
+                  text-xs
+                  theme-text-muted
+                  sm:text-sm
+                "
+              >
 
                 <Link
                   href="/cmsAdmin"
-                  className="shrink-0 transition-colors hover:text-indigo-600"
+                  className="
+                    shrink-0
+                    transition-colors
+                    hover:text-[var(--color-primary)]
+                  "
                 >
                   Dashboard
                 </Link>
 
                 <ChevronRight className="h-3.5 w-3.5 shrink-0" />
 
-                <span className="truncate font-medium text-slate-600">
+                <span className="truncate font-medium theme-text-secondary">
                   Media
                 </span>
 
@@ -282,12 +309,50 @@ export default function MediaPage() {
                   HERO
               ================================================= */}
 
-              <section className="relative mb-6 overflow-hidden rounded-2xl border border-indigo-100/70 bg-gradient-to-br from-slate-950 via-indigo-950 to-indigo-800 shadow-xl shadow-indigo-900/10">
+              <section
+                className="
+                  relative
+                  mb-6
+                  overflow-hidden
+                  rounded-2xl
+                  border
+                  theme-border
+                  theme-card
+                  shadow-sm
+                "
+              >
 
                 {/* Decorative */}
-                <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-indigo-400/15 blur-2xl" />
 
-                <div className="pointer-events-none absolute -bottom-24 left-1/3 h-64 w-64 rounded-full bg-blue-400/10 blur-3xl" />
+                <div
+                  className="
+                    pointer-events-none
+                    absolute
+                    -right-20
+                    -top-24
+                    h-64
+                    w-64
+                    rounded-full
+                    bg-[var(--color-primary)]
+                    opacity-[0.08]
+                    blur-2xl
+                  "
+                />
+
+                <div
+                  className="
+                    pointer-events-none
+                    absolute
+                    -bottom-24
+                    left-1/3
+                    h-64
+                    w-64
+                    rounded-full
+                    bg-[var(--color-info)]
+                    opacity-[0.06]
+                    blur-3xl
+                  "
+                />
 
                 <div className="relative p-5 sm:p-6 md:p-8 lg:p-9">
 
@@ -297,33 +362,86 @@ export default function MediaPage() {
 
                     <div className="flex min-w-0 items-start gap-4">
 
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-white/10 bg-white/10 shadow-inner backdrop-blur-md sm:h-14 sm:w-14">
-
-                        <ImageIcon className="h-6 w-6 text-white sm:h-7 sm:w-7" />
-
+                      <div
+                        className="
+                          flex
+                          h-12
+                          w-12
+                          shrink-0
+                          items-center
+                          justify-center
+                          rounded-2xl
+                          theme-info
+                          shadow-inner
+                          sm:h-14
+                          sm:w-14
+                        "
+                      >
+                        <ImageIcon className="h-6 w-6 sm:h-7 sm:w-7" />
                       </div>
 
                       <div className="min-w-0">
 
                         <div className="mb-1 flex items-center gap-2">
 
-                          <span className="text-[10px] font-semibold uppercase tracking-[0.18em] text-indigo-200 sm:text-xs">
+                          <span
+                            className="
+                              text-[10px]
+                              font-semibold
+                              uppercase
+                              tracking-[0.18em]
+                              theme-text-muted
+                              sm:text-xs
+                            "
+                          >
                             CMS Management
                           </span>
 
-                          <span className="h-1 w-1 rounded-full bg-indigo-300" />
+                          <span
+                            className="
+                              h-1
+                              w-1
+                              rounded-full
+                              bg-[var(--color-primary)]
+                            "
+                          />
 
-                          <span className="text-[10px] font-medium text-indigo-200 sm:text-xs">
+                          <span
+                            className="
+                              text-[10px]
+                              font-medium
+                              theme-text-muted
+                              sm:text-xs
+                            "
+                          >
                             Media Library
                           </span>
 
                         </div>
 
-                        <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl lg:text-4xl">
+                        <h1
+                          className="
+                            text-2xl
+                            font-bold
+                            tracking-tight
+                            theme-text
+                            sm:text-3xl
+                            lg:text-4xl
+                          "
+                        >
                           Media
                         </h1>
 
-                        <p className="mt-1.5 max-w-2xl text-xs leading-relaxed text-indigo-100 sm:text-sm">
+                        <p
+                          className="
+                            mt-1.5
+                            max-w-2xl
+                            text-xs
+                            leading-relaxed
+                            theme-text-secondary
+                            sm:text-sm
+                          "
+                        >
                           Kelola gambar, video, dokumen, dan seluruh aset
                           digital website sekolah dalam satu tempat.
                         </p>
@@ -343,17 +461,14 @@ export default function MediaPage() {
                         justify-center
                         gap-2
                         rounded-xl
-                        bg-white
+                        theme-primary
                         px-5
                         py-3
                         text-sm
                         font-semibold
-                        text-indigo-700
                         shadow-lg
-                        shadow-black/10
                         transition-all
                         hover:-translate-y-0.5
-                        hover:bg-indigo-50
                         hover:shadow-xl
                         sm:w-fit
                       "
@@ -370,11 +485,22 @@ export default function MediaPage() {
                   STATISTICS
               ================================================= */}
 
-              <div className="mb-6 grid w-full grid-cols-2 gap-3 lg:grid-cols-4 lg:gap-4">
+              <div
+                className="
+                  mb-6
+                  grid
+                  w-full
+                  grid-cols-2
+                  gap-3
+                  lg:grid-cols-4
+                  lg:gap-4
+                "
+              >
 
                 {stats.map((stat) => {
 
                   const StatIcon = stat.icon;
+                  const statTheme = getStatTheme(stat.type);
 
                   return (
                     <div
@@ -386,8 +512,8 @@ export default function MediaPage() {
                         overflow-hidden
                         rounded-2xl
                         border
-                        border-slate-200/80
-                        bg-white
+                        theme-border
+                        theme-card
                         p-4
                         shadow-sm
                         transition-all
@@ -399,24 +525,63 @@ export default function MediaPage() {
                     >
 
                       <div
-                        className={`absolute right-0 top-0 h-20 w-20 rounded-full bg-gradient-to-br ${stat.gradient} opacity-[0.04] blur-xl`}
+                        className="
+                          pointer-events-none
+                          absolute
+                          right-0
+                          top-0
+                          h-20
+                          w-20
+                          rounded-full
+                          bg-[var(--color-primary)]
+                          opacity-[0.04]
+                          blur-xl
+                        "
                       />
 
                       <div className="relative flex items-center gap-3">
 
                         <div
-                          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${stat.light} ${stat.text}`}
+                          className={`
+                            flex
+                            h-10
+                            w-10
+                            shrink-0
+                            items-center
+                            justify-center
+                            rounded-xl
+                            ${statTheme.icon}
+                          `}
                         >
                           <StatIcon className="h-5 w-5" />
                         </div>
 
                         <div className="min-w-0">
 
-                          <p className="truncate text-[10px] font-semibold uppercase tracking-wider text-slate-400 sm:text-xs">
+                          <p
+                            className="
+                              truncate
+                              text-[10px]
+                              font-semibold
+                              uppercase
+                              tracking-wider
+                              theme-text-muted
+                              sm:text-xs
+                            "
+                          >
                             {stat.label}
                           </p>
 
-                          <p className="mt-0.5 text-xl font-bold tracking-tight text-slate-800 sm:text-2xl">
+                          <p
+                            className="
+                              mt-0.5
+                              text-xl
+                              font-bold
+                              tracking-tight
+                              theme-text
+                              sm:text-2xl
+                            "
+                          >
                             {stat.value}
                           </p>
 
@@ -433,15 +598,45 @@ export default function MediaPage() {
                   TOOLBAR
               ================================================= */}
 
-              <section className="mb-5 rounded-2xl border border-slate-200/80 bg-white p-3 shadow-sm sm:p-4">
+              <section
+                className="
+                  mb-5
+                  rounded-2xl
+                  border
+                  theme-border
+                  theme-card
+                  p-3
+                  shadow-sm
+                  sm:p-4
+                "
+              >
 
-                <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                <div
+                  className="
+                    flex
+                    flex-col
+                    gap-3
+                    lg:flex-row
+                    lg:items-center
+                    lg:justify-between
+                  "
+                >
 
                   {/* SEARCH */}
 
                   <div className="relative w-full min-w-0 lg:max-w-xl">
 
-                    <Search className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                    <Search
+                      className="
+                        absolute
+                        left-3.5
+                        top-1/2
+                        h-4
+                        w-4
+                        -translate-y-1/2
+                        theme-text-muted
+                      "
+                    />
 
                     <input
                       type="text"
@@ -451,24 +646,18 @@ export default function MediaPage() {
                       }
                       placeholder="Cari nama file, folder, atau tipe..."
                       className="
+                        theme-input
                         w-full
                         rounded-xl
                         border
-                        border-slate-200
-                        bg-slate-50/60
                         py-2.5
                         pl-10
                         pr-10
                         text-sm
-                        text-slate-700
                         outline-none
                         transition-all
-                        placeholder:text-slate-400
-                        hover:border-slate-300
-                        focus:border-indigo-500
-                        focus:bg-white
-                        focus:ring-4
-                        focus:ring-indigo-500/10
+                        placeholder:theme-text-placeholder
+                        focus:border-[var(--color-primary)]
                       "
                     />
 
@@ -483,10 +672,9 @@ export default function MediaPage() {
                           -translate-y-1/2
                           rounded-md
                           p-1
-                          text-slate-400
+                          theme-text-muted
                           transition
-                          hover:bg-slate-100
-                          hover:text-slate-600
+                          theme-table-hover
                         "
                       >
                         <X className="h-4 w-4" />
@@ -497,17 +685,38 @@ export default function MediaPage() {
 
                   {/* RIGHT TOOLBAR */}
 
-                  <div className="flex items-center justify-between gap-3 lg:justify-end">
+                  <div
+                    className="
+                      flex
+                      items-center
+                      justify-between
+                      gap-3
+                      lg:justify-end
+                    "
+                  >
 
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs theme-text-muted">
                       Menampilkan{" "}
-                      <span className="font-semibold text-slate-700">
+                      <span className="font-semibold theme-text">
                         {filteredMedia.length}
                       </span>{" "}
                       file
                     </p>
 
-                    <div className="inline-flex shrink-0 items-center rounded-xl border border-slate-200 bg-slate-50 p-1">
+                    <div
+                      className="
+                        inline-flex
+                        shrink-0
+                        items-center
+                        rounded-xl
+                        border
+                        theme-border
+                        theme-card-soft
+                        p-1
+                      "
+                    >
+
+                      {/* LIST */}
 
                       <button
                         type="button"
@@ -524,8 +733,8 @@ export default function MediaPage() {
                           transition-all
                           ${
                             viewMode === "table"
-                              ? "bg-white text-indigo-600 shadow-sm ring-1 ring-slate-200"
-                              : "text-slate-400 hover:text-slate-600"
+                              ? "theme-card theme-text shadow-sm"
+                              : "theme-text-muted theme-table-hover"
                           }
                         `}
                       >
@@ -535,6 +744,8 @@ export default function MediaPage() {
                           List
                         </span>
                       </button>
+
+                      {/* GRID */}
 
                       <button
                         type="button"
@@ -551,8 +762,8 @@ export default function MediaPage() {
                           transition-all
                           ${
                             viewMode === "grid"
-                              ? "bg-white text-indigo-600 shadow-sm ring-1 ring-slate-200"
-                              : "text-slate-400 hover:text-slate-600"
+                              ? "theme-card theme-text shadow-sm"
+                              : "theme-text-muted theme-table-hover"
                           }
                         `}
                       >
@@ -575,19 +786,51 @@ export default function MediaPage() {
 
               {filteredMedia.length === 0 ? (
 
-                <div className="rounded-2xl border border-slate-200 bg-white px-5 py-16 text-center shadow-sm">
+                <div
+                  className="
+                    rounded-2xl
+                    border
+                    theme-border
+                    theme-card
+                    px-5
+                    py-16
+                    text-center
+                    shadow-sm
+                  "
+                >
 
-                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100">
-                    <File className="h-7 w-7 text-slate-400" />
+                  <div
+                    className="
+                      mx-auto
+                      mb-4
+                      flex
+                      h-16
+                      w-16
+                      items-center
+                      justify-center
+                      rounded-2xl
+                      theme-card-soft
+                    "
+                  >
+                    <File className="h-7 w-7 theme-text-muted" />
                   </div>
 
-                  <h3 className="text-base font-bold text-slate-800">
+                  <h3 className="text-base font-bold theme-text">
                     {searchQuery
                       ? "Media tidak ditemukan"
                       : "Belum ada file media"}
                   </h3>
 
-                  <p className="mx-auto mt-1.5 max-w-sm text-sm leading-relaxed text-slate-400">
+                  <p
+                    className="
+                      mx-auto
+                      mt-1.5
+                      max-w-sm
+                      text-sm
+                      leading-relaxed
+                      theme-text-muted
+                    "
+                  >
                     {searchQuery
                       ? "Coba gunakan kata kunci pencarian yang berbeda."
                       : "Upload gambar, video, atau dokumen pertama Anda ke media library."}
@@ -598,7 +841,21 @@ export default function MediaPage() {
                     <button
                       type="button"
                       onClick={clearSearch}
-                      className="mt-5 inline-flex items-center gap-2 rounded-xl bg-slate-100 px-4 py-2.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-200"
+                      className="
+                        mt-5
+                        inline-flex
+                        items-center
+                        gap-2
+                        rounded-xl
+                        theme-card-soft
+                        px-4
+                        py-2.5
+                        text-xs
+                        font-semibold
+                        theme-text-secondary
+                        transition
+                        theme-table-hover
+                      "
                     >
                       <X className="h-4 w-4" />
                       Reset Pencarian
@@ -608,7 +865,21 @@ export default function MediaPage() {
 
                     <Link
                       href="/cmsAdmin/media/upload"
-                      className="mt-5 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-semibold text-white shadow-md shadow-indigo-600/20 transition hover:bg-indigo-700"
+                      className="
+                        mt-5
+                        inline-flex
+                        items-center
+                        gap-2
+                        rounded-xl
+                        theme-primary
+                        px-4
+                        py-2.5
+                        text-xs
+                        font-semibold
+                        shadow-md
+                        transition
+                        hover:shadow-lg
+                      "
                     >
                       <Upload className="h-4 w-4" />
                       Upload Media
@@ -624,7 +895,18 @@ export default function MediaPage() {
                     GRID VIEW
                 ================================================= */
 
-                <div className="grid min-w-0 grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+                <div
+                  className="
+                    grid
+                    min-w-0
+                    grid-cols-2
+                    gap-3
+                    sm:grid-cols-3
+                    md:grid-cols-4
+                    xl:grid-cols-5
+                    2xl:grid-cols-6
+                  "
+                >
 
                   {filteredMedia.map((item) => {
 
@@ -642,35 +924,65 @@ export default function MediaPage() {
                           overflow-hidden
                           rounded-2xl
                           border
-                          border-slate-200
-                          bg-white
+                          theme-border
+                          theme-card
                           shadow-sm
                           transition-all
                           duration-300
                           hover:-translate-y-1
-                          hover:border-indigo-200
                           hover:shadow-xl
                         "
                       >
 
                         {/* PREVIEW */}
 
-                        <div className="relative aspect-square overflow-hidden bg-slate-100">
+                        <div
+                          className="
+                            relative
+                            aspect-square
+                            overflow-hidden
+                            theme-card-soft
+                          "
+                        >
 
                           {type === "image" && item.url ? (
 
                             <img
                               src={item.url}
                               alt={item.name}
-                              className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+                              className="
+                                h-full
+                                w-full
+                                object-cover
+                                transition-transform
+                                duration-500
+                                group-hover:scale-105
+                              "
                             />
 
                           ) : (
 
-                            <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100">
+                            <div
+                              className="
+                                flex
+                                h-full
+                                w-full
+                                items-center
+                                justify-center
+                                theme-card-soft
+                              "
+                            >
 
                               <div
-                                className={`flex h-14 w-14 items-center justify-center rounded-2xl ${config.iconBg}`}
+                                className={`
+                                  flex
+                                  h-14
+                                  w-14
+                                  items-center
+                                  justify-center
+                                  rounded-2xl
+                                  ${config.iconBg}
+                                `}
                               >
                                 <TypeIcon className="h-7 w-7" />
                               </div>
@@ -681,13 +993,41 @@ export default function MediaPage() {
 
                           {/* OVERLAY */}
 
-                          <div className="absolute inset-0 flex items-center justify-center gap-2 bg-slate-950/30 opacity-0 backdrop-blur-[2px] transition-all duration-300 group-hover:opacity-100">
+                          <div
+                            className="
+                              absolute
+                              inset-0
+                              flex
+                              items-center
+                              justify-center
+                              gap-2
+                              bg-slate-950/30
+                              opacity-0
+                              backdrop-blur-[2px]
+                              transition-all
+                              duration-300
+                              group-hover:opacity-100
+                            "
+                          >
 
                             <a
                               href={item.url}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-slate-600 shadow-lg transition hover:scale-105 hover:text-indigo-600"
+                              className="
+                                flex
+                                h-9
+                                w-9
+                                items-center
+                                justify-center
+                                rounded-xl
+                                bg-white
+                                text-slate-600
+                                shadow-lg
+                                transition
+                                hover:scale-105
+                                hover:text-indigo-600
+                              "
                               title="Lihat"
                             >
                               <Eye className="h-4 w-4" />
@@ -696,7 +1036,20 @@ export default function MediaPage() {
                             <a
                               href={item.url}
                               download
-                              className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-slate-600 shadow-lg transition hover:scale-105 hover:text-blue-600"
+                              className="
+                                flex
+                                h-9
+                                w-9
+                                items-center
+                                justify-center
+                                rounded-xl
+                                bg-white
+                                text-slate-600
+                                shadow-lg
+                                transition
+                                hover:scale-105
+                                hover:text-blue-600
+                              "
                               title="Download"
                             >
                               <Download className="h-4 w-4" />
@@ -707,7 +1060,20 @@ export default function MediaPage() {
                               onClick={() =>
                                 handleDelete(item.id)
                               }
-                              className="flex h-9 w-9 items-center justify-center rounded-xl bg-white text-slate-600 shadow-lg transition hover:scale-105 hover:text-rose-600"
+                              className="
+                                flex
+                                h-9
+                                w-9
+                                items-center
+                                justify-center
+                                rounded-xl
+                                bg-white
+                                text-slate-600
+                                shadow-lg
+                                transition
+                                hover:scale-105
+                                hover:text-rose-600
+                              "
                               title="Hapus"
                             >
                               <Trash2 className="h-4 w-4" />
@@ -717,9 +1083,34 @@ export default function MediaPage() {
 
                           {/* FOLDER */}
 
-                          <div className="absolute left-2 top-2 max-w-[calc(100%-1rem)]">
+                          <div
+                            className="
+                              absolute
+                              left-2
+                              top-2
+                              max-w-[calc(100%-1rem)]
+                            "
+                          >
 
-                            <span className="inline-flex max-w-full items-center gap-1 rounded-lg border border-white/60 bg-white/85 px-2 py-1 text-[9px] font-semibold text-slate-600 shadow-sm backdrop-blur-md">
+                            <span
+                              className="
+                                inline-flex
+                                max-w-full
+                                items-center
+                                gap-1
+                                rounded-lg
+                                border
+                                border-white/60
+                                bg-white/85
+                                px-2
+                                py-1
+                                text-[9px]
+                                font-semibold
+                                text-slate-600
+                                shadow-sm
+                                backdrop-blur-md
+                              "
+                            >
 
                               <FolderOpen className="h-3 w-3 shrink-0" />
 
@@ -739,19 +1130,50 @@ export default function MediaPage() {
 
                           <p
                             title={item.name}
-                            className="truncate text-xs font-semibold text-slate-800 sm:text-sm"
+                            className="
+                              truncate
+                              text-xs
+                              font-semibold
+                              theme-text
+                              sm:text-sm
+                            "
                           >
                             {item.name}
                           </p>
 
-                          <div className="mt-2 flex min-w-0 items-center justify-between gap-2">
+                          <div
+                            className="
+                              mt-2
+                              flex
+                              min-w-0
+                              items-center
+                              justify-between
+                              gap-2
+                            "
+                          >
 
-                            <span className="truncate text-[10px] font-medium text-slate-400">
+                            <span
+                              className="
+                                truncate
+                                text-[10px]
+                                font-medium
+                                theme-text-muted
+                              "
+                            >
                               {formatFileSize(item.size)}
                             </span>
 
                             <span
-                              className={`shrink-0 rounded-full border px-2 py-0.5 text-[9px] font-semibold ${config.badge}`}
+                              className={`
+                                shrink-0
+                                rounded-full
+                                border
+                                px-2
+                                py-0.5
+                                text-[9px]
+                                font-semibold
+                                ${config.badge}
+                              `}
                             >
                               {config.label}
                             </span>
@@ -772,7 +1194,18 @@ export default function MediaPage() {
                     TABLE VIEW
                 ================================================= */
 
-                <div className="w-full min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                <div
+                  className="
+                    w-full
+                    min-w-0
+                    overflow-hidden
+                    rounded-2xl
+                    border
+                    theme-border
+                    theme-card
+                    shadow-sm
+                  "
+                >
 
                   <div className="w-full overflow-x-auto">
 
@@ -780,34 +1213,74 @@ export default function MediaPage() {
 
                       <thead>
 
-                        <tr className="border-b border-slate-100 bg-slate-50/80">
+                        <tr className="border-b theme-border-soft theme-table-header">
 
                           <th className="px-4 py-4 sm:px-5">
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            <span
+                              className="
+                                text-[10px]
+                                font-bold
+                                uppercase
+                                tracking-wider
+                                theme-text-muted
+                              "
+                            >
                               File
                             </span>
                           </th>
 
                           <th className="hidden px-5 py-4 md:table-cell">
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            <span
+                              className="
+                                text-[10px]
+                                font-bold
+                                uppercase
+                                tracking-wider
+                                theme-text-muted
+                              "
+                            >
                               Tipe
                             </span>
                           </th>
 
                           <th className="hidden px-5 py-4 lg:table-cell">
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            <span
+                              className="
+                                text-[10px]
+                                font-bold
+                                uppercase
+                                tracking-wider
+                                theme-text-muted
+                              "
+                            >
                               Ukuran
                             </span>
                           </th>
 
                           <th className="hidden px-5 py-4 lg:table-cell">
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            <span
+                              className="
+                                text-[10px]
+                                font-bold
+                                uppercase
+                                tracking-wider
+                                theme-text-muted
+                              "
+                            >
                               Folder
                             </span>
                           </th>
 
                           <th className="px-4 py-4 text-right sm:px-5">
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                            <span
+                              className="
+                                text-[10px]
+                                font-bold
+                                uppercase
+                                tracking-wider
+                                theme-text-muted
+                              "
+                            >
                               Aksi
                             </span>
                           </th>
@@ -816,7 +1289,7 @@ export default function MediaPage() {
 
                       </thead>
 
-                      <tbody className="divide-y divide-slate-100">
+                      <tbody className="divide-y">
 
                         {filteredMedia.map((item) => {
 
@@ -828,7 +1301,11 @@ export default function MediaPage() {
 
                             <tr
                               key={item.id}
-                              className="group transition-colors hover:bg-indigo-50/30"
+                              className="
+                                group
+                                transition-colors
+                                theme-table-hover
+                              "
                             >
 
                               {/* FILE */}
@@ -837,7 +1314,19 @@ export default function MediaPage() {
 
                                 <div className="flex min-w-0 items-center gap-3">
 
-                                  <div className="h-11 w-11 shrink-0 overflow-hidden rounded-xl border border-slate-200 bg-slate-100 shadow-sm">
+                                  <div
+                                    className="
+                                      h-11
+                                      w-11
+                                      shrink-0
+                                      overflow-hidden
+                                      rounded-xl
+                                      border
+                                      theme-border
+                                      theme-card-soft
+                                      shadow-sm
+                                    "
+                                  >
 
                                     {type === "image" &&
                                     item.url ? (
@@ -851,7 +1340,7 @@ export default function MediaPage() {
                                     ) : (
 
                                       <div className="flex h-full w-full items-center justify-center">
-                                        <TypeIcon className="h-5 w-5 text-slate-400" />
+                                        <TypeIcon className="h-5 w-5 theme-text-muted" />
                                       </div>
 
                                     )}
@@ -862,20 +1351,45 @@ export default function MediaPage() {
 
                                     <p
                                       title={item.name}
-                                      className="max-w-[260px] truncate text-sm font-semibold text-slate-800 transition-colors group-hover:text-indigo-600"
+                                      className="
+                                        max-w-[260px]
+                                        truncate
+                                        text-sm
+                                        font-semibold
+                                        theme-text
+                                        transition-colors
+                                        group-hover:text-[var(--color-primary)]
+                                      "
                                     >
                                       {item.name}
                                     </p>
 
-                                    <div className="mt-1 flex flex-wrap items-center gap-2 md:hidden">
+                                    <div
+                                      className="
+                                        mt-1
+                                        flex
+                                        flex-wrap
+                                        items-center
+                                        gap-2
+                                        md:hidden
+                                      "
+                                    >
 
                                       <span
-                                        className={`rounded-full border px-2 py-0.5 text-[9px] font-semibold ${config.badge}`}
+                                        className={`
+                                          rounded-full
+                                          border
+                                          px-2
+                                          py-0.5
+                                          text-[9px]
+                                          font-semibold
+                                          ${config.badge}
+                                        `}
                                       >
                                         {config.label}
                                       </span>
 
-                                      <span className="text-[10px] text-slate-400">
+                                      <span className="text-[10px] theme-text-muted">
                                         {formatFileSize(item.size)}
                                       </span>
 
@@ -892,7 +1406,18 @@ export default function MediaPage() {
                               <td className="hidden px-5 py-4 md:table-cell">
 
                                 <span
-                                  className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[10px] font-semibold ${config.badge}`}
+                                  className={`
+                                    inline-flex
+                                    items-center
+                                    gap-1.5
+                                    rounded-full
+                                    border
+                                    px-2.5
+                                    py-1
+                                    text-[10px]
+                                    font-semibold
+                                    ${config.badge}
+                                  `}
                                 >
                                   <TypeIcon className="h-3 w-3" />
                                   {config.label}
@@ -902,7 +1427,17 @@ export default function MediaPage() {
 
                               {/* SIZE */}
 
-                              <td className="hidden px-5 py-4 text-xs font-medium text-slate-500 lg:table-cell">
+                              <td
+                                className="
+                                  hidden
+                                  px-5
+                                  py-4
+                                  text-xs
+                                  font-medium
+                                  theme-text-secondary
+                                  lg:table-cell
+                                "
+                              >
                                 {formatFileSize(item.size)}
                               </td>
 
@@ -910,9 +1445,23 @@ export default function MediaPage() {
 
                               <td className="hidden px-5 py-4 lg:table-cell">
 
-                                <span className="inline-flex max-w-[180px] items-center gap-1.5 rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-semibold text-slate-600">
+                                <span
+                                  className="
+                                    inline-flex
+                                    max-w-[180px]
+                                    items-center
+                                    gap-1.5
+                                    rounded-full
+                                    theme-card-soft
+                                    px-2.5
+                                    py-1
+                                    text-[10px]
+                                    font-semibold
+                                    theme-text-secondary
+                                  "
+                                >
 
-                                  <FolderOpen className="h-3 w-3 shrink-0 text-slate-400" />
+                                  <FolderOpen className="h-3 w-3 shrink-0 theme-text-muted" />
 
                                   <span className="truncate">
                                     {item.folder || "Media"}
@@ -933,7 +1482,18 @@ export default function MediaPage() {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     title="Lihat"
-                                    className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-indigo-50 hover:text-indigo-600"
+                                    className="
+                                      flex
+                                      h-8
+                                      w-8
+                                      items-center
+                                      justify-center
+                                      rounded-lg
+                                      theme-text-muted
+                                      transition
+                                      theme-table-hover
+                                      hover:text-[var(--color-primary)]
+                                    "
                                   >
                                     <Eye className="h-4 w-4" />
                                   </a>
@@ -942,7 +1502,18 @@ export default function MediaPage() {
                                     href={item.url}
                                     download
                                     title="Download"
-                                    className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-blue-50 hover:text-blue-600"
+                                    className="
+                                      flex
+                                      h-8
+                                      w-8
+                                      items-center
+                                      justify-center
+                                      rounded-lg
+                                      theme-text-muted
+                                      transition
+                                      theme-table-hover
+                                      hover:text-[var(--color-info)]
+                                    "
                                   >
                                     <Download className="h-4 w-4" />
                                   </a>
@@ -953,7 +1524,18 @@ export default function MediaPage() {
                                       handleDelete(item.id)
                                     }
                                     title="Hapus"
-                                    className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-rose-50 hover:text-rose-600"
+                                    className="
+                                      flex
+                                      h-8
+                                      w-8
+                                      items-center
+                                      justify-center
+                                      rounded-lg
+                                      theme-text-muted
+                                      transition
+                                      hover:bg-[var(--color-danger-background)]
+                                      hover:text-[var(--color-danger)]
+                                    "
                                   >
                                     <Trash2 className="h-4 w-4" />
                                   </button>
@@ -974,14 +1556,48 @@ export default function MediaPage() {
 
                   {/* FOOTER */}
 
-                  <div className="flex flex-col gap-2 border-t border-slate-100 bg-slate-50/60 px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+                  <div
+                    className="
+                      flex
+                      flex-col
+                      gap-2
+                      border-t
+                      theme-border-soft
+                      theme-card-soft
+                      px-4
+                      py-3
+                      sm:flex-row
+                      sm:items-center
+                      sm:justify-between
+                      sm:px-5
+                    "
+                  >
 
-                    <span className="text-[10px] font-medium text-slate-400">
+                    <span
+                      className="
+                        text-[10px]
+                        font-medium
+                        theme-text-muted
+                      "
+                    >
                       Menampilkan {filteredMedia.length} dari{" "}
                       {totalMedia} media
                     </span>
 
-                    <span className="inline-flex w-fit items-center rounded-full bg-slate-100 px-3 py-1 text-[9px] font-semibold text-slate-400">
+                    <span
+                      className="
+                        inline-flex
+                        w-fit
+                        items-center
+                        rounded-full
+                        theme-card
+                        px-3
+                        py-1
+                        text-[9px]
+                        font-semibold
+                        theme-text-muted
+                      "
+                    >
                       Data simulasi
                     </span>
 
@@ -996,7 +1612,13 @@ export default function MediaPage() {
 
               <footer className="py-8 text-center">
 
-                <p className="text-[11px] font-medium text-slate-400">
+                <p
+                  className="
+                    text-[11px]
+                    font-medium
+                    theme-text-muted
+                  "
+                >
                   © 2026 SmartSchool • CMS Media Management
                 </p>
 

@@ -31,6 +31,81 @@ import {
 } from "lucide-react";
 
 /* =========================================================
+   THEME HELPERS
+========================================================= */
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+
+/* =========================================================
+   STATUS THEME
+========================================================= */
+
+const deadlineStatusClasses = {
+  danger: `${themeDangerSurface} theme-danger ${themeDangerBorder}`,
+  warning: `${themeWarningSurface} text-[var(--color-warning)] ${themeWarningBorder}`,
+  success: `${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder}`,
+  normal: `${themeNeutralSurface} theme-text-secondary ${themeNeutralBorder}`,
+};
+
+/* =========================================================
    HELPERS
 ========================================================= */
 
@@ -94,9 +169,7 @@ function getJumlahPengumpulan(data) {
 
   const number = Number(value);
 
-  return Number.isFinite(number) && number >= 0
-    ? number
-    : 0;
+  return Number.isFinite(number) && number >= 0 ? number : 0;
 }
 
 function getTotalSiswa(data) {
@@ -114,9 +187,7 @@ function getTotalSiswa(data) {
 
   const number = Number(value);
 
-  return Number.isFinite(number) && number >= 0
-    ? number
-    : 0;
+  return Number.isFinite(number) && number >= 0 ? number : 0;
 }
 
 function getProgress(data) {
@@ -125,10 +196,7 @@ function getProgress(data) {
 
   if (!total) return 0;
 
-  return Math.min(
-    100,
-    Math.round((submitted / total) * 100)
-  );
+  return Math.min(100, Math.round((submitted / total) * 100));
 }
 
 function getDeadlineStatus(date) {
@@ -157,11 +225,9 @@ function getDeadlineStatus(date) {
     };
   }
 
-  const difference =
-    deadline.getTime() - now.getTime();
+  const difference = deadline.getTime() - now.getTime();
 
-  const days =
-    difference / (1000 * 60 * 60 * 24);
+  const days = difference / (1000 * 60 * 60 * 24);
 
   if (days <= 1) {
     return {
@@ -201,8 +267,7 @@ export default function EditTugasPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  const [sidebarOpen, setSidebarOpen] =
-    useState(true);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const [form, setForm] = useState({
     judul: "",
@@ -241,13 +306,9 @@ export default function EditTugasPage() {
         setLoading(true);
         setError("");
 
-        const response =
-          await getDetailTugas(id);
+        const response = await getDetailTugas(id);
 
-        console.log(
-          "RESPONSE DETAIL TUGAS:",
-          response
-        );
+        console.log("RESPONSE DETAIL TUGAS:", response);
 
         const data =
           response?.data?.data ??
@@ -255,9 +316,7 @@ export default function EditTugasPage() {
           response;
 
         if (!data) {
-          throw new Error(
-            "Data tugas tidak ditemukan"
-          );
+          throw new Error("Data tugas tidak ditemukan");
         }
 
         setTugas(data);
@@ -265,20 +324,12 @@ export default function EditTugasPage() {
         setForm({
           judul: data?.judul || "",
           deskripsi: data?.deskripsi || "",
-          batasWaktu: formatTanggalInput(
-            data?.batasWaktu
-          ),
+          batasWaktu: formatTanggalInput(data?.batasWaktu),
         });
       } catch (err) {
-        console.error(
-          "ERROR LOAD TUGAS:",
-          err
-        );
+        console.error("ERROR LOAD TUGAS:", err);
 
-        setError(
-          err?.message ||
-            "Gagal memuat data tugas"
-        );
+        setError(err?.message || "Gagal memuat data tugas");
       } finally {
         setLoading(false);
       }
@@ -324,69 +375,46 @@ export default function EditTugasPage() {
     }
 
     if (form.judul.trim().length < 3) {
-      setError(
-        "Judul tugas minimal 3 karakter."
-      );
+      setError("Judul tugas minimal 3 karakter.");
       return;
     }
 
     if (!form.batasWaktu) {
-      setError(
-        "Batas waktu wajib diisi."
-      );
+      setError("Batas waktu wajib diisi.");
       return;
     }
 
-    const deadline = new Date(
-      form.batasWaktu
-    );
+    const deadline = new Date(form.batasWaktu);
 
     if (isNaN(deadline.getTime())) {
-      setError(
-        "Format batas waktu tidak valid."
-      );
+      setError("Format batas waktu tidak valid.");
       return;
     }
 
     try {
       setSaving(true);
 
-      const batasWaktuISO =
-        deadline.toISOString();
+      const batasWaktuISO = deadline.toISOString();
 
       const payload = {
         judul: form.judul.trim(),
-        deskripsi:
-          form.deskripsi.trim(),
+        deskripsi: form.deskripsi.trim(),
         batasWaktu: batasWaktuISO,
       };
 
-      console.log(
-        "PAYLOAD UPDATE TUGAS:",
-        payload
-      );
+      console.log("PAYLOAD UPDATE TUGAS:", payload);
 
       await updateTugas(id, payload);
 
-      setSuccess(
-        "Tugas berhasil diperbarui."
-      );
+      setSuccess("Tugas berhasil diperbarui.");
 
       setTimeout(() => {
-        router.push(
-          `/guru/tugas/${id}`
-        );
+        router.push(`/guru/tugas/${id}`);
       }, 1000);
     } catch (err) {
-      console.error(
-        "ERROR UPDATE TUGAS:",
-        err
-      );
+      console.error("ERROR UPDATE TUGAS:", err);
 
-      setError(
-        err?.message ||
-          "Gagal menyimpan perubahan tugas."
-      );
+      setError(err?.message || "Gagal menyimpan perubahan tugas.");
     } finally {
       setSaving(false);
     }
@@ -409,24 +437,17 @@ export default function EditTugasPage() {
     "-";
 
   const guruNama =
-    tugas?.kelasMapel?.guruPengajar
-      ?.namaLengkap ||
+    tugas?.kelasMapel?.guruPengajar?.namaLengkap ||
     tugas?.guru?.namaLengkap ||
     "-";
 
-  const jumlahPengumpulan =
-    getJumlahPengumpulan(tugas);
+  const jumlahPengumpulan = getJumlahPengumpulan(tugas);
 
-  const totalSiswa =
-    getTotalSiswa(tugas);
+  const totalSiswa = getTotalSiswa(tugas);
 
-  const progress =
-    getProgress(tugas);
+  const progress = getProgress(tugas);
 
-  const deadlineStatus =
-    getDeadlineStatus(
-      tugas?.batasWaktu
-    );
+  const deadlineStatus = getDeadlineStatus(tugas?.batasWaktu);
 
   /* =======================================================
      LOADING
@@ -434,47 +455,42 @@ export default function EditTugasPage() {
 
   if (loading) {
     return (
-      <div className="flex h-screen w-full overflow-hidden bg-slate-50">
+      <div className="theme-page flex h-screen w-full overflow-hidden">
         <Sidebar
           active="tugas"
           setActive={() => {}}
           collapsed={!sidebarOpen}
-          setCollapsed={() =>
-            setSidebarOpen(
-              !sidebarOpen
-            )
-          }
+          setCollapsed={() => setSidebarOpen(!sidebarOpen)}
         />
 
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
           <div className="shrink-0">
             <Header
-              toggleSidebar={() =>
-                setSidebarOpen(
-                  !sidebarOpen
-                )
-              }
+              toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
               notifications={notifications}
               user={{
                 name: "Guru",
-                email:
-                  "guru@smartschool.com",
+                email: "guru@smartschool.com",
                 avatar: "GU",
               }}
             />
           </div>
 
-          <main className="flex min-h-0 flex-1 items-center justify-center p-4">
+          <main className="theme-page flex min-h-0 flex-1 items-center justify-center p-4">
             <div className="text-center">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50">
-                <Loader2 className="h-6 w-6 animate-spin text-blue-500" />
+              <div
+                className={`mx-auto flex h-12 w-12 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimarySoftBorder} border`}
+              >
+                <Loader2
+                  className={`h-6 w-6 animate-spin ${themePrimaryText}`}
+                />
               </div>
 
-              <p className="mt-4 text-sm font-medium text-slate-600">
+              <p className="theme-text-secondary mt-4 text-sm font-medium">
                 Memuat data tugas...
               </p>
 
-              <p className="mt-1 text-xs text-slate-400">
+              <p className="theme-text-muted mt-1 text-xs">
                 Mohon tunggu sebentar
               </p>
             </div>
@@ -490,58 +506,49 @@ export default function EditTugasPage() {
 
   if (error && !tugas) {
     return (
-      <div className="flex h-screen w-full overflow-hidden bg-slate-50">
+      <div className="theme-page flex h-screen w-full overflow-hidden">
         <Sidebar
           active="tugas"
           setActive={() => {}}
           collapsed={!sidebarOpen}
-          setCollapsed={() =>
-            setSidebarOpen(
-              !sidebarOpen
-            )
-          }
+          setCollapsed={() => setSidebarOpen(!sidebarOpen)}
         />
 
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
           <div className="shrink-0">
             <Header
-              toggleSidebar={() =>
-                setSidebarOpen(
-                  !sidebarOpen
-                )
-              }
+              toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
               notifications={notifications}
               user={{
                 name: "Guru",
-                email:
-                  "guru@smartschool.com",
+                email: "guru@smartschool.com",
                 avatar: "GU",
               }}
             />
           </div>
 
-          <main className="flex flex-1 items-center justify-center overflow-y-auto p-4">
-            <div className="w-full max-w-md rounded-2xl border border-rose-200 bg-white p-6 text-center shadow-sm">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-50">
-                <AlertCircle className="h-7 w-7 text-rose-500" />
+          <main className="theme-page flex flex-1 items-center justify-center overflow-y-auto p-4">
+            <div
+              className={`theme-card w-full max-w-md rounded-2xl border p-6 text-center ${themeDangerBorder} ${themeCardShadow}`}
+            >
+              <div
+                className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl border ${themeDangerSurface} ${themeDangerBorder}`}
+              >
+                <AlertCircle className="h-7 w-7 theme-danger" />
               </div>
 
-              <h2 className="mt-5 text-lg font-semibold text-slate-800">
+              <h2 className="theme-text mt-5 text-lg font-semibold">
                 Gagal Memuat Tugas
               </h2>
 
-              <p className="mt-2 text-sm leading-6 text-slate-500">
+              <p className="theme-text-secondary mt-2 text-sm leading-6">
                 {error}
               </p>
 
               <button
                 type="button"
-                onClick={() =>
-                  router.push(
-                    "/guru/tugas"
-                  )
-                }
-                className="mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-blue-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-600"
+                onClick={() => router.push("/guru/tugas")}
+                className={`mt-6 inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold text-[var(--color-card)] transition ${themePrimaryGradient} ${themePrimaryShadow}`}
               >
                 <ArrowLeft size={16} />
                 Kembali ke Tugas
@@ -558,43 +565,28 @@ export default function EditTugasPage() {
   ======================================================= */
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-slate-50">
-
-      {/* =================================================
-          SIDEBAR
-      ================================================= */}
+    <div className="theme-page flex h-screen w-full overflow-hidden">
+      {/* SIDEBAR */}
 
       <Sidebar
         active="tugas"
         setActive={() => {}}
         collapsed={!sidebarOpen}
-        setCollapsed={() =>
-          setSidebarOpen(
-            !sidebarOpen
-          )
-        }
+        setCollapsed={() => setSidebarOpen(!sidebarOpen)}
       />
 
-      {/* =================================================
-          CONTENT
-      ================================================= */}
+      {/* CONTENT */}
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-
         {/* HEADER */}
 
         <div className="shrink-0">
           <Header
-            toggleSidebar={() =>
-              setSidebarOpen(
-                !sidebarOpen
-              )
-            }
+            toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
             notifications={notifications}
             user={{
               name: "Guru",
-              email:
-                "guru@smartschool.com",
+              email: "guru@smartschool.com",
               avatar: "GU",
             }}
           />
@@ -602,163 +594,158 @@ export default function EditTugasPage() {
 
         {/* MAIN */}
 
-        <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
-
+        <main className="theme-page min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="mx-auto w-full max-w-7xl px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
-
-            {/* =================================================
-                BACK
-            ================================================== */}
+            {/* BACK */}
 
             <button
               type="button"
-              onClick={() =>
-                router.push(
-                  `/guru/tugas/${id}`
-                )
-              }
-              className="mb-5 inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-blue-600"
+              onClick={() => router.push(`/guru/tugas/${id}`)}
+              className="theme-text-secondary mb-5 inline-flex items-center gap-2 text-sm font-medium transition-colors hover:text-[var(--color-primary)]"
             >
               <ArrowLeft size={16} />
               Kembali ke Detail Tugas
             </button>
 
-            {/* =================================================
-                TITLE
-            ================================================== */}
+            {/* TITLE */}
 
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-
               <div className="flex min-w-0 items-center gap-3">
-
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                <div
+                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
+                >
                   <Pencil size={20} />
                 </div>
 
                 <div className="min-w-0">
-                  <h1 className="text-xl font-bold tracking-tight text-slate-800 sm:text-2xl">
+                  <h1 className="theme-text text-xl font-bold tracking-tight sm:text-2xl">
                     Edit Tugas
                   </h1>
 
-                  <p className="mt-1 text-sm text-slate-500">
-                    Perbarui informasi tugas dan
-                    batas waktu pengumpulan.
+                  <p className="theme-text-secondary mt-1 text-sm">
+                    Perbarui informasi tugas dan batas waktu pengumpulan.
                   </p>
                 </div>
-
               </div>
 
-              <div className="hidden items-center gap-2 rounded-xl border border-blue-100 bg-blue-50 px-3 py-2 sm:flex">
+              <div
+                className={`hidden items-center gap-2 rounded-xl border px-3 py-2 sm:flex ${themePrimarySoftBorder} ${themePrimarySoft}`}
+              >
                 <ClipboardList
                   size={15}
-                  className="text-blue-500"
+                  className={themePrimaryText}
                 />
 
-                <span className="text-xs font-medium text-blue-600">
+                <span className={`text-xs font-medium ${themePrimaryText}`}>
                   Mode Pengeditan
                 </span>
               </div>
-
             </div>
 
-            {/* =================================================
-                TWO COLUMN LAYOUT
-            ================================================== */}
+            {/* TWO COLUMN LAYOUT */}
 
             <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
-
               {/* =================================================
                   LEFT - FORM
               ================================================== */}
 
-              <section className="min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
-
+              <section
+                className={`theme-card min-w-0 overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+              >
                 {/* FORM HEADER */}
 
-                <div className="border-b border-slate-100 px-5 py-5 sm:px-6">
-
+                <div
+                  className={`border-b px-5 py-5 sm:px-6 ${themeDivider}`}
+                >
                   <div className="flex items-center justify-between gap-3">
-
                     <div>
-                      <h2 className="text-sm font-bold text-slate-800 sm:text-base">
+                      <h2 className="theme-text text-sm font-bold sm:text-base">
                         Informasi Tugas
                       </h2>
 
-                      <p className="mt-1 text-xs text-slate-400">
+                      <p className="theme-text-muted mt-1 text-xs">
                         Ubah data tugas sesuai kebutuhan.
                       </p>
                     </div>
 
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-50 text-slate-400">
-                      <FileText size={17} />
+                    <div
+                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${themeNeutralSurface} ${themeNeutralBorder}`}
+                    >
+                      <FileText
+                        size={17}
+                        className="theme-text-secondary"
+                      />
                     </div>
-
                   </div>
-
                 </div>
 
                 {/* FORM */}
 
                 <form onSubmit={handleSubmit}>
-
                   <div className="space-y-6 p-5 sm:p-6">
-
                     {/* ERROR */}
 
                     {error && (
-                      <div className="flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 p-4">
-
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-rose-100 text-rose-500">
-                          <AlertCircle size={17} />
+                      <div
+                        className={`flex items-start gap-3 rounded-xl border p-4 ${themeDangerSurface} ${themeDangerBorder}`}
+                      >
+                        <div
+                          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${theme-card} ${themeDangerBorder}`}
+                        >
+                          <AlertCircle
+                            size={17}
+                            className="theme-danger"
+                          />
                         </div>
 
                         <div className="min-w-0">
-                          <p className="text-sm font-semibold text-rose-700">
+                          <p className="theme-danger text-sm font-semibold">
                             Gagal menyimpan
                           </p>
 
-                          <p className="mt-1 break-words text-xs leading-5 text-rose-600">
+                          <p className="theme-danger mt-1 break-words text-xs leading-5 opacity-80">
                             {error}
                           </p>
                         </div>
-
                       </div>
                     )}
 
                     {/* SUCCESS */}
 
                     {success && (
-                      <div className="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
-
-                        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
-                          <CheckCircle2 size={17} />
+                      <div
+                        className={`flex items-start gap-3 rounded-xl border p-4 ${themeSuccessSurface} ${themeSuccessBorder}`}
+                      >
+                        <div
+                          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border ${themeSuccessBorder} ${theme-card}`}
+                        >
+                          <CheckCircle2
+                            size={17}
+                            className="text-[var(--color-success)]"
+                          />
                         </div>
 
                         <div>
-                          <p className="text-sm font-semibold text-emerald-700">
+                          <p className="text-[var(--color-success)] text-sm font-semibold">
                             Berhasil
                           </p>
 
-                          <p className="mt-1 text-xs text-emerald-600">
+                          <p className="mt-1 text-xs text-[var(--color-success)] opacity-80">
                             {success}
                           </p>
                         </div>
-
                       </div>
                     )}
 
                     {/* JUDUL */}
 
                     <div>
-
                       <label
                         htmlFor="judul"
-                        className="mb-2 block text-sm font-semibold text-slate-700"
+                        className="theme-text-secondary mb-2 block text-sm font-semibold"
                       >
                         Judul Tugas
-                        <span className="ml-1 text-rose-500">
-                          *
-                        </span>
+                        <span className="theme-danger ml-1">*</span>
                       </label>
 
                       <input
@@ -769,23 +756,20 @@ export default function EditTugasPage() {
                         onChange={handleChange}
                         disabled={saving}
                         placeholder="Contoh: Tugas Matriks"
-                        className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 hover:border-blue-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-60"
+                        className={`theme-input h-12 w-full rounded-xl px-4 text-sm outline-none transition ${themeFocus} placeholder:text-[var(--color-text-placeholder)] disabled:cursor-not-allowed disabled:opacity-60`}
                       />
 
-                      <p className="mt-1.5 text-xs text-slate-400">
-                        Gunakan judul yang singkat dan
-                        mudah dipahami siswa.
+                      <p className="theme-text-muted mt-1.5 text-xs">
+                        Gunakan judul yang singkat dan mudah dipahami siswa.
                       </p>
-
                     </div>
 
                     {/* DESKRIPSI */}
 
                     <div>
-
                       <label
                         htmlFor="deskripsi"
-                        className="mb-2 block text-sm font-semibold text-slate-700"
+                        className="theme-text-secondary mb-2 block text-sm font-semibold"
                       >
                         Deskripsi Tugas
                       </label>
@@ -798,38 +782,34 @@ export default function EditTugasPage() {
                         onChange={handleChange}
                         disabled={saving}
                         placeholder="Tulis instruksi, materi, atau keterangan tugas..."
-                        className="w-full resize-y rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm leading-6 text-slate-700 outline-none transition placeholder:text-slate-400 hover:border-blue-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-60"
+                        className={`theme-input w-full resize-y rounded-xl px-4 py-3 text-sm leading-6 outline-none transition ${themeFocus} placeholder:text-[var(--color-text-placeholder)] disabled:cursor-not-allowed disabled:opacity-60`}
                       />
 
                       <div className="mt-1.5 flex items-center justify-between gap-3">
-                        <p className="text-xs text-slate-400">
+                        <p className="theme-text-muted text-xs">
                           Deskripsi bersifat opsional.
                         </p>
 
-                        <span className="text-[11px] text-slate-400">
+                        <span className="theme-text-muted text-[11px]">
                           {form.deskripsi.length} karakter
                         </span>
                       </div>
-
                     </div>
 
                     {/* DEADLINE */}
 
                     <div>
-
                       <label
                         htmlFor="batasWaktu"
-                        className="mb-2 flex items-center gap-2 text-sm font-semibold text-slate-700"
+                        className="theme-text-secondary mb-2 flex items-center gap-2 text-sm font-semibold"
                       >
                         <Clock
                           size={15}
-                          className="text-blue-500"
+                          className={themePrimaryText}
                         />
 
                         Batas Waktu
-                        <span className="text-rose-500">
-                          *
-                        </span>
+                        <span className="theme-danger">*</span>
                       </label>
 
                       <input
@@ -839,58 +819,61 @@ export default function EditTugasPage() {
                         value={form.batasWaktu}
                         onChange={handleChange}
                         disabled={saving}
-                        className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50 px-4 text-sm text-slate-700 outline-none transition hover:border-blue-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-60"
+                        className={`theme-input h-12 w-full rounded-xl px-4 text-sm outline-none transition ${themeFocus} disabled:cursor-not-allowed disabled:opacity-60`}
                       />
 
-                      <p className="mt-1.5 text-xs text-slate-400">
-                        Siswa tidak dapat mengumpulkan
-                        tugas setelah melewati batas waktu.
+                      <p className="theme-text-muted mt-1.5 text-xs">
+                        Siswa tidak dapat mengumpulkan tugas setelah melewati
+                        batas waktu.
                       </p>
-
                     </div>
 
                     {/* INFO READ ONLY */}
 
-                    <div className="rounded-xl border border-slate-200 bg-slate-50">
-
-                      <div className="border-b border-slate-200 px-4 py-4">
-
+                    <div
+                      className={`rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface}`}
+                    >
+                      <div
+                        className={`border-b px-4 py-4 ${themeDivider}`}
+                      >
                         <div className="flex items-center gap-2">
-
                           <Info
                             size={16}
-                            className="text-blue-500"
+                            className={themePrimaryText}
                           />
 
-                          <p className="text-sm font-semibold text-slate-700">
+                          <p className="theme-text-secondary text-sm font-semibold">
                             Informasi Pembelajaran
                           </p>
-
                         </div>
 
-                        <p className="mt-1 text-xs leading-5 text-slate-400">
-                          Data kelas dan mata pelajaran
-                          mengikuti Kelas Mapel yang
-                          sudah tersimpan.
+                        <p className="theme-text-muted mt-1 text-xs leading-5">
+                          Data kelas dan mata pelajaran mengikuti Kelas Mapel
+                          yang sudah tersimpan.
                         </p>
-
                       </div>
 
                       <div className="grid grid-cols-1 sm:grid-cols-2">
-
                         {/* KELAS */}
 
-                        <div className="flex items-start gap-3 border-b border-slate-200 p-4 sm:border-r">
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-blue-500 shadow-sm">
-                            <Users size={16} />
+                        <div
+                          className={`flex items-start gap-3 border-b p-4 sm:border-r ${themeDivider}`}
+                        >
+                          <div
+                            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${theme-card} ${themePrimarySoftBorder}`}
+                          >
+                            <Users
+                              size={16}
+                              className={themePrimaryText}
+                            />
                           </div>
 
                           <div className="min-w-0">
-                            <p className="text-xs text-slate-400">
+                            <p className="theme-text-muted text-xs">
                               Kelas
                             </p>
 
-                            <p className="mt-1 break-words text-sm font-semibold text-slate-700">
+                            <p className="theme-text mt-1 break-words text-sm font-semibold">
                               {kelasNama}
                             </p>
                           </div>
@@ -898,17 +881,24 @@ export default function EditTugasPage() {
 
                         {/* MAPEL */}
 
-                        <div className="flex items-start gap-3 border-b border-slate-200 p-4 sm:border-b-0">
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-blue-500 shadow-sm">
-                            <BookOpen size={16} />
+                        <div
+                          className={`flex items-start gap-3 border-b p-4 sm:border-b-0 ${themeDivider}`}
+                        >
+                          <div
+                            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${theme-card} ${themePrimarySoftBorder}`}
+                          >
+                            <BookOpen
+                              size={16}
+                              className={themePrimaryText}
+                            />
                           </div>
 
                           <div className="min-w-0">
-                            <p className="text-xs text-slate-400">
+                            <p className="theme-text-muted text-xs">
                               Mata Pelajaran
                             </p>
 
-                            <p className="mt-1 break-words text-sm font-semibold text-slate-700">
+                            <p className="theme-text mt-1 break-words text-sm font-semibold">
                               {mapelNama}
                             </p>
                           </div>
@@ -916,17 +906,24 @@ export default function EditTugasPage() {
 
                         {/* GURU */}
 
-                        <div className="flex items-start gap-3 p-4 sm:border-r">
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-blue-500 shadow-sm">
-                            <GraduationCap size={16} />
+                        <div
+                          className={`flex items-start gap-3 p-4 sm:border-r ${themeDivider}`}
+                        >
+                          <div
+                            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${theme-card} ${themePrimarySoftBorder}`}
+                          >
+                            <GraduationCap
+                              size={16}
+                              className={themePrimaryText}
+                            />
                           </div>
 
                           <div className="min-w-0">
-                            <p className="text-xs text-slate-400">
+                            <p className="theme-text-muted text-xs">
                               Guru Pengajar
                             </p>
 
-                            <p className="mt-1 break-words text-sm font-semibold text-slate-700">
+                            <p className="theme-text mt-1 break-words text-sm font-semibold">
                               {guruNama}
                             </p>
                           </div>
@@ -934,51 +931,49 @@ export default function EditTugasPage() {
 
                         {/* DEADLINE */}
 
-                        <div className="flex items-start gap-3 border-t border-slate-200 p-4">
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-blue-500 shadow-sm">
-                            <CalendarDays size={16} />
+                        <div
+                          className={`flex items-start gap-3 border-t p-4 ${themeDivider}`}
+                        >
+                          <div
+                            className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${theme-card} ${themePrimarySoftBorder}`}
+                          >
+                            <CalendarDays
+                              size={16}
+                              className={themePrimaryText}
+                            />
                           </div>
 
                           <div className="min-w-0">
-                            <p className="text-xs text-slate-400">
+                            <p className="theme-text-muted text-xs">
                               Deadline Saat Ini
                             </p>
 
-                            <p className="mt-1 text-sm font-semibold text-slate-700">
-                              {formatTanggal(
-                                tugas?.batasWaktu
-                              )}
+                            <p className="theme-text mt-1 text-sm font-semibold">
+                              {formatTanggal(tugas?.batasWaktu)}
                             </p>
 
-                            <p className="mt-0.5 text-xs text-slate-400">
-                              {formatJam(
-                                tugas?.batasWaktu
-                              )}
+                            <p className="theme-text-muted mt-0.5 text-xs">
+                              {formatJam(tugas?.batasWaktu)}
                             </p>
                           </div>
                         </div>
-
                       </div>
-
                     </div>
-
                   </div>
 
                   {/* FORM FOOTER */}
 
-                  <div className="border-t border-slate-100 bg-slate-50/70 px-5 py-4 sm:px-6">
-
+                  <div
+                    className={`border-t px-5 py-4 sm:px-6 ${themeDivider} ${themeNeutralSurface}`}
+                  >
                     <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-end">
-
                       <button
                         type="button"
                         onClick={() =>
-                          router.push(
-                            `/guru/tugas/${id}`
-                          )
+                          router.push(`/guru/tugas/${id}`)
                         }
                         disabled={saving}
-                        className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
+                        className={`theme-card theme-text-secondary inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border px-5 text-sm font-semibold transition ${themeNeutralBorder} ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto`}
                       >
                         <ArrowLeft size={16} />
                         Batal
@@ -987,7 +982,7 @@ export default function EditTugasPage() {
                       <button
                         type="submit"
                         disabled={saving}
-                        className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-blue-500 px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+                        className={`inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl px-6 text-sm font-semibold text-[var(--color-card)] transition ${themePrimaryGradient} ${themePrimaryShadow} disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto`}
                       >
                         {saving ? (
                           <>
@@ -1004,13 +999,9 @@ export default function EditTugasPage() {
                           </>
                         )}
                       </button>
-
                     </div>
-
                   </div>
-
                 </form>
-
               </section>
 
               {/* =================================================
@@ -1018,272 +1009,298 @@ export default function EditTugasPage() {
               ================================================== */}
 
               <aside className="space-y-5">
-
                 {/* PREVIEW CARD */}
 
-                <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
+                <section
+                  className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+                >
+                  <div className={`relative overflow-hidden p-5 ${themePrimaryGradient}`}>
+                    <div
+                      className="pointer-events-none absolute -right-12 -top-16 h-36 w-36 rounded-full blur-3xl"
+                      style={{
+                        background:
+                          "color-mix(in srgb, var(--color-card) 12%, transparent)",
+                      }}
+                    />
 
-                  <div className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-[#12357d] to-[#0c2458] p-5">
-
-                    <div className="pointer-events-none absolute -right-12 -top-16 h-36 w-36 rounded-full bg-blue-400/20 blur-3xl" />
-
-                    <div className="pointer-events-none absolute -bottom-12 -left-10 h-32 w-32 rounded-full bg-indigo-500/20 blur-3xl" />
+                    <div
+                      className="pointer-events-none absolute -bottom-12 -left-10 h-32 w-32 rounded-full blur-3xl"
+                      style={{
+                        background:
+                          "color-mix(in srgb, var(--color-info) 18%, transparent)",
+                      }}
+                    />
 
                     <div className="relative">
-
                       <div className="flex items-center justify-between gap-3">
-
-                        <div className="flex h-10 w-10 items-center justify-center rounded-xl border border-white/10 bg-white/10 text-white backdrop-blur">
+                        <div
+                          className="flex h-10 w-10 items-center justify-center rounded-xl border text-[var(--color-card)]"
+                          style={{
+                            borderColor:
+                              "color-mix(in srgb, var(--color-card) 18%, transparent)",
+                            background:
+                              "color-mix(in srgb, var(--color-card) 12%, transparent)",
+                          }}
+                        >
                           <ClipboardList size={19} />
                         </div>
 
-                        <span className="rounded-full border border-white/10 bg-white/10 px-2.5 py-1 text-[10px] font-semibold text-blue-100">
+                        <span
+                          className="rounded-full border px-2.5 py-1 text-[10px] font-semibold text-[var(--color-card)]"
+                          style={{
+                            borderColor:
+                              "color-mix(in srgb, var(--color-card) 18%, transparent)",
+                            background:
+                              "color-mix(in srgb, var(--color-card) 10%, transparent)",
+                          }}
+                        >
                           PREVIEW
                         </span>
-
                       </div>
 
-                      <p className="mt-5 text-[11px] font-medium uppercase tracking-wider text-blue-200/70">
+                      <p
+                        className="mt-5 text-[11px] font-medium uppercase tracking-wider"
+                        style={{
+                          color:
+                            "color-mix(in srgb, var(--color-card) 68%, transparent)",
+                        }}
+                      >
                         Judul Tugas
                       </p>
 
-                      <h3 className="mt-1 break-words text-lg font-bold leading-6 text-white">
-                        {form.judul ||
-                          "Judul tugas"}
+                      <h3 className="mt-1 break-words text-lg font-bold leading-6 text-[var(--color-card)]">
+                        {form.judul || "Judul tugas"}
                       </h3>
 
-                      <p className="mt-3 line-clamp-4 min-h-[80px] text-xs leading-5 text-blue-100/80">
+                      <p
+                        className="mt-3 line-clamp-4 min-h-[80px] text-xs leading-5"
+                        style={{
+                          color:
+                            "color-mix(in srgb, var(--color-card) 76%, transparent)",
+                        }}
+                      >
                         {form.deskripsi ||
                           "Deskripsi tugas akan tampil di sini setelah diisi."}
                       </p>
-
                     </div>
-
                   </div>
 
                   {/* PREVIEW META */}
 
-                  <div className="divide-y divide-slate-100">
+                  <div>
+                    {/* KELAS */}
 
-                    <div className="flex items-center gap-3 px-5 py-4">
-
-                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-500">
-                        <Users size={16} />
+                    <div
+                      className={`flex items-center gap-3 border-b px-5 py-4 ${themeDivider}`}
+                    >
+                      <div
+                        className={`flex h-9 w-9 items-center justify-center rounded-lg border ${themePrimarySoft} ${themePrimarySoftBorder}`}
+                      >
+                        <Users
+                          size={16}
+                          className={themePrimaryText}
+                        />
                       </div>
 
                       <div className="min-w-0 flex-1">
-                        <p className="text-[11px] text-slate-400">
+                        <p className="theme-text-muted text-[11px]">
                           Kelas
                         </p>
 
-                        <p className="mt-0.5 truncate text-sm font-semibold text-slate-700">
+                        <p className="theme-text mt-0.5 truncate text-sm font-semibold">
                           {kelasNama}
                         </p>
                       </div>
-
                     </div>
 
-                    <div className="flex items-center gap-3 px-5 py-4">
+                    {/* MAPEL */}
 
-                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-500">
-                        <BookOpen size={16} />
+                    <div
+                      className={`flex items-center gap-3 border-b px-5 py-4 ${themeDivider}`}
+                    >
+                      <div
+                        className={`flex h-9 w-9 items-center justify-center rounded-lg border ${themePrimarySoft} ${themePrimarySoftBorder}`}
+                      >
+                        <BookOpen
+                          size={16}
+                          className={themePrimaryText}
+                        />
                       </div>
 
                       <div className="min-w-0 flex-1">
-                        <p className="text-[11px] text-slate-400">
+                        <p className="theme-text-muted text-[11px]">
                           Mata Pelajaran
                         </p>
 
-                        <p className="mt-0.5 truncate text-sm font-semibold text-slate-700">
+                        <p className="theme-text mt-0.5 truncate text-sm font-semibold">
                           {mapelNama}
                         </p>
                       </div>
-
                     </div>
 
-                    <div className="flex items-center gap-3 px-5 py-4">
+                    {/* DEADLINE */}
 
-                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-500">
-                        <CalendarDays size={16} />
+                    <div className="flex items-center gap-3 px-5 py-4">
+                      <div
+                        className={`flex h-9 w-9 items-center justify-center rounded-lg border ${themePrimarySoft} ${themePrimarySoftBorder}`}
+                      >
+                        <CalendarDays
+                          size={16}
+                          className={themePrimaryText}
+                        />
                       </div>
 
                       <div className="min-w-0 flex-1">
-                        <p className="text-[11px] text-slate-400">
+                        <p className="theme-text-muted text-[11px]">
                           Batas Waktu
                         </p>
 
-                        <p className="mt-0.5 text-sm font-semibold text-slate-700">
+                        <p className="theme-text mt-0.5 text-sm font-semibold">
                           {form.batasWaktu
-                            ? formatTanggal(
-                                form.batasWaktu
-                              )
+                            ? formatTanggal(form.batasWaktu)
                             : "-"}
                         </p>
 
-                        <p className="mt-0.5 text-xs text-slate-400">
+                        <p className="theme-text-muted mt-0.5 text-xs">
                           {form.batasWaktu
-                            ? formatJam(
-                                form.batasWaktu
-                              )
+                            ? formatJam(form.batasWaktu)
                             : "-"}
                         </p>
                       </div>
-
                     </div>
-
                   </div>
-
                 </section>
 
                 {/* DEADLINE STATUS */}
 
-                <section className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
-
+                <section
+                  className={`theme-card rounded-2xl border p-5 ${themeNeutralBorder} ${themeCardShadow}`}
+                >
                   <div className="flex items-center gap-3">
-
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-500">
-                      <Timer size={18} />
+                    <div
+                      className={`flex h-10 w-10 items-center justify-center rounded-xl border ${themePrimarySoft} ${themePrimarySoftBorder}`}
+                    >
+                      <Timer
+                        size={18}
+                        className={themePrimaryText}
+                      />
                     </div>
 
                     <div>
-                      <p className="text-sm font-bold text-slate-800">
+                      <p className="theme-text text-sm font-bold">
                         Status Deadline
                       </p>
 
-                      <p className="mt-0.5 text-xs text-slate-400">
+                      <p className="theme-text-muted mt-0.5 text-xs">
                         Kondisi batas waktu saat ini
                       </p>
                     </div>
-
                   </div>
 
-                  <div className="mt-4 rounded-xl border border-slate-100 bg-slate-50 p-4">
-
+                  <div
+                    className={`mt-4 rounded-xl border p-4 ${themeNeutralSurface} ${themeNeutralBorder}`}
+                  >
                     <div className="flex items-center justify-between gap-3">
-
-                      <span className="text-xs font-medium text-slate-500">
+                      <span className="theme-text-secondary text-xs font-medium">
                         Status
                       </span>
 
                       <span
-                        className={`
-                          rounded-full border px-2.5 py-1
-                          text-[10px] font-semibold
-                          ${
-                            deadlineStatus.type ===
-                            "danger"
-                              ? "border-rose-200 bg-rose-50 text-rose-600"
-                              : deadlineStatus.type ===
-                                "warning"
-                              ? "border-amber-200 bg-amber-50 text-amber-600"
-                              : "border-emerald-200 bg-emerald-50 text-emerald-600"
-                          }
-                        `}
+                        className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold ${
+                          deadlineStatusClasses[deadlineStatus.type]
+                        }`}
                       >
                         {deadlineStatus.label}
                       </span>
-
                     </div>
 
                     <div className="mt-4 flex items-center gap-2">
-
                       <CalendarDays
                         size={14}
-                        className="text-slate-400"
+                        className="theme-text-muted"
                       />
 
-                      <span className="text-xs text-slate-600">
-                        {formatTanggal(
-                          tugas?.batasWaktu
-                        )}
+                      <span className="theme-text-secondary text-xs">
+                        {formatTanggal(tugas?.batasWaktu)}
                       </span>
-
                     </div>
 
                     <div className="mt-2 flex items-center gap-2">
-
                       <Clock
                         size={14}
-                        className="text-slate-400"
+                        className="theme-text-muted"
                       />
 
-                      <span className="text-xs text-slate-600">
-                        {formatJam(
-                          tugas?.batasWaktu
-                        )}
+                      <span className="theme-text-secondary text-xs">
+                        {formatJam(tugas?.batasWaktu)}
                       </span>
-
                     </div>
-
                   </div>
-
                 </section>
 
                 {/* SUBMISSION SUMMARY */}
 
-                <section className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
-
+                <section
+                  className={`theme-card rounded-2xl border p-5 ${themeNeutralBorder} ${themeCardShadow}`}
+                >
                   <div className="flex items-center justify-between gap-3">
-
                     <div className="flex items-center gap-3">
-
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-500">
-                        <CheckCircle2 size={18} />
+                      <div
+                        className={`flex h-10 w-10 items-center justify-center rounded-xl border ${themeSuccessSurface} ${themeSuccessBorder}`}
+                      >
+                        <CheckCircle2
+                          size={18}
+                          className="text-[var(--color-success)]"
+                        />
                       </div>
 
                       <div>
-                        <p className="text-sm font-bold text-slate-800">
+                        <p className="theme-text text-sm font-bold">
                           Pengumpulan
                         </p>
 
-                        <p className="mt-0.5 text-xs text-slate-400">
+                        <p className="theme-text-muted mt-0.5 text-xs">
                           Progres siswa
                         </p>
                       </div>
-
                     </div>
 
-                    <span className="text-lg font-bold text-blue-600">
+                    <span
+                      className={`text-lg font-bold ${themePrimaryText}`}
+                    >
                       {progress}%
                     </span>
-
                   </div>
 
                   <div className="mt-5">
-
                     <div className="flex items-center justify-between text-xs">
-
-                      <span className="text-slate-500">
+                      <span className="theme-text-secondary">
                         Terkumpul
                       </span>
 
-                      <span className="font-semibold text-slate-700">
+                      <span className="theme-text font-semibold">
                         {jumlahPengumpulan}
-                        {totalSiswa > 0
-                          ? ` / ${totalSiswa}`
-                          : ""}
+                        {totalSiswa > 0 ? ` / ${totalSiswa}` : ""}
                       </span>
-
                     </div>
 
-                    <div className="mt-2 h-2 overflow-hidden rounded-full bg-slate-100">
-
+                    <div
+                      className={`mt-2 h-2 overflow-hidden rounded-full ${themeNeutralSurface}`}
+                    >
                       <div
-                        className="h-full rounded-full bg-gradient-to-r from-blue-600 to-blue-400 transition-all duration-500"
+                        className={`h-full rounded-full transition-all duration-500 ${themePrimaryGradient}`}
                         style={{
                           width: `${progress}%`,
                         }}
                       />
-
                     </div>
-
                   </div>
 
                   <div className="mt-4 grid grid-cols-2 gap-2">
-
-                    <div className="rounded-xl bg-slate-50 p-3">
-
-                      <div className="flex items-center gap-1.5 text-slate-400">
+                    <div
+                      className={`rounded-xl border p-3 ${themeNeutralSurface} ${themeNeutralBorder}`}
+                    >
+                      <div className="theme-text-muted flex items-center gap-1.5">
                         <UserCheck size={13} />
 
                         <span className="text-[10px]">
@@ -1291,15 +1308,15 @@ export default function EditTugasPage() {
                         </span>
                       </div>
 
-                      <p className="mt-1 text-base font-bold text-slate-800">
+                      <p className="theme-text mt-1 text-base font-bold">
                         {jumlahPengumpulan}
                       </p>
-
                     </div>
 
-                    <div className="rounded-xl bg-slate-50 p-3">
-
-                      <div className="flex items-center gap-1.5 text-slate-400">
+                    <div
+                      className={`rounded-xl border p-3 ${themeNeutralSurface} ${themeNeutralBorder}`}
+                    >
+                      <div className="theme-text-muted flex items-center gap-1.5">
                         <Users size={13} />
 
                         <span className="text-[10px]">
@@ -1307,42 +1324,34 @@ export default function EditTugasPage() {
                         </span>
                       </div>
 
-                      <p className="mt-1 text-base font-bold text-slate-800">
+                      <p className="theme-text mt-1 text-base font-bold">
                         {totalSiswa || "-"}
                       </p>
-
                     </div>
-
                   </div>
-
                 </section>
 
                 {/* INFO */}
 
-                <div className="flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50 p-4">
-
+                <div
+                  className={`flex items-start gap-3 rounded-xl border p-4 ${themeInfoSurface} ${themeInfoBorder}`}
+                >
                   <Info
                     size={16}
-                    className="mt-0.5 shrink-0 text-blue-500"
+                    className="mt-0.5 shrink-0 text-[var(--color-info)]"
                   />
 
-                  <p className="text-xs leading-5 text-blue-700">
-                    Kelas, mata pelajaran, dan guru
-                    pengajar tidak dapat diubah dari
-                    halaman edit ini karena mengikuti
-                    data Kelas Mapel yang sudah tersimpan.
+                  <p className="text-xs leading-5 text-[var(--color-info)]">
+                    Kelas, mata pelajaran, dan guru pengajar tidak dapat diubah
+                    dari halaman edit ini karena mengikuti data Kelas Mapel
+                    yang sudah tersimpan.
                   </p>
-
                 </div>
-
               </aside>
-
             </div>
 
             <div className="h-4" />
-
           </div>
-
         </main>
       </div>
     </div>

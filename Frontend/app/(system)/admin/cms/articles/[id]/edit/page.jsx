@@ -263,7 +263,7 @@ export default function EditArticlePage() {
 
   if (loading) {
     return (
-      <div className="flex h-screen overflow-hidden bg-slate-50">
+      <div className="theme-page flex h-screen overflow-hidden">
         <Sidebar
           role="cms"
           collapsed={!sidebarOpen}
@@ -277,8 +277,8 @@ export default function EditArticlePage() {
           }}
         />
 
-        <div className="flex h-screen min-w-0 flex-1 flex-col overflow-hidden">
-          <div className="sticky top-0 z-30 shrink-0">
+        <div className="theme-page flex h-screen min-w-0 flex-1 flex-col overflow-hidden">
+          <div className="theme-header sticky top-0 z-30 shrink-0 border-b">
             <Header
               onMenuClick={() =>
                 setSidebarOpen((prev) => !prev)
@@ -286,11 +286,16 @@ export default function EditArticlePage() {
             />
           </div>
 
-          <main className="flex flex-1 items-center justify-center overflow-y-auto p-6">
-            <div className="flex flex-col items-center gap-3 text-slate-500">
-              <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+          <main className="theme-page flex flex-1 items-center justify-center overflow-y-auto p-6">
+            <div className="flex flex-col items-center gap-3">
+              <Loader2
+                className="h-8 w-8 animate-spin"
+                style={{
+                  color: "var(--color-primary)",
+                }}
+              />
 
-              <p className="text-sm">
+              <p className="theme-text-secondary text-sm">
                 Memuat data artikel...
               </p>
             </div>
@@ -305,7 +310,7 @@ export default function EditArticlePage() {
   ========================================================= */
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50">
+    <div className="theme-page flex h-screen overflow-hidden">
       {/* =====================================================
           SIDEBAR
       ===================================================== */}
@@ -327,12 +332,12 @@ export default function EditArticlePage() {
           CONTENT
       ===================================================== */}
 
-      <div className="flex h-screen min-w-0 flex-1 flex-col overflow-hidden">
+      <div className="theme-page flex h-screen min-w-0 flex-1 flex-col overflow-hidden">
         {/* ===================================================
-            HEADER (STICKY)
+            HEADER
         =================================================== */}
 
-        <div className="sticky top-0 z-30 shrink-0">
+        <div className="theme-header sticky top-0 z-30 shrink-0 border-b">
           <Header
             onMenuClick={() =>
               setSidebarOpen((prev) => !prev)
@@ -341,10 +346,10 @@ export default function EditArticlePage() {
         </div>
 
         {/* ===================================================
-            MAIN (SCROLL INTERNAL)
+            MAIN
         =================================================== */}
 
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6">
+        <main className="theme-page flex-1 overflow-y-auto p-4 sm:p-6">
           <div className="mx-auto max-w-5xl">
             {/* =================================================
                 TOP BAR
@@ -355,18 +360,26 @@ export default function EditArticlePage() {
                 <div className="mb-2 flex items-center gap-2">
                   <Link
                     href="/admin/cms/articles"
-                    className="inline-flex items-center gap-1 text-sm text-slate-500 transition hover:text-blue-600"
+                    className="
+                      theme-text-muted
+                      inline-flex
+                      items-center
+                      gap-1
+                      text-sm
+                      transition-opacity
+                      hover:opacity-70
+                    "
                   >
                     <ArrowLeft className="h-4 w-4" />
                     Kembali
                   </Link>
                 </div>
 
-                <h1 className="text-2xl font-bold text-slate-900">
+                <h1 className="theme-text text-2xl font-bold">
                   Edit Artikel
                 </h1>
 
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="theme-text-secondary mt-1 text-sm">
                   Perbarui informasi dan isi artikel.
                 </p>
               </div>
@@ -377,7 +390,7 @@ export default function EditArticlePage() {
             ================================================= */}
 
             {error && (
-              <div className="mb-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
+              <div className="theme-danger mb-5 flex items-start gap-3 rounded-xl border p-4">
                 <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
 
                 <div>
@@ -397,7 +410,7 @@ export default function EditArticlePage() {
             ================================================= */}
 
             {success && (
-              <div className="mb-5 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-700">
+              <div className="theme-success mb-5 flex items-start gap-3 rounded-xl border p-4">
                 <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" />
 
                 <div>
@@ -424,19 +437,19 @@ export default function EditArticlePage() {
                   INFORMASI ARTIKEL
               ================================================= */}
 
-              <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <div className="border-b border-slate-200 px-6 py-5">
+              <section className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
+                <div className="theme-card-soft theme-border-soft border-b px-6 py-5">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50">
-                      <FileText className="h-5 w-5 text-blue-600" />
+                    <div className="theme-info flex h-10 w-10 items-center justify-center rounded-lg">
+                      <FileText className="h-5 w-5" />
                     </div>
 
                     <div>
-                      <h2 className="font-semibold text-slate-900">
+                      <h2 className="theme-text font-semibold">
                         Informasi Artikel
                       </h2>
 
-                      <p className="text-sm text-slate-500">
+                      <p className="theme-text-muted text-sm">
                         Informasi utama artikel.
                       </p>
                     </div>
@@ -449,10 +462,15 @@ export default function EditArticlePage() {
                   <div>
                     <label
                       htmlFor="judul"
-                      className="mb-2 block text-sm font-medium text-slate-700"
+                      className="theme-text-secondary mb-2 block text-sm font-medium"
                     >
                       Judul Artikel
-                      <span className="ml-1 text-red-500">
+                      <span
+                        className="ml-1"
+                        style={{
+                          color: "var(--color-danger)",
+                        }}
+                      >
                         *
                       </span>
                     </label>
@@ -464,7 +482,18 @@ export default function EditArticlePage() {
                       value={form.judul}
                       onChange={handleChange}
                       placeholder="Masukkan judul artikel"
-                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      className="
+                        theme-input
+                        w-full
+                        rounded-xl
+                        border
+                        px-4
+                        py-3
+                        text-sm
+                        outline-none
+                        transition
+                        focus:border-[var(--color-primary)]
+                      "
                     />
                   </div>
 
@@ -473,10 +502,15 @@ export default function EditArticlePage() {
                   <div>
                     <label
                       htmlFor="kategoriArtikelId"
-                      className="mb-2 block text-sm font-medium text-slate-700"
+                      className="theme-text-secondary mb-2 block text-sm font-medium"
                     >
                       Kategori
-                      <span className="ml-1 text-red-500">
+                      <span
+                        className="ml-1"
+                        style={{
+                          color: "var(--color-danger)",
+                        }}
+                      >
                         *
                       </span>
                     </label>
@@ -486,7 +520,18 @@ export default function EditArticlePage() {
                       name="kategoriArtikelId"
                       value={form.kategoriArtikelId}
                       onChange={handleChange}
-                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      className="
+                        theme-input
+                        w-full
+                        rounded-xl
+                        border
+                        px-4
+                        py-3
+                        text-sm
+                        outline-none
+                        transition
+                        focus:border-[var(--color-primary)]
+                      "
                     >
                       <option value="">
                         Pilih kategori
@@ -508,7 +553,7 @@ export default function EditArticlePage() {
                   <div>
                     <label
                       htmlFor="ringkasan"
-                      className="mb-2 block text-sm font-medium text-slate-700"
+                      className="theme-text-secondary mb-2 block text-sm font-medium"
                     >
                       Ringkasan
                     </label>
@@ -520,7 +565,20 @@ export default function EditArticlePage() {
                       onChange={handleChange}
                       rows={4}
                       placeholder="Masukkan ringkasan singkat artikel"
-                      className="w-full resize-y rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      className="
+                        theme-input
+                        w-full
+                        resize-y
+                        rounded-xl
+                        border
+                        px-4
+                        py-3
+                        text-sm
+                        outline-none
+                        transition
+                        placeholder:opacity-70
+                        focus:border-[var(--color-primary)]
+                      "
                     />
                   </div>
 
@@ -529,7 +587,7 @@ export default function EditArticlePage() {
                   <div>
                     <label
                       htmlFor="gambarUtama"
-                      className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-700"
+                      className="theme-text-secondary mb-2 flex items-center gap-2 text-sm font-medium"
                     >
                       <ImageIcon className="h-4 w-4" />
                       URL Gambar Utama
@@ -542,11 +600,23 @@ export default function EditArticlePage() {
                       value={form.gambarUtama}
                       onChange={handleChange}
                       placeholder="https://..."
-                      className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      className="
+                        theme-input
+                        w-full
+                        rounded-xl
+                        border
+                        px-4
+                        py-3
+                        text-sm
+                        outline-none
+                        transition
+                        placeholder:opacity-70
+                        focus:border-[var(--color-primary)]
+                      "
                     />
 
                     {form.gambarUtama && (
-                      <div className="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-slate-50">
+                      <div className="theme-card-soft theme-border mt-4 overflow-hidden rounded-xl border">
                         <img
                           src={form.gambarUtama}
                           alt="Preview gambar utama"
@@ -566,13 +636,13 @@ export default function EditArticlePage() {
                   KONTEN
               ================================================= */}
 
-              <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <div className="border-b border-slate-200 px-6 py-5">
-                  <h2 className="font-semibold text-slate-900">
+              <section className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
+                <div className="theme-card-soft theme-border-soft border-b px-6 py-5">
+                  <h2 className="theme-text font-semibold">
                     Konten Artikel
                   </h2>
 
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="theme-text-muted mt-1 text-sm">
                     Tulis isi artikel yang akan ditampilkan.
                   </p>
                 </div>
@@ -580,10 +650,15 @@ export default function EditArticlePage() {
                 <div className="p-6">
                   <label
                     htmlFor="konten"
-                    className="mb-2 block text-sm font-medium text-slate-700"
+                    className="theme-text-secondary mb-2 block text-sm font-medium"
                   >
                     Konten
-                    <span className="ml-1 text-red-500">
+                    <span
+                      className="ml-1"
+                      style={{
+                        color: "var(--color-danger)",
+                      }}
+                    >
                       *
                     </span>
                   </label>
@@ -595,10 +670,24 @@ export default function EditArticlePage() {
                     onChange={handleChange}
                     rows={18}
                     placeholder="Tulis konten artikel..."
-                    className="w-full resize-y rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm leading-7 text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="
+                      theme-input
+                      w-full
+                      resize-y
+                      rounded-xl
+                      border
+                      px-4
+                      py-3
+                      text-sm
+                      leading-7
+                      outline-none
+                      transition
+                      placeholder:opacity-70
+                      focus:border-[var(--color-primary)]
+                    "
                   />
 
-                  <p className="mt-2 text-xs text-slate-400">
+                  <p className="theme-text-muted mt-2 text-xs">
                     Kamu bisa memasukkan teks atau HTML
                     sesuai format yang digunakan CMS kamu.
                   </p>
@@ -609,13 +698,13 @@ export default function EditArticlePage() {
                   STATUS
               ================================================= */}
 
-              <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <div className="border-b border-slate-200 px-6 py-5">
-                  <h2 className="font-semibold text-slate-900">
+              <section className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
+                <div className="theme-card-soft theme-border-soft border-b px-6 py-5">
+                  <h2 className="theme-text font-semibold">
                     Status Publikasi
                   </h2>
 
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="theme-text-muted mt-1 text-sm">
                     Tentukan apakah artikel disimpan sebagai
                     draft atau langsung dipublikasikan.
                   </p>
@@ -633,30 +722,43 @@ export default function EditArticlePage() {
                           status: "draft",
                         }))
                       }
-                      className={`rounded-xl border p-4 text-left transition ${
-                        form.status === "draft"
-                          ? "border-blue-500 bg-blue-50 ring-2 ring-blue-100"
-                          : "border-slate-200 bg-white hover:border-slate-300"
-                      }`}
+                      className={`
+                        rounded-xl
+                        border
+                        p-4
+                        text-left
+                        transition
+                        ${
+                          form.status === "draft"
+                            ? "theme-info"
+                            : "theme-card theme-border theme-text-secondary theme-table-hover"
+                        }
+                      `}
                     >
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="font-semibold text-slate-900">
+                          <p className="theme-text font-semibold">
                             Draft
                           </p>
 
-                          <p className="mt-1 text-sm text-slate-500">
+                          <p className="theme-text-muted mt-1 text-sm">
                             Artikel belum ditampilkan ke
                             publik.
                           </p>
                         </div>
 
                         <div
-                          className={`h-4 w-4 rounded-full border-2 ${
-                            form.status === "draft"
-                              ? "border-blue-600 bg-blue-600"
-                              : "border-slate-300"
-                          }`}
+                          className="h-4 w-4 rounded-full border-2"
+                          style={{
+                            borderColor:
+                              form.status === "draft"
+                                ? "var(--color-primary)"
+                                : "var(--color-border)",
+                            backgroundColor:
+                              form.status === "draft"
+                                ? "var(--color-primary)"
+                                : "transparent",
+                          }}
                         />
                       </div>
                     </button>
@@ -671,32 +773,46 @@ export default function EditArticlePage() {
                           status: "dipublikasikan",
                         }))
                       }
-                      className={`rounded-xl border p-4 text-left transition ${
-                        form.status ===
-                        "dipublikasikan"
-                          ? "border-blue-500 bg-blue-50 ring-2 ring-blue-100"
-                          : "border-slate-200 bg-white hover:border-slate-300"
-                      }`}
+                      className={`
+                        rounded-xl
+                        border
+                        p-4
+                        text-left
+                        transition
+                        ${
+                          form.status ===
+                          "dipublikasikan"
+                            ? "theme-info"
+                            : "theme-card theme-border theme-text-secondary theme-table-hover"
+                        }
+                      `}
                     >
                       <div className="flex items-center justify-between">
                         <div>
-                          <p className="font-semibold text-slate-900">
+                          <p className="theme-text font-semibold">
                             Publikasikan
                           </p>
 
-                          <p className="mt-1 text-sm text-slate-500">
+                          <p className="theme-text-muted mt-1 text-sm">
                             Artikel dapat ditampilkan ke
                             publik.
                           </p>
                         </div>
 
                         <div
-                          className={`h-4 w-4 rounded-full border-2 ${
-                            form.status ===
-                            "dipublikasikan"
-                              ? "border-blue-600 bg-blue-600"
-                              : "border-slate-300"
-                          }`}
+                          className="h-4 w-4 rounded-full border-2"
+                          style={{
+                            borderColor:
+                              form.status ===
+                              "dipublikasikan"
+                                ? "var(--color-primary)"
+                                : "var(--color-border)",
+                            backgroundColor:
+                              form.status ===
+                              "dipublikasikan"
+                                ? "var(--color-primary)"
+                                : "transparent",
+                          }}
                         />
                       </div>
                     </button>
@@ -711,7 +827,22 @@ export default function EditArticlePage() {
               <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                 <Link
                   href="/admin/cms/articles"
-                  className="inline-flex items-center justify-center rounded-xl border border-slate-300 bg-white px-5 py-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
+                  className="
+                    theme-card
+                    theme-border
+                    theme-text-secondary
+                    inline-flex
+                    items-center
+                    justify-center
+                    rounded-xl
+                    border
+                    px-5
+                    py-3
+                    text-sm
+                    font-medium
+                    transition-opacity
+                    hover:opacity-80
+                  "
                 >
                   Batal
                 </Link>
@@ -719,7 +850,21 @@ export default function EditArticlePage() {
                 <button
                   type="submit"
                   disabled={saving}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="
+                    theme-primary
+                    inline-flex
+                    items-center
+                    justify-center
+                    gap-2
+                    rounded-xl
+                    px-5
+                    py-3
+                    text-sm
+                    font-semibold
+                    transition-all
+                    disabled:cursor-not-allowed
+                    disabled:opacity-60
+                  "
                 >
                   {saving ? (
                     <>

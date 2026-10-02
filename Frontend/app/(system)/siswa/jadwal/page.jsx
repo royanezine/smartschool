@@ -2,33 +2,123 @@
 
 import { useEffect, useMemo, useState } from "react";
 import {
+  AlertCircle,
+  BookOpen,
   CalendarDays,
-  Clock3,
-  MapPin,
-  UserRound,
   ChevronLeft,
   ChevronRight,
+  Clock3,
   Info,
   Loader2,
-  AlertCircle,
+  MapPin,
   RefreshCw,
-  BookOpen,
-  GraduationCap,
+  UserRound,
 } from "lucide-react";
-
-import Sidebar from "../../../components/Sidebar";
-import Header from "../../../components/Header";
 
 import { getJadwalMengajar } from "../../../../services/jadwalMengajar.service";
 
-const hariList = ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"];
+/* =========================================================
+   THEME HELPERS
+   Menggunakan global theme yang sudah ada.
+========================================================= */
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+/* =========================================================
+   HARI
+========================================================= */
+
+const hariList = [
+  "Senin",
+  "Selasa",
+  "Rabu",
+  "Kamis",
+  "Jumat",
+  "Sabtu",
+];
+
+/* =========================================================
+   FORMAT TANGGAL
+========================================================= */
 
 function formatTanggalHari(hari) {
   const sekarang = new Date();
-  const hariIndex = hariList.indexOf(hari);
-  const jsHari = sekarang.getDay();
-  const hariSekarangIndex = jsHari === 0 ? 6 : jsHari - 1;
-  const selisih = hariIndex - hariSekarangIndex;
+
+  const namaHari = [
+    "Minggu",
+    "Senin",
+    "Selasa",
+    "Rabu",
+    "Kamis",
+    "Jumat",
+    "Sabtu",
+  ];
+
+  const targetIndex = namaHari.indexOf(hari);
+  const sekarangIndex = sekarang.getDay();
+
+  if (targetIndex === -1) {
+    return "";
+  }
+
+  let selisih = targetIndex - sekarangIndex;
+
+  if (selisih < 0) {
+    selisih += 7;
+  }
+
   const tanggal = new Date(sekarang);
   tanggal.setDate(sekarang.getDate() + selisih);
 
@@ -39,55 +129,134 @@ function formatTanggalHari(hari) {
   });
 }
 
+/* =========================================================
+   HARI SEKARANG
+========================================================= */
+
 function getHariSekarang() {
-  const sekarang = new Date();
-  const hari = sekarang.getDay();
-  if (hari === 0) return "Senin";
-  return hariList[hari - 1];
+  const namaHari = [
+    "Minggu",
+    "Senin",
+    "Selasa",
+    "Rabu",
+    "Kamis",
+    "Jumat",
+    "Sabtu",
+  ];
+
+  return namaHari[new Date().getDay()];
 }
+
+/* =========================================================
+   FORMAT JAM
+========================================================= */
 
 function formatJam(jam) {
   if (!jam) return "-";
-  return String(jam).slice(0, 5);
+
+  const value = String(jam);
+
+  if (value.length >= 5) {
+    return value.substring(0, 5);
+  }
+
+  return value;
 }
 
-/* Warna aksen per mata pelajaran biar mirip jadwal sekolah */
+/* =========================================================
+   ACCENT PALETTE
+   Semuanya mengikuti global theme.
+========================================================= */
+
 const accentPalette = [
-  { bg: "bg-blue-50", border: "border-blue-200", text: "text-blue-700", dot: "bg-blue-500", ring: "ring-blue-100" },
-  { bg: "bg-indigo-50", border: "border-indigo-200", text: "text-indigo-700", dot: "bg-indigo-500", ring: "ring-indigo-100" },
-  { bg: "bg-sky-50", border: "border-sky-200", text: "text-sky-700", dot: "bg-sky-500", ring: "ring-sky-100" },
-  { bg: "bg-cyan-50", border: "border-cyan-200", text: "text-cyan-700", dot: "bg-cyan-500", ring: "ring-cyan-100" },
-  { bg: "bg-slate-50", border: "border-slate-200", text: "text-slate-700", dot: "bg-slate-500", ring: "ring-slate-100" },
+  {
+    bg: themePrimarySoft,
+    border: themePrimarySoftBorder,
+    text: themePrimaryText,
+    dot: "bg-[var(--color-primary)]",
+    ring:
+      "ring-[color-mix(in_srgb,var(--color-primary)_18%,transparent)]",
+  },
+  {
+    bg: themeInfoSurface,
+    border: themeInfoBorder,
+    text: "text-[var(--color-info)]",
+    dot: "bg-[var(--color-info)]",
+    ring:
+      "ring-[color-mix(in_srgb,var(--color-info)_18%,transparent)]",
+  },
+  {
+    bg: themeSuccessSurface,
+    border: themeSuccessBorder,
+    text: "text-[var(--color-success)]",
+    dot: "bg-[var(--color-success)]",
+    ring:
+      "ring-[color-mix(in_srgb,var(--color-success)_18%,transparent)]",
+  },
+  {
+    bg: themeWarningSurface,
+    border: themeWarningBorder,
+    text: "text-[var(--color-warning)]",
+    dot: "bg-[var(--color-warning)]",
+    ring:
+      "ring-[color-mix(in_srgb,var(--color-warning)_18%,transparent)]",
+  },
+  {
+    bg: themeNeutralSurface,
+    border: themeNeutralBorder,
+    text: "theme-text-secondary",
+    dot: "bg-[var(--color-text-muted)]",
+    ring:
+      "ring-[color-mix(in_srgb,var(--color-text)_12%,transparent)]",
+  },
 ];
 
-function getAccent(index) {
-  return accentPalette[index % accentPalette.length];
-}
+/* =========================================================
+   PAGE
+========================================================= */
 
 export default function JadwalSiswaPage() {
   const [hariAktif, setHariAktif] = useState(getHariSekarang());
+
   const [jadwalData, setJadwalData] = useState([]);
+
   const [loading, setLoading] = useState(true);
+
   const [error, setError] = useState("");
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+
+  /* =======================================================
+     LOAD JADWAL
+  ======================================================= */
 
   const loadJadwal = async () => {
     try {
       setLoading(true);
       setError("");
+
       const response = await getJadwalMengajar();
-      console.log("[JADWAL SISWA] Response:", response);
 
       if (!response?.success) {
-        throw new Error(response?.message || "Gagal mengambil jadwal pelajaran.");
+        throw new Error(
+          response?.message ||
+            response?.error ||
+            "Gagal mengambil data jadwal."
+        );
       }
 
-      const data = Array.isArray(response?.data) ? response.data : [];
+      const data = Array.isArray(response?.data)
+        ? response.data
+        : [];
+
       setJadwalData(data);
     } catch (err) {
-      console.error("[JADWAL SISWA] Error:", err);
-      setError(err?.message || "Gagal mengambil jadwal pelajaran.");
+      console.error("Gagal mengambil jadwal:", err);
+
       setJadwalData([]);
+
+      setError(
+        err?.message ||
+          "Terjadi kesalahan saat mengambil data jadwal."
+      );
     } finally {
       setLoading(false);
     }
@@ -97,408 +266,697 @@ export default function JadwalSiswaPage() {
     loadJadwal();
   }, []);
 
+  /* =======================================================
+     JADWAL HARI AKTIF
+  ======================================================= */
+
   const jadwalHariIni = useMemo(() => {
     return jadwalData
-      .filter(
-        (item) =>
-          String(item?.hari || "").trim().toLowerCase() === hariAktif.toLowerCase()
-      )
-      .sort((a, b) =>
-        String(a?.jamMulai || "").localeCompare(String(b?.jamMulai || ""))
-      );
+      .filter((item) => {
+        return (
+          String(item?.hari || "").toLowerCase() ===
+          String(hariAktif || "").toLowerCase()
+        );
+      })
+      .sort((a, b) => {
+        const jamA = String(a?.jamMulai || "");
+        const jamB = String(b?.jamMulai || "");
+
+        return jamA.localeCompare(jamB);
+      });
   }, [jadwalData, hariAktif]);
 
+  /* =======================================================
+     KELAS SISWA
+  ======================================================= */
+
   const kelasSiswa = useMemo(() => {
-    const kelasMap = new Map();
-    jadwalData.forEach((item) => {
-      const kelas = item?.kelasMapel?.kelas;
-      if (kelas?.id) kelasMap.set(kelas.id, kelas);
-    });
-    return Array.from(kelasMap.values());
+    const kelas = jadwalData
+      .map((item) => item?.kelasMapel?.kelas)
+      .filter(Boolean);
+
+    return [...new Set(kelas)];
   }, [jadwalData]);
 
-  const namaKelas = kelasSiswa.length > 0 ? kelasSiswa[0]?.nama : "-";
+  /* =======================================================
+     NAMA KELAS
+  ======================================================= */
 
-  const pindahHari = (arah) => {
-    const index = hariList.indexOf(hariAktif);
-    const nextIndex =
-      arah === "next"
-        ? (index + 1) % hariList.length
-        : (index - 1 + hariList.length) % hariList.length;
+  const namaKelas = useMemo(() => {
+    if (kelasSiswa.length === 0) {
+      return "Kelas";
+    }
+
+    return kelasSiswa.join(", ");
+  }, [kelasSiswa]);
+
+  /* =======================================================
+     PINDAH HARI
+  ======================================================= */
+
+  const pindahHari = (direction) => {
+    const currentIndex = hariList.indexOf(hariAktif);
+
+    if (currentIndex === -1) {
+      setHariAktif(hariList[0]);
+      return;
+    }
+
+    let nextIndex = currentIndex + direction;
+
+    if (nextIndex < 0) {
+      nextIndex = hariList.length - 1;
+    }
+
+    if (nextIndex >= hariList.length) {
+      nextIndex = 0;
+    }
+
     setHariAktif(hariList[nextIndex]);
   };
 
+  /* =======================================================
+     RENDER
+  ======================================================= */
+
   return (
-    <div className="min-h-screen bg-slate-50 flex">
-      <Sidebar />
+    <div className="theme-page min-h-full">
+      <div className="mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 lg:px-8">
+        {/* =================================================
+            BREADCRUMB
+        ================================================= */}
 
-      <div className="flex-1 min-w-0 flex flex-col">
-        <Header toggleSidebar={() => setSidebarOpen((prev) => !prev)} />
+        <div className="mb-5 flex items-center gap-2 text-xs">
+          <span className="theme-text-muted">
+            Siswa
+          </span>
 
-        <main className="flex-1 px-4 md:px-6 lg:px-8 py-6">
-          {/* BREADCRUMB */}
-          <div className="mb-3">
-            <p className="text-sm text-slate-500">
-              Akademik
-              <span className="mx-2 text-slate-300">/</span>
-              <span className="text-slate-700">Jadwal Pelajaran</span>
-            </p>
-          </div>
+          <span className="theme-text-placeholder">
+            /
+          </span>
 
-          {/* HERO TITLE */}
-          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-blue-600 to-blue-700 px-6 py-6 mb-6 shadow-lg shadow-blue-600/20">
-            <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/10" />
-            <div className="absolute -bottom-16 -left-10 w-48 h-48 rounded-full bg-white/5" />
+          <span className="theme-text-secondary">
+            Jadwal Pelajaran
+          </span>
+        </div>
 
-            <div className="relative flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-              <div className="flex items-center gap-4">
-                <div className="w-14 h-14 rounded-xl bg-white/15 backdrop-blur flex items-center justify-center ring-1 ring-white/20">
-                  <CalendarDays size={26} className="text-white" />
+        {/* =================================================
+            HERO
+        ================================================= */}
+
+        <section
+          className={`relative mb-6 overflow-hidden rounded-2xl ${themePrimaryGradient} ${themePrimaryShadow}`}
+        >
+          {/* Decorative */}
+
+          <div
+            className="absolute -right-20 -top-24 h-64 w-64 rounded-full blur-2xl"
+            style={{
+              background:
+                "color-mix(in srgb, var(--color-card) 10%, transparent)",
+            }}
+          />
+
+          <div
+            className="absolute -bottom-24 -left-16 h-56 w-56 rounded-full blur-2xl"
+            style={{
+              background:
+                "color-mix(in srgb, var(--color-info) 18%, transparent)",
+            }}
+          />
+
+          <div className="relative px-5 py-6 sm:px-7 sm:py-7">
+            <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+              {/* LEFT */}
+
+              <div className="flex items-start gap-4">
+                <div
+                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl"
+                  style={{
+                    background:
+                      "color-mix(in srgb, var(--color-card) 14%, transparent)",
+                    boxShadow:
+                      "inset 0 0 0 1px color-mix(in srgb, var(--color-card) 20%, transparent)",
+                  }}
+                >
+                  <CalendarDays className="h-6 w-6 text-[var(--color-card)]" />
                 </div>
+
                 <div>
-                  <h1 className="text-2xl font-bold text-white">Jadwal Pelajaran</h1>
-                  <p className="text-sm text-blue-100 mt-1">
-                    Lihat jadwal pelajaran kelas Anda.
+                  <p
+                    className="mb-1 text-xs font-semibold uppercase tracking-[0.14em]"
+                    style={{
+                      color:
+                        "color-mix(in srgb, var(--color-card) 76%, transparent)",
+                    }}
+                  >
+                    Akademik
+                  </p>
+
+                  <h1 className="text-2xl font-bold tracking-tight text-[var(--color-card)] sm:text-3xl">
+                    Jadwal Pelajaran
+                  </h1>
+
+                  <p
+                    className="mt-1.5 max-w-2xl text-sm"
+                    style={{
+                      color:
+                        "color-mix(in srgb, var(--color-card) 78%, transparent)",
+                    }}
+                  >
+                    Lihat jadwal pelajaran dan guru yang
+                    mengajar setiap hari.
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3">
-                <div className="rounded-xl bg-white/15 backdrop-blur px-4 py-2.5 ring-1 ring-white/20">
-                  <p className="text-[11px] uppercase tracking-wide text-blue-100">
-                    Kelas
-                  </p>
-                  <p className="text-sm font-semibold text-white">{namaKelas}</p>
-                </div>
-                <div className="hidden sm:block rounded-xl bg-white/15 backdrop-blur px-4 py-2.5 ring-1 ring-white/20">
-                  <p className="text-[11px] uppercase tracking-wide text-blue-100">
+              {/* RIGHT */}
+
+              <div
+                className="flex items-center gap-3 rounded-xl px-4 py-3"
+                style={{
+                  background:
+                    "color-mix(in srgb, var(--color-card) 10%, transparent)",
+                  boxShadow:
+                    "inset 0 0 0 1px color-mix(in srgb, var(--color-card) 16%, transparent)",
+                }}
+              >
+                <BookOpen className="h-5 w-5 text-[var(--color-card)]" />
+
+                <div>
+                  <p
+                    className="text-[11px]"
+                    style={{
+                      color:
+                        "color-mix(in srgb, var(--color-card) 68%, transparent)",
+                    }}
+                  >
                     Total Mapel
                   </p>
-                  <p className="text-sm font-semibold text-white">
+
+                  <p className="text-lg font-bold text-[var(--color-card)]">
                     {jadwalData.length}
                   </p>
                 </div>
               </div>
             </div>
           </div>
+        </section>
 
-          {/* ERROR */}
-          {error && (
-            <div className="mb-5 rounded-xl border border-red-200 bg-red-50 px-4 py-3">
-              <div className="flex items-start gap-3">
-                <AlertCircle size={20} className="text-red-500 mt-0.5 shrink-0" />
-                <div className="flex-1">
-                  <p className="text-sm font-semibold text-red-700">
-                    Gagal mengambil jadwal
-                  </p>
-                  <p className="text-sm text-red-600 mt-1">{error}</p>
-                </div>
-                <button
-                  type="button"
-                  onClick={loadJadwal}
-                  className="inline-flex items-center gap-2 rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-semibold text-red-600 hover:bg-red-50 transition"
-                >
-                  <RefreshCw size={14} />
-                  Coba Lagi
-                </button>
-              </div>
-            </div>
-          )}
+        {/* =================================================
+            ERROR
+        ================================================= */}
 
-          {/* HARI SELECTOR */}
-          <div className="mb-6 rounded-2xl bg-white border border-slate-200 shadow-sm p-2">
-            <div className="flex items-center gap-2 overflow-x-auto">
-              <button
-                type="button"
-                onClick={() => pindahHari("prev")}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 hover:border-slate-300 transition"
-                aria-label="Hari sebelumnya"
-              >
-                <ChevronLeft size={18} />
-              </button>
+        {error && (
+          <div
+            className={`mb-6 flex flex-col gap-4 rounded-xl border ${themeDangerBorder} ${themeDangerSurface} p-4 sm:flex-row sm:items-center sm:justify-between`}
+          >
+            <div className="flex items-start gap-3">
+              <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 theme-danger" />
 
-              <div className="flex-1 flex items-center gap-2 overflow-x-auto">
-                {hariList.map((hari) => {
-                  const isActive = hariAktif === hari;
-                  const isToday = getHariSekarang() === hari;
-                  return (
-                    <button
-                      type="button"
-                      key={hari}
-                      onClick={() => setHariAktif(hari)}
-                      className={`relative shrink-0 rounded-xl px-5 py-2.5 text-sm font-medium transition-all ${
-                        isActive
-                          ? "bg-blue-600 text-white shadow-md shadow-blue-600/25"
-                          : "text-slate-600 hover:bg-slate-50 border border-transparent hover:border-slate-200"
-                      }`}
-                    >
-                      {hari}
-                      {isToday && !isActive && (
-                        <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-blue-500" />
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
-
-              <button
-                type="button"
-                onClick={() => pindahHari("next")}
-                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-500 hover:bg-slate-50 hover:border-slate-300 transition"
-                aria-label="Hari berikutnya"
-              >
-                <ChevronRight size={18} />
-              </button>
-            </div>
-          </div>
-
-          {/* INFO HARI */}
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between border-b border-slate-200 pb-4 mb-5">
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-xl bg-blue-50 ring-1 ring-blue-100 flex items-center justify-center">
-                <CalendarDays size={20} className="text-blue-600" />
-              </div>
               <div>
-                <h2 className="text-lg font-semibold text-slate-800">
-                  {hariAktif}, {formatTanggalHari(hariAktif)}
-                </h2>
-                <p className="text-sm text-slate-500 mt-0.5">
-                  {loading
-                    ? "Memuat jadwal..."
-                    : `${jadwalHariIni.length} mata pelajaran hari ini`}
+                <p className="text-sm font-semibold theme-danger">
+                  Gagal memuat jadwal
+                </p>
+
+                <p className="mt-1 text-xs theme-text-secondary">
+                  {error}
                 </p>
               </div>
             </div>
 
-            {!loading && jadwalData.length > 0 && (
-              <div className="inline-flex items-center gap-2 self-start sm:self-auto rounded-full bg-slate-100 px-3.5 py-1.5 text-xs font-medium text-slate-600">
-                <BookOpen size={14} className="text-slate-500" />
-                Total jadwal:{" "}
-                <span className="font-semibold text-slate-700">
-                  {jadwalData.length}
-                </span>
-              </div>
-            )}
+            <button
+              type="button"
+              onClick={loadJadwal}
+              className={`inline-flex items-center justify-center gap-2 rounded-lg border ${themeDangerBorder} theme-card px-3.5 py-2 text-xs font-semibold theme-danger transition-colors ${themeNeutralHover}`}
+            >
+              <RefreshCw className="h-3.5 w-3.5" />
+              Coba Lagi
+            </button>
+          </div>
+        )}
+
+        {/* =================================================
+            DAY SELECTOR
+        ================================================= */}
+
+        <section
+          className={`mb-6 theme-card rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+        >
+          <div className="flex items-center justify-between border-b px-4 py-3 sm:px-5">
+            <div>
+              <p className="text-sm font-semibold theme-text">
+                Pilih Hari
+              </p>
+
+              <p className="mt-0.5 text-xs theme-text-muted">
+                Pilih hari untuk melihat jadwal.
+              </p>
+            </div>
+
+            {/* Mobile arrows */}
+
+            <div className="flex gap-1.5 sm:hidden">
+              <button
+                type="button"
+                onClick={() => pindahHari(-1)}
+                className={`flex h-8 w-8 items-center justify-center rounded-lg border ${themeNeutralBorder} ${themeNeutralSurface} theme-text-secondary transition-colors ${themeNeutralHover}`}
+                aria-label="Hari sebelumnya"
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => pindahHari(1)}
+                className={`flex h-8 w-8 items-center justify-center rounded-lg border ${themeNeutralBorder} ${themeNeutralSurface} theme-text-secondary transition-colors ${themeNeutralHover}`}
+                aria-label="Hari berikutnya"
+              >
+                <ChevronRight className="h-4 w-4" />
+              </button>
+            </div>
           </div>
 
-          {/* LOADING */}
-          {loading ? (
-            <div className="bg-white border border-slate-200 rounded-2xl shadow-sm px-5 py-20 text-center">
-              <Loader2 size={36} className="mx-auto text-blue-600 animate-spin mb-4" />
-              <p className="text-sm font-semibold text-slate-700">
-                Memuat jadwal pelajaran...
-              </p>
-              <p className="text-xs text-slate-400 mt-1">Mengambil data dari server.</p>
+          <div className="grid grid-cols-3 gap-2 p-3 sm:grid-cols-6 sm:p-4">
+            {hariList.map((hari) => {
+              const active = hariAktif === hari;
+
+              return (
+                <button
+                  key={hari}
+                  type="button"
+                  onClick={() => setHariAktif(hari)}
+                  className={
+                    active
+                      ? `rounded-xl ${themePrimaryGradient} px-3 py-3 text-sm font-semibold text-[var(--color-card)] ${themePrimaryShadow}`
+                      : `rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} px-3 py-3 text-sm font-semibold theme-text-secondary transition-all ${themeNeutralHover} hover:text-[var(--color-primary)]`
+                  }
+                >
+                  {hari}
+                </button>
+              );
+            })}
+          </div>
+        </section>
+
+        {/* =================================================
+            DAY INFO
+        ================================================= */}
+
+        <section
+          className={`mb-6 flex flex-col gap-4 rounded-2xl border ${themeInfoBorder} ${themeInfoSurface} p-4 sm:flex-row sm:items-center sm:justify-between`}
+        >
+          <div className="flex items-center gap-3">
+            <div
+              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimarySoftBorder} border`}
+            >
+              <CalendarDays
+                className={`h-5 w-5 ${themePrimaryText}`}
+              />
             </div>
-          ) : jadwalHariIni.length > 0 ? (
-            <>
-              {/* ============ DESKTOP: TIMELINE STYLE ============ */}
-              <div className="hidden md:block bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[900px]">
-                    <thead>
-                      <tr className="bg-slate-50 border-b border-slate-100">
-                        <th className="w-16 text-left px-5 py-4 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                          Jam
-                        </th>
-                        <th className="text-left px-5 py-4 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                          Mata Pelajaran
-                        </th>
-                        <th className="w-64 text-left px-5 py-4 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                          Guru Pengajar
-                        </th>
-                        <th className="w-40 text-left px-5 py-4 text-xs font-semibold uppercase tracking-wide text-slate-500">
-                          Ruang
-                        </th>
-                      </tr>
-                    </thead>
 
-                    <tbody className="divide-y divide-slate-100">
-                      {jadwalHariIni.map((item, index) => {
-                        const mapel = item?.kelasMapel?.mataPelajaran;
-                        const guru = item?.kelasMapel?.guruPengajar;
-                        const accent = getAccent(index);
+            <div>
+              <p className="text-sm font-bold theme-text">
+                {hariAktif}
+              </p>
 
-                        return (
-                          <tr
-                            key={item.id}
-                            className="hover:bg-slate-50/70 transition-colors group"
-                          >
-                            {/* JAM */}
-                            <td className="px-5 py-5 align-top">
-                              <div className="flex flex-col items-center gap-1">
-                                <div
-                                  className={`w-2.5 h-2.5 rounded-full ${accent.dot}`}
-                                />
-                                <span className="text-xs font-bold text-slate-700">
-                                  {formatJam(item.jamMulai)}
-                                </span>
-                                <span className="text-[10px] text-slate-400">
-                                  {formatJam(item.jamSelesai)}
-                                </span>
-                              </div>
-                            </td>
+              <p className="text-xs theme-text-muted">
+                {formatTanggalHari(hariAktif)}
+              </p>
+            </div>
+          </div>
 
-                            {/* MAPEL */}
-                            <td className="px-5 py-5">
-                              <div className="flex items-start gap-3">
-                                <div
-                                  className={`w-11 h-11 rounded-xl ${accent.bg} ring-1 ${accent.ring} flex items-center justify-center shrink-0`}
-                                >
-                                  <BookOpen size={19} className={accent.text} />
-                                </div>
-                                <div>
-                                  <p className="text-sm font-semibold text-slate-800">
-                                    {mapel?.nama || "-"}
-                                  </p>
-                                  {mapel?.kode && (
-                                    <span
-                                      className={`inline-block mt-1 rounded-md ${accent.bg} ${accent.text} px-2 py-0.5 text-[10px] font-semibold`}
-                                    >
-                                      {mapel.kode}
-                                    </span>
-                                  )}
-                                </div>
-                              </div>
-                            </td>
+          <div className="flex items-center gap-4">
+            <div>
+              <p className="text-[11px] theme-text-muted">
+                Kelas
+              </p>
 
-                            {/* GURU */}
-                            <td className="px-5 py-5">
-                              <div className="flex items-center gap-2.5">
-                                <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center shrink-0">
-                                  <UserRound size={15} className="text-slate-500" />
-                                </div>
-                                <span className="text-sm text-slate-600">
-                                  {guru?.namaLengkap || "-"}
-                                </span>
-                              </div>
-                            </td>
+              <p className="text-sm font-semibold theme-text-secondary">
+                {namaKelas}
+              </p>
+            </div>
 
-                            {/* RUANG */}
-                            <td className="px-5 py-5">
-                              <div className="inline-flex items-center gap-2 rounded-lg bg-slate-50 border border-slate-200 px-3 py-1.5 text-xs font-medium text-slate-600">
-                                <MapPin size={13} className="text-slate-400" />
-                                {item.ruangan || "-"}
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+            <div className="h-8 w-px bg-[var(--color-border)]" />
 
-              {/* ============ MOBILE: CARD TIMELINE ============ */}
-              <div className="md:hidden space-y-3">
-                {jadwalHariIni.map((item, index) => {
-                  const mapel = item?.kelasMapel?.mataPelajaran;
-                  const guru = item?.kelasMapel?.guruPengajar;
-                  const accent = getAccent(index);
-                  const isLast = index === jadwalHariIni.length - 1;
+            <div>
+              <p className="text-[11px] theme-text-muted">
+                Jadwal
+              </p>
 
-                  return (
-                    <div key={item.id} className="relative flex gap-3">
-                      {/* TIMELINE */}
-                      <div className="flex flex-col items-center pt-5">
-                        <div
-                          className={`w-3 h-3 rounded-full ${accent.dot} ring-4 ${accent.ring}`}
-                        />
-                        {!isLast && (
-                          <div className="w-px flex-1 bg-slate-200 my-1" />
-                        )}
-                      </div>
+              <p className="text-sm font-semibold theme-text-secondary">
+                {jadwalHariIni.length} Pelajaran
+              </p>
+            </div>
+          </div>
+        </section>
 
-                      {/* CARD */}
-                      <div className="flex-1 pb-1">
-                        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-                          {/* HEADER */}
-                          <div
-                            className={`flex items-center justify-between px-4 py-2.5 ${accent.bg} border-b ${accent.border}`}
-                          >
-                            <div className="flex items-center gap-1.5">
-                              <Clock3 size={14} className={accent.text} />
-                              <span
-                                className={`text-xs font-bold ${accent.text}`}
-                              >
-                                {formatJam(item.jamMulai)} -{" "}
-                                {formatJam(item.jamSelesai)}
-                              </span>
-                            </div>
-                            <span className="text-[10px] font-medium text-slate-500">
-                              #{index + 1}
-                            </span>
-                          </div>
+        {/* =================================================
+            LOADING
+        ================================================= */}
 
-                          {/* BODY */}
-                          <div className="p-4">
-                            <div className="flex items-start gap-3 mb-3">
+        {loading ? (
+          <section
+            className={`theme-card flex min-h-[300px] items-center justify-center rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+          >
+            <div className="flex flex-col items-center">
+              <Loader2
+                className={`h-8 w-8 animate-spin ${themePrimaryText}`}
+              />
+
+              <p className="mt-3 text-sm font-medium theme-text-secondary">
+                Memuat jadwal...
+              </p>
+
+              <p className="mt-1 text-xs theme-text-muted">
+                Mohon tunggu sebentar.
+              </p>
+            </div>
+          </section>
+        ) : jadwalHariIni.length > 0 ? (
+          <>
+            {/* =================================================
+                DESKTOP TABLE
+            ================================================= */}
+
+            <section
+              className={`hidden overflow-hidden rounded-2xl border ${themeNeutralBorder} theme-card ${themeCardShadow} md:block`}
+            >
+              <div className="overflow-x-auto">
+                <table className="w-full min-w-[760px] border-collapse">
+                  <thead>
+                    <tr
+                      className={`border-b ${themeDivider} ${themeNeutralSurface}`}
+                    >
+                      <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider theme-text-muted">
+                        Waktu
+                      </th>
+
+                      <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider theme-text-muted">
+                        Mata Pelajaran
+                      </th>
+
+                      <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider theme-text-muted">
+                        Guru
+                      </th>
+
+                      <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider theme-text-muted">
+                        Ruangan
+                      </th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {jadwalHariIni.map((item, index) => {
+                      const accent =
+                        accentPalette[index % accentPalette.length];
+
+                      const namaMapel =
+                        item?.kelasMapel?.mapel?.nama ||
+                        item?.kelasMapel?.mapel?.namaMapel ||
+                        item?.mapel?.nama ||
+                        item?.mapel?.namaMapel ||
+                        "Mata Pelajaran";
+
+                      const namaGuru =
+                        item?.guru?.namaLengkap ||
+                        item?.guru?.nama ||
+                        item?.guru?.user?.namaLengkap ||
+                        item?.guru?.user?.name ||
+                        "-";
+
+                      const namaRuangan =
+                        item?.ruangan?.nama ||
+                        item?.ruangan ||
+                        item?.kelasMapel?.kelas?.nama ||
+                        "-";
+
+                      return (
+                        <tr
+                          key={
+                            item?.id ||
+                            `${hariAktif}-${index}`
+                          }
+                          className={`border-b ${themeDivider} last:border-b-0 transition-colors ${themeNeutralHover}`}
+                        >
+                          {/* TIME */}
+
+                          <td className="px-5 py-4">
+                            <div className="flex items-center gap-2">
                               <div
-                                className={`w-10 h-10 rounded-xl ${accent.bg} ring-1 ${accent.ring} flex items-center justify-center shrink-0`}
+                                className={`flex h-9 w-9 items-center justify-center rounded-lg ${accent.bg} ${accent.border} border`}
                               >
-                                <BookOpen size={18} className={accent.text} />
+                                <Clock3
+                                  className={`h-4 w-4 ${accent.text}`}
+                                />
                               </div>
-                              <div className="min-w-0">
-                                <h3 className="text-sm font-semibold text-slate-800 truncate">
-                                  {mapel?.nama || "-"}
-                                </h3>
-                                {mapel?.kode && (
-                                  <p className="text-[11px] text-slate-400 mt-0.5">
-                                    Kode: {mapel.kode}
+
+                              <div>
+                                <p className="text-sm font-semibold theme-text">
+                                  {formatJam(item?.jamMulai)}
+                                </p>
+
+                                <p className="mt-0.5 text-[11px] theme-text-muted">
+                                  sampai{" "}
+                                  {formatJam(item?.jamSelesai)}
+                                </p>
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* MAPEL */}
+
+                          <td className="px-5 py-4">
+                            <div className="flex items-center gap-3">
+                              <div
+                                className={`h-2.5 w-2.5 shrink-0 rounded-full ${accent.dot} ring-4 ${accent.ring}`}
+                              />
+
+                              <div>
+                                <p className="text-sm font-semibold theme-text">
+                                  {namaMapel}
+                                </p>
+
+                                {item?.kelasMapel?.kelas?.nama && (
+                                  <p className="mt-0.5 text-[11px] theme-text-muted">
+                                    {item.kelasMapel.kelas.nama}
                                   </p>
                                 )}
                               </div>
                             </div>
+                          </td>
 
-                            <div className="space-y-2 pt-3 border-t border-slate-100">
-                              <div className="flex items-center gap-2 text-sm text-slate-600">
-                                <UserRound
-                                  size={14}
-                                  className="text-slate-400 shrink-0"
-                                />
-                                <span className="truncate">
-                                  {guru?.namaLengkap || "-"}
-                                </span>
+                          {/* GURU */}
+
+                          <td className="px-5 py-4">
+                            <div className="flex items-center gap-2.5">
+                              <div
+                                className={`flex h-8 w-8 items-center justify-center rounded-full ${themeNeutralSurface}`}
+                              >
+                                <UserRound className="h-4 w-4 theme-text-muted" />
                               </div>
-                              <div className="flex items-center gap-2 text-sm text-slate-600">
-                                <MapPin
-                                  size={14}
-                                  className="text-slate-400 shrink-0"
-                                />
-                                <span>{item.ruangan || "-"}</span>
-                              </div>
+
+                              <span className="text-sm theme-text-secondary">
+                                {namaGuru}
+                              </span>
                             </div>
-                          </div>
+                          </td>
+
+                          {/* RUANGAN */}
+
+                          <td className="px-5 py-4">
+                            <div
+                              className={`inline-flex items-center gap-1.5 rounded-lg border ${themeNeutralBorder} ${themeNeutralSurface} px-2.5 py-1.5`}
+                            >
+                              <MapPin className="h-3.5 w-3.5 theme-text-muted" />
+
+                              <span className="text-xs font-medium theme-text-secondary">
+                                {namaRuangan}
+                              </span>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
+            {/* =================================================
+                MOBILE CARDS
+            ================================================= */}
+
+            <section className="space-y-3 md:hidden">
+              {jadwalHariIni.map((item, index) => {
+                const accent =
+                  accentPalette[index % accentPalette.length];
+
+                const namaMapel =
+                  item?.kelasMapel?.mapel?.nama ||
+                  item?.kelasMapel?.mapel?.namaMapel ||
+                  item?.mapel?.nama ||
+                  item?.mapel?.namaMapel ||
+                  "Mata Pelajaran";
+
+                const namaGuru =
+                  item?.guru?.namaLengkap ||
+                  item?.guru?.nama ||
+                  item?.guru?.user?.namaLengkap ||
+                  item?.guru?.user?.name ||
+                  "-";
+
+                const namaRuangan =
+                  item?.ruangan?.nama ||
+                  item?.ruangan ||
+                  item?.kelasMapel?.kelas?.nama ||
+                  "-";
+
+                return (
+                  <article
+                    key={
+                      item?.id ||
+                      `${hariAktif}-mobile-${index}`
+                    }
+                    className={`theme-card rounded-2xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}
+                  >
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-start gap-3">
+                        <div
+                          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${accent.bg} ${accent.border} border`}
+                        >
+                          <BookOpen
+                            className={`h-5 w-5 ${accent.text}`}
+                          />
+                        </div>
+
+                        <div>
+                          <h3 className="text-sm font-bold theme-text">
+                            {namaMapel}
+                          </h3>
+
+                          {item?.kelasMapel?.kelas?.nama && (
+                            <p className="mt-1 text-[11px] theme-text-muted">
+                              {item.kelasMapel.kelas.nama}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+
+                      <div
+                        className={`shrink-0 rounded-lg ${accent.bg} px-2.5 py-1.5`}
+                      >
+                        <span
+                          className={`text-xs font-bold ${accent.text}`}
+                        >
+                          {formatJam(item?.jamMulai)}
+                        </span>
+                      </div>
+                    </div>
+
+                    <div
+                      className={`mt-4 grid grid-cols-2 gap-2 border-t ${themeDivider} pt-4`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <Clock3 className="h-4 w-4 theme-text-muted" />
+
+                        <div>
+                          <p className="text-[10px] theme-text-muted">
+                            Waktu
+                          </p>
+
+                          <p className="text-xs font-semibold theme-text-secondary">
+                            {formatJam(item?.jamMulai)} -{" "}
+                            {formatJam(item?.jamSelesai)}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-2">
+                        <UserRound className="h-4 w-4 theme-text-muted" />
+
+                        <div className="min-w-0">
+                          <p className="text-[10px] theme-text-muted">
+                            Guru
+                          </p>
+
+                          <p className="truncate text-xs font-semibold theme-text-secondary">
+                            {namaGuru}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="col-span-2 flex items-center gap-2">
+                        <MapPin className="h-4 w-4 theme-text-muted" />
+
+                        <div>
+                          <p className="text-[10px] theme-text-muted">
+                            Ruangan
+                          </p>
+
+                          <p className="text-xs font-semibold theme-text-secondary">
+                            {namaRuangan}
+                          </p>
                         </div>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-            </>
-          ) : (
-            /* EMPTY STATE */
-            <div className="bg-white border border-dashed border-slate-300 rounded-2xl px-5 py-16 text-center">
-              <div className="w-16 h-16 mx-auto rounded-full bg-slate-50 flex items-center justify-center mb-4">
-                <CalendarDays size={30} className="text-slate-300" />
-              </div>
-              <p className="text-sm font-semibold text-slate-700">
-                Tidak Ada Jadwal
-              </p>
-              <p className="text-xs text-slate-400 mt-1">
-                Tidak ada mata pelajaran untuk hari {hariAktif}.
-              </p>
-            </div>
-          )}
+                  </article>
+                );
+              })}
+            </section>
+          </>
+        ) : (
+          /* =================================================
+             EMPTY STATE
+          ================================================= */
 
-          {/* INFO FOOTER */}
-          <div className="mt-5 rounded-xl bg-blue-50/60 border border-blue-100 px-4 py-3 flex items-start gap-2.5">
-            <Info size={17} className="mt-0.5 shrink-0 text-blue-500" />
-            <p className="text-sm text-slate-600">
-              Jadwal dapat berubah sewaktu-waktu sesuai informasi dari sekolah.
+          <section
+            className={`theme-card flex min-h-[330px] flex-col items-center justify-center rounded-2xl border border-dashed ${themeNeutralBorder} px-6 text-center ${themeCardShadow}`}
+          >
+            <div
+              className={`flex h-16 w-16 items-center justify-center rounded-2xl ${themeNeutralSurface}`}
+            >
+              <CalendarDays className="h-7 w-7 theme-text-placeholder" />
+            </div>
+
+            <h3 className="mt-5 text-base font-bold theme-text">
+              Tidak ada jadwal
+            </h3>
+
+            <p className="mt-1.5 max-w-md text-sm leading-6 theme-text-muted">
+              Belum ada jadwal pelajaran untuk{" "}
+              <span className="font-semibold theme-text-secondary">
+                {hariAktif}
+              </span>
+              .
             </p>
-          </div>
-        </main>
+
+            <button
+              type="button"
+              onClick={loadJadwal}
+              className={`mt-5 inline-flex items-center gap-2 rounded-xl ${themePrimaryGradient} px-4 py-2.5 text-xs font-semibold text-[var(--color-card)] ${themePrimaryShadow} transition-all hover:shadow-[0_10px_24px_color-mix(in_srgb,var(--color-primary)_22%,transparent)]`}
+            >
+              <RefreshCw className="h-3.5 w-3.5" />
+              Refresh Jadwal
+            </button>
+          </section>
+        )}
+
+        {/* =================================================
+            FOOTER INFO
+        ================================================= */}
+
+        <div
+          className={`mt-6 flex items-start gap-3 rounded-xl border ${themeInfoBorder} ${themeInfoSurface} px-4 py-3.5`}
+        >
+          <Info className="mt-0.5 h-4 w-4 shrink-0 text-[var(--color-info)]" />
+
+          <p className="text-xs leading-5 theme-text-secondary">
+            Jadwal dapat berubah sesuai dengan pengaturan
+            akademik sekolah. Pastikan kamu selalu melihat
+            jadwal terbaru sebelum mengikuti pelajaran.
+          </p>
+        </div>
       </div>
     </div>
   );

@@ -915,8 +915,8 @@ function StatusBadge({ status }) {
     <span
       className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${
         ready
-          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-          : "border-amber-200 bg-amber-50 text-amber-700"
+          ? "theme-success"
+          : "theme-warning"
       }`}
     >
       {ready ? (
@@ -937,31 +937,31 @@ function StatusBadge({ status }) {
 function StatCard({ icon: Icon, label, value, type = "blue" }) {
   const styles = {
     blue: {
-      box: "bg-blue-50",
-      icon: "text-blue-600",
-      value: "text-slate-900",
+      box: "theme-info",
+      icon: "text-[var(--color-info)]",
+      value: "theme-text",
     },
     green: {
-      box: "bg-emerald-50",
-      icon: "text-emerald-600",
-      value: "text-emerald-700",
+      box: "theme-success",
+      icon: "text-[var(--color-success)]",
+      value: "text-[var(--color-success)]",
     },
     amber: {
-      box: "bg-amber-50",
-      icon: "text-amber-600",
-      value: "text-amber-700",
+      box: "theme-warning",
+      icon: "text-[var(--color-warning)]",
+      value: "text-[var(--color-warning)]",
     },
     purple: {
-      box: "bg-indigo-50",
-      icon: "text-indigo-600",
-      value: "text-indigo-700",
+      box: "theme-info",
+      icon: "text-[var(--color-primary)]",
+      value: "text-[var(--color-primary)]",
     },
   };
 
   const style = styles[type];
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white px-4 py-4 shadow-[0_1px_3px_rgba(15,23,42,0.06)] sm:px-5">
+    <div className="theme-card rounded-xl border px-4 py-4 shadow-sm sm:px-5">
       <div className="flex items-center gap-3">
         <div
           className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${style.box} ${style.icon}`}
@@ -970,7 +970,7 @@ function StatCard({ icon: Icon, label, value, type = "blue" }) {
         </div>
 
         <div>
-          <p className="text-[11px] font-medium uppercase tracking-wide text-slate-600">
+          <p className="theme-text-secondary text-[11px] font-medium uppercase tracking-wide">
             {label}
           </p>
 
@@ -1130,7 +1130,7 @@ export default function CetakRaportPage() {
 
   return (
     <>
-      <div className="min-h-screen bg-slate-50 flex print:block">
+      <div className="theme-page flex min-h-screen w-full print:block">
         <Sidebar />
 
         <div className="flex min-w-0 flex-1 flex-col print:block">
@@ -1144,16 +1144,16 @@ export default function CetakRaportPage() {
             <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
               <div>
                 <div className="flex items-center gap-2">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                  <div className="theme-info flex h-10 w-10 items-center justify-center rounded-xl">
                     <Printer size={21} />
                   </div>
 
                   <div>
-                    <h1 className="text-xl font-bold text-slate-900">
+                    <h1 className="theme-text text-xl font-bold">
                       Cetak Raport Siswa
                     </h1>
 
-                    <p className="mt-0.5 text-sm text-slate-600">
+                    <p className="theme-text-muted mt-0.5 text-sm">
                       Kelola preview dan pencetakan raport siswa
                     </p>
                   </div>
@@ -1164,7 +1164,7 @@ export default function CetakRaportPage() {
                 <button
                   type="button"
                   onClick={handleBulkPrint}
-                  className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white transition hover:bg-blue-700"
+                  className="theme-primary inline-flex h-10 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition"
                 >
                   <Printer size={17} />
                   Cetak {selectedIds.length} Raport
@@ -1176,18 +1176,18 @@ export default function CetakRaportPage() {
                 FILTER
             ================================================= */}
 
-            <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-[0_1px_3px_rgba(15,23,42,0.06)]">
+            <div className="theme-card rounded-xl border p-4 shadow-sm">
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
                 {/* TAHUN AJARAN */}
                 <div>
-                  <label className="mb-1.5 block text-xs font-semibold text-slate-700">
+                  <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
                     Tahun Ajaran
                   </label>
 
                   <div className="relative">
                     <CalendarDays
                       size={16}
-                      className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
+                      className="theme-text-muted pointer-events-none absolute left-3 top-1/2 -translate-y-1/2"
                     />
 
                     <select
@@ -1195,7 +1195,7 @@ export default function CetakRaportPage() {
                       onChange={(e) =>
                         setTahunAjaran(e.target.value)
                       }
-                      className="h-10 w-full rounded-lg border border-slate-300 bg-white pl-9 pr-3 text-sm font-medium text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      className="theme-input h-10 w-full rounded-lg border pl-9 pr-3 text-sm font-medium outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
                     >
                       <option>2025/2026</option>
                       <option>2024/2025</option>
@@ -1206,14 +1206,14 @@ export default function CetakRaportPage() {
 
                 {/* SEMESTER */}
                 <div>
-                  <label className="mb-1.5 block text-xs font-semibold text-slate-700">
+                  <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
                     Semester
                   </label>
 
                   <select
                     value={semester}
                     onChange={(e) => setSemester(e.target.value)}
-                    className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm font-medium text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="theme-input h-10 w-full rounded-lg border px-3 text-sm font-medium outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
                   >
                     <option>Ganjil</option>
                     <option>Genap</option>
@@ -1222,14 +1222,14 @@ export default function CetakRaportPage() {
 
                 {/* KELAS */}
                 <div>
-                  <label className="mb-1.5 block text-xs font-semibold text-slate-700">
+                  <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
                     Kelas
                   </label>
 
                   <select
                     value={kelas}
                     onChange={(e) => setKelas(e.target.value)}
-                    className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm font-medium text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="theme-input h-10 w-full rounded-lg border px-3 text-sm font-medium outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
                   >
                     <option>Semua Kelas</option>
                     <option>XII PPLG 1</option>
@@ -1239,7 +1239,7 @@ export default function CetakRaportPage() {
 
                 {/* STATUS */}
                 <div>
-                  <label className="mb-1.5 block text-xs font-semibold text-slate-700">
+                  <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
                     Status Raport
                   </label>
 
@@ -1248,7 +1248,7 @@ export default function CetakRaportPage() {
                     onChange={(e) =>
                       setStatusFilter(e.target.value)
                     }
-                    className="h-10 w-full rounded-lg border border-slate-300 bg-white px-3 text-sm font-medium text-slate-800 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="theme-input h-10 w-full rounded-lg border px-3 text-sm font-medium outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
                   >
                     <option>Semua Status</option>
                     <option>Siap Dicetak</option>
@@ -1262,7 +1262,7 @@ export default function CetakRaportPage() {
                 <div className="relative flex-1">
                   <Search
                     size={17}
-                    className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-500"
+                    className="theme-text-muted pointer-events-none absolute left-3 top-1/2 -translate-y-1/2"
                   />
 
                   <input
@@ -1270,7 +1270,7 @@ export default function CetakRaportPage() {
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                     placeholder="Cari nama siswa, NIS, atau NISN..."
-                    className="h-10 w-full rounded-lg border border-slate-300 bg-white pl-9 pr-3 text-sm font-medium text-slate-800 outline-none placeholder:text-slate-500 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="theme-input h-10 w-full rounded-lg border pl-9 pr-3 text-sm font-medium outline-none placeholder:text-[var(--color-text-placeholder)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
                   />
                 </div>
 
@@ -1284,7 +1284,7 @@ export default function CetakRaportPage() {
                     setStatusFilter("Semua Status");
                     setSelectedIds([]);
                   }}
-                  className="h-10 rounded-lg px-4 text-sm font-semibold text-blue-600 transition hover:bg-blue-50"
+                  className="theme-sidebar-text-active theme-sidebar-hover h-10 rounded-lg px-4 text-sm font-semibold transition"
                 >
                   Reset Filter
                 </button>
@@ -1329,20 +1329,20 @@ export default function CetakRaportPage() {
                 TABLE
             ================================================= */}
 
-            <div className="mt-5 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.06)]">
-              <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4">
+            <div className="theme-card mt-5 overflow-hidden rounded-xl border shadow-sm">
+              <div className="theme-border flex items-center justify-between border-b px-5 py-4">
                 <div>
-                  <h2 className="text-sm font-bold text-slate-900">
+                  <h2 className="theme-text text-sm font-bold">
                     Data Raport Siswa
                   </h2>
 
-                  <p className="mt-0.5 text-xs font-medium text-slate-600">
+                  <p className="theme-text-muted mt-0.5 text-xs font-medium">
                     {filteredStudents.length} siswa ditemukan
                   </p>
                 </div>
 
                 {selectedIds.length > 0 && (
-                  <span className="text-xs font-semibold text-blue-600">
+                  <span className="theme-sidebar-text-active text-xs font-semibold">
                     {selectedIds.length} dipilih
                   </span>
                 )}
@@ -1351,7 +1351,7 @@ export default function CetakRaportPage() {
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[1000px] border-collapse">
                   <thead>
-                    <tr className="bg-blue-600 text-xs font-semibold uppercase tracking-wide text-white">
+                    <tr className="theme-primary text-xs font-semibold uppercase tracking-wide">
                       <th className="w-12 px-4 py-3.5 text-center">
                         <input
                           type="checkbox"
@@ -1362,7 +1362,7 @@ export default function CetakRaportPage() {
                             )
                           }
                           onChange={toggleAll}
-                          className="h-4 w-4 rounded border-white accent-blue-700"
+                          className="h-4 w-4 rounded border-[var(--color-border)] accent-[var(--color-primary)]"
                         />
                       </th>
 
@@ -1407,8 +1407,10 @@ export default function CetakRaportPage() {
                       return (
                         <tr
                           key={student.id}
-                          className={`border-b border-slate-100 transition last:border-0 hover:bg-slate-50 ${
-                            selected ? "bg-blue-50/50" : ""
+                          className={`theme-table-hover border-b transition last:border-0 ${
+                            selected
+                              ? "bg-[var(--color-sidebar-active)]"
+                              : ""
                           }`}
                         >
                           <td className="px-4 py-4 text-center">
@@ -1418,26 +1420,26 @@ export default function CetakRaportPage() {
                               onChange={() =>
                                 toggleStudent(student.id)
                               }
-                              className="h-4 w-4 rounded border-slate-300 accent-blue-600"
+                              className="h-4 w-4 rounded border-[var(--color-border)] accent-[var(--color-primary)]"
                             />
                           </td>
 
-                          <td className="px-4 py-4 text-center text-sm font-medium text-slate-700">
+                          <td className="theme-text-secondary px-4 py-4 text-center text-sm font-medium">
                             {index + 1}
                           </td>
 
                           <td className="px-5 py-4">
                             <div className="flex items-center gap-3">
-                              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                              <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
                                 <GraduationCap size={18} />
                               </div>
 
                               <div className="min-w-0">
-                                <p className="truncate text-sm font-semibold text-slate-900">
+                                <p className="theme-text truncate text-sm font-semibold">
                                   {student.nama}
                                 </p>
 
-                                <p className="mt-0.5 text-xs font-medium text-slate-600">
+                                <p className="theme-text-muted mt-0.5 text-xs font-medium">
                                   NIS {student.nis}
                                 </p>
                               </div>
@@ -1445,16 +1447,16 @@ export default function CetakRaportPage() {
                           </td>
 
                           <td className="px-5 py-4">
-                            <p className="text-sm font-medium text-slate-800">
+                            <p className="theme-text-secondary text-sm font-medium">
                               {student.nis}
                             </p>
 
-                            <p className="mt-0.5 text-xs font-medium text-slate-600">
+                            <p className="theme-text-muted mt-0.5 text-xs font-medium">
                               NISN {student.nisn}
                             </p>
                           </td>
 
-                          <td className="px-5 py-4 text-sm font-semibold text-slate-800">
+                          <td className="theme-text-secondary px-5 py-4 text-sm font-semibold">
                             {student.kelas}
                           </td>
 
@@ -1463,8 +1465,8 @@ export default function CetakRaportPage() {
                               className={`text-sm font-bold ${
                                 student.nilaiTerisi ===
                                 student.totalMapel
-                                  ? "text-emerald-700"
-                                  : "text-amber-700"
+                                  ? "text-[var(--color-success)]"
+                                  : "text-[var(--color-warning)]"
                               }`}
                             >
                               {student.nilaiTerisi}/
@@ -1473,7 +1475,7 @@ export default function CetakRaportPage() {
                           </td>
 
                           <td className="px-5 py-4 text-center">
-                            <span className="text-sm font-bold text-slate-900">
+                            <span className="theme-text text-sm font-bold">
                               {student.rataRata}
                             </span>
                           </td>
@@ -1491,7 +1493,7 @@ export default function CetakRaportPage() {
                                   openDetail(student)
                                 }
                                 title="Lihat detail raport"
-                                className="flex h-8 w-8 items-center justify-center rounded-md text-slate-600 transition hover:bg-blue-50 hover:text-blue-700"
+                                className="theme-text-muted theme-sidebar-hover flex h-8 w-8 items-center justify-center rounded-md transition hover:text-[var(--color-primary)]"
                               >
                                 <Eye size={16} />
                               </button>
@@ -1510,8 +1512,8 @@ export default function CetakRaportPage() {
                                 className={`flex h-8 w-8 items-center justify-center rounded-md transition ${
                                   student.status ===
                                   "Siap Dicetak"
-                                    ? "text-slate-600 hover:bg-emerald-50 hover:text-emerald-700"
-                                    : "cursor-not-allowed text-slate-300"
+                                    ? "theme-text-muted theme-sidebar-hover hover:text-[var(--color-success)]"
+                                    : "cursor-not-allowed text-[var(--color-text-placeholder)]"
                                 }`}
                               >
                                 <Printer size={16} />
@@ -1529,15 +1531,15 @@ export default function CetakRaportPage() {
                           className="px-5 py-16 text-center"
                         >
                           <div className="mx-auto flex max-w-sm flex-col items-center">
-                            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-500">
+                            <div className="theme-card-soft theme-text-muted flex h-12 w-12 items-center justify-center rounded-full">
                               <Search size={21} />
                             </div>
 
-                            <p className="mt-3 text-sm font-semibold text-slate-900">
+                            <p className="theme-text mt-3 text-sm font-semibold">
                               Data tidak ditemukan
                             </p>
 
-                            <p className="mt-1 text-xs font-medium text-slate-600">
+                            <p className="theme-text-muted mt-1 text-xs font-medium">
                               Coba ubah kata kunci atau filter
                               yang digunakan.
                             </p>
@@ -1554,18 +1556,18 @@ export default function CetakRaportPage() {
                 INFO
             ================================================= */}
 
-            <div className="mt-5 rounded-xl border border-blue-100 bg-blue-50 px-4 py-4">
+            <div className="theme-info mt-5 rounded-xl border px-4 py-4">
               <div className="flex gap-3">
-                <div className="mt-0.5 text-blue-600">
+                <div className="mt-0.5">
                   <FileText size={18} />
                 </div>
 
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">
+                  <p className="theme-text text-sm font-semibold">
                     Informasi Cetak Raport
                   </p>
 
-                  <p className="mt-1 text-xs font-medium leading-5 text-slate-700">
+                  <p className="theme-text-secondary mt-1 text-xs font-medium leading-5">
                     Raport hanya dapat dicetak apabila seluruh
                     nilai mata pelajaran siswa sudah lengkap.
                     Gunakan tombol Detail untuk melihat seluruh
@@ -1583,21 +1585,21 @@ export default function CetakRaportPage() {
       ===================================================== */}
 
       {detailStudent && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 p-3 sm:p-5">
-          <div className="flex max-h-[94vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div className="theme-overlay fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-5">
+          <div className="theme-card theme-modal flex max-h-[94vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl shadow-xl">
             {/* MODAL HEADER */}
-            <div className="flex shrink-0 items-center justify-between border-b border-slate-200 bg-white px-5 py-4">
+            <div className="theme-header theme-border flex shrink-0 items-center justify-between border-b px-5 py-4">
               <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                <div className="theme-info flex h-10 w-10 items-center justify-center rounded-xl">
                   <FileText size={20} />
                 </div>
 
                 <div>
-                  <h2 className="text-base font-bold text-slate-900">
+                  <h2 className="theme-text text-base font-bold">
                     Detail Raport Siswa
                   </h2>
 
-                  <p className="mt-0.5 text-xs font-medium text-slate-600">
+                  <p className="theme-text-muted mt-0.5 text-xs font-medium">
                     {detailStudent.nama} • {detailStudent.kelas}
                   </p>
                 </div>
@@ -1606,92 +1608,92 @@ export default function CetakRaportPage() {
               <button
                 type="button"
                 onClick={() => setDetailStudent(null)}
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-600 transition hover:bg-slate-100 hover:text-slate-900"
+                className="theme-text-muted theme-sidebar-hover flex h-9 w-9 items-center justify-center rounded-lg transition hover:text-[var(--color-text)]"
               >
                 <X size={19} />
               </button>
             </div>
 
             {/* MODAL CONTENT */}
-            <div className="min-h-0 flex-1 overflow-y-auto bg-slate-50 p-4 sm:p-6">
+            <div className="theme-card-soft min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
               {/* IDENTITAS */}
-              <div className="rounded-xl border border-slate-200 bg-white p-5">
+              <div className="theme-card rounded-xl border p-5">
                 <div className="mb-4 flex items-center gap-2">
                   <GraduationCap
                     size={18}
-                    className="text-blue-600"
+                    className="text-[var(--color-primary)]"
                   />
 
-                  <h3 className="text-sm font-bold text-slate-900">
+                  <h3 className="theme-text text-sm font-bold">
                     Identitas Siswa
                   </h3>
                 </div>
 
                 <div className="grid grid-cols-1 gap-x-8 gap-y-3 sm:grid-cols-2 lg:grid-cols-4">
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-600">
+                    <p className="theme-text-muted text-[11px] font-semibold uppercase tracking-wide">
                       Nama Siswa
                     </p>
 
-                    <p className="mt-1 text-sm font-bold text-slate-900">
+                    <p className="theme-text mt-1 text-sm font-bold">
                       {detailStudent.nama}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-600">
+                    <p className="theme-text-muted text-[11px] font-semibold uppercase tracking-wide">
                       NIS
                     </p>
 
-                    <p className="mt-1 text-sm font-semibold text-slate-800">
+                    <p className="theme-text-secondary mt-1 text-sm font-semibold">
                       {detailStudent.nis}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-600">
+                    <p className="theme-text-muted text-[11px] font-semibold uppercase tracking-wide">
                       NISN
                     </p>
 
-                    <p className="mt-1 text-sm font-semibold text-slate-800">
+                    <p className="theme-text-secondary mt-1 text-sm font-semibold">
                       {detailStudent.nisn}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-[11px] font-semibold uppercase tracking-wide text-slate-600">
+                    <p className="theme-text-muted text-[11px] font-semibold uppercase tracking-wide">
                       Kelas
                     </p>
 
-                    <p className="mt-1 text-sm font-semibold text-slate-800">
+                    <p className="theme-text-secondary mt-1 text-sm font-semibold">
                       {detailStudent.kelas}
                     </p>
                   </div>
                 </div>
 
                 <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                  <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-                    <p className="text-xs font-semibold text-slate-600">
+                  <div className="theme-card-soft rounded-lg border p-3">
+                    <p className="theme-text-muted text-xs font-semibold">
                       Tahun Ajaran
                     </p>
 
-                    <p className="mt-1 text-sm font-bold text-slate-900">
+                    <p className="theme-text mt-1 text-sm font-bold">
                       {tahunAjaran}
                     </p>
                   </div>
 
-                  <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-                    <p className="text-xs font-semibold text-slate-600">
+                  <div className="theme-card-soft rounded-lg border p-3">
+                    <p className="theme-text-muted text-xs font-semibold">
                       Semester
                     </p>
 
-                    <p className="mt-1 text-sm font-bold text-slate-900">
+                    <p className="theme-text mt-1 text-sm font-bold">
                       {semester}
                     </p>
                   </div>
 
-                  <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
-                    <p className="text-xs font-semibold text-slate-600">
+                  <div className="theme-card-soft rounded-lg border p-3">
+                    <p className="theme-text-muted text-xs font-semibold">
                       Status Raport
                     </p>
 
@@ -1706,29 +1708,29 @@ export default function CetakRaportPage() {
 
               {/* RINGKASAN */}
               <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <div className="rounded-xl border border-slate-200 bg-white p-4">
-                  <p className="text-xs font-semibold text-slate-600">
+                <div className="theme-card rounded-xl border p-4">
+                  <p className="theme-text-muted text-xs font-semibold">
                     Mata Pelajaran
                   </p>
 
-                  <p className="mt-1 text-xl font-bold text-slate-900">
+                  <p className="theme-text mt-1 text-xl font-bold">
                     {detailStudent.nilaiTerisi}/
                     {detailStudent.totalMapel}
                   </p>
                 </div>
 
-                <div className="rounded-xl border border-slate-200 bg-white p-4">
-                  <p className="text-xs font-semibold text-slate-600">
+                <div className="theme-card rounded-xl border p-4">
+                  <p className="theme-text-muted text-xs font-semibold">
                     Rata-rata Nilai
                   </p>
 
-                  <p className="mt-1 text-xl font-bold text-blue-700">
+                  <p className="mt-1 text-xl font-bold text-[var(--color-primary)]">
                     {detailStudent.rataRata}
                   </p>
                 </div>
 
-                <div className="rounded-xl border border-slate-200 bg-white p-4">
-                  <p className="text-xs font-semibold text-slate-600">
+                <div className="theme-card rounded-xl border p-4">
+                  <p className="theme-text-muted text-xs font-semibold">
                     Status
                   </p>
 
@@ -1741,13 +1743,13 @@ export default function CetakRaportPage() {
               </div>
 
               {/* SELURUH NILAI */}
-              <div className="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-white">
-                <div className="border-b border-slate-200 px-5 py-4">
-                  <h3 className="text-sm font-bold text-slate-900">
+              <div className="theme-card mt-4 overflow-hidden rounded-xl border">
+                <div className="theme-border border-b px-5 py-4">
+                  <h3 className="theme-text text-sm font-bold">
                     Seluruh Nilai Mata Pelajaran
                   </h3>
 
-                  <p className="mt-0.5 text-xs font-medium text-slate-600">
+                  <p className="theme-text-muted mt-0.5 text-xs font-medium">
                     Detail nilai akademik siswa pada semester{" "}
                     {semester.toLowerCase()}
                   </p>
@@ -1756,7 +1758,7 @@ export default function CetakRaportPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full min-w-[1050px] border-collapse">
                     <thead>
-                      <tr className="bg-slate-100 text-xs font-bold text-slate-800">
+                      <tr className="theme-table-header text-xs font-bold">
                         <th className="w-14 px-4 py-3 text-center">
                           No
                         </th>
@@ -1800,34 +1802,34 @@ export default function CetakRaportPage() {
                         (nilai, index) => (
                           <tr
                             key={`${detailStudent.id}-${index}`}
-                            className="border-t border-slate-200 transition hover:bg-slate-50"
+                            className="theme-table-hover border-t transition"
                           >
-                            <td className="px-4 py-3 text-center text-sm font-medium text-slate-700">
+                            <td className="theme-text-secondary px-4 py-3 text-center text-sm font-medium">
                               {index + 1}
                             </td>
 
-                            <td className="px-4 py-3 text-sm font-semibold text-slate-900">
+                            <td className="theme-text px-4 py-3 text-sm font-semibold">
                               {nilai.mapel}
                             </td>
 
-                            <td className="px-4 py-3 text-center text-sm font-semibold text-slate-800">
+                            <td className="theme-text-secondary px-4 py-3 text-center text-sm font-semibold">
                               {nilai.tugas}
                             </td>
 
-                            <td className="px-4 py-3 text-center text-sm font-semibold text-slate-800">
+                            <td className="theme-text-secondary px-4 py-3 text-center text-sm font-semibold">
                               {nilai.uts}
                             </td>
 
-                            <td className="px-4 py-3 text-center text-sm font-semibold text-slate-800">
+                            <td className="theme-text-secondary px-4 py-3 text-center text-sm font-semibold">
                               {nilai.uas}
                             </td>
 
-                            <td className="px-4 py-3 text-center text-sm font-semibold text-slate-800">
+                            <td className="theme-text-secondary px-4 py-3 text-center text-sm font-semibold">
                               {nilai.praktik}
                             </td>
 
                             <td className="px-4 py-3 text-center">
-                              <span className="text-sm font-bold text-slate-900">
+                              <span className="theme-text text-sm font-bold">
                                 {nilai.nilaiAkhir}
                               </span>
                             </td>
@@ -1836,15 +1838,15 @@ export default function CetakRaportPage() {
                               <span
                                 className={`inline-flex min-w-8 items-center justify-center rounded-md px-2 py-1 text-xs font-bold ${
                                   nilai.predikat === "A"
-                                    ? "bg-emerald-50 text-emerald-700"
-                                    : "bg-blue-50 text-blue-700"
+                                    ? "theme-success"
+                                    : "theme-info"
                                 }`}
                               >
                                 {nilai.predikat}
                               </span>
                             </td>
 
-                            <td className="px-4 py-3 text-sm font-medium text-slate-700">
+                            <td className="theme-text-secondary px-4 py-3 text-sm font-medium">
                               {nilai.keterangan}
                             </td>
                           </tr>
@@ -1858,7 +1860,7 @@ export default function CetakRaportPage() {
                             colSpan={9}
                             className="px-5 py-10 text-center"
                           >
-                            <p className="text-sm font-semibold text-slate-800">
+                            <p className="theme-text-secondary text-sm font-semibold">
                               Data nilai belum tersedia
                             </p>
                           </td>
@@ -1870,51 +1872,51 @@ export default function CetakRaportPage() {
               </div>
 
               {/* KEHADIRAN */}
-              <div className="mt-4 rounded-xl border border-slate-200 bg-white p-5">
+              <div className="theme-card mt-4 rounded-xl border p-5">
                 <div className="mb-4 flex items-center gap-2">
                   <CalendarDays
                     size={18}
-                    className="text-blue-600"
+                    className="text-[var(--color-primary)]"
                   />
 
-                  <h3 className="text-sm font-bold text-slate-900">
+                  <h3 className="theme-text text-sm font-bold">
                     Rekap Kehadiran
                   </h3>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                  <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-center">
-                    <p className="text-xs font-semibold text-slate-600">
+                  <div className="theme-card-soft rounded-lg border p-3 text-center">
+                    <p className="theme-text-muted text-xs font-semibold">
                       Sakit
                     </p>
-                    <p className="mt-1 text-lg font-bold text-slate-900">
+                    <p className="theme-text mt-1 text-lg font-bold">
                       2
                     </p>
                   </div>
 
-                  <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-center">
-                    <p className="text-xs font-semibold text-slate-600">
+                  <div className="theme-card-soft rounded-lg border p-3 text-center">
+                    <p className="theme-text-muted text-xs font-semibold">
                       Izin
                     </p>
-                    <p className="mt-1 text-lg font-bold text-slate-900">
+                    <p className="theme-text mt-1 text-lg font-bold">
                       1
                     </p>
                   </div>
 
-                  <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-center">
-                    <p className="text-xs font-semibold text-slate-600">
+                  <div className="theme-card-soft rounded-lg border p-3 text-center">
+                    <p className="theme-text-muted text-xs font-semibold">
                       Alpa
                     </p>
-                    <p className="mt-1 text-lg font-bold text-slate-900">
+                    <p className="theme-text mt-1 text-lg font-bold">
                       0
                     </p>
                   </div>
 
-                  <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 text-center">
-                    <p className="text-xs font-semibold text-slate-600">
+                  <div className="theme-success rounded-lg border p-3 text-center">
+                    <p className="theme-text-muted text-xs font-semibold">
                       Kehadiran
                     </p>
-                    <p className="mt-1 text-lg font-bold text-emerald-700">
+                    <p className="mt-1 text-lg font-bold text-[var(--color-success)]">
                       98%
                     </p>
                   </div>
@@ -1923,11 +1925,11 @@ export default function CetakRaportPage() {
             </div>
 
             {/* MODAL FOOTER */}
-            <div className="flex shrink-0 flex-col-reverse gap-2 border-t border-slate-200 bg-white px-5 py-4 sm:flex-row sm:justify-end">
+            <div className="theme-header theme-border flex shrink-0 flex-col-reverse gap-2 border-t px-5 py-4 sm:flex-row sm:justify-end">
               <button
                 type="button"
                 onClick={() => setDetailStudent(null)}
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-300 px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                className="theme-card theme-text-secondary theme-sidebar-hover theme-border inline-flex h-10 items-center justify-center gap-2 rounded-lg border px-4 text-sm font-semibold transition"
               >
                 <X size={16} />
                 Tutup
@@ -1940,7 +1942,7 @@ export default function CetakRaportPage() {
                     "Fitur Download PDF siap dihubungkan ke backend/PDF generator."
                   );
                 }}
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-300 px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50"
+                className="theme-card theme-text-secondary theme-sidebar-hover theme-border inline-flex h-10 items-center justify-center gap-2 rounded-lg border px-4 text-sm font-semibold transition"
               >
                 <Download size={16} />
                 Download PDF
@@ -1954,8 +1956,8 @@ export default function CetakRaportPage() {
                 onClick={() => handlePrint(detailStudent)}
                 className={`inline-flex h-10 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold text-white transition ${
                   detailStudent.status === "Siap Dicetak"
-                    ? "bg-blue-600 hover:bg-blue-700"
-                    : "cursor-not-allowed bg-slate-300"
+                    ? "theme-primary"
+                    : "cursor-not-allowed theme-disabled"
                 }`}
               >
                 <Printer size={16} />
@@ -1971,6 +1973,38 @@ export default function CetakRaportPage() {
       ===================================================== */}
 
       <style jsx global>{`
+        /* =====================================================
+           PAGE THEME SAFETY
+           Semua warna tambahan tetap mengambil token theme.
+        ===================================================== */
+        .theme-overlay {
+          background: color-mix(in srgb, var(--color-text) 55%, transparent);
+        }
+
+        .theme-selected {
+          background: var(--color-sidebar-active);
+        }
+
+        .theme-disabled {
+          background: var(--color-text-placeholder);
+          color: var(--color-card);
+        }
+
+        .theme-modal {
+          border-color: var(--color-border);
+          box-shadow: var(--theme-shadow-lg, 0 20px 45px color-mix(in srgb, var(--color-text) 18%, transparent));
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .theme-modal,
+          .theme-card,
+          button,
+          input,
+          select {
+            transition: none !important;
+          }
+        }
+
         @media print {
           body * {
             visibility: hidden !important;

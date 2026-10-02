@@ -1,60 +1,113 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import Sidebar from "../../../components/Sidebar";
-import Header from "../../../components/Header";
 import {
   Settings,
-  Globe,
   Shield,
   Bell,
   Mail,
-  Key,
-  UserCog,
-  Database,
+  DollarSign,
   Clock,
   RefreshCw,
   Save,
-  X,
   Check,
-  AlertTriangle,
-  Info,
   Eye,
   EyeOff,
-  Smartphone,
-  Monitor,
-  Cloud,
   Share2,
-  Lock,
-  Unlock,
-  ChevronDown,
-  ChevronUp,
-  Edit,
-  Trash2,
-  Plus,
   Search,
-  FileText,
-  Building2,
-  School,
-  Calendar,
-  DollarSign,
-  CreditCard,
-  Zap,
-  Sparkles,
-  Crown,
 } from "lucide-react";
 
+// ============================================================
+// THEME HELPERS
+// ============================================================
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+
+const themeInput =
+  "theme-input theme-text";
+
+const themeLabel =
+  "block text-sm font-medium theme-text mb-1.5";
+
+const themeMuted =
+  "theme-text-secondary";
+
+const themePlaceholder =
+  "placeholder:text-[var(--color-text-placeholder)]";
+
+const themeCard =
+  "theme-card theme-border";
+
+const themeCheckbox =
+  "accent-[var(--color-primary)] focus:ring-[var(--color-primary)]";
+
+
+// ============================================================
+// MAIN PAGE
+// ============================================================
+
 export default function PengaturanSistemPage() {
-  const router = useRouter();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeMenu] = useState("pengaturan");
   const [activeTab, setActiveTab] = useState("umum");
   const [isSaving, setIsSaving] = useState(false);
   const [saveSuccess, setSaveSuccess] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
 
-  // ===== STATE UNTUK SETIAP SECTION =====
+  // ============================================================
+  // GENERAL
+  // ============================================================
+
   const [general, setGeneral] = useState({
     namaSistem: "SmartSchool",
     subdomain: "smartschool",
@@ -64,8 +117,13 @@ export default function PengaturanSistemPage() {
     logo: null,
     favicon: null,
     maintenanceMode: false,
-    maintenanceMessage: "Kami sedang melakukan pemeliharaan. Kembali lagi nanti.",
+    maintenanceMessage:
+      "Kami sedang melakukan pemeliharaan. Kembali lagi nanti.",
   });
+
+  // ============================================================
+  // SECURITY
+  // ============================================================
 
   const [security, setSecurity] = useState({
     authMethod: "email_password",
@@ -80,6 +138,10 @@ export default function PengaturanSistemPage() {
     twoFactorAuth: false,
     twoFactorMethod: "email",
   });
+
+  // ============================================================
+  // INTEGRATIONS
+  // ============================================================
 
   const [integrations, setIntegrations] = useState({
     xendit: {
@@ -106,6 +168,10 @@ export default function PengaturanSistemPage() {
     },
   });
 
+  // ============================================================
+  // NOTIFICATIONS
+  // ============================================================
+
   const [notifications, setNotifications] = useState({
     emailEnabled: true,
     pushEnabled: false,
@@ -119,325 +185,491 @@ export default function PengaturanSistemPage() {
     emailReplyTo: "support@smartschool.com",
   });
 
+  // ============================================================
+  // ACTIVITY LOG
+  // ============================================================
+
   const [activityLogs] = useState([
-    { id: 1, user: "Super Admin", action: "Mengubah pengaturan umum", timestamp: "2026-08-11 14:30:22", ip: "192.168.1.1" },
-    { id: 2, user: "Super Admin", action: "Mengaktifkan maintenance mode", timestamp: "2026-08-10 09:15:45", ip: "192.168.1.1" },
-    { id: 3, user: "Admin Sekolah", action: "Mengubah pengaturan sekolah", timestamp: "2026-08-09 16:20:10", ip: "192.168.1.5" },
+    {
+      id: 1,
+      user: "Super Admin",
+      action: "Mengubah pengaturan umum",
+      timestamp: "2026-08-11 14:30:22",
+      ip: "192.168.1.1",
+    },
+    {
+      id: 2,
+      user: "Super Admin",
+      action: "Mengaktifkan maintenance mode",
+      timestamp: "2026-08-10 09:15:45",
+      ip: "192.168.1.1",
+    },
+    {
+      id: 3,
+      user: "Admin Sekolah",
+      action: "Mengubah pengaturan sekolah",
+      timestamp: "2026-08-09 16:20:10",
+      ip: "192.168.1.5",
+    },
   ]);
 
   const [filterLog, setFilterLog] = useState("");
 
-  const notificationsData = [
-    { id: 1, title: "Pembaruan Sistem v2.0", desc: "Dikirim 2 jam lalu", read: false },
-    { id: 2, title: "Pengingat: Backup Data", desc: "Dikirim 1 hari lalu", read: false },
-  ];
+  // ============================================================
+  // HANDLERS
+  // ============================================================
 
-  // ===== HANDLER =====
   const handleGeneralChange = (field, value) => {
-    setGeneral((prev) => ({ ...prev, [field]: value }));
+    setGeneral((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
   };
 
   const handleSecurityChange = (field, value) => {
-    setSecurity((prev) => ({ ...prev, [field]: value }));
+    setSecurity((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
   };
 
   const handleIntegrationChange = (service, field, value) => {
     setIntegrations((prev) => ({
       ...prev,
-      [service]: { ...prev[service], [field]: value },
+      [service]: {
+        ...prev[service],
+        [field]: value,
+      },
     }));
   };
 
   const handleNotificationChange = (field, value) => {
-    setNotifications((prev) => ({ ...prev, [field]: value }));
+    setNotifications((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
   };
 
   const handleSave = () => {
     setIsSaving(true);
     setSaveSuccess(false);
+
     setTimeout(() => {
       setIsSaving(false);
       setSaveSuccess(true);
-      setTimeout(() => setSaveSuccess(false), 3000);
-      console.log("Pengaturan disimpan:", { general, security, integrations, notifications });
+
+      setTimeout(() => {
+        setSaveSuccess(false);
+      }, 3000);
+
+      console.log("Pengaturan disimpan:", {
+        general,
+        security,
+        integrations,
+        notifications,
+      });
     }, 1000);
   };
 
-  const filteredLogs = activityLogs.filter((log) =>
-    log.user.toLowerCase().includes(filterLog.toLowerCase()) ||
-    log.action.toLowerCase().includes(filterLog.toLowerCase()) ||
-    log.ip.includes(filterLog)
+  const filteredLogs = activityLogs.filter(
+    (log) =>
+      log.user.toLowerCase().includes(filterLog.toLowerCase()) ||
+      log.action.toLowerCase().includes(filterLog.toLowerCase()) ||
+      log.ip.includes(filterLog)
   );
 
   const tabs = [
-    { id: "umum", label: "Umum", icon: Settings },
-    { id: "keamanan", label: "Keamanan", icon: Shield },
-    { id: "integrasi", label: "Integrasi", icon: Share2 },
-    { id: "notifikasi", label: "Notifikasi", icon: Bell },
-    { id: "aktivitas", label: "Aktivitas", icon: Clock },
+    {
+      id: "umum",
+      label: "Umum",
+      icon: Settings,
+    },
+    {
+      id: "keamanan",
+      label: "Keamanan",
+      icon: Shield,
+    },
+    {
+      id: "integrasi",
+      label: "Integrasi",
+      icon: Share2,
+    },
+    {
+      id: "notifikasi",
+      label: "Notifikasi",
+      icon: Bell,
+    },
+    {
+      id: "aktivitas",
+      label: "Aktivitas",
+      icon: Clock,
+    },
   ];
 
+  // ============================================================
+  // RENDER
+  // ============================================================
+
   return (
-  <div className="flex min-h-screen bg-slate-50">
-    <Sidebar
-      active={activeMenu}
-      setActive={() => {}}
-      collapsed={!sidebarOpen}
-      setCollapsed={() => setSidebarOpen(!sidebarOpen)}
-    />
+    <div className="theme-page theme-text min-h-full">
+      <div className="w-full max-w-[1500px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-5 sm:space-y-6">
 
-    <div className="flex-1 flex flex-col min-w-0">
-      <Header
-        toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-        notifications={notificationsData}
-        user={{
-          name: "Super Admin",
-          email: "admin@smartschool.com",
-          avatar: "SA",
-        }}
-      />
+        {/* ======================================================
+            HEADER
+        ====================================================== */}
 
-      <main className="flex-1 p-4 sm:p-6 lg:p-8">
-        <div className="w-full space-y-5 sm:space-y-6">
-
-          {/* HEADER */}
-          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2">
-                <Settings size={20} className="text-blue-600" />
-
-                <h1 className="text-xl sm:text-2xl font-bold text-slate-800">
-                  Pengaturan Sistem
-                </h1>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <div className="flex items-center gap-2">
+              <div
+                className={`w-9 h-9 rounded-xl ${themePrimarySoft} ${themePrimarySoftBorder} border flex items-center justify-center`}
+              >
+                <Settings
+                  size={19}
+                  className={themePrimaryText}
+                />
               </div>
 
-              <p className="text-sm text-slate-500 mt-1">
-                Kelola konfigurasi dan pengaturan utama SmartSchool
+              <h1 className="text-xl sm:text-2xl font-bold theme-text">
+                Pengaturan Sistem
+              </h1>
+            </div>
+
+            <p className="text-sm theme-text-secondary mt-1">
+              Kelola konfigurasi dan pengaturan utama SmartSchool
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleSave}
+            disabled={isSaving}
+            className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg ${themePrimaryGradient} text-[var(--color-card)] text-sm font-medium transition ${themePrimaryShadow} hover:opacity-90 disabled:opacity-60 disabled:cursor-not-allowed`}
+          >
+            {isSaving ? (
+              <>
+                <RefreshCw
+                  size={16}
+                  className="animate-spin"
+                />
+                Menyimpan...
+              </>
+            ) : (
+              <>
+                <Save size={16} />
+                Simpan Perubahan
+              </>
+            )}
+          </button>
+        </div>
+
+        {/* ======================================================
+            SUCCESS MESSAGE
+        ====================================================== */}
+
+        {saveSuccess && (
+          <div
+            className={`flex items-center gap-3 p-3.5 rounded-xl ${themeSuccessSurface} ${themeSuccessBorder} border`}
+          >
+            <div
+              className={`w-8 h-8 rounded-lg ${themeSuccessSurface} flex items-center justify-center shrink-0`}
+            >
+              <Check
+                size={18}
+                className="text-[var(--color-success)]"
+              />
+            </div>
+
+            <div>
+              <p className="text-sm font-semibold text-[var(--color-success)]">
+                Pengaturan berhasil disimpan
+              </p>
+
+              <p className="text-xs theme-text-secondary mt-0.5">
+                Perubahan konfigurasi sistem telah berhasil disimpan.
               </p>
             </div>
-
-            <button
-              type="button"
-              onClick={handleSave}
-              disabled={isSaving}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed text-white text-sm font-medium transition"
-            >
-              {isSaving ? (
-                <>
-                  <RefreshCw size={16} className="animate-spin" />
-                  Menyimpan...
-                </>
-              ) : (
-                <>
-                  <Save size={16} />
-                  Simpan Perubahan
-                </>
-              )}
-            </button>
           </div>
+        )}
 
-          {/* SUCCESS MESSAGE */}
-          {saveSuccess && (
-            <div className="flex items-center gap-3 p-3.5 bg-emerald-50 border border-emerald-200 rounded-lg">
-              <Check size={18} className="text-emerald-600" />
+        {/* ======================================================
+            TABS + CONTENT
+        ====================================================== */}
 
-              <div>
-                <p className="text-sm font-semibold text-emerald-700">
-                  Pengaturan berhasil disimpan
-                </p>
-
-                <p className="text-xs text-emerald-600 mt-0.5">
-                  Perubahan konfigurasi sistem telah berhasil disimpan.
-                </p>
-              </div>
-            </div>
-          )}
-
+        <div
+          className={`${themeCard} rounded-xl ${themeCardShadow} overflow-hidden`}
+        >
           {/* TABS */}
-          <div className="bg-white border border-slate-200/80 rounded-xl shadow-sm">
-            <div className="border-b border-slate-200/80 overflow-x-auto">
-              <div className="flex min-w-max">
-                {tabs.map((tab) => {
-                  const Icon = tab.icon;
-                  const isActive = activeTab === tab.id;
 
-                  return (
-                    <button
-                      key={tab.id}
-                      type="button"
-                      onClick={() => setActiveTab(tab.id)}
-                      className={`flex items-center gap-2 px-4 sm:px-5 py-3.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
-                        isActive
-                          ? "text-blue-600 border-blue-600"
-                          : "text-slate-500 border-transparent hover:text-slate-700 hover:bg-slate-50"
-                      }`}
-                    >
-                      <Icon size={16} />
-                      {tab.label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
+          <div className={`border-b ${themeDivider} overflow-x-auto`}>
+            <div className="flex min-w-max">
+              {tabs.map((tab) => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.id;
 
-            {/* CONTENT */}
-            <div className="p-4 sm:p-6">
-
-              {activeTab === "umum" && (
-                <GeneralTab
-                  general={general}
-                  handleChange={handleGeneralChange}
-                />
-              )}
-
-              {activeTab === "keamanan" && (
-                <SecurityTab
-                  security={security}
-                  handleChange={handleSecurityChange}
-                  showPassword={showPassword}
-                  setShowPassword={setShowPassword}
-                />
-              )}
-
-              {activeTab === "integrasi" && (
-                <IntegrationTab
-                  integrations={integrations}
-                  handleChange={handleIntegrationChange}
-                  showPassword={showPassword}
-                  setShowPassword={setShowPassword}
-                />
-              )}
-
-              {activeTab === "notifikasi" && (
-                <NotificationTab
-                  notifications={notifications}
-                  handleChange={handleNotificationChange}
-                />
-              )}
-
-              {activeTab === "aktivitas" && (
-                <ActivityTab
-                  logs={filteredLogs}
-                  filter={filterLog}
-                  setFilter={setFilterLog}
-                />
-              )}
-
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex items-center gap-2 px-4 sm:px-5 py-3.5 text-sm font-medium border-b-2 transition whitespace-nowrap ${
+                      isActive
+                        ? `${themePrimaryText} border-[var(--color-primary)] ${themePrimarySoft}`
+                        : `theme-text-secondary border-transparent ${themeNeutralHover}`
+                    }`}
+                  >
+                    <Icon size={16} />
+                    {tab.label}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
-          {/* FOOTER */}
-          <div className="text-center text-xs text-slate-400/80 py-2 border-t border-slate-200/40">
-            © 2026 SmartSchool • Pengaturan terakhir diperbarui hari ini
-          </div>
+          {/* CONTENT */}
 
+          <div className="p-4 sm:p-6">
+            {activeTab === "umum" && (
+              <GeneralTab
+                general={general}
+                handleChange={handleGeneralChange}
+              />
+            )}
+
+            {activeTab === "keamanan" && (
+              <SecurityTab
+                security={security}
+                handleChange={handleSecurityChange}
+              />
+            )}
+
+            {activeTab === "integrasi" && (
+              <IntegrationTab
+                integrations={integrations}
+                handleChange={handleIntegrationChange}
+                showPassword={showPassword}
+                setShowPassword={setShowPassword}
+              />
+            )}
+
+            {activeTab === "notifikasi" && (
+              <NotificationTab
+                notifications={notifications}
+                handleChange={handleNotificationChange}
+              />
+            )}
+
+            {activeTab === "aktivitas" && (
+              <ActivityTab
+                logs={filteredLogs}
+                filter={filterLog}
+                setFilter={setFilterLog}
+              />
+            )}
+          </div>
         </div>
-      </main>
+
+        {/* ======================================================
+            FOOTER
+        ====================================================== */}
+
+        <div
+          className={`text-center text-xs theme-text-muted py-3 border-t ${themeDivider}`}
+        >
+          © 2026 SmartSchool • Pengaturan terakhir diperbarui hari ini
+        </div>
+      </div>
     </div>
-  </div>
-);
+  );
 }
 
+
 // ============================================================
-// TAB KOMPONEN dengan teks lebih jelas
+// GENERAL TAB
 // ============================================================
 
 function GeneralTab({ general, handleChange }) {
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+        {/* Nama Sistem */}
+
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Nama Sistem</label>
+          <label className={themeLabel}>
+            Nama Sistem
+          </label>
+
           <input
             type="text"
             value={general.namaSistem}
-            onChange={(e) => handleChange("namaSistem", e.target.value)}
-            className="w-full px-3 py-2 text-sm text-slate-800 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 placeholder:text-slate-400"
+            onChange={(e) =>
+              handleChange("namaSistem", e.target.value)
+            }
+            className={`w-full px-3 py-2 text-sm rounded-lg ${themeInput} ${themeFocus} ${themePlaceholder} transition`}
           />
         </div>
+
+        {/* Subdomain */}
+
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Subdomain Utama</label>
+          <label className={themeLabel}>
+            Subdomain Utama
+          </label>
+
           <input
             type="text"
             value={general.subdomain}
-            onChange={(e) => handleChange("subdomain", e.target.value)}
-            className="w-full px-3 py-2 text-sm text-slate-800 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 placeholder:text-slate-400"
+            onChange={(e) =>
+              handleChange("subdomain", e.target.value)
+            }
+            className={`w-full px-3 py-2 text-sm rounded-lg ${themeInput} ${themeFocus} ${themePlaceholder} transition`}
           />
         </div>
+
+        {/* Timezone */}
+
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Zona Waktu</label>
+          <label className={themeLabel}>
+            Zona Waktu
+          </label>
+
           <select
             value={general.timezone}
-            onChange={(e) => handleChange("timezone", e.target.value)}
-            className="w-full px-3 py-2 text-sm text-slate-800 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+            onChange={(e) =>
+              handleChange("timezone", e.target.value)
+            }
+            className={`w-full px-3 py-2 text-sm rounded-lg ${themeInput} ${themeFocus} transition`}
           >
-            <option value="Asia/Jakarta">Asia/Jakarta (WIB)</option>
-            <option value="Asia/Makassar">Asia/Makassar (WITA)</option>
-            <option value="Asia/Jayapura">Asia/Jayapura (WIT)</option>
-            <option value="Asia/Singapore">Asia/Singapore</option>
+            <option value="Asia/Jakarta">
+              Asia/Jakarta (WIB)
+            </option>
+            <option value="Asia/Makassar">
+              Asia/Makassar (WITA)
+            </option>
+            <option value="Asia/Jayapura">
+              Asia/Jayapura (WIT)
+            </option>
+            <option value="Asia/Singapore">
+              Asia/Singapore
+            </option>
           </select>
         </div>
+
+        {/* Format tanggal */}
+
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Format Tanggal</label>
+          <label className={themeLabel}>
+            Format Tanggal
+          </label>
+
           <select
             value={general.tanggalFormat}
-            onChange={(e) => handleChange("tanggalFormat", e.target.value)}
-            className="w-full px-3 py-2 text-sm text-slate-800 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+            onChange={(e) =>
+              handleChange("tanggalFormat", e.target.value)
+            }
+            className={`w-full px-3 py-2 text-sm rounded-lg ${themeInput} ${themeFocus} transition`}
           >
-            <option value="dd-mm-yyyy">DD-MM-YYYY</option>
-            <option value="mm-dd-yyyy">MM-DD-YYYY</option>
-            <option value="yyyy-mm-dd">YYYY-MM-DD</option>
+            <option value="dd-mm-yyyy">
+              DD-MM-YYYY
+            </option>
+
+            <option value="mm-dd-yyyy">
+              MM-DD-YYYY
+            </option>
+
+            <option value="yyyy-mm-dd">
+              YYYY-MM-DD
+            </option>
           </select>
         </div>
+
+        {/* Bahasa */}
+
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Bahasa</label>
+          <label className={themeLabel}>
+            Bahasa
+          </label>
+
           <select
             value={general.bahasa}
-            onChange={(e) => handleChange("bahasa", e.target.value)}
-            className="w-full px-3 py-2 text-sm text-slate-800 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+            onChange={(e) =>
+              handleChange("bahasa", e.target.value)
+            }
+            className={`w-full px-3 py-2 text-sm rounded-lg ${themeInput} ${themeFocus} transition`}
           >
-            <option value="id">Indonesia</option>
-            <option value="en">English</option>
+            <option value="id">
+              Indonesia
+            </option>
+
+            <option value="en">
+              English
+            </option>
           </select>
         </div>
-        <div className="space-y-1">
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Logo</label>
+
+        {/* Logo */}
+
+        <div>
+          <label className={themeLabel}>
+            Logo
+          </label>
+
           <input
             type="file"
-            className="w-full px-3 py-2 text-sm text-slate-800 bg-slate-50 border border-slate-200 rounded-lg file:mr-3 file:py-1.5 file:px-3 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-600 file:border-0 file:rounded-lg hover:file:bg-blue-100 transition cursor-pointer"
             accept="image/*"
+            className={`w-full px-3 py-2 text-sm rounded-lg ${themeInput} ${themeFocus} file:mr-3 file:py-1.5 file:px-3 file:text-sm file:font-medium file:border-0 file:rounded-lg file:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] file:text-[var(--color-primary)] hover:file:bg-[color-mix(in_srgb,var(--color-primary)_16%,transparent)] transition cursor-pointer`}
           />
         </div>
-        <div className="space-y-1">
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Favicon</label>
+
+        {/* Favicon */}
+
+        <div>
+          <label className={themeLabel}>
+            Favicon
+          </label>
+
           <input
             type="file"
-            className="w-full px-3 py-2 text-sm text-slate-800 bg-slate-50 border border-slate-200 rounded-lg file:mr-3 file:py-1.5 file:px-3 file:text-sm file:font-medium file:bg-blue-50 file:text-blue-600 file:border-0 file:rounded-lg hover:file:bg-blue-100 transition cursor-pointer"
             accept="image/x-icon,image/png"
+            className={`w-full px-3 py-2 text-sm rounded-lg ${themeInput} ${themeFocus} file:mr-3 file:py-1.5 file:px-3 file:text-sm file:font-medium file:border-0 file:rounded-lg file:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] file:text-[var(--color-primary)] hover:file:bg-[color-mix(in_srgb,var(--color-primary)_16%,transparent)] transition cursor-pointer`}
           />
         </div>
       </div>
-      <div className="border-t border-slate-200/60 pt-4">
+
+      {/* Maintenance */}
+
+      <div className={`border-t ${themeDivider} pt-4`}>
         <div className="flex items-center gap-3">
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={general.maintenanceMode}
-              onChange={(e) => handleChange("maintenanceMode", e.target.checked)}
-              className="sr-only peer"
-            />
-            <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-          </label>
-          <span className="text-sm font-medium text-slate-700">Mode Pemeliharaan</span>
+
+          <ThemeToggle
+            checked={general.maintenanceMode}
+            onChange={(value) =>
+              handleChange("maintenanceMode", value)
+            }
+          />
+
+          <span className="text-sm font-medium theme-text">
+            Mode Pemeliharaan
+          </span>
         </div>
+
         {general.maintenanceMode && (
           <div className="mt-3">
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Pesan Pemeliharaan</label>
+            <label className={themeLabel}>
+              Pesan Pemeliharaan
+            </label>
+
             <textarea
               value={general.maintenanceMessage}
-              onChange={(e) => handleChange("maintenanceMessage", e.target.value)}
+              onChange={(e) =>
+                handleChange(
+                  "maintenanceMessage",
+                  e.target.value
+                )
+              }
               rows={2}
-              className="w-full px-3 py-2 text-sm text-slate-800 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 resize-none placeholder:text-slate-400"
+              className={`w-full px-3 py-2 text-sm rounded-lg ${themeInput} ${themeFocus} ${themePlaceholder} resize-none transition`}
             />
           </div>
         )}
@@ -446,123 +678,203 @@ function GeneralTab({ general, handleChange }) {
   );
 }
 
-function SecurityTab({ security, handleChange, showPassword, setShowPassword }) {
+
+// ============================================================
+// SECURITY TAB
+// ============================================================
+
+function SecurityTab({ security, handleChange }) {
   return (
     <div className="space-y-6">
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Metode Autentikasi</label>
+          <label className={themeLabel}>
+            Metode Autentikasi
+          </label>
+
           <select
             value={security.authMethod}
-            onChange={(e) => handleChange("authMethod", e.target.value)}
-            className="w-full px-3 py-2 text-sm text-slate-800 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+            onChange={(e) =>
+              handleChange("authMethod", e.target.value)
+            }
+            className={`w-full px-3 py-2 text-sm rounded-lg ${themeInput} ${themeFocus}`}
           >
-            <option value="email_password">Email + Password</option>
-            <option value="email_otp">Email + OTP</option>
-            <option value="sso">SSO (SAML/OAuth)</option>
+            <option value="email_password">
+              Email + Password
+            </option>
+
+            <option value="email_otp">
+              Email + OTP
+            </option>
+
+            <option value="sso">
+              SSO (SAML/OAuth)
+            </option>
           </select>
         </div>
+
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Panjang Password Minimum</label>
+          <label className={themeLabel}>
+            Panjang Password Minimum
+          </label>
+
           <input
             type="number"
             value={security.minPasswordLength}
-            onChange={(e) => handleChange("minPasswordLength", parseInt(e.target.value))}
-            className="w-full px-3 py-2 text-sm text-slate-800 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+            onChange={(e) =>
+              handleChange(
+                "minPasswordLength",
+                parseInt(e.target.value)
+              )
+            }
+            className={`w-full px-3 py-2 text-sm rounded-lg ${themeInput} ${themeFocus}`}
           />
         </div>
       </div>
+
+      {/* Password Rules */}
+
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <label className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={security.requireUppercase}
-            onChange={(e) => handleChange("requireUppercase", e.target.checked)}
-            className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-          />
-          Huruf Besar
-        </label>
-        <label className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={security.requireLowercase}
-            onChange={(e) => handleChange("requireLowercase", e.target.checked)}
-            className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-          />
-          Huruf Kecil
-        </label>
-        <label className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={security.requireNumbers}
-            onChange={(e) => handleChange("requireNumbers", e.target.checked)}
-            className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-          />
-          Angka
-        </label>
-        <label className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
-          <input
-            type="checkbox"
-            checked={security.requireSymbols}
-            onChange={(e) => handleChange("requireSymbols", e.target.checked)}
-            className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-          />
-          Simbol
-        </label>
+
+        <ThemeCheckbox
+          checked={security.requireUppercase}
+          onChange={(value) =>
+            handleChange("requireUppercase", value)
+          }
+          label="Huruf Besar"
+        />
+
+        <ThemeCheckbox
+          checked={security.requireLowercase}
+          onChange={(value) =>
+            handleChange("requireLowercase", value)
+          }
+          label="Huruf Kecil"
+        />
+
+        <ThemeCheckbox
+          checked={security.requireNumbers}
+          onChange={(value) =>
+            handleChange("requireNumbers", value)
+          }
+          label="Angka"
+        />
+
+        <ThemeCheckbox
+          checked={security.requireSymbols}
+          onChange={(value) =>
+            handleChange("requireSymbols", value)
+          }
+          label="Simbol"
+        />
       </div>
+
+      {/* Session */}
+
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Session Timeout (menit)</label>
+          <label className={themeLabel}>
+            Session Timeout (menit)
+          </label>
+
           <input
             type="number"
             value={security.sessionTimeout}
-            onChange={(e) => handleChange("sessionTimeout", parseInt(e.target.value))}
-            className="w-full px-3 py-2 text-sm text-slate-800 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+            onChange={(e) =>
+              handleChange(
+                "sessionTimeout",
+                parseInt(e.target.value)
+              )
+            }
+            className={`w-full px-3 py-2 text-sm rounded-lg ${themeInput} ${themeFocus}`}
           />
         </div>
+
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Max Login Attempts</label>
+          <label className={themeLabel}>
+            Max Login Attempts
+          </label>
+
           <input
             type="number"
             value={security.maxLoginAttempts}
-            onChange={(e) => handleChange("maxLoginAttempts", parseInt(e.target.value))}
-            className="w-full px-3 py-2 text-sm text-slate-800 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+            onChange={(e) =>
+              handleChange(
+                "maxLoginAttempts",
+                parseInt(e.target.value)
+              )
+            }
+            className={`w-full px-3 py-2 text-sm rounded-lg ${themeInput} ${themeFocus}`}
           />
         </div>
+
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Durasi Blokir (menit)</label>
+          <label className={themeLabel}>
+            Durasi Blokir (menit)
+          </label>
+
           <input
             type="number"
             value={security.blockDuration}
-            onChange={(e) => handleChange("blockDuration", parseInt(e.target.value))}
-            className="w-full px-3 py-2 text-sm text-slate-800 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+            onChange={(e) =>
+              handleChange(
+                "blockDuration",
+                parseInt(e.target.value)
+              )
+            }
+            className={`w-full px-3 py-2 text-sm rounded-lg ${themeInput} ${themeFocus}`}
           />
         </div>
       </div>
-      <div className="border-t border-slate-200/60 pt-4 space-y-3">
+
+      {/* 2FA */}
+
+      <div className={`border-t ${themeDivider} pt-4 space-y-3`}>
+
         <div className="flex items-center gap-3">
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={security.twoFactorAuth}
-              onChange={(e) => handleChange("twoFactorAuth", e.target.checked)}
-              className="sr-only peer"
-            />
-            <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-          </label>
-          <span className="text-sm font-medium text-slate-700">Two-Factor Authentication (2FA)</span>
+
+          <ThemeToggle
+            checked={security.twoFactorAuth}
+            onChange={(value) =>
+              handleChange("twoFactorAuth", value)
+            }
+          />
+
+          <span className="text-sm font-medium theme-text">
+            Two-Factor Authentication (2FA)
+          </span>
         </div>
+
         {security.twoFactorAuth && (
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Metode 2FA</label>
+            <label className={themeLabel}>
+              Metode 2FA
+            </label>
+
             <select
               value={security.twoFactorMethod}
-              onChange={(e) => handleChange("twoFactorMethod", e.target.value)}
-              className="w-full max-w-xs px-3 py-2 text-sm text-slate-800 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+              onChange={(e) =>
+                handleChange(
+                  "twoFactorMethod",
+                  e.target.value
+                )
+              }
+              className={`w-full max-w-xs px-3 py-2 text-sm rounded-lg ${themeInput} ${themeFocus}`}
             >
-              <option value="email">Email</option>
-              <option value="sms">SMS</option>
-              <option value="authenticator">Authenticator App</option>
+              <option value="email">
+                Email
+              </option>
+
+              <option value="sms">
+                SMS
+              </option>
+
+              <option value="authenticator">
+                Authenticator App
+              </option>
             </select>
           </div>
         )}
@@ -571,144 +883,270 @@ function SecurityTab({ security, handleChange, showPassword, setShowPassword }) 
   );
 }
 
-function IntegrationTab({ integrations, handleChange, showPassword, setShowPassword }) {
+
+// ============================================================
+// INTEGRATION TAB
+// ============================================================
+
+function IntegrationTab({
+  integrations,
+  handleChange,
+  showPassword,
+  setShowPassword,
+}) {
   return (
     <div className="space-y-8">
-      {/* Xendit */}
+
+      {/* XENDIT */}
+
       <div>
-        <h4 className="text-sm font-semibold text-slate-800 flex items-center gap-2 mb-3">
-          <DollarSign size={16} className="text-blue-600" />
+        <h4 className="text-sm font-semibold theme-text flex items-center gap-2 mb-3">
+          <DollarSign
+            size={16}
+            className={themePrimaryText}
+          />
+
           Xendit (Pembayaran)
         </h4>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
           <div className="flex items-center gap-3">
-            <label className="relative inline-flex items-center cursor-pointer">
-              <input
-                type="checkbox"
-                checked={integrations.xendit.enabled}
-                onChange={(e) => handleChange("xendit", "enabled", e.target.checked)}
-                className="sr-only peer"
-              />
-              <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-            </label>
-            <span className="text-sm font-medium text-slate-700">Aktif</span>
+            <ThemeToggle
+              checked={integrations.xendit.enabled}
+              onChange={(value) =>
+                handleChange(
+                  "xendit",
+                  "enabled",
+                  value
+                )
+              }
+            />
+
+            <span className="text-sm font-medium theme-text">
+              Aktif
+            </span>
           </div>
+
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Environment</label>
+            <label className={themeLabel}>
+              Environment
+            </label>
+
             <select
               value={integrations.xendit.environment}
-              onChange={(e) => handleChange("xendit", "environment", e.target.value)}
-              className="w-full px-3 py-2 text-sm text-slate-800 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+              onChange={(e) =>
+                handleChange(
+                  "xendit",
+                  "environment",
+                  e.target.value
+                )
+              }
+              className={`w-full px-3 py-2 text-sm rounded-lg ${themeInput} ${themeFocus}`}
             >
-              <option value="production">Production</option>
-              <option value="sandbox">Sandbox</option>
+              <option value="production">
+                Production
+              </option>
+
+              <option value="sandbox">
+                Sandbox
+              </option>
             </select>
           </div>
+
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">API Key</label>
-            <div className="relative">
-              <input
-                type={showPassword ? "text" : "password"}
-                value={integrations.xendit.apiKey}
-                onChange={(e) => handleChange("xendit", "apiKey", e.target.value)}
-                className="w-full px-3 py-2 text-sm text-slate-800 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 pr-10"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-              >
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            </div>
+            <label className={themeLabel}>
+              API Key
+            </label>
+
+            <PasswordInput
+              value={integrations.xendit.apiKey}
+              onChange={(value) =>
+                handleChange(
+                  "xendit",
+                  "apiKey",
+                  value
+                )
+              }
+              visible={showPassword}
+              onToggle={() =>
+                setShowPassword(!showPassword)
+              }
+            />
           </div>
+
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Webhook Secret</label>
+            <label className={themeLabel}>
+              Webhook Secret
+            </label>
+
             <input
               type="password"
               value={integrations.xendit.webhookSecret}
-              onChange={(e) => handleChange("xendit", "webhookSecret", e.target.value)}
-              className="w-full px-3 py-2 text-sm text-slate-800 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+              onChange={(e) =>
+                handleChange(
+                  "xendit",
+                  "webhookSecret",
+                  e.target.value
+                )
+              }
+              className={`w-full px-3 py-2 text-sm rounded-lg ${themeInput} ${themeFocus}`}
             />
           </div>
         </div>
       </div>
 
-      {/* Email */}
-      <div className="border-t border-slate-200/60 pt-4">
-        <h4 className="text-sm font-semibold text-slate-800 flex items-center gap-2 mb-3">
-          <Mail size={16} className="text-blue-600" />
+      {/* EMAIL */}
+
+      <div className={`border-t ${themeDivider} pt-4`}>
+
+        <h4 className="text-sm font-semibold theme-text flex items-center gap-2 mb-3">
+          <Mail
+            size={16}
+            className={themePrimaryText}
+          />
+
           Email (SMTP)
         </h4>
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Provider</label>
+            <label className={themeLabel}>
+              Provider
+            </label>
+
             <select
               value={integrations.email.provider}
-              onChange={(e) => handleChange("email", "provider", e.target.value)}
-              className="w-full px-3 py-2 text-sm text-slate-800 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+              onChange={(e) =>
+                handleChange(
+                  "email",
+                  "provider",
+                  e.target.value
+                )
+              }
+              className={`w-full px-3 py-2 text-sm rounded-lg ${themeInput} ${themeFocus}`}
             >
-              <option value="smtp">SMTP</option>
-              <option value="sendgrid">SendGrid</option>
-              <option value="mailgun">Mailgun</option>
+              <option value="smtp">
+                SMTP
+              </option>
+
+              <option value="sendgrid">
+                SendGrid
+              </option>
+
+              <option value="mailgun">
+                Mailgun
+              </option>
             </select>
           </div>
+
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Host</label>
+            <label className={themeLabel}>
+              Host
+            </label>
+
             <input
               type="text"
               value={integrations.email.host}
-              onChange={(e) => handleChange("email", "host", e.target.value)}
-              className="w-full px-3 py-2 text-sm text-slate-800 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+              onChange={(e) =>
+                handleChange(
+                  "email",
+                  "host",
+                  e.target.value
+                )
+              }
+              className={`w-full px-3 py-2 text-sm rounded-lg ${themeInput} ${themeFocus}`}
             />
           </div>
+
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Port</label>
+            <label className={themeLabel}>
+              Port
+            </label>
+
             <input
               type="number"
               value={integrations.email.port}
-              onChange={(e) => handleChange("email", "port", parseInt(e.target.value))}
-              className="w-full px-3 py-2 text-sm text-slate-800 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+              onChange={(e) =>
+                handleChange(
+                  "email",
+                  "port",
+                  parseInt(e.target.value)
+                )
+              }
+              className={`w-full px-3 py-2 text-sm rounded-lg ${themeInput} ${themeFocus}`}
             />
           </div>
+
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Encryption</label>
+            <label className={themeLabel}>
+              Encryption
+            </label>
+
             <select
               value={integrations.email.encryption}
-              onChange={(e) => handleChange("email", "encryption", e.target.value)}
-              className="w-full px-3 py-2 text-sm text-slate-800 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+              onChange={(e) =>
+                handleChange(
+                  "email",
+                  "encryption",
+                  e.target.value
+                )
+              }
+              className={`w-full px-3 py-2 text-sm rounded-lg ${themeInput} ${themeFocus}`}
             >
-              <option value="tls">TLS</option>
-              <option value="ssl">SSL</option>
-              <option value="none">None</option>
+              <option value="tls">
+                TLS
+              </option>
+
+              <option value="ssl">
+                SSL
+              </option>
+
+              <option value="none">
+                None
+              </option>
             </select>
           </div>
+
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Username</label>
+            <label className={themeLabel}>
+              Username
+            </label>
+
             <input
               type="text"
               value={integrations.email.username}
-              onChange={(e) => handleChange("email", "username", e.target.value)}
-              className="w-full px-3 py-2 text-sm text-slate-800 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+              onChange={(e) =>
+                handleChange(
+                  "email",
+                  "username",
+                  e.target.value
+                )
+              }
+              className={`w-full px-3 py-2 text-sm rounded-lg ${themeInput} ${themeFocus}`}
             />
           </div>
+
           <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1.5">Password</label>
-            <div className="relative">
-              <input
-                type="password"
-                value={integrations.email.password}
-                onChange={(e) => handleChange("email", "password", e.target.value)}
-                className="w-full px-3 py-2 text-sm text-slate-800 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 pr-10"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-              >
-                {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-              </button>
-            </div>
+            <label className={themeLabel}>
+              Password
+            </label>
+
+            <PasswordInput
+              value={integrations.email.password}
+              onChange={(value) =>
+                handleChange(
+                  "email",
+                  "password",
+                  value
+                )
+              }
+              visible={showPassword}
+              onToggle={() =>
+                setShowPassword(!showPassword)
+              }
+            />
           </div>
         </div>
       </div>
@@ -716,117 +1154,169 @@ function IntegrationTab({ integrations, handleChange, showPassword, setShowPassw
   );
 }
 
-function NotificationTab({ notifications, handleChange }) {
+
+// ============================================================
+// NOTIFICATION TAB
+// ============================================================
+
+function NotificationTab({
+  notifications,
+  handleChange,
+}) {
   return (
     <div className="space-y-6">
+
+      {/* CHANNELS */}
+
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+
         <div className="flex items-center gap-3">
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={notifications.emailEnabled}
-              onChange={(e) => handleChange("emailEnabled", e.target.checked)}
-              className="sr-only peer"
-            />
-            <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-          </label>
-          <span className="text-sm font-medium text-slate-700">Email</span>
+          <ThemeToggle
+            checked={notifications.emailEnabled}
+            onChange={(value) =>
+              handleChange("emailEnabled", value)
+            }
+          />
+
+          <span className="text-sm font-medium theme-text">
+            Email
+          </span>
         </div>
+
         <div className="flex items-center gap-3">
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={notifications.pushEnabled}
-              onChange={(e) => handleChange("pushEnabled", e.target.checked)}
-              className="sr-only peer"
-            />
-            <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-          </label>
-          <span className="text-sm font-medium text-slate-700">Push Notifikasi</span>
+          <ThemeToggle
+            checked={notifications.pushEnabled}
+            onChange={(value) =>
+              handleChange("pushEnabled", value)
+            }
+          />
+
+          <span className="text-sm font-medium theme-text">
+            Push Notifikasi
+          </span>
         </div>
+
         <div className="flex items-center gap-3">
-          <label className="relative inline-flex items-center cursor-pointer">
-            <input
-              type="checkbox"
-              checked={notifications.smsEnabled}
-              onChange={(e) => handleChange("smsEnabled", e.target.checked)}
-              className="sr-only peer"
-            />
-            <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-blue-500/20 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600"></div>
-          </label>
-          <span className="text-sm font-medium text-slate-700">SMS</span>
+          <ThemeToggle
+            checked={notifications.smsEnabled}
+            onChange={(value) =>
+              handleChange("smsEnabled", value)
+            }
+          />
+
+          <span className="text-sm font-medium theme-text">
+            SMS
+          </span>
         </div>
       </div>
+
+      {/* EVENT NOTIFICATIONS */}
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
         <div className="space-y-2">
-          <label className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={notifications.notifyOnMaintenance}
-              onChange={(e) => handleChange("notifyOnMaintenance", e.target.checked)}
-              className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-            />
-            Maintenance Mode
-          </label>
-          <label className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={notifications.notifyOnSubscription}
-              onChange={(e) => handleChange("notifyOnSubscription", e.target.checked)}
-              className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-            />
-            Perubahan Langganan
-          </label>
-          <label className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={notifications.notifyOnPayment}
-              onChange={(e) => handleChange("notifyOnPayment", e.target.checked)}
-              className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-            />
-            Pembayaran
-          </label>
+
+          <ThemeCheckbox
+            checked={notifications.notifyOnMaintenance}
+            onChange={(value) =>
+              handleChange(
+                "notifyOnMaintenance",
+                value
+              )
+            }
+            label="Maintenance Mode"
+          />
+
+          <ThemeCheckbox
+            checked={notifications.notifyOnSubscription}
+            onChange={(value) =>
+              handleChange(
+                "notifyOnSubscription",
+                value
+              )
+            }
+            label="Perubahan Langganan"
+          />
+
+          <ThemeCheckbox
+            checked={notifications.notifyOnPayment}
+            onChange={(value) =>
+              handleChange(
+                "notifyOnPayment",
+                value
+              )
+            }
+            label="Pembayaran"
+          />
         </div>
+
         <div className="space-y-2">
-          <label className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={notifications.notifyOnUserRegistration}
-              onChange={(e) => handleChange("notifyOnUserRegistration", e.target.checked)}
-              className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-            />
-            Registrasi Pengguna
-          </label>
-          <label className="flex items-center gap-2 text-sm text-slate-700 cursor-pointer">
-            <input
-              type="checkbox"
-              checked={notifications.notifyOnBackup}
-              onChange={(e) => handleChange("notifyOnBackup", e.target.checked)}
-              className="rounded border-slate-300 text-blue-600 focus:ring-blue-500"
-            />
-            Backup Database
-          </label>
+
+          <ThemeCheckbox
+            checked={
+              notifications.notifyOnUserRegistration
+            }
+            onChange={(value) =>
+              handleChange(
+                "notifyOnUserRegistration",
+                value
+              )
+            }
+            label="Registrasi Pengguna"
+          />
+
+          <ThemeCheckbox
+            checked={notifications.notifyOnBackup}
+            onChange={(value) =>
+              handleChange(
+                "notifyOnBackup",
+                value
+              )
+            }
+            label="Backup Database"
+          />
         </div>
       </div>
 
-      <div className="border-t border-slate-200/60 pt-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+      {/* EMAIL */}
+
+      <div
+        className={`border-t ${themeDivider} pt-4 grid grid-cols-1 sm:grid-cols-2 gap-4`}
+      >
+
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Email Pengirim (From)</label>
+          <label className={themeLabel}>
+            Email Pengirim (From)
+          </label>
+
           <input
             type="email"
             value={notifications.emailFrom}
-            onChange={(e) => handleChange("emailFrom", e.target.value)}
-            className="w-full px-3 py-2 text-sm text-slate-800 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+            onChange={(e) =>
+              handleChange(
+                "emailFrom",
+                e.target.value
+              )
+            }
+            className={`w-full px-3 py-2 text-sm rounded-lg ${themeInput} ${themeFocus}`}
           />
         </div>
+
         <div>
-          <label className="block text-sm font-medium text-slate-700 mb-1.5">Email Balasan (Reply-To)</label>
+          <label className={themeLabel}>
+            Email Balasan (Reply-To)
+          </label>
+
           <input
             type="email"
             value={notifications.emailReplyTo}
-            onChange={(e) => handleChange("emailReplyTo", e.target.value)}
-            className="w-full px-3 py-2 text-sm text-slate-800 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+            onChange={(e) =>
+              handleChange(
+                "emailReplyTo",
+                e.target.value
+              )
+            }
+            className={`w-full px-3 py-2 text-sm rounded-lg ${themeInput} ${themeFocus}`}
           />
         </div>
       </div>
@@ -834,50 +1324,217 @@ function NotificationTab({ notifications, handleChange }) {
   );
 }
 
-function ActivityTab({ logs, filter, setFilter }) {
+
+// ============================================================
+// ACTIVITY TAB
+// ============================================================
+
+function ActivityTab({
+  logs,
+  filter,
+  setFilter,
+}) {
   return (
     <div className="space-y-4">
+
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+
         <div className="relative flex-1 max-w-xs">
-          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search
+            size={16}
+            className="absolute left-3 top-1/2 -translate-y-1/2 theme-text-muted"
+          />
+
           <input
             type="text"
             placeholder="Cari aktivitas..."
             value={filter}
-            onChange={(e) => setFilter(e.target.value)}
-            className="w-full pl-9 pr-3 py-2 text-sm text-slate-800 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 placeholder:text-slate-400"
+            onChange={(e) =>
+              setFilter(e.target.value)
+            }
+            className={`w-full pl-9 pr-3 py-2 text-sm rounded-lg ${themeInput} ${themeFocus} ${themePlaceholder}`}
           />
         </div>
-        <span className="text-sm text-slate-500">{logs.length} aktivitas ditemukan</span>
+
+        <span className="text-sm theme-text-secondary">
+          {logs.length} aktivitas ditemukan
+        </span>
       </div>
-      <div className="overflow-x-auto">
+
+      <div
+        className={`overflow-x-auto rounded-lg border ${themeDivider}`}
+      >
         <table className="w-full text-sm">
+
           <thead>
-            <tr className="bg-slate-50/80 border-b border-slate-200/80">
-              <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Pengguna</th>
-              <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">Aktivitas</th>
-              <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider hidden sm:table-cell">Waktu</th>
-              <th className="px-4 py-2.5 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider hidden md:table-cell">IP</th>
+            <tr
+              className={`${themeNeutralSurface} border-b ${themeDivider}`}
+            >
+              <th className="px-4 py-2.5 text-left text-xs font-semibold theme-text-secondary uppercase tracking-wider">
+                Pengguna
+              </th>
+
+              <th className="px-4 py-2.5 text-left text-xs font-semibold theme-text-secondary uppercase tracking-wider">
+                Aktivitas
+              </th>
+
+              <th className="px-4 py-2.5 text-left text-xs font-semibold theme-text-secondary uppercase tracking-wider hidden sm:table-cell">
+                Waktu
+              </th>
+
+              <th className="px-4 py-2.5 text-left text-xs font-semibold theme-text-secondary uppercase tracking-wider hidden md:table-cell">
+                IP
+              </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-100">
+
+          <tbody>
             {logs.length === 0 ? (
               <tr>
-                <td colSpan={4} className="px-4 py-8 text-center text-slate-400">Tidak ada aktivitas ditemukan</td>
+                <td
+                  colSpan={4}
+                  className="px-4 py-8 text-center theme-text-muted"
+                >
+                  Tidak ada aktivitas ditemukan
+                </td>
               </tr>
             ) : (
               logs.map((log) => (
-                <tr key={log.id} className="hover:bg-slate-50/60 transition-colors">
-                  <td className="px-4 py-2.5 font-medium text-slate-800">{log.user}</td>
-                  <td className="px-4 py-2.5 text-slate-700">{log.action}</td>
-                  <td className="px-4 py-2.5 text-slate-500 hidden sm:table-cell">{log.timestamp}</td>
-                  <td className="px-4 py-2.5 text-slate-400 font-mono text-xs hidden md:table-cell">{log.ip}</td>
+                <tr
+                  key={log.id}
+                  className={`border-b last:border-b-0 ${themeDivider} ${themeNeutralHover} transition-colors`}
+                >
+                  <td className="px-4 py-2.5 font-medium theme-text">
+                    {log.user}
+                  </td>
+
+                  <td className="px-4 py-2.5 theme-text-secondary">
+                    {log.action}
+                  </td>
+
+                  <td className="px-4 py-2.5 theme-text-secondary hidden sm:table-cell">
+                    {log.timestamp}
+                  </td>
+
+                  <td className="px-4 py-2.5 theme-text-muted font-mono text-xs hidden md:table-cell">
+                    {log.ip}
+                  </td>
                 </tr>
               ))
             )}
           </tbody>
         </table>
       </div>
+    </div>
+  );
+}
+
+
+// ============================================================
+// REUSABLE THEME TOGGLE
+// ============================================================
+
+function ThemeToggle({ checked, onChange }) {
+  return (
+    <label className="relative inline-flex items-center cursor-pointer shrink-0">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) =>
+          onChange(e.target.checked)
+        }
+        className="sr-only peer"
+      />
+
+      <div
+        className="
+          relative
+          w-11
+          h-6
+          rounded-full
+          transition-colors
+          bg-[color-mix(in_srgb,var(--color-text)_14%,transparent)]
+          peer-focus:outline-none
+          peer-focus:ring-2
+          peer-focus:ring-[color-mix(in_srgb,var(--color-primary)_18%,transparent)]
+          peer-checked:bg-[var(--color-primary)]
+          after:content-['']
+          after:absolute
+          after:top-[2px]
+          after:left-[2px]
+          after:h-5
+          after:w-5
+          after:rounded-full
+          after:bg-[var(--color-card)]
+          after:border
+          after:border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]
+          after:transition-all
+          peer-checked:after:translate-x-full
+        "
+      />
+    </label>
+  );
+}
+
+
+// ============================================================
+// REUSABLE THEME CHECKBOX
+// ============================================================
+
+function ThemeCheckbox({
+  checked,
+  onChange,
+  label,
+}) {
+  return (
+    <label className="flex items-center gap-2 text-sm theme-text-secondary cursor-pointer">
+      <input
+        type="checkbox"
+        checked={checked}
+        onChange={(e) =>
+          onChange(e.target.checked)
+        }
+        className={`w-4 h-4 rounded ${themeCheckbox}`}
+      />
+
+      {label}
+    </label>
+  );
+}
+
+
+// ============================================================
+// PASSWORD INPUT
+// ============================================================
+
+function PasswordInput({
+  value,
+  onChange,
+  visible,
+  onToggle,
+}) {
+  return (
+    <div className="relative">
+      <input
+        type={visible ? "text" : "password"}
+        value={value}
+        onChange={(e) =>
+          onChange(e.target.value)
+        }
+        className={`w-full px-3 py-2 pr-10 text-sm rounded-lg ${themeInput} ${themeFocus}`}
+      />
+
+      <button
+        type="button"
+        onClick={onToggle}
+        className="absolute right-3 top-1/2 -translate-y-1/2 theme-text-muted hover:text-[var(--color-primary)] transition"
+      >
+        {visible ? (
+          <EyeOff size={16} />
+        ) : (
+          <Eye size={16} />
+        )}
+      </button>
     </div>
   );
 }

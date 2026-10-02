@@ -97,22 +97,22 @@ function InfoItem({
   icon: Icon,
   label,
   value,
-  iconClass = "text-slate-500",
+  iconClass = "theme-text-muted",
 }) {
   return (
     <div className="flex min-w-0 items-start gap-3">
       <div
-        className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-slate-50 ${iconClass}`}
+        className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg theme-card-soft ${iconClass}`}
       >
         <Icon size={17} strokeWidth={1.8} />
       </div>
 
       <div className="min-w-0 flex-1">
-        <p className="mb-1 text-xs font-medium text-slate-500">
+        <p className="mb-1 text-xs font-medium theme-text-muted">
           {label}
         </p>
 
-        <p className="break-words text-sm font-semibold leading-5 text-slate-800 sm:text-[15px]">
+        <p className="break-words text-sm font-semibold leading-5 theme-text sm:text-[15px]">
           {value || "-"}
         </p>
       </div>
@@ -129,11 +129,11 @@ function StatCard({
   value,
   label,
   description,
-  iconClass = "text-blue-600",
-  valueClass = "text-slate-900",
+  iconClass = "text-[var(--color-primary)]",
+  valueClass = "theme-text",
 }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4">
+    <div className="rounded-xl border theme-card p-4">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
           <p
@@ -142,18 +142,18 @@ function StatCard({
             {value}
           </p>
 
-          <p className="mt-1 truncate text-sm font-semibold text-slate-700">
+          <p className="mt-1 truncate text-sm font-semibold theme-text-secondary">
             {label}
           </p>
 
           {description && (
-            <p className="mt-1 break-words text-xs text-slate-500">
+            <p className="mt-1 break-words text-xs theme-text-muted">
               {description}
             </p>
           )}
         </div>
 
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-slate-50">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border theme-card-soft">
           <Icon
             size={19}
             className={iconClass}
@@ -264,7 +264,7 @@ export default function DetailGuruPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen w-full bg-[#F8FAFC]">
+      <div className="flex min-h-screen w-full theme-page">
         <Sidebar
           active="guru"
           setActive={() => {}}
@@ -287,11 +287,11 @@ export default function DetailGuruPage() {
 
           <main className="flex flex-1 items-center justify-center">
             <div className="text-center">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full theme-info">
                 <UserRound size={22} />
               </div>
 
-              <p className="mt-4 text-sm font-medium text-slate-600">
+              <p className="mt-4 text-sm font-medium theme-text-secondary">
                 Memuat data guru...
               </p>
             </div>
@@ -307,7 +307,7 @@ export default function DetailGuruPage() {
 
   if (error || !guru) {
     return (
-      <div className="flex min-h-screen w-full bg-[#F8FAFC]">
+      <div className="flex min-h-screen w-full theme-page">
         <Sidebar
           active="guru"
           setActive={() => {}}
@@ -329,16 +329,16 @@ export default function DetailGuruPage() {
           />
 
           <main className="flex flex-1 items-center justify-center overflow-y-auto px-6">
-            <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-rose-50 text-rose-600">
+            <div className="w-full max-w-md rounded-xl border theme-card p-8 text-center shadow-sm">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full theme-danger">
                 <UserRound size={22} />
               </div>
 
-              <h1 className="mt-4 text-lg font-bold text-slate-900">
+              <h1 className="mt-4 text-lg font-bold theme-text">
                 Data Guru Tidak Ditemukan
               </h1>
 
-              <p className="mt-2 text-sm leading-6 text-slate-500">
+              <p className="mt-2 text-sm leading-6 theme-text-muted">
                 {error ||
                   "Data guru tidak tersedia."}
               </p>
@@ -348,7 +348,7 @@ export default function DetailGuruPage() {
                 onClick={() =>
                   router.push("/admin/guru")
                 }
-                className="mt-5 inline-flex items-center gap-2 rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-800"
+                className="mt-5 inline-flex items-center gap-2 rounded-lg theme-primary px-4 py-2.5 text-sm font-semibold transition"
               >
                 <ArrowLeft size={16} />
                 Kembali ke Daftar Guru
@@ -446,7 +446,7 @@ export default function DetailGuruPage() {
   // =======================================================
 
   return (
-    <div className="flex min-h-screen w-full min-w-0 bg-[#F8FAFC]">
+    <div className="flex min-h-screen w-full min-w-0 theme-page">
 
       {/* SIDEBAR */}
       <div className="shrink-0">
@@ -487,7 +487,7 @@ export default function DetailGuruPage() {
                     onClick={() =>
                       router.back()
                     }
-                    className="inline-flex max-w-full items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-slate-800"
+                    className="inline-flex max-w-full items-center gap-2 text-sm font-medium theme-text-muted transition hover:text-[var(--color-primary)]"
                   >
                     <ArrowLeft
                       size={17}
@@ -501,11 +501,11 @@ export default function DetailGuruPage() {
                   </button>
 
                   <div className="mt-3">
-                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-blue-600">
+                    <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-primary)]">
                       Data Guru
                     </p>
 
-                    <h1 className="mt-1 text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+                    <h1 className="mt-1 text-xl font-bold tracking-tight theme-text sm:text-2xl">
                       Detail Profil Guru
                     </h1>
                   </div>
@@ -517,7 +517,7 @@ export default function DetailGuruPage() {
                       `/admin/guru/edit/${guru.id}`
                     )
                   }
-                  className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-700 sm:w-auto"
+                  className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-lg border theme-card px-4 py-2.5 text-sm font-semibold theme-text-secondary shadow-sm transition theme-sidebar-hover hover:text-[var(--color-primary)] sm:w-auto"
                 >
                   <Edit
                     size={16}
@@ -529,8 +529,8 @@ export default function DetailGuruPage() {
               </div>
 
               {/* PROFILE CARD */}
-              <section className="w-full overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-                <div className="h-1 bg-blue-700" />
+              <section className="w-full overflow-hidden rounded-xl border theme-card shadow-sm">
+                <div className="h-1 bg-[var(--color-primary)]" />
 
                 <div className="p-4 sm:p-6 lg:p-7 xl:p-8">
                   <div className="flex min-w-0 flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
@@ -550,22 +550,22 @@ export default function DetailGuruPage() {
                       {/* IDENTITY */}
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="inline-flex items-center rounded-md bg-slate-100 px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide text-slate-600">
+                          <span className="inline-flex items-center rounded-md theme-card-soft px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide theme-text-secondary">
                             Guru
                           </span>
 
                           <span
                             className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-semibold ${
                               isActive
-                                ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                                : "border-rose-200 bg-rose-50 text-rose-700"
+                                ? "theme-success"
+                                : "theme-danger"
                             }`}
                           >
                             <span
                               className={`h-1.5 w-1.5 shrink-0 rounded-full ${
                                 isActive
-                                  ? "bg-emerald-500"
-                                  : "bg-rose-500"
+                                  ? "bg-[var(--color-success)]"
+                                  : "bg-[var(--color-danger)]"
                               }`}
                             />
 
@@ -573,16 +573,16 @@ export default function DetailGuruPage() {
                           </span>
                         </div>
 
-                        <h2 className="mt-2 break-words text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+                        <h2 className="mt-2 break-words text-2xl font-bold tracking-tight theme-text sm:text-3xl">
                           {nama}
                         </h2>
 
-                        <div className="mt-2 flex min-w-0 flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-500">
+                        <div className="mt-2 flex min-w-0 flex-wrap items-center gap-x-4 gap-y-2 text-sm theme-text-muted">
 
                           <span className="inline-flex min-w-0 max-w-full items-center gap-1.5">
                             <Hash
                               size={15}
-                              className="shrink-0 text-slate-400"
+                              className="shrink-0 theme-text-placeholder"
                             />
 
                             <span className="break-all">
@@ -590,12 +590,12 @@ export default function DetailGuruPage() {
                             </span>
                           </span>
 
-                          <span className="hidden h-4 w-px bg-slate-200 sm:block" />
+                          <span className="hidden h-4 w-px bg-[var(--color-border)] sm:block" />
 
                           <span className="inline-flex min-w-0 max-w-full items-center gap-1.5">
                             <BookOpen
                               size={15}
-                              className="shrink-0 text-slate-400"
+                              className="shrink-0 theme-text-placeholder"
                             />
 
                             <span className="break-words">
@@ -608,19 +608,19 @@ export default function DetailGuruPage() {
                     </div>
 
                     {/* JOIN DATE */}
-                    <div className="shrink-0 border-t border-slate-100 pt-4 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
-                      <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                    <div className="shrink-0 border-t theme-border pt-4 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
+                      <p className="text-xs font-medium uppercase tracking-wide theme-text-muted">
                         Bergabung Sejak
                       </p>
 
                       <div className="mt-1.5 flex items-center gap-2">
                         <Calendar
                           size={17}
-                          className="shrink-0 text-blue-600"
+                          className="shrink-0 text-[var(--color-primary)]"
                           strokeWidth={1.8}
                         />
 
-                        <span className="text-sm font-semibold text-slate-800">
+                        <span className="text-sm font-semibold theme-text">
                           {formatDate(joinDate)}
                         </span>
                       </div>
@@ -629,7 +629,7 @@ export default function DetailGuruPage() {
                   </div>
 
                   {/* DIVIDER */}
-                  <div className="my-6 border-t border-slate-100" />
+                  <div className="my-6 border-t theme-border" />
 
                   {/* BASIC INFORMATION */}
                   <div className="grid min-w-0 grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
@@ -638,14 +638,14 @@ export default function DetailGuruPage() {
                       icon={Mail}
                       label="Email"
                       value={email}
-                      iconClass="text-blue-600"
+                      iconClass="text-[var(--color-primary)]"
                     />
 
                     <InfoItem
                       icon={Phone}
                       label="Nomor Telepon"
                       value={phone}
-                      iconClass="text-blue-600"
+                      iconClass="text-[var(--color-primary)]"
                     />
 
                     <InfoItem
@@ -658,14 +658,14 @@ export default function DetailGuruPage() {
                           ? "Perempuan"
                           : gender || "-"
                       }
-                      iconClass="text-blue-600"
+                      iconClass="text-[var(--color-primary)]"
                     />
 
                     <InfoItem
                       icon={Calendar}
                       label="Tanggal Lahir"
                       value={formatDate(tglLahir)}
-                      iconClass="text-blue-600"
+                      iconClass="text-[var(--color-primary)]"
                     />
 
                   </div>
@@ -679,24 +679,24 @@ export default function DetailGuruPage() {
                 <div className="min-w-0 space-y-5">
 
                   {/* DATA KEPEGAWAIAN */}
-                  <section className="w-full rounded-xl border border-slate-200 bg-white shadow-sm">
-                    <div className="border-b border-slate-100 px-4 py-4 sm:px-6">
+                  <section className="w-full rounded-xl border theme-card shadow-sm">
+                    <div className="border-b theme-border px-4 py-4 sm:px-6">
                       <div className="flex min-w-0 items-center gap-3">
 
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg theme-info">
                           <BriefcaseBusiness
                             size={18}
-                            className="text-blue-700"
+                            className="text-[var(--color-info)]"
                             strokeWidth={1.8}
                           />
                         </div>
 
                         <div className="min-w-0">
-                          <h3 className="text-sm font-bold text-slate-800">
+                          <h3 className="text-sm font-bold theme-text">
                             Informasi Kepegawaian
                           </h3>
 
-                          <p className="mt-0.5 text-xs text-slate-500">
+                          <p className="mt-0.5 text-xs theme-text-muted">
                             Informasi penugasan dan status guru
                           </p>
                         </div>
@@ -734,24 +734,24 @@ export default function DetailGuruPage() {
                   </section>
 
                   {/* ALAMAT */}
-                  <section className="w-full rounded-xl border border-slate-200 bg-white shadow-sm">
-                    <div className="border-b border-slate-100 px-4 py-4 sm:px-6">
+                  <section className="w-full rounded-xl border theme-card shadow-sm">
+                    <div className="border-b theme-border px-4 py-4 sm:px-6">
                       <div className="flex min-w-0 items-center gap-3">
 
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg theme-info">
                           <MapPin
                             size={18}
-                            className="text-blue-700"
+                            className="text-[var(--color-info)]"
                             strokeWidth={1.8}
                           />
                         </div>
 
                         <div className="min-w-0">
-                          <h3 className="text-sm font-bold text-slate-800">
+                          <h3 className="text-sm font-bold theme-text">
                             Alamat
                           </h3>
 
-                          <p className="mt-0.5 text-xs text-slate-500">
+                          <p className="mt-0.5 text-xs theme-text-muted">
                             Informasi alamat tempat tinggal guru
                           </p>
                         </div>
@@ -760,12 +760,12 @@ export default function DetailGuruPage() {
                     </div>
 
                     <div className="p-4 sm:p-6">
-                      <div className="w-full rounded-lg border border-slate-200 bg-slate-50/70 p-4">
-                        <p className="text-xs font-medium text-slate-500">
+                      <div className="w-full rounded-lg border theme-card-soft p-4">
+                        <p className="text-xs font-medium theme-text-muted">
                           Alamat Lengkap
                         </p>
 
-                        <p className="mt-2 break-words text-sm font-semibold leading-6 text-slate-800 sm:text-[15px]">
+                        <p className="mt-2 break-words text-sm font-semibold leading-6 theme-text sm:text-[15px]">
                           {alamat}
                         </p>
                       </div>
@@ -773,24 +773,24 @@ export default function DetailGuruPage() {
                   </section>
 
                   {/* INFORMASI PRIBADI */}
-                  <section className="w-full rounded-xl border border-slate-200 bg-white shadow-sm">
-                    <div className="border-b border-slate-100 px-4 py-4 sm:px-6">
+                  <section className="w-full rounded-xl border theme-card shadow-sm">
+                    <div className="border-b theme-border px-4 py-4 sm:px-6">
                       <div className="flex min-w-0 items-center gap-3">
 
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg theme-info">
                           <Users
                             size={18}
-                            className="text-blue-700"
+                            className="text-[var(--color-info)]"
                             strokeWidth={1.8}
                           />
                         </div>
 
                         <div className="min-w-0">
-                          <h3 className="text-sm font-bold text-slate-800">
+                          <h3 className="text-sm font-bold theme-text">
                             Informasi Pribadi
                           </h3>
 
-                          <p className="mt-0.5 text-xs text-slate-500">
+                          <p className="mt-0.5 text-xs theme-text-muted">
                             Informasi dasar profil guru
                           </p>
                         </div>
@@ -839,24 +839,24 @@ export default function DetailGuruPage() {
                 <aside className="min-w-0 space-y-5">
 
                   {/* STATISTIK */}
-                  <section className="w-full rounded-xl border border-slate-200 bg-white shadow-sm">
-                    <div className="border-b border-slate-100 px-4 py-4 sm:px-5">
+                  <section className="w-full rounded-xl border theme-card shadow-sm">
+                    <div className="border-b theme-border px-4 py-4 sm:px-5">
                       <div className="flex min-w-0 items-center gap-3">
 
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg theme-info">
                           <GraduationCap
                             size={18}
-                            className="text-blue-700"
+                            className="text-[var(--color-info)]"
                             strokeWidth={1.8}
                           />
                         </div>
 
                         <div className="min-w-0">
-                          <h3 className="text-sm font-bold text-slate-800">
+                          <h3 className="text-sm font-bold theme-text">
                             Statistik Mengajar
                           </h3>
 
-                          <p className="mt-0.5 text-xs text-slate-500">
+                          <p className="mt-0.5 text-xs theme-text-muted">
                             Ringkasan aktivitas mengajar
                           </p>
                         </div>
@@ -871,7 +871,7 @@ export default function DetailGuruPage() {
                         value={kelasDiampu}
                         label="Kelas Diampu"
                         description="Kelas yang ditangani"
-                        iconClass="text-blue-600"
+                        iconClass="text-[var(--color-primary)]"
                       />
 
                       <StatCard
@@ -879,7 +879,7 @@ export default function DetailGuruPage() {
                         value={totalSiswa}
                         label="Total Siswa"
                         description="Siswa yang diajar"
-                        iconClass="text-indigo-600"
+                        iconClass="text-[var(--color-info)]"
                       />
 
                       <StatCard
@@ -887,21 +887,21 @@ export default function DetailGuruPage() {
                         value={rataKehadiran}
                         label="Rata-rata Kehadiran"
                         description="Kehadiran mengajar"
-                        iconClass="text-emerald-600"
-                        valueClass="text-emerald-600"
+                        iconClass="text-[var(--color-success)]"
+                        valueClass="text-[var(--color-success)]"
                       />
 
                     </div>
                   </section>
 
                   {/* STATUS */}
-                  <section className="w-full rounded-xl border border-slate-200 bg-white shadow-sm">
-                    <div className="border-b border-slate-100 px-4 py-4 sm:px-5">
-                      <h3 className="text-sm font-bold text-slate-800">
+                  <section className="w-full rounded-xl border theme-card shadow-sm">
+                    <div className="border-b theme-border px-4 py-4 sm:px-5">
+                      <h3 className="text-sm font-bold theme-text">
                         Status Profil
                       </h3>
 
-                      <p className="mt-0.5 text-xs text-slate-500">
+                      <p className="mt-0.5 text-xs theme-text-muted">
                         Status data guru saat ini
                       </p>
                     </div>
@@ -910,15 +910,15 @@ export default function DetailGuruPage() {
                       <div
                         className={`flex min-w-0 items-start gap-3 rounded-lg border p-4 ${
                           isActive
-                            ? "border-emerald-200 bg-emerald-50"
-                            : "border-rose-200 bg-rose-50"
+                            ? "theme-success"
+                            : "theme-danger"
                         }`}
                       >
                         <div
-                          className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white ${
+                          className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg theme-card ${
                             isActive
-                              ? "text-emerald-600"
-                              : "text-rose-600"
+                              ? "text-[var(--color-success)]"
+                              : "text-[var(--color-danger)]"
                           }`}
                         >
                           {isActive ? (
@@ -932,8 +932,8 @@ export default function DetailGuruPage() {
                           <p
                             className={`text-sm font-bold ${
                               isActive
-                                ? "text-emerald-800"
-                                : "text-rose-800"
+                                ? "text-[var(--color-success)]"
+                                : "text-[var(--color-danger)]"
                             }`}
                           >
                             {isActive
@@ -944,8 +944,8 @@ export default function DetailGuruPage() {
                           <p
                             className={`mt-1 break-words text-xs leading-5 ${
                               isActive
-                                ? "text-emerald-700"
-                                : "text-rose-700"
+                                ? "text-[var(--color-success)]"
+                                : "text-[var(--color-danger)]"
                             }`}
                           >
                             {isActive
@@ -958,33 +958,33 @@ export default function DetailGuruPage() {
                   </section>
 
                   {/* SUBJECT */}
-                  <section className="w-full rounded-xl border border-slate-200 bg-white shadow-sm">
-                    <div className="border-b border-slate-100 px-4 py-4 sm:px-5">
-                      <h3 className="text-sm font-bold text-slate-800">
+                  <section className="w-full rounded-xl border theme-card shadow-sm">
+                    <div className="border-b theme-border px-4 py-4 sm:px-5">
+                      <h3 className="text-sm font-bold theme-text">
                         Mata Pelajaran
                       </h3>
 
-                      <p className="mt-0.5 text-xs text-slate-500">
+                      <p className="mt-0.5 text-xs theme-text-muted">
                         Bidang pengajaran utama
                       </p>
                     </div>
 
                     <div className="p-4 sm:p-5">
-                      <div className="flex min-w-0 items-center gap-3 rounded-lg border border-blue-100 bg-blue-50/60 p-4">
+                      <div className="flex min-w-0 items-center gap-3 rounded-lg border theme-info p-4">
 
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-blue-100 bg-white">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border theme-card">
                           <BookOpen
                             size={18}
-                            className="text-blue-700"
+                            className="text-[var(--color-info)]"
                           />
                         </div>
 
                         <div className="min-w-0">
-                          <p className="text-xs font-medium text-slate-500">
+                          <p className="text-xs font-medium theme-text-muted">
                             Mengajar
                           </p>
 
-                          <p className="mt-0.5 break-words text-sm font-bold text-slate-800">
+                          <p className="mt-0.5 break-words text-sm font-bold theme-text">
                             {mapel}
                           </p>
                         </div>
@@ -997,14 +997,14 @@ export default function DetailGuruPage() {
               </div>
 
               {/* BOTTOM ACTION */}
-              <div className="flex min-w-0 flex-col gap-3 border-t border-slate-200 pb-4 pt-5 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex min-w-0 flex-col gap-3 border-t theme-border pb-4 pt-5 sm:flex-row sm:items-center sm:justify-between">
 
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-slate-700">
+                  <p className="text-sm font-semibold theme-text-secondary">
                     Perlu mengubah data guru?
                   </p>
 
-                  <p className="mt-0.5 text-xs text-slate-500">
+                  <p className="mt-0.5 text-xs theme-text-muted">
                     Pastikan data yang diperbarui sudah sesuai.
                   </p>
                 </div>
@@ -1015,7 +1015,7 @@ export default function DetailGuruPage() {
                     onClick={() =>
                       router.back()
                     }
-                    className="flex-1 rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 sm:flex-none"
+                    className="flex-1 rounded-lg border theme-card px-4 py-2.5 text-sm font-semibold theme-text-secondary transition theme-sidebar-hover sm:flex-none"
                   >
                     Kembali
                   </button>
@@ -1026,7 +1026,7 @@ export default function DetailGuruPage() {
                         `/admin/guru/edit/${guru.id}`
                       )
                     }
-                    className="flex flex-1 items-center justify-center gap-2 rounded-lg bg-blue-700 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-800 sm:flex-none"
+                    className="flex flex-1 items-center justify-center gap-2 rounded-lg theme-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition sm:flex-none"
                   >
                     <Edit size={16} />
                     Edit Profil

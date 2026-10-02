@@ -44,6 +44,73 @@ import {
 } from "../../../../services/materiPembelajaran.service";
 
 // ============================================================
+// THEME HELPERS
+// ============================================================
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+
+const themeOverlay =
+  "bg-[color-mix(in_srgb,var(--color-text)_70%,transparent)]";
+
+// ============================================================
 // HELPER
 // ============================================================
 
@@ -97,6 +164,10 @@ function formatTanggal(value) {
   });
 }
 
+// ============================================================
+// TIPE MATERI
+// ============================================================
+
 function getTipeInfo(tipe) {
   switch (String(tipe || "").toLowerCase()) {
     case "pdf":
@@ -104,9 +175,9 @@ function getTipeInfo(tipe) {
         label: "PDF",
         description: "Dokumen PDF",
         icon: FileText,
-        bg: "bg-red-50",
-        color: "text-red-600",
-        border: "border-red-200",
+        bg: themeDangerSurface,
+        color: "theme-danger",
+        border: themeDangerBorder,
       };
 
     case "video":
@@ -114,9 +185,9 @@ function getTipeInfo(tipe) {
         label: "Video",
         description: "Video pembelajaran",
         icon: Video,
-        bg: "bg-purple-50",
-        color: "text-purple-600",
-        border: "border-purple-200",
+        bg: themePrimarySoft,
+        color: themePrimaryText,
+        border: themePrimarySoftBorder,
       };
 
     case "link":
@@ -124,9 +195,9 @@ function getTipeInfo(tipe) {
         label: "Link",
         description: "Tautan eksternal",
         icon: LinkIcon,
-        bg: "bg-blue-50",
-        color: "text-blue-600",
-        border: "border-blue-200",
+        bg: themeInfoSurface,
+        color: "text-[var(--color-info)]",
+        border: themeInfoBorder,
       };
 
     default:
@@ -134,50 +205,45 @@ function getTipeInfo(tipe) {
         label: "Materi",
         description: "Bahan ajar",
         icon: File,
-        bg: "bg-slate-50",
-        color: "text-slate-600",
-        border: "border-slate-200",
+        bg: themeNeutralSurface,
+        color: "theme-text-secondary",
+        border: themeNeutralBorder,
       };
   }
 }
 
+// ============================================================
+// KELAS STYLE
+// ============================================================
+
 function getKelasColor(kelas) {
   const value = String(kelas || "").toLowerCase();
 
-  if (
-    value.includes("12") ||
-    value.includes("xii")
-  ) {
-    return "bg-violet-100 text-violet-700 border-violet-200";
+  if (value.includes("12") || value.includes("xii")) {
+    return `${themePrimarySoft} ${themePrimaryText} ${themePrimarySoftBorder}`;
   }
 
-  if (
-    value.includes("11") ||
-    value.includes("xi")
-  ) {
-    return "bg-emerald-100 text-emerald-700 border-emerald-200";
+  if (value.includes("11") || value.includes("xi")) {
+    return `${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder}`;
   }
 
-  if (
-    value.includes("10") ||
-    value.includes("x ")
-  ) {
-    return "bg-blue-100 text-blue-700 border-blue-200";
+  if (value.includes("10") || value.includes("x ")) {
+    return `${themeInfoSurface} text-[var(--color-info)] ${themeInfoBorder}`;
   }
 
   if (value.includes("9")) {
-    return "bg-blue-100 text-blue-700 border-blue-200";
+    return `${themeInfoSurface} text-[var(--color-info)] ${themeInfoBorder}`;
   }
 
   if (value.includes("8")) {
-    return "bg-amber-100 text-amber-700 border-amber-200";
+    return `${themeWarningSurface} text-[var(--color-warning)] ${themeWarningBorder}`;
   }
 
   if (value.includes("7")) {
-    return "bg-purple-100 text-purple-700 border-purple-200";
+    return `${themePrimarySoft} ${themePrimaryText} ${themePrimarySoftBorder}`;
   }
 
-  return "bg-slate-100 text-slate-600 border-slate-200";
+  return `${themeNeutralSurface} theme-text-secondary ${themeNeutralBorder}`;
 }
 
 // ============================================================
@@ -186,32 +252,34 @@ function getKelasColor(kelas) {
 
 function SkeletonCard() {
   return (
-    <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-5 animate-pulse">
+    <div
+      className={`theme-card ${themeNeutralBorder} rounded-2xl ${themeSmallShadow} p-5 animate-pulse`}
+    >
       <div className="flex items-start justify-between">
-        <div className="w-11 h-11 rounded-xl bg-slate-200" />
-        <div className="w-20 h-6 rounded-full bg-slate-200" />
+        <div className="w-11 h-11 rounded-xl theme-neutral-surface bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)]" />
+        <div className="w-20 h-6 rounded-full bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)]" />
       </div>
 
-      <div className="mt-4 h-6 bg-slate-200 rounded-lg w-3/4" />
+      <div className="mt-4 h-6 bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)] rounded-lg w-3/4" />
 
-      <div className="mt-2 h-4 bg-slate-200 rounded-lg w-1/2" />
+      <div className="mt-2 h-4 bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)] rounded-lg w-1/2" />
 
-      <div className="mt-3 h-4 bg-slate-200 rounded-lg w-full" />
+      <div className="mt-3 h-4 bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)] rounded-lg w-full" />
 
-      <div className="mt-3 h-4 bg-slate-200 rounded-lg w-5/6" />
+      <div className="mt-3 h-4 bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)] rounded-lg w-5/6" />
 
-      <div className="mt-4 pt-4 border-t border-slate-100">
+      <div className={`mt-4 pt-4 border-t ${themeDivider}`}>
         <div className="grid grid-cols-2 gap-3">
-          <div className="h-8 bg-slate-200 rounded-lg" />
-          <div className="h-8 bg-slate-200 rounded-lg" />
+          <div className="h-8 bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)] rounded-lg" />
+          <div className="h-8 bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)] rounded-lg" />
         </div>
 
-        <div className="mt-3 h-4 bg-slate-200 rounded-lg w-1/3" />
+        <div className="mt-3 h-4 bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)] rounded-lg w-1/3" />
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-2">
-        <div className="h-10 bg-slate-200 rounded-lg" />
-        <div className="h-10 bg-slate-200 rounded-lg" />
+        <div className="h-10 bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)] rounded-lg" />
+        <div className="h-10 bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)] rounded-lg" />
       </div>
     </div>
   );
@@ -291,14 +359,14 @@ function KelasSearchDropdown({
       ref={wrapperRef}
       className="relative w-full"
     >
-      <label className="block text-xs font-semibold text-slate-500 mb-1.5">
+      <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
         Kelas
       </label>
 
       <div className="relative">
         <Search
           size={15}
-          className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+          className="absolute left-3.5 top-1/2 -translate-y-1/2 theme-text-muted pointer-events-none"
         />
 
         <input
@@ -321,7 +389,7 @@ function KelasSearchDropdown({
           onChange={handleInputChange}
           disabled={disabled}
           placeholder="Cari kelas..."
-          className="w-full pl-10 pr-20 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-medium text-slate-700 placeholder:text-slate-400 outline-none transition-all hover:border-slate-300 focus:border-[#155DFC] focus:ring-4 focus:ring-[#155DFC]/10 disabled:opacity-60"
+          className={`theme-input w-full pl-10 pr-20 py-2.5 rounded-xl text-sm font-medium outline-none transition-all ${themeFocus} placeholder:text-[var(--color-text-placeholder)] disabled:opacity-60`}
         />
 
         {value !== "Semua Kelas" && (
@@ -332,7 +400,7 @@ function KelasSearchDropdown({
               setKeyword("");
               setOpen(false);
             }}
-            className="absolute right-9 top-1/2 -translate-y-1/2 p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-200"
+            className={`absolute right-9 top-1/2 -translate-y-1/2 p-1 rounded-md theme-text-muted ${themeNeutralHover} hover:text-[var(--color-text)]`}
           >
             <X size={14} />
           </button>
@@ -349,7 +417,7 @@ function KelasSearchDropdown({
             );
           }}
           disabled={disabled}
-          className="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded-md text-slate-400 hover:text-slate-600"
+          className={`absolute right-2.5 top-1/2 -translate-y-1/2 p-1 rounded-md theme-text-muted ${themeNeutralHover}`}
         >
           <ChevronDown
             size={15}
@@ -361,7 +429,9 @@ function KelasSearchDropdown({
       </div>
 
       {open && !disabled && (
-        <div className="absolute z-50 left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-xl shadow-slate-300/30 overflow-hidden">
+        <div
+          className={`absolute z-50 left-0 right-0 mt-2 theme-card border ${themeNeutralBorder} rounded-xl ${themePrimaryShadow} overflow-hidden`}
+        >
           <div className="max-h-60 overflow-y-auto p-1.5">
             <button
               type="button"
@@ -370,8 +440,8 @@ function KelasSearchDropdown({
               }
               className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left text-sm transition-colors ${
                 value === "Semua Kelas"
-                  ? "bg-blue-50 text-[#155DFC] font-semibold"
-                  : "text-slate-600 hover:bg-slate-50"
+                  ? `${themePrimarySoft} ${themePrimaryText} font-semibold`
+                  : `theme-text-secondary ${themeNeutralHover}`
               }`}
             >
               <span>Semua Kelas</span>
@@ -379,7 +449,7 @@ function KelasSearchDropdown({
               {value === "Semua Kelas" && (
                 <CheckCircle2
                   size={15}
-                  className="text-[#155DFC]"
+                  className={themePrimaryText}
                 />
               )}
             </button>
@@ -398,8 +468,8 @@ function KelasSearchDropdown({
                   }
                   className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-left text-sm transition-colors ${
                     value === item
-                      ? "bg-blue-50 text-[#155DFC] font-semibold"
-                      : "text-slate-600 hover:bg-slate-50"
+                      ? `${themePrimarySoft} ${themePrimaryText} font-semibold`
+                      : `theme-text-secondary ${themeNeutralHover}`
                   }`}
                 >
                   <span className="truncate">
@@ -409,7 +479,7 @@ function KelasSearchDropdown({
                   {value === item && (
                     <CheckCircle2
                       size={15}
-                      className="text-[#155DFC] shrink-0"
+                      className={`${themePrimaryText} shrink-0`}
                     />
                   )}
                 </button>
@@ -422,14 +492,14 @@ function KelasSearchDropdown({
               <div className="px-4 py-6 text-center">
                 <Search
                   size={22}
-                  className="mx-auto text-slate-300"
+                  className="mx-auto theme-text-muted"
                 />
 
-                <p className="text-sm font-medium text-slate-500 mt-2">
+                <p className="text-sm font-medium theme-text-secondary mt-2">
                   Kelas tidak ditemukan
                 </p>
 
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="text-xs theme-text-muted mt-1">
                   Coba kata pencarian lain
                 </p>
               </div>
@@ -545,7 +615,7 @@ export default function GuruMateriPage() {
   }, [loadMateri]);
 
   // ============================================================
-  // KELAS YANG TERSEDIA UNTUK GURU
+  // KELAS
   // ============================================================
 
   const kelasOptions = useMemo(() => {
@@ -591,7 +661,7 @@ export default function GuruMateriPage() {
   ];
 
   // ============================================================
-  // FILTER MATERI
+  // FILTER
   // ============================================================
 
   const filteredMateri = useMemo(() => {
@@ -631,7 +701,9 @@ export default function GuruMateriPage() {
 
       const matchTipe =
         tipe === "Semua Tipe" ||
-        String(materi?.tipe || "").toLowerCase() ===
+        String(
+          materi?.tipe || ""
+        ).toLowerCase() ===
           tipe.toLowerCase();
 
       const matchSearch =
@@ -746,9 +818,7 @@ export default function GuruMateriPage() {
       setDeletingId(id);
       setError("");
 
-      await deleteMateriPembelajaran(
-        id
-      );
+      await deleteMateriPembelajaran(id);
 
       setMateriList((prev) =>
         prev.filter(
@@ -809,10 +879,8 @@ export default function GuruMateriPage() {
   // ============================================================
 
   return (
-    <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
-      {/* ======================================================
-          SIDEBAR
-      ====================================================== */}
+    <div className="theme-page flex h-screen w-full overflow-hidden">
+      {/* SIDEBAR */}
 
       <Sidebar
         active="materi"
@@ -826,9 +894,7 @@ export default function GuruMateriPage() {
         role="guru"
       />
 
-      {/* ======================================================
-          CONTENT
-      ====================================================== */}
+      {/* CONTENT */}
 
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         <Header
@@ -854,54 +920,68 @@ export default function GuruMateriPage() {
                   HERO
               ================================================== */}
 
-              <section className="relative overflow-hidden rounded-2xl bg-slate-900 p-6 sm:p-8 shadow-xl border border-white/10">
+              <section
+                className={`relative overflow-hidden rounded-2xl ${themeCardShadow} border ${themePrimarySoftBorder} p-6 sm:p-8`}
+                style={{
+                  background:
+                    "linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 18%, var(--color-card)), color-mix(in srgb, var(--color-info) 10%, var(--color-card)))",
+                }}
+              >
+                <div
+                  className="absolute top-0 right-0 w-64 h-64 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3 opacity-40"
+                  style={{
+                    background:
+                      "color-mix(in srgb, var(--color-primary) 22%, transparent)",
+                  }}
+                />
 
-                <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3" />
-
-                <div className="absolute bottom-0 left-0 w-48 h-48 bg-indigo-500/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4" />
+                <div
+                  className="absolute bottom-0 left-0 w-48 h-48 rounded-full blur-3xl translate-y-1/2 -translate-x-1/4 opacity-30"
+                  style={{
+                    background:
+                      "color-mix(in srgb, var(--color-info) 20%, transparent)",
+                  }}
+                />
 
                 <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
-
                   <div className="flex items-start gap-4">
-
-                    <div className="hidden sm:flex items-center justify-center w-12 h-12 rounded-xl bg-blue-500/20 backdrop-blur-sm border border-blue-400/20">
+                    <div
+                      className={`hidden sm:flex items-center justify-center w-12 h-12 rounded-xl ${themePrimarySoft} border ${themePrimarySoftBorder}`}
+                    >
                       <BookOpen
                         size={24}
-                        className="text-blue-400"
+                        className={themePrimaryText}
                       />
                     </div>
 
                     <div>
                       <div className="flex items-center gap-3 flex-wrap">
-
-                        <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
+                        <h1 className="text-2xl sm:text-3xl font-bold theme-text tracking-tight">
                           Materi Pembelajaran
                         </h1>
 
-                        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/20 text-blue-300 text-xs font-medium">
+                        <span
+                          className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full ${themePrimarySoft} border ${themePrimarySoftBorder} ${themePrimaryText} text-xs font-medium`}
+                        >
                           <Sparkles size={12} />
                           Guru
                         </span>
-
                       </div>
 
-                      <p className="text-blue-300/80 text-sm mt-1">
+                      <p className="theme-text-secondary text-sm mt-1">
                         Kelola bahan ajar untuk siswa berdasarkan kelas dan mata pelajaran
                       </p>
                     </div>
                   </div>
 
                   <div className="flex flex-col sm:flex-row gap-2.5 shrink-0">
-
                     <button
                       type="button"
                       onClick={() =>
                         loadMateri(true)
                       }
-                      disabled={
-                        refreshing
-                      }
-                      className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 hover:bg-white/20 backdrop-blur-sm text-white text-sm font-medium transition-all border border-white/20 disabled:opacity-60"
+                      disabled={refreshing}
+                      className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl theme-card ${themeNeutralBorder} theme-text-secondary ${themeNeutralHover} text-sm font-medium transition-all disabled:opacity-60`}
                     >
                       <RefreshCw
                         size={15}
@@ -911,7 +991,6 @@ export default function GuruMateriPage() {
                             : ""
                         }
                       />
-
                       Refresh
                     </button>
 
@@ -922,208 +1001,167 @@ export default function GuruMateriPage() {
                           "/guru/materi/tambah"
                         )
                       }
-                      className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-sm font-semibold transition-all shadow-lg shadow-blue-500/30"
+                      className={`inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl ${themePrimaryGradient} text-[var(--color-card)] text-sm font-semibold transition-all ${themePrimaryShadow}`}
                     >
                       <Plus size={16} />
-
                       Tambah Materi
                     </button>
-
                   </div>
                 </div>
 
-                {/* ==================================================
-                    QUICK STATS
-                ================================================== */}
+                {/* QUICK STATS */}
 
                 <div className="relative mt-5 grid grid-cols-2 sm:grid-cols-4 gap-3">
-
                   {[
                     {
-                      label:
-                        "Total Materi",
-                      value:
-                        loading
-                          ? "—"
-                          : summary.total,
+                      label: "Total Materi",
+                      value: loading
+                        ? "—"
+                        : summary.total,
                       icon: Layers,
                     },
                     {
-                      label:
-                        "Bulan Ini",
-                      value:
-                        loading
-                          ? "—"
-                          : summary.bulanIni,
+                      label: "Bulan Ini",
+                      value: loading
+                        ? "—"
+                        : summary.bulanIni,
                       icon: CalendarDays,
                     },
                     {
-                      label:
-                        "Kelas",
-                      value:
-                        loading
-                          ? "—"
-                          : summary.kelasTercakup,
+                      label: "Kelas",
+                      value: loading
+                        ? "—"
+                        : summary.kelasTercakup,
                       icon: GraduationCap,
                     },
                     {
-                      label:
-                        "Sumber",
-                      value:
-                        loading
-                          ? "Memuat..."
-                          : `${summary.totalFile} file · ${summary.totalLink} link`,
+                      label: "Sumber",
+                      value: loading
+                        ? "Memuat..."
+                        : `${summary.totalFile} file · ${summary.totalLink} link`,
                       icon: HardDrive,
                     },
                   ].map(
                     (stat, idx) => (
                       <div
                         key={idx}
-                        className="bg-white/5 backdrop-blur-sm rounded-xl p-3.5 border border-white/10 hover:bg-white/10 transition-all"
+                        className={`theme-card-soft rounded-xl p-3.5 border ${themeNeutralBorder} ${themeNeutralHover} transition-all`}
                       >
                         <div className="flex items-center gap-2.5">
-
-                          <div className="w-8 h-8 rounded-lg bg-white/10 flex items-center justify-center">
+                          <div
+                            className={`w-8 h-8 rounded-lg ${themePrimarySoft} flex items-center justify-center`}
+                          >
                             <stat.icon
                               size={16}
-                              className="text-blue-300"
+                              className={themePrimaryText}
                             />
                           </div>
 
                           <div className="min-w-0">
-                            <p className="text-lg font-bold text-white truncate">
-                              {
-                                stat.value
-                              }
+                            <p className="text-lg font-bold theme-text truncate">
+                              {stat.value}
                             </p>
 
-                            <p className="text-[10px] text-white/50 uppercase tracking-wider truncate">
-                              {
-                                stat.label
-                              }
+                            <p className="text-[10px] theme-text-muted uppercase tracking-wider truncate">
+                              {stat.label}
                             </p>
                           </div>
-
                         </div>
                       </div>
                     )
                   )}
-
                 </div>
               </section>
 
-              {/* ==================================================
-                  SUCCESS
-              ================================================== */}
+              {/* SUCCESS */}
 
               {successMessage && (
-                <div className="flex items-center gap-3 p-4 rounded-xl bg-emerald-50 border border-emerald-200">
-
-                  <div className="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-600 flex items-center justify-center shrink-0">
-                    <CheckCircle2
-                      size={17}
-                    />
+                <div
+                  className={`flex items-center gap-3 p-4 rounded-xl ${themeSuccessSurface} border ${themeSuccessBorder}`}
+                >
+                  <div
+                    className={`w-8 h-8 rounded-lg ${themeSuccessSurface} text-[var(--color-success)] flex items-center justify-center shrink-0`}
+                  >
+                    <CheckCircle2 size={17} />
                   </div>
 
-                  <p className="text-sm font-medium text-emerald-700">
-                    {
-                      successMessage
-                    }
+                  <p className="text-sm font-medium text-[var(--color-success)]">
+                    {successMessage}
                   </p>
-
                 </div>
               )}
 
-              {/* ==================================================
-                  ERROR
-              ================================================== */}
+              {/* ERROR */}
 
               {error && (
-                <div className="flex items-start gap-3 p-4 rounded-xl bg-red-50 border border-red-200">
-
-                  <div className="w-8 h-8 rounded-lg bg-red-100 text-red-600 flex items-center justify-center shrink-0">
-                    <AlertCircle
-                      size={17}
-                    />
+                <div
+                  className={`flex items-start gap-3 p-4 rounded-xl ${themeDangerSurface} border ${themeDangerBorder}`}
+                >
+                  <div
+                    className={`w-8 h-8 rounded-lg ${themeDangerSurface} theme-danger flex items-center justify-center shrink-0`}
+                  >
+                    <AlertCircle size={17} />
                   </div>
 
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-red-700">
+                    <p className="text-sm font-semibold theme-danger">
                       Terjadi kesalahan
                     </p>
 
-                    <p className="text-sm text-red-600 mt-1 break-words leading-relaxed">
+                    <p className="text-sm theme-danger mt-1 break-words leading-relaxed">
                       {error}
                     </p>
                   </div>
-
                 </div>
               )}
 
-              {/* ==================================================
-                  FILTER
-              ================================================== */}
+              {/* FILTER */}
 
-              <section className="bg-white rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-200/80 p-4 sm:p-5">
-
+              <section
+                className={`theme-card rounded-2xl ${themeCardShadow} border ${themeNeutralBorder} p-4 sm:p-5`}
+              >
                 <div className="flex flex-col lg:flex-row lg:items-end gap-4">
-
                   {/* FILTER TITLE */}
 
                   <div className="lg:w-36 shrink-0">
-
                     <div className="flex items-center gap-2">
-
-                      <div className="w-8 h-8 rounded-lg bg-[#eaf1ff] text-[#155DFC] flex items-center justify-center">
-                        <Filter
-                          size={15}
-                        />
+                      <div
+                        className={`w-8 h-8 rounded-lg ${themePrimarySoft} ${themePrimaryText} flex items-center justify-center`}
+                      >
+                        <Filter size={15} />
                       </div>
 
                       <div>
-                        <p className="text-sm font-semibold text-slate-700">
+                        <p className="text-sm font-semibold theme-text">
                           Filter
                         </p>
 
-                        <p className="text-xs text-slate-400">
+                        <p className="text-xs theme-text-muted">
                           Daftar materi
                         </p>
                       </div>
-
                     </div>
                   </div>
 
-                  {/* ==================================================
-                      KELAS SEARCHABLE
-                  ================================================== */}
+                  {/* KELAS */}
 
                   <div className="w-full lg:w-64">
                     <KelasSearchDropdown
                       value={kelas}
-                      options={
-                        kelasOptions
-                      }
-                      onChange={
-                        setKelas
-                      }
-                      disabled={
-                        loading
-                      }
+                      options={kelasOptions}
+                      onChange={setKelas}
+                      disabled={loading}
                     />
                   </div>
 
-                  {/* ==================================================
-                      TIPE
-                  ================================================== */}
+                  {/* TIPE */}
 
                   <div className="w-full lg:w-56">
-
-                    <label className="block text-xs font-semibold text-slate-500 mb-1.5">
+                    <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
                       Tipe Materi
                     </label>
 
                     <div className="relative">
-
                       <select
                         value={tipe}
                         onChange={(e) =>
@@ -1131,58 +1169,44 @@ export default function GuruMateriPage() {
                             e.target.value
                           )
                         }
-                        disabled={
-                          loading
-                        }
-                        className="w-full appearance-none px-3.5 pr-10 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm font-medium text-slate-700 outline-none transition-all hover:border-slate-300 focus:border-[#155DFC] focus:ring-4 focus:ring-[#155DFC]/10 disabled:opacity-60"
+                        disabled={loading}
+                        className={`theme-input w-full appearance-none px-3.5 pr-10 py-2.5 rounded-xl text-sm font-medium outline-none transition-all ${themeFocus} disabled:opacity-60`}
                       >
-
                         {tipeOptions.map(
                           (item) => (
                             <option
-                              key={
-                                item
-                              }
-                              value={
-                                item
-                              }
+                              key={item}
+                              value={item}
                             >
                               {item ===
                               "Semua Tipe"
                                 ? item
                                 : getTipeInfo(
                                     item
-                                  )
-                                    .label}
+                                  ).label}
                             </option>
                           )
                         )}
-
                       </select>
 
                       <ChevronDown
                         size={15}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+                        className="absolute right-3 top-1/2 -translate-y-1/2 theme-text-muted pointer-events-none"
                       />
-
                     </div>
                   </div>
 
-                  {/* ==================================================
-                      SEARCH
-                  ================================================== */}
+                  {/* SEARCH */}
 
                   <div className="flex-1 min-w-0">
-
-                    <label className="block text-xs font-semibold text-slate-500 mb-1.5">
+                    <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
                       Pencarian
                     </label>
 
                     <div className="relative">
-
                       <Search
                         size={16}
-                        className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                        className="absolute left-3.5 top-1/2 -translate-y-1/2 theme-text-muted"
                       />
 
                       <input
@@ -1193,11 +1217,9 @@ export default function GuruMateriPage() {
                             e.target.value
                           )
                         }
-                        disabled={
-                          loading
-                        }
+                        disabled={loading}
                         placeholder="Cari judul, kelas, mapel, atau kategori..."
-                        className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-700 placeholder:text-slate-400 outline-none transition-all hover:border-slate-300 focus:border-[#155DFC] focus:ring-4 focus:ring-[#155DFC]/10 disabled:opacity-60"
+                        className={`theme-input w-full pl-10 pr-10 py-2.5 rounded-xl text-sm outline-none transition-all ${themeFocus} placeholder:text-[var(--color-text-placeholder)] disabled:opacity-60`}
                       />
 
                       {search && (
@@ -1206,167 +1228,124 @@ export default function GuruMateriPage() {
                           onClick={() =>
                             setSearch("")
                           }
-                          className="absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100"
+                          className={`absolute right-3 top-1/2 -translate-y-1/2 p-1 rounded-md theme-text-muted ${themeNeutralHover}`}
                         >
-                          <X
-                            size={14}
-                          />
+                          <X size={14} />
                         </button>
                       )}
-
                     </div>
                   </div>
 
-                  {/* ==================================================
-                      RESET
-                  ================================================== */}
+                  {/* RESET */}
 
                   {hasFilter && (
                     <button
                       type="button"
-                      onClick={
-                        resetFilter
-                      }
-                      className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:border-slate-300 text-sm font-medium shrink-0 transition-all"
+                      onClick={resetFilter}
+                      className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl theme-card ${themeNeutralBorder} theme-text-secondary ${themeNeutralHover} text-sm font-medium shrink-0 transition-all`}
                     >
                       <X size={14} />
-
                       Reset Filter
                     </button>
                   )}
-
                 </div>
 
-                {/* ==================================================
-                    INFO KELAS
-                ================================================== */}
+                {/* INFO KELAS */}
 
                 {!loading &&
-                  kelasOptions.length >
-                    1 && (
-                    <div className="mt-4 pt-4 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-
-                      <div className="flex items-center gap-2 text-xs text-slate-400">
-
+                  kelasOptions.length > 1 && (
+                    <div
+                      className={`mt-4 pt-4 border-t ${themeDivider} flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2`}
+                    >
+                      <div className="flex items-center gap-2 text-xs theme-text-muted">
                         <GraduationCap
                           size={14}
-                          className="text-[#155DFC]"
+                          className={themePrimaryText}
                         />
 
                         <span>
-                          {
-                            kelasOptions.length -
-                            1
-                          }{" "}
+                          {kelasOptions.length - 1}{" "}
                           kelas tersedia pada materi yang diajar
                         </span>
-
                       </div>
 
                       {kelas !==
                         "Semua Kelas" && (
-                        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 border border-blue-100 text-[#155DFC] text-xs font-semibold">
-                          Kelas:{" "}
-                          {kelas}
+                        <span
+                          className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ${themePrimarySoft} border ${themePrimarySoftBorder} ${themePrimaryText} text-xs font-semibold`}
+                        >
+                          Kelas: {kelas}
                         </span>
                       )}
-
                     </div>
                   )}
-
               </section>
 
-              {/* ==================================================
-                  LIST HEADER
-              ================================================== */}
+              {/* LIST HEADER */}
 
               {!loading && (
                 <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-2">
-
                   <div>
-
-                    <h2 className="text-lg font-semibold text-slate-800">
+                    <h2 className="text-lg font-semibold theme-text">
                       Daftar Materi
                     </h2>
 
-                    <p className="text-sm text-slate-400 mt-0.5">
-                      {
-                        filteredMateri.length
-                      }{" "}
+                    <p className="text-sm theme-text-muted mt-0.5">
+                      {filteredMateri.length}{" "}
                       materi ditampilkan dari{" "}
-                      {
-                        materiList.length
-                      }{" "}
-                      data
+                      {materiList.length} data
                     </p>
-
                   </div>
 
                   {hasFilter && (
-                    <span className="text-xs text-[#155DFC] font-medium bg-[#eaf1ff] px-3 py-1 rounded-full">
+                    <span
+                      className={`text-xs ${themePrimaryText} font-medium ${themePrimarySoft} px-3 py-1 rounded-full`}
+                    >
                       Filter aktif
                     </span>
                   )}
-
                 </div>
               )}
 
-              {/* ==================================================
-                  LOADING
-              ================================================== */}
+              {/* LOADING */}
 
               {loading ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 xl:gap-5">
-
-                  {[
-                    1,
-                    2,
-                    3,
-                    4,
-                    5,
-                    6,
-                  ].map((i) => (
-                    <SkeletonCard
-                      key={i}
-                    />
-                  ))}
-
+                  {[1, 2, 3, 4, 5, 6].map(
+                    (i) => (
+                      <SkeletonCard key={i} />
+                    )
+                  )}
                 </div>
-              ) : filteredMateri.length ===
-                0 ? (
-                /* ==================================================
-                    EMPTY
-                ================================================== */
+              ) : filteredMateri.length === 0 ? (
+                /* EMPTY */
 
-                <section className="bg-white rounded-2xl shadow-lg shadow-slate-200/50 border border-slate-200/80 p-12 sm:p-16 text-center">
-
+                <section
+                  className={`theme-card rounded-2xl ${themeCardShadow} border ${themeNeutralBorder} p-12 sm:p-16 text-center`}
+                >
                   <div className="max-w-md mx-auto">
-
-                    <div className="w-20 h-20 mx-auto rounded-2xl bg-[#eaf1ff] border border-[#c7dbff] flex items-center justify-center">
-
+                    <div
+                      className={`w-20 h-20 mx-auto rounded-2xl ${themePrimarySoft} border ${themePrimarySoftBorder} flex items-center justify-center`}
+                    >
                       <BookOpen
                         size={36}
-                        className="text-[#155DFC]"
+                        className={themePrimaryText}
                       />
-
                     </div>
 
-                    <h3 className="text-xl font-bold text-slate-800 mt-6">
-                      {materiList.length ===
-                      0
+                    <h3 className="text-xl font-bold theme-text mt-6">
+                      {materiList.length === 0
                         ? "Belum Ada Materi"
                         : "Materi Tidak Ditemukan"}
                     </h3>
 
-                    <p className="text-sm text-slate-500 mt-2 leading-relaxed">
-                      {materiList.length ===
-                      0
+                    <p className="text-sm theme-text-secondary mt-2 leading-relaxed">
+                      {materiList.length === 0
                         ? "Anda belum memiliki bahan ajar. Mulai bagikan materi untuk siswa."
                         : "Coba ubah filter kelas, tipe materi, atau kata pencarian."}
                     </p>
 
-                    {materiList.length ===
-                    0 ? (
+                    {materiList.length === 0 ? (
                       <button
                         type="button"
                         onClick={() =>
@@ -1374,41 +1353,27 @@ export default function GuruMateriPage() {
                             "/guru/materi/tambah"
                           )
                         }
-                        className="inline-flex items-center gap-2 mt-6 px-5 py-3 bg-[#155DFC] hover:bg-[#0d47c9] text-white rounded-xl text-sm font-semibold transition-all shadow-lg shadow-blue-200"
+                        className={`inline-flex items-center gap-2 mt-6 px-5 py-3 rounded-xl ${themePrimaryGradient} text-[var(--color-card)] text-sm font-semibold transition-all ${themePrimaryShadow}`}
                       >
-                        <Plus
-                          size={16}
-                        />
-
-                        Tambah Materi
-                        Sekarang
+                        <Plus size={16} />
+                        Tambah Materi Sekarang
                       </button>
                     ) : (
                       <button
                         type="button"
-                        onClick={
-                          resetFilter
-                        }
-                        className="inline-flex items-center gap-2 mt-6 px-5 py-3 border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-xl text-sm font-semibold transition-all"
+                        onClick={resetFilter}
+                        className={`inline-flex items-center gap-2 mt-6 px-5 py-3 theme-card border ${themeNeutralBorder} theme-text-secondary ${themeNeutralHover} rounded-xl text-sm font-semibold transition-all`}
                       >
-                        <RefreshCw
-                          size={16}
-                        />
-
+                        <RefreshCw size={16} />
                         Reset Filter
                       </button>
                     )}
-
                   </div>
-
                 </section>
               ) : (
-                /* ==================================================
-                    CARD GRID
-                ================================================== */
+                /* CARD GRID */
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 xl:gap-5">
-
                   {filteredMateri.map(
                     (materi) => {
                       const kelasName =
@@ -1439,21 +1404,16 @@ export default function GuruMateriPage() {
                           key={
                             materi.id
                           }
-                          className="group flex flex-col min-w-0 bg-white border border-slate-200 rounded-2xl shadow-sm hover:border-[#155DFC] hover:shadow-xl hover:shadow-[#155DFC]/10 transition-all duration-300 overflow-hidden"
+                          className={`group flex flex-col min-w-0 theme-card border ${themeNeutralBorder} rounded-2xl ${themeSmallShadow} hover:border-[var(--color-primary)] hover:shadow-[0_10px_30px_color-mix(in_srgb,var(--color-primary)_10%,transparent)] transition-all duration-300 overflow-hidden`}
                         >
-
                           <div className="p-5 flex flex-col flex-1">
-
                             {/* HEADER */}
 
                             <div className="flex items-start justify-between gap-3">
-
                               <div
                                 className={`w-11 h-11 rounded-xl border flex items-center justify-center shrink-0 ${tipeInfo.bg} ${tipeInfo.color} ${tipeInfo.border}`}
                               >
-                                <TypeIcon
-                                  size={20}
-                                />
+                                <TypeIcon size={20} />
                               </div>
 
                               <span
@@ -1461,16 +1421,15 @@ export default function GuruMateriPage() {
                                   kelasName
                                 )}`}
                               >
-                                {
-                                  kelasName
-                                }
+                                {kelasName}
                               </span>
-
                             </div>
 
                             {/* TITLE */}
 
-                            <h3 className="mt-4 text-base sm:text-[17px] font-semibold leading-6 text-slate-800 break-words line-clamp-2 group-hover:text-[#155DFC] transition-colors">
+                            <h3
+                              className={`mt-4 text-base sm:text-[17px] font-semibold leading-6 theme-text break-words line-clamp-2 group-hover:text-[var(--color-primary)] transition-colors`}
+                            >
                               {materi.judul ||
                                 "Tanpa Judul"}
                             </h3>
@@ -1478,124 +1437,96 @@ export default function GuruMateriPage() {
                             {/* MAPEL */}
 
                             <div className="flex items-center gap-2 mt-2">
-
                               <BookOpen
-                                size={
-                                  14
-                                }
-                                className="text-[#155DFC] shrink-0"
+                                size={14}
+                                className={`${themePrimaryText} shrink-0`}
                               />
 
-                              <p className="text-sm font-medium text-[#155DFC] truncate">
-                                {
-                                  mapelName
-                                }
+                              <p
+                                className={`text-sm font-medium ${themePrimaryText} truncate`}
+                              >
+                                {mapelName}
                               </p>
-
                             </div>
 
                             {/* KATEGORI */}
 
                             {materi.kategori && (
                               <div className="mt-3">
-
-                                <span className="inline-flex max-w-full px-2.5 py-1 rounded-md bg-slate-50 border border-slate-200 text-xs font-medium text-slate-500 truncate">
-                                  {
-                                    materi.kategori
-                                  }
+                                <span
+                                  className={`inline-flex max-w-full px-2.5 py-1 rounded-md ${themeNeutralSurface} border ${themeNeutralBorder} text-xs font-medium theme-text-secondary truncate`}
+                                >
+                                  {materi.kategori}
                                 </span>
-
                               </div>
                             )}
 
                             {/* DESKRIPSI */}
 
-                            <p className="mt-3 text-sm text-slate-500 leading-6 line-clamp-3 min-h-[72px]">
+                            <p className="mt-3 text-sm theme-text-secondary leading-6 line-clamp-3 min-h-[72px]">
                               {materi.deskripsi ||
                                 "Belum ada deskripsi materi."}
                             </p>
 
                             {/* META */}
 
-                            <div className="mt-4 pt-4 border-t border-slate-100 flex-1">
-
+                            <div
+                              className={`mt-4 pt-4 border-t ${themeDivider} flex-1`}
+                            >
                               <div className="grid grid-cols-2 gap-3">
-
                                 <div className="min-w-0">
-
-                                  <p className="text-[11px] uppercase tracking-wider font-semibold text-slate-400">
+                                  <p className="text-[11px] uppercase tracking-wider font-semibold theme-text-muted">
                                     Tanggal
                                   </p>
 
                                   <div className="flex items-center gap-1.5 mt-1">
-
                                     <CalendarDays
-                                      size={
-                                        13
-                                      }
-                                      className="text-slate-400 shrink-0"
+                                      size={13}
+                                      className="theme-text-muted shrink-0"
                                     />
 
-                                    <p className="text-xs font-medium text-slate-600 truncate">
+                                    <p className="text-xs font-medium theme-text-secondary truncate">
                                       {formatTanggal(
                                         materi.dibuatPada
                                       )}
                                     </p>
-
                                   </div>
-
                                 </div>
 
                                 <div className="min-w-0">
-
-                                  <p className="text-[11px] uppercase tracking-wider font-semibold text-slate-400">
+                                  <p className="text-[11px] uppercase tracking-wider font-semibold theme-text-muted">
                                     Sumber
                                   </p>
 
                                   <div className="flex items-center gap-1.5 mt-1">
-
                                     <TypeIcon
-                                      size={
-                                        13
-                                      }
-                                      className="text-slate-400 shrink-0"
+                                      size={13}
+                                      className="theme-text-muted shrink-0"
                                     />
 
-                                    <p className="text-xs font-medium text-slate-600">
-                                      {
-                                        tipeInfo.label
-                                      }
+                                    <p className="text-xs font-medium theme-text-secondary">
+                                      {tipeInfo.label}
                                     </p>
-
                                   </div>
-
                                 </div>
-
                               </div>
 
                               <div className="mt-3">
-
-                                <p className="text-[11px] uppercase tracking-wider font-semibold text-slate-400">
+                                <p className="text-[11px] uppercase tracking-wider font-semibold theme-text-muted">
                                   Pengajar
                                 </p>
 
-                                <p className="text-xs font-medium text-slate-600 mt-1 truncate">
-                                  {
-                                    guruName
-                                  }
+                                <p className="text-xs font-medium theme-text-secondary mt-1 truncate">
+                                  {guruName}
                                 </p>
-
                               </div>
-
                             </div>
                           </div>
 
                           {/* ACTION */}
 
                           <div className="px-5 pb-5">
-
                             <div className="grid grid-cols-2 gap-2">
-
                               <button
                                 type="button"
                                 onClick={() =>
@@ -1603,14 +1534,9 @@ export default function GuruMateriPage() {
                                     `/guru/materi/${materi.id}`
                                   )
                                 }
-                                className="inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:border-slate-300 text-sm font-medium transition-all"
+                                className={`inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl theme-card border ${themeNeutralBorder} theme-text-secondary ${themeNeutralHover} text-sm font-medium transition-all`}
                               >
-                                <Eye
-                                  size={
-                                    15
-                                  }
-                                />
-
+                                <Eye size={15} />
                                 Lihat
                               </button>
 
@@ -1621,17 +1547,11 @@ export default function GuruMateriPage() {
                                     `/guru/materi/${materi.id}/edit`
                                   )
                                 }
-                                className="inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-[#eaf1ff] border border-[#c7dbff] text-[#155DFC] hover:bg-[#d6e6ff] text-sm font-medium transition-all"
+                                className={`inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl ${themePrimarySoft} border ${themePrimarySoftBorder} ${themePrimaryText} hover:bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)] text-sm font-medium transition-all`}
                               >
-                                <Pencil
-                                  size={
-                                    15
-                                  }
-                                />
-
+                                <Pencil size={15} />
                                 Edit
                               </button>
-
                             </div>
 
                             <button
@@ -1645,63 +1565,48 @@ export default function GuruMateriPage() {
                                 deletingId ===
                                 materi.id
                               }
-                              className="mt-2.5 w-full inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl bg-red-50 border border-red-200 text-red-600 hover:bg-red-100 text-sm font-medium transition-all disabled:opacity-60 disabled:cursor-not-allowed"
+                              className={`mt-2.5 w-full inline-flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl ${themeDangerSurface} border ${themeDangerBorder} theme-danger hover:bg-[color-mix(in_srgb,var(--color-text)_9%,transparent)] text-sm font-medium transition-all disabled:opacity-60 disabled:cursor-not-allowed`}
                             >
-
                               {deletingId ===
                               materi.id ? (
                                 <>
                                   <Loader2
-                                    size={
-                                      15
-                                    }
+                                    size={15}
                                     className="animate-spin"
                                   />
-
                                   Menghapus...
                                 </>
                               ) : (
                                 <>
-                                  <Trash2
-                                    size={
-                                      15
-                                    }
-                                  />
-
+                                  <Trash2 size={15} />
                                   Hapus
                                 </>
                               )}
-
                             </button>
-
                           </div>
-
                         </article>
                       );
                     }
                   )}
-
                 </div>
               )}
 
-              {/* ==================================================
-                  FOOTER
-              ================================================== */}
+              {/* FOOTER */}
 
               {!loading &&
-                filteredMateri.length >
-                  0 && (
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pt-2 border-t border-slate-200/50">
-
-                    <p className="text-xs sm:text-sm text-slate-400">
+                filteredMateri.length > 0 && (
+                  <div
+                    className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 pt-2 border-t ${themeDivider}`}
+                  >
+                    <p className="text-xs sm:text-sm theme-text-muted">
                       Menampilkan{" "}
-                      <span className="font-semibold text-slate-600">
+                      <span className="font-semibold theme-text-secondary">
                         {
                           filteredMateri.length
                         }
                       </span>{" "}
                       dari{" "}
-                      <span className="font-semibold text-slate-600">
+                      <span className="font-semibold theme-text-secondary">
                         {
                           materiList.length
                         }
@@ -1709,19 +1614,12 @@ export default function GuruMateriPage() {
                       materi
                     </p>
 
-                    <p className="text-xs text-slate-400 flex items-center gap-1.5">
-
-                      <Clock
-                        size={12}
-                      />
-
+                    <p className="text-xs theme-text-muted flex items-center gap-1.5">
+                      <Clock size={12} />
                       Data berasal dari sistem SmartSchool
-
                     </p>
-
                   </div>
                 )}
-
             </div>
           </div>
         </main>

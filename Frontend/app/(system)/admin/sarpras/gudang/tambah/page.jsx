@@ -18,7 +18,6 @@ import {
   Warehouse,
   ClipboardList,
   Wrench,
-  FileText,
   Loader2,
   PackageCheck,
   CircleAlert,
@@ -33,6 +32,85 @@ import {
   getKategoriAset,
   createAset,
 } from "../../../../../../services/sarpras.service";
+
+// ============================================================
+// GLOBAL THEME HELPERS
+// ============================================================
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeInfoStrongSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_14%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+
+const themeCard =
+  `theme-card ${themeCardShadow}`;
+
+const themeInputBase = `
+  theme-input
+  w-full rounded-xl px-4 py-3 text-sm
+  outline-none transition
+  disabled:cursor-not-allowed
+  disabled:opacity-60
+  ${themeFocus}
+`;
 
 export default function TambahAsetPage() {
   const router = useRouter();
@@ -95,8 +173,13 @@ export default function TambahAsetPage() {
           kategoriRes ??
           [];
 
-        setGudangList(Array.isArray(gudangData) ? gudangData : []);
-        setKategoriList(Array.isArray(kategoriData) ? kategoriData : []);
+        setGudangList(
+          Array.isArray(gudangData) ? gudangData : []
+        );
+
+        setKategoriList(
+          Array.isArray(kategoriData) ? kategoriData : []
+        );
       } catch (err) {
         console.error("Gagal mengambil master data:", err);
 
@@ -165,16 +248,19 @@ export default function TambahAsetPage() {
       !Number.isInteger(Number(form.jumlah)) ||
       Number(form.jumlah) < 1
     ) {
-      newErrors.jumlah = "Jumlah harus berupa angka minimal 1.";
+      newErrors.jumlah =
+        "Jumlah harus berupa angka minimal 1.";
     }
 
     if (form.jumlahStok === "") {
-      newErrors.jumlahStok = "Jumlah stok wajib diisi.";
+      newErrors.jumlahStok =
+        "Jumlah stok wajib diisi.";
     } else if (
       !Number.isInteger(Number(form.jumlahStok)) ||
       Number(form.jumlahStok) < 0
     ) {
-      newErrors.jumlahStok = "Jumlah stok harus berupa angka minimal 0.";
+      newErrors.jumlahStok =
+        "Jumlah stok harus berupa angka minimal 0.";
     } else if (
       form.jumlah &&
       Number(form.jumlahStok) > Number(form.jumlah)
@@ -184,7 +270,8 @@ export default function TambahAsetPage() {
     }
 
     if (form.stokMinimum === "") {
-      newErrors.stokMinimum = "Stok minimum wajib diisi.";
+      newErrors.stokMinimum =
+        "Stok minimum wajib diisi.";
     } else if (
       !Number.isInteger(Number(form.stokMinimum)) ||
       Number(form.stokMinimum) < 0
@@ -194,11 +281,13 @@ export default function TambahAsetPage() {
     }
 
     if (!form.kategoriAsetId) {
-      newErrors.kategoriAsetId = "Kategori aset wajib dipilih.";
+      newErrors.kategoriAsetId =
+        "Kategori aset wajib dipilih.";
     }
 
     if (!form.gudangId) {
-      newErrors.gudangId = "Gudang wajib dipilih.";
+      newErrors.gudangId =
+        "Gudang wajib dipilih.";
     }
 
     if (form.tanggalPembelian) {
@@ -246,7 +335,9 @@ export default function TambahAsetPage() {
     const isValid = validateForm();
 
     if (!isValid) {
-      setError("Periksa kembali data yang belum sesuai.");
+      setError(
+        "Periksa kembali data yang belum sesuai."
+      );
       return;
     }
 
@@ -269,9 +360,14 @@ export default function TambahAsetPage() {
 
         status: form.status || "aktif",
 
-        tanggalPembelian: form.tanggalPembelian || null,
-        perawatanTerakhir: form.perawatanTerakhir || null,
-        tanggalRusak: form.tanggalRusak || null,
+        tanggalPembelian:
+          form.tanggalPembelian || null,
+
+        perawatanTerakhir:
+          form.perawatanTerakhir || null,
+
+        tanggalRusak:
+          form.tanggalRusak || null,
 
         deskripsiKerusakan:
           form.deskripsiKerusakan?.trim() || null,
@@ -279,7 +375,8 @@ export default function TambahAsetPage() {
         statusPerbaikan:
           form.statusPerbaikan?.trim() || null,
 
-        catatan: form.catatan?.trim() || null,
+        catatan:
+          form.catatan?.trim() || null,
       };
 
       await createAset(payload);
@@ -337,14 +434,16 @@ export default function TambahAsetPage() {
 
   const selectedGudang = useMemo(() => {
     return gudangList.find(
-      (item) => String(item.id) === String(form.gudangId)
+      (item) =>
+        String(item.id) === String(form.gudangId)
     );
   }, [gudangList, form.gudangId]);
 
   const selectedKategori = useMemo(() => {
     return kategoriList.find(
       (item) =>
-        String(item.id) === String(form.kategoriAsetId)
+        String(item.id) ===
+        String(form.kategoriAsetId)
     );
   }, [kategoriList, form.kategoriAsetId]);
 
@@ -362,7 +461,8 @@ export default function TambahAsetPage() {
     form.gudangId,
   ];
 
-  const completedFields = requiredFields.filter(Boolean).length;
+  const completedFields =
+    requiredFields.filter(Boolean).length;
 
   const completionPercentage = Math.round(
     (completedFields / requiredFields.length) * 100
@@ -373,51 +473,59 @@ export default function TambahAsetPage() {
   // =========================================================
 
   const stockStatus = useMemo(() => {
-    const stok = Number(form.jumlahStok || 0);
-    const minimum = Number(form.stokMinimum || 0);
+    const stok = Number(
+      form.jumlahStok || 0
+    );
 
-    if (!form.jumlahStok || form.stokMinimum === "") {
+    const minimum = Number(
+      form.stokMinimum || 0
+    );
+
+    if (
+      !form.jumlahStok ||
+      form.stokMinimum === ""
+    ) {
       return {
         label: "Belum ditentukan",
-        className: "bg-slate-100 text-slate-600",
+        className: `${themeNeutralSurface} theme-text-muted`,
       };
     }
 
     if (stok <= minimum) {
       return {
         label: "Stok rendah",
-        className: "bg-orange-50 text-orange-700",
+        className: `${themeWarningSurface} theme-warning`,
       };
     }
 
     return {
       label: "Stok aman",
-      className: "bg-emerald-50 text-emerald-700",
+      className: `${themeSuccessSurface} theme-success`,
     };
-  }, [form.jumlahStok, form.stokMinimum]);
+  }, [
+    form.jumlahStok,
+    form.stokMinimum,
+  ]);
 
   // =========================================================
   // REUSABLE CLASS
   // =========================================================
 
   const inputClass = (name) => `
-    w-full rounded-xl border bg-white px-4 py-3 text-sm
-    text-slate-900 placeholder:text-slate-400
-    outline-none transition
+    ${themeInputBase}
     ${
       errors[name]
-        ? "border-red-300 ring-2 ring-red-100"
-        : "border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
+        ? `${themeDangerBorder} ring-2 ring-[color-mix(in_srgb,var(--color-text)_10%,transparent)]`
+        : `${themeNeutralBorder}`
     }
   `;
 
   const selectClass = (name) => `
-    w-full rounded-xl border bg-white px-4 py-3 text-sm
-    text-slate-900 outline-none transition
+    ${themeInputBase}
     ${
       errors[name]
-        ? "border-red-300 ring-2 ring-red-100"
-        : "border-slate-200 focus:border-blue-500 focus:ring-4 focus:ring-blue-50"
+        ? `${themeDangerBorder} ring-2 ring-[color-mix(in_srgb,var(--color-text)_10%,transparent)]`
+        : `${themeNeutralBorder}`
     }
   `;
 
@@ -426,39 +534,27 @@ export default function TambahAsetPage() {
   // =========================================================
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
+    <div className="theme-page min-h-screen">
       <div className="flex min-h-screen items-stretch">
 
-        {/* =====================================================
-            SIDEBAR
-        ====================================================== */}
-
+        {/* SIDEBAR */}
         <aside className="relative z-40 shrink-0 self-stretch">
           <Sidebar />
         </aside>
 
-        {/* =====================================================
-            AREA KANAN
-        ====================================================== */}
-
+        {/* AREA KANAN */}
         <div className="flex min-w-0 flex-1 flex-col">
 
           {/* HEADER */}
-          <div className="relative z-30 shrink-0">
+          <div className="theme-header relative z-30 shrink-0">
             <Header />
           </div>
 
-          {/* ===================================================
-              MAIN CONTENT
-          ==================================================== */}
-
+          {/* MAIN */}
           <main className="min-w-0 flex-1 overflow-x-hidden">
             <div className="mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 lg:px-8">
 
-              {/* =================================================
-                  PAGE HEADER
-              ================================================== */}
-
+              {/* PAGE HEADER */}
               <div className="mb-6">
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
@@ -466,27 +562,50 @@ export default function TambahAsetPage() {
 
                     <Link
                       href="/admin/sarpras/gudang"
-                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-600"
+                      className={`
+                        flex h-11 w-11 shrink-0 items-center
+                        justify-center rounded-xl
+                        ${themeNeutralBorder}
+                        theme-card
+                        theme-text-secondary
+                        ${themeSmallShadow}
+                        transition
+                        hover:border-[color-mix(in_srgb,var(--color-primary)_24%,transparent)]
+                        hover:bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]
+                        hover:text-[var(--color-primary)]
+                      `}
                     >
                       <ArrowLeft className="h-5 w-5" />
                     </Link>
 
                     <div className="min-w-0">
-                      <div className="mb-1 flex flex-wrap items-center gap-2 text-xs font-medium text-slate-500">
-                        <span>Sarpras</span>
-                        <span>/</span>
-                        <span>Gudang & Aset</span>
-                        <span>/</span>
-                        <span className="text-blue-600">
+                      <div className="mb-1 flex flex-wrap items-center gap-2 text-xs font-medium">
+                        <span className="theme-text-muted">
+                          Sarpras
+                        </span>
+
+                        <span className="theme-text-muted">
+                          /
+                        </span>
+
+                        <span className="theme-text-muted">
+                          Gudang & Aset
+                        </span>
+
+                        <span className="theme-text-muted">
+                          /
+                        </span>
+
+                        <span className={themePrimaryText}>
                           Tambah Aset
                         </span>
                       </div>
 
-                      <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+                      <h1 className="theme-text text-2xl font-bold tracking-tight sm:text-3xl">
                         Tambah Aset
                       </h1>
 
-                      <p className="mt-1 text-sm text-slate-500">
+                      <p className="theme-text-secondary mt-1 text-sm">
                         Tambahkan data aset baru ke dalam sistem
                         sarana dan prasarana.
                       </p>
@@ -495,7 +614,17 @@ export default function TambahAsetPage() {
 
                   <Link
                     href="/admin/sarpras/gudang"
-                    className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
+                    className={`
+                      inline-flex shrink-0 items-center
+                      justify-center gap-2 rounded-xl
+                      ${themeNeutralBorder}
+                      theme-card
+                      theme-text-secondary
+                      px-4 py-2.5 text-sm font-semibold
+                      ${themeSmallShadow}
+                      transition
+                      ${themeNeutralHover}
+                    `}
                   >
                     <X className="h-4 w-4" />
                     Batal
@@ -503,12 +632,17 @@ export default function TambahAsetPage() {
                 </div>
               </div>
 
-              {/* =================================================
-                  ALERT
-              ================================================== */}
-
+              {/* ALERT ERROR */}
               {error && (
-                <div className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3.5 text-red-700">
+                <div
+                  className={`
+                    mb-6 flex items-start gap-3 rounded-xl
+                    border px-4 py-3.5
+                    ${themeDangerBorder}
+                    ${themeDangerSurface}
+                    theme-danger
+                  `}
+                >
                   <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
 
                   <div className="min-w-0">
@@ -516,7 +650,7 @@ export default function TambahAsetPage() {
                       Terjadi kesalahan
                     </p>
 
-                    <p className="mt-0.5 text-sm text-red-600">
+                    <p className="theme-text-secondary mt-0.5 text-sm">
                       {error}
                     </p>
                   </div>
@@ -524,15 +658,30 @@ export default function TambahAsetPage() {
                   <button
                     type="button"
                     onClick={() => setError("")}
-                    className="ml-auto shrink-0 rounded-lg p-1 text-red-500 hover:bg-red-100"
+                    className="
+                      theme-text-muted
+                      ml-auto shrink-0 rounded-lg p-1
+                      transition
+                      hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]
+                      hover:text-[var(--color-text)]
+                    "
                   >
                     <X className="h-4 w-4" />
                   </button>
                 </div>
               )}
 
+              {/* ALERT SUCCESS */}
               {success && (
-                <div className="mb-6 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3.5 text-emerald-700">
+                <div
+                  className={`
+                    mb-6 flex items-start gap-3 rounded-xl
+                    border px-4 py-3.5
+                    ${themeSuccessBorder}
+                    ${themeSuccessSurface}
+                    theme-success
+                  `}
+                >
                   <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" />
 
                   <div>
@@ -540,45 +689,51 @@ export default function TambahAsetPage() {
                       Berhasil
                     </p>
 
-                    <p className="mt-0.5 text-sm text-emerald-600">
+                    <p className="theme-text-secondary mt-0.5 text-sm">
                       {success}
                     </p>
                   </div>
                 </div>
               )}
 
-              {/* =================================================
-                  FORM + SUMMARY
-              ================================================== */}
-
+              {/* FORM */}
               <form onSubmit={handleSubmit}>
                 <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
 
-                  {/* =================================================
-                      LEFT - FORM
-                  ================================================== */}
-
+                  {/* LEFT */}
                   <div className="min-w-0 space-y-6">
 
-                    {/* =============================================
-                        INFORMASI UTAMA
-                    ============================================== */}
-
-                    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-
-                      <div className="border-b border-slate-100 px-5 py-5 sm:px-6">
+                    {/* INFORMASI UTAMA */}
+                    <section
+                      className={`
+                        overflow-hidden rounded-2xl
+                        ${themeCard}
+                      `}
+                    >
+                      <div
+                        className={`
+                          ${themeDivider}
+                          border-b px-5 py-5 sm:px-6
+                        `}
+                      >
                         <div className="flex items-center gap-3">
-
-                          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                          <div
+                            className={`
+                              flex h-10 w-10 items-center
+                              justify-center rounded-xl
+                              ${themePrimarySoft}
+                              ${themePrimaryText}
+                            `}
+                          >
                             <Package className="h-5 w-5" />
                           </div>
 
                           <div>
-                            <h2 className="text-base font-bold text-slate-900">
+                            <h2 className="theme-text text-base font-bold">
                               Informasi Aset
                             </h2>
 
-                            <p className="mt-0.5 text-xs text-slate-500">
+                            <p className="theme-text-muted mt-0.5 text-xs">
                               Informasi dasar mengenai aset.
                             </p>
                           </div>
@@ -589,9 +744,9 @@ export default function TambahAsetPage() {
 
                         {/* KODE */}
                         <div>
-                          <label className="mb-2 block text-sm font-semibold text-slate-700">
+                          <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                             Kode Aset
-                            <span className="ml-1 text-red-500">
+                            <span className="theme-danger ml-1">
                               *
                             </span>
                           </label>
@@ -606,7 +761,7 @@ export default function TambahAsetPage() {
                           />
 
                           {errors.kode && (
-                            <p className="mt-1.5 text-xs text-red-600">
+                            <p className="theme-danger mt-1.5 text-xs">
                               {errors.kode}
                             </p>
                           )}
@@ -614,9 +769,9 @@ export default function TambahAsetPage() {
 
                         {/* NAMA */}
                         <div>
-                          <label className="mb-2 block text-sm font-semibold text-slate-700">
+                          <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                             Nama Aset
-                            <span className="ml-1 text-red-500">
+                            <span className="theme-danger ml-1">
                               *
                             </span>
                           </label>
@@ -631,7 +786,7 @@ export default function TambahAsetPage() {
                           />
 
                           {errors.nama && (
-                            <p className="mt-1.5 text-xs text-red-600">
+                            <p className="theme-danger mt-1.5 text-xs">
                               {errors.nama}
                             </p>
                           )}
@@ -639,7 +794,7 @@ export default function TambahAsetPage() {
 
                         {/* KONDISI */}
                         <div>
-                          <label className="mb-2 block text-sm font-semibold text-slate-700">
+                          <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                             Kondisi Aset
                           </label>
 
@@ -648,17 +803,15 @@ export default function TambahAsetPage() {
                             value={form.kondisi}
                             onChange={handleChange}
                             className={selectClass("kondisi")}
-                            style={{
-                              color: "#0F172A",
-                              colorScheme: "light",
-                            }}
                           >
                             <option value="baik">
                               Baik
                             </option>
+
                             <option value="rusak_ringan">
                               Rusak Ringan
                             </option>
+
                             <option value="rusak_berat">
                               Rusak Berat
                             </option>
@@ -667,7 +820,7 @@ export default function TambahAsetPage() {
 
                         {/* STATUS */}
                         <div>
-                          <label className="mb-2 block text-sm font-semibold text-slate-700">
+                          <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                             Status
                           </label>
 
@@ -676,14 +829,11 @@ export default function TambahAsetPage() {
                             value={form.status}
                             onChange={handleChange}
                             className={selectClass("status")}
-                            style={{
-                              color: "#0F172A",
-                              colorScheme: "light",
-                            }}
                           >
                             <option value="aktif">
                               Aktif
                             </option>
+
                             <option value="nonaktif">
                               Nonaktif
                             </option>
@@ -692,25 +842,38 @@ export default function TambahAsetPage() {
                       </div>
                     </section>
 
-                    {/* =============================================
-                        STOK
-                    ============================================== */}
-
-                    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-
-                      <div className="border-b border-slate-100 px-5 py-5 sm:px-6">
+                    {/* STOK */}
+                    <section
+                      className={`
+                        overflow-hidden rounded-2xl
+                        ${themeCard}
+                      `}
+                    >
+                      <div
+                        className={`
+                          ${themeDivider}
+                          border-b px-5 py-5 sm:px-6
+                        `}
+                      >
                         <div className="flex items-center gap-3">
 
-                          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                          <div
+                            className={`
+                              flex h-10 w-10 items-center
+                              justify-center rounded-xl
+                              ${themeInfoSurface}
+                              theme-info
+                            `}
+                          >
                             <Boxes className="h-5 w-5" />
                           </div>
 
                           <div>
-                            <h2 className="text-base font-bold text-slate-900">
+                            <h2 className="theme-text text-base font-bold">
                               Persediaan & Stok
                             </h2>
 
-                            <p className="mt-0.5 text-xs text-slate-500">
+                            <p className="theme-text-muted mt-0.5 text-xs">
                               Tentukan jumlah aset dan batas stok.
                             </p>
                           </div>
@@ -721,9 +884,9 @@ export default function TambahAsetPage() {
 
                         {/* JUMLAH */}
                         <div>
-                          <label className="mb-2 block text-sm font-semibold text-slate-700">
+                          <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                             Jumlah Aset
-                            <span className="ml-1 text-red-500">
+                            <span className="theme-danger ml-1">
                               *
                             </span>
                           </label>
@@ -739,7 +902,7 @@ export default function TambahAsetPage() {
                           />
 
                           {errors.jumlah && (
-                            <p className="mt-1.5 text-xs text-red-600">
+                            <p className="theme-danger mt-1.5 text-xs">
                               {errors.jumlah}
                             </p>
                           )}
@@ -747,9 +910,9 @@ export default function TambahAsetPage() {
 
                         {/* STOK */}
                         <div>
-                          <label className="mb-2 block text-sm font-semibold text-slate-700">
+                          <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                             Jumlah Stok
-                            <span className="ml-1 text-red-500">
+                            <span className="theme-danger ml-1">
                               *
                             </span>
                           </label>
@@ -765,7 +928,7 @@ export default function TambahAsetPage() {
                           />
 
                           {errors.jumlahStok && (
-                            <p className="mt-1.5 text-xs text-red-600">
+                            <p className="theme-danger mt-1.5 text-xs">
                               {errors.jumlahStok}
                             </p>
                           )}
@@ -773,9 +936,9 @@ export default function TambahAsetPage() {
 
                         {/* MINIMUM */}
                         <div>
-                          <label className="mb-2 block text-sm font-semibold text-slate-700">
+                          <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                             Stok Minimum
-                            <span className="ml-1 text-red-500">
+                            <span className="theme-danger ml-1">
                               *
                             </span>
                           </label>
@@ -791,7 +954,7 @@ export default function TambahAsetPage() {
                           />
 
                           {errors.stokMinimum && (
-                            <p className="mt-1.5 text-xs text-red-600">
+                            <p className="theme-danger mt-1.5 text-xs">
                               {errors.stokMinimum}
                             </p>
                           )}
@@ -799,25 +962,38 @@ export default function TambahAsetPage() {
                       </div>
                     </section>
 
-                    {/* =============================================
-                        LOKASI & MASTER
-                    ============================================== */}
-
-                    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-
-                      <div className="border-b border-slate-100 px-5 py-5 sm:px-6">
+                    {/* LOKASI & MASTER */}
+                    <section
+                      className={`
+                        overflow-hidden rounded-2xl
+                        ${themeCard}
+                      `}
+                    >
+                      <div
+                        className={`
+                          ${themeDivider}
+                          border-b px-5 py-5 sm:px-6
+                        `}
+                      >
                         <div className="flex items-center gap-3">
 
-                          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                          <div
+                            className={`
+                              flex h-10 w-10 items-center
+                              justify-center rounded-xl
+                              ${themeSuccessSurface}
+                              theme-success
+                            `}
+                          >
                             <MapPin className="h-5 w-5" />
                           </div>
 
                           <div>
-                            <h2 className="text-base font-bold text-slate-900">
+                            <h2 className="theme-text text-base font-bold">
                               Lokasi & Klasifikasi
                             </h2>
 
-                            <p className="mt-0.5 text-xs text-slate-500">
+                            <p className="theme-text-muted mt-0.5 text-xs">
                               Tentukan lokasi, gudang, dan kategori aset.
                             </p>
                           </div>
@@ -828,12 +1004,19 @@ export default function TambahAsetPage() {
 
                         {/* LOKASI */}
                         <div>
-                          <label className="mb-2 block text-sm font-semibold text-slate-700">
+                          <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                             Lokasi
                           </label>
 
                           <div className="relative">
-                            <MapPin className="pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                            <MapPin
+                              className="
+                                theme-text-muted
+                                pointer-events-none
+                                absolute left-3.5 top-1/2
+                                h-4 w-4 -translate-y-1/2
+                              "
+                            />
 
                             <input
                               type="text"
@@ -841,37 +1024,36 @@ export default function TambahAsetPage() {
                               value={form.lokasi}
                               onChange={handleChange}
                               placeholder="Contoh: Ruang Guru"
-                              className={`${inputClass(
-                                "lokasi"
-                              )} pl-10`}
+                              className={`${inputClass("lokasi")} pl-10`}
                             />
                           </div>
                         </div>
 
                         {/* GUDANG */}
                         <div>
-                          <label className="mb-2 block text-sm font-semibold text-slate-700">
+                          <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                             Gudang
-                            <span className="ml-1 text-red-500">
+                            <span className="theme-danger ml-1">
                               *
                             </span>
                           </label>
 
                           <div className="relative">
-                            <Warehouse className="pointer-events-none absolute left-3.5 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                            <Warehouse
+                              className="
+                                theme-text-muted
+                                pointer-events-none
+                                absolute left-3.5 top-1/2 z-10
+                                h-4 w-4 -translate-y-1/2
+                              "
+                            />
 
                             <select
                               name="gudangId"
                               value={form.gudangId}
                               onChange={handleChange}
                               disabled={loadingMaster}
-                              className={`${selectClass(
-                                "gudangId"
-                              )} pl-10`}
-                              style={{
-                                color: "#0F172A",
-                                colorScheme: "light",
-                              }}
+                              className={`${selectClass("gudangId")} pl-10`}
                             >
                               <option value="">
                                 {loadingMaster
@@ -891,7 +1073,7 @@ export default function TambahAsetPage() {
                           </div>
 
                           {errors.gudangId && (
-                            <p className="mt-1.5 text-xs text-red-600">
+                            <p className="theme-danger mt-1.5 text-xs">
                               {errors.gudangId}
                             </p>
                           )}
@@ -899,15 +1081,22 @@ export default function TambahAsetPage() {
 
                         {/* KATEGORI */}
                         <div className="sm:col-span-2">
-                          <label className="mb-2 block text-sm font-semibold text-slate-700">
+                          <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                             Kategori Aset
-                            <span className="ml-1 text-red-500">
+                            <span className="theme-danger ml-1">
                               *
                             </span>
                           </label>
 
                           <div className="relative">
-                            <Tags className="pointer-events-none absolute left-3.5 top-1/2 z-10 h-4 w-4 -translate-y-1/2 text-slate-400" />
+                            <Tags
+                              className="
+                                theme-text-muted
+                                pointer-events-none
+                                absolute left-3.5 top-1/2 z-10
+                                h-4 w-4 -translate-y-1/2
+                              "
+                            />
 
                             <select
                               name="kategoriAsetId"
@@ -917,10 +1106,6 @@ export default function TambahAsetPage() {
                               className={`${selectClass(
                                 "kategoriAsetId"
                               )} pl-10`}
-                              style={{
-                                color: "#0F172A",
-                                colorScheme: "light",
-                              }}
                             >
                               <option value="">
                                 {loadingMaster
@@ -940,7 +1125,7 @@ export default function TambahAsetPage() {
                           </div>
 
                           {errors.kategoriAsetId && (
-                            <p className="mt-1.5 text-xs text-red-600">
+                            <p className="theme-danger mt-1.5 text-xs">
                               {errors.kategoriAsetId}
                             </p>
                           )}
@@ -948,25 +1133,38 @@ export default function TambahAsetPage() {
                       </div>
                     </section>
 
-                    {/* =============================================
-                        TANGGAL
-                    ============================================== */}
-
-                    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-
-                      <div className="border-b border-slate-100 px-5 py-5 sm:px-6">
+                    {/* TANGGAL */}
+                    <section
+                      className={`
+                        overflow-hidden rounded-2xl
+                        ${themeCard}
+                      `}
+                    >
+                      <div
+                        className={`
+                          ${themeDivider}
+                          border-b px-5 py-5 sm:px-6
+                        `}
+                      >
                         <div className="flex items-center gap-3">
 
-                          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50 text-violet-600">
+                          <div
+                            className={`
+                              flex h-10 w-10 items-center
+                              justify-center rounded-xl
+                              ${themePrimarySoft}
+                              ${themePrimaryText}
+                            `}
+                          >
                             <CalendarDays className="h-5 w-5" />
                           </div>
 
                           <div>
-                            <h2 className="text-base font-bold text-slate-900">
+                            <h2 className="theme-text text-base font-bold">
                               Riwayat Aset
                             </h2>
 
-                            <p className="mt-0.5 text-xs text-slate-500">
+                            <p className="theme-text-muted mt-0.5 text-xs">
                               Informasi waktu pembelian dan perawatan aset.
                             </p>
                           </div>
@@ -977,7 +1175,7 @@ export default function TambahAsetPage() {
 
                         {/* PEMBELIAN */}
                         <div>
-                          <label className="mb-2 block text-sm font-semibold text-slate-700">
+                          <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                             Tanggal Pembelian
                           </label>
 
@@ -992,7 +1190,7 @@ export default function TambahAsetPage() {
                           />
 
                           {errors.tanggalPembelian && (
-                            <p className="mt-1.5 text-xs text-red-600">
+                            <p className="theme-danger mt-1.5 text-xs">
                               {errors.tanggalPembelian}
                             </p>
                           )}
@@ -1000,7 +1198,7 @@ export default function TambahAsetPage() {
 
                         {/* PERAWATAN */}
                         <div>
-                          <label className="mb-2 block text-sm font-semibold text-slate-700">
+                          <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                             Perawatan Terakhir
                           </label>
 
@@ -1015,7 +1213,7 @@ export default function TambahAsetPage() {
                           />
 
                           {errors.perawatanTerakhir && (
-                            <p className="mt-1.5 text-xs text-red-600">
+                            <p className="theme-danger mt-1.5 text-xs">
                               {errors.perawatanTerakhir}
                             </p>
                           )}
@@ -1023,7 +1221,7 @@ export default function TambahAsetPage() {
 
                         {/* RUSAK */}
                         <div>
-                          <label className="mb-2 block text-sm font-semibold text-slate-700">
+                          <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                             Tanggal Rusak
                           </label>
 
@@ -1038,7 +1236,7 @@ export default function TambahAsetPage() {
                           />
 
                           {errors.tanggalRusak && (
-                            <p className="mt-1.5 text-xs text-red-600">
+                            <p className="theme-danger mt-1.5 text-xs">
                               {errors.tanggalRusak}
                             </p>
                           )}
@@ -1046,25 +1244,38 @@ export default function TambahAsetPage() {
                       </div>
                     </section>
 
-                    {/* =============================================
-                        PERBAIKAN
-                    ============================================== */}
-
-                    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-
-                      <div className="border-b border-slate-100 px-5 py-5 sm:px-6">
+                    {/* PERBAIKAN */}
+                    <section
+                      className={`
+                        overflow-hidden rounded-2xl
+                        ${themeCard}
+                      `}
+                    >
+                      <div
+                        className={`
+                          ${themeDivider}
+                          border-b px-5 py-5 sm:px-6
+                        `}
+                      >
                         <div className="flex items-center gap-3">
 
-                          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-50 text-orange-600">
+                          <div
+                            className={`
+                              flex h-10 w-10 items-center
+                              justify-center rounded-xl
+                              ${themeWarningSurface}
+                              theme-warning
+                            `}
+                          >
                             <Wrench className="h-5 w-5" />
                           </div>
 
                           <div>
-                            <h2 className="text-base font-bold text-slate-900">
+                            <h2 className="theme-text text-base font-bold">
                               Kerusakan & Perbaikan
                             </h2>
 
-                            <p className="mt-0.5 text-xs text-slate-500">
+                            <p className="theme-text-muted mt-0.5 text-xs">
                               Informasi kerusakan dan status perbaikan aset.
                             </p>
                           </div>
@@ -1075,7 +1286,7 @@ export default function TambahAsetPage() {
 
                         {/* DESKRIPSI */}
                         <div className="sm:col-span-2">
-                          <label className="mb-2 block text-sm font-semibold text-slate-700">
+                          <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                             Deskripsi Kerusakan
                           </label>
 
@@ -1093,7 +1304,7 @@ export default function TambahAsetPage() {
 
                         {/* STATUS PERBAIKAN */}
                         <div>
-                          <label className="mb-2 block text-sm font-semibold text-slate-700">
+                          <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                             Status Perbaikan
                           </label>
 
@@ -1104,10 +1315,6 @@ export default function TambahAsetPage() {
                             className={selectClass(
                               "statusPerbaikan"
                             )}
-                            style={{
-                              color: "#0F172A",
-                              colorScheme: "light",
-                            }}
                           >
                             <option value="">
                               Pilih status perbaikan
@@ -1129,7 +1336,7 @@ export default function TambahAsetPage() {
 
                         {/* CATATAN */}
                         <div>
-                          <label className="mb-2 block text-sm font-semibold text-slate-700">
+                          <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                             Catatan
                           </label>
 
@@ -1147,17 +1354,27 @@ export default function TambahAsetPage() {
                       </div>
                     </section>
 
-                    {/* =============================================
-                        BUTTON
-                    ============================================== */}
-
+                    {/* BUTTON */}
                     <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
 
                       <button
                         type="button"
                         onClick={handleReset}
                         disabled={submitting}
-                        className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                        className={`
+                          inline-flex min-h-[46px]
+                          items-center justify-center gap-2
+                          rounded-xl
+                          ${themeNeutralBorder}
+                          theme-card
+                          theme-text-secondary
+                          px-5 text-sm font-semibold
+                          ${themeSmallShadow}
+                          transition
+                          ${themeNeutralHover}
+                          disabled:cursor-not-allowed
+                          disabled:opacity-60
+                        `}
                       >
                         <X className="h-4 w-4" />
                         Reset
@@ -1165,8 +1382,23 @@ export default function TambahAsetPage() {
 
                       <button
                         type="submit"
-                        disabled={submitting || loadingMaster}
-                        className="inline-flex min-h-[46px] items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                        disabled={
+                          submitting ||
+                          loadingMaster
+                        }
+                        className={`
+                          inline-flex min-h-[46px]
+                          items-center justify-center gap-2
+                          rounded-xl
+                          ${themePrimaryGradient}
+                          px-6 text-sm font-semibold
+                          text-[var(--color-card)]
+                          ${themePrimaryShadow}
+                          transition
+                          hover:brightness-95
+                          disabled:cursor-not-allowed
+                          disabled:opacity-60
+                        `}
                       >
                         {submitting ? (
                           <>
@@ -1183,26 +1415,27 @@ export default function TambahAsetPage() {
                     </div>
                   </div>
 
-                  {/* =================================================
-                      RIGHT - SUMMARY
-                  ================================================== */}
-
+                  {/* RIGHT - SUMMARY */}
                   <aside className="min-w-0 xl:sticky xl:top-6">
-
                     <div className="space-y-5">
 
-                      {/* =============================================
-                          PREVIEW CARD
-                      ============================================== */}
-
-                      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-
-                        <div className="bg-gradient-to-br from-blue-600 to-indigo-700 p-6 text-white">
-
+                      {/* PREVIEW */}
+                      <div
+                        className={`
+                          overflow-hidden rounded-2xl
+                          ${themeCard}
+                        `}
+                      >
+                        <div
+                          className={`
+                            ${themePrimaryGradient}
+                            p-6 text-[var(--color-card)]
+                          `}
+                        >
                           <div className="mb-6 flex items-start justify-between gap-3">
 
                             <div>
-                              <p className="text-xs font-medium text-blue-100">
+                              <p className="text-xs font-medium opacity-75">
                                 Preview Aset
                               </p>
 
@@ -1211,28 +1444,54 @@ export default function TambahAsetPage() {
                               </h3>
                             </div>
 
-                            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/15">
+                            <div
+                              className="
+                                flex h-10 w-10 items-center
+                                justify-center rounded-xl
+                                bg-[color-mix(in_srgb,var(--color-card)_14%,transparent)]
+                              "
+                            >
                               <PackageCheck className="h-5 w-5" />
                             </div>
                           </div>
 
-                          <div className="rounded-xl border border-white/10 bg-white/10 p-4 backdrop-blur-sm">
-
-                            <p className="text-xs text-blue-100">
+                          <div
+                            className="
+                              rounded-xl
+                              border
+                              border-[color-mix(in_srgb,var(--color-card)_14%,transparent)]
+                              bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)]
+                              p-4
+                            "
+                          >
+                            <p className="text-xs opacity-75">
                               Nama Aset
                             </p>
 
                             <p className="mt-1 break-words text-lg font-bold">
-                              {form.nama || "Nama aset belum diisi"}
+                              {form.nama ||
+                                "Nama aset belum diisi"}
                             </p>
 
                             <div className="mt-3 flex flex-wrap items-center gap-2">
 
-                              <span className="rounded-lg bg-white/15 px-2.5 py-1 text-xs font-medium">
+                              <span
+                                className="
+                                  rounded-lg
+                                  bg-[color-mix(in_srgb,var(--color-card)_14%,transparent)]
+                                  px-2.5 py-1 text-xs font-medium
+                                "
+                              >
                                 {form.kode || "KODE"}
                               </span>
 
-                              <span className="rounded-lg bg-white/15 px-2.5 py-1 text-xs font-medium capitalize">
+                              <span
+                                className="
+                                  rounded-lg
+                                  bg-[color-mix(in_srgb,var(--color-card)_14%,transparent)]
+                                  px-2.5 py-1 text-xs font-medium capitalize
+                                "
+                              >
                                 {form.kondisi?.replace(
                                   "_",
                                   " "
@@ -1243,57 +1502,68 @@ export default function TambahAsetPage() {
                         </div>
 
                         {/* DETAIL */}
-                        <div className="divide-y divide-slate-100">
-
+                        <div
+                          className={`
+                            divide-y
+                            ${themeDivider.replace(
+                              "border-",
+                              ""
+                            )}
+                          `}
+                        >
                           <div className="flex items-center justify-between gap-4 px-5 py-4">
                             <div className="flex min-w-0 items-center gap-3">
-                              <Boxes className="h-4 w-4 shrink-0 text-slate-400" />
+                              <Boxes className="theme-text-muted h-4 w-4 shrink-0" />
 
-                              <span className="text-sm text-slate-500">
+                              <span className="theme-text-secondary text-sm">
                                 Jumlah
                               </span>
                             </div>
 
-                            <span className="shrink-0 text-sm font-bold text-slate-900">
+                            <span className="theme-text shrink-0 text-sm font-bold">
                               {form.jumlah || "0"}
                             </span>
                           </div>
 
                           <div className="flex items-center justify-between gap-4 px-5 py-4">
                             <div className="flex min-w-0 items-center gap-3">
-                              <PackageCheck className="h-4 w-4 shrink-0 text-slate-400" />
+                              <PackageCheck className="theme-text-muted h-4 w-4 shrink-0" />
 
-                              <span className="text-sm text-slate-500">
+                              <span className="theme-text-secondary text-sm">
                                 Stok
                               </span>
                             </div>
 
-                            <span className="shrink-0 text-sm font-bold text-slate-900">
+                            <span className="theme-text shrink-0 text-sm font-bold">
                               {form.jumlahStok || "0"}
                             </span>
                           </div>
 
                           <div className="flex items-center justify-between gap-4 px-5 py-4">
                             <div className="flex min-w-0 items-center gap-3">
-                              <CircleAlert className="h-4 w-4 shrink-0 text-slate-400" />
+                              <CircleAlert className="theme-text-muted h-4 w-4 shrink-0" />
 
-                              <span className="text-sm text-slate-500">
+                              <span className="theme-text-secondary text-sm">
                                 Minimum
                               </span>
                             </div>
 
-                            <span className="shrink-0 text-sm font-bold text-slate-900">
+                            <span className="theme-text shrink-0 text-sm font-bold">
                               {form.stokMinimum || "0"}
                             </span>
                           </div>
 
                           <div className="flex items-center justify-between gap-4 px-5 py-4">
-                            <span className="text-sm text-slate-500">
+                            <span className="theme-text-secondary text-sm">
                               Status Stok
                             </span>
 
                             <span
-                              className={`rounded-lg px-2.5 py-1 text-xs font-semibold ${stockStatus.className}`}
+                              className={`
+                                rounded-lg px-2.5 py-1
+                                text-xs font-semibold
+                                ${stockStatus.className}
+                              `}
                             >
                               {stockStatus.label}
                             </span>
@@ -1301,24 +1571,33 @@ export default function TambahAsetPage() {
                         </div>
                       </div>
 
-                      {/* =============================================
-                          MASTER DATA
-                      ============================================== */}
-
-                      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-
+                      {/* MASTER DATA */}
+                      <div
+                        className={`
+                          rounded-2xl
+                          ${themeCard}
+                          p-5
+                        `}
+                      >
                         <div className="mb-4 flex items-center gap-3">
 
-                          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
+                          <div
+                            className={`
+                              flex h-9 w-9 items-center
+                              justify-center rounded-lg
+                              ${themeNeutralSurface}
+                              theme-text-secondary
+                            `}
+                          >
                             <ClipboardList className="h-4 w-4" />
                           </div>
 
                           <div>
-                            <h3 className="text-sm font-bold text-slate-900">
+                            <h3 className="theme-text text-sm font-bold">
                               Klasifikasi
                             </h3>
 
-                            <p className="text-xs text-slate-500">
+                            <p className="theme-text-muted text-xs">
                               Data master terpilih
                             </p>
                           </div>
@@ -1327,33 +1606,33 @@ export default function TambahAsetPage() {
                         <div className="space-y-4">
 
                           <div>
-                            <p className="mb-1 text-xs font-medium text-slate-400">
+                            <p className="theme-text-muted mb-1 text-xs font-medium">
                               Kategori
                             </p>
 
-                            <p className="break-words text-sm font-semibold text-slate-800">
+                            <p className="theme-text-secondary break-words text-sm font-semibold">
                               {selectedKategori?.nama ||
                                 "Belum dipilih"}
                             </p>
                           </div>
 
                           <div>
-                            <p className="mb-1 text-xs font-medium text-slate-400">
+                            <p className="theme-text-muted mb-1 text-xs font-medium">
                               Gudang
                             </p>
 
-                            <p className="break-words text-sm font-semibold text-slate-800">
+                            <p className="theme-text-secondary break-words text-sm font-semibold">
                               {selectedGudang?.nama ||
                                 "Belum dipilih"}
                             </p>
                           </div>
 
                           <div>
-                            <p className="mb-1 text-xs font-medium text-slate-400">
+                            <p className="theme-text-muted mb-1 text-xs font-medium">
                               Lokasi
                             </p>
 
-                            <p className="break-words text-sm font-semibold text-slate-800">
+                            <p className="theme-text-secondary break-words text-sm font-semibold">
                               {form.lokasi ||
                                 "Belum diisi"}
                             </p>
@@ -1361,32 +1640,45 @@ export default function TambahAsetPage() {
                         </div>
                       </div>
 
-                      {/* =============================================
-                          COMPLETENESS
-                      ============================================== */}
-
-                      <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-
+                      {/* COMPLETENESS */}
+                      <div
+                        className={`
+                          rounded-2xl
+                          ${themeCard}
+                          p-5
+                        `}
+                      >
                         <div className="mb-4 flex items-center justify-between gap-3">
 
                           <div>
-                            <h3 className="text-sm font-bold text-slate-900">
+                            <h3 className="theme-text text-sm font-bold">
                               Kelengkapan Data
                             </h3>
 
-                            <p className="mt-0.5 text-xs text-slate-500">
+                            <p className="theme-text-muted mt-0.5 text-xs">
                               Field wajib diisi
                             </p>
                           </div>
 
-                          <span className="text-sm font-bold text-blue-600">
+                          <span
+                            className={`${themePrimaryText} text-sm font-bold`}
+                          >
                             {completionPercentage}%
                           </span>
                         </div>
 
-                        <div className="h-2 overflow-hidden rounded-full bg-slate-100">
+                        <div
+                          className={`
+                            h-2 overflow-hidden rounded-full
+                            ${themeNeutralSurface}
+                          `}
+                        >
                           <div
-                            className="h-full rounded-full bg-blue-600 transition-all duration-300"
+                            className={`
+                              h-full rounded-full
+                              ${themePrimaryGradient}
+                              transition-all duration-300
+                            `}
                             style={{
                               width: `${completionPercentage}%`,
                             }}
@@ -1394,18 +1686,19 @@ export default function TambahAsetPage() {
                         </div>
 
                         <div className="mt-3 flex items-center justify-between text-xs">
-                          <span className="text-slate-500">
+
+                          <span className="theme-text-secondary">
                             {completedFields} dari{" "}
                             {requiredFields.length} field
                           </span>
 
                           {completionPercentage === 100 ? (
-                            <span className="flex items-center gap-1 font-semibold text-emerald-600">
+                            <span className="theme-success flex items-center gap-1 font-semibold">
                               <CheckCircle2 className="h-3.5 w-3.5" />
                               Lengkap
                             </span>
                           ) : (
-                            <span className="flex items-center gap-1 font-semibold text-orange-600">
+                            <span className="theme-warning flex items-center gap-1 font-semibold">
                               <Info className="h-3.5 w-3.5" />
                               Belum lengkap
                             </span>
@@ -1413,24 +1706,36 @@ export default function TambahAsetPage() {
                         </div>
                       </div>
 
-                      {/* =============================================
-                          INFO
-                      ============================================== */}
-
-                      <div className="rounded-2xl border border-blue-100 bg-blue-50/70 p-5">
-
+                      {/* INFO */}
+                      <div
+                        className={`
+                          rounded-2xl
+                          border
+                          ${themeInfoBorder}
+                          ${themeInfoSurface}
+                          p-5
+                        `}
+                      >
                         <div className="flex items-start gap-3">
 
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
+                          <div
+                            className={`
+                              flex h-9 w-9 shrink-0
+                              items-center justify-center
+                              rounded-lg
+                              ${themeInfoStrongSurface}
+                              theme-info
+                            `}
+                          >
                             <Info className="h-4 w-4" />
                           </div>
 
                           <div className="min-w-0">
-                            <h3 className="text-sm font-bold text-blue-900">
+                            <h3 className="theme-info text-sm font-bold">
                               Informasi
                             </h3>
 
-                            <p className="mt-1 text-xs leading-5 text-blue-700">
+                            <p className="theme-text-secondary mt-1 text-xs leading-5">
                               Pastikan kode, nama, jumlah, stok,
                               kategori, dan gudang sudah benar
                               sebelum menyimpan data aset.

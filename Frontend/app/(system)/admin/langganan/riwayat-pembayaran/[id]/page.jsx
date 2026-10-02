@@ -100,6 +100,25 @@ const PAYMENTS = {
 };
 
 // ============================================================
+// THEME HELPERS
+// ============================================================
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]";
+
+const themePrimaryHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
+
+const themeTextHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themePrimaryShadow =
+  "shadow-[0_10px_25px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]";
+
+// ============================================================
 // FORMAT
 // ============================================================
 
@@ -118,27 +137,23 @@ function PaymentStatus({ status }) {
   const config = {
     Berhasil: {
       icon: CheckCircle2,
-      className:
-        "bg-emerald-50 text-emerald-600 border-emerald-200",
+      className: "theme-success",
     },
 
     Menunggu: {
       icon: Clock3,
-      className:
-        "bg-amber-50 text-amber-600 border-amber-200",
+      className: "theme-warning",
     },
 
     Gagal: {
       icon: Clock3,
-      className:
-        "bg-red-50 text-red-600 border-red-200",
+      className: "theme-danger",
     },
   };
 
   const current = config[status] || {
     icon: Clock3,
-    className:
-      "bg-slate-100 text-slate-500 border-slate-200",
+    className: "theme-text-muted theme-border",
   };
 
   const Icon = current.icon;
@@ -172,17 +187,20 @@ function DetailBox({
   };
 
   return (
-    <div className="p-4 rounded-xl border border-slate-200 bg-white">
+    <div className="p-4 rounded-xl border theme-border theme-card">
       <div className="flex items-center gap-2">
-        <Icon size={15} className="text-[#155DFC]" />
+        <Icon
+          size={15}
+          className="text-[var(--color-primary)]"
+        />
 
-        <p className="text-[11px] font-medium uppercase tracking-wide text-slate-400">
+        <p className="text-[11px] font-medium uppercase tracking-wide theme-text-muted">
           {label}
         </p>
       </div>
 
       <div className="flex items-center justify-between gap-3 mt-2">
-        <p className="text-sm font-semibold text-slate-800 break-all">
+        <p className="text-sm font-semibold theme-text break-all">
           {value}
         </p>
 
@@ -190,7 +208,7 @@ function DetailBox({
           <button
             type="button"
             onClick={handleCopy}
-            className="w-8 h-8 shrink-0 flex items-center justify-center rounded-lg border border-slate-200 text-slate-400 hover:text-[#155DFC] hover:bg-[#eaf1ff] transition"
+            className={`w-8 h-8 shrink-0 flex items-center justify-center rounded-lg border theme-border theme-text-muted ${themePrimaryHover} hover:text-[var(--color-primary)] transition`}
             title="Salin"
           >
             <Copy size={14} />
@@ -219,15 +237,19 @@ export default function DetailPembayaranPage() {
     payment.amount + payment.transactionFee;
 
   return (
-    <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
-      {/* SIDEBAR */}
+    <div className="flex h-screen w-full theme-page overflow-hidden">
+      {/* ======================================================
+          SIDEBAR
+      ====================================================== */}
       <Sidebar
         active="riwayatPembayaran"
         setActive={() => {}}
         role="admin"
       />
 
-      {/* CONTENT */}
+      {/* ======================================================
+          CONTENT
+      ====================================================== */}
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         {/* HEADER */}
         <Header
@@ -240,9 +262,12 @@ export default function DetailPembayaranPage() {
           }}
         />
 
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto theme-page">
           <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-            {/* TOP */}
+
+            {/* ==================================================
+                TOP
+            ================================================== */}
             <div className="flex flex-col gap-4">
               <button
                 type="button"
@@ -251,7 +276,7 @@ export default function DetailPembayaranPage() {
                     "/admin/langganan/riwayat-pembayaran"
                   )
                 }
-                className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-[#155DFC] transition w-fit"
+                className="inline-flex items-center gap-2 text-sm font-medium theme-text-secondary hover:text-[var(--color-primary)] transition w-fit"
               >
                 <ArrowLeft size={16} />
                 Kembali ke Riwayat Pembayaran
@@ -259,13 +284,15 @@ export default function DetailPembayaranPage() {
 
               <div className="flex items-center justify-between gap-4 flex-wrap">
                 <div className="flex items-center gap-3">
-                  <div className="p-2.5 rounded-xl bg-gradient-to-br from-[#155DFC] to-[#0d47c9] text-white shadow-lg shadow-[#155DFC]/20">
+                  <div
+                    className={`p-2.5 rounded-xl ${themePrimarySoft} ${themePrimarySoftBorder} border text-[var(--color-primary)] ${themePrimaryShadow}`}
+                  >
                     <Receipt size={20} />
                   </div>
 
                   <div>
                     <div className="flex items-center gap-2 flex-wrap">
-                      <h1 className="text-2xl font-bold text-slate-800">
+                      <h1 className="text-2xl font-bold theme-text">
                         Detail Pembayaran
                       </h1>
 
@@ -274,7 +301,7 @@ export default function DetailPembayaranPage() {
                       />
                     </div>
 
-                    <p className="text-sm text-slate-500 mt-1">
+                    <p className="text-sm theme-text-secondary mt-1">
                       Informasi lengkap transaksi pembayaran
                       langganan sekolah.
                     </p>
@@ -287,7 +314,7 @@ export default function DetailPembayaranPage() {
                     onClick={() =>
                       window.location.reload()
                     }
-                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-600 text-sm font-semibold hover:bg-slate-50"
+                    className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border theme-border theme-card theme-text-secondary text-sm font-semibold ${themeTextHover} transition`}
                   >
                     <RefreshCw size={15} />
                     Refresh
@@ -296,7 +323,7 @@ export default function DetailPembayaranPage() {
                   {payment.status === "Berhasil" && (
                     <button
                       type="button"
-                      className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[#155DFC] text-white text-sm font-semibold hover:bg-[#0d47c9]"
+                      className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-[var(--color-primary)] text-white text-sm font-semibold hover:opacity-90 transition"
                     >
                       <Download size={15} />
                       Download Bukti
@@ -306,43 +333,47 @@ export default function DetailPembayaranPage() {
               </div>
             </div>
 
-            {/* HERO */}
-            <section className="bg-white rounded-xl border border-slate-200/80 shadow-sm">
+            {/* ==================================================
+                HERO
+            ================================================== */}
+            <section className="theme-card theme-border rounded-xl border shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)]">
               <div className="p-5 sm:p-6">
                 <div className="grid grid-cols-1 lg:grid-cols-[1fr_auto] gap-6 items-center">
                   <div className="flex items-start gap-4">
-                    <div className="w-14 h-14 rounded-xl bg-[#eaf1ff] flex items-center justify-center shrink-0">
+                    <div
+                      className={`w-14 h-14 rounded-xl ${themePrimarySoft} flex items-center justify-center shrink-0`}
+                    >
                       <CreditCard
                         size={26}
-                        className="text-[#155DFC]"
+                        className="text-[var(--color-primary)]"
                       />
                     </div>
 
                     <div>
-                      <p className="text-xs font-medium text-slate-400 uppercase tracking-wide">
+                      <p className="text-xs font-medium theme-text-muted uppercase tracking-wide">
                         ID Transaksi
                       </p>
 
-                      <h2 className="text-xl font-bold text-slate-900 mt-1">
+                      <h2 className="text-xl font-bold theme-text mt-1">
                         {payment.id}
                       </h2>
 
-                      <p className="text-sm text-slate-500 mt-1">
+                      <p className="text-sm theme-text-secondary mt-1">
                         Invoice {payment.invoice}
                       </p>
                     </div>
                   </div>
 
                   <div className="lg:text-right">
-                    <p className="text-xs text-slate-400">
+                    <p className="text-xs theme-text-muted">
                       Total Pembayaran
                     </p>
 
-                    <p className="text-3xl font-bold text-slate-900 mt-1">
+                    <p className="text-3xl font-bold theme-text mt-1">
                       {formatRupiah(total)}
                     </p>
 
-                    <p className="text-xs text-slate-400 mt-1">
+                    <p className="text-xs theme-text-muted mt-1">
                       {payment.period}
                     </p>
                   </div>
@@ -350,24 +381,29 @@ export default function DetailPembayaranPage() {
               </div>
             </section>
 
-            {/* DETAIL */}
+            {/* ==================================================
+                DETAIL
+            ================================================== */}
             <section className="grid grid-cols-1 xl:grid-cols-2 gap-5">
+
               {/* TRANSACTION */}
-              <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm p-5 sm:p-6">
+              <div className="theme-card theme-border rounded-xl border shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)] p-5 sm:p-6">
                 <div className="flex items-center gap-3 mb-5">
-                  <div className="w-9 h-9 rounded-lg bg-[#eaf1ff] flex items-center justify-center">
+                  <div
+                    className={`w-9 h-9 rounded-lg ${themePrimarySoft} flex items-center justify-center`}
+                  >
                     <FileText
                       size={17}
-                      className="text-[#155DFC]"
+                      className="text-[var(--color-primary)]"
                     />
                   </div>
 
                   <div>
-                    <h2 className="font-bold text-slate-800">
+                    <h2 className="font-bold theme-text">
                       Informasi Transaksi
                     </h2>
 
-                    <p className="text-xs text-slate-400 mt-1">
+                    <p className="text-xs theme-text-muted mt-1">
                       Detail transaksi pembayaran.
                     </p>
                   </div>
@@ -415,21 +451,23 @@ export default function DetailPembayaranPage() {
               </div>
 
               {/* METHOD */}
-              <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm p-5 sm:p-6">
+              <div className="theme-card theme-border rounded-xl border shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)] p-5 sm:p-6">
                 <div className="flex items-center gap-3 mb-5">
-                  <div className="w-9 h-9 rounded-lg bg-[#eaf1ff] flex items-center justify-center">
+                  <div
+                    className={`w-9 h-9 rounded-lg ${themePrimarySoft} flex items-center justify-center`}
+                  >
                     <Wallet
                       size={17}
-                      className="text-[#155DFC]"
+                      className="text-[var(--color-primary)]"
                     />
                   </div>
 
                   <div>
-                    <h2 className="font-bold text-slate-800">
+                    <h2 className="font-bold theme-text">
                       Metode Pembayaran
                     </h2>
 
-                    <p className="text-xs text-slate-400 mt-1">
+                    <p className="text-xs theme-text-muted mt-1">
                       Informasi metode pembayaran.
                     </p>
                   </div>
@@ -460,22 +498,26 @@ export default function DetailPembayaranPage() {
               </div>
             </section>
 
-            {/* SCHOOL */}
-            <section className="bg-white rounded-xl border border-slate-200/80 shadow-sm p-5 sm:p-6">
+            {/* ==================================================
+                SCHOOL
+            ================================================== */}
+            <section className="theme-card theme-border rounded-xl border shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)] p-5 sm:p-6">
               <div className="flex items-center gap-3 mb-5">
-                <div className="w-9 h-9 rounded-lg bg-[#eaf1ff] flex items-center justify-center">
+                <div
+                  className={`w-9 h-9 rounded-lg ${themePrimarySoft} flex items-center justify-center`}
+                >
                   <UserRound
                     size={17}
-                    className="text-[#155DFC]"
+                    className="text-[var(--color-primary)]"
                   />
                 </div>
 
                 <div>
-                  <h2 className="font-bold text-slate-800">
+                  <h2 className="font-bold theme-text">
                     Informasi Sekolah
                   </h2>
 
-                  <p className="text-xs text-slate-400 mt-1">
+                  <p className="text-xs theme-text-muted mt-1">
                     Data sekolah pemilik transaksi.
                   </p>
                 </div>
@@ -502,49 +544,53 @@ export default function DetailPembayaranPage() {
               </div>
             </section>
 
-            {/* BILLING */}
-            <section className="bg-white rounded-xl border border-slate-200/80 shadow-sm">
+            {/* ==================================================
+                BILLING
+            ================================================== */}
+            <section className="theme-card theme-border rounded-xl border shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)]">
               <div className="p-5 sm:p-6">
                 <div className="flex items-center gap-3 mb-5">
-                  <div className="w-9 h-9 rounded-lg bg-[#eaf1ff] flex items-center justify-center">
+                  <div
+                    className={`w-9 h-9 rounded-lg ${themePrimarySoft} flex items-center justify-center`}
+                  >
                     <Wallet
                       size={17}
-                      className="text-[#155DFC]"
+                      className="text-[var(--color-primary)]"
                     />
                   </div>
 
-                  <h2 className="font-bold text-slate-800">
+                  <h2 className="font-bold theme-text">
                     Rincian Pembayaran
                   </h2>
                 </div>
 
                 <div className="space-y-1">
-                  <div className="flex items-center justify-between gap-4 py-3 border-b border-slate-100">
-                    <span className="text-sm text-slate-500">
+                  <div className="flex items-center justify-between gap-4 py-3 theme-border-soft border-b">
+                    <span className="text-sm theme-text-secondary">
                       Paket {payment.package}
                     </span>
 
-                    <span className="text-sm font-semibold text-slate-800">
+                    <span className="text-sm font-semibold theme-text">
                       {formatRupiah(payment.amount)}
                     </span>
                   </div>
 
-                  <div className="flex items-center justify-between gap-4 py-3 border-b border-slate-100">
-                    <span className="text-sm text-slate-500">
+                  <div className="flex items-center justify-between gap-4 py-3 theme-border-soft border-b">
+                    <span className="text-sm theme-text-secondary">
                       Biaya transaksi
                     </span>
 
-                    <span className="text-sm font-semibold text-slate-800">
+                    <span className="text-sm font-semibold theme-text">
                       {formatRupiah(payment.transactionFee)}
                     </span>
                   </div>
 
                   <div className="flex items-center justify-between gap-4 pt-4">
-                    <span className="text-sm font-bold text-slate-800">
+                    <span className="text-sm font-bold theme-text">
                       Total
                     </span>
 
-                    <span className="text-xl font-bold text-[#155DFC]">
+                    <span className="text-xl font-bold text-[var(--color-primary)]">
                       {formatRupiah(total)}
                     </span>
                   </div>
@@ -552,28 +598,33 @@ export default function DetailPembayaranPage() {
               </div>
             </section>
 
-            {/* NOTE */}
-            <section className="bg-white rounded-xl border border-slate-200/80 shadow-sm p-5">
+            {/* ==================================================
+                NOTE
+            ================================================== */}
+            <section className="theme-card theme-border rounded-xl border shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)] p-5">
               <div className="flex items-start gap-3">
-                <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
+                <div className="w-9 h-9 rounded-lg theme-success flex items-center justify-center shrink-0">
                   <ShieldCheck
                     size={17}
-                    className="text-emerald-600"
+                    className="text-[var(--color-success)]"
                   />
                 </div>
 
                 <div>
-                  <p className="text-sm font-semibold text-slate-800">
+                  <p className="text-sm font-semibold theme-text">
                     Catatan Transaksi
                   </p>
 
-                  <p className="text-xs text-slate-500 mt-1 leading-5">
+                  <p className="text-xs theme-text-secondary mt-1 leading-5">
                     {payment.notes}
                   </p>
                 </div>
               </div>
             </section>
 
+            {/* ==================================================
+                BACK BUTTON
+            ================================================== */}
             <button
               type="button"
               onClick={() =>
@@ -581,7 +632,7 @@ export default function DetailPembayaranPage() {
                   "/admin/langganan/riwayat-pembayaran"
                 )
               }
-              className="inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl border border-slate-200 bg-white text-slate-700 text-sm font-semibold hover:bg-slate-50"
+              className={`inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl border theme-border theme-card theme-text-secondary text-sm font-semibold ${themeTextHover} transition`}
             >
               <ArrowLeft size={15} />
               Kembali ke Riwayat Pembayaran

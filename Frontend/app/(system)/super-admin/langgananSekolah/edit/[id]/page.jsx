@@ -1,49 +1,48 @@
 "use client";
 
-import { useState } from "react";
 import { useParams } from "next/navigation";
-import Sidebar from "../../../../../components/Sidebar";
-import Header from "../../../../../components/Header";
 import LanggananForm from "../../../../../components/LanggananForm";
 import { dummyLangganan } from "../../../../../../lib/data";
 
 export default function EditLanggananPage() {
   const params = useParams();
   const id = params.id;
-  const initialData = dummyLangganan.find((item) => item.id === id);
 
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeMenu] = useState("langganan");
-  const notifications = [
-    { id: 1, title: "Pembaruan Sistem v2.0", desc: "Dikirim 2 jam lalu", read: false },
-    { id: 2, title: "Pengingat: Backup Data", desc: "Dikirim 1 hari lalu", read: false },
-  ];
+  const initialData = dummyLangganan.find(
+    (item) => item.id === id
+  );
 
   if (!initialData) {
-    return <div className="p-8 text-center text-slate-500">Data tidak ditemukan</div>;
+    return (
+      <div className="theme-page theme-text min-h-full">
+        <div className="flex min-h-[60vh] items-center justify-center px-4">
+          <div className="theme-card theme-border w-full max-w-md rounded-2xl border p-8 text-center shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]">
+            <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]">
+              <span className="text-2xl">!</span>
+            </div>
+
+            <h2 className="text-lg font-bold theme-text">
+              Data tidak ditemukan
+            </h2>
+
+            <p className="mt-2 text-sm theme-text-muted">
+              Data langganan yang ingin diedit tidak tersedia.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    // Pola wrapper disamakan persis dengan halaman Profil/Pengumuman/Dashboard/Langganan Sekolah:
-    // min-h-screen (bukan h-screen + overflow-hidden) di wrapper luar,
-    // dan main tanpa overflow-y-auto (p-4 sm:p-6 lg:p-8) supaya sidebar mengikuti
-    // tinggi konten halaman dan konsisten saat responsive/zoom.
-    <div className="flex min-h-screen bg-slate-50">
-      <Sidebar
-        active={activeMenu}
-        setActive={() => {}}
-        collapsed={!sidebarOpen}
-        setCollapsed={() => setSidebarOpen(!sidebarOpen)}
-      />
-      <div className="flex-1 flex flex-col min-w-0">
-        <Header
-          toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-          notifications={notifications}
-          user={{ name: "Sarah", email: "sarah@smartschool.com", avatar: "SA" }}
-        />
-        <main className="flex-1 p-4 sm:p-6 lg:p-8">
-          <LanggananForm initialData={initialData} isEdit={true} />
-        </main>
+    <div className="theme-page theme-text min-h-full">
+      <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+        <div className="mx-auto w-full max-w-[1400px]">
+          <LanggananForm
+            initialData={initialData}
+            isEdit={true}
+          />
+        </div>
       </div>
     </div>
   );

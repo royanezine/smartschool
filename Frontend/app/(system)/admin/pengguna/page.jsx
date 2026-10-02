@@ -18,7 +18,6 @@ import {
   RefreshCw,
   Eye,
   Pencil,
-  MoreVertical,
   Users,
   UserCheck,
   UserX,
@@ -317,6 +316,28 @@ const normalizeUser = (
 };
 
 /* =========================================================
+   THEME HELPERS
+========================================================= */
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]";
+
+const themePrimaryHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
+
+const themeTextHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_6px_24px_color-mix(in_srgb,var(--color-text)_6%,transparent)]";
+
+const themePrimaryShadow =
+  "shadow-[0_10px_25px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]";
+
+/* =========================================================
    ROLE CONFIG
 ========================================================= */
 
@@ -324,25 +345,25 @@ const roleConfig = {
   Guru: {
     icon: GraduationCap,
     className:
-      "bg-blue-50 text-blue-600 border-blue-200",
+      "theme-primary",
   },
 
   Siswa: {
     icon: UserRound,
     className:
-      "bg-indigo-50 text-indigo-600 border-indigo-200",
+      "theme-info",
   },
 
   Staff: {
     icon: BriefcaseBusiness,
     className:
-      "bg-amber-50 text-amber-600 border-amber-200",
+      "theme-warning",
   },
 
   Admin: {
     icon: ShieldCheck,
     className:
-      "bg-purple-50 text-purple-600 border-purple-200",
+      "theme-primary",
   },
 };
 
@@ -353,8 +374,7 @@ const roleConfig = {
 function RoleBadge({ role }) {
   const config = roleConfig[role] || {
     icon: Users,
-    className:
-      "bg-slate-100 text-slate-600 border-slate-200",
+    className: "theme-text-secondary",
   };
 
   const Icon = config.icon;
@@ -369,10 +389,11 @@ function RoleBadge({ role }) {
         py-1
         rounded-full
         border
+        theme-border
+        ${config.className}
         text-[11px]
         font-semibold
         whitespace-nowrap
-        ${config.className}
       `}
     >
       <Icon size={12} />
@@ -398,14 +419,15 @@ function StatusBadge({ status }) {
         py-1
         rounded-full
         border
+        theme-border
+        ${
+          active
+            ? "theme-success"
+            : "theme-danger"
+        }
         text-[11px]
         font-semibold
         whitespace-nowrap
-        ${
-          active
-            ? "bg-emerald-50 text-emerald-600 border-emerald-200"
-            : "bg-red-50 text-red-600 border-red-200"
-        }
       `}
     >
       {active ? (
@@ -433,51 +455,60 @@ function StatCard({
 }) {
   return (
     <div
-      className="
-        bg-white
+      className={`
+        theme-card
         rounded-2xl
         border
-        border-slate-200/80
+        theme-border
         p-4
         sm:p-5
-        shadow-sm
-        hover:shadow-md
+        ${themeCardShadow}
+        hover:shadow-[0_10px_30px_color-mix(in_srgb,var(--color-text)_10%,transparent)]
         transition-all
         duration-200
-      "
+      `}
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[11px] sm:text-xs font-medium text-slate-500">
+          <p className="text-[11px] sm:text-xs font-medium theme-text-muted">
             {title}
           </p>
 
           {loading ? (
-            <div className="mt-2 h-8 w-16 animate-pulse rounded-lg bg-slate-100" />
+            <div
+              className="
+                mt-2
+                h-8
+                w-16
+                animate-pulse
+                rounded-lg
+                bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]
+              "
+            />
           ) : (
-            <p className="mt-1.5 text-2xl sm:text-3xl font-bold text-slate-900">
+            <p className="mt-1.5 text-2xl sm:text-3xl font-bold theme-text">
               {value}
             </p>
           )}
 
-          <p className="mt-1 text-[10px] sm:text-xs text-slate-400">
+          <p className="mt-1 text-[10px] sm:text-xs theme-text-muted">
             {description}
           </p>
         </div>
 
         <div
-          className="
+          className={`
             w-10
             h-10
             rounded-xl
-            bg-slate-50
+            ${themePrimarySoft}
             border
-            border-slate-100
+            ${themePrimarySoftBorder}
             flex
             items-center
             justify-center
             shrink-0
-          "
+          `}
         >
           <Icon
             size={18}
@@ -1127,7 +1158,7 @@ export default function PenggunaPage() {
   ======================================================= */
 
   return (
-    <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
       {/* =====================================================
           SIDEBAR
       ===================================================== */}
@@ -1160,7 +1191,7 @@ export default function PenggunaPage() {
         />
 
         {/* =====================================================
-            PAGE (HANYA AREA INI YANG SCROLL)
+            PAGE
         ===================================================== */}
 
         <main className="flex-1 overflow-y-auto">
@@ -1183,21 +1214,18 @@ export default function PenggunaPage() {
 
               <div className="flex items-center gap-3">
                 <div
-                  className="
+                  className={`
                     w-11
                     h-11
                     rounded-xl
-                    bg-gradient-to-br
-                    from-[#155DFC]
-                    to-[#0d47c9]
+                    bg-[var(--color-primary)]
                     text-white
                     flex
                     items-center
                     justify-center
-                    shadow-lg
-                    shadow-[#155DFC]/20
+                    ${themePrimaryShadow}
                     shrink-0
-                  "
+                  `}
                 >
                   <Users size={20} />
                 </div>
@@ -1208,14 +1236,14 @@ export default function PenggunaPage() {
                       text-xl
                       sm:text-2xl
                       font-bold
-                      text-slate-800
+                      theme-text
                       truncate
                     "
                   >
                     Pengguna
                   </h1>
 
-                  <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                  <p className="text-xs sm:text-sm theme-text-secondary mt-1">
                     Kelola seluruh pengguna yang terdaftar di sekolah.
                   </p>
                 </div>
@@ -1224,6 +1252,8 @@ export default function PenggunaPage() {
               {/* ACTION */}
 
               <div className="flex flex-col sm:flex-row gap-2">
+                {/* REFRESH */}
+
                 <button
                   type="button"
                   onClick={handleRefresh}
@@ -1237,13 +1267,12 @@ export default function PenggunaPage() {
                     py-2.5
                     rounded-xl
                     border
-                    border-slate-200
-                    bg-white
-                    text-slate-600
+                    theme-border
+                    theme-card
+                    theme-text-secondary
                     text-sm
                     font-semibold
-                    hover:bg-slate-50
-                    hover:border-slate-300
+                    hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
                     transition
                     disabled:cursor-not-allowed
                     disabled:opacity-60
@@ -1257,8 +1286,11 @@ export default function PenggunaPage() {
                         : ""
                     }
                   />
+
                   Refresh
                 </button>
+
+                {/* EXPORT */}
 
                 <button
                   type="button"
@@ -1275,13 +1307,12 @@ export default function PenggunaPage() {
                     py-2.5
                     rounded-xl
                     border
-                    border-slate-200
-                    bg-white
-                    text-slate-600
+                    theme-border
+                    theme-card
+                    theme-text-secondary
                     text-sm
                     font-semibold
-                    hover:bg-slate-50
-                    hover:border-slate-300
+                    hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
                     transition
                     disabled:cursor-not-allowed
                     disabled:opacity-60
@@ -1290,6 +1321,8 @@ export default function PenggunaPage() {
                   <Download size={15} />
                   Export
                 </button>
+
+                {/* TAMBAH */}
 
                 <button
                   type="button"
@@ -1306,13 +1339,10 @@ export default function PenggunaPage() {
                     px-4
                     py-2.5
                     rounded-xl
-                    bg-gradient-to-r
-                    from-[#155DFC]
-                    to-[#0d47c9]
+                    bg-[var(--color-primary)]
                     text-white
                     text-sm
                     font-semibold
-                    shadow-sm
                     hover:brightness-110
                     transition
                   "
@@ -1323,7 +1353,9 @@ export default function PenggunaPage() {
               </div>
             </div>
 
-            {/* ERROR */}
+            {/* =================================================
+                ERROR
+            ================================================== */}
 
             {error && (
               <div
@@ -1333,22 +1365,21 @@ export default function PenggunaPage() {
                   gap-3
                   rounded-xl
                   border
-                  border-red-200
-                  bg-red-50
+                  theme-danger
                   p-4
                 "
               >
                 <AlertCircle
                   size={19}
-                  className="mt-0.5 shrink-0 text-red-600"
+                  className="mt-0.5 shrink-0"
                 />
 
                 <div className="flex-1">
-                  <p className="text-sm font-semibold text-red-800">
+                  <p className="text-sm font-semibold">
                     Terjadi kesalahan
                   </p>
 
-                  <p className="mt-0.5 text-sm text-red-700">
+                  <p className="mt-0.5 text-sm">
                     {error}
                   </p>
                 </div>
@@ -1358,7 +1389,11 @@ export default function PenggunaPage() {
                   onClick={() =>
                     setError("")
                   }
-                  className="text-red-500 hover:text-red-700"
+                  className="
+                    opacity-70
+                    hover:opacity-100
+                    transition
+                  "
                 >
                   <X size={18} />
                 </button>
@@ -1383,7 +1418,7 @@ export default function PenggunaPage() {
                 value={statistics.total}
                 description={`${statistics.aktif} pengguna aktif`}
                 icon={Users}
-                iconClass="text-[#155DFC]"
+                iconClass="text-[var(--color-primary)]"
                 loading={loading}
               />
 
@@ -1392,7 +1427,7 @@ export default function PenggunaPage() {
                 value={statistics.guru}
                 description="Pengguna dengan role Guru"
                 icon={GraduationCap}
-                iconClass="text-blue-500"
+                iconClass="text-[var(--color-primary)]"
                 loading={loading}
               />
 
@@ -1401,7 +1436,7 @@ export default function PenggunaPage() {
                 value={statistics.siswa}
                 description="Pengguna dengan role Siswa"
                 icon={UserRound}
-                iconClass="text-indigo-500"
+                iconClass="theme-info"
                 loading={loading}
               />
 
@@ -1410,7 +1445,7 @@ export default function PenggunaPage() {
                 value={statistics.staff}
                 description="Pengguna dengan role Staff"
                 icon={BriefcaseBusiness}
-                iconClass="text-amber-500"
+                iconClass="theme-warning"
                 loading={loading}
               />
             </div>
@@ -1420,14 +1455,14 @@ export default function PenggunaPage() {
             ================================================== */}
 
             <section
-              className="
-                bg-white
+              className={`
+                theme-card
                 rounded-2xl
                 border
-                border-slate-200/80
-                shadow-sm
+                theme-border
+                ${themeCardShadow}
                 overflow-hidden
-              "
+              `}
             >
               <div className="p-4 sm:p-5 lg:p-6">
                 <div
@@ -1445,30 +1480,30 @@ export default function PenggunaPage() {
                   <div>
                     <div className="flex items-center gap-2">
                       <div
-                        className="
+                        className={`
                           w-8
                           h-8
                           rounded-lg
-                          bg-[#eaf1ff]
+                          ${themePrimarySoft}
                           border
-                          border-[#c7dbff]
+                          ${themePrimarySoftBorder}
                           flex
                           items-center
                           justify-center
-                        "
+                        `}
                       >
                         <Activity
                           size={15}
-                          className="text-[#155DFC]"
+                          className="text-[var(--color-primary)]"
                         />
                       </div>
 
-                      <h2 className="text-sm font-bold text-slate-800">
+                      <h2 className="text-sm font-bold theme-text">
                         Ringkasan Pengguna
                       </h2>
                     </div>
 
-                    <p className="text-xs text-slate-400 mt-2">
+                    <p className="text-xs theme-text-muted mt-2">
                       Distribusi pengguna berdasarkan peran.
                     </p>
                   </div>
@@ -1501,16 +1536,16 @@ export default function PenggunaPage() {
                         transition
                         ${
                           roleFilter === "Semua"
-                            ? "bg-[#eaf1ff] border-[#c7dbff]"
-                            : "bg-white border-slate-200 hover:bg-slate-50"
+                            ? `${themePrimarySoft} ${themePrimarySoftBorder}`
+                            : "theme-card theme-border"
                         }
                       `}
                     >
-                      <p className="text-[10px] text-slate-400">
+                      <p className="text-[10px] theme-text-muted">
                         Semua
                       </p>
 
-                      <p className="text-lg font-bold text-slate-800 mt-1">
+                      <p className="text-lg font-bold theme-text mt-1">
                         {statistics.total}
                       </p>
                     </button>
@@ -1531,16 +1566,16 @@ export default function PenggunaPage() {
                         transition
                         ${
                           roleFilter === "Guru"
-                            ? "bg-[#eaf1ff] border-[#c7dbff]"
-                            : "bg-white border-slate-200 hover:bg-slate-50"
+                            ? `${themePrimarySoft} ${themePrimarySoftBorder}`
+                            : "theme-card theme-border"
                         }
                       `}
                     >
-                      <p className="text-[10px] text-slate-400">
+                      <p className="text-[10px] theme-text-muted">
                         Guru
                       </p>
 
-                      <p className="text-lg font-bold text-slate-800 mt-1">
+                      <p className="text-lg font-bold theme-text mt-1">
                         {statistics.guru}
                       </p>
                     </button>
@@ -1561,16 +1596,16 @@ export default function PenggunaPage() {
                         transition
                         ${
                           roleFilter === "Siswa"
-                            ? "bg-[#eaf1ff] border-[#c7dbff]"
-                            : "bg-white border-slate-200 hover:bg-slate-50"
+                            ? `${themePrimarySoft} ${themePrimarySoftBorder}`
+                            : "theme-card theme-border"
                         }
                       `}
                     >
-                      <p className="text-[10px] text-slate-400">
+                      <p className="text-[10px] theme-text-muted">
                         Siswa
                       </p>
 
-                      <p className="text-lg font-bold text-slate-800 mt-1">
+                      <p className="text-lg font-bold theme-text mt-1">
                         {statistics.siswa}
                       </p>
                     </button>
@@ -1591,16 +1626,16 @@ export default function PenggunaPage() {
                         transition
                         ${
                           roleFilter === "Staff"
-                            ? "bg-[#eaf1ff] border-[#c7dbff]"
-                            : "bg-white border-slate-200 hover:bg-slate-50"
+                            ? `${themePrimarySoft} ${themePrimarySoftBorder}`
+                            : "theme-card theme-border"
                         }
                       `}
                     >
-                      <p className="text-[10px] text-slate-400">
+                      <p className="text-[10px] theme-text-muted">
                         Staff
                       </p>
 
-                      <p className="text-lg font-bold text-slate-800 mt-1">
+                      <p className="text-lg font-bold theme-text mt-1">
                         {statistics.staff}
                       </p>
                     </button>
@@ -1614,7 +1649,7 @@ export default function PenggunaPage() {
                     mt-5
                     pt-4
                     border-t
-                    border-slate-100
+                    theme-border-soft
                     flex
                     flex-wrap
                     gap-x-6
@@ -1622,37 +1657,58 @@ export default function PenggunaPage() {
                   "
                 >
                   <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                    <span
+                      className="
+                        w-2
+                        h-2
+                        rounded-full
+                        bg-[var(--color-success)]
+                      "
+                    />
 
-                    <span className="text-xs text-slate-500">
+                    <span className="text-xs theme-text-secondary">
                       Aktif:
                     </span>
 
-                    <span className="text-xs font-semibold text-slate-700">
+                    <span className="text-xs font-semibold theme-text">
                       {statistics.aktif}
                     </span>
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-red-500" />
+                    <span
+                      className="
+                        w-2
+                        h-2
+                        rounded-full
+                        theme-danger
+                      "
+                    />
 
-                    <span className="text-xs text-slate-500">
+                    <span className="text-xs theme-text-secondary">
                       Nonaktif:
                     </span>
 
-                    <span className="text-xs font-semibold text-slate-700">
+                    <span className="text-xs font-semibold theme-text">
                       {statistics.nonaktif}
                     </span>
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <span className="w-2 h-2 rounded-full bg-purple-500" />
+                    <span
+                      className="
+                        w-2
+                        h-2
+                        rounded-full
+                        bg-[var(--color-primary)]
+                      "
+                    />
 
-                    <span className="text-xs text-slate-500">
+                    <span className="text-xs theme-text-secondary">
                       Admin:
                     </span>
 
-                    <span className="text-xs font-semibold text-slate-700">
+                    <span className="text-xs font-semibold theme-text">
                       {statistics.admin}
                     </span>
                   </div>
@@ -1665,14 +1721,14 @@ export default function PenggunaPage() {
             ================================================== */}
 
             <section
-              className="
-                bg-white
+              className={`
+                theme-card
                 rounded-2xl
                 border
-                border-slate-200/80
-                shadow-sm
+                theme-border
+                ${themeCardShadow}
                 p-4
-              "
+              `}
             >
               <div
                 className="
@@ -1692,7 +1748,7 @@ export default function PenggunaPage() {
                       left-3
                       top-1/2
                       -translate-y-1/2
-                      text-slate-400
+                      theme-text-muted
                     "
                   />
 
@@ -1702,6 +1758,9 @@ export default function PenggunaPage() {
                     onChange={handleSearchChange}
                     placeholder="Cari nama, username, email, ID, jabatan..."
                     className="
+                      theme-input
+                      theme-border
+                      theme-text
                       w-full
                       pl-9
                       pr-10
@@ -1709,14 +1768,11 @@ export default function PenggunaPage() {
                       text-sm
                       rounded-xl
                       border
-                      border-slate-200
-                      bg-white
-                      text-slate-800
-                      placeholder:text-slate-400
-                      focus:outline-none
+                      outline-none
+                      placeholder:text-[var(--color-text-placeholder)]
                       focus:ring-2
-                      focus:ring-[#155DFC]/20
-                      focus:border-[#155DFC]/50
+                      focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
+                      focus:border-[color-mix(in_srgb,var(--color-primary)_50%,transparent)]
                       transition
                     "
                   />
@@ -1733,8 +1789,8 @@ export default function PenggunaPage() {
                         right-3
                         top-1/2
                         -translate-y-1/2
-                        text-slate-400
-                        hover:text-slate-600
+                        theme-text-muted
+                        hover:theme-text
                       "
                     >
                       <X size={15} />
@@ -1756,18 +1812,18 @@ export default function PenggunaPage() {
                     value={roleFilter}
                     onChange={handleRoleChange}
                     className="
+                      theme-input
+                      theme-border
+                      theme-text
                       text-sm
                       rounded-xl
                       border
-                      border-slate-200
                       px-3
                       py-2.5
-                      bg-white
-                      text-slate-700
                       focus:outline-none
                       focus:ring-2
-                      focus:ring-[#155DFC]/20
-                      focus:border-[#155DFC]/50
+                      focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
+                      focus:border-[color-mix(in_srgb,var(--color-primary)_50%,transparent)]
                     "
                   >
                     <option value="Semua">
@@ -1795,18 +1851,18 @@ export default function PenggunaPage() {
                     value={statusFilter}
                     onChange={handleStatusChange}
                     className="
+                      theme-input
+                      theme-border
+                      theme-text
                       text-sm
                       rounded-xl
                       border
-                      border-slate-200
                       px-3
                       py-2.5
-                      bg-white
-                      text-slate-700
                       focus:outline-none
                       focus:ring-2
-                      focus:ring-[#155DFC]/20
-                      focus:border-[#155DFC]/50
+                      focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
+                      focus:border-[color-mix(in_srgb,var(--color-primary)_50%,transparent)]
                     "
                   >
                     <option value="Semua">
@@ -1834,12 +1890,12 @@ export default function PenggunaPage() {
                       py-2.5
                       rounded-xl
                       border
-                      border-slate-200
-                      bg-white
-                      text-slate-600
+                      theme-border
+                      theme-card
+                      theme-text-secondary
                       text-sm
                       font-medium
-                      hover:bg-slate-50
+                      hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
                       transition
                     "
                   >
@@ -1855,14 +1911,14 @@ export default function PenggunaPage() {
             ================================================== */}
 
             <section
-              className="
-                bg-white
+              className={`
+                theme-card
                 rounded-2xl
                 border
-                border-slate-200/80
-                shadow-sm
+                theme-border
+                ${themeCardShadow}
                 overflow-hidden
-              "
+              `}
             >
               {/* TABLE HEADER */}
 
@@ -1873,7 +1929,7 @@ export default function PenggunaPage() {
                   lg:px-6
                   py-4
                   border-b
-                  border-slate-100
+                  theme-border-soft
                   flex
                   flex-col
                   sm:flex-row
@@ -1886,15 +1942,15 @@ export default function PenggunaPage() {
                   <div className="flex items-center gap-2">
                     <Database
                       size={16}
-                      className="text-[#155DFC]"
+                      className="text-[var(--color-primary)]"
                     />
 
-                    <h2 className="text-sm font-bold text-slate-800">
+                    <h2 className="text-sm font-bold theme-text">
                       Data Pengguna
                     </h2>
                   </div>
 
-                  <p className="text-xs text-slate-400 mt-1">
+                  <p className="text-xs theme-text-muted mt-1">
                     Menampilkan data pengguna berdasarkan filter yang dipilih.
                   </p>
                 </div>
@@ -1914,12 +1970,12 @@ export default function PenggunaPage() {
                     py-2
                     rounded-lg
                     border
-                    border-slate-200
-                    bg-white
-                    text-slate-600
+                    theme-border
+                    theme-card
+                    theme-text-secondary
                     text-xs
                     font-semibold
-                    hover:bg-slate-50
+                    hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
                     transition
                     w-fit
                     disabled:cursor-not-allowed
@@ -1936,14 +1992,7 @@ export default function PenggunaPage() {
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[1100px] text-sm border-collapse">
                   <thead>
-                    <tr
-                      className="
-                        bg-gradient-to-r
-                        from-[#155DFC]
-                        to-[#0d47c9]
-                        text-white
-                      "
-                    >
+                    <tr className="bg-[var(--color-primary)] text-white">
                       <th className="px-4 py-3 text-center font-semibold w-[65px]">
                         No
                       </th>
@@ -1983,55 +2032,55 @@ export default function PenggunaPage() {
                       }).map((_, index) => (
                         <tr
                           key={index}
-                          className="border-b border-slate-100 last:border-0"
+                          className="border-b theme-border-soft last:border-0"
                         >
                           <td className="px-4 py-3 text-center">
-                            <div className="mx-auto h-7 w-7 animate-pulse rounded-lg bg-slate-100" />
+                            <div className="mx-auto h-7 w-7 animate-pulse rounded-lg bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
                           </td>
 
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-3">
-                              <div className="h-10 w-10 animate-pulse rounded-full bg-slate-100" />
+                              <div className="h-10 w-10 animate-pulse rounded-full bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
 
                               <div className="space-y-2">
-                                <div className="h-4 w-36 animate-pulse rounded bg-slate-100" />
+                                <div className="h-4 w-36 animate-pulse rounded bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
 
-                                <div className="h-3 w-20 animate-pulse rounded bg-slate-100" />
+                                <div className="h-3 w-20 animate-pulse rounded bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
                               </div>
                             </div>
                           </td>
 
                           <td className="px-4 py-3">
                             <div className="space-y-2">
-                              <div className="h-3 w-40 animate-pulse rounded bg-slate-100" />
+                              <div className="h-3 w-40 animate-pulse rounded bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
 
-                              <div className="h-3 w-24 animate-pulse rounded bg-slate-100" />
+                              <div className="h-3 w-24 animate-pulse rounded bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
                             </div>
                           </td>
 
                           <td className="px-4 py-3">
-                            <div className="h-6 w-20 animate-pulse rounded-full bg-slate-100" />
+                            <div className="h-6 w-20 animate-pulse rounded-full bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
                           </td>
 
                           <td className="px-4 py-3">
                             <div className="space-y-2">
-                              <div className="h-3 w-32 animate-pulse rounded bg-slate-100" />
+                              <div className="h-3 w-32 animate-pulse rounded bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
 
-                              <div className="h-3 w-24 animate-pulse rounded bg-slate-100" />
+                              <div className="h-3 w-24 animate-pulse rounded bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
                             </div>
                           </td>
 
                           <td className="px-4 py-3 text-center">
-                            <div className="mx-auto h-6 w-20 animate-pulse rounded-full bg-slate-100" />
+                            <div className="mx-auto h-6 w-20 animate-pulse rounded-full bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
                           </td>
 
                           <td className="px-4 py-3">
                             <div className="mx-auto flex justify-center gap-1.5">
-                              <div className="h-8 w-8 animate-pulse rounded-lg bg-slate-100" />
+                              <div className="h-8 w-8 animate-pulse rounded-lg bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
 
-                              <div className="h-8 w-8 animate-pulse rounded-lg bg-slate-100" />
+                              <div className="h-8 w-8 animate-pulse rounded-lg bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
 
-                              <div className="h-8 w-8 animate-pulse rounded-lg bg-slate-100" />
+                              <div className="h-8 w-8 animate-pulse rounded-lg bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]" />
                             </div>
                           </td>
                         </tr>
@@ -2044,29 +2093,29 @@ export default function PenggunaPage() {
                         >
                           <div className="flex flex-col items-center">
                             <div
-                              className="
+                              className={`
                                 w-12
                                 h-12
                                 rounded-full
-                                bg-[#eaf1ff]
+                                ${themePrimarySoft}
                                 border
-                                border-[#c7dbff]
+                                ${themePrimarySoftBorder}
                                 flex
                                 items-center
                                 justify-center
-                              "
+                              `}
                             >
                               <Search
                                 size={20}
-                                className="text-[#155DFC]"
+                                className="text-[var(--color-primary)]"
                               />
                             </div>
 
-                            <p className="mt-3 text-sm font-semibold text-slate-700">
+                            <p className="mt-3 text-sm font-semibold theme-text">
                               Pengguna tidak ditemukan
                             </p>
 
-                            <p className="mt-1 text-xs text-slate-400">
+                            <p className="mt-1 text-xs theme-text-muted">
                               Coba ubah kata pencarian atau filter yang digunakan.
                             </p>
 
@@ -2077,7 +2126,7 @@ export default function PenggunaPage() {
                                 mt-4
                                 text-xs
                                 font-semibold
-                                text-[#155DFC]
+                                text-[var(--color-primary)]
                                 hover:underline
                               "
                             >
@@ -2090,32 +2139,32 @@ export default function PenggunaPage() {
                       users.map((user, index) => (
                         <tr
                           key={user.id}
-                          className="
+                          className={`
                             border-b
-                            border-slate-100
+                            theme-border-soft
                             last:border-0
-                            hover:bg-[#eaf1ff]
+                            ${themePrimaryHover}
                             transition-colors
-                          "
+                          `}
                         >
                           {/* NO */}
 
                           <td className="px-4 py-3 text-center">
                             <span
-                              className="
+                              className={`
                                 inline-flex
                                 items-center
                                 justify-center
                                 w-7
                                 h-7
                                 rounded-lg
-                                bg-[#eaf1ff]
+                                ${themePrimarySoft}
                                 border
-                                border-[#c7dbff]
-                                text-[#155DFC]
+                                ${themePrimarySoftBorder}
+                                text-[var(--color-primary)]
                                 text-xs
                                 font-bold
-                              "
+                              `}
                             >
                               {(page - 1) * LIMIT +
                                 index +
@@ -2132,9 +2181,7 @@ export default function PenggunaPage() {
                                   w-10
                                   h-10
                                   rounded-full
-                                  bg-gradient-to-br
-                                  from-[#155DFC]
-                                  to-[#0d47c9]
+                                  bg-[var(--color-primary)]
                                   text-white
                                   flex
                                   items-center
@@ -2170,7 +2217,7 @@ export default function PenggunaPage() {
                                 <p
                                   className="
                                     font-semibold
-                                    text-slate-800
+                                    theme-text
                                     truncate
                                     max-w-[220px]
                                   "
@@ -2178,7 +2225,7 @@ export default function PenggunaPage() {
                                   {user.nama}
                                 </p>
 
-                                <p className="text-[11px] text-slate-400 mt-0.5">
+                                <p className="text-[11px] theme-text-muted mt-0.5">
                                   {user.id}
                                 </p>
                               </div>
@@ -2192,10 +2239,10 @@ export default function PenggunaPage() {
                               <div className="flex items-center gap-2">
                                 <Mail
                                   size={13}
-                                  className="text-[#155DFC] shrink-0"
+                                  className="text-[var(--color-primary)] shrink-0"
                                 />
 
-                                <span className="text-xs text-slate-600">
+                                <span className="text-xs theme-text-secondary">
                                   {user.email}
                                 </span>
                               </div>
@@ -2203,10 +2250,10 @@ export default function PenggunaPage() {
                               <div className="flex items-center gap-2">
                                 <Phone
                                   size={13}
-                                  className="text-slate-400 shrink-0"
+                                  className="theme-text-muted shrink-0"
                                 />
 
-                                <span className="text-xs text-slate-500">
+                                <span className="text-xs theme-text-muted">
                                   {user.noTelepon !== "-"
                                     ? user.noTelepon
                                     : "Belum diisi"}
@@ -2224,11 +2271,11 @@ export default function PenggunaPage() {
                           {/* JABATAN */}
 
                           <td className="px-4 py-3">
-                            <p className="text-xs font-medium text-slate-700">
+                            <p className="text-xs font-medium theme-text-secondary">
                               {user.jabatan}
                             </p>
 
-                            <p className="text-[11px] text-slate-400 mt-1">
+                            <p className="text-[11px] theme-text-muted mt-1">
                               @{user.username}
                             </p>
                           </td>
@@ -2255,12 +2302,11 @@ export default function PenggunaPage() {
                                   h-8
                                   rounded-lg
                                   border
-                                  border-slate-200
-                                  bg-white
-                                  text-slate-500
-                                  hover:text-[#155DFC]
-                                  hover:bg-[#eaf1ff]
-                                  hover:border-[#c7dbff]
+                                  theme-border
+                                  theme-card
+                                  theme-text-muted
+                                  hover:text-[var(--color-primary)]
+                                  hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
                                   transition
                                   flex
                                   items-center
@@ -2283,12 +2329,11 @@ export default function PenggunaPage() {
                                   h-8
                                   rounded-lg
                                   border
-                                  border-slate-200
-                                  bg-white
-                                  text-slate-500
-                                  hover:text-[#155DFC]
-                                  hover:bg-[#eaf1ff]
-                                  hover:border-[#c7dbff]
+                                  theme-border
+                                  theme-card
+                                  theme-text-muted
+                                  hover:text-[var(--color-primary)]
+                                  hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
                                   transition
                                   flex
                                   items-center
@@ -2311,14 +2356,15 @@ export default function PenggunaPage() {
                                   h-8
                                   rounded-lg
                                   border
+                                  theme-card
                                   flex
                                   items-center
                                   justify-center
                                   transition
                                   ${
                                     user.status === "Aktif"
-                                      ? "border-red-200 bg-white text-red-500 hover:bg-red-50"
-                                      : "border-emerald-200 bg-white text-emerald-500 hover:bg-emerald-50"
+                                      ? "theme-danger"
+                                      : "theme-success"
                                   }
                                 `}
                                 title={
@@ -2343,11 +2389,10 @@ export default function PenggunaPage() {
                                   h-8
                                   rounded-lg
                                   border
-                                  border-slate-200
-                                  bg-white
-                                  text-slate-400
-                                  hover:text-slate-600
-                                  hover:bg-slate-50
+                                  theme-border
+                                  theme-card
+                                  theme-text-muted
+                                  hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
                                   transition
                                   flex
                                   items-center
@@ -2377,8 +2422,8 @@ export default function PenggunaPage() {
                     sm:px-5
                     py-3
                     border-t
-                    border-slate-100
-                    bg-slate-50/60
+                    theme-border-soft
+                    theme-card-soft
                     flex
                     flex-col
                     sm:flex-row
@@ -2387,13 +2432,13 @@ export default function PenggunaPage() {
                     gap-3
                   "
                 >
-                  <p className="text-xs text-slate-500">
+                  <p className="text-xs theme-text-secondary">
                     Menampilkan{" "}
-                    <span className="font-semibold text-slate-700">
+                    <span className="font-semibold theme-text">
                       {users.length}
                     </span>{" "}
                     dari{" "}
-                    <span className="font-semibold text-slate-700">
+                    <span className="font-semibold theme-text">
                       {pagination.totalData}
                     </span>{" "}
                     pengguna
@@ -2415,15 +2460,15 @@ export default function PenggunaPage() {
                         h-8
                         rounded-lg
                         border
-                        border-slate-200
-                        bg-white
-                        text-slate-500
+                        theme-border
+                        theme-card
+                        theme-text-muted
                         flex
                         items-center
                         justify-center
                         disabled:opacity-40
                         disabled:cursor-not-allowed
-                        hover:bg-slate-50
+                        hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
                       "
                     >
                       <ChevronLeft size={15} />
@@ -2447,8 +2492,8 @@ export default function PenggunaPage() {
                           transition
                           ${
                             page === pageNumber
-                              ? "bg-[#155DFC] text-white shadow-sm"
-                              : "border border-slate-200 bg-white text-slate-500 hover:bg-slate-50"
+                              ? "bg-[var(--color-primary)] text-white"
+                              : "border theme-border theme-card theme-text-muted hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]"
                           }
                         `}
                       >
@@ -2476,15 +2521,15 @@ export default function PenggunaPage() {
                         h-8
                         rounded-lg
                         border
-                        border-slate-200
-                        bg-white
-                        text-slate-500
+                        theme-border
+                        theme-card
+                        theme-text-muted
                         flex
                         items-center
                         justify-center
                         disabled:opacity-40
                         disabled:cursor-not-allowed
-                        hover:bg-slate-50
+                        hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
                       "
                     >
                       <ChevronRight size={15} />
@@ -2509,7 +2554,7 @@ export default function PenggunaPage() {
             className="
               absolute
               inset-0
-              bg-slate-900/40
+              bg-black/40
               backdrop-blur-sm
             "
             onClick={handleCloseStatusModal}
@@ -2518,17 +2563,17 @@ export default function PenggunaPage() {
           {/* MODAL */}
 
           <div
-            className="
+            className={`
               relative
               w-full
               max-w-md
-              bg-white
+              theme-card
               rounded-2xl
-              shadow-2xl
+              ${themeCardShadow}
               border
-              border-slate-200
+              theme-border
               overflow-hidden
-            "
+            `}
           >
             {/* HEADER */}
 
@@ -2537,7 +2582,7 @@ export default function PenggunaPage() {
                 px-5
                 py-4
                 border-b
-                border-slate-100
+                theme-border-soft
                 flex
                 items-center
                 justify-between
@@ -2554,32 +2599,30 @@ export default function PenggunaPage() {
                     justify-center
                     ${
                       selectedUser.status === "Aktif"
-                        ? "bg-red-50"
-                        : "bg-emerald-50"
+                        ? "theme-danger"
+                        : "theme-success"
                     }
                   `}
                 >
                   {selectedUser.status === "Aktif" ? (
                     <UserX
                       size={17}
-                      className="text-red-500"
                     />
                   ) : (
                     <UserCheck
                       size={17}
-                      className="text-emerald-500"
                     />
                   )}
                 </div>
 
                 <div>
-                  <h3 className="text-sm font-bold text-slate-800">
+                  <h3 className="text-sm font-bold theme-text">
                     {selectedUser.status === "Aktif"
                       ? "Nonaktifkan Pengguna"
                       : "Aktifkan Pengguna"}
                   </h3>
 
-                  <p className="text-[11px] text-slate-400 mt-0.5">
+                  <p className="text-[11px] theme-text-muted mt-0.5">
                     Konfirmasi perubahan status akun
                   </p>
                 </div>
@@ -2593,11 +2636,11 @@ export default function PenggunaPage() {
                   w-8
                   h-8
                   rounded-lg
-                  hover:bg-slate-100
+                  hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
                   flex
                   items-center
                   justify-center
-                  text-slate-400
+                  theme-text-muted
                   transition
                   disabled:opacity-50
                 "
@@ -2610,25 +2653,23 @@ export default function PenggunaPage() {
 
             <div className="p-5">
               <div
-                className="
+                className={`
                   flex
                   items-center
                   gap-3
                   p-4
                   rounded-xl
-                  bg-slate-50
+                  theme-card-soft
                   border
-                  border-slate-200
-                "
+                  theme-border
+                `}
               >
                 <div
                   className="
                     w-10
                     h-10
                     rounded-full
-                    bg-gradient-to-br
-                    from-[#155DFC]
-                    to-[#0d47c9]
+                    bg-[var(--color-primary)]
                     text-white
                     flex
                     items-center
@@ -2641,19 +2682,19 @@ export default function PenggunaPage() {
                 </div>
 
                 <div className="min-w-0">
-                  <p className="text-sm font-semibold text-slate-800">
+                  <p className="text-sm font-semibold theme-text">
                     {selectedUser.nama}
                   </p>
 
-                  <p className="text-xs text-slate-400 mt-1 truncate">
+                  <p className="text-xs theme-text-muted mt-1 truncate">
                     {selectedUser.email}
                   </p>
                 </div>
               </div>
 
-              <p className="text-sm text-slate-600 leading-6 mt-4">
+              <p className="text-sm theme-text-secondary leading-6 mt-4">
                 Apakah kamu yakin ingin{" "}
-                <span className="font-semibold text-slate-800">
+                <span className="font-semibold theme-text">
                   {selectedUser.status === "Aktif"
                     ? "menonaktifkan"
                     : "mengaktifkan"}
@@ -2669,8 +2710,8 @@ export default function PenggunaPage() {
                 px-5
                 py-4
                 border-t
-                border-slate-100
-                bg-slate-50/70
+                theme-border-soft
+                theme-card-soft
                 flex
                 justify-end
                 gap-2
@@ -2685,12 +2726,12 @@ export default function PenggunaPage() {
                   py-2.5
                   rounded-lg
                   border
-                  border-slate-200
-                  bg-white
-                  text-slate-600
+                  theme-border
+                  theme-card
+                  theme-text-secondary
                   text-sm
                   font-semibold
-                  hover:bg-slate-50
+                  hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
                   transition
                   disabled:opacity-50
                 "
@@ -2717,8 +2758,8 @@ export default function PenggunaPage() {
                   disabled:opacity-60
                   ${
                     selectedUser.status === "Aktif"
-                      ? "bg-red-500 hover:bg-red-600"
-                      : "bg-emerald-500 hover:bg-emerald-600"
+                      ? "theme-danger"
+                      : "theme-success"
                   }
                 `}
               >

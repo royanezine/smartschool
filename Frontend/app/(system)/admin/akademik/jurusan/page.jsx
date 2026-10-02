@@ -20,7 +20,6 @@ import {
   Trash2,
   X,
   Users,
-  BookOpen,
   Layers3,
   CircleCheck,
   CircleSlash,
@@ -168,31 +167,34 @@ const emptyForm = {
 function StatCard({ icon: Icon, label, value, type = "blue" }) {
   const styles = {
     blue: {
-      box: "bg-blue-50",
-      icon: "text-blue-600",
-      value: "text-slate-900",
+      box: "theme-info",
+      icon: "text-[var(--color-primary)]",
+      value: "theme-text",
     },
+
     green: {
-      box: "bg-emerald-50",
-      icon: "text-emerald-600",
-      value: "text-emerald-700",
+      box: "theme-success",
+      icon: "text-[var(--color-success)]",
+      value: "text-[var(--color-success)]",
     },
+
     red: {
-      box: "bg-rose-50",
-      icon: "text-rose-600",
-      value: "text-rose-600",
+      box: "theme-danger",
+      icon: "text-[var(--color-danger)]",
+      value: "text-[var(--color-danger)]",
     },
+
     purple: {
-      box: "bg-indigo-50",
-      icon: "text-indigo-600",
-      value: "text-indigo-700",
+      box: "theme-card-soft",
+      icon: "text-[var(--color-info)]",
+      value: "theme-text",
     },
   };
 
   const style = styles[type];
 
   return (
-    <div className="min-w-0 rounded-xl border border-slate-200 bg-white px-4 py-4 shadow-[0_1px_3px_rgba(15,23,42,0.08)] sm:px-5">
+    <div className="min-w-0 rounded-xl border theme-border theme-card px-4 py-4 shadow-sm sm:px-5">
       <div className="flex items-center gap-3">
         <div
           className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${style.box} ${style.icon}`}
@@ -201,7 +203,7 @@ function StatCard({ icon: Icon, label, value, type = "blue" }) {
         </div>
 
         <div className="min-w-0">
-          <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
+          <p className="text-[11px] font-medium uppercase tracking-wide theme-text-muted">
             {label}
           </p>
 
@@ -227,8 +229,8 @@ function StatusBadge({ status }) {
     <span
       className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium ${
         active
-          ? "border-emerald-300 bg-emerald-50 text-emerald-700"
-          : "border-slate-300 bg-slate-100 text-slate-500"
+          ? "theme-success"
+          : "theme-card-soft theme-text-muted theme-border"
       }`}
     >
       {active ? (
@@ -247,15 +249,14 @@ function StatusBadge({ status }) {
 ========================================================= */
 
 function JenjangBadge({ jenjang }) {
-  const sma = jenjang === "SMA";
-
   return (
     <span
-      className={`inline-flex rounded-md px-3 py-1 text-xs font-medium ${
-        sma
-          ? "bg-violet-100 text-violet-700"
-          : "bg-indigo-100 text-indigo-700"
-      }`}
+      className="
+        inline-flex rounded-md
+        theme-info
+        px-3 py-1
+        text-xs font-medium
+      "
     >
       {jenjang}
     </span>
@@ -294,7 +295,7 @@ function JurusanForm({ initial, onCancel, onSave }) {
       {/* KODE + JENJANG */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-2 block text-xs font-semibold text-slate-600">
+          <label className="mb-2 block text-xs font-semibold theme-text-secondary">
             Kode Jurusan
           </label>
 
@@ -303,12 +304,18 @@ function JurusanForm({ initial, onCancel, onSave }) {
             value={form.kode}
             onChange={update("kode")}
             placeholder="Contoh: RPL"
-            className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            className="
+              theme-input
+              h-11 w-full rounded-lg
+              px-3.5 text-sm
+              outline-none transition
+              focus:outline-none
+            "
           />
         </div>
 
         <div>
-          <label className="mb-2 block text-xs font-semibold text-slate-600">
+          <label className="mb-2 block text-xs font-semibold theme-text-secondary">
             Jenjang
           </label>
 
@@ -316,7 +323,13 @@ function JurusanForm({ initial, onCancel, onSave }) {
             <select
               value={form.jenjang}
               onChange={update("jenjang")}
-              className="h-11 w-full appearance-none rounded-lg border border-slate-300 bg-white px-3.5 pr-10 text-sm text-slate-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              className="
+                theme-input
+                h-11 w-full appearance-none rounded-lg
+                px-3.5 pr-10 text-sm
+                outline-none
+                focus:outline-none
+              "
             >
               <option value="SMA">SMA</option>
               <option value="SMK">SMK</option>
@@ -324,7 +337,10 @@ function JurusanForm({ initial, onCancel, onSave }) {
 
             <ChevronDown
               size={16}
-              className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+              className="
+                pointer-events-none absolute right-3 top-1/2
+                -translate-y-1/2 theme-text-placeholder
+              "
             />
           </div>
         </div>
@@ -332,7 +348,7 @@ function JurusanForm({ initial, onCancel, onSave }) {
 
       {/* NAMA */}
       <div>
-        <label className="mb-2 block text-xs font-semibold text-slate-600">
+        <label className="mb-2 block text-xs font-semibold theme-text-secondary">
           Nama Jurusan
         </label>
 
@@ -341,13 +357,19 @@ function JurusanForm({ initial, onCancel, onSave }) {
           value={form.nama}
           onChange={update("nama")}
           placeholder="Contoh: Rekayasa Perangkat Lunak"
-          className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+          className="
+            theme-input
+            h-11 w-full rounded-lg
+            px-3.5 text-sm
+            outline-none transition
+            focus:outline-none
+          "
         />
       </div>
 
       {/* KEPALA */}
       <div>
-        <label className="mb-2 block text-xs font-semibold text-slate-600">
+        <label className="mb-2 block text-xs font-semibold theme-text-secondary">
           Kepala Jurusan
         </label>
 
@@ -355,14 +377,20 @@ function JurusanForm({ initial, onCancel, onSave }) {
           value={form.kepala}
           onChange={update("kepala")}
           placeholder="Nama lengkap beserta gelar"
-          className="h-11 w-full rounded-lg border border-slate-300 bg-white px-3.5 text-sm text-slate-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+          className="
+            theme-input
+            h-11 w-full rounded-lg
+            px-3.5 text-sm
+            outline-none transition
+            focus:outline-none
+          "
         />
       </div>
 
       {/* KELAS / SISWA / STATUS */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div>
-          <label className="mb-2 block text-xs font-semibold text-slate-600">
+          <label className="mb-2 block text-xs font-semibold theme-text-secondary">
             Jumlah Kelas
           </label>
 
@@ -371,12 +399,18 @@ function JurusanForm({ initial, onCancel, onSave }) {
             min="0"
             value={form.kelas}
             onChange={update("kelas")}
-            className="h-11 w-full rounded-lg border border-slate-300 px-3.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            className="
+              theme-input
+              h-11 w-full rounded-lg
+              px-3.5 text-sm
+              outline-none
+              focus:outline-none
+            "
           />
         </div>
 
         <div>
-          <label className="mb-2 block text-xs font-semibold text-slate-600">
+          <label className="mb-2 block text-xs font-semibold theme-text-secondary">
             Jumlah Siswa
           </label>
 
@@ -385,12 +419,18 @@ function JurusanForm({ initial, onCancel, onSave }) {
             min="0"
             value={form.siswa}
             onChange={update("siswa")}
-            className="h-11 w-full rounded-lg border border-slate-300 px-3.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            className="
+              theme-input
+              h-11 w-full rounded-lg
+              px-3.5 text-sm
+              outline-none
+              focus:outline-none
+            "
           />
         </div>
 
         <div>
-          <label className="mb-2 block text-xs font-semibold text-slate-600">
+          <label className="mb-2 block text-xs font-semibold theme-text-secondary">
             Status
           </label>
 
@@ -398,7 +438,13 @@ function JurusanForm({ initial, onCancel, onSave }) {
             <select
               value={form.status}
               onChange={update("status")}
-              className="h-11 w-full appearance-none rounded-lg border border-slate-300 bg-white px-3.5 pr-10 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              className="
+                theme-input
+                h-11 w-full appearance-none rounded-lg
+                px-3.5 pr-10 text-sm
+                outline-none
+                focus:outline-none
+              "
             >
               <option value="Aktif">Aktif</option>
               <option value="Nonaktif">Nonaktif</option>
@@ -406,7 +452,10 @@ function JurusanForm({ initial, onCancel, onSave }) {
 
             <ChevronDown
               size={16}
-              className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+              className="
+                pointer-events-none absolute right-3 top-1/2
+                -translate-y-1/2 theme-text-placeholder
+              "
             />
           </div>
         </div>
@@ -414,7 +463,7 @@ function JurusanForm({ initial, onCancel, onSave }) {
 
       {/* ICON */}
       <div>
-        <label className="mb-2 block text-xs font-semibold text-slate-600">
+        <label className="mb-2 block text-xs font-semibold theme-text-secondary">
           Ikon Jurusan
         </label>
 
@@ -434,8 +483,8 @@ function JurusanForm({ initial, onCancel, onSave }) {
                 }
                 className={`flex h-10 w-10 items-center justify-center rounded-lg border transition ${
                   selected
-                    ? "border-blue-600 bg-blue-600 text-white shadow-sm"
-                    : "border-slate-200 bg-white text-slate-500 hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600"
+                    ? "theme-primary theme-border shadow-sm"
+                    : "theme-card theme-border theme-text-muted theme-header-hover"
                 }`}
               >
                 <Icon size={17} />
@@ -446,18 +495,33 @@ function JurusanForm({ initial, onCancel, onSave }) {
       </div>
 
       {/* FOOTER */}
-      <div className="flex flex-col-reverse gap-2 border-t border-slate-200 pt-5 sm:flex-row sm:justify-end">
+      <div className="flex flex-col-reverse gap-2 border-t theme-border pt-5 sm:flex-row sm:justify-end">
         <button
           type="button"
           onClick={onCancel}
-          className="h-10 rounded-lg border border-slate-300 px-5 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+          className="
+            theme-card
+            theme-border
+            theme-text-secondary
+            theme-header-hover
+            h-10 rounded-lg
+            border px-5
+            text-sm font-medium
+            transition
+          "
         >
           Batal
         </button>
 
         <button
           type="submit"
-          className="h-10 rounded-lg bg-blue-600 px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+          className="
+            theme-primary
+            h-10 rounded-lg
+            px-5
+            text-sm font-semibold
+            shadow-sm transition
+          "
         >
           Simpan Jurusan
         </button>
@@ -509,7 +573,10 @@ export default function ListJurusanPage() {
      STATISTIC
   ========================================================= */
 
-  const totalSiswa = data.reduce((total, item) => total + item.siswa, 0);
+  const totalSiswa = data.reduce(
+    (total, item) => total + item.siswa,
+    0
+  );
 
   const totalAktif = data.filter(
     (item) => item.status === "Aktif"
@@ -594,7 +661,7 @@ export default function ListJurusanPage() {
   ========================================================= */
 
   return (
-    <div className="flex min-h-screen bg-[#F5F8FC]">
+    <div className="flex min-h-screen theme-page">
       {/* SIDEBAR */}
       <Sidebar />
 
@@ -610,7 +677,7 @@ export default function ListJurusanPage() {
 
             <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex min-w-0 items-center gap-3">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm">
+                <div className="theme-primary flex h-12 w-12 shrink-0 items-center justify-center rounded-xl shadow-sm">
                   <GraduationCap
                     size={23}
                     strokeWidth={2}
@@ -618,11 +685,11 @@ export default function ListJurusanPage() {
                 </div>
 
                 <div className="min-w-0">
-                  <h1 className="text-[24px] font-bold tracking-tight text-slate-900 sm:text-[27px]">
+                  <h1 className="text-[24px] font-bold tracking-tight theme-text sm:text-[27px]">
                     Data Jurusan
                   </h1>
 
-                  <p className="text-sm text-slate-500">
+                  <p className="text-sm theme-text-muted">
                     Kelola program keahlian dan data jurusan sekolah
                   </p>
                 </div>
@@ -632,9 +699,20 @@ export default function ListJurusanPage() {
                 <button
                   type="button"
                   onClick={resetFilter}
-                  className="flex h-10 items-center gap-2 rounded-lg border border-slate-300 bg-white px-3.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+                  className="
+                    theme-card
+                    theme-border
+                    theme-text-secondary
+                    theme-header-hover
+                    flex h-10 items-center gap-2
+                    rounded-lg border
+                    px-3.5
+                    text-sm font-medium
+                    transition
+                  "
                 >
                   <RefreshCw size={16} />
+
                   <span className="hidden sm:inline">
                     Reset
                   </span>
@@ -643,7 +721,14 @@ export default function ListJurusanPage() {
                 <button
                   type="button"
                   onClick={openAdd}
-                  className="flex h-10 items-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+                  className="
+                    theme-primary
+                    flex h-10 items-center gap-2
+                    rounded-lg
+                    px-4
+                    text-sm font-semibold
+                    shadow-sm transition
+                  "
                 >
                   <Plus size={17} />
                   Tambah Jurusan
@@ -689,13 +774,24 @@ export default function ListJurusanPage() {
                 FILTER CARD
             ================================================= */}
 
-            <div className="mt-5 rounded-xl border border-slate-200 bg-white p-4 shadow-[0_1px_3px_rgba(15,23,42,0.08)] sm:p-5">
+            <div
+              className="
+                theme-card
+                theme-border
+                mt-5 rounded-xl border
+                p-4 shadow-sm sm:p-5
+              "
+            >
               {/* SEARCH */}
 
               <div className="relative">
                 <Search
                   size={18}
-                  className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                  className="
+                    pointer-events-none absolute left-3.5
+                    top-1/2 -translate-y-1/2
+                    text-[var(--color-primary)]
+                  "
                 />
 
                 <input
@@ -704,7 +800,14 @@ export default function ListJurusanPage() {
                     setSearch(e.target.value)
                   }
                   placeholder="Cari nama, kode, atau kepala jurusan..."
-                  className="h-11 w-full rounded-lg border border-slate-300 bg-white pl-10 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="
+                    theme-input
+                    h-11 w-full rounded-lg
+                    pl-10 pr-4
+                    text-sm
+                    outline-none transition
+                    focus:outline-none
+                  "
                 />
               </div>
 
@@ -716,12 +819,24 @@ export default function ListJurusanPage() {
                     onChange={(e) =>
                       setStatusFilter(e.target.value)
                     }
-                    className="h-10 w-full appearance-none rounded-lg border border-slate-300 bg-white px-3.5 pr-9 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="
+                      theme-input
+                      h-10 w-full appearance-none
+                      rounded-lg
+                      px-3.5 pr-9
+                      text-sm
+                      outline-none
+                      focus:outline-none
+                    "
                   >
                     <option value="Semua">
                       Semua Status
                     </option>
-                    <option value="Aktif">Aktif</option>
+
+                    <option value="Aktif">
+                      Aktif
+                    </option>
+
                     <option value="Nonaktif">
                       Nonaktif
                     </option>
@@ -729,7 +844,11 @@ export default function ListJurusanPage() {
 
                   <ChevronDown
                     size={15}
-                    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+                    className="
+                      pointer-events-none absolute right-3
+                      top-1/2 -translate-y-1/2
+                      theme-text-placeholder
+                    "
                   />
                 </div>
 
@@ -739,31 +858,56 @@ export default function ListJurusanPage() {
                     onChange={(e) =>
                       setJenjangFilter(e.target.value)
                     }
-                    className="h-10 w-full appearance-none rounded-lg border border-slate-300 bg-white px-3.5 pr-9 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="
+                      theme-input
+                      h-10 w-full appearance-none
+                      rounded-lg
+                      px-3.5 pr-9
+                      text-sm
+                      outline-none
+                      focus:outline-none
+                    "
                   >
                     <option value="Semua">
                       Semua Jenjang
                     </option>
-                    <option value="SMA">SMA</option>
-                    <option value="SMK">SMK</option>
+
+                    <option value="SMA">
+                      SMA
+                    </option>
+
+                    <option value="SMK">
+                      SMK
+                    </option>
                   </select>
 
                   <ChevronDown
                     size={15}
-                    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+                    className="
+                      pointer-events-none absolute right-3
+                      top-1/2 -translate-y-1/2
+                      theme-text-placeholder
+                    "
                   />
                 </div>
 
                 <button
                   type="button"
                   onClick={resetFilter}
-                  className="h-10 rounded-lg px-3 text-sm font-medium text-blue-600 transition hover:bg-blue-50"
+                  className="
+                    theme-sidebar-text-active
+                    theme-sidebar-hover
+                    h-10 rounded-lg
+                    px-3
+                    text-sm font-medium
+                    transition
+                  "
                 >
                   Reset Filter
                 </button>
 
                 <div className="lg:ml-auto">
-                  <span className="text-sm font-medium text-slate-500">
+                  <span className="text-sm font-medium theme-text-muted">
                     {filtered.length} jurusan ditemukan
                   </span>
                 </div>
@@ -774,11 +918,18 @@ export default function ListJurusanPage() {
                 TABLE
             ================================================= */}
 
-            <div className="mt-5 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]">
+            <div
+              className="
+                theme-card
+                theme-border
+                mt-5 overflow-hidden
+                rounded-xl border shadow-sm
+              "
+            >
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[1050px] border-collapse text-left">
                   <thead>
-                    <tr className="bg-blue-600 text-xs font-semibold uppercase tracking-wide text-white">
+                    <tr className="theme-primary text-xs font-semibold uppercase tracking-wide">
                       <th className="w-16 px-5 py-3.5 text-center">
                         No
                       </th>
@@ -821,17 +972,23 @@ export default function ListJurusanPage() {
                       return (
                         <tr
                           key={j.id}
-                          className="border-b border-slate-100 transition last:border-0 hover:bg-slate-50"
+                          className="
+                            theme-table-hover
+                            border-b
+                            theme-border-soft
+                            transition
+                            last:border-0
+                          "
                         >
                           {/* NO */}
-                          <td className="px-5 py-4 text-center text-sm font-medium text-slate-500">
+                          <td className="px-5 py-4 text-center text-sm font-medium theme-text-muted">
                             {index + 1}
                           </td>
 
                           {/* JURUSAN */}
                           <td className="px-5 py-4">
                             <div className="flex items-center gap-3">
-                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                              <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-lg">
                                 <Icon
                                   size={18}
                                   strokeWidth={2}
@@ -839,11 +996,11 @@ export default function ListJurusanPage() {
                               </div>
 
                               <div className="min-w-0">
-                                <p className="truncate text-sm font-semibold text-slate-900">
+                                <p className="truncate text-sm font-semibold theme-text">
                                   {j.nama}
                                 </p>
 
-                                <p className="mt-0.5 text-xs text-slate-500">
+                                <p className="mt-0.5 text-xs theme-text-muted">
                                   Kode {j.kode}
                                 </p>
                               </div>
@@ -859,18 +1016,18 @@ export default function ListJurusanPage() {
 
                           {/* KEPALA */}
                           <td className="px-5 py-4">
-                            <p className="max-w-[220px] truncate text-sm text-slate-600">
+                            <p className="max-w-[220px] truncate text-sm theme-text-secondary">
                               {j.kepala || "-"}
                             </p>
                           </td>
 
                           {/* KELAS */}
-                          <td className="px-5 py-4 text-center text-sm font-medium text-slate-700">
+                          <td className="px-5 py-4 text-center text-sm font-medium theme-text-secondary">
                             {j.kelas}
                           </td>
 
                           {/* SISWA */}
-                          <td className="px-5 py-4 text-center text-sm font-medium text-slate-700">
+                          <td className="px-5 py-4 text-center text-sm font-medium theme-text-secondary">
                             {j.siswa.toLocaleString("id-ID")}
                           </td>
 
@@ -887,7 +1044,14 @@ export default function ListJurusanPage() {
                               <button
                                 type="button"
                                 title="Lihat detail"
-                                className="flex h-8 w-8 items-center justify-center rounded-md text-slate-500 transition hover:bg-blue-50 hover:text-blue-600"
+                                className="
+                                  theme-header-hover
+                                  theme-text-muted
+                                  flex h-8 w-8
+                                  items-center justify-center
+                                  rounded-md
+                                  transition
+                                "
                               >
                                 <Eye size={16} />
                               </button>
@@ -898,7 +1062,14 @@ export default function ListJurusanPage() {
                                   openEdit(j)
                                 }
                                 title="Edit jurusan"
-                                className="flex h-8 w-8 items-center justify-center rounded-md text-slate-500 transition hover:bg-blue-50 hover:text-blue-600"
+                                className="
+                                  theme-header-hover
+                                  theme-text-muted
+                                  flex h-8 w-8
+                                  items-center justify-center
+                                  rounded-md
+                                  transition
+                                "
                               >
                                 <Pencil size={16} />
                               </button>
@@ -906,12 +1077,16 @@ export default function ListJurusanPage() {
                               <button
                                 type="button"
                                 onClick={() =>
-                                  setConfirmDeleteId(
-                                    j.id
-                                  )
+                                  setConfirmDeleteId(j.id)
                                 }
                                 title="Hapus jurusan"
-                                className="flex h-8 w-8 items-center justify-center rounded-md text-slate-500 transition hover:bg-rose-50 hover:text-rose-600"
+                                className="
+                                  theme-danger
+                                  flex h-8 w-8
+                                  items-center justify-center
+                                  rounded-md
+                                  transition
+                                "
                               >
                                 <Trash2 size={16} />
                               </button>
@@ -928,15 +1103,23 @@ export default function ListJurusanPage() {
                           colSpan={8}
                           className="px-5 py-16 text-center"
                         >
-                          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                          <div
+                            className="
+                              theme-card-soft
+                              theme-text-muted
+                              mx-auto flex h-12 w-12
+                              items-center justify-center
+                              rounded-full
+                            "
+                          >
                             <Search size={21} />
                           </div>
 
-                          <p className="mt-3 text-sm font-semibold text-slate-700">
+                          <p className="mt-3 text-sm font-semibold theme-text-secondary">
                             Jurusan tidak ditemukan
                           </p>
 
-                          <p className="mt-1 text-xs text-slate-400">
+                          <p className="mt-1 text-xs theme-text-muted">
                             Coba ubah kata kunci atau filter
                             pencarian.
                           </p>
@@ -948,14 +1131,14 @@ export default function ListJurusanPage() {
               </div>
 
               {/* TABLE FOOTER */}
-              <div className="border-t border-slate-100 px-5 py-3">
-                <p className="text-xs text-slate-400">
+              <div className="border-t theme-border-soft theme-card-soft px-5 py-3">
+                <p className="text-xs theme-text-muted">
                   Menampilkan{" "}
-                  <span className="font-medium text-slate-600">
+                  <span className="font-medium theme-text-secondary">
                     {filtered.length}
                   </span>{" "}
                   dari{" "}
-                  <span className="font-medium text-slate-600">
+                  <span className="font-medium theme-text-secondary">
                     {data.length}
                   </span>{" "}
                   jurusan
@@ -969,17 +1152,35 @@ export default function ListJurusanPage() {
 
             {modalMode && (
               <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-[2px]">
-                <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
+                <div
+                  className="
+                    theme-card
+                    theme-border
+                    max-h-[92vh] w-full max-w-2xl
+                    overflow-y-auto
+                    rounded-2xl border
+                    shadow-2xl
+                  "
+                >
                   {/* MODAL HEADER */}
-                  <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white px-5 py-4 sm:px-6">
+                  <div
+                    className="
+                      theme-card
+                      sticky top-0 z-10
+                      flex items-center justify-between
+                      border-b theme-border
+                      px-5 py-4
+                      sm:px-6
+                    "
+                  >
                     <div>
-                      <h2 className="text-lg font-bold text-slate-900">
+                      <h2 className="text-lg font-bold theme-text">
                         {modalMode === "add"
                           ? "Tambah Jurusan"
                           : "Edit Jurusan"}
                       </h2>
 
-                      <p className="mt-0.5 text-xs text-slate-500">
+                      <p className="mt-0.5 text-xs theme-text-muted">
                         Lengkapi informasi jurusan sekolah
                       </p>
                     </div>
@@ -987,7 +1188,14 @@ export default function ListJurusanPage() {
                     <button
                       type="button"
                       onClick={closeModal}
-                      className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                      className="
+                        theme-header-hover
+                        theme-text-muted
+                        flex h-9 w-9
+                        items-center justify-center
+                        rounded-lg
+                        transition
+                      "
                     >
                       <X size={18} />
                     </button>
@@ -1011,18 +1219,34 @@ export default function ListJurusanPage() {
 
             {confirmDeleteId !== null && (
               <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-[2px]">
-                <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+                <div
+                  className="
+                    theme-card
+                    theme-border
+                    w-full max-w-md
+                    rounded-2xl border
+                    p-6
+                    shadow-2xl
+                  "
+                >
                   <div className="flex items-start gap-4">
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-rose-50 text-rose-600">
+                    <div
+                      className="
+                        theme-danger
+                        flex h-11 w-11 shrink-0
+                        items-center justify-center
+                        rounded-full
+                      "
+                    >
                       <Trash2 size={20} />
                     </div>
 
                     <div>
-                      <h2 className="text-lg font-bold text-slate-900">
+                      <h2 className="text-lg font-bold theme-text">
                         Hapus jurusan?
                       </h2>
 
-                      <p className="mt-1.5 text-sm leading-6 text-slate-500">
+                      <p className="mt-1.5 text-sm leading-6 theme-text-muted">
                         Data jurusan ini akan dihapus dari
                         sistem. Pastikan tidak ada data kelas
                         atau siswa yang masih menggunakan
@@ -1037,7 +1261,17 @@ export default function ListJurusanPage() {
                       onClick={() =>
                         setConfirmDeleteId(null)
                       }
-                      className="h-10 rounded-lg border border-slate-300 px-5 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+                      className="
+                        theme-card
+                        theme-border
+                        theme-text-secondary
+                        theme-header-hover
+                        h-10 rounded-lg
+                        border
+                        px-5
+                        text-sm font-medium
+                        transition
+                      "
                     >
                       Batal
                     </button>
@@ -1047,7 +1281,13 @@ export default function ListJurusanPage() {
                       onClick={() =>
                         removeItem(confirmDeleteId)
                       }
-                      className="h-10 rounded-lg bg-rose-600 px-5 text-sm font-semibold text-white transition hover:bg-rose-700"
+                      className="
+                        theme-danger
+                        h-10 rounded-lg
+                        px-5
+                        text-sm font-semibold
+                        transition
+                      "
                     >
                       Ya, Hapus
                     </button>

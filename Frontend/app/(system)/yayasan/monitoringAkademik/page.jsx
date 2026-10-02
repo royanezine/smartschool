@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import Sidebar from "../../../components/Sidebar";
-import Header from "../../../components/Header";
 import {
   ClipboardCheck,
   Search,
@@ -20,11 +18,87 @@ import {
   Minus,
 } from "lucide-react";
 
-// ===== DUMMY DATA =====
-// Catatan: ganti dengan data asli dari API/DB begitu tersedia.
-const JENJANG_OPTIONS = ["Semua Jenjang", "SD", "SMP", "SMA"];
-const TAHUN_AJARAN_OPTIONS = ["2025/2026 - Genap", "2025/2026 - Ganjil", "2024/2025 - Genap"];
-const STATUS_OPTIONS = ["Semua Status", "Baik", "Perlu Perhatian", "Kritis"];
+// ============================================================
+// THEME HELPERS
+// ============================================================
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+
+// ============================================================
+// DUMMY DATA
+// ============================================================
+
+const JENJANG_OPTIONS = [
+  "Semua Jenjang",
+  "SD",
+  "SMP",
+  "SMA",
+];
+
+const TAHUN_AJARAN_OPTIONS = [
+  "2025/2026 - Genap",
+  "2025/2026 - Ganjil",
+  "2024/2025 - Genap",
+];
+
+const STATUS_OPTIONS = [
+  "Semua Status",
+  "Baik",
+  "Perlu Perhatian",
+  "Kritis",
+];
 
 const dataSekolah = [
   {
@@ -108,372 +182,972 @@ const dataSekolah = [
 ];
 
 const mapelOverview = [
-  { mapel: "Matematika", rataRata: 71, target: 75 },
-  { mapel: "Bahasa Indonesia", rataRata: 79, target: 75 },
-  { mapel: "IPA", rataRata: 70, target: 75 },
-  { mapel: "IPS", rataRata: 76, target: 75 },
-  { mapel: "Bahasa Inggris", rataRata: 74, target: 75 },
+  {
+    mapel: "Matematika",
+    rataRata: 71,
+    target: 75,
+  },
+  {
+    mapel: "Bahasa Indonesia",
+    rataRata: 79,
+    target: 75,
+  },
+  {
+    mapel: "IPA",
+    rataRata: 70,
+    target: 75,
+  },
+  {
+    mapel: "IPS",
+    rataRata: 76,
+    target: 75,
+  },
+  {
+    mapel: "Bahasa Inggris",
+    rataRata: 74,
+    target: 75,
+  },
 ];
+
+// ============================================================
+// THEME STATUS
+// ============================================================
 
 function statusStyle(status) {
   switch (status) {
     case "Baik":
-      return "bg-emerald-50 text-emerald-600 border-emerald-200";
+      return `${themeSuccessSurface} ${themeSuccessBorder} text-[var(--color-success)]`;
+
     case "Perlu Perhatian":
-      return "bg-amber-50 text-amber-600 border-amber-200";
+      return `${themeWarningSurface} ${themeWarningBorder} text-[var(--color-warning)]`;
+
     case "Kritis":
-      return "bg-rose-50 text-rose-600 border-rose-200";
+      return `${themeDangerSurface} ${themeDangerBorder} text-[var(--color-text)]`;
+
     default:
-      return "bg-slate-100 text-slate-500 border-slate-200";
+      return `${themeNeutralSurface} ${themeNeutralBorder} theme-text-muted`;
   }
 }
+
+// ============================================================
+// PROGRESS BAR THEME
+// ============================================================
 
 function barColor(value, kind) {
   if (kind === "kehadiran") {
-    if (value >= 90) return "bg-emerald-500";
-    if (value >= 80) return "bg-amber-500";
-    return "bg-rose-500";
+    if (value >= 90) {
+      return "bg-[var(--color-success)]";
+    }
+
+    if (value >= 80) {
+      return "bg-[var(--color-warning)]";
+    }
+
+    return "bg-[var(--color-text)]";
   }
-  if (value >= 75) return "bg-emerald-500";
-  if (value >= 65) return "bg-amber-500";
-  return "bg-rose-500";
+
+  if (value >= 75) {
+    return "bg-[var(--color-success)]";
+  }
+
+  if (value >= 65) {
+    return "bg-[var(--color-warning)]";
+  }
+
+  return "bg-[var(--color-text)]";
 }
 
-// ===== MAIN COMPONENT =====
+// ============================================================
+// MAIN COMPONENT
+// ============================================================
 
 export default function MonitoringAkademikPage() {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [jenjang, setJenjang] = useState(JENJANG_OPTIONS[0]);
-  const [tahunAjaran, setTahunAjaran] = useState(TAHUN_AJARAN_OPTIONS[0]);
+  const [tahunAjaran, setTahunAjaran] = useState(
+    TAHUN_AJARAN_OPTIONS[0]
+  );
   const [status, setStatus] = useState(STATUS_OPTIONS[0]);
   const [search, setSearch] = useState("");
+
+  // ==========================================================
+  // FILTER SEKOLAH
+  // ==========================================================
 
   const filteredSekolah = useMemo(() => {
     return dataSekolah
       .filter((s) => {
-        const matchJenjang = jenjang === "Semua Jenjang" || s.jenjang === jenjang;
-        const matchStatus = status === "Semua Status" || s.status === status;
+        const matchJenjang =
+          jenjang === "Semua Jenjang" ||
+          s.jenjang === jenjang;
+
+        const matchStatus =
+          status === "Semua Status" ||
+          s.status === status;
+
         const matchSearch =
-          !search.trim() || s.nama.toLowerCase().includes(search.toLowerCase());
-        return matchJenjang && matchStatus && matchSearch;
+          !search.trim() ||
+          s.nama
+            .toLowerCase()
+            .includes(search.toLowerCase());
+
+        return (
+          matchJenjang &&
+          matchStatus &&
+          matchSearch
+        );
       })
-      .sort((a, b) => b.rataRataNilai - a.rataRataNilai);
+      .sort(
+        (a, b) =>
+          b.rataRataNilai - a.rataRataNilai
+      );
   }, [jenjang, status, search]);
+
+  // ==========================================================
+  // SUMMARY
+  // ==========================================================
 
   const summary = useMemo(() => {
     const total = filteredSekolah.length;
+
     const rataRataNilai = total
       ? Math.round(
-          filteredSekolah.reduce((a, s) => a + s.rataRataNilai, 0) / total
+          filteredSekolah.reduce(
+            (a, s) => a + s.rataRataNilai,
+            0
+          ) / total
         )
       : 0;
+
     const rataRataKehadiran = total
       ? Math.round(
-          filteredSekolah.reduce((a, s) => a + s.kehadiran, 0) / total
+          filteredSekolah.reduce(
+            (a, s) => a + s.kehadiran,
+            0
+          ) / total
         )
       : 0;
-    const perluPerhatian = filteredSekolah.filter(
-      (s) => s.status === "Perlu Perhatian" || s.status === "Kritis"
-    ).length;
-    const totalSiswaPerluPerhatian = filteredSekolah.reduce(
-      (a, s) => a + s.siswaPerluPerhatian,
-      0
-    );
-    return { total, rataRataNilai, rataRataKehadiran, perluPerhatian, totalSiswaPerluPerhatian };
+
+    const perluPerhatian =
+      filteredSekolah.filter(
+        (s) =>
+          s.status === "Perlu Perhatian" ||
+          s.status === "Kritis"
+      ).length;
+
+    const totalSiswaPerluPerhatian =
+      filteredSekolah.reduce(
+        (a, s) => a + s.siswaPerluPerhatian,
+        0
+      );
+
+    return {
+      total,
+      rataRataNilai,
+      rataRataKehadiran,
+      perluPerhatian,
+      totalSiswaPerluPerhatian,
+    };
   }, [filteredSekolah]);
 
-  const notifications = [
-    { id: 1, title: "Rata-rata nilai SMA Smart School 2 turun 4.5 poin", desc: "Dikirim 1 jam lalu", read: false },
-    { id: 2, title: "2 unit sekolah masuk status Perlu Perhatian/Kritis", desc: "Dikirim 4 jam lalu", read: false },
-  ];
-
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden">
-      <Sidebar
-        active="monitoring-akademik"
-        setActive={() => {}}
-        collapsed={!sidebarOpen}
-        setCollapsed={() => setSidebarOpen(!sidebarOpen)}
-      />
-      <div className="flex-1 flex flex-col min-w-0">
-        <Header
-          toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-          notifications={notifications}
-          user={{ name: "Admin Yayasan", email: "admin@smartschool.com", avatar: "Y" }}
-        />
-        <main className="flex-1 overflow-y-auto min-h-screen p-4 sm:p-6 lg:p-8">
-          <div className="w-full space-y-6">
+    <div className="theme-page theme-text min-h-full">
+      <div className="w-full max-w-[1800px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 space-y-6">
 
-            {/* PAGE HEADER */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-xs font-medium text-slate-400 mb-1">Akademik</p>
-                <div className="flex items-center gap-2.5">
-                  <div className="p-2 rounded-lg bg-blue-500 text-white shadow-sm flex-shrink-0">
-                    <ClipboardCheck size={18} />
+        {/* ====================================================
+            PAGE HEADER
+        ==================================================== */}
+
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-xs font-medium theme-text-muted mb-1">
+              Akademik
+            </p>
+
+            <div className="flex items-center gap-2.5">
+              <div
+                className={`
+                  p-2
+                  rounded-lg
+                  ${themePrimaryGradient}
+                  text-[var(--color-card)]
+                  ${themePrimaryShadow}
+                  flex-shrink-0
+                `}
+              >
+                <ClipboardCheck size={18} />
+              </div>
+
+              <h1 className="text-xl sm:text-2xl font-semibold theme-text truncate">
+                Monitoring Akademik
+              </h1>
+            </div>
+
+            <p className="text-sm theme-text-secondary mt-1 ml-[42px] flex items-center gap-1.5">
+              <Sparkles
+                size={14}
+                className="theme-text-muted flex-shrink-0"
+              />
+
+              <span className="truncate">
+                Pantau performa akademik seluruh unit
+                sekolah di lingkungan yayasan.
+              </span>
+            </p>
+          </div>
+
+          <button
+            type="button"
+            className={`
+              flex
+              items-center
+              justify-center
+              gap-2
+              px-4
+              py-2.5
+              text-sm
+              font-medium
+              text-[var(--color-card)]
+              bg-[var(--color-primary)]
+              rounded-lg
+              hover:opacity-90
+              transition-colors
+              ${themePrimaryShadow}
+              whitespace-nowrap
+              flex-shrink-0
+            `}
+          >
+            <Download size={16} />
+            Unduh Laporan
+          </button>
+        </div>
+
+        {/* ====================================================
+            FILTER BAR
+        ==================================================== */}
+
+        <div
+          className={`
+            theme-card
+            rounded-xl
+            border theme-border
+            p-4
+            ${themeCardShadow}
+          `}
+        >
+          <div className="flex flex-col sm:flex-row flex-wrap gap-3">
+
+            {/* SEARCH */}
+            <div className="relative flex-1 min-w-[200px]">
+              <Search
+                size={15}
+                className="
+                  absolute
+                  left-3
+                  top-1/2
+                  -translate-y-1/2
+                  theme-text-muted
+                "
+              />
+
+              <input
+                type="text"
+                value={search}
+                onChange={(e) =>
+                  setSearch(e.target.value)
+                }
+                placeholder="Cari nama sekolah..."
+                className={`
+                  theme-input
+                  w-full
+                  pl-9
+                  pr-3
+                  py-2.5
+                  text-sm
+                  rounded-lg
+                  transition-colors
+                  ${themeFocus}
+                  placeholder:text-[var(--color-text-placeholder)]
+                `}
+              />
+            </div>
+
+            {/* JENJANG */}
+            <div className="relative flex-1 min-w-[150px]">
+              <select
+                value={jenjang}
+                onChange={(e) =>
+                  setJenjang(e.target.value)
+                }
+                className={`
+                  theme-input
+                  w-full
+                  appearance-none
+                  pl-3
+                  pr-9
+                  py-2.5
+                  text-sm
+                  font-medium
+                  rounded-lg
+                  transition-colors
+                  cursor-pointer
+                  ${themeFocus}
+                `}
+              >
+                {JENJANG_OPTIONS.map((j) => (
+                  <option key={j} value={j}>
+                    {j}
+                  </option>
+                ))}
+              </select>
+
+              <ChevronDown
+                size={14}
+                className="
+                  absolute
+                  right-3
+                  top-1/2
+                  -translate-y-1/2
+                  theme-text-muted
+                  pointer-events-none
+                "
+              />
+            </div>
+
+            {/* TAHUN AJARAN */}
+            <div className="relative flex-1 min-w-[190px]">
+              <select
+                value={tahunAjaran}
+                onChange={(e) =>
+                  setTahunAjaran(e.target.value)
+                }
+                className={`
+                  theme-input
+                  w-full
+                  appearance-none
+                  pl-3
+                  pr-9
+                  py-2.5
+                  text-sm
+                  font-medium
+                  rounded-lg
+                  transition-colors
+                  cursor-pointer
+                  ${themeFocus}
+                `}
+              >
+                {TAHUN_AJARAN_OPTIONS.map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
+              </select>
+
+              <ChevronDown
+                size={14}
+                className="
+                  absolute
+                  right-3
+                  top-1/2
+                  -translate-y-1/2
+                  theme-text-muted
+                  pointer-events-none
+                "
+              />
+            </div>
+
+            {/* STATUS */}
+            <div className="relative flex-1 min-w-[160px]">
+              <select
+                value={status}
+                onChange={(e) =>
+                  setStatus(e.target.value)
+                }
+                className={`
+                  theme-input
+                  w-full
+                  appearance-none
+                  pl-3
+                  pr-9
+                  py-2.5
+                  text-sm
+                  font-medium
+                  rounded-lg
+                  transition-colors
+                  cursor-pointer
+                  ${themeFocus}
+                `}
+              >
+                {STATUS_OPTIONS.map((s) => (
+                  <option key={s} value={s}>
+                    {s}
+                  </option>
+                ))}
+              </select>
+
+              <ChevronDown
+                size={14}
+                className="
+                  absolute
+                  right-3
+                  top-1/2
+                  -translate-y-1/2
+                  theme-text-muted
+                  pointer-events-none
+                "
+              />
+            </div>
+          </div>
+        </div>
+
+        {/* ====================================================
+            SUMMARY CARDS
+        ==================================================== */}
+
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+
+          {/* RATA-RATA NILAI */}
+          <div
+            className={`
+              theme-card
+              rounded-xl
+              border theme-border
+              p-3.5
+              ${themeCardShadow}
+              flex
+              items-center
+              gap-3
+              min-w-0
+            `}
+          >
+            <div
+              className={`
+                p-2
+                rounded-lg
+                border
+                ${themeInfoSurface}
+                ${themeInfoBorder}
+                text-[var(--color-info)]
+                flex-shrink-0
+              `}
+            >
+              <BarChart3 size={16} />
+            </div>
+
+            <div className="min-w-0">
+              <p className="text-[11px] font-medium theme-text-muted uppercase tracking-wider truncate">
+                Rata-rata Nilai Yayasan
+              </p>
+
+              <p className="text-lg font-bold theme-text">
+                {summary.rataRataNilai}
+              </p>
+            </div>
+          </div>
+
+          {/* KEHADIRAN */}
+          <div
+            className={`
+              theme-card
+              rounded-xl
+              border theme-border
+              p-3.5
+              ${themeCardShadow}
+              flex
+              items-center
+              gap-3
+              min-w-0
+            `}
+          >
+            <div
+              className={`
+                p-2
+                rounded-lg
+                border
+                ${themeSuccessSurface}
+                ${themeSuccessBorder}
+                text-[var(--color-success)]
+                flex-shrink-0
+              `}
+            >
+              <CalendarCheck size={16} />
+            </div>
+
+            <div className="min-w-0">
+              <p className="text-[11px] font-medium theme-text-muted uppercase tracking-wider truncate">
+                Rata-rata Kehadiran
+              </p>
+
+              <p className="text-lg font-bold theme-text">
+                {summary.rataRataKehadiran}%
+              </p>
+            </div>
+          </div>
+
+          {/* UNIT PERHATIAN */}
+          <div
+            className={`
+              theme-card
+              rounded-xl
+              border theme-border
+              p-3.5
+              ${themeCardShadow}
+              flex
+              items-center
+              gap-3
+              min-w-0
+            `}
+          >
+            <div
+              className={`
+                p-2
+                rounded-lg
+                border
+                ${themeDangerSurface}
+                ${themeDangerBorder}
+                text-[var(--color-text)]
+                flex-shrink-0
+              `}
+            >
+              <AlertTriangle size={16} />
+            </div>
+
+            <div className="min-w-0">
+              <p className="text-[11px] font-medium theme-text-muted uppercase tracking-wider truncate">
+                Unit Perlu Perhatian
+              </p>
+
+              <p className="text-lg font-bold theme-text">
+                {summary.perluPerhatian}
+              </p>
+            </div>
+          </div>
+
+          {/* SISWA PERHATIAN */}
+          <div
+            className={`
+              theme-card
+              rounded-xl
+              border theme-border
+              p-3.5
+              ${themeCardShadow}
+              flex
+              items-center
+              gap-3
+              min-w-0
+            `}
+          >
+            <div
+              className={`
+                p-2
+                rounded-lg
+                border
+                ${themeWarningSurface}
+                ${themeWarningBorder}
+                text-[var(--color-warning)]
+                flex-shrink-0
+              `}
+            >
+              <School size={16} />
+            </div>
+
+            <div className="min-w-0">
+              <p className="text-[11px] font-medium theme-text-muted uppercase tracking-wider truncate">
+                Siswa Perlu Perhatian
+              </p>
+
+              <p className="text-lg font-bold theme-text">
+                {summary.totalSiswaPerluPerhatian}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* ====================================================
+            RATA-RATA PER MAPEL
+        ==================================================== */}
+
+        <div
+          className={`
+            theme-card
+            rounded-xl
+            border theme-border
+            ${themeCardShadow}
+            p-4
+            sm:p-5
+          `}
+        >
+          <div className="flex items-center justify-between mb-4 gap-3">
+            <h3 className="text-sm font-semibold theme-text-secondary flex items-center gap-2">
+              <BarChart3
+                size={15}
+                className="theme-text-muted"
+              />
+
+              <span>
+                Rata-rata Nilai per Mata Pelajaran —
+                Seluruh Yayasan
+              </span>
+            </h3>
+
+            <span className="text-xs theme-text-muted whitespace-nowrap">
+              Target KKM: 75
+            </span>
+          </div>
+
+          <div className="space-y-3.5">
+            {mapelOverview.map((m) => {
+              const belowTarget =
+                m.rataRata < m.target;
+
+              return (
+                <div key={m.mapel}>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs font-medium theme-text-secondary">
+                      {m.mapel}
+                    </span>
+
+                    <span
+                      className={`
+                        text-xs
+                        font-semibold
+                        ${
+                          belowTarget
+                            ? "text-[var(--color-warning)]"
+                            : "text-[var(--color-success)]"
+                        }
+                      `}
+                    >
+                      {m.rataRata}
+                    </span>
                   </div>
-                  <h1 className="text-xl sm:text-2xl font-semibold text-slate-800 truncate">
-                    Monitoring Akademik
-                  </h1>
-                </div>
-                <p className="text-sm text-slate-500 mt-1 ml-[42px] flex items-center gap-1.5">
-                  <Sparkles size={14} className="text-slate-400 flex-shrink-0" />
-                  <span className="truncate">Pantau performa akademik seluruh unit sekolah di lingkungan yayasan.</span>
-                </p>
-              </div>
 
-              <button className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors shadow-sm whitespace-nowrap flex-shrink-0">
-                <Download size={16} />
-                Unduh Laporan
-              </button>
-            </div>
-
-            {/* FILTER BAR */}
-            <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm">
-              <div className="flex flex-col sm:flex-row flex-wrap gap-3">
-                <div className="relative flex-1 min-w-[200px]">
-                  <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    type="text"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Cari nama sekolah..."
-                    className="w-full pl-9 pr-3 py-2.5 text-sm text-slate-700 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors"
-                  />
-                </div>
-
-                <div className="relative flex-1 min-w-[150px]">
-                  <select
-                    value={jenjang}
-                    onChange={(e) => setJenjang(e.target.value)}
-                    className="w-full appearance-none pl-3 pr-9 py-2.5 text-sm font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-lg hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors cursor-pointer"
+                  <div
+                    className={`
+                      relative
+                      h-2
+                      rounded-full
+                      ${themeNeutralSurface}
+                      overflow-hidden
+                    `}
                   >
-                    {JENJANG_OPTIONS.map((j) => (
-                      <option key={j} value={j}>{j}</option>
-                    ))}
-                  </select>
-                  <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                </div>
+                    <div
+                      className={`
+                        h-full
+                        rounded-full
+                        ${
+                          belowTarget
+                            ? "bg-[var(--color-warning)]"
+                            : "bg-[var(--color-success)]"
+                        }
+                      `}
+                      style={{
+                        width: `${m.rataRata}%`,
+                      }}
+                    />
 
-                <div className="relative flex-1 min-w-[190px]">
-                  <select
-                    value={tahunAjaran}
-                    onChange={(e) => setTahunAjaran(e.target.value)}
-                    className="w-full appearance-none pl-3 pr-9 py-2.5 text-sm font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-lg hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors cursor-pointer"
-                  >
-                    {TAHUN_AJARAN_OPTIONS.map((t) => (
-                      <option key={t} value={t}>{t}</option>
-                    ))}
-                  </select>
-                  <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+                    {/* TARGET KKM */}
+                    <div
+                      className="
+                        absolute
+                        top-0
+                        h-full
+                        w-[2px]
+                        bg-[var(--color-text-muted)]
+                      "
+                      style={{
+                        left: `${m.target}%`,
+                      }}
+                      title={`Target KKM ${m.target}`}
+                    />
+                  </div>
                 </div>
+              );
+            })}
+          </div>
+        </div>
 
-                <div className="relative flex-1 min-w-[160px]">
-                  <select
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value)}
-                    className="w-full appearance-none pl-3 pr-9 py-2.5 text-sm font-medium text-slate-700 bg-slate-50 border border-slate-200 rounded-lg hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition-colors cursor-pointer"
-                  >
-                    {STATUS_OPTIONS.map((s) => (
-                      <option key={s} value={s}>{s}</option>
-                    ))}
-                  </select>
-                  <ChevronDown size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
-                </div>
-              </div>
+        {/* ====================================================
+            PERINGKAT UNIT SEKOLAH
+        ==================================================== */}
+
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <h3 className="text-sm font-semibold theme-text-secondary">
+              Peringkat Performa Unit Sekolah
+            </h3>
+
+            <span className="text-xs theme-text-muted">
+              {filteredSekolah.length} unit
+            </span>
+          </div>
+
+          {filteredSekolah.length === 0 ? (
+            <div
+              className={`
+                theme-card
+                rounded-xl
+                border theme-border
+                ${themeCardShadow}
+                p-10
+                text-center
+              `}
+            >
+              <School
+                size={28}
+                className="mx-auto theme-text-muted mb-2"
+              />
+
+              <p className="text-sm theme-text-muted">
+                Tidak ada unit sekolah yang cocok
+                dengan filter.
+              </p>
             </div>
+          ) : (
+            <div
+              className={`
+                theme-card
+                rounded-xl
+                border theme-border
+                ${themeCardShadow}
+                overflow-hidden
+              `}
+            >
+              <div className={`divide-y ${themeDivider}`}>
+                {filteredSekolah.map((s, idx) => (
+                  <div
+                    key={s.id}
+                    className={`
+                      flex
+                      flex-col
+                      lg:flex-row
+                      lg:items-center
+                      gap-4
+                      p-4
+                      sm:p-5
+                      ${themeNeutralHover}
+                      transition-colors
+                    `}
+                  >
+                    {/* ========================================
+                        PERINGKAT + IDENTITAS
+                    ======================================== */}
 
-            {/* SUMMARY CARDS */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              <div className="bg-white rounded-xl border border-slate-200/80 p-3.5 shadow-sm flex items-center gap-3 min-w-0">
-                <div className="p-2 rounded-lg border bg-blue-50 text-blue-600 border-blue-200 flex-shrink-0">
-                  <BarChart3 size={16} />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider truncate">Rata-rata Nilai Yayasan</p>
-                  <p className="text-lg font-bold text-slate-800">{summary.rataRataNilai}</p>
-                </div>
-              </div>
-              <div className="bg-white rounded-xl border border-slate-200/80 p-3.5 shadow-sm flex items-center gap-3 min-w-0">
-                <div className="p-2 rounded-lg border bg-emerald-50 text-emerald-600 border-emerald-200 flex-shrink-0">
-                  <CalendarCheck size={16} />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider truncate">Rata-rata Kehadiran</p>
-                  <p className="text-lg font-bold text-slate-800">{summary.rataRataKehadiran}%</p>
-                </div>
-              </div>
-              <div className="bg-white rounded-xl border border-slate-200/80 p-3.5 shadow-sm flex items-center gap-3 min-w-0">
-                <div className="p-2 rounded-lg border bg-rose-50 text-rose-600 border-rose-200 flex-shrink-0">
-                  <AlertTriangle size={16} />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider truncate">Unit Perlu Perhatian</p>
-                  <p className="text-lg font-bold text-slate-800">{summary.perluPerhatian}</p>
-                </div>
-              </div>
-              <div className="bg-white rounded-xl border border-slate-200/80 p-3.5 shadow-sm flex items-center gap-3 min-w-0">
-                <div className="p-2 rounded-lg border bg-amber-50 text-amber-600 border-amber-200 flex-shrink-0">
-                  <School size={16} />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider truncate">Siswa Perlu Perhatian</p>
-                  <p className="text-lg font-bold text-slate-800">{summary.totalSiswaPerluPerhatian}</p>
-                </div>
-              </div>
-            </div>
+                    <div className="flex items-center gap-3 lg:w-[240px] flex-shrink-0 min-w-0">
+                      <div
+                        className={`
+                          w-8
+                          h-8
+                          rounded-lg
+                          flex
+                          items-center
+                          justify-center
+                          text-xs
+                          font-bold
+                          flex-shrink-0
+                          ${
+                            idx === 0
+                              ? `${themeWarningSurface} ${themeWarningBorder} text-[var(--color-warning)]`
+                              : `${themeNeutralSurface} ${themeNeutralBorder} theme-text-muted`
+                          }
+                          border
+                        `}
+                      >
+                        {idx === 0 ? (
+                          <Trophy size={14} />
+                        ) : (
+                          idx + 1
+                        )}
+                      </div>
 
-            {/* RATA-RATA PER MAPEL (SELURUH YAYASAN) */}
-            <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm p-4 sm:p-5">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                  <BarChart3 size={15} className="text-slate-400" />
-                  Rata-rata Nilai per Mata Pelajaran — Seluruh Yayasan
-                </h3>
-                <span className="text-xs text-slate-400">Target KKM: 75</span>
-              </div>
-              <div className="space-y-3.5">
-                {mapelOverview.map((m) => {
-                  const belowTarget = m.rataRata < m.target;
-                  return (
-                    <div key={m.mapel}>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold theme-text truncate">
+                          {s.nama}
+                        </p>
+
+                        <p className="text-xs theme-text-muted">
+                          {s.jenjang} &middot;{" "}
+                          {s.totalSiswa.toLocaleString(
+                            "id-ID"
+                          )}{" "}
+                          siswa
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* ========================================
+                        NILAI
+                    ======================================== */}
+
+                    <div className="flex-1 min-w-[140px]">
                       <div className="flex items-center justify-between mb-1">
-                        <span className="text-xs font-medium text-slate-600">{m.mapel}</span>
-                        <span
-                          className={`text-xs font-semibold ${
-                            belowTarget ? "text-rose-500" : "text-emerald-600"
-                          }`}
-                        >
-                          {m.rataRata}
+                        <span className="text-[11px] font-medium theme-text-muted uppercase tracking-wide">
+                          Rata-rata Nilai
+                        </span>
+
+                        <span className="flex items-center gap-1 text-xs font-semibold theme-text-secondary">
+                          {s.rataRataNilai}
+
+                          {s.trend === "up" ? (
+                            <TrendingUp
+                              size={12}
+                              className="text-[var(--color-success)]"
+                            />
+                          ) : s.trend === "down" ? (
+                            <TrendingDown
+                              size={12}
+                              className="text-[var(--color-warning)]"
+                            />
+                          ) : (
+                            <Minus
+                              size={12}
+                              className="theme-text-muted"
+                            />
+                          )}
+
+                          <span
+                            className={
+                              s.perubahan >= 0
+                                ? "text-[var(--color-success)]"
+                                : "text-[var(--color-warning)]"
+                            }
+                          >
+                            (
+                            {s.perubahan >= 0
+                              ? "+"
+                              : ""}
+                            {s.perubahan})
+                          </span>
                         </span>
                       </div>
-                      <div className="relative h-2 rounded-full bg-slate-100 overflow-hidden">
+
+                      <div
+                        className={`
+                          h-2
+                          rounded-full
+                          ${themeNeutralSurface}
+                          overflow-hidden
+                        `}
+                      >
                         <div
-                          className={`h-full rounded-full ${belowTarget ? "bg-rose-400" : "bg-emerald-500"}`}
-                          style={{ width: `${m.rataRata}%` }}
-                        />
-                        <div
-                          className="absolute top-0 h-full w-[2px] bg-slate-400"
-                          style={{ left: `${m.target}%` }}
-                          title={`Target KKM ${m.target}`}
+                          className={`
+                            h-full
+                            rounded-full
+                            ${barColor(
+                              s.rataRataNilai,
+                              "nilai"
+                            )}
+                          `}
+                          style={{
+                            width: `${s.rataRataNilai}%`,
+                          }}
                         />
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-            </div>
 
-            {/* PERINGKAT UNIT SEKOLAH */}
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-semibold text-slate-700">Peringkat Performa Unit Sekolah</h3>
-                <span className="text-xs text-slate-400">{filteredSekolah.length} unit</span>
-              </div>
+                    {/* ========================================
+                        KEHADIRAN
+                    ======================================== */}
 
-              {filteredSekolah.length === 0 ? (
-                <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm p-10 text-center">
-                  <School size={28} className="mx-auto text-slate-300 mb-2" />
-                  <p className="text-sm text-slate-400">Tidak ada unit sekolah yang cocok dengan filter.</p>
-                </div>
-              ) : (
-                <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden">
-                  <div className="divide-y divide-slate-100">
-                    {filteredSekolah.map((s, idx) => (
-                      <div
-                        key={s.id}
-                        className="flex flex-col lg:flex-row lg:items-center gap-4 p-4 sm:p-5 hover:bg-slate-50/60 transition-colors"
-                      >
-                        {/* Peringkat + Identitas */}
-                        <div className="flex items-center gap-3 lg:w-[240px] flex-shrink-0 min-w-0">
-                          <div
-                            className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-bold flex-shrink-0 ${
-                              idx === 0
-                                ? "bg-amber-100 text-amber-600"
-                                : "bg-slate-100 text-slate-500"
-                            }`}
-                          >
-                            {idx === 0 ? <Trophy size={14} /> : idx + 1}
-                          </div>
-                          <div className="min-w-0">
-                            <p className="text-sm font-semibold text-slate-800 truncate">{s.nama}</p>
-                            <p className="text-xs text-slate-400">{s.jenjang} &middot; {s.totalSiswa.toLocaleString("id-ID")} siswa</p>
-                          </div>
-                        </div>
+                    <div className="flex-1 min-w-[140px]">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-[11px] font-medium theme-text-muted uppercase tracking-wide">
+                          Kehadiran
+                        </span>
 
-                        {/* Nilai */}
-                        <div className="flex-1 min-w-[140px]">
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wide">Rata-rata Nilai</span>
-                            <span className="flex items-center gap-1 text-xs font-semibold text-slate-700">
-                              {s.rataRataNilai}
-                              {s.trend === "up" ? (
-                                <TrendingUp size={12} className="text-emerald-500" />
-                              ) : s.trend === "down" ? (
-                                <TrendingDown size={12} className="text-rose-500" />
-                              ) : (
-                                <Minus size={12} className="text-slate-400" />
-                              )}
-                              <span className={s.perubahan >= 0 ? "text-emerald-500" : "text-rose-500"}>
-                                ({s.perubahan >= 0 ? "+" : ""}{s.perubahan})
-                              </span>
-                            </span>
-                          </div>
-                          <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
-                            <div
-                              className={`h-full rounded-full ${barColor(s.rataRataNilai, "nilai")}`}
-                              style={{ width: `${s.rataRataNilai}%` }}
-                            />
-                          </div>
-                        </div>
-
-                        {/* Kehadiran */}
-                        <div className="flex-1 min-w-[140px]">
-                          <div className="flex items-center justify-between mb-1">
-                            <span className="text-[11px] font-medium text-slate-400 uppercase tracking-wide">Kehadiran</span>
-                            <span className="text-xs font-semibold text-slate-700">{s.kehadiran}%</span>
-                          </div>
-                          <div className="h-2 rounded-full bg-slate-100 overflow-hidden">
-                            <div
-                              className={`h-full rounded-full ${barColor(s.kehadiran, "kehadiran")}`}
-                              style={{ width: `${s.kehadiran}%` }}
-                            />
-                          </div>
-                        </div>
-
-                        {/* Siswa perlu perhatian */}
-                        <div className="flex-shrink-0 lg:w-[130px]">
-                          <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wide mb-1">Perlu Perhatian</p>
-                          <p className="text-xs font-semibold text-slate-700">{s.siswaPerluPerhatian} siswa</p>
-                        </div>
-
-                        {/* Status */}
-                        <div className="flex items-center justify-between gap-3 lg:w-[200px] flex-shrink-0">
-                          <div className="min-w-0">
-                            <span
-                              className={`inline-flex items-center gap-1 text-[10px] font-medium px-2 py-1 rounded-full border ${statusStyle(s.status)}`}
-                            >
-                              {s.status}
-                            </span>
-                            {s.mapelLemah && (
-                              <p className="text-[11px] text-slate-400 mt-1 truncate">
-                                Terlemah: {s.mapelLemah}
-                              </p>
-                            )}
-                          </div>
-                          <button className="p-1.5 rounded-md text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors flex-shrink-0">
-                            <ChevronRight size={16} />
-                          </button>
-                        </div>
+                        <span className="text-xs font-semibold theme-text-secondary">
+                          {s.kehadiran}%
+                        </span>
                       </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
 
-          </div>
-        </main>
+                      <div
+                        className={`
+                          h-2
+                          rounded-full
+                          ${themeNeutralSurface}
+                          overflow-hidden
+                        `}
+                      >
+                        <div
+                          className={`
+                            h-full
+                            rounded-full
+                            ${barColor(
+                              s.kehadiran,
+                              "kehadiran"
+                            )}
+                          `}
+                          style={{
+                            width: `${s.kehadiran}%`,
+                          }}
+                        />
+                      </div>
+                    </div>
+
+                    {/* ========================================
+                        SISWA PERLU PERHATIAN
+                    ======================================== */}
+
+                    <div className="flex-shrink-0 lg:w-[130px]">
+                      <p className="text-[11px] font-medium theme-text-muted uppercase tracking-wide mb-1">
+                        Perlu Perhatian
+                      </p>
+
+                      <p className="text-xs font-semibold theme-text-secondary">
+                        {s.siswaPerluPerhatian} siswa
+                      </p>
+                    </div>
+
+                    {/* ========================================
+                        STATUS
+                    ======================================== */}
+
+                    <div className="flex items-center justify-between gap-3 lg:w-[200px] flex-shrink-0">
+                      <div className="min-w-0">
+                        <span
+                          className={`
+                            inline-flex
+                            items-center
+                            gap-1
+                            text-[10px]
+                            font-medium
+                            px-2
+                            py-1
+                            rounded-full
+                            border
+                            ${statusStyle(s.status)}
+                          `}
+                        >
+                          {s.status}
+                        </span>
+
+                        {s.mapelLemah && (
+                          <p className="text-[11px] theme-text-muted mt-1 truncate">
+                            Terlemah: {s.mapelLemah}
+                          </p>
+                        )}
+                      </div>
+
+                      <button
+                        type="button"
+                        className={`
+                          p-1.5
+                          rounded-md
+                          theme-text-muted
+                          hover:text-[var(--color-primary)]
+                          ${themePrimarySoft}
+                          transition-colors
+                          flex-shrink-0
+                        `}
+                      >
+                        <ChevronRight size={16} />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );

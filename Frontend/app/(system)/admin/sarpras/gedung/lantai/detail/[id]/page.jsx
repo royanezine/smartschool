@@ -23,6 +23,61 @@ import {
   getLantaiByGedung,
 } from "../../../../../../../../services/infrastruktur.service";
 
+// ============================================================
+// THEME HELPERS
+// ============================================================
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_2px_10px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeCardHoverShadow =
+  "hover:shadow-[0_7px_20px_color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themePrimaryShadow =
+  "shadow-[0_7px_18px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]";
+
+const themeButtonShadow =
+  "shadow-[0_4px_12px_color-mix(in_srgb,var(--color-text)_12%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
+
+const themeSoftSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
 export default function DetailLantaiPage() {
   const router = useRouter();
   const params = useParams();
@@ -49,8 +104,7 @@ export default function DetailLantaiPage() {
 
       if (!gedungResult?.success) {
         throw new Error(
-          gedungResult?.message ||
-            "Gagal mengambil data gedung."
+          gedungResult?.message || "Gagal mengambil data gedung."
         );
       }
 
@@ -88,9 +142,7 @@ export default function DetailLantaiPage() {
     } catch (err) {
       console.error(err);
 
-      setError(
-        err?.message || "Gagal mengambil detail lantai."
-      );
+      setError(err?.message || "Gagal mengambil detail lantai.");
     } finally {
       setLoading(false);
     }
@@ -112,9 +164,13 @@ export default function DetailLantaiPage() {
     });
   }
 
+  // ============================================================
+  // LOADING
+  // ============================================================
+
   if (loading) {
     return (
-      <div className="flex h-screen w-full overflow-hidden bg-[#f8fafc]">
+      <div className="theme-page flex h-screen w-full overflow-hidden">
         <Sidebar
           active="sarpras"
           setActive={() => {}}
@@ -133,10 +189,14 @@ export default function DetailLantaiPage() {
             }}
           />
 
-          <main className="flex min-h-0 flex-1 items-center justify-center overflow-hidden">
+          <main className="theme-page flex min-h-0 flex-1 items-center justify-center overflow-hidden">
             <div className="flex flex-col items-center gap-3 text-center">
-              <Loader2 size={34} className="animate-spin text-blue-600" />
-              <p className="text-sm font-medium text-slate-600">
+              <Loader2
+                size={34}
+                className="animate-spin text-[var(--color-primary)]"
+              />
+
+              <p className="theme-text-secondary text-sm font-medium">
                 Memuat detail lantai...
               </p>
             </div>
@@ -146,9 +206,13 @@ export default function DetailLantaiPage() {
     );
   }
 
+  // ============================================================
+  // ERROR / DATA TIDAK DITEMUKAN
+  // ============================================================
+
   if (error || !data) {
     return (
-      <div className="flex h-screen w-full overflow-hidden bg-[#f8fafc]">
+      <div className="theme-page flex h-screen w-full overflow-hidden">
         <Sidebar
           active="sarpras"
           setActive={() => {}}
@@ -167,26 +231,37 @@ export default function DetailLantaiPage() {
             }}
           />
 
-          <main className="flex min-h-0 flex-1 items-center justify-center overflow-hidden p-6">
+          <main className="theme-page flex min-h-0 flex-1 items-center justify-center overflow-hidden p-6">
             <div className="w-full max-w-2xl">
               <button
                 onClick={() =>
                   router.push("/admin/sarpras/gedung/lantai")
                 }
-                className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-blue-600"
+                className={`theme-text-muted mb-6 inline-flex items-center gap-2 text-sm font-medium transition ${themePrimaryHover}`}
               >
                 <ArrowLeft size={17} />
                 Kembali
               </button>
 
-              <div className="rounded-2xl border border-red-200 bg-red-50 p-6 shadow-sm">
+              <div
+                className={`rounded-2xl border p-6 ${themeDangerBorder} ${themeDangerSurface} ${themeCardShadow}`}
+              >
                 <div className="flex items-start gap-3">
-                  <AlertCircle size={21} className="mt-0.5 text-red-500" />
+                  <div
+                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themeSoftSurface}`}
+                  >
+                    <AlertCircle
+                      size={21}
+                      className="theme-danger"
+                    />
+                  </div>
+
                   <div>
-                    <h2 className="font-semibold text-red-800">
+                    <h2 className="theme-danger font-semibold">
                       Data tidak ditemukan
                     </h2>
-                    <p className="mt-1 text-sm text-red-700">
+
+                    <p className="theme-text-secondary mt-1 text-sm">
                       {error || "Data lantai tidak tersedia."}
                     </p>
                   </div>
@@ -202,7 +277,7 @@ export default function DetailLantaiPage() {
   const kelas = Array.isArray(data.kelas) ? data.kelas : [];
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[#f8fafc]">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
       {/* SIDEBAR */}
       <Sidebar
         active="sarpras"
@@ -223,27 +298,31 @@ export default function DetailLantaiPage() {
           }}
         />
 
-        <main className="min-h-0 flex-1 overflow-y-auto">
+        <main className="theme-page min-h-0 flex-1 overflow-y-auto">
           <div className="w-full p-4 sm:p-6 lg:p-8">
             <div className="mx-auto w-full max-w-6xl space-y-6">
-              {/* HEADER SECTION */}
+
+              {/* ============================================================
+                  HEADER SECTION
+              ============================================================ */}
+
               <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div>
                   <button
                     onClick={() =>
                       router.push("/admin/sarpras/gedung/lantai")
                     }
-                    className="mb-3 inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-blue-600"
+                    className={`theme-text-muted mb-3 inline-flex items-center gap-2 text-sm font-medium transition hover:text-[var(--color-primary)]`}
                   >
                     <ArrowLeft size={17} />
                     Kembali ke Data Lantai
                   </button>
 
-                  <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+                  <h1 className="theme-text text-2xl font-bold tracking-tight sm:text-3xl">
                     Detail Lantai
                   </h1>
 
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="theme-text-muted mt-1 text-sm">
                     Informasi lengkap lantai dan kelas yang menggunakannya.
                   </p>
                 </div>
@@ -252,115 +331,160 @@ export default function DetailLantaiPage() {
                   onClick={() =>
                     router.push(`/admin/sarpras/lantai/edit/${data.id}`)
                   }
-                  className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 text-sm font-semibold text-white shadow-[0_7px_18px_rgba(37,99,235,0.25)] transition-all hover:shadow-[0_9px_22px_rgba(37,99,235,0.35)] hover:brightness-105 active:scale-[0.98]"
+                  className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl px-6 text-sm font-semibold text-[var(--color-card)] transition-all ${themePrimaryGradient} ${themePrimaryShadow} hover:brightness-95 active:scale-[0.98]`}
                 >
                   <Pencil size={17} />
                   Edit Lantai
                 </button>
               </div>
 
-              {/* OVERVIEW CARDS */}
+              {/* ============================================================
+                  OVERVIEW CARDS
+              ============================================================ */}
+
               <div className="grid gap-4 sm:grid-cols-3">
+
                 {/* NAMA */}
-                <div className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_2px_10px_rgba(15,23,42,0.04)] transition-all hover:-translate-y-0.5 hover:shadow-[0_7px_20px_rgba(15,23,42,0.08)]">
-                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-[0_4px_12px_rgba(37,99,235,0.25)]">
+                <div
+                  className={`theme-card theme-border group rounded-2xl border p-5 transition-all hover:-translate-y-0.5 ${themeCardShadow} ${themeCardHoverShadow}`}
+                >
+                  <div
+                    className={`mb-4 flex h-11 w-11 items-center justify-center rounded-xl ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
+                  >
                     <Layers3 size={20} />
                   </div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-slate-400">
+
+                  <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-[0.06em]">
                     Nama Lantai
                   </p>
-                  <h2 className="mt-2 text-xl font-bold text-slate-900">
+
+                  <h2 className="theme-text mt-2 text-xl font-bold">
                     {data.nama || "-"}
                   </h2>
                 </div>
 
                 {/* GEDUNG */}
-                <div className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_2px_10px_rgba(15,23,42,0.04)] transition-all hover:-translate-y-0.5 hover:shadow-[0_7px_20px_rgba(15,23,42,0.08)]">
-                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white shadow-[0_4px_12px_rgba(99,102,241,0.25)]">
+                <div
+                  className={`theme-card theme-border group rounded-2xl border p-5 transition-all hover:-translate-y-0.5 ${themeCardShadow} ${themeCardHoverShadow}`}
+                >
+                  <div
+                    className={`mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-[linear-gradient(135deg,var(--color-info),color-mix(in_srgb,var(--color-info)_72%,var(--color-primary)))] text-[var(--color-card)] ${themeButtonShadow}`}
+                  >
                     <Building2 size={20} />
                   </div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-slate-400">
+
+                  <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-[0.06em]">
                     Gedung
                   </p>
-                  <h2 className="mt-2 text-xl font-bold text-slate-900">
+
+                  <h2 className="theme-text mt-2 text-xl font-bold">
                     {gedung?.nama || "-"}
                   </h2>
+
                   {gedung?.kode && (
-                    <p className="mt-1 text-xs text-slate-500">
+                    <p className="theme-text-muted mt-1 text-xs">
                       Kode: {gedung.kode}
                     </p>
                   )}
                 </div>
 
                 {/* JUMLAH KELAS */}
-                <div className="group rounded-2xl border border-slate-200 bg-white p-5 shadow-[0_2px_10px_rgba(15,23,42,0.04)] transition-all hover:-translate-y-0.5 hover:shadow-[0_7px_20px_rgba(15,23,42,0.08)]">
-                  <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-600 to-teal-600 text-white shadow-[0_4px_12px_rgba(16,185,129,0.25)]">
+                <div
+                  className={`theme-card theme-border group rounded-2xl border p-5 transition-all hover:-translate-y-0.5 ${themeCardShadow} ${themeCardHoverShadow}`}
+                >
+                  <div
+                    className={`mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-[linear-gradient(135deg,var(--color-success),color-mix(in_srgb,var(--color-success)_70%,var(--color-info)))] text-[var(--color-card)] ${themeButtonShadow}`}
+                  >
                     <School size={20} />
                   </div>
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-slate-400">
+
+                  <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-[0.06em]">
                     Jumlah Kelas
                   </p>
-                  <h2 className="mt-2 text-xl font-bold text-slate-900">
+
+                  <h2 className="theme-text mt-2 text-xl font-bold">
                     {kelas.length}
                   </h2>
-                  <p className="mt-1 text-xs text-slate-500">
+
+                  <p className="theme-text-muted mt-1 text-xs">
                     kelas menggunakan lantai ini
                   </p>
                 </div>
               </div>
 
-              {/* DETAIL INFORMATION */}
-              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_2px_10px_rgba(15,23,42,0.05)]">
-                <div className="border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white px-6 py-5 sm:px-8">
-                  <h2 className="text-base font-semibold text-slate-900">
+              {/* ============================================================
+                  DETAIL INFORMATION
+              ============================================================ */}
+
+              <div
+                className={`theme-card theme-border overflow-hidden rounded-2xl border ${themeCardShadow}`}
+              >
+                <div
+                  className={`theme-border border-b px-6 py-5 sm:px-8 ${themeSoftSurface}`}
+                >
+                  <h2 className="theme-text text-base font-semibold">
                     Informasi Lantai
                   </h2>
-                  <p className="mt-1 text-sm text-slate-500">
+
+                  <p className="theme-text-muted mt-1 text-sm">
                     Detail data yang tersimpan pada sistem.
                   </p>
                 </div>
 
                 <div className="grid sm:grid-cols-2">
+
                   {/* ID */}
-                  <div className="flex gap-4 border-b border-slate-100 p-5 sm:border-r">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
+                  <div className="theme-border flex gap-4 border-b p-5 sm:border-r">
+                    <div
+                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${themeSoftSurface} theme-text-secondary`}
+                    >
                       <Hash size={19} />
                     </div>
+
                     <div className="min-w-0">
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-slate-400">
+                      <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-[0.06em]">
                         ID Lantai
                       </p>
-                      <p className="mt-1 break-all font-mono text-sm font-medium text-slate-700">
+
+                      <p className="theme-text-secondary mt-1 break-all font-mono text-sm font-medium">
                         {data.id}
                       </p>
                     </div>
                   </div>
 
                   {/* GEDUNG ID */}
-                  <div className="flex gap-4 border-b border-slate-100 p-5">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                  <div className="theme-border flex gap-4 border-b p-5">
+                    <div
+                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${themePrimarySoft} text-[var(--color-primary)]`}
+                    >
                       <Building2 size={19} />
                     </div>
+
                     <div className="min-w-0">
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-slate-400">
+                      <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-[0.06em]">
                         ID Gedung
                       </p>
-                      <p className="mt-1 break-all font-mono text-sm font-medium text-slate-700">
+
+                      <p className="theme-text-secondary mt-1 break-all font-mono text-sm font-medium">
                         {data.gedungId || gedung?.id || "-"}
                       </p>
                     </div>
                   </div>
 
                   {/* TANGGAL */}
-                  <div className="flex gap-4 border-b border-slate-100 p-5 sm:border-r sm:border-b-0">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-amber-50 text-amber-600">
+                  <div className="theme-border flex gap-4 border-b p-5 sm:border-r sm:border-b-0">
+                    <div
+                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${themeInfoSurface} theme-info`}
+                    >
                       <CalendarDays size={19} />
                     </div>
+
                     <div>
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-slate-400">
+                      <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-[0.06em]">
                         Dibuat Pada
                       </p>
-                      <p className="mt-1 text-sm font-medium text-slate-700">
+
+                      <p className="theme-text-secondary mt-1 text-sm font-medium">
                         {formatDate(data.dibuatPada)}
                       </p>
                     </div>
@@ -368,14 +492,18 @@ export default function DetailLantaiPage() {
 
                   {/* TOTAL KELAS */}
                   <div className="flex gap-4 p-5">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
+                    <div
+                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${themeSuccessSurface} theme-success`}
+                    >
                       <Users size={19} />
                     </div>
+
                     <div>
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.06em] text-slate-400">
+                      <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-[0.06em]">
                         Total Kelas
                       </p>
-                      <p className="mt-1 text-sm font-medium text-slate-700">
+
+                      <p className="theme-text-secondary mt-1 text-sm font-medium">
                         {kelas.length} kelas
                       </p>
                     </div>
@@ -383,18 +511,29 @@ export default function DetailLantaiPage() {
                 </div>
               </div>
 
-              {/* KELAS TABLE */}
-              <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_2px_10px_rgba(15,23,42,0.05)]">
-                <div className="flex flex-col gap-3 border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8">
+              {/* ============================================================
+                  KELAS TABLE
+              ============================================================ */}
+
+              <div
+                className={`theme-card theme-border overflow-hidden rounded-2xl border ${themeCardShadow}`}
+              >
+                <div
+                  className={`theme-border flex flex-col gap-3 border-b px-6 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-8 ${themeSoftSurface}`}
+                >
                   <div>
-                    <h2 className="text-base font-semibold text-slate-900">
+                    <h2 className="theme-text text-base font-semibold">
                       Kelas di Lantai Ini
                     </h2>
-                    <p className="mt-1 text-sm text-slate-500">
+
+                    <p className="theme-text-muted mt-1 text-sm">
                       Daftar kelas yang terhubung dengan lantai.
                     </p>
                   </div>
-                  <div className="inline-flex w-fit items-center gap-2 rounded-xl bg-slate-100 px-4 py-2 text-sm font-semibold text-slate-700">
+
+                  <div
+                    className={`theme-text-secondary inline-flex w-fit items-center gap-2 rounded-xl px-4 py-2 text-sm font-semibold ${themeSoftSurface}`}
+                  >
                     <School size={16} />
                     {kelas.length} Kelas
                   </div>
@@ -402,13 +541,17 @@ export default function DetailLantaiPage() {
 
                 {kelas.length === 0 ? (
                   <div className="px-6 py-16 text-center">
-                    <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+                    <div
+                      className={`theme-text-muted mx-auto flex h-16 w-16 items-center justify-center rounded-2xl ${themeSoftSurface}`}
+                    >
                       <School size={28} />
                     </div>
-                    <h3 className="mt-4 text-sm font-semibold text-slate-700">
+
+                    <h3 className="theme-text-secondary mt-4 text-sm font-semibold">
                       Belum ada kelas
                     </h3>
-                    <p className="mt-1 text-xs text-slate-500">
+
+                    <p className="theme-text-muted mt-1 text-xs">
                       Belum ada kelas yang menggunakan lantai ini.
                     </p>
                   </div>
@@ -416,45 +559,59 @@ export default function DetailLantaiPage() {
                   <div className="overflow-x-auto">
                     <table className="w-full min-w-[600px] border-collapse">
                       <thead>
-                        <tr className="border-b border-slate-200 bg-slate-50/80">
-                          <th className="px-6 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-400">
+                        <tr
+                          className={`theme-border border-b ${themeSoftSurface}`}
+                        >
+                          <th className="theme-text-muted px-6 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em]">
                             No
                           </th>
-                          <th className="px-6 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-400">
+
+                          <th className="theme-text-muted px-6 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em]">
                             Nama Kelas
                           </th>
-                          <th className="px-6 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-400">
+
+                          <th className="theme-text-muted px-6 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em]">
                             Tingkat
                           </th>
-                          <th className="px-6 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-slate-400">
+
+                          <th className="theme-text-muted px-6 py-3 text-left text-[10px] font-semibold uppercase tracking-[0.08em]">
                             ID Kelas
                           </th>
                         </tr>
                       </thead>
-                      <tbody className="divide-y divide-slate-100">
+
+                      <tbody
+                        className={`divide-y ${"divide-[color-mix(in_srgb,var(--color-text)_7%,transparent)]"}`}
+                      >
                         {kelas.map((item, index) => (
                           <tr
                             key={item.id}
-                            className="transition-colors hover:bg-slate-50/70"
+                            className={`transition-colors ${themeNeutralHover}`}
                           >
-                            <td className="px-6 py-4 text-sm text-slate-500">
+                            <td className="theme-text-muted px-6 py-4 text-sm">
                               {index + 1}
                             </td>
+
                             <td className="px-6 py-4">
                               <div className="flex items-center gap-3">
-                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                                <div
+                                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${themePrimarySoft} text-[var(--color-primary)]`}
+                                >
                                   <School size={17} />
                                 </div>
-                                <span className="text-sm font-semibold text-slate-700">
+
+                                <span className="theme-text-secondary text-sm font-semibold">
                                   {item.nama || "-"}
                                 </span>
                               </div>
                             </td>
-                            <td className="px-6 py-4 text-sm text-slate-600">
+
+                            <td className="theme-text-secondary px-6 py-4 text-sm">
                               {item.tingkat || "-"}
                             </td>
+
                             <td className="px-6 py-4">
-                              <span className="font-mono text-xs text-slate-500">
+                              <span className="theme-text-muted font-mono text-xs">
                                 {item.id}
                               </span>
                             </td>

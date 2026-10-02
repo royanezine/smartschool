@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Sidebar from "../../../components/Sidebar";
-import Header from "../../../components/Header";
 import { apiFetch } from "../../../../lib/api";
 import {
   User,
@@ -58,22 +56,11 @@ function getInitials(name) {
 }
 
 export default function PengaturanSiswaPage() {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-
   const [profile, setProfile] = useState(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
-
-  const notifications = [
-    {
-      id: 1,
-      title: "Tugas Matematika deadline besok",
-      desc: "Dikirim 1 jam lalu",
-      read: false,
-    },
-  ];
 
   useEffect(() => {
     loadProfile();
@@ -112,112 +99,86 @@ export default function PengaturanSiswaPage() {
   const initials = getInitials(nama);
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50">
-      <Sidebar
-        role="siswa"
-        active="profil"
-        setActive={() => {}}
-        collapsed={!sidebarOpen}
-        setCollapsed={() =>
-          setSidebarOpen((prev) => !prev)
-        }
-      />
+    <main className="theme-page min-h-full flex-1 overflow-y-auto">
+      <div className="mx-auto w-full max-w-[1380px] p-4 sm:p-6 lg:p-8">
+        <div className="mb-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-primary)]">
+            Profil Saya
+          </p>
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <Header
-          toggleSidebar={() =>
-            setSidebarOpen((prev) => !prev)
-          }
-          notifications={notifications}
-          user={{
-            name: nama,
-            email,
-            avatar: avatarUrl || initials,
-          }}
-        />
+          <h1 className="mt-1 text-2xl font-bold tracking-tight theme-text sm:text-[28px]">
+            Pengaturan
+          </h1>
 
-        <main className="flex-1 overflow-y-auto">
-          <div className="mx-auto w-full max-w-[1380px] p-4 sm:p-6 lg:p-8">
-            <div className="mb-6">
-              <p className="text-xs font-semibold uppercase tracking-[0.12em] text-blue-600">
-                Profil Saya
+          <p className="mt-1 text-sm theme-text-muted">
+            Kelola keamanan dan preferensi akun kamu.
+          </p>
+        </div>
+
+        {error && (
+          <div className="theme-danger mb-6 flex items-start gap-3 rounded-xl px-4 py-3 text-sm">
+            <AlertCircle
+              size={18}
+              className="mt-0.5 shrink-0"
+            />
+
+            <div className="min-w-0">
+              <p className="font-semibold">
+                Terjadi kesalahan
               </p>
 
-              <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 sm:text-[28px]">
-                Pengaturan
-              </h1>
+              <p className="mt-0.5">{error}</p>
+            </div>
+          </div>
+        )}
 
-              <p className="mt-1 text-sm text-slate-500">
-                Kelola keamanan dan preferensi akun kamu.
+        {success && (
+          <div className="theme-success mb-6 flex items-center gap-3 rounded-xl px-4 py-3 text-sm">
+            <Check size={18} />
+
+            <span>{success}</span>
+          </div>
+        )}
+
+        {loadingProfile ? (
+          <div className="theme-card flex min-h-[400px] items-center justify-center rounded-2xl border">
+            <div className="flex flex-col items-center gap-3 theme-text-muted">
+              <Loader2
+                size={28}
+                className="animate-spin text-[var(--color-primary)]"
+              />
+
+              <p className="text-sm">
+                Memuat data profile...
               </p>
             </div>
-
-            {error && (
-              <div className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
-                <AlertCircle
-                  size={18}
-                  className="mt-0.5 shrink-0"
-                />
-
-                <div className="min-w-0">
-                  <p className="font-semibold">
-                    Terjadi kesalahan
-                  </p>
-
-                  <p className="mt-0.5">{error}</p>
-                </div>
-              </div>
-            )}
-
-            {success && (
-              <div className="mb-6 flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
-                <Check size={18} />
-
-                <span>{success}</span>
-              </div>
-            )}
-
-            {loadingProfile ? (
-              <div className="flex min-h-[400px] items-center justify-center rounded-2xl border border-slate-200 bg-white">
-                <div className="flex flex-col items-center gap-3 text-slate-500">
-                  <Loader2
-                    size={28}
-                    className="animate-spin text-blue-600"
-                  />
-
-                  <p className="text-sm">
-                    Memuat data profile...
-                  </p>
-                </div>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
-                <div className="min-w-0 space-y-6">
-                  <DataPribadiSection
-                    profile={profile}
-                    onProfileUpdated={setProfile}
-                    onSuccess={setSuccess}
-                    onError={setError}
-                  />
-
-                  <KeamananSection />
-
-                  <NotifikasiSection />
-                </div>
-
-                <aside className="xl:sticky xl:top-6">
-                  <StudentCard
-                    profile={profile}
-                    avatarUrl={avatarUrl}
-                    initials={initials}
-                  />
-                </aside>
-              </div>
-            )}
           </div>
-        </main>
+        ) : (
+          <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_380px]">
+            <div className="min-w-0 space-y-6">
+              <DataPribadiSection
+                profile={profile}
+                onProfileUpdated={setProfile}
+                onSuccess={setSuccess}
+                onError={setError}
+              />
+
+              <KeamananSection />
+
+              <NotifikasiSection />
+            </div>
+
+            <aside className="xl:sticky xl:top-6">
+              <StudentCard
+                profile={profile}
+                avatarUrl={avatarUrl}
+                initials={initials}
+              />
+            </aside>
+          </div>
+        )}
       </div>
-    </div>
+    </main>
   );
 }
 
@@ -232,19 +193,19 @@ function SettingsCard({
   children,
 }) {
   return (
-    <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
-      <div className="flex items-center gap-3 border-b border-slate-100 px-5 py-4 sm:px-6">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+    <section className="theme-card overflow-hidden rounded-2xl border shadow-sm">
+      <div className="flex items-center gap-3 border-b theme-border-soft px-5 py-4 sm:px-6">
+        <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-xl">
           <Icon size={17} />
         </div>
 
         <div className="min-w-0">
-          <h3 className="text-sm font-bold text-slate-800">
+          <h3 className="text-sm font-bold theme-text">
             {title}
           </h3>
 
           {desc && (
-            <p className="mt-0.5 text-xs leading-5 text-slate-500">
+            <p className="mt-0.5 text-xs leading-5 theme-text-muted">
               {desc}
             </p>
           )}
@@ -273,7 +234,7 @@ function SaveButton({
       onClick={onClick}
       disabled={disabled || loading}
       type="button"
-      className="inline-flex items-center justify-center gap-1.5 rounded-xl bg-[#155DFC] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0D47C9] disabled:cursor-not-allowed disabled:opacity-50"
+      className="theme-primary inline-flex items-center justify-center gap-1.5 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50"
     >
       {loading ? (
         <Loader2
@@ -311,8 +272,8 @@ function StudentCard({
   const status = profile?.status || "-";
 
   return (
-    <div className="overflow-hidden rounded-[24px] border border-slate-200/80 bg-white shadow-sm">
-      <div className="relative overflow-hidden bg-[#155DFC] px-6 pb-20 pt-6">
+    <div className="theme-card overflow-hidden rounded-[24px] border shadow-sm">
+      <div className="relative overflow-hidden bg-[var(--color-primary)] px-6 pb-20 pt-6">
         <div className="absolute -right-14 -top-14 h-40 w-40 rounded-full bg-white/10" />
 
         <div className="absolute -bottom-20 -left-10 h-40 w-40 rounded-full bg-white/5" />
@@ -342,38 +303,37 @@ function StudentCard({
             <img
               src={avatarUrl}
               alt={`Foto ${nama}`}
-              className="h-24 w-24 rounded-2xl border-4 border-white object-cover shadow-md"
+              className="h-24 w-24 rounded-2xl border-4 border-[var(--color-card)] object-cover shadow-md"
               onError={(event) => {
-                event.currentTarget.style.display =
-                  "none";
+                event.currentTarget.style.display = "none";
               }}
             />
           ) : (
-            <div className="flex h-24 w-24 items-center justify-center rounded-2xl border-4 border-white bg-gradient-to-br from-blue-100 to-blue-50 text-2xl font-bold text-blue-700 shadow-md">
+            <div className="flex h-24 w-24 items-center justify-center rounded-2xl border-4 border-[var(--color-card)] bg-[var(--color-info-background)] text-2xl font-bold text-[var(--color-primary)] shadow-md">
               {initials}
             </div>
           )}
 
-          <div className="mb-1 inline-flex items-center gap-1.5 rounded-full border border-emerald-100 bg-emerald-50 px-2.5 py-1.5 text-[11px] font-semibold capitalize text-emerald-700">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+          <div className="theme-success mb-1 inline-flex items-center gap-1.5 rounded-full px-2.5 py-1.5 text-[11px] font-semibold capitalize">
+            <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-success)]" />
 
             {status}
           </div>
         </div>
 
         <div className="mt-4">
-          <h2 className="text-xl font-bold tracking-tight text-slate-900">
+          <h2 className="text-xl font-bold tracking-tight theme-text">
             {nama}
           </h2>
 
-          <p className="mt-1 text-sm text-slate-500">
+          <p className="mt-1 text-sm theme-text-muted">
             {profile?.peran?.namaTampilan ||
               profile?.peran?.nama ||
               "Siswa"}
           </p>
         </div>
 
-        <div className="mt-5 divide-y divide-slate-100 rounded-2xl border border-slate-100 bg-slate-50/70">
+        <div className="theme-card-soft theme-border-soft mt-5 divide-y rounded-2xl border">
           <StudentInfo
             icon={IdCard}
             label="NISN"
@@ -399,18 +359,21 @@ function StudentCard({
           />
         </div>
 
-        <div className="mt-5 rounded-2xl border border-blue-100 bg-blue-50/70 p-4">
+        <div className="theme-info mt-5 rounded-2xl p-4">
           <div className="flex items-start gap-3">
-            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-blue-600 shadow-sm">
-              <ShieldCheck size={17} />
+            <div className="theme-card flex h-9 w-9 shrink-0 items-center justify-center rounded-xl shadow-sm">
+              <ShieldCheck
+                size={17}
+                className="text-[var(--color-info)]"
+              />
             </div>
 
             <div className="min-w-0">
-              <p className="text-xs font-bold text-slate-800">
+              <p className="text-xs font-bold theme-text">
                 Akun terlindungi
               </p>
 
-              <p className="mt-1 text-[11px] leading-5 text-slate-500">
+              <p className="mt-1 text-[11px] leading-5 theme-text-muted">
                 Pastikan kata sandi akun kamu tetap aman
                 dan tidak dibagikan kepada orang lain.
               </p>
@@ -418,19 +381,19 @@ function StudentCard({
           </div>
         </div>
 
-        <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-4">
+        <div className="mt-5 flex items-center justify-between border-t theme-border-soft pt-4">
           <div className="flex items-center gap-2">
             <BookOpen
               size={14}
-              className="text-slate-400"
+              className="theme-text-placeholder"
             />
 
-            <span className="text-[11px] text-slate-400">
+            <span className="text-[11px] theme-text-placeholder">
               SmartSchool Student
             </span>
           </div>
 
-          <span className="text-[11px] font-semibold text-blue-600">
+          <span className="text-[11px] font-semibold text-[var(--color-primary)]">
             {profile?.sekolah?.kode || "STUDENT"}
           </span>
         </div>
@@ -446,16 +409,19 @@ function StudentInfo({
 }) {
   return (
     <div className="flex items-center gap-3 px-3.5 py-3">
-      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-slate-500 shadow-sm">
-        <Icon size={14} />
+      <div className="theme-card flex h-8 w-8 shrink-0 items-center justify-center rounded-lg shadow-sm">
+        <Icon
+          size={14}
+          className="theme-text-muted"
+        />
       </div>
 
       <div className="min-w-0">
-        <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+        <p className="text-[10px] font-medium uppercase tracking-wide theme-text-placeholder">
           {label}
         </p>
 
-        <p className="mt-0.5 truncate text-xs font-semibold text-slate-700">
+        <p className="mt-0.5 truncate text-xs font-semibold theme-text-secondary">
           {value}
         </p>
       </div>
@@ -553,6 +519,7 @@ function DataPribadiSection({
       }));
 
       setSaved(true);
+
       onSuccess(
         "Data profile berhasil diperbarui."
       );
@@ -613,8 +580,8 @@ function DataPribadiSection({
           />
         </div>
 
-        <div className="border-t border-slate-100 pt-5">
-          <p className="mb-4 text-xs font-semibold uppercase tracking-wide text-slate-400">
+        <div className="border-t theme-border-soft pt-5">
+          <p className="mb-4 text-xs font-semibold uppercase tracking-wide theme-text-placeholder">
             Data yang dapat diperbarui
           </p>
 
@@ -640,7 +607,7 @@ function DataPribadiSection({
             />
 
             <div>
-              <label className="text-xs font-semibold text-slate-600">
+              <label className="text-xs font-semibold theme-text-secondary">
                 Tanggal Lahir
               </label>
 
@@ -652,7 +619,7 @@ function DataPribadiSection({
                     event.target.value
                   )
                 }
-                className="mt-1.5 h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-800 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-50"
+                className="theme-input mt-1.5 h-11 w-full rounded-xl px-3.5 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-primary)]"
               />
             </div>
           </div>
@@ -674,8 +641,8 @@ function DataPribadiSection({
           </div>
         </div>
 
-        <div className="flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs leading-5 text-slate-400">
+        <div className="flex flex-col gap-3 border-t theme-border-soft pt-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xs leading-5 theme-text-placeholder">
             Data seperti NISN, email, username, dan
             sekolah mengikuti data dari sekolah.
           </p>
@@ -698,17 +665,20 @@ function ReadOnlyField({
   icon: Icon,
 }) {
   return (
-    <div className="flex items-center gap-3 rounded-xl border border-slate-100 bg-slate-50/70 px-3.5 py-3">
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500">
-        <Icon size={15} />
+    <div className="theme-card-soft theme-border-soft flex items-center gap-3 rounded-xl border px-3.5 py-3">
+      <div className="theme-card theme-border flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border">
+        <Icon
+          size={15}
+          className="theme-text-muted"
+        />
       </div>
 
       <div className="min-w-0">
-        <p className="text-[11px] font-medium text-slate-400">
+        <p className="text-[11px] font-medium theme-text-placeholder">
           {label}
         </p>
 
-        <p className="mt-0.5 truncate text-sm font-semibold text-slate-800">
+        <p className="mt-0.5 truncate text-sm font-semibold theme-text">
           {value}
         </p>
       </div>
@@ -724,7 +694,7 @@ function InputField({
 }) {
   return (
     <div>
-      <label className="text-xs font-semibold text-slate-600">
+      <label className="text-xs font-semibold theme-text-secondary">
         {label}
       </label>
 
@@ -734,7 +704,7 @@ function InputField({
           onChange(event.target.value)
         }
         placeholder={placeholder}
-        className="mt-1.5 h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-300 focus:border-blue-400 focus:ring-4 focus:ring-blue-50"
+        className="theme-input mt-1.5 h-11 w-full rounded-xl px-3.5 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-primary)]"
       />
     </div>
   );
@@ -748,7 +718,7 @@ function TextAreaField({
 }) {
   return (
     <div>
-      <label className="text-xs font-semibold text-slate-600">
+      <label className="text-xs font-semibold theme-text-secondary">
         {label}
       </label>
 
@@ -759,7 +729,7 @@ function TextAreaField({
         }
         placeholder={placeholder}
         rows={3}
-        className="mt-1.5 w-full resize-none rounded-xl border border-slate-200 bg-white px-3.5 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-300 focus:border-blue-400 focus:ring-4 focus:ring-blue-50"
+        className="theme-input mt-1.5 w-full resize-none rounded-xl px-3.5 py-3 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-primary)]"
       />
     </div>
   );
@@ -827,14 +797,14 @@ function KeamananSection() {
 
           {konfirmasiSandi.length > 0 &&
             !cocok && (
-              <p className="mt-1.5 text-xs text-red-600">
+              <p className="mt-1.5 text-xs text-[var(--color-danger)]">
                 Konfirmasi kata sandi tidak cocok.
               </p>
             )}
         </div>
 
-        <div className="flex flex-col gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-xs leading-5 text-slate-400">
+        <div className="flex flex-col gap-3 border-t theme-border-soft pt-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-xs leading-5 theme-text-placeholder">
             Fitur ubah kata sandi menunggu endpoint
             backend.
           </p>
@@ -843,7 +813,7 @@ function KeamananSection() {
             type="button"
             onClick={handleSave}
             disabled={!cocok || !sandiLama}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#155DFC] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0D47C9] disabled:cursor-not-allowed disabled:opacity-50"
+            className="theme-primary inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-50"
           >
             <Lock size={15} />
             Ubah Kata Sandi
@@ -863,7 +833,7 @@ function PasswordInput({
 }) {
   return (
     <div>
-      <label className="text-xs font-semibold text-slate-600">
+      <label className="text-xs font-semibold theme-text-secondary">
         {label}
       </label>
 
@@ -874,12 +844,12 @@ function PasswordInput({
             onChange(event.target.value)
           }
           type={show ? "text" : "password"}
-          className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 pr-11 text-sm text-slate-800 outline-none transition focus:border-blue-400 focus:ring-4 focus:ring-blue-50"
+          className="theme-input h-11 w-full rounded-xl px-3.5 pr-11 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-primary)]"
         />
 
         <button
           onClick={onToggle}
-          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition hover:text-slate-700"
+          className="absolute right-3 top-1/2 -translate-y-1/2 theme-text-muted transition hover:text-[var(--color-text)]"
           type="button"
         >
           {show ? (
@@ -906,12 +876,12 @@ function ToggleRow({
   return (
     <div className="flex items-center justify-between gap-5 py-3.5">
       <div className="min-w-0">
-        <p className="text-sm font-semibold text-slate-700">
+        <p className="text-sm font-semibold theme-text-secondary">
           {label}
         </p>
 
         {desc && (
-          <p className="mt-0.5 text-xs leading-5 text-slate-500">
+          <p className="mt-0.5 text-xs leading-5 theme-text-muted">
             {desc}
           </p>
         )}
@@ -924,8 +894,8 @@ function ToggleRow({
         aria-checked={checked}
         className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
           checked
-            ? "bg-[#155DFC]"
-            : "bg-slate-300"
+            ? "bg-[var(--color-primary)]"
+            : "bg-[var(--color-border)]"
         }`}
       >
         <span
@@ -962,7 +932,7 @@ function NotifikasiSection() {
       title="Notifikasi"
       desc="Atur jenis pemberitahuan yang ingin kamu terima"
     >
-      <div className="divide-y divide-slate-100">
+      <div className="divide-y theme-border-soft">
         <ToggleRow
           label="Tugas Baru"
           desc="Saat guru mengupload tugas baru"
@@ -992,11 +962,11 @@ function NotifikasiSection() {
         />
       </div>
 
-      <div className="mt-4 flex justify-end border-t border-slate-100 pt-4">
+      <div className="mt-4 flex justify-end border-t theme-border-soft pt-4">
         <button
           type="button"
           onClick={handleSave}
-          className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#155DFC] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0D47C9]"
+          className="theme-primary inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm transition"
         >
           {saved && <Check size={15} />}
           Simpan Perubahan

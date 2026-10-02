@@ -1,19 +1,15 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import {
-  ArrowLeft,
   Download,
   Eye,
   FileSpreadsheet,
-  Filter,
   Printer,
   Search,
   TrendingUp,
   TrendingDown,
-  DollarSign,
   Calendar,
-  CreditCard,
   Wallet,
   ChevronLeft,
   ChevronRight,
@@ -28,7 +24,9 @@ import { useRouter } from "next/navigation";
 import Header from "../../../../components/Header";
 import Sidebar from "../../../../components/Sidebar";
 
-// Data dummy awal
+// =============================================================
+// DATA DUMMY AWAL
+// =============================================================
 const initialTransactions = [
   {
     id: 1,
@@ -95,80 +93,138 @@ const initialTransactions = [
   },
 ];
 
+// =============================================================
+// PAGE
+// =============================================================
 export default function LaporanKeuanganPage() {
   const router = useRouter();
+
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("semua");
   const [currentPage, setCurrentPage] = useState(1);
   const [entriesPerPage] = useState(5);
 
-  // State untuk data transaksi (bisa berubah saat edit/hapus)
   const [transactions, setTransactions] = useState(initialTransactions);
-  const [selectedId, setSelectedId] = useState(null);
 
-  const toggleSidebar = () => setIsCollapsed((prev) => !prev);
+  // =============================================================
+  // SIDEBAR
+  // =============================================================
+  const toggleSidebar = () => {
+    setIsCollapsed((prev) => !prev);
+  };
 
-  // Statistik
+  // =============================================================
+  // STATISTIK
+  // =============================================================
   const totalPemasukan = transactions
-    .filter((t) => t.kategori === "Pemasukan")
-    .reduce((a, b) => a + b.jumlah, 0);
+    .filter((transaction) => transaction.kategori === "Pemasukan")
+    .reduce((total, transaction) => total + transaction.jumlah, 0);
+
   const totalPengeluaran = transactions
-    .filter((t) => t.kategori === "Pengeluaran")
-    .reduce((a, b) => a + b.jumlah, 0);
+    .filter((transaction) => transaction.kategori === "Pengeluaran")
+    .reduce((total, transaction) => total + transaction.jumlah, 0);
+
   const saldo = totalPemasukan - totalPengeluaran;
 
-  // Filter & Pagination
-  const filtered = transactions.filter((t) => {
+  // =============================================================
+  // FILTER
+  // =============================================================
+  const filtered = transactions.filter((transaction) => {
+    const keyword = search.trim().toLowerCase();
+
     const matchSearch =
-      t.deskripsi.toLowerCase().includes(search.toLowerCase()) ||
-      t.kategori.toLowerCase().includes(search.toLowerCase()) ||
-      t.metode.toLowerCase().includes(search.toLowerCase());
-    const matchFilter = filter === "semua" || t.kategori === filter;
+      transaction.deskripsi.toLowerCase().includes(keyword) ||
+      transaction.kategori.toLowerCase().includes(keyword) ||
+      transaction.metode.toLowerCase().includes(keyword);
+
+    const matchFilter =
+      filter === "semua" || transaction.kategori === filter;
+
     return matchSearch && matchFilter;
   });
 
-  const indexOfLast = currentPage * entriesPerPage;
-  const indexOfFirst = indexOfLast - entriesPerPage;
-  const currentEntries = filtered.slice(indexOfFirst, indexOfLast);
+  // =============================================================
+  // PAGINATION
+  // =============================================================
   const totalPages = Math.ceil(filtered.length / entriesPerPage);
 
+  const safeCurrentPage =
+    totalPages > 0 ? Math.min(currentPage, totalPages) : 1;
+
+  const indexOfLast = safeCurrentPage * entriesPerPage;
+  const indexOfFirst = indexOfLast - entriesPerPage;
+
+  const currentEntries = filtered.slice(indexOfFirst, indexOfLast);
+
   // =============================================================
-  // HANDLER: Navigasi ke halaman edit
+  // HANDLER EDIT
   // =============================================================
   const handleEdit = (id) => {
     router.push(`/laporan-keuangan/edit/${id}`);
   };
 
   // =============================================================
-  // HANDLER: Hapus transaksi
+  // HANDLER DELETE
   // =============================================================
   const handleDelete = (id) => {
-    if (window.confirm("Apakah Anda yakin ingin menghapus transaksi ini?")) {
-      setTransactions((prev) => prev.filter((item) => item.id !== id));
+    const confirmed = window.confirm(
+      "Apakah Anda yakin ingin menghapus transaksi ini?"
+    );
+
+    if (!confirmed) return;
+
+    setTransactions((previous) =>
+      previous.filter((transaction) => transaction.id !== id)
+    );
+
+    if (safeCurrentPage > 1 && currentEntries.length === 1) {
+      setCurrentPage((previous) => Math.max(1, previous - 1));
     }
   };
 
   // =============================================================
-  // HANDLER: Lihat detail (bisa pakai alert atau modal sederhana)
+  // HANDLER DETAIL
   // =============================================================
   const handleView = (id) => {
-    const item = transactions.find((t) => t.id === id);
-    if (item) {
-      alert(
-        `📋 Detail Transaksi\n\n` +
-          `Tanggal   : ${item.tanggal}\n` +
-          `Deskripsi : ${item.deskripsi}\n` +
-          `Kategori  : ${item.kategori}\n` +
-          `Jumlah    : Rp ${item.jumlah.toLocaleString()}\n` +
-          `Metode    : ${item.metode}\n` +
-          `Status    : ${item.status}`
-      );
-    }
+    const transaction = transactions.find(
+      (item) => item.id === id
+    );
+
+    if (!transaction) return;
+
+    window.alert(
+      `📋 Detail Transaksi\n\n` +
+        `Tanggal   : ${transaction.tanggal}\n` +
+        `Deskripsi : ${transaction.deskripsi}\n` +
+        `Kategori  : ${transaction.kategori}\n` +
+        `Jumlah    : Rp ${transaction.jumlah.toLocaleString("id-ID")}\n` +
+        `Metode    : ${transaction.metode}\n` +
+        `Status    : ${transaction.status}`
+    );
   };
 
+  // =============================================================
+  // RESET PAGE SAAT SEARCH / FILTER
+  // =============================================================
+  const handleSearchChange = (event) => {
+    setSearch(event.target.value);
+    setCurrentPage(1);
+  };
+
+  const handleFilterChange = (event) => {
+    setFilter(event.target.value);
+    setCurrentPage(1);
+  };
+
+  // =============================================================
+  // RENDER
+  // =============================================================
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-slate-50">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
+      {/* =========================================================
+          SIDEBAR
+      ========================================================= */}
       <Sidebar
         active="laporanKeuangan"
         setActive={() => {}}
@@ -176,7 +232,13 @@ export default function LaporanKeuanganPage() {
         setCollapsed={setIsCollapsed}
       />
 
+      {/* =========================================================
+          CONTENT WRAPPER
+      ========================================================= */}
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        {/* =======================================================
+            HEADER
+        ======================================================= */}
         <Header
           toggleSidebar={toggleSidebar}
           notifications={[]}
@@ -187,235 +249,437 @@ export default function LaporanKeuanganPage() {
           }}
         />
 
-        <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden bg-gradient-to-br from-slate-50 via-white to-slate-50/50">
+        {/* =======================================================
+            MAIN
+        ======================================================= */}
+        <main className="theme-page min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 xl:px-10">
-            {/* =========================================================
-                HEADER
-            ========================================================= */}
-            <div className="mb-6 flex flex-col gap-4 rounded-2xl bg-gradient-to-r from-[#0F172A] to-[#1E293B] p-6 sm:p-8">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-4">
-                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-white/10 border border-white/5 text-white">
+            {/* ===================================================
+                PAGE HEADER
+            =================================================== */}
+            <section
+              className="
+                theme-card
+                theme-border
+                mb-6
+                overflow-hidden
+                rounded-2xl
+                border
+                p-6
+                shadow-[0_10px_30px_color-mix(in_srgb,var(--color-text)_8%,transparent)]
+                sm:p-8
+              "
+            >
+              <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
+                {/* TITLE */}
+                <div className="flex min-w-0 items-center gap-4">
+                  <div
+                    className="
+                      flex
+                      h-14
+                      w-14
+                      shrink-0
+                      items-center
+                      justify-center
+                      rounded-xl
+                      border
+                      border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]
+                      bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
+                      text-[var(--color-primary)]
+                    "
+                  >
                     <FileSpreadsheet size={28} />
                   </div>
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-blue-300">
+
+                  <div className="min-w-0">
+                    <p className="text-[var(--color-primary)] text-xs font-semibold uppercase tracking-wider">
                       Keuangan & Kas
                     </p>
-                    <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
+
+                    <h1 className="theme-text mt-0.5 text-2xl font-bold tracking-tight sm:text-3xl">
                       Laporan Keuangan
                     </h1>
-                    <p className="mt-1 text-sm text-slate-300">
+
+                    <p className="theme-text-secondary mt-1 text-sm">
                       Ringkasan transaksi keuangan sekolah secara lengkap
                     </p>
                   </div>
                 </div>
 
+                {/* ACTION BUTTONS */}
                 <div className="flex flex-wrap gap-2">
-                  <button className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/20">
+                  {/* CETAK */}
+                  <button
+                    type="button"
+                    className="
+                      theme-card-soft
+                      theme-border
+                      theme-text-secondary
+                      inline-flex
+                      items-center
+                      gap-2
+                      rounded-lg
+                      border
+                      px-4
+                      py-2.5
+                      text-sm
+                      font-medium
+                      transition
+                      hover:bg-[color-mix(in_srgb,var(--color-primary)_7%,var(--color-card))]
+                      hover:text-[var(--color-primary)]
+                    "
+                  >
                     <Printer size={16} />
                     Cetak
                   </button>
-                  <button className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/20">
+
+                  {/* EXPORT */}
+                  <button
+                    type="button"
+                    className="
+                      theme-card-soft
+                      theme-border
+                      theme-text-secondary
+                      inline-flex
+                      items-center
+                      gap-2
+                      rounded-lg
+                      border
+                      px-4
+                      py-2.5
+                      text-sm
+                      font-medium
+                      transition
+                      hover:bg-[color-mix(in_srgb,var(--color-primary)_7%,var(--color-card))]
+                      hover:text-[var(--color-primary)]
+                    "
+                  >
                     <Download size={16} />
                     Ekspor
                   </button>
+
+                  {/* TAMBAH */}
                   <button
+                    type="button"
                     onClick={() => router.push("/laporan/tambah")}
-                    className="inline-flex items-center gap-2 rounded-lg bg-[#155DFC] px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-blue-500/25 transition hover:bg-[#0d47c9]"
+                    className="
+                      theme-primary
+                      inline-flex
+                      items-center
+                      gap-2
+                      rounded-lg
+                      px-4
+                      py-2.5
+                      text-sm
+                      font-medium
+                      shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]
+                      transition
+                      hover:opacity-90
+                    "
                   >
                     <Plus size={16} />
                     Tambah Transaksi
                   </button>
                 </div>
               </div>
-            </div>
+            </section>
 
-            {/* =========================================================
+            {/* ===================================================
                 STATISTIK
-            ========================================================= */}
-            <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            =================================================== */}
+            <section className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
               <StatCard
                 icon={<TrendingUp size={22} />}
                 label="Total Pemasukan"
-                value={`Rp ${totalPemasukan.toLocaleString()}`}
-                color="emerald"
+                value={`Rp ${totalPemasukan.toLocaleString("id-ID")}`}
+                color="success"
                 subtext="Semua pemasukan masuk"
               />
+
               <StatCard
                 icon={<TrendingDown size={22} />}
                 label="Total Pengeluaran"
-                value={`Rp ${totalPengeluaran.toLocaleString()}`}
-                color="red"
+                value={`Rp ${totalPengeluaran.toLocaleString("id-ID")}`}
+                color="danger"
                 subtext="Semua pengeluaran kas"
               />
+
               <StatCard
                 icon={<Wallet size={22} />}
                 label="Saldo Akhir"
-                value={`Rp ${saldo.toLocaleString()}`}
-                color={saldo >= 0 ? "blue" : "red"}
-                subtext={saldo >= 0 ? "Saldo positif" : "Saldo negatif"}
+                value={`Rp ${saldo.toLocaleString("id-ID")}`}
+                color={saldo >= 0 ? "primary" : "danger"}
+                subtext={
+                  saldo >= 0 ? "Saldo positif" : "Saldo negatif"
+                }
               />
-            </div>
+            </section>
 
-            {/* =========================================================
-                FILTER & SEARCH
-            ========================================================= */}
-            <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+            {/* ===================================================
+                SEARCH & FILTER
+            =================================================== */}
+            <section className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
+              {/* SEARCH */}
               <div className="relative flex-1">
                 <Search
                   size={18}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                  className="
+                    theme-text-muted
+                    absolute
+                    left-3.5
+                    top-1/2
+                    -translate-y-1/2
+                  "
                 />
+
                 <input
+                  type="text"
                   value={search}
-                  onChange={(e) => {
-                    setSearch(e.target.value);
-                    setCurrentPage(1);
-                  }}
+                  onChange={handleSearchChange}
                   placeholder="Cari transaksi, kategori, atau metode..."
-                  className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#155DFC] focus:ring-4 focus:ring-[#155DFC]/10"
+                  className="
+                    theme-input
+                    theme-border
+                    theme-text
+                    w-full
+                    rounded-xl
+                    border
+                    py-2.5
+                    pl-10
+                    pr-4
+                    text-sm
+                    outline-none
+                    transition
+                    placeholder:text-[var(--color-text-placeholder)]
+                    focus:border-[var(--color-primary)]
+                    focus:ring-4
+                    focus:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
+                  "
                 />
               </div>
 
+              {/* FILTER */}
               <div className="flex gap-2">
                 <select
                   value={filter}
-                  onChange={(e) => {
-                    setFilter(e.target.value);
-                    setCurrentPage(1);
-                  }}
-                  className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none focus:border-[#155DFC] focus:ring-4 focus:ring-[#155DFC]/10"
+                  onChange={handleFilterChange}
+                  className="
+                    theme-input
+                    theme-border
+                    theme-text
+                    rounded-xl
+                    border
+                    px-4
+                    py-2.5
+                    text-sm
+                    outline-none
+                    transition
+                    focus:border-[var(--color-primary)]
+                    focus:ring-4
+                    focus:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
+                  "
                 >
                   <option value="semua">Semua Kategori</option>
                   <option value="Pemasukan">Pemasukan</option>
                   <option value="Pengeluaran">Pengeluaran</option>
                 </select>
-                <button className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50">
+
+                <button
+                  type="button"
+                  className="
+                    theme-card
+                    theme-border
+                    theme-text-secondary
+                    inline-flex
+                    items-center
+                    gap-2
+                    rounded-xl
+                    border
+                    px-4
+                    py-2.5
+                    text-sm
+                    font-medium
+                    transition
+                    hover:bg-[color-mix(in_srgb,var(--color-primary)_7%,var(--color-card))]
+                    hover:text-[var(--color-primary)]
+                  "
+                >
                   <Calendar size={16} />
                   Periode
                 </button>
               </div>
-            </div>
+            </section>
 
-            {/* =========================================================
-                TABEL
-            ========================================================= */}
-            <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
+            {/* ===================================================
+                TABLE
+            =================================================== */}
+            <section
+              className="
+                theme-card
+                theme-border
+                overflow-hidden
+                rounded-2xl
+                border
+                shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_7%,transparent)]
+              "
+            >
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
+                  {/* TABLE HEADER */}
                   <thead>
-                    <tr className="border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">
-                      <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                        Tanggal
-                      </th>
-                      <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                        Deskripsi
-                      </th>
-                      <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                        Kategori
-                      </th>
-                      <th className="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
-                        Jumlah
-                      </th>
-                      <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                        Metode
-                      </th>
-                      <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                        Status
-                      </th>
-                      <th className="px-4 py-3.5 text-center text-xs font-semibold uppercase tracking-wider text-slate-500">
-                        Aksi
-                      </th>
+                    <tr className="bg-[color-mix(in_srgb,var(--color-primary)_4%,var(--color-card))]">
+                      <TableHead>Tanggal</TableHead>
+                      <TableHead>Deskripsi</TableHead>
+                      <TableHead>Kategori</TableHead>
+                      <TableHead align="right">Jumlah</TableHead>
+                      <TableHead>Metode</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead align="center">Aksi</TableHead>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+
+                  {/* TABLE BODY */}
+                  <tbody className="divide-y divide-[var(--color-border-soft)]">
                     {currentEntries.length === 0 ? (
                       <tr>
                         <td
                           colSpan={7}
-                          className="px-4 py-12 text-center text-slate-400"
+                          className="theme-text-muted px-4 py-12 text-center"
                         >
                           <div className="flex flex-col items-center gap-2">
-                            <FileText size={32} className="text-slate-300" />
-                            <p className="text-sm font-medium">
+                            <FileText
+                              size={32}
+                              className="theme-text-placeholder"
+                            />
+
+                            <p className="theme-text-secondary text-sm font-medium">
                               Tidak ada transaksi ditemukan
                             </p>
-                            <p className="text-xs">
+
+                            <p className="theme-text-muted text-xs">
                               Coba ubah kata kunci pencarian
                             </p>
                           </div>
                         </td>
                       </tr>
                     ) : (
-                      currentEntries.map((item) => (
+                      currentEntries.map((transaction) => (
                         <tr
-                          key={item.id}
-                          className="group transition hover:bg-slate-50/80"
+                          key={transaction.id}
+                          className="
+                            group
+                            transition
+                            hover:bg-[color-mix(in_srgb,var(--color-primary)_4%,var(--color-card))]
+                          "
                         >
-                          <td className="px-4 py-3.5 text-sm text-slate-600">
+                          {/* TANGGAL */}
+                          <td className="theme-text-secondary px-4 py-3.5 text-sm">
                             <div className="flex items-center gap-2">
-                              <Clock size={14} className="text-slate-400" />
-                              {item.tanggal}
+                              <Clock
+                                size={14}
+                                className="theme-text-muted"
+                              />
+
+                              {transaction.tanggal}
                             </div>
                           </td>
-                          <td className="px-4 py-3.5 font-medium text-slate-800">
-                            {item.deskripsi}
+
+                          {/* DESKRIPSI */}
+                          <td className="theme-text px-4 py-3.5 font-medium">
+                            {transaction.deskripsi}
                           </td>
+
+                          {/* KATEGORI */}
                           <td className="px-4 py-3.5">
+                            <CategoryBadge
+                              kategori={transaction.kategori}
+                            />
+                          </td>
+
+                          {/* JUMLAH */}
+                          <td className="px-4 py-3.5 text-right font-bold">
                             <span
-                              className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
-                                item.kategori === "Pemasukan"
-                                  ? "bg-emerald-100 text-emerald-700"
-                                  : "bg-red-100 text-red-700"
-                              }`}
+                              className={
+                                transaction.kategori === "Pemasukan"
+                                  ? "theme-success"
+                                  : "theme-danger"
+                              }
                             >
-                              {item.kategori}
+                              Rp{" "}
+                              {transaction.jumlah.toLocaleString(
+                                "id-ID"
+                              )}
                             </span>
                           </td>
-                          <td
-                            className={`px-4 py-3.5 text-right font-bold ${
-                              item.kategori === "Pemasukan"
-                                ? "text-emerald-600"
-                                : "text-red-500"
-                            }`}
-                          >
-                            Rp {item.jumlah.toLocaleString()}
+
+                          {/* METODE */}
+                          <td className="theme-text-secondary px-4 py-3.5">
+                            {transaction.metode}
                           </td>
-                          <td className="px-4 py-3.5 text-slate-600">
-                            {item.metode}
-                          </td>
+
+                          {/* STATUS */}
                           <td className="px-4 py-3.5">
-                            <span
-                              className={`inline-flex rounded-full px-2.5 py-1 text-xs font-semibold ${
-                                item.status === "Lunas"
-                                  ? "bg-emerald-100 text-emerald-700"
-                                  : "bg-yellow-100 text-yellow-700"
-                              }`}
-                            >
-                              {item.status}
-                            </span>
+                            <StatusBadge
+                              status={transaction.status}
+                            />
                           </td>
+
+                          {/* AKSI */}
                           <td className="px-4 py-3.5 text-center">
                             <div className="flex items-center justify-center gap-1">
+                              {/* VIEW */}
                               <button
-                                onClick={() => handleView(item.id)}
-                                className="rounded-lg p-1.5 text-slate-400 transition hover:bg-blue-50 hover:text-[#155DFC]"
+                                type="button"
+                                onClick={() =>
+                                  handleView(transaction.id)
+                                }
                                 title="Lihat Detail"
+                                className="
+                                  theme-text-muted
+                                  rounded-lg
+                                  p-1.5
+                                  transition
+                                  hover:bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]
+                                  hover:text-[var(--color-primary)]
+                                "
                               >
                                 <Eye size={16} />
                               </button>
+
+                              {/* EDIT */}
                               <button
-                                onClick={() => handleEdit(item.id)}
-                                className="rounded-lg p-1.5 text-slate-400 transition hover:bg-blue-50 hover:text-[#155DFC]"
+                                type="button"
+                                onClick={() =>
+                                  handleEdit(transaction.id)
+                                }
                                 title="Edit Transaksi"
+                                className="
+                                  theme-text-muted
+                                  rounded-lg
+                                  p-1.5
+                                  transition
+                                  hover:bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]
+                                  hover:text-[var(--color-primary)]
+                                "
                               >
                                 <Edit size={16} />
                               </button>
+
+                              {/* DELETE */}
                               <button
-                                onClick={() => handleDelete(item.id)}
-                                className="rounded-lg p-1.5 text-slate-400 transition hover:bg-red-50 hover:text-red-600"
+                                type="button"
+                                onClick={() =>
+                                  handleDelete(transaction.id)
+                                }
                                 title="Hapus Transaksi"
+                                className="
+                                  theme-text-muted
+                                  rounded-lg
+                                  p-1.5
+                                  transition
+                                  hover:bg-[color-mix(in_srgb,var(--color-danger)_9%,transparent)]
+                                  hover:text-[var(--color-danger)]
+                                "
                               >
                                 <Trash2 size={16} />
                               </button>
@@ -428,55 +692,139 @@ export default function LaporanKeuanganPage() {
                 </table>
               </div>
 
-              {/* Pagination */}
+              {/* =================================================
+                  PAGINATION
+              ================================================= */}
               {filtered.length > 0 && (
-                <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50/50 px-4 py-3">
-                  <p className="text-sm text-slate-500">
+                <div
+                  className="
+                    theme-border
+                    flex
+                    flex-col
+                    gap-3
+                    border-t
+                    bg-[color-mix(in_srgb,var(--color-primary)_3%,var(--color-card))]
+                    px-4
+                    py-3
+                    sm:flex-row
+                    sm:items-center
+                    sm:justify-between
+                  "
+                >
+                  <p className="theme-text-secondary text-sm">
                     Menampilkan {indexOfFirst + 1}-
                     {Math.min(indexOfLast, filtered.length)} dari{" "}
                     {filtered.length} transaksi
                   </p>
+
                   <div className="flex items-center gap-1">
+                    {/* PREVIOUS */}
                     <button
+                      type="button"
                       onClick={() =>
-                        setCurrentPage((p) => Math.max(1, p - 1))
+                        setCurrentPage((page) =>
+                          Math.max(1, page - 1)
+                        )
                       }
-                      disabled={currentPage === 1}
-                      className="rounded-lg border border-slate-200 bg-white p-2 text-slate-500 transition hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white"
+                      disabled={safeCurrentPage === 1}
+                      className="
+                        theme-card
+                        theme-border
+                        theme-text-secondary
+                        rounded-lg
+                        border
+                        p-2
+                        transition
+                        hover:bg-[color-mix(in_srgb,var(--color-primary)_7%,var(--color-card))]
+                        disabled:cursor-not-allowed
+                        disabled:opacity-40
+                      "
+                      title="Halaman sebelumnya"
                     >
                       <ChevronLeft size={16} />
                     </button>
-                    {Array.from({ length: totalPages }, (_, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setCurrentPage(i + 1)}
-                        className={`rounded-lg px-3.5 py-1.5 text-sm font-medium transition ${
-                          currentPage === i + 1
-                            ? "bg-[#155DFC] text-white shadow-sm shadow-blue-500/25"
-                            : "text-slate-600 hover:bg-slate-100"
-                        }`}
-                      >
-                        {i + 1}
-                      </button>
-                    ))}
-                    <button
-                      onClick={() =>
-                        setCurrentPage((p) => Math.min(totalPages, p + 1))
+
+                    {/* PAGE NUMBERS */}
+                    {Array.from(
+                      { length: totalPages },
+                      (_, index) => {
+                        const pageNumber = index + 1;
+                        const isActive =
+                          safeCurrentPage === pageNumber;
+
+                        return (
+                          <button
+                            type="button"
+                            key={pageNumber}
+                            onClick={() =>
+                              setCurrentPage(pageNumber)
+                            }
+                            className={`
+                              rounded-lg
+                              px-3.5
+                              py-1.5
+                              text-sm
+                              font-medium
+                              transition
+                              ${
+                                isActive
+                                  ? "theme-primary shadow-[0_4px_12px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]"
+                                  : "theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-primary)_7%,var(--color-card))] hover:text-[var(--color-primary)]"
+                              }
+                            `}
+                          >
+                            {pageNumber}
+                          </button>
+                        );
                       }
-                      disabled={currentPage === totalPages}
-                      className="rounded-lg border border-slate-200 bg-white p-2 text-slate-500 transition hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white"
+                    )}
+
+                    {/* NEXT */}
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setCurrentPage((page) =>
+                          Math.min(totalPages, page + 1)
+                        )
+                      }
+                      disabled={
+                        safeCurrentPage === totalPages
+                      }
+                      className="
+                        theme-card
+                        theme-border
+                        theme-text-secondary
+                        rounded-lg
+                        border
+                        p-2
+                        transition
+                        hover:bg-[color-mix(in_srgb,var(--color-primary)_7%,var(--color-card))]
+                        disabled:cursor-not-allowed
+                        disabled:opacity-40
+                      "
+                      title="Halaman berikutnya"
                     >
                       <ChevronRight size={16} />
                     </button>
                   </div>
                 </div>
               )}
-            </div>
+            </section>
 
-            {/* =========================================================
+            {/* ===================================================
                 FOOTER
-            ========================================================= */}
-            <footer className="mt-8 border-t border-slate-200/50 pt-6 text-center text-xs text-slate-400">
+            =================================================== */}
+            <footer
+              className="
+                theme-border-soft
+                theme-text-muted
+                mt-8
+                border-t
+                pt-6
+                text-center
+                text-xs
+              "
+            >
               © 2026 SmartSchool • Laporan Keuangan
             </footer>
           </div>
@@ -486,29 +834,189 @@ export default function LaporanKeuanganPage() {
   );
 }
 
-// =========================================================
-// STAT CARD COMPONENT
-// =========================================================
-function StatCard({ icon, label, value, color, subtext }) {
-  const colors = {
-    emerald: "bg-emerald-50 text-emerald-600",
-    red: "bg-red-50 text-red-600",
-    blue: "bg-blue-50 text-[#155DFC]",
-  };
+// =============================================================
+// TABLE HEAD
+// =============================================================
+function TableHead({ children, align = "left" }) {
+  const alignmentClass =
+    {
+      left: "text-left",
+      center: "text-center",
+      right: "text-right",
+    }[align] || "text-left";
 
   return (
-    <div className="group rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition hover:shadow-md">
+    <th
+      className={`
+        theme-text-muted
+        px-4
+        py-3.5
+        text-xs
+        font-semibold
+        uppercase
+        tracking-wider
+        ${alignmentClass}
+      `}
+    >
+      {children}
+    </th>
+  );
+}
+
+// =============================================================
+// CATEGORY BADGE
+// =============================================================
+function CategoryBadge({ kategori }) {
+  const isIncome = kategori === "Pemasukan";
+
+  return (
+    <span
+      className={`
+        inline-flex
+        items-center
+        rounded-full
+        border
+        border-current
+        px-2.5
+        py-1
+        text-xs
+        font-semibold
+        ${
+          isIncome
+            ? `
+              theme-success
+              bg-[color-mix(in_srgb,currentColor_10%,transparent)]
+            `
+            : `
+              theme-danger
+              bg-[color-mix(in_srgb,currentColor_10%,transparent)]
+            `
+        }
+      `}
+    >
+      {kategori}
+    </span>
+  );
+}
+
+// =============================================================
+// STATUS BADGE
+// =============================================================
+function StatusBadge({ status }) {
+  const isPaid = status === "Lunas";
+
+  return (
+    <span
+      className={`
+        inline-flex
+        items-center
+        rounded-full
+        border
+        border-current
+        px-2.5
+        py-1
+        text-xs
+        font-semibold
+        ${
+          isPaid
+            ? `
+              theme-success
+              bg-[color-mix(in_srgb,currentColor_10%,transparent)]
+            `
+            : `
+              theme-warning
+              bg-[color-mix(in_srgb,currentColor_10%,transparent)]
+            `
+        }
+      `}
+    >
+      {status}
+    </span>
+  );
+}
+
+// =============================================================
+// STAT CARD
+// =============================================================
+function StatCard({
+  icon,
+  label,
+  value,
+  color,
+  subtext,
+}) {
+  const colorConfig = {
+    success: {
+      textClass: "theme-success",
+      background:
+        "bg-[color-mix(in_srgb,var(--color-success)_7%,var(--color-card))]",
+    },
+
+    danger: {
+      textClass: "theme-danger",
+      background:
+        "bg-[color-mix(in_srgb,var(--color-danger)_7%,var(--color-card))]",
+    },
+
+    primary: {
+      textClass: "text-[var(--color-primary)]",
+      background:
+        "bg-[color-mix(in_srgb,var(--color-primary)_7%,var(--color-card))]",
+    },
+  };
+
+  const selected =
+    colorConfig[color] || colorConfig.primary;
+
+  return (
+    <div
+      className={`
+        theme-card
+        theme-border
+        group
+        rounded-2xl
+        border
+        p-5
+        shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_7%,transparent)]
+        transition
+        hover:shadow-[0_8px_24px_color-mix(in_srgb,var(--color-text)_10%,transparent)]
+        ${selected.background}
+      `}
+    >
       <div className="flex items-start gap-4">
+        {/* ICON */}
         <div
-          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${colors[color]} transition group-hover:scale-105`}
+          className={`
+            flex
+            h-12
+            w-12
+            shrink-0
+            items-center
+            justify-center
+            rounded-xl
+            bg-[color-mix(in_srgb,currentColor_10%,transparent)]
+            transition
+            group-hover:scale-105
+            ${selected.textClass}
+          `}
         >
           {icon}
         </div>
+
+        {/* CONTENT */}
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-medium text-slate-400">{label}</p>
-          <p className="mt-1 text-xl font-bold text-slate-800">{value}</p>
+          <p className="theme-text-muted text-xs font-medium">
+            {label}
+          </p>
+
+          <p className="theme-text mt-1 text-xl font-bold">
+            {value}
+          </p>
+
           {subtext && (
-            <p className="mt-0.5 text-xs text-slate-400">{subtext}</p>
+            <p className="theme-text-muted mt-0.5 text-xs">
+              {subtext}
+            </p>
           )}
         </div>
       </div>

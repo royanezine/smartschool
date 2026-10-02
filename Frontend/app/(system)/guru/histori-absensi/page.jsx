@@ -9,7 +9,6 @@ import {
   Calendar,
   Search,
   Download,
-  Printer,
   Filter,
   Clock,
   CheckCircle2,
@@ -25,9 +24,73 @@ import {
   BarChart3,
 } from "lucide-react";
 
-// =========================================================
-// DATA DUMMY
-// =========================================================
+/* ============================================================
+   THEME HELPERS
+============================================================ */
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+
+/* ============================================================
+   DATA DUMMY
+============================================================ */
 
 const MAPEL_LIST = [
   "Matematika",
@@ -95,28 +158,86 @@ const SISWA_LIST = [
   { id: 50, nama: "Wahyu Setiawan", nis: "2409015", kelas: "X IPA 1" },
 ];
 
+/* ============================================================
+   GENERATE ATTENDANCE DATA
+============================================================ */
+
 const generateAttendanceData = () => {
   const data = [];
-  const statuses = ["Hadir", "Hadir", "Hadir", "Hadir", "Sakit", "Izin", "Alpa"];
-  const dates = [
-    "2026-08-01", "2026-08-08", "2026-08-15", "2026-08-22",
-    "2026-08-29", "2026-09-05", "2026-09-12", "2026-09-19",
-    "2026-09-26", "2026-10-03", "2026-10-10", "2026-10-17",
+
+  const statuses = [
+    "Hadir",
+    "Hadir",
+    "Hadir",
+    "Hadir",
+    "Sakit",
+    "Izin",
+    "Alpa",
   ];
+
+  const dates = [
+    "2026-08-01",
+    "2026-08-08",
+    "2026-08-15",
+    "2026-08-22",
+    "2026-08-29",
+    "2026-09-05",
+    "2026-09-12",
+    "2026-09-19",
+    "2026-09-26",
+    "2026-10-03",
+    "2026-10-10",
+    "2026-10-17",
+  ];
+
   const notes = {
-    Sakit: ["Demam", "Flu", "Sakit kepala", "Batuk"],
-    Izin: ["Acara keluarga", "Keperluan pribadi"],
-    Alpa: ["Tidak masuk tanpa keterangan"],
+    Sakit: [
+      "Demam",
+      "Flu",
+      "Sakit kepala",
+      "Batuk",
+    ],
+    Izin: [
+      "Acara keluarga",
+      "Keperluan pribadi",
+    ],
+    Alpa: [
+      "Tidak masuk tanpa keterangan",
+    ],
   };
 
   let id = 1;
+
   MAPEL_LIST.forEach((mapel) => {
     SISWA_LIST.forEach((siswa) => {
-      const numRecords = 5 + Math.floor(Math.random() * 6);
-      const shuffledDates = [...dates].sort(() => Math.random() - 0.5);
-      for (let i = 0; i < Math.min(numRecords, shuffledDates.length); i++) {
-        const status = statuses[Math.floor(Math.random() * statuses.length)];
-        const hasNote = status !== "Hadir" && Math.random() > 0.5;
+      const numRecords =
+        5 + Math.floor(Math.random() * 6);
+
+      const shuffledDates = [...dates].sort(
+        () => Math.random() - 0.5,
+      );
+
+      for (
+        let i = 0;
+        i <
+        Math.min(
+          numRecords,
+          shuffledDates.length,
+        );
+        i++
+      ) {
+        const status =
+          statuses[
+            Math.floor(
+              Math.random() *
+                statuses.length,
+            )
+          ];
+
+        const hasNote =
+          status !== "Hadir" &&
+          Math.random() > 0.5;
+
         data.push({
           id: id++,
           siswaId: siswa.id,
@@ -126,1287 +247,1291 @@ const generateAttendanceData = () => {
           mapel,
           tanggal: shuffledDates[i],
           status,
-          catatan: hasNote && status !== "Hadir"
-            ? notes[status]?.[Math.floor(Math.random() * notes[status].length)] || "-"
-            : "-",
+          catatan:
+            hasNote && status !== "Hadir"
+              ? notes[status]?.[
+                  Math.floor(
+                    Math.random() *
+                      notes[status].length,
+                  )
+                ] || "-"
+              : "-",
           pertemuanKe: i + 1,
         });
       }
     });
   });
+
   return data;
 };
+
+/* ============================================================
+   PAGE
+============================================================ */
 
 export default function HistoriAbsensiPage() {
   const router = useRouter();
 
-  const [attendanceData, setAttendanceData] = useState([]);
-  const [selectedMapel, setSelectedMapel] = useState("Matematika");
-  const [selectedKelas, setSelectedKelas] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
+  const [attendanceData, setAttendanceData] =
+    useState([]);
+
+  const [selectedMapel, setSelectedMapel] =
+    useState("Matematika");
+
+  const [selectedKelas, setSelectedKelas] =
+    useState("");
+
+  const [searchQuery, setSearchQuery] =
+    useState("");
+
+  const [startDate, setStartDate] =
+    useState("");
+
+  const [endDate, setEndDate] =
+    useState("");
+
+  const [currentPage, setCurrentPage] =
+    useState(1);
+
   const itemsPerPage = 10;
 
+  /* ==========================================================
+     LOAD DATA
+  ========================================================== */
+
   useEffect(() => {
-    setAttendanceData(generateAttendanceData());
+    setAttendanceData(
+      generateAttendanceData(),
+    );
   }, []);
+
+  /* ==========================================================
+     FILTER DATA
+  ========================================================== */
 
   const filteredData = useMemo(() => {
     let data = [...attendanceData];
-    if (selectedMapel) data = data.filter((item) => item.mapel === selectedMapel);
-    if (selectedKelas) data = data.filter((item) => item.kelas === selectedKelas);
-    if (searchQuery.trim()) {
-      const q = searchQuery.toLowerCase();
-      data = data.filter((item) => item.nama.toLowerCase().includes(q) || item.nis.includes(q));
+
+    if (selectedMapel) {
+      data = data.filter(
+        (item) =>
+          item.mapel === selectedMapel,
+      );
     }
-    if (startDate) data = data.filter((item) => item.tanggal >= startDate);
-    if (endDate) data = data.filter((item) => item.tanggal <= endDate);
-    data.sort((a, b) => b.tanggal.localeCompare(a.tanggal));
+
+    if (selectedKelas) {
+      data = data.filter(
+        (item) =>
+          item.kelas === selectedKelas,
+      );
+    }
+
+    if (searchQuery.trim()) {
+      const q =
+        searchQuery.toLowerCase();
+
+      data = data.filter(
+        (item) =>
+          item.nama
+            .toLowerCase()
+            .includes(q) ||
+          item.nis.includes(q),
+      );
+    }
+
+    if (startDate) {
+      data = data.filter(
+        (item) =>
+          item.tanggal >= startDate,
+      );
+    }
+
+    if (endDate) {
+      data = data.filter(
+        (item) =>
+          item.tanggal <= endDate,
+      );
+    }
+
+    data.sort((a, b) =>
+      b.tanggal.localeCompare(
+        a.tanggal,
+      ),
+    );
+
     return data;
-  }, [attendanceData, selectedMapel, selectedKelas, searchQuery, startDate, endDate]);
+  }, [
+    attendanceData,
+    selectedMapel,
+    selectedKelas,
+    searchQuery,
+    startDate,
+    endDate,
+  ]);
+
+  /* ==========================================================
+     STATISTICS
+  ========================================================== */
 
   const stats = useMemo(() => {
     const total = filteredData.length;
-    const hadir = filteredData.filter((d) => d.status === "Hadir").length;
-    const sakit = filteredData.filter((d) => d.status === "Sakit").length;
-    const izin = filteredData.filter((d) => d.status === "Izin").length;
-    const alpa = filteredData.filter((d) => d.status === "Alpa").length;
-    const persentase = total > 0 ? Math.round((hadir / total) * 100) : 0;
-    return { total, hadir, sakit, izin, alpa, persentase };
+
+    const hadir = filteredData.filter(
+      (d) => d.status === "Hadir",
+    ).length;
+
+    const sakit = filteredData.filter(
+      (d) => d.status === "Sakit",
+    ).length;
+
+    const izin = filteredData.filter(
+      (d) => d.status === "Izin",
+    ).length;
+
+    const alpa = filteredData.filter(
+      (d) => d.status === "Alpa",
+    ).length;
+
+    const persentase =
+      total > 0
+        ? Math.round((hadir / total) * 100)
+        : 0;
+
+    return {
+      total,
+      hadir,
+      sakit,
+      izin,
+      alpa,
+      persentase,
+    };
   }, [filteredData]);
 
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+  /* ==========================================================
+     PAGINATION
+  ========================================================== */
+
+  const totalPages = Math.ceil(
+    filteredData.length / itemsPerPage,
+  );
+
   const paginatedData = useMemo(() => {
-    const start = (currentPage - 1) * itemsPerPage;
-    return filteredData.slice(start, start + itemsPerPage);
-  }, [filteredData, currentPage]);
+    const start =
+      (currentPage - 1) *
+      itemsPerPage;
+
+    return filteredData.slice(
+      start,
+      start + itemsPerPage,
+    );
+  }, [
+    filteredData,
+    currentPage,
+  ]);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [selectedMapel, selectedKelas, searchQuery, startDate, endDate]);
+  }, [
+    selectedMapel,
+    selectedKelas,
+    searchQuery,
+    startDate,
+    endDate,
+  ]);
+
+  /* ==========================================================
+     AVAILABLE CLASS
+  ========================================================== */
 
   const availableKelas = useMemo(() => {
     const kelas = new Set();
-    attendanceData.filter((item) => item.mapel === selectedMapel).forEach((item) => kelas.add(item.kelas));
+
+    attendanceData
+      .filter(
+        (item) =>
+          item.mapel === selectedMapel,
+      )
+      .forEach((item) =>
+        kelas.add(item.kelas),
+      );
+
     return Array.from(kelas).sort();
-  }, [attendanceData, selectedMapel]);
+  }, [
+    attendanceData,
+    selectedMapel,
+  ]);
+
+  /* ==========================================================
+     STATUS HELPERS
+  ========================================================== */
 
   const getStatusBadge = (status) => {
     const map = {
-      Hadir: "bg-emerald-50 text-emerald-700 border-emerald-200",
-      Sakit: "bg-amber-50 text-amber-700 border-amber-200",
-      Izin: "bg-blue-50 text-blue-700 border-blue-200",
-      Alpa: "bg-rose-50 text-rose-700 border-rose-200",
+      Hadir: `${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder}`,
+
+      Sakit: `${themeWarningSurface} text-[var(--color-warning)] ${themeWarningBorder}`,
+
+      Izin: `${themeInfoSurface} text-[var(--color-info)] ${themeInfoBorder}`,
+
+      Alpa: `${themeDangerSurface} theme-danger ${themeDangerBorder}`,
     };
-    return map[status] || "bg-slate-50 text-slate-500 border-slate-200";
+
+    return (
+      map[status] ||
+      `${themeNeutralSurface} theme-text-secondary ${themeNeutralBorder}`
+    );
   };
 
   const getStatusIcon = (status) => {
     const map = {
-      Hadir: <CheckCircle2 size={14} className="text-emerald-500" />,
-      Sakit: <Stethoscope size={14} className="text-amber-500" />,
-      Izin: <FileText size={14} className="text-blue-500" />,
-      Alpa: <XCircle size={14} className="text-rose-500" />,
+      Hadir: (
+        <CheckCircle2
+          size={14}
+          className="text-[var(--color-success)]"
+        />
+      ),
+
+      Sakit: (
+        <Stethoscope
+          size={14}
+          className="text-[var(--color-warning)]"
+        />
+      ),
+
+      Izin: (
+        <FileText
+          size={14}
+          className="text-[var(--color-info)]"
+        />
+      ),
+
+      Alpa: (
+        <XCircle
+          size={14}
+          className="theme-danger"
+        />
+      ),
     };
+
     return map[status] || null;
   };
 
+  /* ==========================================================
+     INITIALS
+  ========================================================== */
+
   const getInitials = (nama) => {
     const parts = nama.split(" ");
-    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
-    return nama.substring(0, 2).toUpperCase();
+
+    if (parts.length >= 2) {
+      return (
+        parts[0][0] +
+        parts[1][0]
+      ).toUpperCase();
+    }
+
+    return nama
+      .substring(0, 2)
+      .toUpperCase();
   };
 
-  const getAvatarColor = (nama) => {
-    const colors = [
-      "bg-blue-500", "bg-emerald-500", "bg-amber-500", "bg-rose-500",
-      "bg-indigo-500", "bg-purple-500", "bg-cyan-500", "bg-orange-500",
-      "bg-pink-500", "bg-teal-500",
-    ];
-    return colors[nama.length % colors.length];
+  /* ==========================================================
+     AVATAR
+  ========================================================== */
+
+  const getAvatarColor = () => {
+    return `${themePrimarySoft} ${themePrimaryText} border ${themePrimarySoftBorder}`;
   };
+
+  /* ==========================================================
+     FORMAT DATE
+  ========================================================== */
 
   const formatDate = (dateStr) => {
     const d = new Date(dateStr);
-    return d.toLocaleDateString("id-ID", {
-      weekday: "short",
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-    });
+
+    return d.toLocaleDateString(
+      "id-ID",
+      {
+        weekday: "short",
+        day: "numeric",
+        month: "short",
+        year: "numeric",
+      },
+    );
   };
 
-  const handleExport = () => alert("Fitur ekspor akan segera hadir!");
+  /* ==========================================================
+     EXPORT
+  ========================================================== */
+
+  const handleExport = () =>
+    alert(
+      "Fitur ekspor akan segera hadir!",
+    );
+
+  /* ==========================================================
+     RENDER
+  ========================================================== */
 
   return (
-  <div className="min-h-screen w-full bg-slate-50 flex">
+    <div className="min-h-screen w-full theme-page flex">
+      {/* =====================================================
+          SIDEBAR
+      ====================================================== */}
 
-    {/* =====================================================
-        SIDEBAR
-    ====================================================== */}
-    <div className="flex-shrink-0">
-      <Sidebar />
-    </div>
-
-    {/* =====================================================
-        AREA UTAMA
-    ====================================================== */}
-    <div className="flex-1 min-w-0 min-h-screen flex flex-col">
-
-      {/* HEADER */}
       <div className="flex-shrink-0">
-        <Header />
+        <Sidebar />
       </div>
 
-      {/* ===================================================
-          CONTENT
-      ==================================================== */}
-      <main className="flex-1 min-w-0 bg-slate-50 overflow-x-hidden">
+      {/* =====================================================
+          AREA UTAMA
+      ====================================================== */}
 
-        <div className="w-full min-w-0 px-3 py-4 sm:px-5 sm:py-5 md:px-6 lg:px-8 xl:px-10">
+      <div className="flex-1 min-w-0 min-h-screen flex flex-col">
+        {/* HEADER */}
 
-          <div className="w-full max-w-none mx-auto space-y-5 sm:space-y-6">
+        <div className="flex-shrink-0">
+          <Header />
+        </div>
 
-            {/* =================================================
-                HEADER HALAMAN
-            ================================================== */}
-            <section className="w-full">
+        {/* ===================================================
+            CONTENT
+        ==================================================== */}
 
-              <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <main className="flex-1 min-w-0 theme-page overflow-x-hidden">
+          <div className="w-full min-w-0 px-3 py-4 sm:px-5 sm:py-5 md:px-6 lg:px-8 xl:px-10">
+            <div className="w-full max-w-none mx-auto space-y-5 sm:space-y-6">
+              {/* =================================================
+                  HEADER HALAMAN
+              ================================================== */}
 
-                {/* TITLE */}
-                <div className="min-w-0">
+              <section className="w-full">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                  {/* TITLE */}
 
-                  <div className="flex items-center gap-3">
-
-                    <div className="w-11 h-11 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-br from-indigo-600 to-purple-600 text-white flex items-center justify-center shadow-md shadow-indigo-200 flex-shrink-0">
-                      <BarChart3 size={22} />
-                    </div>
-
-                    <div className="min-w-0">
-
-                      <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-slate-800 truncate">
-                        Histori Absensi Siswa
-                      </h1>
-
-                      <p className="mt-1 flex items-center gap-1.5 text-xs sm:text-sm text-slate-500">
-                        <BookOpen
-                          size={14}
-                          className="text-slate-400 flex-shrink-0"
-                        />
-
-                        <span className="truncate">
-                          Rekap kehadiran siswa berdasarkan mata pelajaran
-                        </span>
-                      </p>
-
-                    </div>
-
-                  </div>
-
-                </div>
-
-                {/* ACTION */}
-                <div className="flex items-center gap-2">
-
-                  <button
-                    onClick={handleExport}
-                    className="
-                      inline-flex
-                      items-center
-                      justify-center
-                      gap-2
-                      px-4
-                      py-2.5
-                      bg-white
-                      border
-                      border-slate-200
-                      text-slate-600
-                      rounded-xl
-                      text-sm
-                      font-medium
-                      shadow-sm
-                      hover:bg-slate-50
-                      hover:border-slate-300
-                      hover:shadow
-                      transition-all
-                      whitespace-nowrap
-                    "
-                  >
-                    <Download size={17} />
-                    <span>Ekspor</span>
-                  </button>
-
-                </div>
-
-              </div>
-
-            </section>
-
-
-            {/* =================================================
-                FILTER
-            ================================================== */}
-            <section className="w-full bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-
-              <div className="p-4 sm:p-5 lg:p-6">
-
-                {/* FILTER HEADER */}
-                <div className="flex items-center gap-2 mb-5">
-
-                  <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                    <Filter size={17} />
-                  </div>
-
-                  <div>
-                    <h2 className="text-sm font-semibold text-slate-700">
-                      Filter Data
-                    </h2>
-
-                    <p className="text-xs text-slate-400 mt-0.5">
-                      Gunakan filter untuk mencari data absensi
-                    </p>
-                  </div>
-
-                </div>
-
-
-                {/* FILTER GRID */}
-                <div className="
-                  grid
-                  grid-cols-1
-                  sm:grid-cols-2
-                  lg:grid-cols-4
-                  gap-4
-                ">
-
-                  {/* MAPEL */}
                   <div className="min-w-0">
-
-                    <label className="block text-xs font-semibold text-slate-500 mb-1.5">
-                      Mata Pelajaran
-                    </label>
-
-                    <select
-                      value={selectedMapel}
-                      onChange={(e) => setSelectedMapel(e.target.value)}
-                      className="
-                        w-full
-                        h-10
-                        px-3
-                        text-sm
-                        text-slate-700
-                        bg-slate-50
-                        border
-                        border-slate-200
-                        rounded-xl
-                        focus:outline-none
-                        focus:ring-2
-                        focus:ring-indigo-500/20
-                        focus:border-indigo-400
-                        transition
-                      "
-                    >
-                      {MAPEL_LIST.map((mapel) => (
-                        <option key={mapel} value={mapel}>
-                          {mapel}
-                        </option>
-                      ))}
-                    </select>
-
-                  </div>
-
-
-                  {/* KELAS */}
-                  <div className="min-w-0">
-
-                    <label className="block text-xs font-semibold text-slate-500 mb-1.5">
-                      Kelas
-                    </label>
-
-                    <select
-                      value={selectedKelas}
-                      onChange={(e) => setSelectedKelas(e.target.value)}
-                      className="
-                        w-full
-                        h-10
-                        px-3
-                        text-sm
-                        text-slate-700
-                        bg-slate-50
-                        border
-                        border-slate-200
-                        rounded-xl
-                        focus:outline-none
-                        focus:ring-2
-                        focus:ring-indigo-500/20
-                        focus:border-indigo-400
-                        transition
-                      "
-                    >
-                      <option value="">
-                        Semua Kelas
-                      </option>
-
-                      {availableKelas.map((kelas) => (
-                        <option key={kelas} value={kelas}>
-                          {kelas}
-                        </option>
-                      ))}
-                    </select>
-
-                  </div>
-
-
-                  {/* SEARCH */}
-                  <div className="min-w-0">
-
-                    <label className="block text-xs font-semibold text-slate-500 mb-1.5">
-                      Cari Siswa
-                    </label>
-
-                    <div className="relative">
-
-                      <Search
-                        size={16}
-                        className="
-                          absolute
-                          left-3
-                          top-1/2
-                          -translate-y-1/2
-                          text-slate-400
-                        "
-                      />
-
-                      <input
-                        type="text"
-                        placeholder="Nama atau NIS..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                        className="
-                          w-full
-                          h-10
-                          pl-9
-                          pr-3
-                          text-sm
-                          text-slate-700
-                          bg-slate-50
-                          border
-                          border-slate-200
-                          rounded-xl
-                          focus:outline-none
-                          focus:ring-2
-                          focus:ring-indigo-500/20
-                          focus:border-indigo-400
-                          transition
-                        "
-                      />
-
-                    </div>
-
-                  </div>
-
-
-                  {/* DATE */}
-                  <div className="grid grid-cols-2 gap-2 min-w-0">
-
-                    <div className="min-w-0">
-
-                      <label className="block text-xs font-semibold text-slate-500 mb-1.5">
-                        Dari
-                      </label>
-
-                      <input
-                        type="date"
-                        value={startDate}
-                        onChange={(e) => setStartDate(e.target.value)}
-                        className="
-                          w-full
-                          h-10
-                          px-2
-                          text-xs
-                          sm:text-sm
-                          text-slate-700
-                          bg-slate-50
-                          border
-                          border-slate-200
-                          rounded-xl
-                          focus:outline-none
-                          focus:ring-2
-                          focus:ring-indigo-500/20
-                          focus:border-indigo-400
-                        "
-                      />
-
-                    </div>
-
-                    <div className="min-w-0">
-
-                      <label className="block text-xs font-semibold text-slate-500 mb-1.5">
-                        Sampai
-                      </label>
-
-                      <input
-                        type="date"
-                        value={endDate}
-                        onChange={(e) => setEndDate(e.target.value)}
-                        className="
-                          w-full
-                          h-10
-                          px-2
-                          text-xs
-                          sm:text-sm
-                          text-slate-700
-                          bg-slate-50
-                          border
-                          border-slate-200
-                          rounded-xl
-                          focus:outline-none
-                          focus:ring-2
-                          focus:ring-indigo-500/20
-                          focus:border-indigo-400
-                        "
-                      />
-
-                    </div>
-
-                  </div>
-
-                </div>
-
-
-                {/* ACTIVE FILTER */}
-                {(selectedKelas || searchQuery || startDate || endDate) && (
-
-                  <div className="mt-5 pt-4 border-t border-slate-100">
-
-                    <div className="flex flex-wrap items-center gap-2">
-
-                      <span className="text-xs text-slate-400">
-                        Filter aktif:
-                      </span>
-
-
-                      {selectedKelas && (
-                        <span className="
-                          inline-flex
-                          items-center
-                          gap-1.5
-                          px-3
-                          py-1.5
-                          text-xs
-                          font-medium
-                          bg-indigo-50
-                          text-indigo-600
-                          rounded-full
-                          border
-                          border-indigo-200
-                        ">
-                          Kelas: {selectedKelas}
-
-                          <button
-                            onClick={() => setSelectedKelas("")}
-                            className="hover:text-indigo-900"
-                          >
-                            ×
-                          </button>
-                        </span>
-                      )}
-
-
-                      {searchQuery && (
-                        <span className="
-                          inline-flex
-                          items-center
-                          gap-1.5
-                          px-3
-                          py-1.5
-                          text-xs
-                          font-medium
-                          bg-blue-50
-                          text-blue-600
-                          rounded-full
-                          border
-                          border-blue-200
-                        ">
-                          Cari: {searchQuery}
-
-                          <button
-                            onClick={() => setSearchQuery("")}
-                            className="hover:text-blue-900"
-                          >
-                            ×
-                          </button>
-                        </span>
-                      )}
-
-
-                      {(startDate || endDate) && (
-                        <span className="
-                          inline-flex
-                          items-center
-                          gap-1.5
-                          px-3
-                          py-1.5
-                          text-xs
-                          font-medium
-                          bg-amber-50
-                          text-amber-600
-                          rounded-full
-                          border
-                          border-amber-200
-                        ">
-
-                          {startDate && `Dari ${formatDate(startDate)}`}
-
-                          {startDate && endDate && " - "}
-
-                          {endDate && formatDate(endDate)}
-
-                          <button
-                            onClick={() => {
-                              setStartDate("");
-                              setEndDate("");
-                            }}
-                            className="hover:text-amber-900"
-                          >
-                            ×
-                          </button>
-
-                        </span>
-                      )}
-
-
-                      <button
-                        onClick={() => {
-                          setSelectedKelas("");
-                          setSearchQuery("");
-                          setStartDate("");
-                          setEndDate("");
-                        }}
-                        className="
-                          text-xs
-                          text-slate-400
-                          hover:text-slate-600
-                          underline
-                        "
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-11 h-11 sm:w-12 sm:h-12 rounded-2xl ${themePrimaryGradient} text-[var(--color-card)] flex items-center justify-center ${themePrimaryShadow} flex-shrink-0`}
                       >
-                        Hapus semua
-                      </button>
+                        <BarChart3
+                          size={22}
+                        />
+                      </div>
 
+                      <div className="min-w-0">
+                        <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold theme-text truncate">
+                          Histori Absensi
+                          Siswa
+                        </h1>
+
+                        <p className="mt-1 flex items-center gap-1.5 text-xs sm:text-sm theme-text-secondary">
+                          <BookOpen
+                            size={14}
+                            className="theme-text-muted flex-shrink-0"
+                          />
+
+                          <span className="truncate">
+                            Rekap kehadiran
+                            siswa berdasarkan
+                            mata pelajaran
+                          </span>
+                        </p>
+                      </div>
                     </div>
-
                   </div>
 
-                )}
+                  {/* ACTION */}
 
-              </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={
+                        handleExport
+                      }
+                      className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 theme-card border ${themeNeutralBorder} theme-text-secondary rounded-xl text-sm font-medium ${themeCardShadow} ${themeNeutralHover} transition-all whitespace-nowrap`}
+                    >
+                      <Download
+                        size={17}
+                      />
 
-            </section>
-
-
-            {/* =================================================
-                STATISTIK
-            ================================================== */}
-            <section className="
-              grid
-              grid-cols-2
-              sm:grid-cols-3
-              md:grid-cols-3
-              lg:grid-cols-6
-              gap-3
-            ">
-
-              {[
-                ["Total", stats.total, "text-slate-800", "bg-slate-50"],
-                ["Hadir", stats.hadir, "text-emerald-600", "bg-emerald-50"],
-                ["Sakit", stats.sakit, "text-amber-600", "bg-amber-50"],
-                ["Izin", stats.izin, "text-blue-600", "bg-blue-50"],
-                ["Alpa", stats.alpa, "text-rose-600", "bg-rose-50"],
-              ].map(([label, value, color, bg]) => (
-
-                <div
-                  key={label}
-                  className="
-                    bg-white
-                    rounded-2xl
-                    border
-                    border-slate-200
-                    shadow-sm
-                    p-4
-                    hover:shadow-md
-                    transition-all
-                    min-w-0
-                  "
-                >
-
-                  <div className={`w-8 h-8 rounded-lg ${bg} flex items-center justify-center mb-3`}>
-
-                    {label === "Total" && (
-                      <BarChart3 size={15} className={color} />
-                    )}
-
-                    {label === "Hadir" && (
-                      <CheckCircle2 size={15} className={color} />
-                    )}
-
-                    {label === "Sakit" && (
-                      <Stethoscope size={15} className={color} />
-                    )}
-
-                    {label === "Izin" && (
-                      <FileText size={15} className={color} />
-                    )}
-
-                    {label === "Alpa" && (
-                      <XCircle size={15} className={color} />
-                    )}
-
+                      <span>
+                        Ekspor
+                      </span>
+                    </button>
                   </div>
-
-                  <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
-                    {label}
-                  </p>
-
-                  <p className={`text-2xl font-bold mt-0.5 ${color}`}>
-                    {value}
-                  </p>
-
                 </div>
+              </section>
 
-              ))}
+              {/* =================================================
+                  FILTER
+              ================================================== */}
 
+              <section
+                className={`w-full theme-card rounded-2xl border ${themeNeutralBorder} ${themeCardShadow} overflow-hidden`}
+              >
+                <div className="p-4 sm:p-5 lg:p-6">
+                  {/* FILTER HEADER */}
 
-              {/* KEHADIRAN */}
-              <div className="
-                bg-gradient-to-br
-                from-indigo-50
-                to-purple-50
-                rounded-2xl
-                border
-                border-indigo-100
-                shadow-sm
-                p-4
-                hover:shadow-md
-                transition-all
-                min-w-0
-              ">
-
-                <div className="w-8 h-8 rounded-lg bg-white/80 flex items-center justify-center mb-3">
-
-                  {stats.persentase >= 80 ? (
-                    <TrendingUp
-                      size={16}
-                      className="text-emerald-500"
-                    />
-                  ) : (
-                    <TrendingDown
-                      size={16}
-                      className="text-amber-500"
-                    />
-                  )}
-
-                </div>
-
-                <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">
-                  Kehadiran
-                </p>
-
-                <div className="flex items-center gap-1">
-
-                  <p
-                    className={`text-2xl font-bold ${
-                      stats.persentase >= 80
-                        ? "text-emerald-600"
-                        : "text-amber-600"
-                    }`}
-                  >
-                    {stats.persentase}%
-                  </p>
-
-                </div>
-
-              </div>
-
-            </section>
-
-
-            {/* =================================================
-                TABLE
-            ================================================== */}
-            <section className="
-              w-full
-              bg-white
-              rounded-2xl
-              border
-              border-slate-200
-              shadow-sm
-              overflow-hidden
-            ">
-
-              {/* TABLE HEADER */}
-              <div className="
-                p-4
-                sm:p-5
-                lg:p-6
-                border-b
-                border-slate-100
-                bg-white
-              ">
-
-                <div className="
-                  flex
-                  flex-col
-                  gap-2
-                  sm:flex-row
-                  sm:items-center
-                  sm:justify-between
-                ">
-
-                  <div className="flex items-center gap-3">
-
-                    <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
-                      <Clock size={17} />
+                  <div className="flex items-center gap-2 mb-5">
+                    <div
+                      className={`w-9 h-9 rounded-xl ${themePrimarySoft} ${themePrimaryText} flex items-center justify-center`}
+                    >
+                      <Filter
+                        size={17}
+                      />
                     </div>
 
                     <div>
-
-                      <h2 className="text-sm sm:text-base font-semibold text-slate-700">
-                        Riwayat Absensi
+                      <h2 className="text-sm font-semibold theme-text">
+                        Filter Data
                       </h2>
 
-                      <p className="text-xs text-slate-400 mt-0.5">
-                        {filteredData.length} data ditemukan
+                      <p className="text-xs theme-text-muted mt-0.5">
+                        Gunakan filter
+                        untuk mencari
+                        data absensi
                       </p>
+                    </div>
+                  </div>
 
+                  {/* FILTER GRID */}
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                    {/* MAPEL */}
+
+                    <div className="min-w-0">
+                      <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
+                        Mata Pelajaran
+                      </label>
+
+                      <select
+                        value={
+                          selectedMapel
+                        }
+                        onChange={(e) =>
+                          setSelectedMapel(
+                            e.target.value,
+                          )
+                        }
+                        className={`w-full h-10 px-3 text-sm theme-input rounded-xl focus:outline-none ${themeFocus} transition`}
+                      >
+                        {MAPEL_LIST.map(
+                          (mapel) => (
+                            <option
+                              key={mapel}
+                              value={
+                                mapel
+                              }
+                            >
+                              {mapel}
+                            </option>
+                          ),
+                        )}
+                      </select>
                     </div>
 
-                  </div>
+                    {/* KELAS */}
 
-                  <div className="text-xs text-slate-400">
-                    Menampilkan{" "}
-                    <span className="font-semibold text-slate-600">
-                      {paginatedData.length}
-                    </span>{" "}
-                    dari{" "}
-                    <span className="font-semibold text-slate-600">
-                      {filteredData.length}
-                    </span>{" "}
-                    data
-                  </div>
-
-                </div>
-
-              </div>
-
-
-              {/* TABLE WRAPPER */}
-              <div className="w-full overflow-x-auto">
-
-                <table className="w-full min-w-[760px]">
-
-                  <thead>
-
-                    <tr className="bg-slate-50 border-b border-slate-200">
-
-                      <th className="
-                        px-4
-                        py-3
-                        text-left
-                        text-[10px]
-                        sm:text-[11px]
-                        font-bold
-                        uppercase
-                        tracking-wider
-                        text-slate-500
-                      ">
-                        Siswa
-                      </th>
-
-                      <th className="
-                        px-4
-                        py-3
-                        text-left
-                        text-[10px]
-                        sm:text-[11px]
-                        font-bold
-                        uppercase
-                        tracking-wider
-                        text-slate-500
-                      ">
+                    <div className="min-w-0">
+                      <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
                         Kelas
-                      </th>
+                      </label>
 
-                      <th className="
-                        px-4
-                        py-3
-                        text-left
-                        text-[10px]
-                        sm:text-[11px]
-                        font-bold
-                        uppercase
-                        tracking-wider
-                        text-slate-500
-                      ">
-                        Mata Pelajaran
-                      </th>
+                      <select
+                        value={
+                          selectedKelas
+                        }
+                        onChange={(e) =>
+                          setSelectedKelas(
+                            e.target.value,
+                          )
+                        }
+                        className={`w-full h-10 px-3 text-sm theme-input rounded-xl focus:outline-none ${themeFocus} transition`}
+                      >
+                        <option value="">
+                          Semua Kelas
+                        </option>
 
-                      <th className="
-                        px-4
-                        py-3
-                        text-left
-                        text-[10px]
-                        sm:text-[11px]
-                        font-bold
-                        uppercase
-                        tracking-wider
-                        text-slate-500
-                      ">
-                        Tanggal
-                      </th>
-
-                      <th className="
-                        px-4
-                        py-3
-                        text-left
-                        text-[10px]
-                        sm:text-[11px]
-                        font-bold
-                        uppercase
-                        tracking-wider
-                        text-slate-500
-                      ">
-                        Status
-                      </th>
-
-                      <th className="
-                        px-4
-                        py-3
-                        text-left
-                        text-[10px]
-                        sm:text-[11px]
-                        font-bold
-                        uppercase
-                        tracking-wider
-                        text-slate-500
-                      ">
-                        Catatan
-                      </th>
-
-                      <th className="
-                        px-4
-                        py-3
-                        text-right
-                        text-[10px]
-                        sm:text-[11px]
-                        font-bold
-                        uppercase
-                        tracking-wider
-                        text-slate-500
-                      ">
-                        Aksi
-                      </th>
-
-                    </tr>
-
-                  </thead>
-
-
-                  <tbody className="divide-y divide-slate-100">
-
-                    {paginatedData.length === 0 ? (
-
-                      <tr>
-
-                        <td
-                          colSpan={7}
-                          className="px-4 py-16 text-center"
-                        >
-
-                          <div className="
-                            w-16
-                            h-16
-                            mx-auto
-                            rounded-2xl
-                            bg-slate-100
-                            flex
-                            items-center
-                            justify-center
-                            text-slate-300
-                            mb-4
-                          ">
-                            <Calendar size={28} />
-                          </div>
-
-                          <p className="text-sm font-semibold text-slate-600">
-                            Tidak ada data absensi
-                          </p>
-
-                          <p className="text-xs text-slate-400 mt-1">
-                            Coba ubah filter atau pilih mata pelajaran lain
-                          </p>
-
-                        </td>
-
-                      </tr>
-
-                    ) : (
-
-                      paginatedData.map((item) => (
-
-                        <tr
-                          key={item.id}
-                          className="
-                            hover:bg-indigo-50/30
-                            transition-colors
-                          "
-                        >
-
-                          {/* SISWA */}
-                          <td className="px-4 py-3.5">
-
-                            <div className="flex items-center gap-3">
-
-                              <div
-                                className={`
-                                  w-9
-                                  h-9
-                                  rounded-xl
-                                  ${getAvatarColor(item.nama)}
-                                  flex
-                                  items-center
-                                  justify-center
-                                  text-white
-                                  font-bold
-                                  text-[11px]
-                                  shadow-sm
-                                  flex-shrink-0
-                                `}
-                              >
-                                {getInitials(item.nama)}
-                              </div>
-
-                              <div className="min-w-0">
-
-                                <p className="
-                                  font-semibold
-                                  text-slate-800
-                                  text-sm
-                                  truncate
-                                  max-w-[180px]
-                                ">
-                                  {item.nama}
-                                </p>
-
-                                <p className="text-[10px] text-slate-400 mt-0.5">
-                                  NIS: {item.nis}
-                                </p>
-
-                              </div>
-
-                            </div>
-
-                          </td>
-
-
-                          {/* KELAS */}
-                          <td className="px-4 py-3.5">
-
-                            <span className="text-xs text-slate-600 whitespace-nowrap">
-                              {item.kelas}
-                            </span>
-
-                          </td>
-
-
-                          {/* MAPEL */}
-                          <td className="px-4 py-3.5">
-
-                            <span className="
-                              inline-flex
-                              items-center
-                              px-2.5
-                              py-1
-                              rounded-lg
-                              text-[10px]
-                              font-semibold
-                              bg-indigo-50
-                              text-indigo-600
-                              border
-                              border-indigo-100
-                              whitespace-nowrap
-                            ">
-                              {item.mapel}
-                            </span>
-
-                          </td>
-
-
-                          {/* TANGGAL */}
-                          <td className="px-4 py-3.5">
-
-                            <span className="
-                              text-xs
-                              text-slate-500
-                              flex
-                              items-center
-                              gap-1.5
-                              whitespace-nowrap
-                            ">
-                              <Calendar
-                                size={12}
-                                className="text-slate-300"
-                              />
-
-                              {formatDate(item.tanggal)}
-                            </span>
-
-                          </td>
-
-
-                          {/* STATUS */}
-                          <td className="px-4 py-3.5">
-
-                            <span
-                              className={`
-                                inline-flex
-                                items-center
-                                gap-1.5
-                                text-xs
-                                font-semibold
-                                px-2.5
-                                py-1.5
-                                rounded-full
-                                border
-                                whitespace-nowrap
-                                ${getStatusBadge(item.status)}
-                              `}
+                        {availableKelas.map(
+                          (kelas) => (
+                            <option
+                              key={kelas}
+                              value={
+                                kelas
+                              }
                             >
-                              {getStatusIcon(item.status)}
-                              {item.status}
-                            </span>
+                              {kelas}
+                            </option>
+                          ),
+                        )}
+                      </select>
+                    </div>
 
-                          </td>
+                    {/* SEARCH */}
 
+                    <div className="min-w-0">
+                      <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
+                        Cari Siswa
+                      </label>
 
-                          {/* CATATAN */}
-                          <td className="px-4 py-3.5">
+                      <div className="relative">
+                        <Search
+                          size={16}
+                          className="absolute left-3 top-1/2 -translate-y-1/2 theme-text-muted"
+                        />
 
-                            <span className="text-xs text-slate-500">
-                              {item.catatan !== "-"
-                                ? item.catatan
-                                : "—"}
-                            </span>
+                        <input
+                          type="text"
+                          placeholder="Nama atau NIS..."
+                          value={
+                            searchQuery
+                          }
+                          onChange={(e) =>
+                            setSearchQuery(
+                              e.target
+                                .value,
+                            )
+                          }
+                          className={`w-full h-10 pl-9 pr-3 text-sm theme-input rounded-xl focus:outline-none ${themeFocus} placeholder:text-[var(--color-text-placeholder)] transition`}
+                        />
+                      </div>
+                    </div>
 
-                          </td>
+                    {/* DATE */}
 
+                    <div className="grid grid-cols-2 gap-2 min-w-0">
+                      {/* FROM */}
 
-                          {/* AKSI */}
-                          <td className="px-4 py-3.5">
+                      <div className="min-w-0">
+                        <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
+                          Dari
+                        </label>
 
-                            <div className="flex justify-end">
+                        <input
+                          type="date"
+                          value={
+                            startDate
+                          }
+                          onChange={(e) =>
+                            setStartDate(
+                              e.target
+                                .value,
+                            )
+                          }
+                          className={`w-full h-10 px-2 text-xs sm:text-sm theme-input rounded-xl focus:outline-none ${themeFocus}`}
+                        />
+                      </div>
 
-                              <button
-                                onClick={() =>
-                                  router.push(
-                                    `/guru/siswa/${item.siswaId}`
-                                  )
-                                }
-                                className="
-                                  w-8
-                                  h-8
-                                  rounded-lg
-                                  flex
-                                  items-center
-                                  justify-center
-                                  text-slate-400
-                                  hover:text-indigo-600
-                                  hover:bg-indigo-50
-                                  transition
-                                "
-                                title="Lihat Detail Siswa"
-                              >
-                                <Eye size={16} />
-                              </button>
+                      {/* TO */}
 
-                            </div>
+                      <div className="min-w-0">
+                        <label className="block text-xs font-semibold theme-text-secondary mb-1.5">
+                          Sampai
+                        </label>
 
-                          </td>
+                        <input
+                          type="date"
+                          value={
+                            endDate
+                          }
+                          onChange={(e) =>
+                            setEndDate(
+                              e.target
+                                .value,
+                            )
+                          }
+                          className={`w-full h-10 px-2 text-xs sm:text-sm theme-input rounded-xl focus:outline-none ${themeFocus}`}
+                        />
+                      </div>
+                    </div>
+                  </div>
 
-                        </tr>
+                  {/* ACTIVE FILTER */}
 
-                      ))
+                  {(selectedKelas ||
+                    searchQuery ||
+                    startDate ||
+                    endDate) && (
+                    <div
+                      className={`mt-5 pt-4 border-t ${themeDivider}`}
+                    >
+                      <div className="flex flex-wrap items-center gap-2">
+                        <span className="text-xs theme-text-muted">
+                          Filter aktif:
+                        </span>
 
-                    )}
+                        {/* KELAS */}
 
-                  </tbody>
+                        {selectedKelas && (
+                          <span
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium ${themePrimarySoft} ${themePrimaryText} rounded-full border ${themePrimarySoftBorder}`}
+                          >
+                            Kelas:{" "}
+                            {
+                              selectedKelas
+                            }
 
-                </table>
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setSelectedKelas(
+                                  "",
+                                )
+                              }
+                              className="hover:opacity-70 transition"
+                            >
+                              ×
+                            </button>
+                          </span>
+                        )}
 
-              </div>
+                        {/* SEARCH */}
 
+                        {searchQuery && (
+                          <span
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium ${themeInfoSurface} text-[var(--color-info)] rounded-full border ${themeInfoBorder}`}
+                          >
+                            Cari:{" "}
+                            {
+                              searchQuery
+                            }
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                setSearchQuery(
+                                  "",
+                                )
+                              }
+                              className="hover:opacity-70 transition"
+                            >
+                              ×
+                            </button>
+                          </span>
+                        )}
+
+                        {/* DATE */}
+
+                        {(startDate ||
+                          endDate) && (
+                          <span
+                            className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium ${themeWarningSurface} text-[var(--color-warning)] rounded-full border ${themeWarningBorder}`}
+                          >
+                            {startDate &&
+                              `Dari ${formatDate(
+                                startDate,
+                              )}`}
+
+                            {startDate &&
+                              endDate &&
+                              " - "}
+
+                            {endDate &&
+                              formatDate(
+                                endDate,
+                              )}
+
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setStartDate(
+                                  "",
+                                );
+                                setEndDate(
+                                  "",
+                                );
+                              }}
+                              className="hover:opacity-70 transition"
+                            >
+                              ×
+                            </button>
+                          </span>
+                        )}
+
+                        {/* CLEAR */}
+
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setSelectedKelas(
+                              "",
+                            );
+                            setSearchQuery(
+                              "",
+                            );
+                            setStartDate(
+                              "",
+                            );
+                            setEndDate("");
+                          }}
+                          className="text-xs theme-text-muted hover:text-[var(--color-primary)] underline transition"
+                        >
+                          Hapus semua
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </section>
 
               {/* =================================================
-                  PAGINATION
+                  STATISTIK
               ================================================== */}
-              {totalPages > 1 && (
 
-                <div className="
-                  flex
-                  flex-col
-                  sm:flex-row
-                  items-center
-                  justify-between
-                  gap-3
-                  p-4
-                  border-t
-                  border-slate-100
-                  bg-slate-50/50
-                ">
+              <section className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-3">
+                {/* TOTAL */}
 
-                  <span className="text-xs text-slate-400">
-                    Halaman{" "}
-                    <span className="font-semibold text-slate-600">
-                      {currentPage}
-                    </span>{" "}
-                    dari{" "}
-                    <span className="font-semibold text-slate-600">
-                      {totalPages}
-                    </span>
-                  </span>
-
-
-                  <div className="flex items-center gap-1">
-
-                    <button
-                      onClick={() =>
-                        setCurrentPage((p) => Math.max(1, p - 1))
-                      }
-                      disabled={currentPage === 1}
-                      className="
-                        w-8
-                        h-8
-                        rounded-lg
-                        flex
-                        items-center
-                        justify-center
-                        text-slate-500
-                        hover:bg-white
-                        hover:shadow-sm
-                        disabled:opacity-30
-                        disabled:cursor-not-allowed
-                        transition
-                      "
-                    >
-                      <ChevronLeft size={16} />
-                    </button>
-
-
-                    {Array.from(
-                      { length: Math.min(5, totalPages) },
-                      (_, i) => {
-
-                        let pageNum;
-
-                        if (totalPages <= 5) {
-                          pageNum = i + 1;
-                        } else if (currentPage <= 3) {
-                          pageNum = i + 1;
-                        } else if (
-                          currentPage >= totalPages - 2
-                        ) {
-                          pageNum = totalPages - 4 + i;
-                        } else {
-                          pageNum = currentPage - 2 + i;
-                        }
-
-                        return (
-
-                          <button
-                            key={pageNum}
-                            onClick={() =>
-                              setCurrentPage(pageNum)
-                            }
-                            className={`
-                              w-8
-                              h-8
-                              rounded-lg
-                              text-xs
-                              font-semibold
-                              transition
-                              ${
-                                currentPage === pageNum
-                                  ? "bg-indigo-600 text-white shadow-sm"
-                                  : "text-slate-500 hover:bg-white hover:shadow-sm"
-                              }
-                            `}
-                          >
-                            {pageNum}
-                          </button>
-
-                        );
-                      }
-                    )}
-
-
-                    <button
-                      onClick={() =>
-                        setCurrentPage((p) =>
-                          Math.min(totalPages, p + 1)
-                        )
-                      }
-                      disabled={currentPage === totalPages}
-                      className="
-                        w-8
-                        h-8
-                        rounded-lg
-                        flex
-                        items-center
-                        justify-center
-                        text-slate-500
-                        hover:bg-white
-                        hover:shadow-sm
-                        disabled:opacity-30
-                        disabled:cursor-not-allowed
-                        transition
-                      "
-                    >
-                      <ChevronRight size={16} />
-                    </button>
-
+                <div
+                  className={`theme-card rounded-2xl border ${themeNeutralBorder} ${themeCardShadow} p-4 ${themeNeutralHover} transition-all min-w-0`}
+                >
+                  <div
+                    className={`w-8 h-8 rounded-lg ${themeNeutralSurface} theme-text-secondary flex items-center justify-center mb-3`}
+                  >
+                    <BarChart3
+                      size={15}
+                    />
                   </div>
 
+                  <p className="text-[10px] font-semibold theme-text-muted uppercase tracking-wider">
+                    Total
+                  </p>
+
+                  <p className="text-2xl font-bold mt-0.5 theme-text">
+                    {stats.total}
+                  </p>
                 </div>
 
-              )}
+                {/* HADIR */}
 
-            </section>
+                <div
+                  className={`theme-card rounded-2xl border ${themeSuccessBorder} ${themeSuccessSurface} ${themeCardShadow} p-4 ${themeNeutralHover} transition-all min-w-0`}
+                >
+                  <div className="w-8 h-8 rounded-lg bg-[color-mix(in_srgb,var(--color-success)_15%,transparent)] text-[var(--color-success)] flex items-center justify-center mb-3">
+                    <CheckCircle2
+                      size={15}
+                    />
+                  </div>
 
+                  <p className="text-[10px] font-semibold theme-text-muted uppercase tracking-wider">
+                    Hadir
+                  </p>
 
-            {/* =================================================
-                FOOTER
-            ================================================== */}
-            <footer className="
-              text-center
-              text-xs
-              text-slate-400
-              py-5
-              border-t
-              border-slate-200
-            ">
-              © 2026 SmartSchool • Histori Absensi Siswa
-            </footer>
+                  <p className="text-2xl font-bold mt-0.5 text-[var(--color-success)]">
+                    {stats.hadir}
+                  </p>
+                </div>
 
+                {/* SAKIT */}
+
+                <div
+                  className={`theme-card rounded-2xl border ${themeWarningBorder} ${themeWarningSurface} ${themeCardShadow} p-4 ${themeNeutralHover} transition-all min-w-0`}
+                >
+                  <div className="w-8 h-8 rounded-lg bg-[color-mix(in_srgb,var(--color-warning)_15%,transparent)] text-[var(--color-warning)] flex items-center justify-center mb-3">
+                    <Stethoscope
+                      size={15}
+                    />
+                  </div>
+
+                  <p className="text-[10px] font-semibold theme-text-muted uppercase tracking-wider">
+                    Sakit
+                  </p>
+
+                  <p className="text-2xl font-bold mt-0.5 text-[var(--color-warning)]">
+                    {stats.sakit}
+                  </p>
+                </div>
+
+                {/* IZIN */}
+
+                <div
+                  className={`theme-card rounded-2xl border ${themeInfoBorder} ${themeInfoSurface} ${themeCardShadow} p-4 ${themeNeutralHover} transition-all min-w-0`}
+                >
+                  <div className="w-8 h-8 rounded-lg bg-[color-mix(in_srgb,var(--color-info)_15%,transparent)] text-[var(--color-info)] flex items-center justify-center mb-3">
+                    <FileText
+                      size={15}
+                    />
+                  </div>
+
+                  <p className="text-[10px] font-semibold theme-text-muted uppercase tracking-wider">
+                    Izin
+                  </p>
+
+                  <p className="text-2xl font-bold mt-0.5 text-[var(--color-info)]">
+                    {stats.izin}
+                  </p>
+                </div>
+
+                {/* ALPA */}
+
+                <div
+                  className={`theme-card rounded-2xl border ${themeDangerBorder} ${themeDangerSurface} ${themeCardShadow} p-4 ${themeNeutralHover} transition-all min-w-0`}
+                >
+                  <div className={`w-8 h-8 rounded-lg ${themeNeutralSurface} theme-danger flex items-center justify-center mb-3`}>
+                    <XCircle
+                      size={15}
+                    />
+                  </div>
+
+                  <p className="text-[10px] font-semibold theme-text-muted uppercase tracking-wider">
+                    Alpa
+                  </p>
+
+                  <p className="text-2xl font-bold mt-0.5 theme-danger">
+                    {stats.alpa}
+                  </p>
+                </div>
+
+                {/* KEHADIRAN */}
+
+                <div
+                  className={`rounded-2xl border ${themePrimarySoftBorder} ${themePrimarySoft} ${themeCardShadow} p-4 ${themeNeutralHover} transition-all min-w-0`}
+                >
+                  <div
+                    className={`w-8 h-8 rounded-lg bg-[color-mix(in_srgb,var(--color-card)_55%,transparent)] ${themePrimaryText} flex items-center justify-center mb-3`}
+                  >
+                    {stats.persentase >=
+                    80 ? (
+                      <TrendingUp
+                        size={16}
+                        className="text-[var(--color-success)]"
+                      />
+                    ) : (
+                      <TrendingDown
+                        size={16}
+                        className="text-[var(--color-warning)]"
+                      />
+                    )}
+                  </div>
+
+                  <p className="text-[10px] font-semibold theme-text-muted uppercase tracking-wider">
+                    Kehadiran
+                  </p>
+
+                  <div className="flex items-center gap-1">
+                    <p
+                      className={`text-2xl font-bold ${
+                        stats.persentase >=
+                        80
+                          ? "text-[var(--color-success)]"
+                          : "text-[var(--color-warning)]"
+                      }`}
+                    >
+                      {stats.persentase}%
+                    </p>
+                  </div>
+                </div>
+              </section>
+
+              {/* =================================================
+                  TABLE
+              ================================================== */}
+
+              <section
+                className={`w-full theme-card rounded-2xl border ${themeNeutralBorder} ${themeCardShadow} overflow-hidden`}
+              >
+                {/* TABLE HEADER */}
+
+                <div
+                  className={`p-4 sm:p-5 lg:p-6 border-b ${themeDivider}`}
+                >
+                  <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-9 h-9 rounded-xl ${themePrimarySoft} ${themePrimaryText} flex items-center justify-center`}
+                      >
+                        <Clock
+                          size={17}
+                        />
+                      </div>
+
+                      <div>
+                        <h2 className="text-sm sm:text-base font-semibold theme-text">
+                          Riwayat Absensi
+                        </h2>
+
+                        <p className="text-xs theme-text-muted mt-0.5">
+                          {
+                            filteredData.length
+                          }{" "}
+                          data ditemukan
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="text-xs theme-text-muted">
+                      Menampilkan{" "}
+                      <span className="font-semibold theme-text-secondary">
+                        {
+                          paginatedData.length
+                        }
+                      </span>{" "}
+                      dari{" "}
+                      <span className="font-semibold theme-text-secondary">
+                        {
+                          filteredData.length
+                        }
+                      </span>{" "}
+                      data
+                    </div>
+                  </div>
+                </div>
+
+                {/* TABLE WRAPPER */}
+
+                <div className="w-full overflow-x-auto">
+                  <table className="w-full min-w-[760px]">
+                    <thead>
+                      <tr
+                        className={`${themeNeutralSurface} border-b ${themeDivider}`}
+                      >
+                        <th className="px-4 py-3 text-left text-[10px] sm:text-[11px] font-bold uppercase tracking-wider theme-text-muted">
+                          Siswa
+                        </th>
+
+                        <th className="px-4 py-3 text-left text-[10px] sm:text-[11px] font-bold uppercase tracking-wider theme-text-muted">
+                          Kelas
+                        </th>
+
+                        <th className="px-4 py-3 text-left text-[10px] sm:text-[11px] font-bold uppercase tracking-wider theme-text-muted">
+                          Mata
+                          Pelajaran
+                        </th>
+
+                        <th className="px-4 py-3 text-left text-[10px] sm:text-[11px] font-bold uppercase tracking-wider theme-text-muted">
+                          Tanggal
+                        </th>
+
+                        <th className="px-4 py-3 text-left text-[10px] sm:text-[11px] font-bold uppercase tracking-wider theme-text-muted">
+                          Status
+                        </th>
+
+                        <th className="px-4 py-3 text-left text-[10px] sm:text-[11px] font-bold uppercase tracking-wider theme-text-muted">
+                          Catatan
+                        </th>
+
+                        <th className="px-4 py-3 text-right text-[10px] sm:text-[11px] font-bold uppercase tracking-wider theme-text-muted">
+                          Aksi
+                        </th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {paginatedData.length ===
+                      0 ? (
+                        <tr>
+                          <td
+                            colSpan={7}
+                            className="px-4 py-16 text-center"
+                          >
+                            <div
+                              className={`w-16 h-16 mx-auto rounded-2xl ${themeNeutralSurface} theme-text-muted flex items-center justify-center mb-4`}
+                            >
+                              <Calendar
+                                size={28}
+                              />
+                            </div>
+
+                            <p className="text-sm font-semibold theme-text-secondary">
+                              Tidak ada data
+                              absensi
+                            </p>
+
+                            <p className="text-xs theme-text-muted mt-1">
+                              Coba ubah filter
+                              atau pilih
+                              mata pelajaran
+                              lain
+                            </p>
+                          </td>
+                        </tr>
+                      ) : (
+                        paginatedData.map(
+                          (item) => (
+                            <tr
+                              key={
+                                item.id
+                              }
+                              className={`border-b ${themeDivider} ${themeNeutralHover} transition-colors`}
+                            >
+                              {/* SISWA */}
+
+                              <td className="px-4 py-3.5">
+                                <div className="flex items-center gap-3">
+                                  <div
+                                    className={`w-9 h-9 rounded-xl ${getAvatarColor()} flex items-center justify-center font-bold text-[11px] flex-shrink-0`}
+                                  >
+                                    {getInitials(
+                                      item.nama,
+                                    )}
+                                  </div>
+
+                                  <div className="min-w-0">
+                                    <p className="font-semibold theme-text text-sm truncate max-w-[180px]">
+                                      {
+                                        item.nama
+                                      }
+                                    </p>
+
+                                    <p className="text-[10px] theme-text-muted mt-0.5">
+                                      NIS:{" "}
+                                      {
+                                        item.nis
+                                      }
+                                    </p>
+                                  </div>
+                                </div>
+                              </td>
+
+                              {/* KELAS */}
+
+                              <td className="px-4 py-3.5">
+                                <span className="text-xs theme-text-secondary whitespace-nowrap">
+                                  {
+                                    item.kelas
+                                  }
+                                </span>
+                              </td>
+
+                              {/* MAPEL */}
+
+                              <td className="px-4 py-3.5">
+                                <span
+                                  className={`inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-semibold ${themePrimarySoft} ${themePrimaryText} border ${themePrimarySoftBorder} whitespace-nowrap`}
+                                >
+                                  {
+                                    item.mapel
+                                  }
+                                </span>
+                              </td>
+
+                              {/* TANGGAL */}
+
+                              <td className="px-4 py-3.5">
+                                <span className="text-xs theme-text-secondary flex items-center gap-1.5 whitespace-nowrap">
+                                  <Calendar
+                                    size={12}
+                                    className="theme-text-muted"
+                                  />
+
+                                  {formatDate(
+                                    item.tanggal,
+                                  )}
+                                </span>
+                              </td>
+
+                              {/* STATUS */}
+
+                              <td className="px-4 py-3.5">
+                                <span
+                                  className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1.5 rounded-full border whitespace-nowrap ${getStatusBadge(
+                                    item.status,
+                                  )}`}
+                                >
+                                  {getStatusIcon(
+                                    item.status,
+                                  )}
+
+                                  {
+                                    item.status
+                                  }
+                                </span>
+                              </td>
+
+                              {/* CATATAN */}
+
+                              <td className="px-4 py-3.5">
+                                <span className="text-xs theme-text-secondary">
+                                  {item.catatan !==
+                                  "-"
+                                    ? item.catatan
+                                    : "—"}
+                                </span>
+                              </td>
+
+                              {/* AKSI */}
+
+                              <td className="px-4 py-3.5">
+                                <div className="flex justify-end">
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      router.push(
+                                        `/guru/siswa/${item.siswaId}`,
+                                      )
+                                    }
+                                    className={`w-8 h-8 rounded-lg flex items-center justify-center theme-text-muted hover:${themePrimaryText} ${themePrimarySoft} transition`}
+                                    title="Lihat Detail Siswa"
+                                  >
+                                    <Eye
+                                      size={
+                                        16
+                                      }
+                                    />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ),
+                        )
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* =================================================
+                    PAGINATION
+                ================================================== */}
+
+                {totalPages > 1 && (
+                  <div
+                    className={`flex flex-col sm:flex-row items-center justify-between gap-3 p-4 border-t ${themeDivider} ${themeNeutralSurface}`}
+                  >
+                    <span className="text-xs theme-text-muted">
+                      Halaman{" "}
+                      <span className="font-semibold theme-text-secondary">
+                        {currentPage}
+                      </span>{" "}
+                      dari{" "}
+                      <span className="font-semibold theme-text-secondary">
+                        {totalPages}
+                      </span>
+                    </span>
+
+                    <div className="flex items-center gap-1">
+                      {/* PREVIOUS */}
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setCurrentPage(
+                            (p) =>
+                              Math.max(
+                                1,
+                                p - 1,
+                              ),
+                          )
+                        }
+                        disabled={
+                          currentPage ===
+                          1
+                        }
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center theme-text-secondary ${themeNeutralHover} disabled:opacity-30 disabled:cursor-not-allowed transition`}
+                      >
+                        <ChevronLeft
+                          size={16}
+                        />
+                      </button>
+
+                      {/* PAGE NUMBERS */}
+
+                      {Array.from(
+                        {
+                          length: Math.min(
+                            5,
+                            totalPages,
+                          ),
+                        },
+                        (_, i) => {
+                          let pageNum;
+
+                          if (
+                            totalPages <=
+                            5
+                          ) {
+                            pageNum =
+                              i + 1;
+                          } else if (
+                            currentPage <=
+                            3
+                          ) {
+                            pageNum =
+                              i + 1;
+                          } else if (
+                            currentPage >=
+                            totalPages -
+                              2
+                          ) {
+                            pageNum =
+                              totalPages -
+                              4 +
+                              i;
+                          } else {
+                            pageNum =
+                              currentPage -
+                              2 +
+                              i;
+                          }
+
+                          return (
+                            <button
+                              key={
+                                pageNum
+                              }
+                              type="button"
+                              onClick={() =>
+                                setCurrentPage(
+                                  pageNum,
+                                )
+                              }
+                              className={`w-8 h-8 rounded-lg text-xs font-semibold transition ${
+                                currentPage ===
+                                pageNum
+                                  ? `${themePrimaryGradient} text-[var(--color-card)] ${themeSmallShadow}`
+                                  : `theme-text-secondary ${themeNeutralHover}`
+                              }`}
+                            >
+                              {
+                                pageNum
+                              }
+                            </button>
+                          );
+                        },
+                      )}
+
+                      {/* NEXT */}
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setCurrentPage(
+                            (p) =>
+                              Math.min(
+                                totalPages,
+                                p + 1,
+                              ),
+                          )
+                        }
+                        disabled={
+                          currentPage ===
+                          totalPages
+                        }
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center theme-text-secondary ${themeNeutralHover} disabled:opacity-30 disabled:cursor-not-allowed transition`}
+                      >
+                        <ChevronRight
+                          size={16}
+                        />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </section>
+
+              {/* =================================================
+                  FOOTER
+              ================================================== */}
+
+              <footer
+                className={`text-center text-xs theme-text-muted py-5 border-t ${themeDivider}`}
+              >
+                © 2026 SmartSchool •
+                Histori Absensi Siswa
+              </footer>
+            </div>
           </div>
-
-        </div>
-
-      </main>
-
+        </main>
+      </div>
     </div>
-
-  </div>
-);
+  );
 }

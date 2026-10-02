@@ -26,6 +26,64 @@ import {
   updateLantai,
 } from "../../../../../../../../services/infrastruktur.service";
 
+// ============================================================
+// THEME HELPERS
+// ============================================================
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryShadow =
+  "shadow-[0_7px_18px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_2px_12px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeCardHoverShadow =
+  "hover:shadow-[0_8px_22px_color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeButtonShadow =
+  "shadow-[0_5px_14px_color-mix(in_srgb,var(--color-text)_12%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]";
+
+const themeSoftSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeSoftSurfaceHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeNeutralDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
 export default function EditLantaiPage() {
   const router = useRouter();
   const params = useParams();
@@ -231,7 +289,7 @@ export default function EditLantaiPage() {
 
   if (loading) {
     return (
-      <div className="flex h-screen w-full overflow-hidden bg-[#f8fafc]">
+      <div className="theme-page flex h-screen w-full overflow-hidden">
         <div className="shrink-0">
           <Sidebar
             active="sarpras"
@@ -254,21 +312,23 @@ export default function EditLantaiPage() {
             />
           </div>
 
-          <main className="flex min-h-0 flex-1 items-center justify-center overflow-hidden">
+          <main className="theme-page flex min-h-0 flex-1 items-center justify-center overflow-hidden">
             <div className="flex flex-col items-center gap-4">
-              <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-blue-100 bg-white shadow-sm">
+              <div
+                className={`flex h-14 w-14 items-center justify-center rounded-2xl border ${themePrimarySoftBorder} ${themePrimarySoft} ${themeCardShadow}`}
+              >
                 <Loader2
                   size={25}
-                  className="animate-spin text-blue-600"
+                  className="animate-spin text-[var(--color-primary)]"
                 />
               </div>
 
               <div className="text-center">
-                <p className="text-sm font-semibold text-slate-700">
+                <p className="theme-text text-sm font-semibold">
                   Memuat data lantai
                 </p>
 
-                <p className="mt-1 text-xs text-slate-400">
+                <p className="theme-text-muted mt-1 text-xs">
                   Mohon tunggu sebentar...
                 </p>
               </div>
@@ -284,7 +344,7 @@ export default function EditLantaiPage() {
   ========================================================= */
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[#f8fafc]">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
       {/* =====================================================
           SIDEBAR
       ===================================================== */}
@@ -321,7 +381,7 @@ export default function EditLantaiPage() {
             MAIN
         =================================================== */}
 
-        <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
+        <main className="theme-page min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-7 xl:px-10">
             <div className="mx-auto w-full max-w-[1280px]">
 
@@ -338,7 +398,7 @@ export default function EditLantaiPage() {
                         "/admin/sarpras/gedung/lantai"
                       )
                     }
-                    className="group inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition-colors hover:text-blue-600"
+                    className="group theme-text-muted inline-flex items-center gap-2 text-sm font-medium transition-colors hover:text-[var(--color-primary)]"
                   >
                     <ArrowLeft
                       size={17}
@@ -350,17 +410,19 @@ export default function EditLantaiPage() {
 
                   <div className="mt-3">
                     <div className="flex flex-wrap items-center gap-2">
-                      <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+                      <h1 className="theme-text text-2xl font-bold tracking-tight sm:text-3xl">
                         Edit Lantai
                       </h1>
 
-                      <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-100 bg-blue-50 px-2.5 py-1 text-[10px] font-semibold text-blue-700">
-                        <span className="h-1.5 w-1.5 rounded-full bg-blue-600" />
+                      <span
+                        className={`inline-flex items-center gap-1.5 rounded-full border ${themePrimarySoftBorder} ${themePrimarySoft} px-2.5 py-1 text-[10px] font-semibold text-[var(--color-primary)]`}
+                      >
+                        <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-primary)]" />
                         Edit Data
                       </span>
                     </div>
 
-                    <p className="mt-1.5 text-sm text-slate-500">
+                    <p className="theme-text-muted mt-1.5 text-sm">
                       Perbarui informasi lantai yang
                       tersimpan di sistem SmartSchool.
                     </p>
@@ -369,18 +431,20 @@ export default function EditLantaiPage() {
 
                 {/* ID */}
 
-                <div className="hidden items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 shadow-sm sm:flex">
+                <div
+                  className={`theme-card ${themeNeutralBorder} hidden items-center gap-2 rounded-xl border px-3.5 py-2.5 ${themeCardShadow} sm:flex`}
+                >
                   <Hash
                     size={15}
-                    className="text-slate-400"
+                    className="theme-text-muted"
                   />
 
                   <div>
-                    <p className="text-[9px] font-semibold uppercase tracking-wider text-slate-400">
+                    <p className="theme-text-muted text-[9px] font-semibold uppercase tracking-wider">
                       ID Lantai
                     </p>
 
-                    <p className="mt-0.5 max-w-[160px] truncate font-mono text-[11px] font-medium text-slate-600">
+                    <p className="theme-text-secondary mt-0.5 max-w-[160px] truncate font-mono text-[11px] font-medium">
                       {id}
                     </p>
                   </div>
@@ -392,17 +456,24 @@ export default function EditLantaiPage() {
               ================================================= */}
 
               {error && (
-                <div className="mb-5 flex items-start gap-3 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3.5 shadow-sm">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-rose-600 shadow-sm">
-                    <AlertCircle size={17} />
+                <div
+                  className={`mb-5 flex items-start gap-3 rounded-2xl border ${themeDangerBorder} ${themeDangerSurface} px-4 py-3.5 ${themeCardShadow}`}
+                >
+                  <div
+                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${themeSoftSurface}`}
+                  >
+                    <AlertCircle
+                      size={17}
+                      className="theme-danger"
+                    />
                   </div>
 
                   <div className="min-w-0">
-                    <p className="text-sm font-semibold text-rose-800">
+                    <p className="theme-danger text-sm font-semibold">
                       Terjadi kesalahan
                     </p>
 
-                    <p className="mt-0.5 text-xs leading-5 text-rose-700">
+                    <p className="theme-text-secondary mt-0.5 text-xs leading-5">
                       {error}
                     </p>
                   </div>
@@ -410,17 +481,24 @@ export default function EditLantaiPage() {
               )}
 
               {success && (
-                <div className="mb-5 flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-3.5 shadow-sm">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-emerald-600 shadow-sm">
-                    <CheckCircle2 size={17} />
+                <div
+                  className={`mb-5 flex items-start gap-3 rounded-2xl border ${themeSuccessBorder} ${themeSuccessSurface} px-4 py-3.5 ${themeCardShadow}`}
+                >
+                  <div
+                    className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${themeSoftSurface}`}
+                  >
+                    <CheckCircle2
+                      size={17}
+                      className="theme-success"
+                    />
                   </div>
 
                   <div>
-                    <p className="text-sm font-semibold text-emerald-800">
+                    <p className="theme-success text-sm font-semibold">
                       Berhasil disimpan
                     </p>
 
-                    <p className="mt-0.5 text-xs text-emerald-700">
+                    <p className="theme-text-secondary mt-0.5 text-xs">
                       {success} Mengalihkan ke data
                       lantai...
                     </p>
@@ -438,15 +516,21 @@ export default function EditLantaiPage() {
                     LEFT — FORM
                 ================================================= */}
 
-                <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_2px_12px_rgba(15,23,42,0.045)]">
+                <section
+                  className={`theme-card ${themeNeutralBorder} overflow-hidden rounded-2xl border ${themeCardShadow}`}
+                >
 
                   {/* FORM HEADER */}
 
-                  <div className="border-b border-slate-100 bg-gradient-to-r from-slate-50/90 to-white px-5 py-5 sm:px-7">
+                  <div
+                    className={`border-b ${themeNeutralDivider} ${themeSoftSurface} px-5 py-5 sm:px-7`}
+                  >
                     <div className="flex items-center justify-between gap-4">
 
                       <div className="flex min-w-0 items-center gap-3.5">
-                        <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-[0_7px_18px_rgba(37,99,235,0.20)]">
+                        <div
+                          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
+                        >
                           <Layers3
                             size={21}
                             strokeWidth={2}
@@ -454,18 +538,20 @@ export default function EditLantaiPage() {
                         </div>
 
                         <div className="min-w-0">
-                          <h2 className="text-base font-bold text-slate-900">
+                          <h2 className="theme-text text-base font-bold">
                             Informasi Lantai
                           </h2>
 
-                          <p className="mt-0.5 text-xs text-slate-500">
+                          <p className="theme-text-muted mt-0.5 text-xs">
                             Perbarui data sesuai kondisi
                             terbaru.
                           </p>
                         </div>
                       </div>
 
-                      <div className="hidden rounded-lg border border-slate-200 bg-white px-2.5 py-1.5 text-[10px] font-semibold text-slate-500 sm:block">
+                      <div
+                        className={`theme-text-muted ${themeNeutralBorder} hidden rounded-lg border ${themeSoftSurface} px-2.5 py-1.5 text-[10px] font-semibold sm:block`}
+                      >
                         DATA LANTAI
                       </div>
                     </div>
@@ -482,15 +568,15 @@ export default function EditLantaiPage() {
                         <div className="mb-2 flex items-center justify-between">
                           <label
                             htmlFor="gedungId"
-                            className="text-sm font-semibold text-slate-700"
+                            className="theme-text-secondary text-sm font-semibold"
                           >
                             Gedung{" "}
-                            <span className="text-rose-500">
+                            <span className="theme-danger">
                               *
                             </span>
                           </label>
 
-                          <span className="text-[10px] font-medium text-slate-400">
+                          <span className="theme-text-muted text-[10px] font-medium">
                             Pilih lokasi gedung
                           </span>
                         </div>
@@ -498,7 +584,7 @@ export default function EditLantaiPage() {
                         <div className="relative">
                           <Building2
                             size={18}
-                            className="pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2 text-slate-400"
+                            className="theme-text-muted pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2"
                           />
 
                           <select
@@ -507,11 +593,7 @@ export default function EditLantaiPage() {
                             value={form.gedungId}
                             onChange={handleChange}
                             disabled={saving}
-                            className="h-12 w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-10 text-sm font-medium text-slate-800 outline-none transition-all hover:border-slate-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-60"
-                            style={{
-                              color: "#1e293b",
-                              colorScheme: "light",
-                            }}
+                            className={`theme-input theme-text theme-border h-12 w-full appearance-none rounded-xl border pl-11 pr-10 text-sm font-medium outline-none transition-all hover:border-[color-mix(in_srgb,var(--color-text)_18%,transparent)] ${themeFocus} disabled:cursor-not-allowed disabled:opacity-60`}
                           >
                             <option value="">
                               Pilih gedung
@@ -521,11 +603,6 @@ export default function EditLantaiPage() {
                               <option
                                 key={item.id}
                                 value={item.id}
-                                style={{
-                                  color: "#1e293b",
-                                  backgroundColor:
-                                    "#ffffff",
-                                }}
                               >
                                 {item.nama}
                                 {item.kode
@@ -537,7 +614,7 @@ export default function EditLantaiPage() {
 
                           {/* CUSTOM ARROW */}
 
-                          <div className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-slate-400">
+                          <div className="theme-text-muted pointer-events-none absolute right-4 top-1/2 -translate-y-1/2">
                             <svg
                               width="15"
                               height="15"
@@ -551,7 +628,7 @@ export default function EditLantaiPage() {
                           </div>
                         </div>
 
-                        <p className="mt-1.5 text-xs text-slate-400">
+                        <p className="theme-text-muted mt-1.5 text-xs">
                           Gedung tempat lantai ini berada.
                         </p>
                       </div>
@@ -562,15 +639,15 @@ export default function EditLantaiPage() {
                         <div className="mb-2 flex items-center justify-between">
                           <label
                             htmlFor="nama"
-                            className="text-sm font-semibold text-slate-700"
+                            className="theme-text-secondary text-sm font-semibold"
                           >
                             Nama Lantai{" "}
-                            <span className="text-rose-500">
+                            <span className="theme-danger">
                               *
                             </span>
                           </label>
 
-                          <span className="text-[10px] font-medium text-slate-400">
+                          <span className="theme-text-muted text-[10px] font-medium">
                             {form.nama.length}/50
                           </span>
                         </div>
@@ -578,7 +655,7 @@ export default function EditLantaiPage() {
                         <div className="relative">
                           <Layers3
                             size={18}
-                            className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                            className="theme-text-muted pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2"
                           />
 
                           <input
@@ -590,16 +667,11 @@ export default function EditLantaiPage() {
                             disabled={saving}
                             maxLength={50}
                             placeholder="Contoh: Lantai 1"
-                            className="h-12 w-full rounded-xl border border-slate-200 bg-slate-50 pl-11 pr-4 text-sm font-medium text-slate-900 outline-none transition-all placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:opacity-60"
-                            style={{
-                              color: "#0f172a",
-                              WebkitTextFillColor:
-                                "#0f172a",
-                            }}
+                            className={`theme-input theme-text theme-border h-12 w-full rounded-xl border pl-11 pr-4 text-sm font-medium outline-none transition-all placeholder:text-[var(--color-text-placeholder)] hover:border-[color-mix(in_srgb,var(--color-text)_18%,transparent)] ${themeFocus} disabled:cursor-not-allowed disabled:opacity-60`}
                           />
                         </div>
 
-                        <p className="mt-1.5 text-xs text-slate-400">
+                        <p className="theme-text-muted mt-1.5 text-xs">
                           Gunakan nama yang mudah
                           dikenali, misalnya Lantai 1
                           atau Lantai Dasar.
@@ -608,18 +680,22 @@ export default function EditLantaiPage() {
 
                       {/* INFORMATION BOX */}
 
-                      <div className="rounded-xl border border-blue-100 bg-blue-50/60 p-4">
+                      <div
+                        className={`rounded-xl border ${themeInfoBorder} ${themeInfoSurface} p-4`}
+                      >
                         <div className="flex items-start gap-3">
-                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-blue-600 shadow-sm">
+                          <div
+                            className={`theme-card theme-info flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${themeButtonShadow}`}
+                          >
                             <Info size={16} />
                           </div>
 
                           <div>
-                            <p className="text-xs font-bold text-blue-800">
+                            <p className="theme-info text-xs font-bold">
                               Informasi Pengelolaan
                             </p>
 
-                            <p className="mt-1 text-xs leading-5 text-blue-700">
+                            <p className="theme-text-secondary mt-1 text-xs leading-5">
                               Data yang dapat diperbarui
                               pada halaman ini adalah
                               gedung dan nama lantai.
@@ -633,7 +709,9 @@ export default function EditLantaiPage() {
 
                     {/* FORM FOOTER */}
 
-                    <div className="flex flex-col-reverse gap-3 border-t border-slate-100 bg-slate-50/70 px-5 py-4 sm:flex-row sm:items-center sm:justify-end sm:px-7">
+                    <div
+                      className={`flex flex-col-reverse gap-3 border-t ${themeNeutralDivider} ${themeSoftSurface} px-5 py-4 sm:flex-row sm:items-center sm:justify-end sm:px-7`}
+                    >
                       <button
                         type="button"
                         onClick={() =>
@@ -642,7 +720,7 @@ export default function EditLantaiPage() {
                           )
                         }
                         disabled={saving}
-                        className="inline-flex h-11 items-center justify-center rounded-xl border border-slate-200 bg-white px-6 text-sm font-semibold text-slate-600 shadow-sm transition-all hover:border-slate-300 hover:bg-slate-50 hover:text-slate-800 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+                        className={`theme-card theme-text-secondary ${themeNeutralBorder} inline-flex h-11 items-center justify-center rounded-xl border px-6 text-sm font-semibold ${themeCardShadow} transition-all ${themeSoftSurfaceHover} active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60`}
                       >
                         Batal
                       </button>
@@ -650,7 +728,7 @@ export default function EditLantaiPage() {
                       <button
                         type="submit"
                         disabled={saving}
-                        className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 px-6 text-sm font-semibold text-white shadow-[0_8px_20px_rgba(37,99,235,0.22)] transition-all hover:from-blue-700 hover:to-indigo-700 hover:shadow-[0_10px_25px_rgba(37,99,235,0.28)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60"
+                        className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl px-6 text-sm font-semibold text-[var(--color-card)] ${themePrimaryGradient} ${themePrimaryShadow} transition-all hover:brightness-95 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60`}
                       >
                         {saving ? (
                           <>
@@ -679,14 +757,20 @@ export default function EditLantaiPage() {
                 ================================================= */}
 
                 <aside className="xl:sticky xl:top-5">
-                  <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_2px_12px_rgba(15,23,42,0.045)]">
+                  <div
+                    className={`theme-card ${themeNeutralBorder} overflow-hidden rounded-2xl border ${themeCardShadow}`}
+                  >
 
                     {/* PREVIEW HEADER */}
 
-                    <div className="border-b border-slate-100 px-5 py-4.5">
+                    <div
+                      className={`border-b ${themeNeutralDivider} px-5 py-4.5`}
+                    >
                       <div className="flex items-center justify-between gap-3">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-900 text-white shadow-sm">
+                          <div
+                            className={`flex h-10 w-10 items-center justify-center rounded-xl bg-[var(--color-text)] text-[var(--color-card)] ${themeButtonShadow}`}
+                          >
                             <Layers3
                               size={19}
                               strokeWidth={2}
@@ -694,11 +778,11 @@ export default function EditLantaiPage() {
                           </div>
 
                           <div>
-                            <h2 className="text-sm font-bold text-slate-900">
+                            <h2 className="theme-text text-sm font-bold">
                               Preview
                             </h2>
 
-                            <p className="text-[11px] text-slate-400">
+                            <p className="theme-text-muted text-[11px]">
                               Tampilan data lantai
                             </p>
                           </div>
@@ -706,7 +790,7 @@ export default function EditLantaiPage() {
 
                         <Sparkles
                           size={17}
-                          className="text-blue-500"
+                          className="text-[var(--color-primary)]"
                         />
                       </div>
                     </div>
@@ -717,23 +801,29 @@ export default function EditLantaiPage() {
 
                       {/* VISUAL */}
 
-                      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 p-5 text-white shadow-[0_12px_28px_rgba(37,99,235,0.20)]">
-                        <div className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-white/10" />
+                      <div
+                        className={`relative overflow-hidden rounded-2xl p-5 text-[var(--color-card)] ${themePrimaryGradient} ${themePrimaryShadow}`}
+                      >
+                        <div
+                          className="pointer-events-none absolute -right-10 -top-10 h-28 w-28 rounded-full bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)]"
+                        />
 
-                        <div className="pointer-events-none absolute -bottom-12 -left-8 h-32 w-32 rounded-full bg-indigo-400/20 blur-2xl" />
+                        <div
+                          className="pointer-events-none absolute -bottom-12 -left-8 h-32 w-32 rounded-full bg-[color-mix(in_srgb,var(--color-info)_20%,transparent)] blur-2xl"
+                        />
 
                         <div className="relative">
                           <div className="mb-8 flex items-start justify-between">
-                            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/15 backdrop-blur-sm">
+                            <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-card)_15%,transparent)]">
                               <Layers3 size={22} />
                             </div>
 
-                            <span className="rounded-full border border-white/15 bg-white/10 px-2.5 py-1 text-[9px] font-semibold uppercase tracking-wider text-blue-50">
+                            <span className="rounded-full border border-[color-mix(in_srgb,var(--color-card)_15%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)] px-2.5 py-1 text-[9px] font-semibold uppercase tracking-wider text-[color-mix(in_srgb,var(--color-card)_90%,transparent)]">
                               Lantai
                             </span>
                           </div>
 
-                          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-blue-100">
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.16em] text-[color-mix(in_srgb,var(--color-card)_78%,transparent)]">
                             Nama Lantai
                           </p>
 
@@ -742,7 +832,7 @@ export default function EditLantaiPage() {
                               "Nama Lantai"}
                           </h3>
 
-                          <div className="mt-3 flex items-center gap-2 text-xs text-blue-100">
+                          <div className="mt-3 flex items-center gap-2 text-xs text-[color-mix(in_srgb,var(--color-card)_78%,transparent)]">
                             <Building2 size={14} />
 
                             <span className="truncate">
@@ -755,21 +845,27 @@ export default function EditLantaiPage() {
 
                       {/* DETAIL */}
 
-                      <div className="mt-4 overflow-hidden rounded-xl border border-slate-200 bg-slate-50/70">
+                      <div
+                        className={`theme-border mt-4 overflow-hidden rounded-xl border ${themeSoftSurface}`}
+                      >
 
                         {/* GEDUNG */}
 
-                        <div className="flex items-center gap-3 border-b border-slate-200/80 px-4 py-3.5">
-                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-blue-600 shadow-sm">
+                        <div
+                          className={`flex items-center gap-3 border-b ${themeNeutralDivider} px-4 py-3.5`}
+                        >
+                          <div
+                            className={`theme-card flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-[var(--color-primary)] ${themeButtonShadow}`}
+                          >
                             <Building2 size={15} />
                           </div>
 
                           <div className="min-w-0 flex-1">
-                            <p className="text-[10px] font-medium uppercase tracking-wider text-slate-400">
+                            <p className="theme-text-muted text-[10px] font-medium uppercase tracking-wider">
                               Gedung
                             </p>
 
-                            <p className="mt-0.5 truncate text-sm font-semibold text-slate-800">
+                            <p className="theme-text-secondary mt-0.5 truncate text-sm font-semibold">
                               {selectedGedung?.nama ||
                                 "Belum dipilih"}
                             </p>
@@ -778,17 +874,21 @@ export default function EditLantaiPage() {
 
                         {/* KODE GEDUNG */}
 
-                        <div className="flex items-center gap-3 border-b border-slate-200/80 px-4 py-3.5">
-                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-slate-500 shadow-sm">
+                        <div
+                          className={`flex items-center gap-3 border-b ${themeNeutralDivider} px-4 py-3.5`}
+                        >
+                          <div
+                            className={`theme-card theme-text-muted flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${themeButtonShadow}`}
+                          >
                             <Hash size={15} />
                           </div>
 
                           <div className="min-w-0 flex-1">
-                            <p className="text-[10px] font-medium uppercase tracking-wider text-slate-400">
+                            <p className="theme-text-muted text-[10px] font-medium uppercase tracking-wider">
                               Kode Gedung
                             </p>
 
-                            <p className="mt-0.5 truncate text-sm font-semibold text-slate-800">
+                            <p className="theme-text-secondary mt-0.5 truncate text-sm font-semibold">
                               {selectedGedung?.kode ||
                                 "Tidak ada kode"}
                             </p>
@@ -798,16 +898,18 @@ export default function EditLantaiPage() {
                         {/* ID */}
 
                         <div className="flex items-center gap-3 px-4 py-3.5">
-                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white text-slate-500 shadow-sm">
+                          <div
+                            className={`theme-card theme-text-muted flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${themeButtonShadow}`}
+                          >
                             <Hash size={15} />
                           </div>
 
                           <div className="min-w-0 flex-1">
-                            <p className="text-[10px] font-medium uppercase tracking-wider text-slate-400">
+                            <p className="theme-text-muted text-[10px] font-medium uppercase tracking-wider">
                               ID Lantai
                             </p>
 
-                            <p className="mt-0.5 truncate font-mono text-[10px] font-medium text-slate-600">
+                            <p className="theme-text-secondary mt-0.5 truncate font-mono text-[10px] font-medium">
                               {id}
                             </p>
                           </div>
@@ -816,18 +918,20 @@ export default function EditLantaiPage() {
 
                       {/* STATUS */}
 
-                      <div className="mt-4 flex items-start gap-2.5 rounded-xl border border-emerald-100 bg-emerald-50/70 px-3.5 py-3">
+                      <div
+                        className={`mt-4 flex items-start gap-2.5 rounded-xl border ${themeSuccessBorder} ${themeSuccessSurface} px-3.5 py-3`}
+                      >
                         <CheckCircle2
                           size={16}
-                          className="mt-0.5 shrink-0 text-emerald-500"
+                          className="theme-success mt-0.5 shrink-0"
                         />
 
                         <div>
-                          <p className="text-[11px] font-semibold text-emerald-700">
+                          <p className="theme-success text-[11px] font-semibold">
                             Data siap diperbarui
                           </p>
 
-                          <p className="mt-0.5 text-[10px] leading-4 text-emerald-600">
+                          <p className="theme-text-secondary mt-0.5 text-[10px] leading-4">
                             Preview akan mengikuti
                             perubahan yang kamu masukkan.
                           </p>
@@ -838,18 +942,22 @@ export default function EditLantaiPage() {
 
                   {/* QUICK INFO */}
 
-                  <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-[0_2px_10px_rgba(15,23,42,0.035)]">
+                  <div
+                    className={`theme-card ${themeNeutralBorder} mt-4 rounded-2xl border p-4 ${themeCardShadow}`}
+                  >
                     <div className="flex items-start gap-3">
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                      <div
+                        className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${themePrimarySoft} text-[var(--color-primary)]`}
+                      >
                         <Info size={15} />
                       </div>
 
                       <div>
-                        <p className="text-xs font-semibold text-slate-700">
+                        <p className="theme-text-secondary text-xs font-semibold">
                           Tentang Data Lantai
                         </p>
 
-                        <p className="mt-1 text-[11px] leading-5 text-slate-400">
+                        <p className="theme-text-muted mt-1 text-[11px] leading-5">
                           Satu lantai terhubung dengan
                           satu gedung. Pastikan gedung
                           yang dipilih sudah sesuai.
@@ -864,8 +972,10 @@ export default function EditLantaiPage() {
                   FOOTER
               ================================================= */}
 
-              <div className="mt-7 border-t border-slate-200/80 py-5 text-center">
-                <p className="text-[11px] text-slate-400">
+              <div
+                className={`mt-7 border-t ${themeNeutralDivider} py-5 text-center`}
+              >
+                <p className="theme-text-muted text-[11px]">
                   © 2026 SmartSchool • Edit Lantai •
                   Sarana & Prasarana
                 </p>

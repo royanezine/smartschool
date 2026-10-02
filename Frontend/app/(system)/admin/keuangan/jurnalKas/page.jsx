@@ -27,7 +27,6 @@ import {
   Receipt,
   CircleDollarSign,
   SlidersHorizontal,
-  MoreHorizontal,
 } from "lucide-react";
 
 import Header from "../../../../components/Header";
@@ -283,7 +282,7 @@ export default function JurnalKasPage() {
   };
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[#F4F7FB]">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
       {/* SIDEBAR */}
       <Sidebar
         active="jurnalKas"
@@ -306,36 +305,34 @@ export default function JurnalKasPage() {
           }}
         />
 
-        <main className="min-h-0 flex-1 overflow-y-auto">
+        <main className="theme-page min-h-0 flex-1 overflow-y-auto">
           <div className="px-4 py-6 sm:px-6 lg:px-8">
             <div className="mx-auto max-w-[1500px]">
 
-              {/* ================================================= */}
               {/* PAGE HEADER */}
-              {/* ================================================= */}
-
               <section className="mb-7">
                 <div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
 
                   <div>
                     <div className="flex items-center gap-3">
 
-                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#E8EEF9] text-[#1E3A8A] ring-1 ring-[#D7E2F4]">
+                      <div className="theme-info flex h-12 w-12 items-center justify-center rounded-xl border">
                         <Wallet size={23} strokeWidth={2} />
                       </div>
 
                       <div>
-                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[#3159A6]">
+                        <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-[var(--color-primary)]">
                           KEUANGAN SEKOLAH
                         </p>
 
-                        <h1 className="mt-0.5 text-[25px] font-bold tracking-tight text-[#172033] sm:text-[29px]">
+                        <h1 className="theme-text mt-0.5 text-[25px] font-bold tracking-tight sm:text-[29px]">
                           Jurnal & Kas
                         </h1>
                       </div>
+
                     </div>
 
-                    <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-500">
+                    <p className="theme-text-muted mt-3 max-w-2xl text-sm leading-6">
                       Kelola, pantau, dan dokumentasikan seluruh
                       transaksi keuangan sekolah dalam satu halaman.
                     </p>
@@ -345,7 +342,7 @@ export default function JurnalKasPage() {
 
                     <button
                       onClick={() => window.print()}
-                      className="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
+                      className="theme-input inline-flex h-10 items-center gap-2 rounded-lg px-3.5 text-sm font-semibold shadow-sm transition hover:bg-[var(--color-input-hover)]"
                     >
                       <Printer size={16} />
                       Cetak
@@ -353,7 +350,7 @@ export default function JurnalKasPage() {
 
                     <button
                       onClick={handleExport}
-                      className="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 text-sm font-semibold text-slate-600 shadow-sm transition hover:border-slate-300 hover:bg-slate-50"
+                      className="theme-input inline-flex h-10 items-center gap-2 rounded-lg px-3.5 text-sm font-semibold shadow-sm transition hover:bg-[var(--color-input-hover)]"
                     >
                       <Download size={16} />
                       Ekspor
@@ -361,7 +358,7 @@ export default function JurnalKasPage() {
 
                     <Link
                       href="/admin/keuangan/jurnalKas/tambah"
-                      className="inline-flex h-10 items-center gap-2 rounded-lg bg-[#1E3A8A] px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-[#173274]"
+                      className="theme-primary inline-flex h-10 items-center gap-2 rounded-lg px-4 text-sm font-semibold shadow-sm transition"
                     >
                       <Plus size={17} />
                       Tambah Transaksi
@@ -371,10 +368,7 @@ export default function JurnalKasPage() {
                 </div>
               </section>
 
-              {/* ================================================= */}
               {/* FINANCE OVERVIEW */}
-              {/* ================================================= */}
-
               <section className="mb-7 grid grid-cols-1 gap-4 md:grid-cols-3">
 
                 <FinanceCard
@@ -407,46 +401,43 @@ export default function JurnalKasPage() {
 
               </section>
 
-              {/* ================================================= */}
               {/* QUICK INSIGHT */}
-              {/* ================================================= */}
-
               <section className="mb-7 grid grid-cols-1 gap-4 lg:grid-cols-3">
 
-                <div className="lg:col-span-2 overflow-hidden rounded-2xl border border-[#DCE4F0] bg-white shadow-[0_2px_10px_rgba(15,23,42,0.04)]">
+                <div className="theme-card overflow-hidden rounded-2xl border shadow-sm lg:col-span-2">
 
-                  <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+                  <div className="theme-border flex items-center justify-between border-b px-5 py-4">
 
                     <div>
-                      <h2 className="text-sm font-bold text-[#172033]">
+                      <h2 className="theme-text text-sm font-bold">
                         Ringkasan Kas
                       </h2>
 
-                      <p className="mt-1 text-xs text-slate-400">
+                      <p className="theme-text-muted mt-1 text-xs">
                         Perbandingan pemasukan dan pengeluaran
                       </p>
                     </div>
 
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#EEF3FB] text-[#1E3A8A]">
+                    <div className="theme-info flex h-9 w-9 items-center justify-center rounded-lg">
                       <CircleDollarSign size={18} />
                     </div>
 
                   </div>
 
-                  <div className="grid grid-cols-2 divide-x divide-slate-100">
+                  <div className="grid grid-cols-2 divide-x divide-[var(--color-border-soft)]">
 
                     <div className="px-5 py-5">
-                      <p className="text-xs font-medium text-slate-400">
+                      <p className="theme-text-muted text-xs font-medium">
                         Kas Masuk
                       </p>
 
                       <div className="mt-2 flex items-end gap-2">
-                        <span className="text-lg font-bold text-emerald-600">
+                        <span className="text-lg font-bold text-[var(--color-success)]">
                           {formatCurrency(totalKredit)}
                         </span>
                       </div>
 
-                      <div className="mt-3 flex items-center gap-2 text-xs text-emerald-600">
+                      <div className="theme-text-success mt-3 flex items-center gap-2 text-xs">
                         <TrendingUp size={14} />
                         <span>
                           {totalPemasukan} transaksi
@@ -455,17 +446,17 @@ export default function JurnalKasPage() {
                     </div>
 
                     <div className="px-5 py-5">
-                      <p className="text-xs font-medium text-slate-400">
+                      <p className="theme-text-muted text-xs font-medium">
                         Kas Keluar
                       </p>
 
                       <div className="mt-2">
-                        <span className="text-lg font-bold text-rose-600">
+                        <span className="text-lg font-bold text-[var(--color-danger)]">
                           {formatCurrency(totalDebit)}
                         </span>
                       </div>
 
-                      <div className="mt-3 flex items-center gap-2 text-xs text-rose-600">
+                      <div className="theme-text-danger mt-3 flex items-center gap-2 text-xs">
                         <TrendingDown size={14} />
                         <span>
                           {totalPengeluaran} transaksi
@@ -476,32 +467,46 @@ export default function JurnalKasPage() {
                   </div>
                 </div>
 
-                <div className="rounded-2xl border border-[#DCE4F0] bg-[#172B52] p-5 text-white shadow-[0_8px_25px_rgba(23,43,82,0.12)]">
+                <div className="theme-card-soft overflow-hidden rounded-2xl border p-5 shadow-sm">
 
                   <div className="flex items-start justify-between">
+
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-blue-200">
+                      <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[var(--color-primary)]">
                         POSISI KAS
                       </p>
 
-                      <h3 className="mt-2 text-xl font-bold">
+                      <h3
+                        className={`theme-text mt-2 text-xl font-bold ${
+                          saldoAkhir < 0
+                            ? "text-[var(--color-danger)]"
+                            : ""
+                        }`}
+                      >
                         {formatCurrency(saldoAkhir)}
                       </h3>
                     </div>
 
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white/10">
+                    <div className="theme-info flex h-9 w-9 items-center justify-center rounded-lg">
                       <Wallet size={18} />
                     </div>
+
                   </div>
 
-                  <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-4">
+                  <div className="theme-border mt-6 flex items-center justify-between border-t pt-4">
 
                     <div>
-                      <p className="text-[11px] text-blue-200">
+                      <p className="theme-text-muted text-[11px]">
                         Status
                       </p>
 
-                      <p className="mt-1 text-xs font-semibold text-white">
+                      <p
+                        className={`mt-1 text-xs font-semibold ${
+                          saldoAkhir >= 0
+                            ? "text-[var(--color-success)]"
+                            : "text-[var(--color-danger)]"
+                        }`}
+                      >
                         {saldoAkhir >= 0
                           ? "Kas dalam kondisi positif"
                           : "Perlu evaluasi pengeluaran"}
@@ -510,7 +515,7 @@ export default function JurnalKasPage() {
 
                     <ArrowRight
                       size={17}
-                      className="text-blue-200"
+                      className="text-[var(--color-primary)]"
                     />
 
                   </div>
@@ -518,21 +523,18 @@ export default function JurnalKasPage() {
 
               </section>
 
-              {/* ================================================= */}
               {/* FILTER */}
-              {/* ================================================= */}
+              <section className="theme-card mb-5 overflow-hidden rounded-2xl border shadow-sm">
 
-              <section className="mb-5 rounded-2xl border border-[#DCE4F0] bg-white shadow-[0_2px_10px_rgba(15,23,42,0.04)]">
-
-                <div className="border-b border-slate-100 px-5 py-4">
+                <div className="theme-border border-b px-5 py-4">
 
                   <div className="flex items-center gap-2">
                     <SlidersHorizontal
                       size={16}
-                      className="text-[#1E3A8A]"
+                      className="text-[var(--color-primary)]"
                     />
 
-                    <h2 className="text-sm font-bold text-[#172033]">
+                    <h2 className="theme-text text-sm font-bold">
                       Filter Transaksi
                     </h2>
                   </div>
@@ -546,7 +548,7 @@ export default function JurnalKasPage() {
                     <div className="relative flex-1">
                       <Search
                         size={17}
-                        className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                        className="theme-text-placeholder absolute left-3.5 top-1/2 -translate-y-1/2"
                       />
 
                       <input
@@ -556,7 +558,7 @@ export default function JurnalKasPage() {
                           setCurrentPage(1);
                         }}
                         placeholder="Cari keterangan, metode, atau catatan..."
-                        className="h-11 w-full rounded-xl border border-slate-200 bg-[#F8FAFC] pl-10 pr-4 text-sm text-slate-700 outline-none transition focus:border-[#3159A6] focus:bg-white focus:ring-4 focus:ring-blue-500/10"
+                        className="theme-input h-11 w-full rounded-xl border pl-10 pr-4 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]"
                       />
                     </div>
 
@@ -564,7 +566,7 @@ export default function JurnalKasPage() {
 
                       <Filter
                         size={15}
-                        className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                        className="theme-text-placeholder pointer-events-none absolute left-3 top-1/2 -translate-y-1/2"
                       />
 
                       <select
@@ -573,7 +575,7 @@ export default function JurnalKasPage() {
                           setJenisFilter(e.target.value);
                           setCurrentPage(1);
                         }}
-                        className="h-11 min-w-[190px] appearance-none rounded-xl border border-slate-200 bg-[#F8FAFC] pl-9 pr-9 text-sm font-medium text-slate-600 outline-none transition focus:border-[#3159A6] focus:bg-white focus:ring-4 focus:ring-blue-500/10"
+                        className="theme-input h-11 min-w-[190px] appearance-none rounded-xl border pl-9 pr-9 text-sm font-medium outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]"
                       >
                         <option value="Semua">
                           Semua Transaksi
@@ -592,7 +594,7 @@ export default function JurnalKasPage() {
 
                     <button
                       onClick={handleReset}
-                      className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+                      className="theme-input inline-flex h-11 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold transition hover:bg-[var(--color-input-hover)]"
                     >
                       <RefreshCw size={15} />
                       Reset
@@ -603,35 +605,32 @@ export default function JurnalKasPage() {
                 </div>
               </section>
 
-              {/* ================================================= */}
               {/* TRANSACTION TABLE */}
-              {/* ================================================= */}
+              <section className="theme-card overflow-hidden rounded-2xl border shadow-sm">
 
-              <section className="overflow-hidden rounded-2xl border border-[#DCE4F0] bg-white shadow-[0_3px_14px_rgba(15,23,42,0.05)]">
-
-                <div className="flex flex-col gap-3 border-b border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                <div className="theme-border flex flex-col gap-3 border-b px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
 
                   <div>
                     <div className="flex items-center gap-2">
 
-                      <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#EEF3FB] text-[#1E3A8A]">
+                      <div className="theme-info flex h-8 w-8 items-center justify-center rounded-lg">
                         <Receipt size={16} />
                       </div>
 
-                      <h2 className="text-sm font-bold text-[#172033]">
+                      <h2 className="theme-text text-sm font-bold">
                         Riwayat Transaksi
                       </h2>
 
                     </div>
 
-                    <p className="mt-1 ml-10 text-xs text-slate-400">
+                    <p className="theme-text-muted ml-10 mt-1 text-xs">
                       {filteredData.length} transaksi ditemukan
                     </p>
                   </div>
 
-                  <div className="flex items-center gap-2 text-xs text-slate-400">
+                  <div className="theme-text-muted flex items-center gap-2 text-xs">
 
-                    <span className="h-2 w-2 rounded-full bg-emerald-500" />
+                    <span className="h-2 w-2 rounded-full bg-[var(--color-success)]" />
 
                     Sistem kas aktif
 
@@ -643,45 +642,45 @@ export default function JurnalKasPage() {
 
                   <table className="w-full min-w-[1100px]">
 
-                    <thead>
-                      <tr className="border-b border-slate-200 bg-[#F8FAFC]">
+                    <thead className="theme-table-header">
+                      <tr className="theme-border border-b">
 
-                        <th className="px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">
+                        <th className="px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-[0.12em]">
                           Tanggal
                         </th>
 
-                        <th className="px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">
+                        <th className="px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-[0.12em]">
                           Transaksi
                         </th>
 
-                        <th className="px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">
+                        <th className="px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-[0.12em]">
                           Jenis
                         </th>
 
-                        <th className="px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">
+                        <th className="px-5 py-3.5 text-left text-[10px] font-bold uppercase tracking-[0.12em]">
                           Metode
                         </th>
 
-                        <th className="px-5 py-3.5 text-right text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">
+                        <th className="px-5 py-3.5 text-right text-[10px] font-bold uppercase tracking-[0.12em]">
                           Debit
                         </th>
 
-                        <th className="px-5 py-3.5 text-right text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">
+                        <th className="px-5 py-3.5 text-right text-[10px] font-bold uppercase tracking-[0.12em]">
                           Kredit
                         </th>
 
-                        <th className="px-5 py-3.5 text-right text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">
+                        <th className="px-5 py-3.5 text-right text-[10px] font-bold uppercase tracking-[0.12em]">
                           Saldo
                         </th>
 
-                        <th className="px-5 py-3.5 text-center text-[10px] font-bold uppercase tracking-[0.12em] text-slate-500">
+                        <th className="px-5 py-3.5 text-center text-[10px] font-bold uppercase tracking-[0.12em]">
                           Aksi
                         </th>
 
                       </tr>
                     </thead>
 
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-[var(--color-border-soft)]">
 
                       {currentEntries.length === 0 ? (
 
@@ -691,15 +690,15 @@ export default function JurnalKasPage() {
                             className="px-5 py-16 text-center"
                           >
 
-                            <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
+                            <div className="theme-card-soft theme-text-muted mx-auto flex h-12 w-12 items-center justify-center rounded-xl border">
                               <FileText size={22} />
                             </div>
 
-                            <p className="mt-3 text-sm font-semibold text-slate-700">
+                            <p className="theme-text mt-3 text-sm font-semibold">
                               Tidak ada transaksi
                             </p>
 
-                            <p className="mt-1 text-xs text-slate-400">
+                            <p className="theme-text-muted mt-1 text-xs">
                               Coba ubah kata kunci atau filter.
                             </p>
 
@@ -712,17 +711,17 @@ export default function JurnalKasPage() {
 
                           <tr
                             key={item.id}
-                            className="group transition hover:bg-[#F8FAFD]"
+                            className="theme-table-hover transition"
                           >
 
                             <td className="px-5 py-4">
                               <div className="flex items-center gap-2.5">
 
-                                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+                                <div className="theme-card-soft theme-text-muted flex h-8 w-8 items-center justify-center rounded-lg border">
                                   <CalendarDays size={14} />
                                 </div>
 
-                                <span className="whitespace-nowrap text-sm font-medium text-slate-600">
+                                <span className="theme-text-secondary whitespace-nowrap text-sm font-medium">
                                   {formatDate(item.tanggal)}
                                 </span>
 
@@ -732,11 +731,11 @@ export default function JurnalKasPage() {
                             <td className="px-5 py-4">
 
                               <div>
-                                <p className="text-sm font-semibold text-[#172033]">
+                                <p className="theme-text text-sm font-semibold">
                                   {item.keterangan}
                                 </p>
 
-                                <p className="mt-1 max-w-[290px] truncate text-xs text-slate-400">
+                                <p className="theme-text-muted mt-1 max-w-[290px] truncate text-xs">
                                   {item.catatan || "Tidak ada catatan"}
                                 </p>
                               </div>
@@ -751,9 +750,9 @@ export default function JurnalKasPage() {
 
                             <td className="px-5 py-4">
 
-                              <div className="inline-flex items-center gap-2 text-xs font-semibold text-slate-600">
+                              <div className="theme-text-secondary inline-flex items-center gap-2 text-xs font-semibold">
 
-                                <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+                                <span className="theme-card-soft theme-text-muted flex h-7 w-7 items-center justify-center rounded-lg border">
                                   {item.metode === "Transfer" ? (
                                     <CreditCard size={13} />
                                   ) : (
@@ -768,7 +767,7 @@ export default function JurnalKasPage() {
                             </td>
 
                             <td className="px-5 py-4 text-right">
-                              <span className="text-sm font-semibold text-rose-600">
+                              <span className="text-sm font-semibold text-[var(--color-danger)]">
                                 {item.debit > 0
                                   ? formatCurrency(item.debit)
                                   : "-"}
@@ -776,7 +775,7 @@ export default function JurnalKasPage() {
                             </td>
 
                             <td className="px-5 py-4 text-right">
-                              <span className="text-sm font-semibold text-emerald-600">
+                              <span className="text-sm font-semibold text-[var(--color-success)]">
                                 {item.kredit > 0
                                   ? formatCurrency(item.kredit)
                                   : "-"}
@@ -788,8 +787,8 @@ export default function JurnalKasPage() {
                               <span
                                 className={`text-sm font-bold ${
                                   item.saldo >= 0
-                                    ? "text-[#172033]"
-                                    : "text-rose-600"
+                                    ? "theme-text"
+                                    : "text-[var(--color-danger)]"
                                 }`}
                               >
                                 {formatCurrency(item.saldo)}
@@ -804,7 +803,7 @@ export default function JurnalKasPage() {
                                 <Link
                                   href={`/admin/keuangan/jurnalKas/detail/${item.id}`}
                                   title="Detail"
-                                  className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-[#EEF3FB] hover:text-[#2563EB]"
+                                  className="theme-text-muted flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-[var(--color-info-background)] hover:text-[var(--color-info)]"
                                 >
                                   <Eye size={15} />
                                 </Link>
@@ -812,7 +811,7 @@ export default function JurnalKasPage() {
                                 <Link
                                   href={`/admin/keuangan/jurnalKas/edit/${item.id}`}
                                   title="Edit"
-                                  className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-amber-50 hover:text-amber-600"
+                                  className="theme-text-muted flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-[var(--color-warning-background)] hover:text-[var(--color-warning)]"
                                 >
                                   <Edit size={15} />
                                 </Link>
@@ -822,7 +821,7 @@ export default function JurnalKasPage() {
                                     handleDelete(item.id)
                                   }
                                   title="Hapus"
-                                  className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-rose-50 hover:text-rose-600"
+                                  className="theme-text-muted flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-[var(--color-danger-background)] hover:text-[var(--color-danger)]"
                                 >
                                   <Trash2 size={15} />
                                 </button>
@@ -846,22 +845,22 @@ export default function JurnalKasPage() {
                 {/* PAGINATION */}
 
                 {filteredData.length > 0 && (
-                  <div className="flex flex-col gap-3 border-t border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                  <div className="theme-border flex flex-col gap-3 border-t px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
 
-                    <p className="text-xs text-slate-500">
+                    <p className="theme-text-muted text-xs">
                       Menampilkan{" "}
-                      <span className="font-semibold text-slate-700">
+                      <span className="theme-text-secondary font-semibold">
                         {(safePage - 1) * entriesPerPage + 1}
                       </span>{" "}
                       -{" "}
-                      <span className="font-semibold text-slate-700">
+                      <span className="theme-text-secondary font-semibold">
                         {Math.min(
                           safePage * entriesPerPage,
                           filteredData.length
                         )}
                       </span>{" "}
                       dari{" "}
-                      <span className="font-semibold text-slate-700">
+                      <span className="theme-text-secondary font-semibold">
                         {filteredData.length}
                       </span>{" "}
                       transaksi
@@ -876,7 +875,7 @@ export default function JurnalKasPage() {
                             Math.max(1, page - 1)
                           )
                         }
-                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="theme-input flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-[var(--color-input-hover)] disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         <ChevronLeft size={15} />
                       </button>
@@ -892,8 +891,8 @@ export default function JurnalKasPage() {
                           }
                           className={`flex h-8 min-w-8 items-center justify-center rounded-lg px-2 text-xs font-semibold transition ${
                             safePage === page
-                              ? "bg-[#1E3A8A] text-white shadow-sm"
-                              : "text-slate-500 hover:bg-slate-100"
+                              ? "theme-primary shadow-sm"
+                              : "theme-text-muted hover:bg-[var(--color-input-hover)]"
                           }`}
                         >
                           {page}
@@ -907,7 +906,7 @@ export default function JurnalKasPage() {
                             Math.min(totalPages, page + 1)
                           )
                         }
-                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="theme-input flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-[var(--color-input-hover)] disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         <ChevronRight size={15} />
                       </button>
@@ -942,28 +941,28 @@ function FinanceCard({
 }) {
   const styles = {
     income: {
-      iconBg: "bg-emerald-50 text-emerald-600",
-      accent: "bg-emerald-500",
-      value: "text-[#172033]",
+      iconBg: "theme-success",
+      accent: "bg-[var(--color-success)]",
+      value: "theme-text",
     },
 
     expense: {
-      iconBg: "bg-rose-50 text-rose-600",
-      accent: "bg-rose-500",
-      value: "text-[#172033]",
+      iconBg: "theme-danger",
+      accent: "bg-[var(--color-danger)]",
+      value: "theme-text",
     },
 
     balance: {
-      iconBg: "bg-[#EEF3FB] text-[#1E3A8A]",
-      accent: "bg-[#1E3A8A]",
-      value: "text-[#172033]",
+      iconBg: "theme-info",
+      accent: "bg-[var(--color-primary)]",
+      value: "theme-text",
     },
   };
 
   const style = styles[type];
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-[#DCE4F0] bg-white p-5 shadow-[0_2px_10px_rgba(15,23,42,0.04)] transition duration-200 hover:-translate-y-0.5 hover:shadow-[0_8px_25px_rgba(15,23,42,0.07)]">
+    <div className="theme-card relative overflow-hidden rounded-2xl border p-5 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-md">
 
       <div
         className={`absolute left-0 top-0 h-full w-[3px] ${style.accent}`}
@@ -973,7 +972,7 @@ function FinanceCard({
 
         <div className="min-w-0">
 
-          <p className="text-xs font-semibold text-slate-500">
+          <p className="theme-text-secondary text-xs font-semibold">
             {label}
           </p>
 
@@ -983,7 +982,7 @@ function FinanceCard({
             {value}
           </p>
 
-          <p className="mt-2 text-xs text-slate-400">
+          <p className="theme-text-muted mt-2 text-xs">
             {description}
           </p>
 
@@ -1011,15 +1010,15 @@ function TransactionBadge({ type }) {
     <span
       className={`inline-flex items-center gap-2 text-xs font-semibold ${
         isIncome
-          ? "text-emerald-600"
-          : "text-rose-600"
+          ? "text-[var(--color-success)]"
+          : "text-[var(--color-danger)]"
       }`}
     >
       <span
         className={`flex h-6 w-6 items-center justify-center rounded-md ${
           isIncome
-            ? "bg-emerald-50"
-            : "bg-rose-50"
+            ? "bg-[var(--color-success-background)]"
+            : "bg-[var(--color-danger-background)]"
         }`}
       >
         {isIncome ? (
@@ -1033,3 +1032,4 @@ function TransactionBadge({ type }) {
     </span>
   );
 }
+

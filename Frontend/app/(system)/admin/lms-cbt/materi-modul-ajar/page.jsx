@@ -18,6 +18,32 @@ import {
 import Sidebar from "../../../../components/Sidebar";
 import Header from "../../../../components/Header";
 
+/* ============================================================
+   THEME HELPERS
+============================================================ */
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]";
+
+const themePrimaryHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
+
+const themeTextHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_24px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_6px_24px_color-mix(in_srgb,var(--color-text)_6%,transparent)]";
+
+/* ============================================================
+   PAGE
+============================================================ */
+
 export default function MateriModulAjarPage() {
   const [search, setSearch] = useState("");
   const [showModal, setShowModal] = useState(false);
@@ -33,7 +59,8 @@ export default function MateriModulAjarPage() {
       guru: "Budi Santoso, S.Kom",
       bab: "Algoritma dan Pemrograman",
       pertemuan: "Pertemuan 1",
-      deskripsi: "Pengenalan dasar algoritma dan pemrograman.",
+      deskripsi:
+        "Pengenalan dasar algoritma dan pemrograman.",
       durasi: "90 Menit",
       tanggal: "02 September 2026",
       status: "Published",
@@ -48,7 +75,8 @@ export default function MateriModulAjarPage() {
       guru: "Andi Wijaya, S.Kom",
       bab: "HTML & CSS",
       pertemuan: "Pertemuan 3",
-      deskripsi: "Materi dasar pembuatan halaman web menggunakan HTML dan CSS.",
+      deskripsi:
+        "Materi dasar pembuatan halaman web menggunakan HTML dan CSS.",
       durasi: "90 Menit",
       tanggal: "01 September 2026",
       status: "Published",
@@ -63,7 +91,8 @@ export default function MateriModulAjarPage() {
       guru: "Rina Maharani, S.Kom",
       bab: "Database Relasional",
       pertemuan: "Pertemuan 2",
-      deskripsi: "Konsep database relasional dan penggunaan tabel.",
+      deskripsi:
+        "Konsep database relasional dan penggunaan tabel.",
       durasi: "90 Menit",
       tanggal: "30 Agustus 2026",
       status: "Published",
@@ -78,7 +107,8 @@ export default function MateriModulAjarPage() {
       guru: "Dedi Firmansyah, S.Kom",
       bab: "Topologi Jaringan",
       pertemuan: "Pertemuan 1",
-      deskripsi: "Pengenalan berbagai jenis topologi jaringan komputer.",
+      deskripsi:
+        "Pengenalan berbagai jenis topologi jaringan komputer.",
       durasi: "90 Menit",
       tanggal: "28 Agustus 2026",
       status: "Draft",
@@ -86,6 +116,10 @@ export default function MateriModulAjarPage() {
       jumlahSiswa: 31,
     },
   ]);
+
+  /* ============================================================
+     STATISTICS
+  ============================================================ */
 
   const publishedCount = materi.filter(
     (item) => item.status === "Published"
@@ -100,6 +134,10 @@ export default function MateriModulAjarPage() {
     0
   );
 
+  /* ============================================================
+     SEARCH
+  ============================================================ */
+
   const filteredMateri = materi.filter((item) => {
     const keyword = search.toLowerCase();
 
@@ -110,6 +148,10 @@ export default function MateriModulAjarPage() {
       item.guru.toLowerCase().includes(keyword)
     );
   });
+
+  /* ============================================================
+     MODAL ACTIONS
+  ============================================================ */
 
   const openAddModal = () => {
     setModalType("add");
@@ -130,46 +172,72 @@ export default function MateriModulAjarPage() {
   };
 
   const handleDelete = (id) => {
-    if (confirm("Apakah Anda yakin ingin menghapus materi ini?")) {
-      setMateri((prev) => prev.filter((item) => item.id !== id));
+    if (
+      confirm(
+        "Apakah Anda yakin ingin menghapus materi ini?"
+      )
+    ) {
+      setMateri((prev) =>
+        prev.filter((item) => item.id !== id)
+      );
     }
   };
 
+  /* ============================================================
+     RENDER
+  ============================================================ */
+
   return (
-    /*
-     * ==========================================================
-     * ROOT LAYOUT
-     * ==========================================================
-     *
-     * Sidebar dan area utama harus sejajar secara HORIZONTAL.
-     * Header berada DI ATAS main content.
-     */
-    <div className="min-h-screen bg-slate-50 flex">
-      {/* SIDEBAR */}
+    <div className="min-h-screen flex theme-page">
+      {/* ======================================================
+          SIDEBAR
+      ====================================================== */}
+
       <Sidebar />
 
-      {/* AREA KANAN */}
+      {/* ======================================================
+          AREA KANAN
+      ====================================================== */}
+
       <div className="flex-1 min-w-0 flex flex-col">
-        {/* HEADER HARUS DI SINI */}
         <Header />
 
-        {/* CONTENT */}
-        <main className="flex-1 px-4 md:px-6 lg:px-8 py-6">
-          {/* Breadcrumb */}
+        <main className="flex-1 px-4 md:px-6 lg:px-8 py-6 theme-page">
+          {/* ==================================================
+              BREADCRUMB
+          ================================================== */}
+
           <div className="mb-3">
-            <p className="text-sm text-slate-500">
+            <p className="text-sm theme-text-muted">
               LMS & CBT
-              <span className="mx-2 text-slate-300">/</span>
-              <span className="text-slate-700">
+
+              <span className="mx-2 theme-text-placeholder">
+                /
+              </span>
+
+              <span className="theme-text-secondary">
                 Materi dan Modul Ajar
               </span>
             </p>
           </div>
 
-          {/* TITLE */}
+          {/* ==================================================
+              TITLE
+          ================================================== */}
+
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-7">
             <div className="flex items-center gap-3">
-              <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center shadow-lg shadow-blue-600/20">
+              <div
+                className={`
+                  w-12 h-12
+                  rounded-xl
+                  bg-[var(--color-primary)]
+                  flex
+                  items-center
+                  justify-center
+                  ${themePrimaryShadow}
+                `}
+              >
                 <BookOpenCheck
                   size={24}
                   className="text-white"
@@ -177,280 +245,475 @@ export default function MateriModulAjarPage() {
               </div>
 
               <div>
-                <h1 className="text-2xl font-bold text-slate-900">
+                <h1 className="text-2xl font-bold theme-text">
                   Materi dan Modul Ajar
                 </h1>
 
-                <p className="text-sm text-slate-500 mt-1">
-                  Kelola materi pembelajaran dan modul ajar untuk siswa.
+                <p className="text-sm theme-text-muted mt-1">
+                  Kelola materi pembelajaran dan modul ajar
+                  untuk siswa.
                 </p>
               </div>
             </div>
 
+            {/* ADD BUTTON */}
+
             <button
               onClick={openAddModal}
-              className="inline-flex items-center justify-center gap-2 px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl shadow-lg shadow-blue-600/20 transition-all"
+              className="
+                inline-flex
+                items-center
+                justify-center
+                gap-2
+                px-5
+                py-3
+                bg-[var(--color-primary)]
+                hover:brightness-95
+                text-white
+                text-sm
+                font-semibold
+                rounded-xl
+                transition-all
+                shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]
+              "
             >
               <Plus size={18} />
               Tambah Materi
             </button>
           </div>
 
-          {/* STATISTICS */}
+          {/* ==================================================
+              STATISTICS
+          ================================================== */}
+
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
-            {/* Total */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            {/* TOTAL */}
+
+            <div
+              className={`
+                theme-card
+                theme-border
+                rounded-2xl
+                border
+                p-5
+                ${themeCardShadow}
+              `}
+            >
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-sm text-slate-500">
+                  <p className="text-sm theme-text-muted">
                     Total Materi
                   </p>
 
-                  <p className="text-3xl font-bold text-slate-900 mt-2">
+                  <p className="text-3xl font-bold theme-text mt-2">
                     {materi.length}
                   </p>
 
-                  <p className="text-xs text-slate-400 mt-2">
+                  <p className="text-xs theme-text-placeholder mt-2">
                     Materi & modul ajar
                   </p>
                 </div>
 
-                <div className="w-11 h-11 rounded-xl bg-blue-50 flex items-center justify-center">
-                  <BookOpenCheck
-                    size={21}
-                    className="text-blue-600"
-                  />
+                <div
+                  className={`
+                    w-11
+                    h-11
+                    rounded-xl
+                    ${themePrimarySoft}
+                    flex
+                    items-center
+                    justify-center
+                    text-[var(--color-primary)]
+                  `}
+                >
+                  <BookOpenCheck size={21} />
                 </div>
               </div>
             </div>
 
-            {/* Published */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            {/* PUBLISHED */}
+
+            <div
+              className={`
+                theme-card
+                theme-border
+                rounded-2xl
+                border
+                p-5
+                ${themeCardShadow}
+              `}
+            >
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-sm text-slate-500">
+                  <p className="text-sm theme-text-muted">
                     Published
                   </p>
 
-                  <p className="text-3xl font-bold text-slate-900 mt-2">
+                  <p className="text-3xl font-bold theme-text mt-2">
                     {publishedCount}
                   </p>
 
-                  <p className="text-xs text-slate-400 mt-2">
+                  <p className="text-xs theme-text-placeholder mt-2">
                     Sudah diterbitkan
                   </p>
                 </div>
 
-                <div className="w-11 h-11 rounded-xl bg-emerald-50 flex items-center justify-center">
-                  <CheckCircle2
-                    size={21}
-                    className="text-emerald-600"
-                  />
+                <div
+                  className="
+                    w-11
+                    h-11
+                    rounded-xl
+                    theme-success
+                    flex
+                    items-center
+                    justify-center
+                  "
+                >
+                  <CheckCircle2 size={21} />
                 </div>
               </div>
             </div>
 
-            {/* Draft */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            {/* DRAFT */}
+
+            <div
+              className={`
+                theme-card
+                theme-border
+                rounded-2xl
+                border
+                p-5
+                ${themeCardShadow}
+              `}
+            >
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-sm text-slate-500">
+                  <p className="text-sm theme-text-muted">
                     Draft
                   </p>
 
-                  <p className="text-3xl font-bold text-slate-900 mt-2">
+                  <p className="text-3xl font-bold theme-text mt-2">
                     {draftCount}
                   </p>
 
-                  <p className="text-xs text-slate-400 mt-2">
+                  <p className="text-xs theme-text-placeholder mt-2">
                     Belum diterbitkan
                   </p>
                 </div>
 
-                <div className="w-11 h-11 rounded-xl bg-orange-50 flex items-center justify-center">
-                  <Clock3
-                    size={21}
-                    className="text-orange-600"
-                  />
+                <div
+                  className="
+                    w-11
+                    h-11
+                    rounded-xl
+                    theme-warning
+                    flex
+                    items-center
+                    justify-center
+                  "
+                >
+                  <Clock3 size={21} />
                 </div>
               </div>
             </div>
 
-            {/* Siswa */}
-            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm">
+            {/* SISWA */}
+
+            <div
+              className={`
+                theme-card
+                theme-border
+                rounded-2xl
+                border
+                p-5
+                ${themeCardShadow}
+              `}
+            >
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-sm text-slate-500">
+                  <p className="text-sm theme-text-muted">
                     Total Siswa
                   </p>
 
-                  <p className="text-3xl font-bold text-slate-900 mt-2">
+                  <p className="text-3xl font-bold theme-text mt-2">
                     {totalSiswa}
                   </p>
 
-                  <p className="text-xs text-slate-400 mt-2">
+                  <p className="text-xs theme-text-placeholder mt-2">
                     Distribusi pembelajaran
                   </p>
                 </div>
 
-                <div className="w-11 h-11 rounded-xl bg-purple-50 flex items-center justify-center">
-                  <Users
-                    size={21}
-                    className="text-purple-600"
-                  />
+                <div
+                  className={`
+                    w-11
+                    h-11
+                    rounded-xl
+                    ${themePrimarySoft}
+                    flex
+                    items-center
+                    justify-center
+                    text-[var(--color-primary)]
+                  `}
+                >
+                  <Users size={21} />
                 </div>
               </div>
             </div>
           </div>
 
-          {/* TABLE CARD */}
-          <div className="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+          {/* ==================================================
+              TABLE CARD
+          ================================================== */}
+
+          <div
+            className={`
+              theme-card
+              theme-border
+              rounded-2xl
+              border
+              ${themeCardShadow}
+              overflow-hidden
+            `}
+          >
             {/* TOOLBAR */}
-            <div className="p-5 border-b border-slate-100">
+
+            <div className="p-5 theme-border-soft border-b">
               <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
                 <div>
-                  <h2 className="font-semibold text-slate-900">
+                  <h2 className="font-semibold theme-text">
                     Daftar Materi
                   </h2>
 
-                  <p className="text-xs text-slate-400 mt-1">
+                  <p className="text-xs theme-text-placeholder mt-1">
                     Daftar materi dan modul ajar yang tersedia.
                   </p>
                 </div>
 
+                {/* SEARCH */}
+
                 <div className="relative w-full md:w-72">
                   <Search
                     size={17}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                    className="
+                      absolute
+                      left-3
+                      top-1/2
+                      -translate-y-1/2
+                      theme-text-placeholder
+                    "
                   />
 
                   <input
                     value={search}
-                    onChange={(e) => setSearch(e.target.value)}
+                    onChange={(e) =>
+                      setSearch(e.target.value)
+                    }
                     placeholder="Cari materi..."
-                    className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                    className="
+                      theme-input
+                      w-full
+                      pl-10
+                      pr-4
+                      py-2.5
+                      rounded-xl
+                      text-sm
+                      focus:outline-none
+                    "
                   />
                 </div>
               </div>
             </div>
 
-            {/* TABLE */}
+            {/* ==================================================
+                TABLE
+            ================================================== */}
+
             <div className="overflow-x-auto">
               <table className="w-full min-w-[900px]">
                 <thead>
-                  <tr className="bg-slate-50 border-b border-slate-100">
-                    <th className="text-left px-5 py-4 text-xs font-semibold text-slate-500">
+                  <tr className="theme-card-soft theme-border-soft border-b">
+                    <th className="text-left px-5 py-4 text-xs font-semibold theme-text-muted">
                       Materi
                     </th>
 
-                    <th className="text-left px-5 py-4 text-xs font-semibold text-slate-500">
+                    <th className="text-left px-5 py-4 text-xs font-semibold theme-text-muted">
                       Mata Pelajaran
                     </th>
 
-                    <th className="text-left px-5 py-4 text-xs font-semibold text-slate-500">
+                    <th className="text-left px-5 py-4 text-xs font-semibold theme-text-muted">
                       Kelas
                     </th>
 
-                    <th className="text-left px-5 py-4 text-xs font-semibold text-slate-500">
+                    <th className="text-left px-5 py-4 text-xs font-semibold theme-text-muted">
                       Guru
                     </th>
 
-                    <th className="text-left px-5 py-4 text-xs font-semibold text-slate-500">
+                    <th className="text-left px-5 py-4 text-xs font-semibold theme-text-muted">
                       Status
                     </th>
 
-                    <th className="text-center px-5 py-4 text-xs font-semibold text-slate-500">
+                    <th className="text-center px-5 py-4 text-xs font-semibold theme-text-muted">
                       Siswa
                     </th>
 
-                    <th className="text-right px-5 py-4 text-xs font-semibold text-slate-500">
+                    <th className="text-right px-5 py-4 text-xs font-semibold theme-text-muted">
                       Aksi
                     </th>
                   </tr>
                 </thead>
 
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y theme-border-soft">
                   {filteredMateri.length > 0 ? (
                     filteredMateri.map((item) => (
                       <tr
                         key={item.id}
-                        className="hover:bg-slate-50/70 transition-colors"
+                        className={`
+                          transition-colors
+                          ${themePrimaryHover}
+                        `}
                       >
+                        {/* MATERI */}
+
                         <td className="px-5 py-4">
                           <div>
-                            <p className="font-semibold text-sm text-slate-800">
+                            <p className="font-semibold text-sm theme-text">
                               {item.judul}
                             </p>
 
-                            <p className="text-xs text-slate-400 mt-1">
+                            <p className="text-xs theme-text-placeholder mt-1">
                               {item.tipe} • {item.pertemuan}
                             </p>
                           </div>
                         </td>
 
+                        {/* MAPEL */}
+
                         <td className="px-5 py-4">
-                          <span className="text-sm text-slate-600">
+                          <span className="text-sm theme-text-secondary">
                             {item.mapel}
                           </span>
                         </td>
 
+                        {/* KELAS */}
+
                         <td className="px-5 py-4">
-                          <span className="text-sm text-slate-600">
+                          <span className="text-sm theme-text-secondary">
                             {item.kelas}
                           </span>
                         </td>
 
+                        {/* GURU */}
+
                         <td className="px-5 py-4">
-                          <span className="text-sm text-slate-600">
+                          <span className="text-sm theme-text-secondary">
                             {item.guru}
                           </span>
                         </td>
 
+                        {/* STATUS */}
+
                         <td className="px-5 py-4">
                           <span
-                            className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
-                              item.status === "Published"
-                                ? "bg-emerald-50 text-emerald-600"
-                                : "bg-orange-50 text-orange-600"
-                            }`}
+                            className={`
+                              inline-flex
+                              items-center
+                              px-2.5
+                              py-1
+                              rounded-full
+                              text-xs
+                              font-medium
+                              ${
+                                item.status === "Published"
+                                  ? "theme-success"
+                                  : "theme-warning"
+                              }
+                            `}
                           >
                             {item.status}
                           </span>
                         </td>
 
+                        {/* SISWA */}
+
                         <td className="px-5 py-4 text-center">
-                          <span className="text-sm font-medium text-slate-700">
+                          <span className="text-sm font-medium theme-text-secondary">
                             {item.jumlahSiswa}
                           </span>
                         </td>
 
+                        {/* ACTION */}
+
                         <td className="px-5 py-4">
                           <div className="flex items-center justify-end gap-1">
+
+                            {/* DETAIL */}
+
                             <button
-                              onClick={() => openDetailModal(item)}
-                              className="p-2 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition"
+                              onClick={() =>
+                                openDetailModal(item)
+                              }
+                              className={`
+                                p-2
+                                rounded-lg
+                                theme-text-placeholder
+                                transition
+                                hover:text-[var(--color-primary)]
+                                ${themePrimarySoft}
+                              `}
                               title="Detail"
                             >
                               <Eye size={16} />
                             </button>
 
+                            {/* EDIT */}
+
                             <button
-                              onClick={() => openEditModal(item)}
-                              className="p-2 rounded-lg text-slate-400 hover:text-amber-600 hover:bg-amber-50 transition"
+                              onClick={() =>
+                                openEditModal(item)
+                              }
+                              className="
+                                p-2
+                                rounded-lg
+                                theme-text-placeholder
+                                hover:theme-warning
+                                transition
+                              "
                               title="Edit"
                             >
                               <Pencil size={16} />
                             </button>
 
+                            {/* DELETE */}
+
                             <button
-                              onClick={() => handleDelete(item.id)}
-                              className="p-2 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition"
+                              onClick={() =>
+                                handleDelete(item.id)
+                              }
+                              className="
+                                p-2
+                                rounded-lg
+                                theme-text-placeholder
+                                hover:theme-danger
+                                transition
+                              "
                               title="Hapus"
                             >
                               <Trash2 size={16} />
                             </button>
 
-                            <button className="p-2 rounded-lg text-slate-400 hover:bg-slate-100 transition">
+                            {/* MORE */}
+
+                            <button
+                              className={`
+                                p-2
+                                rounded-lg
+                                theme-text-placeholder
+                                transition
+                                ${themeTextHover}
+                              `}
+                              title="Menu"
+                            >
                               <MoreVertical size={16} />
                             </button>
                           </div>
@@ -465,14 +728,14 @@ export default function MateriModulAjarPage() {
                       >
                         <BookOpenCheck
                           size={38}
-                          className="mx-auto text-slate-300 mb-3"
+                          className="mx-auto theme-text-placeholder mb-3"
                         />
 
-                        <p className="text-sm font-medium text-slate-600">
+                        <p className="text-sm font-medium theme-text-secondary">
                           Materi tidak ditemukan
                         </p>
 
-                        <p className="text-xs text-slate-400 mt-1">
+                        <p className="text-xs theme-text-placeholder mt-1">
                           Coba gunakan kata kunci pencarian lain.
                         </p>
                       </td>
@@ -485,14 +748,45 @@ export default function MateriModulAjarPage() {
         </main>
       </div>
 
-      {/* MODAL */}
+      {/* ========================================================
+          MODAL
+      ======================================================== */}
+
       {showModal && (
-        <div className="fixed inset-0 z-50 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-white w-full max-w-2xl rounded-2xl shadow-2xl overflow-hidden">
-            {/* Modal Header */}
-            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+        <div
+          className="
+            fixed
+            inset-0
+            z-50
+            bg-[color-mix(in_srgb,var(--color-text)_45%,transparent)]
+            backdrop-blur-sm
+            flex
+            items-center
+            justify-center
+            p-4
+          "
+        >
+          <div
+            className={`
+              theme-card
+              theme-border
+              w-full
+              max-w-2xl
+              rounded-2xl
+              border
+              ${themeCardShadow}
+              overflow-hidden
+              max-h-[90vh]
+              overflow-y-auto
+            `}
+          >
+            {/* ==================================================
+                MODAL HEADER
+            ================================================== */}
+
+            <div className="px-6 py-4 theme-border-soft border-b flex items-center justify-between">
               <div>
-                <h3 className="font-semibold text-slate-900">
+                <h3 className="font-semibold theme-text">
                   {modalType === "add"
                     ? "Tambah Materi"
                     : modalType === "edit"
@@ -500,7 +794,7 @@ export default function MateriModulAjarPage() {
                     : "Detail Materi"}
                 </h3>
 
-                <p className="text-xs text-slate-400 mt-1">
+                <p className="text-xs theme-text-placeholder mt-1">
                   {modalType === "detail"
                     ? "Informasi detail materi pembelajaran"
                     : "Kelola informasi materi pembelajaran"}
@@ -509,103 +803,177 @@ export default function MateriModulAjarPage() {
 
               <button
                 onClick={() => setShowModal(false)}
-                className="p-2 rounded-lg hover:bg-slate-100 text-slate-400"
+                className={`
+                  p-2
+                  rounded-lg
+                  theme-text-placeholder
+                  transition
+                  ${themeTextHover}
+                  hover:text-[var(--color-primary)]
+                `}
               >
                 <X size={18} />
               </button>
             </div>
 
-            {/* Detail */}
-            {modalType === "detail" && selectedMateri && (
-              <div className="p-6 space-y-5">
-                <div>
-                  <p className="text-xs text-slate-400 mb-1">
-                    Judul Materi
-                  </p>
-                  <p className="font-semibold text-slate-800">
-                    {selectedMateri.judul}
-                  </p>
+            {/* ==================================================
+                DETAIL
+            ================================================== */}
+
+            {modalType === "detail" &&
+              selectedMateri && (
+                <div className="p-6 space-y-5">
+
+                  {/* JUDUL */}
+
+                  <div>
+                    <p className="text-xs theme-text-placeholder mb-1">
+                      Judul Materi
+                    </p>
+
+                    <p className="font-semibold theme-text">
+                      {selectedMateri.judul}
+                    </p>
+                  </div>
+
+                  {/* GRID DETAIL */}
+
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                    {/* MAPEL */}
+
+                    <div>
+                      <p className="text-xs theme-text-placeholder mb-1">
+                        Mata Pelajaran
+                      </p>
+
+                      <p className="text-sm theme-text-secondary">
+                        {selectedMateri.mapel}
+                      </p>
+                    </div>
+
+                    {/* KELAS */}
+
+                    <div>
+                      <p className="text-xs theme-text-placeholder mb-1">
+                        Kelas
+                      </p>
+
+                      <p className="text-sm theme-text-secondary">
+                        {selectedMateri.kelas}
+                      </p>
+                    </div>
+
+                    {/* GURU */}
+
+                    <div>
+                      <p className="text-xs theme-text-placeholder mb-1">
+                        Guru
+                      </p>
+
+                      <p className="text-sm theme-text-secondary">
+                        {selectedMateri.guru}
+                      </p>
+                    </div>
+
+                    {/* PERTEMUAN */}
+
+                    <div>
+                      <p className="text-xs theme-text-placeholder mb-1">
+                        Pertemuan
+                      </p>
+
+                      <p className="text-sm theme-text-secondary">
+                        {selectedMateri.pertemuan}
+                      </p>
+                    </div>
+
+                    {/* DURASI */}
+
+                    <div>
+                      <p className="text-xs theme-text-placeholder mb-1">
+                        Durasi
+                      </p>
+
+                      <p className="text-sm theme-text-secondary">
+                        {selectedMateri.durasi}
+                      </p>
+                    </div>
+
+                    {/* SISWA */}
+
+                    <div>
+                      <p className="text-xs theme-text-placeholder mb-1">
+                        Jumlah Siswa
+                      </p>
+
+                      <p className="text-sm theme-text-secondary">
+                        {selectedMateri.jumlahSiswa} siswa
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* DESKRIPSI */}
+
+                  <div>
+                    <p className="text-xs theme-text-placeholder mb-1">
+                      Deskripsi
+                    </p>
+
+                    <p className="text-sm theme-text-secondary leading-relaxed">
+                      {selectedMateri.deskripsi}
+                    </p>
+                  </div>
+
+                  {/* STATUS */}
+
+                  <div>
+                    <p className="text-xs theme-text-placeholder mb-2">
+                      Status
+                    </p>
+
+                    <span
+                      className={`inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium ${
+                        selectedMateri.status ===
+                        "Published"
+                          ? "theme-success"
+                          : "theme-warning"
+                      }`}
+                    >
+                      {selectedMateri.status}
+                    </span>
+                  </div>
+
+                  {/* BUTTON */}
+
+                  <div className="flex justify-end">
+                    <button
+                      onClick={() =>
+                        setShowModal(false)
+                      }
+                      className="
+                        px-4
+                        py-2.5
+                        rounded-xl
+                        theme-card-soft
+                        theme-text-secondary
+                        text-sm
+                        font-medium
+                        transition
+                        hover:brightness-95
+                      "
+                    >
+                      Tutup
+                    </button>
+                  </div>
                 </div>
+              )}
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-                  <div>
-                    <p className="text-xs text-slate-400 mb-1">
-                      Mata Pelajaran
-                    </p>
-                    <p className="text-sm text-slate-700">
-                      {selectedMateri.mapel}
-                    </p>
-                  </div>
+            {/* ==================================================
+                ADD / EDIT
+            ================================================== */}
 
-                  <div>
-                    <p className="text-xs text-slate-400 mb-1">
-                      Kelas
-                    </p>
-                    <p className="text-sm text-slate-700">
-                      {selectedMateri.kelas}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-xs text-slate-400 mb-1">
-                      Guru
-                    </p>
-                    <p className="text-sm text-slate-700">
-                      {selectedMateri.guru}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-xs text-slate-400 mb-1">
-                      Pertemuan
-                    </p>
-                    <p className="text-sm text-slate-700">
-                      {selectedMateri.pertemuan}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-xs text-slate-400 mb-1">
-                      Durasi
-                    </p>
-                    <p className="text-sm text-slate-700">
-                      {selectedMateri.durasi}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="text-xs text-slate-400 mb-1">
-                      Jumlah Siswa
-                    </p>
-                    <p className="text-sm text-slate-700">
-                      {selectedMateri.jumlahSiswa} siswa
-                    </p>
-                  </div>
-                </div>
-
-                <div>
-                  <p className="text-xs text-slate-400 mb-1">
-                    Deskripsi
-                  </p>
-
-                  <p className="text-sm text-slate-600 leading-relaxed">
-                    {selectedMateri.deskripsi}
-                  </p>
-                </div>
-
-                <div className="flex justify-end">
-                  <button
-                    onClick={() => setShowModal(false)}
-                    className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-sm font-medium text-slate-700"
-                  >
-                    Tutup
-                  </button>
-                </div>
-              </div>
-            )}
-
-            {/* Add / Edit */}
-            {(modalType === "add" || modalType === "edit") && (
+            {(modalType === "add" ||
+              modalType === "edit") && (
               <form
                 onSubmit={(e) => {
                   e.preventDefault();
@@ -614,122 +982,250 @@ export default function MateriModulAjarPage() {
                 className="p-6"
               >
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                  {/* JUDUL */}
+
                   <div className="md:col-span-2">
-                    <label className="block text-xs font-medium text-slate-600 mb-1.5">
+                    <label className="block text-xs font-medium theme-text-secondary mb-1.5">
                       Judul Materi
                     </label>
 
                     <input
-                      defaultValue={selectedMateri?.judul || ""}
+                      defaultValue={
+                        selectedMateri?.judul || ""
+                      }
                       required
-                      className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                      className="
+                        theme-input
+                        w-full
+                        px-3.5
+                        py-2.5
+                        rounded-xl
+                        text-sm
+                        focus:outline-none
+                      "
                       placeholder="Masukkan judul materi"
                     />
                   </div>
 
+                  {/* MAPEL */}
+
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1.5">
+                    <label className="block text-xs font-medium theme-text-secondary mb-1.5">
                       Mata Pelajaran
                     </label>
 
                     <input
-                      defaultValue={selectedMateri?.mapel || ""}
+                      defaultValue={
+                        selectedMateri?.mapel || ""
+                      }
                       required
-                      className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                      className="
+                        theme-input
+                        w-full
+                        px-3.5
+                        py-2.5
+                        rounded-xl
+                        text-sm
+                        focus:outline-none
+                      "
                       placeholder="Mata pelajaran"
                     />
                   </div>
 
+                  {/* KELAS */}
+
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1.5">
+                    <label className="block text-xs font-medium theme-text-secondary mb-1.5">
                       Kelas
                     </label>
 
                     <input
-                      defaultValue={selectedMateri?.kelas || ""}
+                      defaultValue={
+                        selectedMateri?.kelas || ""
+                      }
                       required
-                      className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                      className="
+                        theme-input
+                        w-full
+                        px-3.5
+                        py-2.5
+                        rounded-xl
+                        text-sm
+                        focus:outline-none
+                      "
                       placeholder="Contoh: X PPLG 1"
                     />
                   </div>
 
+                  {/* GURU */}
+
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1.5">
+                    <label className="block text-xs font-medium theme-text-secondary mb-1.5">
                       Guru
                     </label>
 
                     <input
-                      defaultValue={selectedMateri?.guru || ""}
+                      defaultValue={
+                        selectedMateri?.guru || ""
+                      }
                       required
-                      className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                      className="
+                        theme-input
+                        w-full
+                        px-3.5
+                        py-2.5
+                        rounded-xl
+                        text-sm
+                        focus:outline-none
+                      "
                       placeholder="Nama guru"
                     />
                   </div>
 
+                  {/* PERTEMUAN */}
+
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1.5">
+                    <label className="block text-xs font-medium theme-text-secondary mb-1.5">
                       Pertemuan
                     </label>
 
                     <input
-                      defaultValue={selectedMateri?.pertemuan || ""}
-                      className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                      defaultValue={
+                        selectedMateri?.pertemuan || ""
+                      }
+                      className="
+                        theme-input
+                        w-full
+                        px-3.5
+                        py-2.5
+                        rounded-xl
+                        text-sm
+                        focus:outline-none
+                      "
                       placeholder="Contoh: Pertemuan 1"
                     />
                   </div>
 
+                  {/* DURASI */}
+
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1.5">
+                    <label className="block text-xs font-medium theme-text-secondary mb-1.5">
                       Durasi
                     </label>
 
                     <input
-                      defaultValue={selectedMateri?.durasi || ""}
-                      className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                      defaultValue={
+                        selectedMateri?.durasi || ""
+                      }
+                      className="
+                        theme-input
+                        w-full
+                        px-3.5
+                        py-2.5
+                        rounded-xl
+                        text-sm
+                        focus:outline-none
+                      "
                       placeholder="Contoh: 90 Menit"
                     />
                   </div>
 
+                  {/* TIPE */}
+
                   <div>
-                    <label className="block text-xs font-medium text-slate-600 mb-1.5">
+                    <label className="block text-xs font-medium theme-text-secondary mb-1.5">
                       Tipe
                     </label>
 
                     <select
-                      defaultValue={selectedMateri?.tipe || "Materi"}
-                      className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                      defaultValue={
+                        selectedMateri?.tipe ||
+                        "Materi"
+                      }
+                      className="
+                        theme-input
+                        w-full
+                        px-3.5
+                        py-2.5
+                        rounded-xl
+                        text-sm
+                        focus:outline-none
+                      "
                     >
-                      <option>Materi</option>
-                      <option>Modul Ajar</option>
+                      <option value="Materi">
+                        Materi
+                      </option>
+
+                      <option value="Modul Ajar">
+                        Modul Ajar
+                      </option>
                     </select>
                   </div>
 
+                  {/* DESKRIPSI */}
+
                   <div className="md:col-span-2">
-                    <label className="block text-xs font-medium text-slate-600 mb-1.5">
+                    <label className="block text-xs font-medium theme-text-secondary mb-1.5">
                       Deskripsi
                     </label>
 
                     <textarea
-                      defaultValue={selectedMateri?.deskripsi || ""}
+                      defaultValue={
+                        selectedMateri?.deskripsi || ""
+                      }
                       rows={4}
-                      className="w-full px-3.5 py-2.5 border border-slate-200 rounded-xl text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+                      className="
+                        theme-input
+                        w-full
+                        px-3.5
+                        py-2.5
+                        rounded-xl
+                        text-sm
+                        resize-none
+                        focus:outline-none
+                      "
                       placeholder="Deskripsi materi..."
                     />
                   </div>
                 </div>
 
+                {/* FORM ACTION */}
+
                 <div className="flex justify-end gap-3 mt-6">
                   <button
                     type="button"
-                    onClick={() => setShowModal(false)}
-                    className="px-4 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-sm font-medium text-slate-700"
+                    onClick={() =>
+                      setShowModal(false)
+                    }
+                    className="
+                      px-4
+                      py-2.5
+                      rounded-xl
+                      theme-card-soft
+                      theme-text-secondary
+                      text-sm
+                      font-medium
+                      transition
+                      hover:brightness-95
+                    "
                   >
                     Batal
                   </button>
 
                   <button
                     type="submit"
-                    className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold"
+                    className="
+                      px-5
+                      py-2.5
+                      rounded-xl
+                      bg-[var(--color-primary)]
+                      hover:brightness-95
+                      text-white
+                      text-sm
+                      font-semibold
+                      transition
+                    "
                   >
                     {modalType === "edit"
                       ? "Simpan Perubahan"

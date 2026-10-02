@@ -27,16 +27,10 @@ import {
   ClipboardCheck,
   RefreshCw,
   FileSpreadsheet,
-  Download,
 } from "lucide-react";
 
-import {
-  getAbsensiKelas,
-} from "../../../../../services/absensi.service";
-
-import {
-  getKelas,
-} from "../../../../../services/kelas.service";
+import { getAbsensiKelas } from "../../../../../services/absensi.service";
+import { getKelas } from "../../../../../services/kelas.service";
 
 /* =========================================================
    API CONFIG
@@ -88,15 +82,10 @@ function normalizeStatus(status) {
     .trim();
 
   if (value === "hadir") return "Hadir";
-
   if (value === "izin") return "Izin";
-
   if (value === "sakit") return "Sakit";
 
-  if (
-    value === "alpa" ||
-    value === "alpha"
-  ) {
+  if (value === "alpa" || value === "alpha") {
     return "Alpa";
   }
 
@@ -104,34 +93,26 @@ function normalizeStatus(status) {
     return "Terlambat";
   }
 
-  return status
-    ? String(status)
-    : "Alpa";
+  return status ? String(status) : "Alpa";
 }
 
 function formatTanggal(value) {
   if (!value) return "-";
 
   const raw = String(value);
-
   const dateOnly = raw.slice(0, 10);
 
-  const date = new Date(
-    `${dateOnly}T00:00:00`
-  );
+  const date = new Date(`${dateOnly}T00:00:00`);
 
   if (Number.isNaN(date.getTime())) {
     return raw;
   }
 
-  return date.toLocaleDateString(
-    "id-ID",
-    {
-      day: "2-digit",
-      month: "long",
-      year: "numeric",
-    }
-  );
+  return date.toLocaleDateString("id-ID", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
 }
 
 function formatJam(value) {
@@ -143,14 +124,11 @@ function formatJam(value) {
     return String(value);
   }
 
-  return date.toLocaleTimeString(
-    "id-ID",
-    {
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-    }
-  );
+  return date.toLocaleTimeString("id-ID", {
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
 }
 
 function getInitials(nama) {
@@ -159,9 +137,7 @@ function getInitials(nama) {
     .trim()
     .split(/\s+/)
     .slice(0, 2)
-    .map(
-      (word) => word?.[0] || ""
-    )
+    .map((word) => word?.[0] || "")
     .join("")
     .toUpperCase();
 }
@@ -228,15 +204,8 @@ function mapAbsensi(item, kelas) {
       ? Number(item.akurasi)
       : null;
 
-  let status = normalizeStatus(
-    item?.status
-  );
+  let status = normalizeStatus(item?.status);
 
-  /*
-   * Kalau backend mengirim status hadir
-   * tetapi ada informasi keterlambatan,
-   * tampilkan sebagai Terlambat.
-   */
   const terlambatValue =
     item?.terlambat ??
     item?.terlambatMenit ??
@@ -257,10 +226,7 @@ function mapAbsensi(item, kelas) {
 
     nisn: getNisn(item),
 
-    kelas: getNamaKelas(
-      item,
-      kelas
-    ),
+    kelas: getNamaKelas(item, kelas),
 
     kelasId:
       item?.kelasId ||
@@ -270,13 +236,11 @@ function mapAbsensi(item, kelas) {
 
     tanggal,
 
-    tanggalLabel:
-      formatTanggal(tanggal),
+    tanggalLabel: formatTanggal(tanggal),
 
-    jamMasuk:
-      formatJam(
-        dibuatPada || tanggal
-      ),
+    jamMasuk: formatJam(
+      dibuatPada || tanggal
+    ),
 
     status,
 
@@ -287,13 +251,10 @@ function mapAbsensi(item, kelas) {
         ? String(item.metode)
         : "-",
 
-    metode:
-      item?.metode || "-",
+    metode: item?.metode || "-",
 
     latitude,
-
     longitude,
-
     akurasi,
 
     foto:
@@ -306,11 +267,9 @@ function mapAbsensi(item, kelas) {
       item?.keterangan || "-",
 
     waliKelas:
-      item?.kelas?.waliKelas
-        ?.namaLengkap ||
+      item?.kelas?.waliKelas?.namaLengkap ||
       item?.kelas?.waliKelas?.nama ||
-      kelas?.waliKelas
-        ?.namaLengkap ||
+      kelas?.waliKelas?.namaLengkap ||
       kelas?.waliKelas?.nama ||
       "-",
 
@@ -338,46 +297,36 @@ const STATUS_OPTIONS = [
 
 function StatusBadge({ status }) {
   const styles = {
-    Hadir:
-      "bg-emerald-50 text-emerald-600 border-emerald-200",
-
-    Terlambat:
-      "bg-amber-50 text-amber-600 border-amber-200",
-
-    Izin:
-      "bg-blue-50 text-blue-600 border-blue-200",
-
-    Sakit:
-      "bg-orange-50 text-orange-600 border-orange-200",
-
-    Alpa:
-      "bg-red-50 text-red-600 border-red-200",
+    Hadir: "theme-success",
+    Terlambat: "theme-warning",
+    Izin: "theme-info",
+    Sakit: "theme-warning",
+    Alpa: "theme-danger",
   };
 
   const dots = {
-    Hadir: "bg-emerald-500",
-
-    Terlambat: "bg-amber-500",
-
-    Izin: "bg-blue-500",
-
-    Sakit: "bg-orange-500",
-
-    Alpa: "bg-red-500",
+    Hadir: "bg-[var(--color-success)]",
+    Terlambat: "bg-[var(--color-warning)]",
+    Izin: "bg-[var(--color-info)]",
+    Sakit: "bg-[var(--color-warning)]",
+    Alpa: "bg-[var(--color-danger)]",
   };
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold border ${
-        styles[status] ||
-        "bg-slate-100 text-slate-500 border-slate-200"
-      }`}
+      className={`
+        inline-flex items-center gap-1.5
+        px-2.5 py-1 rounded-full
+        text-[11px] font-semibold
+        border
+        ${styles[status] || "theme-card-soft theme-text-muted theme-border"}
+      `}
     >
       <span
-        className={`w-1.5 h-1.5 rounded-full ${
-          dots[status] ||
-          "bg-slate-400"
-        }`}
+        className={`
+          w-1.5 h-1.5 rounded-full
+          ${dots[status] || "bg-[var(--color-text-muted)]"}
+        `}
       />
 
       {status}
@@ -387,7 +336,15 @@ function StatusBadge({ status }) {
 
 function Avatar({ nama }) {
   return (
-    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#155DFC] to-[#0d47c9] text-white flex items-center justify-center font-bold text-xs flex-shrink-0">
+    <div
+      className="
+        w-9 h-9 rounded-full
+        theme-primary
+        flex items-center justify-center
+        font-bold text-xs
+        flex-shrink-0
+      "
+    >
       {getInitials(nama)}
     </div>
   );
@@ -400,19 +357,19 @@ function StatCard({
   iconClass,
 }) {
   return (
-    <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm">
+    <div className="theme-card rounded-xl border theme-border p-4 shadow-sm">
       <div className="flex items-center gap-2">
         <Icon
           size={15}
           className={iconClass}
         />
 
-        <p className="text-[11px] font-medium text-slate-500 tracking-wide">
+        <p className="text-[11px] font-medium theme-text-muted tracking-wide">
           {title}
         </p>
       </div>
 
-      <p className="text-2xl font-bold text-slate-900 mt-1.5">
+      <p className="text-2xl font-bold theme-text mt-1.5">
         {value}
       </p>
     </div>
@@ -425,19 +382,19 @@ function DetailBox({
   value,
 }) {
   return (
-    <div className="p-3 rounded-xl border border-slate-200">
+    <div className="p-3 rounded-xl border theme-border">
       <div className="flex items-center gap-2">
         <Icon
           size={14}
-          className="text-[#155DFC]"
+          className="text-[var(--color-primary)]"
         />
 
-        <span className="text-[11px] text-slate-500">
+        <span className="text-[11px] theme-text-muted">
           {label}
         </span>
       </div>
 
-      <p className="text-sm font-semibold text-slate-700 mt-2">
+      <p className="text-sm font-semibold theme-text-secondary mt-2">
         {value || "-"}
       </p>
     </div>
@@ -464,9 +421,7 @@ function getFileNameFromResponse(
       );
 
     if (match?.[1]) {
-      return decodeURIComponent(
-        match[1]
-      );
+      return decodeURIComponent(match[1]);
     }
   }
 
@@ -492,36 +447,21 @@ async function downloadExcel({
   const params =
     new URLSearchParams();
 
-  /*
-   * Hanya kirim parameter yang
-   * memang dipilih user.
-   */
-
   if (tanggal) {
-    params.set(
-      "tanggal",
-      tanggal
-    );
+    params.set("tanggal", tanggal);
   }
 
   if (
     kelasId &&
     kelasId !== "Semua Kelas"
   ) {
-    params.set(
-      "kelasId",
-      kelasId
-    );
+    params.set("kelasId", kelasId);
   }
 
   if (
     status &&
     status !== "Semua Status"
   ) {
-    /*
-     * Backend biasanya menggunakan
-     * status lowercase.
-     */
     const backendStatus =
       status === "Alpa"
         ? "alpha"
@@ -533,29 +473,24 @@ async function downloadExcel({
     );
   }
 
-  const query =
-    params.toString();
+  const query = params.toString();
 
   const url =
     `${API_BASE}/absensi/export` +
-    (query
-      ? `?${query}`
-      : "");
+    (query ? `?${query}` : "");
 
-  const response =
-    await fetch(url, {
-      method: "GET",
+  const response = await fetch(url, {
+    method: "GET",
 
-      headers: {
-        Authorization:
-          `Bearer ${token}`,
+    headers: {
+      Authorization: `Bearer ${token}`,
 
-        Accept:
-          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, application/octet-stream",
-      },
+      Accept:
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel, application/octet-stream",
+    },
 
-      cache: "no-store",
-    });
+    cache: "no-store",
+  });
 
   if (!response.ok) {
     let message =
@@ -609,29 +544,21 @@ async function downloadExcel({
     );
 
   const blobUrl =
-    window.URL.createObjectURL(
-      blob
-    );
+    window.URL.createObjectURL(blob);
 
   const link =
     document.createElement("a");
 
   link.href = blobUrl;
+  link.download = fileName;
 
-  link.download =
-    fileName;
-
-  document.body.appendChild(
-    link
-  );
+  document.body.appendChild(link);
 
   link.click();
 
   link.remove();
 
-  window.URL.revokeObjectURL(
-    blobUrl
-  );
+  window.URL.revokeObjectURL(blobUrl);
 }
 
 /* =========================================================
@@ -689,10 +616,6 @@ export default function AbsenSiswaPage() {
     setStatusFilter,
   ] = useState("Semua Status");
 
-  /*
-   * Kosong = tampilkan seluruh
-   * data absensi dari backend.
-   */
   const [
     tanggalFilter,
     setTanggalFilter,
@@ -747,11 +670,6 @@ export default function AbsenSiswaPage() {
             daftarKelas.map(
               async (kelas) => {
                 try {
-                  /*
-                   * BE:
-                   * GET /api/v1/absensi/kelas/:kelasId
-                   */
-
                   const response =
                     await getAbsensiKelas(
                       kelas.id,
@@ -826,11 +744,6 @@ export default function AbsenSiswaPage() {
         ).sort(),
       ];
     }, [kelasData]);
-
-  /*
-   * Ambil ID kelas berdasarkan
-   * nama kelas yang dipilih.
-   */
 
   const selectedKelasId =
     useMemo(() => {
@@ -998,13 +911,17 @@ export default function AbsenSiswaPage() {
   const resetFilter =
     () => {
       setSearch("");
+
       setKelasFilter(
         "Semua Kelas"
       );
+
       setStatusFilter(
         "Semua Status"
       );
+
       setTanggalFilter("");
+
       setExportError("");
     };
 
@@ -1021,8 +938,10 @@ export default function AbsenSiswaPage() {
         await downloadExcel({
           tanggal:
             tanggalFilter,
+
           kelasId:
             selectedKelasId,
+
           status:
             statusFilter,
         });
@@ -1046,16 +965,14 @@ export default function AbsenSiswaPage() {
   ========================================================= */
 
   return (
-    <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
+    <div className="flex h-screen w-full theme-page overflow-hidden">
       {/* SIDEBAR */}
 
       <Sidebar
         active="siswaAbsen"
         setActive={() => {}}
         collapsed={isCollapsed}
-        setCollapsed={
-          setIsCollapsed
-        }
+        setCollapsed={setIsCollapsed}
         role="admin"
       />
 
@@ -1080,24 +997,22 @@ export default function AbsenSiswaPage() {
         <main className="flex-1 overflow-y-auto">
           <div className="p-4 sm:p-6 lg:p-8 space-y-6">
 
-            {/* =================================================
-                PAGE HEADER
-            ================================================= */}
+            {/* PAGE HEADER */}
 
             <div className="flex items-center justify-between gap-3 flex-wrap">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-gradient-to-br from-[#155DFC] to-[#0d47c9] text-white shadow-lg shadow-[#155DFC]/20">
+                <div className="p-2.5 rounded-xl theme-primary shadow-lg">
                   <ClipboardCheck
                     size={20}
                   />
                 </div>
 
                 <div>
-                  <h1 className="text-2xl font-bold text-slate-800">
+                  <h1 className="text-2xl font-bold theme-text">
                     Absensi Siswa
                   </h1>
 
-                  <p className="text-sm text-slate-500">
+                  <p className="text-sm theme-text-muted">
                     Data absensi siswa
                     langsung dari
                     backend.
@@ -1107,7 +1022,7 @@ export default function AbsenSiswaPage() {
 
               <div className="flex items-center gap-2 flex-wrap">
 
-                {/* EXPORT EXCEL */}
+                {/* EXPORT */}
 
                 <button
                   type="button"
@@ -1118,7 +1033,16 @@ export default function AbsenSiswaPage() {
                     exporting ||
                     loading
                   }
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-600 text-white text-sm font-semibold hover:bg-emerald-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed shadow-sm"
+                  className="
+                    inline-flex items-center gap-2
+                    px-4 py-2.5 rounded-xl
+                    theme-success
+                    text-sm font-semibold
+                    transition-colors
+                    disabled:opacity-60
+                    disabled:cursor-not-allowed
+                    shadow-sm
+                  "
                 >
                   {exporting ? (
                     <RefreshCw
@@ -1146,7 +1070,17 @@ export default function AbsenSiswaPage() {
                   disabled={
                     loading
                   }
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-600 text-sm font-semibold hover:bg-slate-50 transition-colors disabled:opacity-60"
+                  className="
+                    inline-flex items-center gap-2
+                    px-4 py-2.5 rounded-xl
+                    border theme-border
+                    theme-card
+                    theme-text-secondary
+                    text-sm font-semibold
+                    theme-sidebar-hover
+                    transition-colors
+                    disabled:opacity-60
+                  "
                 >
                   <RefreshCw
                     size={15}
@@ -1162,66 +1096,59 @@ export default function AbsenSiswaPage() {
               </div>
             </div>
 
-            {/* =================================================
-                EXPORT ERROR
-            ================================================= */}
+            {/* EXPORT ERROR */}
 
             {exportError && (
-              <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4">
+              <div className="flex items-start gap-3 rounded-xl border theme-border theme-danger p-4">
                 <AlertCircle
                   size={18}
-                  className="text-red-500 mt-0.5"
+                  className="mt-0.5"
                 />
 
                 <div>
-                  <p className="text-sm font-semibold text-red-700">
+                  <p className="text-sm font-semibold">
                     Export Excel gagal
                   </p>
 
-                  <p className="text-xs text-red-600 mt-1">
+                  <p className="text-xs mt-1">
                     {exportError}
                   </p>
                 </div>
               </div>
             )}
 
-            {/* =================================================
-                ERROR
-            ================================================= */}
+            {/* ERROR */}
 
             {error && (
-              <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4">
+              <div className="flex items-start gap-3 rounded-xl border theme-border theme-danger p-4">
                 <AlertCircle
                   size={18}
-                  className="text-red-500 mt-0.5"
+                  className="mt-0.5"
                 />
 
                 <div>
-                  <p className="text-sm font-semibold text-red-700">
+                  <p className="text-sm font-semibold">
                     Gagal mengambil
                     data
                   </p>
 
-                  <p className="text-xs text-red-600 mt-1">
+                  <p className="text-xs mt-1">
                     {error}
                   </p>
                 </div>
               </div>
             )}
 
-            {/* =================================================
-                STATISTICS
-            ================================================= */}
+            {/* STATISTICS */}
 
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-
               <StatCard
                 title="Total Data"
                 value={
                   totalSiswa
                 }
                 icon={Users}
-                iconClass="text-[#155DFC]"
+                iconClass="text-[var(--color-primary)]"
               />
 
               <StatCard
@@ -1232,7 +1159,7 @@ export default function AbsenSiswaPage() {
                 icon={
                   CheckCircle2
                 }
-                iconClass="text-emerald-500"
+                iconClass="text-[var(--color-success)]"
               />
 
               <StatCard
@@ -1241,7 +1168,7 @@ export default function AbsenSiswaPage() {
                   totalTerlambat
                 }
                 icon={Clock3}
-                iconClass="text-amber-500"
+                iconClass="text-[var(--color-warning)]"
               />
 
               <StatCard
@@ -1252,7 +1179,7 @@ export default function AbsenSiswaPage() {
                 icon={
                   AlertCircle
                 }
-                iconClass="text-blue-500"
+                iconClass="text-[var(--color-info)]"
               />
 
               <StatCard
@@ -1263,7 +1190,7 @@ export default function AbsenSiswaPage() {
                 icon={
                   AlertCircle
                 }
-                iconClass="text-orange-500"
+                iconClass="text-[var(--color-warning)]"
               />
 
               <StatCard
@@ -1272,23 +1199,22 @@ export default function AbsenSiswaPage() {
                   totalAlpa
                 }
                 icon={XCircle}
-                iconClass="text-red-500"
+                iconClass="text-[var(--color-danger)]"
               />
             </div>
 
-            {/* =================================================
-                SUMMARY
-            ================================================= */}
+            {/* SUMMARY */}
 
-            <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm">
+            <div className="theme-card rounded-xl border theme-border p-4 shadow-sm">
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+
                 <div>
-                  <p className="text-xs font-medium text-slate-500">
+                  <p className="text-xs font-medium theme-text-muted">
                     Persentase
                     Kehadiran
                   </p>
 
-                  <p className="text-2xl font-bold text-slate-900 mt-1">
+                  <p className="text-2xl font-bold theme-text mt-1">
                     {
                       persentaseHadir
                     }
@@ -1297,9 +1223,9 @@ export default function AbsenSiswaPage() {
                 </div>
 
                 <div className="flex-1 max-w-xl">
-                  <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
+                  <div className="h-3 theme-card-soft rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-[#155DFC] to-[#0d47c9] rounded-full transition-all"
+                      className="h-full theme-primary rounded-full transition-all"
                       style={{
                         width: `${persentaseHadir}%`,
                       }}
@@ -1307,14 +1233,14 @@ export default function AbsenSiswaPage() {
                   </div>
 
                   <div className="flex justify-between mt-2">
-                    <span className="text-[11px] text-slate-400">
+                    <span className="text-[11px] theme-text-muted">
                       {
                         totalHadir
                       }{" "}
                       data hadir
                     </span>
 
-                    <span className="text-[11px] text-slate-400">
+                    <span className="text-[11px] theme-text-muted">
                       {
                         totalSiswa
                       }{" "}
@@ -1325,15 +1251,18 @@ export default function AbsenSiswaPage() {
               </div>
             </div>
 
-            {/* =================================================
-                FILTER
-            ================================================= */}
+            {/* FILTER */}
 
-            <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm flex flex-col lg:flex-row gap-3">
+            <div className="theme-card rounded-xl border theme-border p-4 shadow-sm flex flex-col lg:flex-row gap-3">
+
               <div className="relative flex-1">
                 <Search
                   size={16}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  className="
+                    absolute left-3 top-1/2
+                    -translate-y-1/2
+                    theme-text-muted
+                  "
                 />
 
                 <input
@@ -1345,14 +1274,23 @@ export default function AbsenSiswaPage() {
                     )
                   }
                   placeholder="Cari nama, NISN, atau kelas..."
-                  className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-[#155DFC]/25 focus:border-[#155DFC]/50 text-slate-800"
+                  className="
+                    w-full pl-9 pr-3 py-2
+                    text-sm rounded-lg
+                    theme-input
+                    focus:outline-none
+                  "
                 />
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
+
                 <Filter
                   size={15}
-                  className="text-[#155DFC] hidden sm:block"
+                  className="
+                    text-[var(--color-primary)]
+                    hidden sm:block
+                  "
                 />
 
                 {/* DATE */}
@@ -1360,7 +1298,12 @@ export default function AbsenSiswaPage() {
                 <div className="relative">
                   <CalendarDays
                     size={14}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+                    className="
+                      absolute left-3 top-1/2
+                      -translate-y-1/2
+                      theme-text-muted
+                      pointer-events-none
+                    "
                   />
 
                   <input
@@ -1368,15 +1311,18 @@ export default function AbsenSiswaPage() {
                     value={
                       tanggalFilter
                     }
-                    onChange={(
-                      e
-                    ) =>
+                    onChange={(e) =>
                       setTanggalFilter(
-                        e.target
-                          .value
+                        e.target.value
                       )
                     }
-                    className="text-sm rounded-lg border border-slate-200 pl-9 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#155DFC]/25 focus:border-[#155DFC]/50 bg-white text-slate-800 font-medium"
+                    className="
+                      text-sm rounded-lg
+                      theme-input
+                      pl-9 pr-3 py-2
+                      font-medium
+                      focus:outline-none
+                    "
                   />
                 </div>
 
@@ -1386,25 +1332,24 @@ export default function AbsenSiswaPage() {
                   value={
                     kelasFilter
                   }
-                  onChange={(
-                    e
-                  ) =>
+                  onChange={(e) =>
                     setKelasFilter(
-                      e.target
-                        .value
+                      e.target.value
                     )
                   }
-                  className="text-sm rounded-lg border border-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#155DFC]/25 focus:border-[#155DFC]/50 bg-white text-slate-800 font-medium"
+                  className="
+                    text-sm rounded-lg
+                    theme-input
+                    px-3 py-2
+                    font-medium
+                    focus:outline-none
+                  "
                 >
                   {kelasOptions.map(
                     (item) => (
                       <option
-                        key={
-                          item
-                        }
-                        value={
-                          item
-                        }
+                        key={item}
+                        value={item}
                       >
                         {item}
                       </option>
@@ -1418,25 +1363,24 @@ export default function AbsenSiswaPage() {
                   value={
                     statusFilter
                   }
-                  onChange={(
-                    e
-                  ) =>
+                  onChange={(e) =>
                     setStatusFilter(
-                      e.target
-                        .value
+                      e.target.value
                     )
                   }
-                  className="text-sm rounded-lg border border-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-[#155DFC]/25 focus:border-[#155DFC]/50 bg-white text-slate-800 font-medium"
+                  className="
+                    text-sm rounded-lg
+                    theme-input
+                    px-3 py-2
+                    font-medium
+                    focus:outline-none
+                  "
                 >
                   {STATUS_OPTIONS.map(
                     (item) => (
                       <option
-                        key={
-                          item
-                        }
-                        value={
-                          item
-                        }
+                        key={item}
+                        value={item}
                       >
                         {item}
                       </option>
@@ -1451,23 +1395,28 @@ export default function AbsenSiswaPage() {
                   onClick={
                     resetFilter
                   }
-                  className="px-3 py-2 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-500 hover:bg-slate-50"
+                  className="
+                    px-3 py-2 rounded-lg
+                    border theme-border
+                    theme-card
+                    theme-text-muted
+                    text-xs font-semibold
+                    theme-sidebar-hover
+                  "
                 >
                   Reset
                 </button>
               </div>
             </div>
 
-            {/* =================================================
-                TABLE
-            ================================================= */}
+            {/* TABLE */}
 
-            <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden">
+            <div className="theme-card rounded-xl border theme-border shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm border-collapse">
-                  <thead>
-                    <tr className="bg-gradient-to-r from-[#155DFC] to-[#0d47c9] text-white">
 
+                  <thead>
+                    <tr className="theme-primary">
                       <th className="text-center font-semibold px-4 py-3 w-[60px]">
                         No
                       </th>
@@ -1512,15 +1461,15 @@ export default function AbsenSiswaPage() {
                           <div className="flex flex-col items-center">
                             <RefreshCw
                               size={24}
-                              className="text-[#155DFC] animate-spin"
+                              className="text-[var(--color-primary)] animate-spin"
                             />
 
-                            <p className="text-sm font-semibold text-slate-700 mt-3">
+                            <p className="text-sm font-semibold theme-text-secondary mt-3">
                               Mengambil data
                               absensi...
                             </p>
 
-                            <p className="text-xs text-slate-400 mt-1">
+                            <p className="text-xs theme-text-muted mt-1">
                               Data kelas dan
                               absensi sedang
                               dimuat dari
@@ -1529,8 +1478,7 @@ export default function AbsenSiswaPage() {
                           </div>
                         </td>
                       </tr>
-                    ) : filteredAbsensi.length >
-                      0 ? (
+                    ) : filteredAbsensi.length > 0 ? (
                       filteredAbsensi.map(
                         (
                           item,
@@ -1541,16 +1489,15 @@ export default function AbsenSiswaPage() {
                               item.id ||
                               `${item.nisn}-${index}`
                             }
-                            className={`border-b border-slate-100 last:border-0 transition-colors hover:bg-[#eaf1ff] ${
-                              index %
-                                2 ===
-                              0
-                                ? "bg-[#f7f9ff]"
-                                : "bg-white"
-                            }`}
+                            className="
+                              border-b theme-border-soft
+                              last:border-0
+                              transition-colors
+                              theme-table-hover
+                            "
                           >
                             <td className="px-4 py-3 text-center">
-                              <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg bg-[#eaf1ff] text-[#155DFC] border border-[#c7dbff] text-xs font-bold">
+                              <span className="inline-flex items-center justify-center w-7 h-7 rounded-lg theme-info border theme-border text-xs font-bold">
                                 {
                                   index +
                                   1
@@ -1567,13 +1514,13 @@ export default function AbsenSiswaPage() {
                                 />
 
                                 <div>
-                                  <p className="font-semibold text-slate-900">
+                                  <p className="font-semibold theme-text">
                                     {
                                       item.nama
                                     }
                                   </p>
 
-                                  <p className="text-[11px] text-slate-400 mt-0.5">
+                                  <p className="text-[11px] theme-text-muted mt-0.5">
                                     NISN:{" "}
                                     {
                                       item.nisn
@@ -1584,7 +1531,7 @@ export default function AbsenSiswaPage() {
                             </td>
 
                             <td className="px-4 py-3">
-                              <span className="inline-flex items-center justify-center min-w-[48px] px-2.5 py-1 rounded-lg text-xs font-bold text-[#155DFC] bg-[#eaf1ff] border border-[#c7dbff]">
+                              <span className="inline-flex items-center justify-center min-w-[48px] px-2.5 py-1 rounded-lg text-xs font-bold theme-info border theme-border">
                                 {
                                   item.kelas
                                 }
@@ -1593,14 +1540,14 @@ export default function AbsenSiswaPage() {
 
                             <td className="px-4 py-3">
                               <div>
-                                <p className="text-xs font-medium text-slate-700">
+                                <p className="text-xs font-medium theme-text-secondary">
                                   {
                                     item.tanggalLabel
                                   }
                                 </p>
 
                                 {item.dibuatPada && (
-                                  <p className="text-[10px] text-slate-400 mt-0.5">
+                                  <p className="text-[10px] theme-text-muted mt-0.5">
                                     dibuat{" "}
                                     {formatTanggal(
                                       item.dibuatPada
@@ -1613,13 +1560,11 @@ export default function AbsenSiswaPage() {
                             <td className="px-4 py-3">
                               <div className="flex items-center gap-2">
                                 <Clock3
-                                  size={
-                                    14
-                                  }
-                                  className="text-slate-400"
+                                  size={14}
+                                  className="theme-text-muted"
                                 />
 
-                                <span className="font-mono text-xs font-medium text-slate-600">
+                                <span className="font-mono text-xs font-medium theme-text-secondary">
                                   {
                                     item.jamMasuk
                                   }
@@ -1636,18 +1581,15 @@ export default function AbsenSiswaPage() {
                             </td>
 
                             <td className="px-4 py-3">
-                              {item.lokasi !==
-                              "-" ? (
+                              {item.lokasi !== "-" ? (
                                 <div className="flex items-center gap-2">
                                   <MapPin
-                                    size={
-                                      14
-                                    }
-                                    className="text-[#155DFC]"
+                                    size={14}
+                                    className="text-[var(--color-primary)]"
                                   />
 
                                   <div>
-                                    <p className="text-xs font-medium text-slate-700">
+                                    <p className="text-xs font-medium theme-text-secondary">
                                       {
                                         item.lokasi
                                       }
@@ -1659,7 +1601,7 @@ export default function AbsenSiswaPage() {
                                       Number.isFinite(
                                         item.longitude
                                       ) && (
-                                        <p className="text-[10px] font-mono text-slate-400 mt-0.5">
+                                        <p className="text-[10px] font-mono theme-text-muted mt-0.5">
                                           {item.latitude.toFixed(
                                             4
                                           )}
@@ -1672,7 +1614,7 @@ export default function AbsenSiswaPage() {
                                   </div>
                                 </div>
                               ) : (
-                                <span className="text-xs text-slate-400">
+                                <span className="text-xs theme-text-muted">
                                   Tidak
                                   tersedia
                                 </span>
@@ -1688,12 +1630,18 @@ export default function AbsenSiswaPage() {
                                       item
                                     )
                                   }
-                                  className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-[#155DFC] bg-[#eaf1ff] border border-[#c7dbff] hover:bg-[#d6e6ff] text-xs font-medium transition-colors"
+                                  className="
+                                    inline-flex items-center gap-1.5
+                                    px-2.5 py-1.5
+                                    rounded-md
+                                    theme-info
+                                    border theme-border
+                                    text-xs font-medium
+                                    transition-colors
+                                  "
                                 >
                                   <Eye
-                                    size={
-                                      13
-                                    }
+                                    size={13}
                                   />
 
                                   Detail
@@ -1710,22 +1658,20 @@ export default function AbsenSiswaPage() {
                           className="px-4 py-12 text-center"
                         >
                           <div className="flex flex-col items-center">
-                            <div className="w-12 h-12 rounded-full bg-[#eaf1ff] flex items-center justify-center mb-3">
+
+                            <div className="w-12 h-12 rounded-full theme-info flex items-center justify-center mb-3">
                               <Search
-                                size={
-                                  20
-                                }
-                                className="text-[#155DFC]"
+                                size={20}
                               />
                             </div>
 
-                            <p className="text-sm font-semibold text-slate-700">
+                            <p className="text-sm font-semibold theme-text-secondary">
                               Data absensi
                               tidak
                               ditemukan
                             </p>
 
-                            <p className="text-xs text-slate-400 mt-1">
+                            <p className="text-xs theme-text-muted mt-1">
                               Coba kosongkan
                               tanggal atau
                               ubah filter
@@ -1742,10 +1688,10 @@ export default function AbsenSiswaPage() {
 
               {/* TABLE FOOTER */}
 
-              <div className="px-4 py-3 border-t border-slate-100 bg-slate-50/60 flex items-center justify-between">
-                <p className="text-xs text-slate-500">
+              <div className="px-4 py-3 border-t theme-border theme-card-soft flex items-center justify-between">
+                <p className="text-xs theme-text-muted">
                   Menampilkan{" "}
-                  <span className="font-semibold text-slate-700">
+                  <span className="font-semibold theme-text-secondary">
                     {
                       filteredAbsensi.length
                     }
@@ -1757,10 +1703,10 @@ export default function AbsenSiswaPage() {
                 <div className="flex items-center gap-2">
                   <ClipboardCheck
                     size={15}
-                    className="text-[#155DFC]"
+                    className="text-[var(--color-primary)]"
                   />
 
-                  <span className="text-[11px] text-slate-400">
+                  <span className="text-[11px] theme-text-muted">
                     Monitoring
                     Absensi
                     Siswa
@@ -1779,18 +1725,18 @@ export default function AbsenSiswaPage() {
       {showDetail &&
         selectedAbsen && (
           <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-            <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto bg-white rounded-2xl shadow-2xl">
+            <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto theme-card rounded-2xl shadow-2xl">
 
               {/* MODAL HEADER */}
 
-              <div className="flex items-center justify-between p-5 border-b border-slate-200">
+              <div className="flex items-center justify-between p-5 border-b theme-border">
                 <div>
-                  <h3 className="font-bold text-slate-800">
+                  <h3 className="font-bold theme-text">
                     Detail Absensi
                     Siswa
                   </h3>
 
-                  <p className="text-xs text-slate-500 mt-1">
+                  <p className="text-xs theme-text-muted mt-1">
                     Data diambil dari
                     backend
                   </p>
@@ -1803,7 +1749,13 @@ export default function AbsenSiswaPage() {
                       false
                     )
                   }
-                  className="w-9 h-9 rounded-lg hover:bg-slate-100 flex items-center justify-center text-slate-500"
+                  className="
+                    w-9 h-9 rounded-lg
+                    theme-sidebar-hover
+                    flex items-center
+                    justify-center
+                    theme-text-muted
+                  "
                 >
                   <XCircle
                     size={20}
@@ -1815,21 +1767,21 @@ export default function AbsenSiswaPage() {
 
                 {/* PROFIL */}
 
-                <div className="flex items-center gap-4 p-4 rounded-xl bg-[#f7f9ff] border border-[#eaf1ff]">
-                  <div className="w-14 h-14 rounded-full bg-gradient-to-br from-[#155DFC] to-[#0d47c9] text-white flex items-center justify-center font-bold">
+                <div className="flex items-center gap-4 p-4 rounded-xl theme-info border theme-border">
+                  <div className="w-14 h-14 rounded-full theme-primary flex items-center justify-center font-bold">
                     {getInitials(
                       selectedAbsen.nama
                     )}
                   </div>
 
                   <div className="flex-1">
-                    <h4 className="font-bold text-slate-800">
+                    <h4 className="font-bold theme-text">
                       {
                         selectedAbsen.nama
                       }
                     </h4>
 
-                    <p className="text-xs text-slate-500 mt-1">
+                    <p className="text-xs theme-text-muted mt-1">
                       NISN:{" "}
                       {
                         selectedAbsen.nisn
@@ -1837,7 +1789,7 @@ export default function AbsenSiswaPage() {
                     </p>
 
                     <div className="flex flex-wrap gap-2 mt-2">
-                      <span className="px-2.5 py-1 rounded-lg bg-[#eaf1ff] border border-[#c7dbff] text-[#155DFC] text-[11px] font-bold">
+                      <span className="px-2.5 py-1 rounded-lg theme-info border theme-border text-[11px] font-bold">
                         {
                           selectedAbsen.kelas
                         }
@@ -1900,24 +1852,22 @@ export default function AbsenSiswaPage() {
 
                   {/* FOTO */}
 
-                  <div className="border border-slate-200 rounded-xl overflow-hidden">
-                    <div className="px-4 py-3 bg-slate-50 border-b border-slate-200">
+                  <div className="border theme-border rounded-xl overflow-hidden">
+                    <div className="px-4 py-3 theme-card-soft border-b theme-border">
                       <div className="flex items-center gap-2">
                         <Camera
-                          size={
-                            15
-                          }
-                          className="text-[#155DFC]"
+                          size={15}
+                          className="text-[var(--color-primary)]"
                         />
 
-                        <p className="text-xs font-semibold text-slate-700">
+                        <p className="text-xs font-semibold theme-text-secondary">
                           Foto
                           Kehadiran
                         </p>
                       </div>
                     </div>
 
-                    <div className="aspect-video bg-slate-100 flex items-center justify-center">
+                    <div className="aspect-video theme-card-soft flex items-center justify-center">
                       {selectedAbsen.foto ? (
                         <img
                           src={
@@ -1929,13 +1879,11 @@ export default function AbsenSiswaPage() {
                       ) : (
                         <div className="flex flex-col items-center">
                           <Camera
-                            size={
-                              32
-                            }
-                            className="text-slate-300"
+                            size={32}
+                            className="theme-text-placeholder"
                           />
 
-                          <p className="text-xs text-slate-400 mt-2">
+                          <p className="text-xs theme-text-muted mt-2">
                             Foto belum
                             tersedia
                           </p>
@@ -1946,17 +1894,15 @@ export default function AbsenSiswaPage() {
 
                   {/* GPS */}
 
-                  <div className="border border-slate-200 rounded-xl overflow-hidden">
-                    <div className="px-4 py-3 bg-slate-50 border-b border-slate-200">
+                  <div className="border theme-border rounded-xl overflow-hidden">
+                    <div className="px-4 py-3 theme-card-soft border-b theme-border">
                       <div className="flex items-center gap-2">
                         <Navigation
-                          size={
-                            15
-                          }
-                          className="text-[#155DFC]"
+                          size={15}
+                          className="text-[var(--color-primary)]"
                         />
 
-                        <p className="text-xs font-semibold text-slate-700">
+                        <p className="text-xs font-semibold theme-text-secondary">
                           Lokasi
                           GPS
                         </p>
@@ -1968,17 +1914,20 @@ export default function AbsenSiswaPage() {
                         selectedAbsen.latitude
                       ) ? (
                         <>
-                          <div className="h-28 rounded-lg bg-[#eaf1ff] flex items-center justify-center relative overflow-hidden">
+                          <div className="h-28 rounded-lg theme-info flex items-center justify-center relative overflow-hidden">
                             <div className="absolute inset-0 opacity-30">
-                              <div className="w-full h-full bg-[linear-gradient(90deg,transparent_49%,#155DFC_50%,transparent_51%),linear-gradient(0deg,transparent_49%,#155DFC_50%,transparent_51%)] bg-[size:30px_30px]" />
+                              <div
+                                className="
+                                  w-full h-full
+                                  bg-[linear-gradient(90deg,transparent_49%,var(--color-primary)_50%,transparent_51%),linear-gradient(0deg,transparent_49%,var(--color-primary)_50%,transparent_51%)]
+                                  bg-[size:30px_30px]
+                                "
+                              />
                             </div>
 
-                            <div className="relative w-10 h-10 rounded-full bg-[#155DFC]/20 flex items-center justify-center">
+                            <div className="relative w-10 h-10 rounded-full theme-primary flex items-center justify-center">
                               <MapPin
-                                size={
-                                  22
-                                }
-                                className="text-[#155DFC]"
+                                size={22}
                                 fill="currentColor"
                               />
                             </div>
@@ -1987,11 +1936,11 @@ export default function AbsenSiswaPage() {
                           <div className="mt-3 space-y-2">
 
                             <div>
-                              <p className="text-[10px] text-slate-400">
+                              <p className="text-[10px] theme-text-muted">
                                 Latitude
                               </p>
 
-                              <p className="font-mono text-xs text-slate-700">
+                              <p className="font-mono text-xs theme-text-secondary">
                                 {selectedAbsen.latitude.toFixed(
                                   6
                                 )}
@@ -1999,11 +1948,11 @@ export default function AbsenSiswaPage() {
                             </div>
 
                             <div>
-                              <p className="text-[10px] text-slate-400">
+                              <p className="text-[10px] theme-text-muted">
                                 Longitude
                               </p>
 
-                              <p className="font-mono text-xs text-slate-700">
+                              <p className="font-mono text-xs theme-text-secondary">
                                 {Number.isFinite(
                                   selectedAbsen.longitude
                                 )
@@ -2017,11 +1966,9 @@ export default function AbsenSiswaPage() {
                             {Number.isFinite(
                               selectedAbsen.akurasi
                             ) && (
-                              <div className="flex items-center gap-2 text-[11px] text-emerald-600">
+                              <div className="flex items-center gap-2 text-[11px] theme-success">
                                 <Navigation
-                                  size={
-                                    12
-                                  }
+                                  size={12}
                                 />
 
                                 Akurasi GPS
@@ -2037,13 +1984,11 @@ export default function AbsenSiswaPage() {
                       ) : (
                         <div className="h-44 flex flex-col items-center justify-center">
                           <MapPin
-                            size={
-                              32
-                            }
-                            className="text-slate-300"
+                            size={32}
+                            className="theme-text-placeholder"
                           />
 
-                          <p className="text-xs text-slate-400 mt-2">
+                          <p className="text-xs theme-text-muted mt-2">
                             Lokasi tidak
                             tersedia
                           </p>
@@ -2055,12 +2000,12 @@ export default function AbsenSiswaPage() {
 
                 {/* KETERANGAN */}
 
-                <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                  <p className="text-[10px] uppercase tracking-wide font-bold text-slate-400">
+                <div className="p-4 rounded-xl theme-card-soft border theme-border">
+                  <p className="text-[10px] uppercase tracking-wide font-bold theme-text-muted">
                     Keterangan
                   </p>
 
-                  <p className="text-sm text-slate-700 mt-2">
+                  <p className="text-sm theme-text-secondary mt-2">
                     {
                       selectedAbsen.keterangan
                     }
@@ -2076,7 +2021,13 @@ export default function AbsenSiswaPage() {
                       false
                     )
                   }
-                  className="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-[#155DFC] to-[#0d47c9] text-white font-semibold text-sm hover:brightness-110 transition-all"
+                  className="
+                    w-full px-4 py-3
+                    rounded-xl
+                    theme-primary
+                    font-semibold text-sm
+                    transition-all
+                  "
                 >
                   Tutup Detail
                 </button>

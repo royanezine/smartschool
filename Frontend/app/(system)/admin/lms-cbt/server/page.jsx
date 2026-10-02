@@ -107,8 +107,23 @@ const activities = [
 ];
 
 export default function ServerCbtPage() {
+  const themePrimarySoft =
+    "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
+
+  const themePrimaryHover =
+    "hover:bg-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
+
+  const themeTextHover =
+    "hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+  const themePrimaryShadow =
+    "shadow-[0_8px_24px_color-mix(in_srgb,var(--color-primary)_16%,transparent)]";
+
+  const themeCardShadow =
+    "shadow-[0_6px_24px_color-mix(in_srgb,var(--color-text)_6%,transparent)]";
+
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div className="theme-page min-h-screen flex">
       <Sidebar />
 
       <div className="flex-1 min-w-0 flex flex-col">
@@ -116,10 +131,16 @@ export default function ServerCbtPage() {
 
         <main className="flex-1 px-4 md:px-6 lg:px-8 py-6">
           {/* Breadcrumb */}
-          <div className="flex items-center gap-2 text-sm text-slate-500 mb-5">
-            <span>CBT</span>
-            <span>/</span>
-            <span className="text-slate-800 font-medium">
+          <div className="flex items-center gap-2 text-sm mb-5">
+            <span className="theme-text-muted">
+              CBT
+            </span>
+
+            <span className="theme-text-placeholder">
+              /
+            </span>
+
+            <span className="theme-text font-medium">
               Kapasitas & Server
             </span>
           </div>
@@ -127,49 +148,56 @@ export default function ServerCbtPage() {
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-2xl font-bold text-slate-800">
+              <h1 className="text-2xl font-bold theme-text">
                 Kapasitas & Server CBT
               </h1>
 
-              <p className="text-sm text-slate-500 mt-1">
+              <p className="text-sm theme-text-secondary mt-1">
                 Monitoring kondisi server dan aktivitas ujian CBT
               </p>
             </div>
 
-            <div className="flex items-center gap-2 px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-lg">
-              <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <div className="flex items-center gap-2 px-3 py-2 theme-success rounded-lg">
+              <span className="w-2 h-2 rounded-full bg-[var(--color-success)] animate-pulse" />
 
-              <span className="text-sm font-medium text-emerald-700">
+              <span className="text-sm font-medium">
                 Server Online
               </span>
             </div>
           </div>
 
           {/* Server Overview */}
-          <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-5 mb-6">
+          <div
+            className={`theme-card border theme-border rounded-xl ${themeCardShadow} p-5 mb-6`}
+          >
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-xl bg-slate-100 flex items-center justify-center">
-                  <Server size={24} className="text-slate-700" />
+                <div
+                  className={`w-12 h-12 rounded-xl ${themePrimarySoft} flex items-center justify-center`}
+                >
+                  <Server
+                    size={24}
+                    className="text-[var(--color-primary)]"
+                  />
                 </div>
 
                 <div>
-                  <h2 className="font-semibold text-slate-800">
+                  <h2 className="font-semibold theme-text">
                     SmartSchool CBT Server
                   </h2>
 
-                  <p className="text-sm text-slate-500 mt-1">
+                  <p className="text-sm theme-text-secondary mt-1">
                     Server utama sistem ujian
                   </p>
                 </div>
               </div>
 
               <div className="text-left sm:text-right">
-                <p className="text-xs text-slate-400">
+                <p className="text-xs theme-text-muted">
                   Uptime
                 </p>
 
-                <p className="font-semibold text-slate-700 mt-1">
+                <p className="font-semibold theme-text-secondary mt-1">
                   14 Hari 08 Jam
                 </p>
               </div>
@@ -184,28 +212,33 @@ export default function ServerCbtPage() {
               return (
                 <div
                   key={item.title}
-                  className="bg-white border border-slate-200 rounded-xl shadow-sm p-5"
+                  className={`theme-card border theme-border rounded-xl ${themeCardShadow} p-5`}
                 >
                   <div className="flex items-start justify-between">
                     <div>
-                      <p className="text-sm text-slate-500">
+                      <p className="text-sm theme-text-secondary">
                         {item.title}
                       </p>
 
-                      <p className="text-xl font-bold text-slate-800 mt-2">
+                      <p className="text-xl font-bold theme-text mt-2">
                         {item.value}
                       </p>
                     </div>
 
-                    <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center">
-                      <Icon size={20} className="text-slate-600" />
+                    <div
+                      className={`w-10 h-10 rounded-lg ${themePrimarySoft} flex items-center justify-center`}
+                    >
+                      <Icon
+                        size={20}
+                        className="text-[var(--color-primary)]"
+                      />
                     </div>
                   </div>
 
                   <div className="mt-4">
-                    <div className="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
+                    <div className="w-full h-2 theme-card-soft rounded-full overflow-hidden">
                       <div
-                        className="h-full bg-slate-700 rounded-full"
+                        className="h-full bg-[var(--color-primary)] rounded-full transition-all"
                         style={{
                           width: `${item.progress}%`,
                         }}
@@ -213,11 +246,11 @@ export default function ServerCbtPage() {
                     </div>
 
                     <div className="flex items-center justify-between mt-2">
-                      <span className="text-xs text-slate-400">
+                      <span className="text-xs theme-text-muted">
                         Penggunaan
                       </span>
 
-                      <span className="text-xs font-medium text-emerald-600">
+                      <span className="text-xs font-medium text-[var(--color-success)]">
                         {item.status}
                       </span>
                     </div>
@@ -253,46 +286,49 @@ export default function ServerCbtPage() {
 
           {/* Active Exams + Activity */}
           <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+
             {/* Active Exams */}
-            <div className="xl:col-span-2 bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-              <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
+            <div
+              className={`xl:col-span-2 theme-card border theme-border rounded-xl ${themeCardShadow} overflow-hidden`}
+            >
+              <div className="px-5 py-4 border-b theme-border-soft flex items-center justify-between">
                 <div>
-                  <h2 className="font-semibold text-slate-800">
+                  <h2 className="font-semibold theme-text">
                     Aktivitas Ujian
                   </h2>
 
-                  <p className="text-xs text-slate-400 mt-1">
+                  <p className="text-xs theme-text-muted mt-1">
                     Ujian yang sedang berjalan di server
                   </p>
                 </div>
 
                 <Activity
                   size={20}
-                  className="text-slate-500"
+                  className="theme-text-muted"
                 />
               </div>
 
-              <div className="divide-y divide-slate-100">
+              <div className="divide-y theme-border-soft">
                 {activeExams.map((item) => (
                   <div
                     key={item.id}
-                    className="p-5 hover:bg-slate-50/70 transition"
+                    className={`${themePrimaryHover} p-5 transition`}
                   >
                     <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
                       <div className="min-w-0">
                         <div className="flex items-center gap-2">
-                          <h3 className="font-semibold text-slate-800">
+                          <h3 className="font-semibold theme-text">
                             {item.exam}
                           </h3>
 
                           <StatusBadge status={item.status} />
                         </div>
 
-                        <p className="text-sm text-slate-500 mt-1">
+                        <p className="text-sm theme-text-secondary mt-1">
                           {item.subject} • {item.className}
                         </p>
 
-                        <div className="flex flex-wrap items-center gap-4 mt-3 text-xs text-slate-400">
+                        <div className="flex flex-wrap items-center gap-4 mt-3 text-xs theme-text-muted">
                           <span className="flex items-center gap-1">
                             <Clock3 size={14} />
                             {item.duration}
@@ -306,25 +342,28 @@ export default function ServerCbtPage() {
                       </div>
 
                       <div className="lg:text-right">
-                        <p className="text-xs text-slate-400">
+                        <p className="text-xs theme-text-muted">
                           Online
                         </p>
 
-                        <p className="text-lg font-bold text-slate-800 mt-1">
+                        <p className="text-lg font-bold theme-text mt-1">
                           {item.online}
-                          <span className="text-sm font-normal text-slate-400">
+
+                          <span className="text-sm font-normal theme-text-muted">
                             {" "}
                             / {item.participants}
                           </span>
                         </p>
 
-                        <div className="w-28 h-1.5 bg-slate-100 rounded-full mt-2 lg:ml-auto overflow-hidden">
+                        <div className="w-28 h-1.5 theme-card-soft rounded-full mt-2 lg:ml-auto overflow-hidden">
                           <div
-                            className="h-full bg-emerald-500 rounded-full"
+                            className="h-full bg-[var(--color-success)] rounded-full"
                             style={{
                               width: `${
                                 item.participants
-                                  ? (item.online / item.participants) * 100
+                                  ? (item.online /
+                                      item.participants) *
+                                    100
                                   : 0
                               }%`,
                             }}
@@ -338,28 +377,31 @@ export default function ServerCbtPage() {
             </div>
 
             {/* Server Activity */}
-            <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-              <div className="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
+            <div
+              className={`theme-card border theme-border rounded-xl ${themeCardShadow} overflow-hidden`}
+            >
+              <div className="px-5 py-4 border-b theme-border-soft flex items-center justify-between">
                 <div>
-                  <h2 className="font-semibold text-slate-800">
+                  <h2 className="font-semibold theme-text">
                     Aktivitas Server
                   </h2>
 
-                  <p className="text-xs text-slate-400 mt-1">
+                  <p className="text-xs theme-text-muted mt-1">
                     Aktivitas terbaru
                   </p>
                 </div>
 
                 <RefreshCw
                   size={18}
-                  className="text-slate-400"
+                  className="theme-text-muted"
                 />
               </div>
 
               <div className="p-5">
                 <div className="space-y-5">
                   {activities.map((item, index) => {
-                    const isWarning = item.type === "warning";
+                    const isWarning =
+                      item.type === "warning";
 
                     return (
                       <div
@@ -370,22 +412,22 @@ export default function ServerCbtPage() {
                           {isWarning ? (
                             <CircleAlert
                               size={18}
-                              className="text-amber-500"
+                              className="text-[var(--color-warning)]"
                             />
                           ) : (
                             <CircleCheck
                               size={18}
-                              className="text-emerald-500"
+                              className="text-[var(--color-success)]"
                             />
                           )}
                         </div>
 
                         <div className="min-w-0">
-                          <p className="text-sm font-medium text-slate-700">
+                          <p className="text-sm font-medium theme-text-secondary">
                             {item.title}
                           </p>
 
-                          <p className="text-xs text-slate-400 mt-1">
+                          <p className="text-xs theme-text-muted mt-1">
                             {item.time}
                           </p>
                         </div>
@@ -398,26 +440,34 @@ export default function ServerCbtPage() {
           </div>
 
           {/* Server Info */}
-          <div className="mt-6 bg-slate-800 rounded-xl p-5 text-white">
+          <div
+            className={`mt-6 theme-card border theme-border rounded-xl ${themeCardShadow} p-5`}
+          >
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center">
-                  <Server size={20} />
+                <div
+                  className={`w-10 h-10 rounded-lg ${themePrimarySoft} flex items-center justify-center`}
+                >
+                  <Server
+                    size={20}
+                    className="text-[var(--color-primary)]"
+                  />
                 </div>
 
                 <div>
-                  <p className="font-semibold">
+                  <p className="font-semibold theme-text">
                     Sistem CBT berjalan normal
                   </p>
 
-                  <p className="text-xs text-slate-300 mt-1">
+                  <p className="text-xs theme-text-muted mt-1">
                     Tidak ada gangguan pada layanan ujian saat ini.
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 text-sm text-emerald-300">
-                <span className="w-2 h-2 rounded-full bg-emerald-400" />
+              <div className="flex items-center gap-2 text-sm text-[var(--color-success)]">
+                <span className="w-2 h-2 rounded-full bg-[var(--color-success)]" />
+
                 Semua sistem normal
               </div>
             </div>
@@ -434,25 +484,33 @@ function SummaryCard({
   value,
   description,
 }) {
+  const themePrimarySoft =
+    "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
+
   return (
-    <div className="bg-white border border-slate-200 rounded-xl shadow-sm p-5">
+    <div className="theme-card border theme-border rounded-xl shadow-[0_6px_24px_color-mix(in_srgb,var(--color-text)_6%,transparent)] p-5">
       <div className="flex items-center gap-4">
-        <div className="w-11 h-11 rounded-lg bg-slate-100 flex items-center justify-center">
-          <Icon size={21} className="text-slate-600" />
+        <div
+          className={`w-11 h-11 rounded-lg ${themePrimarySoft} flex items-center justify-center`}
+        >
+          <Icon
+            size={21}
+            className="text-[var(--color-primary)]"
+          />
         </div>
 
         <div>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm theme-text-secondary">
             {title}
           </p>
 
-          <p className="text-xl font-bold text-slate-800 mt-1">
+          <p className="text-xl font-bold theme-text mt-1">
             {value}
           </p>
         </div>
       </div>
 
-      <p className="text-xs text-slate-400 mt-4">
+      <p className="text-xs theme-text-muted mt-4">
         {description}
       </p>
     </div>
@@ -464,15 +522,17 @@ function StatusBadge({ status }) {
 
   return (
     <span
-      className={`inline-flex items-center gap-1 px-2 py-1 rounded-full border text-[11px] font-medium ${
+      className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-[11px] font-medium ${
         selesai
-          ? "bg-violet-50 text-violet-700 border-violet-200"
-          : "bg-emerald-50 text-emerald-700 border-emerald-200"
+          ? "theme-card-soft theme-text-muted"
+          : "theme-success"
       }`}
     >
       <span
         className={`w-1.5 h-1.5 rounded-full ${
-          selesai ? "bg-violet-500" : "bg-emerald-500"
+          selesai
+            ? "bg-[var(--color-text-muted)]"
+            : "bg-[var(--color-success)]"
         }`}
       />
 

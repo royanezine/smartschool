@@ -1,732 +1,1071 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import {
+  Camera,
+  MapPin,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  X,
+  Loader2,
+  Calendar,
+  BookOpen,
+  UserCheck,
+  Activity,
+  Database,
+  Shield,
+} from "lucide-react";
 
 import Sidebar from "../../../components/Sidebar";
 import Header from "../../../components/Header";
 
-import {
-  Calendar,
-  Clock,
-  MapPin,
-  ChevronRight,
-  Sparkles,
-  CheckSquare,
-  FileText,
-  CalendarDays,
-  CircleDot,
-  RefreshCw,
-  AlertCircle,
-} from "lucide-react";
-
-/* =========================================================
-   CONFIG
-========================================================= */
-
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
-const BASE_ENDPOINT = "/api/v1/jadwal-mengajar";
+/* =========================================================
+   GLOBAL THEME HELPERS
+========================================================= */
 
-const HARI_OPTIONS = [
-  "Senin",
-  "Selasa",
-  "Rabu",
-  "Kamis",
-  "Jumat",
-];
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeDashedBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_14%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
 /* =========================================================
-   HELPER - TOKEN
+   AUTH
 ========================================================= */
 
 function getToken() {
-  if (typeof window === "undefined") {
-    return null;
-  }
+  if (typeof window === "undefined") return null;
 
-  const tokenKeys = [
-    "token",
-    "accessToken",
-    "access_token",
-    "authToken",
-    "jwt",
-  ];
-
-  for (const key of tokenKeys) {
-    const value = localStorage.getItem(key);
-
-    if (value && value.trim()) {
-      return value
-        .trim()
-        .replace(/^Bearer\s+/i, "");
-    }
-  }
-
-  return null;
+  return localStorage.getItem("token");
 }
 
 /* =========================================================
-   HELPER - DECODE JWT
+   RESPONSE
 ========================================================= */
 
-function getUserFromToken() {
-  const token = getToken();
+async function parseResponse(response) {
+  const text = await response.text();
 
-  if (!token) {
-    return null;
-  }
+  let data = null;
 
   try {
-    const parts = token.split(".");
-
-    if (parts.length !== 3) {
-      return null;
-    }
-
-    const payload = parts[1];
-
-    const base64 = payload
-      .replace(/-/g, "+")
-      .replace(/_/g, "/");
-
-    const jsonPayload = decodeURIComponent(
-      atob(base64)
-        .split("")
-        .map(
-          (char) =>
-            "%" +
-            ("00" + char.charCodeAt(0).toString(16)).slice(-2)
-        )
-        .join("")
-    );
-
-    return JSON.parse(jsonPayload);
-  } catch (error) {
-    console.error("Gagal membaca JWT:", error);
-    return null;
-  }
-}
-
-/* =========================================================
-   HELPER - REQUEST
-========================================================= */
-
-async function getJadwalMengajar() {
-  const token = getToken();
-
-  if (!token) {
+    data = text ? JSON.parse(text) : null;
+  } catch {
     throw new Error(
-      "Token login tidak ditemukan. Silakan login kembali."
-    );
-  }
-
-  const response = await fetch(
-    `${API_URL}${BASE_ENDPOINT}`,
-    {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      cache: "no-store",
-    }
-  );
-
-  const rawText = await response.text();
-
-  let result = null;
-
-  if (rawText.trim()) {
-    try {
-      result = JSON.parse(rawText);
-    } catch {
-      throw new Error(
-        `Server mengembalikan response bukan JSON (${response.status}).`
-      );
-    }
-  }
-
-  if (response.status === 401) {
-    throw new Error(
-      result?.message ||
-        "Token tidak valid atau sudah expired. Silakan login kembali."
-    );
-  }
-
-  if (response.status === 403) {
-    throw new Error(
-      result?.message ||
-        "Anda tidak memiliki akses ke jadwal mengajar."
+      `Response bukan JSON. Status: ${response.status}`
     );
   }
 
   if (!response.ok) {
     throw new Error(
-      result?.message ||
-        `Gagal mengambil jadwal mengajar (${response.status}).`
+      data?.message ||
+        data?.error ||
+        data?.detail ||
+        `Request gagal (${response.status})`
     );
   }
 
-  return result;
+  return data;
 }
 
 /* =========================================================
-   HELPER - HARI SEKARANG
+   DATE
 ========================================================= */
 
-function getHariSekarang() {
-  const hari = new Date().getDay();
+function getTodayDate() {
+  const now = new Date();
 
-  const mapping = {
-    0: "Minggu",
-    1: "Senin",
-    2: "Selasa",
-    3: "Rabu",
-    4: "Kamis",
-    5: "Jumat",
-    6: "Sabtu",
-  };
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
 
-  return mapping[hari];
+  return `${year}-${month}-${day}`;
 }
 
-/* =========================================================
-   HELPER - JAM KE MENIT
-========================================================= */
+function getCurrentDayName() {
+  const days = [
+    "Minggu",
+    "Senin",
+    "Selasa",
+    "Rabu",
+    "Kamis",
+    "Jumat",
+    "Sabtu",
+  ];
 
-function timeToMinutes(time) {
-  if (!time) {
-    return 0;
-  }
-
-  const [hours, minutes] = String(time)
-    .split(":")
-    .map(Number);
-
-  return hours * 60 + minutes;
+  return days[new Date().getDay()];
 }
 
-/* =========================================================
-   HELPER - FORMAT JAM
-========================================================= */
+function formatTanggal(value) {
+  if (!value) return "-";
 
-function formatTime(time) {
-  if (!time) {
-    return "-";
-  }
-
-  const value = String(time);
-
-  const parts = value.split(":");
-
-  if (parts.length < 2) {
+  try {
+    return new Intl.DateTimeFormat("id-ID", {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    }).format(new Date(value));
+  } catch {
     return value;
   }
+}
 
-  return `${parts[0].padStart(2, "0")}.${parts[1].padStart(
-    2,
-    "0"
-  )}`;
+function formatJam(value) {
+  if (!value) return "-";
+
+  if (
+    typeof value === "string" &&
+    /^\d{1,2}:\d{2}/.test(value)
+  ) {
+    return value.substring(0, 5);
+  }
+
+  try {
+    return new Intl.DateTimeFormat("id-ID", {
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(new Date(value));
+  } catch {
+    return value;
+  }
 }
 
 /* =========================================================
-   HELPER - STATUS JADWAL
+   STATUS
 ========================================================= */
 
-function getStatusJadwal(jadwal) {
-  const hariSekarang = getHariSekarang();
+function getStatusLabel(status) {
+  const value = String(status || "").toLowerCase();
 
-  if (jadwal.hari !== hariSekarang) {
-    return "akan datang";
+  if (value === "hadir") return "Hadir";
+  if (value === "terlambat") return "Terlambat";
+  if (value === "izin") return "Izin";
+  if (value === "sakit") return "Sakit";
+  if (value === "alpha" || value === "alpa") return "Alpa";
+
+  return status || "-";
+}
+
+function getStatusClass(status) {
+  const value = String(status || "").toLowerCase();
+
+  if (value === "hadir") {
+    return `${themeSuccessSurface} ${themeSuccessBorder} text-[var(--color-success)]`;
+  }
+
+  if (value === "terlambat") {
+    return `${themeWarningSurface} ${themeWarningBorder} text-[var(--color-warning)]`;
+  }
+
+  if (value === "izin") {
+    return `${themeInfoSurface} ${themeInfoBorder} text-[var(--color-info)]`;
+  }
+
+  if (value === "sakit") {
+    return `${themeWarningSurface} ${themeWarningBorder} text-[var(--color-warning)]`;
+  }
+
+  if (value === "alpha" || value === "alpa") {
+    return `${themeDangerSurface} ${themeDangerBorder} theme-danger`;
+  }
+
+  return `${themeNeutralSurface} ${themeNeutralBorder} theme-text-secondary`;
+}
+
+/* =========================================================
+   RESPONSE NORMALIZER
+========================================================= */
+
+function getScheduleList(data) {
+  if (Array.isArray(data)) return data;
+
+  if (Array.isArray(data?.data)) return data.data;
+  if (Array.isArray(data?.jadwal)) return data.jadwal;
+  if (Array.isArray(data?.items)) return data.items;
+  if (Array.isArray(data?.rows)) return data.rows;
+
+  return [];
+}
+
+function getAbsensiList(data) {
+  if (Array.isArray(data)) return data;
+
+  if (Array.isArray(data?.data)) return data.data;
+  if (Array.isArray(data?.absensi)) return data.absensi;
+  if (Array.isArray(data?.items)) return data.items;
+  if (Array.isArray(data?.rows)) return data.rows;
+
+  return [];
+}
+
+/* =========================================================
+   SCHEDULE HELPERS
+========================================================= */
+
+function getKelasIdFromSchedule(schedule) {
+  if (!schedule) return null;
+
+  return (
+    schedule.kelasId ||
+    schedule.kelas?.id ||
+    schedule.kelasMapel?.kelasId ||
+    schedule.kelasMapel?.kelas?.id ||
+    schedule.kelasMataPelajaran?.kelasId ||
+    schedule.kelasMataPelajaran?.kelas?.id ||
+    null
+  );
+}
+
+function getScheduleDay(schedule) {
+  if (!schedule) return "";
+
+  return String(
+    schedule.hari ||
+      schedule.hariNama ||
+      schedule.hariMengajar ||
+      schedule.day ||
+      ""
+  ).toLowerCase();
+}
+
+function getScheduleStart(schedule) {
+  return (
+    schedule.jamMulai ||
+    schedule.waktuMulai ||
+    schedule.mulai ||
+    schedule.jam?.mulai ||
+    schedule.jamPelajaran?.mulai ||
+    ""
+  );
+}
+
+function getScheduleEnd(schedule) {
+  return (
+    schedule.jamSelesai ||
+    schedule.waktuSelesai ||
+    schedule.selesai ||
+    schedule.jam?.selesai ||
+    schedule.jamPelajaran?.selesai ||
+    ""
+  );
+}
+
+function getScheduleMapel(schedule) {
+  return (
+    schedule.mapel?.nama ||
+    schedule.mapel?.namaMapel ||
+    schedule.mataPelajaran?.nama ||
+    schedule.mataPelajaran?.namaMapel ||
+    schedule.namaMapel ||
+    schedule.mapelNama ||
+    "Mata Pelajaran"
+  );
+}
+
+function getScheduleKelas(schedule) {
+  return (
+    schedule.kelas?.nama ||
+    schedule.kelas?.namaKelas ||
+    schedule.namaKelas ||
+    schedule.kelasNama ||
+    "Kelas"
+  );
+}
+
+function isTodaySchedule(schedule) {
+  const currentDay = getCurrentDayName().toLowerCase();
+  const scheduleDay = getScheduleDay(schedule);
+
+  if (!scheduleDay) return true;
+
+  return (
+    scheduleDay === currentDay ||
+    scheduleDay.includes(currentDay)
+  );
+}
+
+function getTimeInMinutes(value) {
+  if (!value) return null;
+
+  const match = String(value).match(
+    /(\d{1,2}):(\d{2})/
+  );
+
+  if (!match) return null;
+
+  return (
+    Number(match[1]) * 60 +
+    Number(match[2])
+  );
+}
+
+function isScheduleCurrentlyActive(schedule) {
+  const start = getTimeInMinutes(
+    getScheduleStart(schedule)
+  );
+
+  const end = getTimeInMinutes(
+    getScheduleEnd(schedule)
+  );
+
+  if (start === null || end === null) {
+    return false;
   }
 
   const now = new Date();
 
-  const currentMinutes =
+  const current =
     now.getHours() * 60 + now.getMinutes();
 
-  const mulai = timeToMinutes(jadwal.jamMulai);
-  const selesai = timeToMinutes(jadwal.jamSelesai);
-
-  if (currentMinutes < mulai) {
-    return "akan datang";
-  }
-
-  if (
-    currentMinutes >= mulai &&
-    currentMinutes <= selesai
-  ) {
-    return "berlangsung";
-  }
-
-  return "selesai";
+  return current >= start && current <= end;
 }
 
 /* =========================================================
-   STATUS STYLE
+   PAGE
 ========================================================= */
 
-const statusStyle = {
-  selesai: {
-    bg: "bg-slate-100",
-    text: "text-slate-500",
-    dot: "bg-slate-400",
-    label: "Selesai",
-  },
+export default function PresensiGuruPage() {
+  const videoRef = useRef(null);
+  const canvasRef = useRef(null);
+  const streamRef = useRef(null);
 
-  berlangsung: {
-    bg: "bg-emerald-50",
-    text: "text-emerald-600",
-    dot: "bg-emerald-500",
-    label: "Berlangsung",
-  },
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [user, setUser] = useState(null);
 
-  "akan datang": {
-    bg: "bg-blue-50",
-    text: "text-blue-600",
-    dot: "bg-blue-400",
-    label: "Akan datang",
-  },
-};
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
 
-/* =========================================================
-   NORMALIZE DATA
-========================================================= */
+  const [absensi, setAbsensi] = useState([]);
+  const [jadwal, setJadwal] = useState([]);
 
-function normalizeJadwal(item) {
-  return {
-    ...item,
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
-    kelasNama:
-      item?.kelasMapel?.kelas?.nama ||
-      "-",
-
-    mapelNama:
-      item?.kelasMapel?.mataPelajaran?.nama ||
-      "-",
-
-    guruNama:
-      item?.kelasMapel?.guruPengajar?.namaLengkap ||
-      "-",
-
-    guruId:
-      item?.kelasMapel?.guruPengajar?.id ||
-      null,
-
-    kelasId:
-      item?.kelasMapel?.kelas?.id ||
-      null,
-
-    mataPelajaranId:
-      item?.kelasMapel?.mataPelajaran?.id ||
-      null,
-
-    statusJadwal:
-      getStatusJadwal(item),
-  };
-}
-
-/* =========================================================
-   MAIN COMPONENT
-========================================================= */
-
-export default function GuruJadwalPage() {
-  const router = useRouter();
-
-  const [sidebarOpen, setSidebarOpen] =
-    useState(true);
-
-  const [hariAktif, setHariAktif] =
-    useState("Senin");
-
-  const [jadwal, setJadwal] =
-    useState([]);
-
-  const [loading, setLoading] =
-    useState(true);
-
-  const [refreshing, setRefreshing] =
+  const [cameraOpen, setCameraOpen] = useState(false);
+  const [cameraLoading, setCameraLoading] =
     useState(false);
+  const [cameraError, setCameraError] = useState("");
 
-  const [error, setError] =
+  const [capturedPhoto, setCapturedPhoto] =
+    useState(null);
+
+  const [location, setLocation] = useState(null);
+  const [locationLoading, setLocationLoading] =
+    useState(false);
+  const [locationError, setLocationError] =
     useState("");
 
-  const [userData, setUserData] =
+  const [jadwalAktif, setJadwalAktif] =
     useState(null);
 
   /* =======================================================
      LOAD DATA
   ======================================================= */
 
-  async function loadJadwal(showRefresh = false) {
-    try {
-      if (showRefresh) {
-        setRefreshing(true);
-      } else {
-        setLoading(true);
-      }
+  const loadData = useCallback(async () => {
+    const token = getToken();
 
+    if (!token) {
+      setError("Sesi login tidak ditemukan.");
+      setLoading(false);
+      return;
+    }
+
+    try {
+      setLoading(true);
       setError("");
 
-      const tokenUser = getUserFromToken();
+      const headers = {
+        Authorization: `Bearer ${token}`,
+      };
 
-      setUserData(tokenUser);
+      const [
+        absensiResponse,
+        jadwalResponse,
+      ] = await Promise.all([
+        fetch(
+          `${API_URL}/api/v1/absensi/saya`,
+          {
+            method: "GET",
+            headers,
+            cache: "no-store",
+          }
+        ),
+        fetch(
+          `${API_URL}/api/v1/jadwal-mengajar`,
+          {
+            method: "GET",
+            headers,
+            cache: "no-store",
+          }
+        ),
+      ]);
 
-      const response =
-        await getJadwalMengajar();
+      const absensiResult =
+        await parseResponse(absensiResponse);
 
-      const semuaJadwal =
-        response?.data || [];
+      const jadwalResult =
+        await parseResponse(jadwalResponse);
 
-      if (!Array.isArray(semuaJadwal)) {
-        setJadwal([]);
-        return;
+      const absensiData =
+        getAbsensiList(absensiResult);
+
+      const jadwalData =
+        getScheduleList(jadwalResult);
+
+      setAbsensi(absensiData);
+      setJadwal(jadwalData);
+
+      const userRaw =
+        typeof window !== "undefined"
+          ? localStorage.getItem("user")
+          : null;
+
+      if (userRaw) {
+        try {
+          setUser(JSON.parse(userRaw));
+        } catch {
+          setUser(null);
+        }
       }
 
-      /*
-       * BE mengembalikan semua jadwal dalam sekolah.
-       *
-       * Kita filter hanya jadwal milik guru yang login.
-       */
+      const todaySchedules =
+        jadwalData.filter(isTodaySchedule);
 
-      const userId =
-        tokenUser?.userId ||
-        tokenUser?.id ||
+      const active =
+        todaySchedules.find(
+          isScheduleCurrentlyActive
+        ) ||
+        todaySchedules[0] ||
         null;
 
-      let jadwalGuru = semuaJadwal;
-
-      if (userId) {
-        jadwalGuru = semuaJadwal.filter(
-          (item) =>
-            item?.kelasMapel?.guruPengajar?.id ===
-            userId
-        );
-      }
-
-      const normalized =
-        jadwalGuru
-          .map(normalizeJadwal)
-          .sort((a, b) => {
-            const hariOrder = {
-              Senin: 1,
-              Selasa: 2,
-              Rabu: 3,
-              Kamis: 4,
-              Jumat: 5,
-              Sabtu: 6,
-              Minggu: 7,
-            };
-
-            const hariA =
-              hariOrder[a.hari] || 99;
-
-            const hariB =
-              hariOrder[b.hari] || 99;
-
-            if (hariA !== hariB) {
-              return hariA - hariB;
-            }
-
-            return (
-              timeToMinutes(a.jamMulai) -
-              timeToMinutes(b.jamMulai)
-            );
-          });
-
-      setJadwal(normalized);
+      setJadwalAktif(active);
     } catch (err) {
       console.error(
-        "Gagal mengambil jadwal mengajar:",
+        "Gagal mengambil data presensi:",
         err
       );
 
       setError(
         err?.message ||
-          "Gagal mengambil jadwal mengajar."
+          "Gagal mengambil data presensi."
       );
     } finally {
       setLoading(false);
-      setRefreshing(false);
     }
-  }
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
 
   /* =======================================================
-     INITIAL LOAD
+     CLEANUP
   ======================================================= */
 
   useEffect(() => {
-    const hariSekarang =
-      getHariSekarang();
-
-    if (
-      HARI_OPTIONS.includes(hariSekarang)
-    ) {
-      setHariAktif(hariSekarang);
-    }
-
-    loadJadwal();
-  }, []);
-
-  /* =======================================================
-     REFRESH STATUS
-     Supaya status berlangsung/selesai berubah otomatis.
-  ======================================================= */
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setJadwal((current) =>
-        current.map((item) => ({
-          ...item,
-          statusJadwal:
-            getStatusJadwal(item),
-        }))
-      );
-    }, 60000);
-
-    return () => clearInterval(interval);
-  }, []);
-
-  /* =======================================================
-     JADWAL HARI AKTIF
-  ======================================================= */
-
-  const sesiHari = useMemo(() => {
-    return jadwal
-      .filter(
-        (item) =>
-          item.hari === hariAktif
-      )
-      .sort(
-        (a, b) =>
-          timeToMinutes(a.jamMulai) -
-          timeToMinutes(b.jamMulai)
-      );
-  }, [jadwal, hariAktif]);
-
-  /* =======================================================
-     SUMMARY - SESI HARI INI
-  ======================================================= */
-
-  const sesiHariIni = useMemo(() => {
-    const hariSekarang =
-      getHariSekarang();
-
-    if (
-      !HARI_OPTIONS.includes(hariSekarang)
-    ) {
-      return 0;
-    }
-
-    return jadwal.filter(
-      (item) =>
-        item.hari === hariSekarang
-    ).length;
-  }, [jadwal]);
-
-  /* =======================================================
-     SUMMARY - JAM PER MINGGU
-  ======================================================= */
-
-  const jamPerMinggu = useMemo(() => {
-    let totalMinutes = 0;
-
-    jadwal.forEach((item) => {
-      const mulai =
-        timeToMinutes(item.jamMulai);
-
-      const selesai =
-        timeToMinutes(item.jamSelesai);
-
-      if (selesai > mulai) {
-        totalMinutes +=
-          selesai - mulai;
+    return () => {
+      if (streamRef.current) {
+        streamRef.current
+          .getTracks()
+          .forEach((track) => track.stop());
       }
+
+      if (capturedPhoto?.url) {
+        URL.revokeObjectURL(
+          capturedPhoto.url
+        );
+      }
+    };
+  }, [capturedPhoto]);
+
+  /* =======================================================
+     GPS
+  ======================================================= */
+
+  const getCurrentLocation = () => {
+    return new Promise((resolve, reject) => {
+      if (!navigator.geolocation) {
+        reject(
+          new Error(
+            "Browser tidak mendukung GPS."
+          )
+        );
+
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          resolve({
+            lintang: position.coords.latitude,
+            bujur: position.coords.longitude,
+            accuracy:
+              position.coords.accuracy,
+          });
+        },
+        (err) => {
+          let message =
+            "Lokasi tidak dapat diperoleh.";
+
+          if (err.code === 1) {
+            message =
+              "Izin lokasi ditolak. Silakan aktifkan lokasi pada browser.";
+          } else if (err.code === 2) {
+            message =
+              "Lokasi tidak tersedia.";
+          } else if (err.code === 3) {
+            message =
+              "Pengambilan lokasi terlalu lama.";
+          }
+
+          reject(new Error(message));
+        },
+        {
+          enableHighAccuracy: true,
+          timeout: 15000,
+          maximumAge: 0,
+        }
+      );
     });
+  };
 
-    const hours =
-      Math.floor(totalMinutes / 60);
+  const checkLocation = async () => {
+    try {
+      setLocationLoading(true);
+      setLocationError("");
 
-    const minutes =
-      totalMinutes % 60;
+      const currentLocation =
+        await getCurrentLocation();
 
-    if (minutes === 0) {
-      return `${hours} jam`;
+      setLocation(currentLocation);
+
+      return currentLocation;
+    } catch (err) {
+      console.error("GPS error:", err);
+
+      setLocationError(
+        err?.message ||
+          "Lokasi tidak dapat diperoleh."
+      );
+
+      return null;
+    } finally {
+      setLocationLoading(false);
+    }
+  };
+
+  /* =======================================================
+     CAMERA
+  ======================================================= */
+
+  const startCamera = async () => {
+    try {
+      setCameraLoading(true);
+      setCameraError("");
+      setError("");
+      setSuccess("");
+
+      if (!navigator.mediaDevices?.getUserMedia) {
+        throw new Error(
+          "Browser tidak mendukung akses kamera."
+        );
+      }
+
+      if (streamRef.current) {
+        streamRef.current
+          .getTracks()
+          .forEach((track) => track.stop());
+      }
+
+      const stream =
+        await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: "user",
+            width: { ideal: 1280 },
+            height: { ideal: 720 },
+          },
+          audio: false,
+        });
+
+      streamRef.current = stream;
+
+      setCameraOpen(true);
+
+      requestAnimationFrame(() => {
+        if (videoRef.current) {
+          videoRef.current.srcObject = stream;
+
+          videoRef.current
+            .play()
+            .catch(() => {});
+        }
+      });
+
+      await checkLocation();
+    } catch (err) {
+      console.error("Camera error:", err);
+
+      setCameraError(
+        err?.message ||
+          "Kamera tidak dapat dibuka."
+      );
+    } finally {
+      setCameraLoading(false);
+    }
+  };
+
+  const stopCamera = () => {
+    if (streamRef.current) {
+      streamRef.current
+        .getTracks()
+        .forEach((track) => track.stop());
+
+      streamRef.current = null;
     }
 
-    return `${hours} jam ${minutes} menit`;
-  }, [jadwal]);
+    setCameraOpen(false);
+    setCameraLoading(false);
+    setCameraError("");
+  };
+
+  const capturePhoto = () => {
+    try {
+      setCameraError("");
+
+      const video = videoRef.current;
+      const canvas = canvasRef.current;
+
+      if (!video || !canvas) {
+        setCameraError("Kamera belum siap.");
+        return;
+      }
+
+      if (
+        video.readyState <
+        HTMLMediaElement.HAVE_CURRENT_DATA
+      ) {
+        setCameraError(
+          "Tunggu kamera siap terlebih dahulu."
+        );
+        return;
+      }
+
+      const width =
+        video.videoWidth || 1280;
+
+      const height =
+        video.videoHeight || 720;
+
+      if (!width || !height) {
+        setCameraError(
+          "Ukuran kamera belum tersedia."
+        );
+        return;
+      }
+
+      canvas.width = width;
+      canvas.height = height;
+
+      const context =
+        canvas.getContext("2d");
+
+      if (!context) {
+        setCameraError(
+          "Gagal menyiapkan kamera."
+        );
+        return;
+      }
+
+      context.drawImage(
+        video,
+        0,
+        0,
+        width,
+        height
+      );
+
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            setCameraError(
+              "Gagal mengambil foto wajah."
+            );
+            return;
+          }
+
+          if (capturedPhoto?.url) {
+            URL.revokeObjectURL(
+              capturedPhoto.url
+            );
+          }
+
+          const url =
+            URL.createObjectURL(blob);
+
+          setCapturedPhoto({
+            blob,
+            url,
+          });
+        },
+        "image/jpeg",
+        0.9
+      );
+    } catch (err) {
+      console.error(
+        "Capture photo error:",
+        err
+      );
+
+      setCameraError(
+        "Gagal mengambil foto wajah."
+      );
+    }
+  };
+
+  const retakePhoto = () => {
+    if (capturedPhoto?.url) {
+      URL.revokeObjectURL(
+        capturedPhoto.url
+      );
+    }
+
+    setCapturedPhoto(null);
+    setCameraError("");
+  };
 
   /* =======================================================
-     SUMMARY - PRESENSI
-     
-     Belum mengambil dari endpoint absensi karena halaman
-     jadwal ini belum menggunakan endpoint summary absensi.
+     SELECTED SCHEDULE
   ======================================================= */
 
-  const presensiBulanIni = "-";
+  const getSelectedSchedule = () => {
+    if (jadwalAktif) {
+      return jadwalAktif;
+    }
+
+    const todaySchedules =
+      jadwal.filter(isTodaySchedule);
+
+    return todaySchedules[0] || null;
+  };
 
   /* =======================================================
-     SUMMARY - IZIN
-     
-     Belum mengambil dari endpoint izin karena endpoint
-     izin belum diberikan.
+     CHECK-IN
   ======================================================= */
 
-  const izinDiajukan = "-";
+  const handleCheckin = async () => {
+    try {
+      setError("");
+      setSuccess("");
+
+      if (submitting) return;
+
+      if (!capturedPhoto?.blob) {
+        setError(
+          "Silakan ambil foto wajah terlebih dahulu."
+        );
+        return;
+      }
+
+      const schedule =
+        getSelectedSchedule();
+
+      const kelasId =
+        getKelasIdFromSchedule(schedule);
+
+      if (!kelasId) {
+        setError(
+          "Kelas pada jadwal mengajar tidak ditemukan."
+        );
+        return;
+      }
+
+      let currentLocation = location;
+
+      if (!currentLocation) {
+        currentLocation =
+          await getCurrentLocation();
+
+        setLocation(currentLocation);
+      }
+
+      if (!currentLocation) {
+        setError(
+          "Lokasi GPS wajib diaktifkan untuk presensi Face ID."
+        );
+        return;
+      }
+
+      const token = getToken();
+
+      if (!token) {
+        setError(
+          "Sesi login tidak ditemukan."
+        );
+        return;
+      }
+
+      setSubmitting(true);
+
+      const formData = new FormData();
+
+      formData.append(
+        "kelasId",
+        String(kelasId)
+      );
+
+      formData.append("status", "hadir");
+      formData.append("metode", "face");
+
+      formData.append(
+        "lintang",
+        String(currentLocation.lintang)
+      );
+
+      formData.append(
+        "bujur",
+        String(currentLocation.bujur)
+      );
+
+      formData.append(
+        "snapshot",
+        capturedPhoto.blob,
+        `face-${Date.now()}.jpg`
+      );
+
+      const response = await fetch(
+        `${API_URL}/api/v1/absensi/`,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        }
+      );
+
+      const result =
+        await parseResponse(response);
+
+      setSuccess(
+        result?.message ||
+          "Presensi Face ID berhasil dicatat."
+      );
+
+      setCapturedPhoto(null);
+
+      stopCamera();
+
+      await loadData();
+    } catch (err) {
+      console.error(
+        "Presensi Face ID gagal:",
+        err
+      );
+
+      setError(
+        err?.message ||
+          "Presensi Face ID gagal."
+      );
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   /* =======================================================
-     USER HEADER
+     DERIVED DATA
   ======================================================= */
 
-  const userName =
-    userData?.namaLengkap ||
-    userData?.nama ||
-    "Guru";
+  const today = getTodayDate();
 
-  const userEmail =
-    userData?.email ||
-    "guru@smartschool.com";
+  const absensiHariIni = absensi.find(
+    (item) => {
+      const tanggal =
+        item.tanggal ||
+        item.waktuAbsensi ||
+        item.dibuatPada ||
+        item.createdAt;
 
-  const avatar =
-    userName
-      .split(" ")
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((word) =>
-        word.charAt(0).toUpperCase()
-      )
-      .join("") || "GU";
+      if (!tanggal) return false;
 
-  /* =======================================================
-     NOTIFICATIONS
-  ======================================================= */
+      return (
+        String(tanggal).substring(0, 10) ===
+        today
+      );
+    }
+  );
 
-  const notifications = [
-    {
-      id: 1,
-      title: "Jadwal Mengajar",
-      desc: `${jadwal.length} jadwal mengajar ditemukan`,
-      read: true,
-    },
-  ];
+  const jumlahHadir = absensi.filter(
+    (item) =>
+      String(item.status || "").toLowerCase() ===
+      "hadir"
+  ).length;
+
+  const jumlahTerlambat = absensi.filter(
+    (item) =>
+      String(item.status || "").toLowerCase() ===
+      "terlambat"
+  ).length;
+
+  const jumlahIzin = absensi.filter(
+    (item) =>
+      String(item.status || "").toLowerCase() ===
+      "izin"
+  ).length;
+
+  const todaySchedules =
+    jadwal.filter(isTodaySchedule);
+
+  const selectedSchedule =
+    getSelectedSchedule();
 
   /* =======================================================
      RENDER
   ======================================================= */
 
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
       {/* =====================================================
-          SIDEBAR
+          SIDEBAR GURU
       ===================================================== */}
 
       <Sidebar
-        active="jadwal"
-        setActive={() => {}}
-        collapsed={!sidebarOpen}
-        setCollapsed={() =>
+        role="guru"
+        activeMenu="presensi"
+        isOpen={sidebarOpen}
+        onToggle={() =>
           setSidebarOpen(!sidebarOpen)
         }
       />
 
       {/* =====================================================
-          CONTENT
+          MAIN
       ===================================================== */}
 
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex min-w-0 flex-1 flex-col h-full overflow-hidden">
         <Header
-          toggleSidebar={() =>
+          title="Presensi"
+          onMenuClick={() =>
             setSidebarOpen(!sidebarOpen)
           }
-          notifications={notifications}
-          user={{
-            name: userName,
-            email: userEmail,
-            avatar,
-          }}
+          user={user}
         />
 
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-          <div className="w-full space-y-6">
+        {/* ===================================================
+            CONTENT SCROLL
+        =================================================== */}
 
+        <main className="flex-1 overflow-y-auto">
+          <div className="space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8">
             {/* =================================================
                 PAGE HEADER
             ================================================= */}
 
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              <div className="min-w-0">
-                <div className="flex items-center gap-2.5">
-                  <div className="p-2 rounded-lg bg-blue-600 text-white shadow-sm flex-shrink-0">
-                    <Calendar size={18} />
-                  </div>
-
-                  <h1 className="text-xl sm:text-2xl font-semibold text-slate-800 truncate">
-                    Jadwal Mengajar
-                  </h1>
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex min-w-0 items-center gap-3">
+                <div
+                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
+                >
+                  <Camera size={20} />
                 </div>
 
-                <p className="text-sm text-slate-500 mt-1 ml-[42px] flex items-center gap-1.5">
-                  <Sparkles
-                    size={14}
-                    className="text-slate-400 flex-shrink-0"
-                  />
+                <div className="min-w-0">
+                  <h1 className="theme-text truncate text-xl font-bold sm:text-2xl">
+                    Presensi Mengajar
+                  </h1>
 
-                  <span className="truncate">
-                    Jadwal kelas dan waktu mengajar Anda.
-                  </span>
-                </p>
+                  <p className="theme-text-secondary mt-1 text-xs sm:text-sm">
+                    Presensi mengajar dengan verifikasi Face ID.
+                  </p>
+                </div>
               </div>
 
-              {/* ACTION */}
+              {/* DATE */}
 
-              <div className="flex items-center gap-2 flex-shrink-0">
-                <button
-                  onClick={() =>
-                    loadJadwal(true)
-                  }
-                  disabled={refreshing}
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors shadow-sm whitespace-nowrap disabled:opacity-50"
-                >
-                  <RefreshCw
-                    size={16}
-                    className={
-                      refreshing
-                        ? "animate-spin"
-                        : ""
+              <div
+                className={`theme-card rounded-xl border ${themeNeutralBorder} px-5 py-3 ${themeSmallShadow}`}
+              >
+                <p className="theme-text-muted text-[10px] font-medium uppercase tracking-wide">
+                  Hari ini
+                </p>
+
+                <p className="theme-text mt-1 text-sm font-bold">
+                  {new Intl.DateTimeFormat(
+                    "id-ID",
+                    {
+                      weekday: "long",
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
                     }
-                  />
-
-                  {refreshing
-                    ? "Memuat..."
-                    : "Refresh"}
-                </button>
-
-                <button
-                  onClick={() =>
-                    router.push(
-                      "/guru/jadwal/presensi"
-                    )
-                  }
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-blue-500 rounded-lg hover:bg-blue-600 transition-colors shadow-sm whitespace-nowrap"
-                >
-                  <CheckSquare size={16} />
-                  Presensi
-                </button>
-
-                <button
-                  onClick={() =>
-                    router.push(
-                      "/guru/jadwal/izin"
-                    )
-                  }
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors shadow-sm whitespace-nowrap"
-                >
-                  <FileText size={16} />
-                  Ajukan Izin
-                </button>
+                  ).format(new Date())}
+                </p>
               </div>
             </div>
 
@@ -735,364 +1074,884 @@ export default function GuruJadwalPage() {
             ================================================= */}
 
             {error && (
-              <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
+              <div
+                className={`flex items-start gap-3 rounded-xl border ${themeDangerBorder} ${themeDangerSurface} p-4`}
+              >
                 <AlertCircle
-                  size={20}
-                  className="text-red-500 flex-shrink-0 mt-0.5"
+                  size={19}
+                  className="theme-danger mt-0.5 shrink-0"
                 />
 
-                <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-red-700">
-                    Gagal memuat jadwal
+                <div className="flex-1">
+                  <p className="theme-danger text-sm font-semibold">
+                    Presensi gagal
                   </p>
 
-                  <p className="text-sm text-red-600 mt-1">
+                  <p className="theme-text-secondary mt-0.5 text-sm">
                     {error}
                   </p>
-
-                  <button
-                    onClick={() =>
-                      loadJadwal(true)
-                    }
-                    className="mt-3 text-xs font-semibold text-red-700 hover:text-red-800 underline"
-                  >
-                    Coba lagi
-                  </button>
                 </div>
+
+                <button
+                  type="button"
+                  onClick={() => setError("")}
+                  className="theme-danger transition-opacity hover:opacity-70"
+                >
+                  <X size={18} />
+                </button>
               </div>
             )}
 
             {/* =================================================
-                SUMMARY CARDS
+                SUCCESS
             ================================================= */}
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-
-              {/* SESI */}
-
-              <div className="bg-white rounded-xl border border-slate-200/80 p-3.5 shadow-sm flex items-center gap-3 min-w-0">
-                <div className="p-2 rounded-lg border bg-blue-50 text-blue-600 border-blue-200 flex-shrink-0">
-                  <CalendarDays size={16} />
-                </div>
-
-                <div className="min-w-0">
-                  <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider truncate">
-                    Sesi Hari Ini
-                  </p>
-
-                  <p className="text-lg font-bold text-slate-800">
-                    {loading
-                      ? "..."
-                      : sesiHariIni}
-                  </p>
-                </div>
-              </div>
-
-              {/* JAM */}
-
-              <div className="bg-white rounded-xl border border-slate-200/80 p-3.5 shadow-sm flex items-center gap-3 min-w-0">
-                <div className="p-2 rounded-lg border bg-purple-50 text-purple-600 border-purple-200 flex-shrink-0">
-                  <Clock size={16} />
-                </div>
-
-                <div className="min-w-0">
-                  <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider truncate">
-                    Jam per Minggu
-                  </p>
-
-                  <p className="text-lg font-bold text-slate-800">
-                    {loading
-                      ? "..."
-                      : jamPerMinggu}
-                  </p>
-                </div>
-              </div>
-
-              {/* PRESENSI */}
-
-              <div className="bg-white rounded-xl border border-slate-200/80 p-3.5 shadow-sm flex items-center gap-3 min-w-0">
-                <div className="p-2 rounded-lg border bg-emerald-50 text-emerald-600 border-emerald-200 flex-shrink-0">
-                  <CheckSquare size={16} />
-                </div>
-
-                <div className="min-w-0">
-                  <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider truncate">
-                    Presensi Bulan Ini
-                  </p>
-
-                  <p className="text-lg font-bold text-slate-800">
-                    {presensiBulanIni}
-                  </p>
-                </div>
-              </div>
-
-              {/* IZIN */}
-
-              <div className="bg-white rounded-xl border border-slate-200/80 p-3.5 shadow-sm flex items-center gap-3 min-w-0">
-                <div className="p-2 rounded-lg border bg-amber-50 text-amber-600 border-amber-200 flex-shrink-0">
-                  <FileText size={16} />
-                </div>
-
-                <div className="min-w-0">
-                  <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider truncate">
-                    Izin Diajukan
-                  </p>
-
-                  <p className="text-lg font-bold text-slate-800">
-                    {izinDiajukan}
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* =================================================
-                LOADING
-            ================================================= */}
-
-            {loading && (
-              <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm p-12 text-center">
-                <RefreshCw
-                  size={28}
-                  className="mx-auto text-blue-500 animate-spin mb-3"
+            {success && (
+              <div
+                className={`flex items-start gap-3 rounded-xl border ${themeSuccessBorder} ${themeSuccessSurface} p-4`}
+              >
+                <CheckCircle2
+                  size={19}
+                  className="mt-0.5 shrink-0 text-[var(--color-success)]"
                 />
 
-                <p className="text-sm font-medium text-slate-600">
-                  Memuat jadwal mengajar...
-                </p>
+                <div className="flex-1">
+                  <p className="text-[var(--color-success)] text-sm font-semibold">
+                    Berhasil
+                  </p>
 
-                <p className="text-xs text-slate-400 mt-1">
-                  Mengambil data dari server
-                </p>
+                  <p className="theme-text-secondary mt-0.5 text-sm">
+                    {success}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => setSuccess("")}
+                  className="text-[var(--color-success)] transition-opacity hover:opacity-70"
+                >
+                  <X size={18} />
+                </button>
               </div>
             )}
 
             {/* =================================================
-                JADWAL MINGGUAN
+                STATISTICS
             ================================================= */}
 
-            {!loading && (
-              <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden">
+            <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 sm:gap-4">
+              <StatCard
+                title="Hadir"
+                value={jumlahHadir}
+                description="Total kehadiran"
+                icon={UserCheck}
+                iconClass="text-[var(--color-success)]"
+              />
 
-                {/* HEADER */}
+              <StatCard
+                title="Terlambat"
+                value={jumlahTerlambat}
+                description="Total keterlambatan"
+                icon={Clock}
+                iconClass="text-[var(--color-warning)]"
+              />
 
-                <div className="p-4 sm:p-5 border-b border-slate-200/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                  <div>
-                    <h3 className="text-sm font-semibold text-slate-700 truncate">
-                      Jadwal Minggu Ini
-                    </h3>
+              <StatCard
+                title="Izin"
+                value={jumlahIzin}
+                description="Total izin"
+                icon={Calendar}
+                iconClass="text-[var(--color-info)]"
+              />
 
-                    <p className="text-xs text-slate-400 mt-1">
-                      Menampilkan jadwal mengajar Anda dari sistem.
-                    </p>
-                  </div>
+              <StatCard
+                title="Total Riwayat"
+                value={absensi.length}
+                description="Data tersimpan"
+                icon={Database}
+                iconClass={themePrimaryText}
+              />
+            </div>
 
-                  {/* HARI */}
+            {/* =================================================
+                MAIN GRID
+            ================================================= */}
 
-                  <div className="flex items-center gap-1 bg-slate-100 rounded-lg p-1 w-full sm:w-auto overflow-x-auto">
-                    {HARI_OPTIONS.map(
-                      (hari) => (
-                        <button
-                          key={hari}
-                          onClick={() =>
-                            setHariAktif(hari)
-                          }
-                          className={`px-3 py-1.5 text-xs font-medium rounded-md whitespace-nowrap transition-colors flex-shrink-0 ${
-                            hariAktif === hari
-                              ? "bg-white text-slate-800 shadow-sm"
-                              : "text-slate-500 hover:text-slate-700"
-                          }`}
-                        >
-                          {hari}
-                        </button>
-                      )
-                    )}
-                  </div>
-                </div>
+            <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(360px,0.8fr)]">
+              {/* =================================================
+                  CHECK-IN
+              ================================================= */}
 
-                {/* DATA */}
+              <section
+                className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+              >
+                <SectionHeader
+                  icon={Camera}
+                  title="Check-in Presensi"
+                  description="Verifikasi wajah untuk mencatat kehadiran mengajar."
+                />
 
-                <div className="divide-y divide-slate-100">
+                <div className="space-y-4 p-4 sm:p-6">
+                  {/* JADWAL AKTIF */}
 
-                  {sesiHari.length === 0 && (
-                    <div className="p-10 text-center">
-                      <Calendar
-                        size={28}
-                        className="mx-auto text-slate-300 mb-2"
-                      />
+                  <div
+                    className={`rounded-xl border ${themeInfoBorder} ${themeInfoSurface} p-4`}
+                  >
+                    <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="min-w-0">
+                        <p className="text-[var(--color-info)] text-[10px] font-semibold uppercase tracking-wide">
+                          Jadwal Mengajar
+                        </p>
 
-                      <p className="text-sm text-slate-400">
-                        Tidak ada jadwal mengajar di hari{" "}
-                        {hariAktif}.
-                      </p>
-                    </div>
-                  )}
+                        <p className="theme-text mt-1 truncate text-base font-bold">
+                          {selectedSchedule
+                            ? getScheduleMapel(
+                                selectedSchedule
+                              )
+                            : "Belum ada jadwal"}
+                        </p>
 
-                  {sesiHari.map(
-                    (sesi) => {
-                      const status =
-                        sesi.statusJadwal ||
-                        getStatusJadwal(
-                          sesi
-                        );
+                        <p className="theme-text-secondary mt-1 truncate text-sm">
+                          {selectedSchedule
+                            ? getScheduleKelas(
+                                selectedSchedule
+                              )
+                            : "Tidak ada jadwal mengajar hari ini"}
+                        </p>
+                      </div>
 
-                      const s =
-                        statusStyle[
-                          status
-                        ] ||
-                        statusStyle[
-                          "akan datang"
-                        ];
-
-                      return (
+                      {selectedSchedule && (
                         <div
-                          key={sesi.id}
-                          className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 px-4 sm:px-5 py-4"
+                          className={`theme-card shrink-0 rounded-lg border ${themeInfoBorder} px-3 py-2 text-right ${themeSmallShadow}`}
                         >
-                          {/* JAM */}
+                          <p className="theme-text-muted text-[10px]">
+                            Jam
+                          </p>
 
-                          <span className="text-xs font-medium text-slate-400 sm:w-32 flex-shrink-0 flex items-center gap-1.5">
-                            <Clock
-                              size={13}
-                              className="flex-shrink-0"
-                            />
-
-                            {formatTime(
-                              sesi.jamMulai
+                          <p className="text-[var(--color-info)] text-sm font-bold">
+                            {formatJam(
+                              getScheduleStart(
+                                selectedSchedule
+                              )
                             )}{" "}
                             -{" "}
-                            {formatTime(
-                              sesi.jamSelesai
+                            {formatJam(
+                              getScheduleEnd(
+                                selectedSchedule
+                              )
                             )}
-                          </span>
-
-                          {/* MAPEL */}
-
-                          <div className="min-w-0 sm:flex-1">
-                            <p className="text-sm font-medium text-slate-800 truncate">
-                              {sesi.mapelNama}
-                            </p>
-
-                            <p className="text-xs text-slate-400 mt-0.5">
-                              {sesi.guruNama}
-                            </p>
-                          </div>
-
-                          {/* RUANGAN */}
-
-                          <span className="text-xs text-slate-500 flex items-center gap-1.5 flex-shrink-0">
-                            <MapPin
-                              size={13}
-                              className="flex-shrink-0"
-                            />
-
-                            {sesi.ruangan ||
-                              "Ruangan belum ditentukan"}
-                          </span>
-
-                          {/* KELAS */}
-
-                          <span className="text-[11px] font-medium px-2 py-0.5 rounded-full border bg-slate-100 text-slate-500 border-slate-200 flex-shrink-0">
-                            Kelas{" "}
-                            {sesi.kelasNama}
-                          </span>
-
-                          {/* STATUS */}
-
-                          <span
-                            className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${s.bg} ${s.text} flex items-center gap-1 flex-shrink-0 w-fit`}
-                          >
-                            <CircleDot
-                              size={10}
-                              className={`${s.dot} rounded-full`}
-                            />
-
-                            {s.label}
-                          </span>
+                          </p>
                         </div>
-                      );
+                      )}
+                    </div>
+                  </div>
+
+                  {/* STATUS */}
+
+                  <div
+                    className={`theme-card rounded-xl border ${themeNeutralBorder} p-4`}
+                  >
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="theme-text text-sm font-semibold">
+                          Status Hari Ini
+                        </p>
+
+                        <p className="theme-text-secondary mt-1 text-xs">
+                          Status presensi kamu untuk hari ini.
+                        </p>
+                      </div>
+
+                      <span
+                        className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${
+                          absensiHariIni
+                            ? getStatusClass(
+                                absensiHariIni.status
+                              )
+                            : `${themeWarningBorder} ${themeWarningSurface} text-[var(--color-warning)]`
+                        }`}
+                      >
+                        {absensiHariIni
+                          ? getStatusLabel(
+                              absensiHariIni.status
+                            )
+                          : "Belum Absen"}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* GPS */}
+
+                  <div
+                    className={`rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} p-4`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div
+                      className={`theme-card flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themePrimaryText} ${themeSmallShadow}`}
+                    >
+                      <MapPin size={18} />
+                    </div>
+
+                      <div className="min-w-0 flex-1">
+                        <p className="theme-text text-sm font-semibold">
+                          Lokasi GPS
+                        </p>
+
+                        {locationLoading ? (
+                          <p className="theme-text-secondary mt-1 text-xs">
+                            Mengambil lokasi...
+                          </p>
+                        ) : location ? (
+                          <p className="mt-1 text-xs text-[var(--color-success)]">
+                            Lokasi berhasil didapatkan
+                            {location.accuracy
+                              ? ` • Akurasi ±${Math.round(
+                                  location.accuracy
+                                )} m`
+                              : ""}
+                          </p>
+                        ) : (
+                          <p className="theme-text-secondary mt-1 text-xs">
+                            GPS akan digunakan saat melakukan presensi.
+                          </p>
+                        )}
+
+                        {locationError && (
+                          <p className="theme-danger mt-1 text-xs">
+                            {locationError}
+                          </p>
+                        )}
+                      </div>
+
+                      {!location && (
+                        <button
+                          type="button"
+                          onClick={checkLocation}
+                          disabled={locationLoading}
+                          className={`theme-card theme-text-secondary shrink-0 rounded-lg border ${themeNeutralBorder} px-3 py-2 text-xs font-semibold transition ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-50`}
+                        >
+                          {locationLoading
+                            ? "Memuat..."
+                            : "Aktifkan"}
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* CAMERA BUTTON */}
+
+                  <button
+                    type="button"
+                    onClick={startCamera}
+                    disabled={
+                      cameraLoading ||
+                      submitting ||
+                      Boolean(absensiHariIni)
                     }
-                  )}
+                    className={`group flex w-full items-center justify-center gap-3 rounded-xl ${themePrimaryGradient} px-5 py-4 text-sm font-bold text-[var(--color-card)] ${themePrimaryShadow} transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60`}
+                  >
+                    {cameraLoading ? (
+                      <>
+                        <Loader2
+                          size={18}
+                          className="animate-spin"
+                        />
+                        Membuka Kamera...
+                      </>
+                    ) : absensiHariIni ? (
+                      <>
+                        <CheckCircle2 size={18} />
+                        Sudah Melakukan Presensi
+                      </>
+                    ) : (
+                      <>
+                        <Camera size={18} />
+                        Buka Kamera Face ID
+                      </>
+                    )}
+                  </button>
+
+                  <p className="theme-text-muted text-center text-xs leading-5">
+                    Pastikan wajah terlihat jelas, pencahayaan cukup,
+                    dan posisi wajah berada di dalam oval.
+                  </p>
                 </div>
-              </div>
-            )}
+              </section>
+
+              {/* =================================================
+                  SUMMARY
+              ================================================= */}
+
+              <section
+                className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+              >
+                <SectionHeader
+                  icon={Activity}
+                  title="Ringkasan Presensi"
+                  description="Rekap data presensi kamu."
+                />
+
+                <div className="grid grid-cols-1 gap-3 p-4 sm:grid-cols-3 sm:p-6 xl:grid-cols-1">
+                  <SummaryItem
+                    label="Hadir"
+                    value={jumlahHadir}
+                    surface={themeSuccessSurface}
+                    border={themeSuccessBorder}
+                    text="text-[var(--color-success)]"
+                  />
+
+                  <SummaryItem
+                    label="Terlambat"
+                    value={jumlahTerlambat}
+                    surface={themeWarningSurface}
+                    border={themeWarningBorder}
+                    text="text-[var(--color-warning)]"
+                  />
+
+                  <SummaryItem
+                    label="Izin"
+                    value={jumlahIzin}
+                    surface={themeInfoSurface}
+                    border={themeInfoBorder}
+                    text="text-[var(--color-info)]"
+                  />
+                </div>
+
+                <div
+                  className={`border-t ${themeDivider} p-6`}
+                >
+                  <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wide">
+                    Total Riwayat
+                  </p>
+
+                  <p className="theme-text mt-1 text-2xl font-bold">
+                    {absensi.length}
+                  </p>
+
+                  <p className="theme-text-secondary mt-1 text-xs">
+                    data presensi tersimpan
+                  </p>
+                </div>
+              </section>
+            </div>
 
             {/* =================================================
-                PINTASAN
+                JADWAL HARI INI
             ================================================= */}
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <section
+              className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+            >
+              <SectionHeader
+                icon={BookOpen}
+                title="Jadwal Hari Ini"
+                description="Daftar jadwal mengajar kamu hari ini."
+              />
 
-              {/* PRESENSI */}
-
-              <button
-                onClick={() =>
-                  router.push(
-                    "/guru/jadwal/presensi"
-                  )
-                }
-                className="group text-left bg-white rounded-2xl border border-blue-200 hover:border-blue-300 p-5 shadow-sm hover:shadow-lg transition-all duration-300 relative overflow-hidden min-w-0"
-              >
-                <div className="absolute -right-6 -top-6 w-28 h-28 rounded-full bg-blue-50 opacity-70" />
-
-                <div className="relative min-w-0">
-                  <div className="flex items-start justify-between">
-                    <div className="p-3 rounded-xl bg-blue-50 text-blue-600 flex-shrink-0">
-                      <CheckSquare size={20} />
-                    </div>
-
-                    <ChevronRight
-                      size={20}
-                      className="text-slate-300 group-hover:text-slate-500 group-hover:translate-x-0.5 transition-all duration-300 flex-shrink-0"
-                    />
+              <div className="p-4 sm:p-6">
+                {loading ? (
+                  <div className="theme-text-secondary py-10 text-center text-sm">
+                    Memuat jadwal...
                   </div>
+                ) : todaySchedules.length === 0 ? (
+                  <div
+                    className={`rounded-xl border border-dashed ${themeDashedBorder} py-10 text-center`}
+                  >
+                    <p className="theme-text text-sm font-medium">
+                      Belum ada jadwal mengajar hari ini.
+                    </p>
 
-                  <h3 className="mt-4 text-base font-semibold text-slate-800 truncate">
-                    Check-in Presensi
+                    <p className="theme-text-secondary mt-1 text-xs">
+                      Jadwal akan muncul jika sudah tersedia.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
+                    {todaySchedules.map(
+                      (schedule, index) => {
+                        const active =
+                          jadwalAktif ===
+                          schedule;
+
+                        return (
+                          <div
+                            key={
+                              schedule.id ||
+                              schedule.jadwalId ||
+                              index
+                            }
+                            className={`rounded-xl border p-4 transition ${
+                              active
+                                ? `${themePrimarySoft} ${themePrimarySoftBorder}`
+                                : `theme-card ${themeNeutralBorder} ${themeNeutralHover}`
+                            }`}
+                          >
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="min-w-0">
+                                <p className="theme-text truncate text-sm font-bold">
+                                  {getScheduleMapel(
+                                    schedule
+                                  )}
+                                </p>
+
+                                <p className="theme-text-secondary mt-1 truncate text-xs">
+                                  {getScheduleKelas(
+                                    schedule
+                                  )}
+                                </p>
+                              </div>
+
+                              {active && (
+                                <span
+                                  className={`shrink-0 rounded-full ${themePrimaryGradient} px-2.5 py-1 text-[10px] font-bold text-[var(--color-card)]`}
+                                >
+                                  Aktif
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="theme-text-secondary mt-4 flex items-center gap-2 text-xs font-medium">
+                              <Clock size={13} />
+
+                              {formatJam(
+                                getScheduleStart(
+                                  schedule
+                                )
+                              )}{" "}
+                              -{" "}
+                              {formatJam(
+                                getScheduleEnd(
+                                  schedule
+                                )
+                              )}
+                            </div>
+                          </div>
+                        );
+                      }
+                    )}
+                  </div>
+                )}
+              </div>
+            </section>
+
+            {/* =================================================
+                RIWAYAT
+            ================================================= */}
+
+            <section
+              className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+            >
+              <SectionHeader
+                icon={Database}
+                title="Riwayat Presensi"
+                description="Riwayat presensi yang sudah tercatat."
+              />
+
+              <div className="overflow-x-auto">
+                {loading ? (
+                  <div className="theme-text-secondary px-6 py-10 text-center text-sm">
+                    Memuat riwayat...
+                  </div>
+                ) : absensi.length === 0 ? (
+                  <div className="px-6 py-10 text-center">
+                    <p className="theme-text text-sm font-medium">
+                      Belum ada riwayat presensi.
+                    </p>
+
+                    <p className="theme-text-secondary mt-1 text-xs">
+                      Data presensi akan muncul setelah kamu melakukan check-in.
+                    </p>
+                  </div>
+                ) : (
+                  <table className="w-full min-w-[700px] text-left">
+                    <thead>
+                      <tr
+                        className={`${themePrimaryGradient} text-[var(--color-card)]`}
+                      >
+                        <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide">
+                          Tanggal
+                        </th>
+
+                        <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide">
+                          Jam
+                        </th>
+
+                        <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide">
+                          Status
+                        </th>
+
+                        <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide">
+                          Metode
+                        </th>
+                      </tr>
+                    </thead>
+
+                    <tbody>
+                      {absensi
+                        .slice(0, 10)
+                        .map((item, index) => {
+                          const date =
+                            item.tanggal ||
+                            item.waktuAbsensi ||
+                            item.dibuatPada ||
+                            item.createdAt;
+
+                          return (
+                            <tr
+                              key={
+                                item.id || index
+                              }
+                              className={`border-b ${themeDivider} last:border-0 ${themeNeutralHover} transition-colors`}
+                            >
+                              <td className="theme-text px-6 py-4 text-sm font-medium">
+                                {formatTanggal(
+                                  date
+                                )}
+                              </td>
+
+                              <td className="theme-text-secondary px-6 py-4 text-sm">
+                                {formatJam(
+                                  item.jam ||
+                                    item.waktuAbsensi ||
+                                    item.dibuatPada ||
+                                    item.createdAt
+                                )}
+                              </td>
+
+                              <td className="px-6 py-4">
+                                <span
+                                  className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${getStatusClass(
+                                    item.status
+                                  )}`}
+                                >
+                                  {getStatusLabel(
+                                    item.status
+                                  )}
+                                </span>
+                              </td>
+
+                              <td className="theme-text-secondary px-6 py-4 text-sm capitalize">
+                                {item.metode ||
+                                  "-"}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                    </tbody>
+                  </table>
+                )}
+              </div>
+            </section>
+          </div>
+        </main>
+      </div>
+
+      {/* =====================================================
+          CAMERA MODAL
+      ===================================================== */}
+
+      {cameraOpen && (
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-[color-mix(in_srgb,var(--color-text)_78%,transparent)] p-4 backdrop-blur-sm"
+        >
+          <div
+            className={`theme-card w-full max-w-2xl overflow-hidden rounded-2xl ${themeCardShadow}`}
+          >
+            {/* MODAL HEADER */}
+
+            <div
+              className={`flex items-center justify-between border-b ${themeDivider} px-5 py-4`}
+            >
+              <div className="flex items-center gap-3">
+                <div
+                  className={`flex h-9 w-9 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimarySoftBorder} border`}
+                >
+                  <Shield
+                    size={17}
+                    className={themePrimaryText}
+                  />
+                </div>
+
+                <div>
+                  <h3 className="theme-text text-sm font-bold">
+                    Verifikasi Face ID
                   </h3>
 
-                  <p className="mt-1.5 text-sm text-slate-500 leading-relaxed">
-                    Catat kehadiran Anda saat masuk mengajar hari ini.
+                  <p className="theme-text-muted mt-0.5 text-[11px]">
+                    Posisikan wajah di tengah oval.
                   </p>
                 </div>
-              </button>
-
-              {/* IZIN */}
+              </div>
 
               <button
-                onClick={() =>
-                  router.push(
-                    "/guru/jadwal/izin"
-                  )
-                }
-                className="group text-left bg-white rounded-2xl border border-amber-200 hover:border-amber-300 p-5 shadow-sm hover:shadow-lg transition-all duration-300 relative overflow-hidden min-w-0"
+                type="button"
+                onClick={stopCamera}
+                disabled={submitting}
+                className={`theme-text-secondary flex h-9 w-9 items-center justify-center rounded-lg transition ${themeNeutralHover} hover:text-[var(--color-primary)] disabled:opacity-50`}
               >
-                <div className="absolute -right-6 -top-6 w-28 h-28 rounded-full bg-amber-50 opacity-70" />
-
-                <div className="relative min-w-0">
-                  <div className="flex items-start justify-between">
-                    <div className="p-3 rounded-xl bg-amber-50 text-amber-600 flex-shrink-0">
-                      <FileText size={20} />
-                    </div>
-
-                    <ChevronRight
-                      size={20}
-                      className="text-slate-300 group-hover:text-slate-500 group-hover:translate-x-0.5 transition-all duration-300 flex-shrink-0"
-                    />
-                  </div>
-
-                  <h3 className="mt-4 text-base font-semibold text-slate-800 truncate">
-                    Pengajuan Izin
-                  </h3>
-
-                  <p className="mt-1.5 text-sm text-slate-500 leading-relaxed">
-                    Ajukan izin tidak hadir mengajar dan pantau statusnya.
-                  </p>
-                </div>
+                <X size={18} />
               </button>
             </div>
 
+            {/* CAMERA */}
+
+            <div
+              className="bg-[color-mix(in_srgb,var(--color-text)_92%,var(--color-card))] p-4 sm:p-6"
+            >
+              <div className="relative mx-auto w-full max-w-[620px] overflow-hidden rounded-2xl bg-[color-mix(in_srgb,var(--color-text)_96%,var(--color-card))]">
+                {!capturedPhoto ? (
+                  <>
+                    <video
+                      ref={videoRef}
+                      autoPlay
+                      muted
+                      playsInline
+                      className="aspect-video h-auto w-full object-cover"
+                      style={{
+                        transform:
+                          "scaleX(-1)",
+                      }}
+                    />
+
+                    {/* FACE OVAL */}
+
+                    <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                      <div
+                        className="h-[76%] w-[34%] min-w-[170px] max-w-[260px] rounded-[50%] border-2 border-[var(--color-card)] shadow-[0_0_0_9999px_color-mix(in_srgb,var(--color-text)_18%,transparent)]"
+                      />
+                    </div>
+
+                    {/* CAMERA GUIDE */}
+
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-[linear-gradient(to_top,color-mix(in_srgb,var(--color-text)_72%,transparent),color-mix(in_srgb,var(--color-text)_20%,transparent),transparent)] px-5 pb-5 pt-14 text-center">
+                      <p className="text-sm font-semibold text-[var(--color-card)]">
+                        Posisikan wajah di dalam oval
+                      </p>
+
+                      <p className="mt-1 text-xs text-[color-mix(in_srgb,var(--color-card)_75%,transparent)]">
+                        Pastikan pencahayaan cukup dan wajah terlihat jelas
+                      </p>
+                    </div>
+                  </>
+                ) : (
+                  <>
+                    <img
+                      src={capturedPhoto.url}
+                      alt="Preview wajah"
+                      className="aspect-video h-auto w-full object-cover"
+                    />
+
+                    <div
+                      className={`absolute left-3 top-3 rounded-full ${themeSuccessSurface} border ${themeSuccessBorder} px-3 py-1.5 text-xs font-bold text-[var(--color-success)] ${themeSmallShadow}`}
+                    >
+                      Foto siap diverifikasi
+                    </div>
+                  </>
+                )}
+              </div>
+
+              <canvas
+                ref={canvasRef}
+                className="hidden"
+              />
+
+              {cameraError && (
+                <div
+                  className={`mt-4 rounded-xl border ${themeDangerBorder} ${themeDangerSurface} px-4 py-3 text-sm theme-danger`}
+                >
+                  {cameraError}
+                </div>
+              )}
+
+              <div className="mt-4 flex items-center justify-center gap-2 text-xs text-[color-mix(in_srgb,var(--color-card)_70%,transparent)]">
+                <MapPin size={14} />
+
+                {location
+                  ? `GPS aktif • akurasi ±${Math.round(
+                      location.accuracy || 0
+                    )} m`
+                  : "Mengambil lokasi GPS..."}
+              </div>
+            </div>
+
+            {/* MODAL FOOTER */}
+
+            <div
+              className={`flex flex-col gap-3 border-t ${themeDivider} theme-card p-5 sm:flex-row sm:justify-end`}
+            >
+              {!capturedPhoto ? (
+                <>
+                  <button
+                    type="button"
+                    onClick={stopCamera}
+                    disabled={submitting}
+                    className={`theme-card theme-text-secondary rounded-xl border ${themeNeutralBorder} px-5 py-3 text-sm font-semibold transition ${themeNeutralHover} disabled:opacity-50`}
+                  >
+                    Batal
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={capturePhoto}
+                    disabled={
+                      submitting ||
+                      cameraLoading
+                    }
+                    className={`rounded-xl ${themePrimaryGradient} px-6 py-3 text-sm font-bold text-[var(--color-card)] ${themePrimaryShadow} transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60`}
+                  >
+                    Ambil Foto
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    type="button"
+                    onClick={retakePhoto}
+                    disabled={submitting}
+                    className={`theme-card theme-text-secondary rounded-xl border ${themeNeutralBorder} px-5 py-3 text-sm font-semibold transition ${themeNeutralHover} disabled:opacity-50`}
+                  >
+                    Ambil Ulang
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleCheckin}
+                    disabled={
+                      submitting ||
+                      !location
+                    }
+                    className={`inline-flex items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-6 py-3 text-sm font-bold text-[var(--color-card)] ${themePrimaryShadow} transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60`}
+                  >
+                    {submitting ? (
+                      <>
+                        <Loader2
+                          size={15}
+                          className="animate-spin"
+                        />
+                        Memverifikasi Wajah...
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle2
+                          size={15}
+                        />
+                        Verifikasi & Check-in
+                      </>
+                    )}
+                  </button>
+                </>
+              )}
+            </div>
           </div>
-        </main>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* =========================================================
+   SECTION HEADER
+========================================================= */
+
+function SectionHeader({
+  icon: Icon,
+  title,
+  description,
+}) {
+  return (
+    <div
+      className={`border-b ${themeDivider} px-4 py-4 sm:px-5 lg:px-6`}
+    >
+      <div className="flex items-center gap-2">
+        <div
+          className={`flex h-8 w-8 items-center justify-center rounded-lg border ${themePrimarySoft} ${themePrimarySoftBorder}`}
+        >
+          <Icon
+            size={15}
+            className={themePrimaryText}
+          />
+        </div>
+
+        <h2 className="theme-text text-sm font-bold">
+          {title}
+        </h2>
+      </div>
+
+      <p className="theme-text-muted mt-1 text-xs">
+        {description}
+      </p>
+    </div>
+  );
+}
+
+/* =========================================================
+   SUMMARY ITEM
+========================================================= */
+
+function SummaryItem({
+  label,
+  value,
+  surface,
+  border,
+  text,
+}) {
+  return (
+    <div
+      className={`rounded-xl border ${border} ${surface} p-4`}
+    >
+      <p
+        className={`${text} text-xs font-medium`}
+      >
+        {label}
+      </p>
+
+      <p
+        className={`mt-2 text-2xl font-bold ${text}`}
+      >
+        {value}
+      </p>
+    </div>
+  );
+}
+
+/* =========================================================
+   STAT CARD
+========================================================= */
+
+function StatCard({
+  title,
+  value,
+  description,
+  icon: Icon,
+  iconClass,
+}) {
+  return (
+    <div
+      className={`theme-card rounded-2xl border ${themeNeutralBorder} p-4 ${themeCardShadow} transition-all duration-200 hover:-translate-y-0.5`}
+    >
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="theme-text-secondary text-[11px] font-medium sm:text-xs">
+            {title}
+          </p>
+
+          <p className="theme-text mt-1.5 text-2xl font-bold sm:text-3xl">
+            {value}
+          </p>
+
+          <p className="theme-text-muted mt-1 text-[10px] sm:text-xs">
+            {description}
+          </p>
+        </div>
+
+        <div
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface}`}
+        >
+          <Icon
+            size={18}
+            className={iconClass}
+          />
+        </div>
       </div>
     </div>
   );

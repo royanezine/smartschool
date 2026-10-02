@@ -29,31 +29,103 @@ import {
 import { getAbsensiKelas } from "../../../../services/absensi.service";
 import { getKelas } from "../../../../services/kelas.service";
 
+/* ============================================================
+   THEME HELPERS
+============================================================ */
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+
+/* ============================================================
+   STATUS CONFIG
+============================================================ */
+
 const STATUS_CONFIG = {
   hadir: {
     label: "Hadir",
     icon: CheckCircle2,
-    badge: "bg-emerald-50 text-emerald-600 border-emerald-200",
+    badge: `${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder}`,
   },
 
   sakit: {
     label: "Sakit",
     icon: Stethoscope,
-    badge: "bg-amber-50 text-amber-600 border-amber-200",
+    badge: `${themeWarningSurface} text-[var(--color-warning)] ${themeWarningBorder}`,
   },
 
   izin: {
     label: "Izin",
     icon: FileText,
-    badge: "bg-blue-50 text-blue-600 border-blue-200",
+    badge: `${themeInfoSurface} text-[var(--color-info)] ${themeInfoBorder}`,
   },
 
   alpha: {
     label: "Alpha",
     icon: XCircle,
-    badge: "bg-rose-50 text-rose-600 border-rose-200",
+    badge: `${themeDangerSurface} theme-danger ${themeDangerBorder}`,
   },
 };
+
+/* ============================================================
+   METODE CONFIG
+============================================================ */
 
 const METODE_CONFIG = {
   lokasi: {
@@ -77,6 +149,10 @@ const METODE_CONFIG = {
   },
 };
 
+/* ============================================================
+   FORMAT TANGGAL
+============================================================ */
+
 function formatTanggal(tanggal) {
   if (!tanggal) return "-";
 
@@ -93,6 +169,10 @@ function formatTanggal(tanggal) {
   });
 }
 
+/* ============================================================
+   FORMAT JAM
+============================================================ */
+
 function formatJam(tanggal) {
   if (!tanggal) return "-";
 
@@ -108,25 +188,10 @@ function formatJam(tanggal) {
   });
 }
 
-/**
- * Karena response backend bisa berbentuk:
- *
- * {
- *   success: true,
- *   data: [...]
- * }
- *
- * atau:
- *
- * {
- *   success: true,
- *   data: {
- *      data: [...]
- *   }
- * }
- *
- * maka kita buat normalizer supaya frontend aman.
- */
+/* ============================================================
+   NORMALIZE KELAS RESPONSE
+============================================================ */
+
 function normalizeKelasResponse(response) {
   if (Array.isArray(response)) {
     return response;
@@ -146,6 +211,10 @@ function normalizeKelasResponse(response) {
 
   return [];
 }
+
+/* ============================================================
+   NORMALIZE ABSENSI RESPONSE
+============================================================ */
 
 function normalizeAbsensiResponse(response) {
   if (Array.isArray(response)) {
@@ -167,36 +236,45 @@ function normalizeAbsensiResponse(response) {
   return [];
 }
 
+/* ============================================================
+   PAGE
+============================================================ */
+
 export default function GuruAbsensiPage() {
   const router = useRouter();
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  /**
-   * DATA KELAS
-   */
+  /* ==========================================================
+     DATA KELAS
+  ========================================================== */
+
   const [kelas, setKelas] = useState([]);
   const [kelasId, setKelasId] = useState("");
 
-  /**
-   * FILTER TANGGAL
-   */
+  /* ==========================================================
+     FILTER TANGGAL
+  ========================================================== */
+
   const [tanggal, setTanggal] = useState("");
 
-  /**
-   * DATA ABSENSI
-   */
+  /* ==========================================================
+     DATA ABSENSI
+  ========================================================== */
+
   const [absensi, setAbsensi] = useState([]);
 
-  /**
-   * LOADING
-   */
+  /* ==========================================================
+     LOADING
+  ========================================================== */
+
   const [loadingKelas, setLoadingKelas] = useState(false);
   const [loadingAbsensi, setLoadingAbsensi] = useState(false);
 
-  /**
-   * ERROR
-   */
+  /* ==========================================================
+     ERROR
+  ========================================================== */
+
   const [errorKelas, setErrorKelas] = useState("");
   const [errorAbsensi, setErrorAbsensi] = useState("");
 
@@ -217,12 +295,10 @@ export default function GuruAbsensiPage() {
     },
   ];
 
-  /**
-   * ============================================================
-   * AMBIL DAFTAR KELAS DARI BACKEND
-   * GET /api/kelas
-   * ============================================================
-   */
+  /* ==========================================================
+     AMBIL DATA KELAS
+  ========================================================== */
+
   const fetchKelas = useCallback(async () => {
     try {
       setLoadingKelas(true);
@@ -245,10 +321,6 @@ export default function GuruAbsensiPage() {
 
       setKelas(dataKelas);
 
-      /**
-       * Kalau belum ada kelas yang dipilih,
-       * otomatis pilih kelas pertama.
-       */
       if (dataKelas.length > 0) {
         setKelasId((currentId) => {
           if (currentId) {
@@ -280,21 +352,18 @@ export default function GuruAbsensiPage() {
     }
   }, []);
 
-  /**
-   * LOAD KELAS SAAT HALAMAN DIBUKA
-   */
+  /* ==========================================================
+     LOAD KELAS SAAT HALAMAN DIBUKA
+  ========================================================== */
+
   useEffect(() => {
     fetchKelas();
   }, [fetchKelas]);
 
-  /**
-   * ============================================================
-   * AMBIL KELAS ID DARI URL JIKA ADA
-   *
-   * Contoh:
-   * /guru/absensi?kelasId=uuid
-   * ============================================================
-   */
+  /* ==========================================================
+     AMBIL KELAS ID DARI URL
+  ========================================================== */
+
   useEffect(() => {
     if (typeof window === "undefined") return;
 
@@ -309,12 +378,10 @@ export default function GuruAbsensiPage() {
     }
   }, []);
 
-  /**
-   * ============================================================
-   * FETCH ABSENSI
-   * GET /api/v1/absensi/kelas/:kelasId
-   * ============================================================
-   */
+  /* ==========================================================
+     FETCH ABSENSI
+  ========================================================== */
+
   const fetchAbsensi = useCallback(async () => {
     if (!kelasId) {
       setAbsensi([]);
@@ -370,31 +437,30 @@ export default function GuruAbsensiPage() {
     }
   }, [kelasId, tanggal]);
 
-  /**
-   * FETCH ABSENSI SETIAP KELAS ID / TANGGAL BERUBAH
-   */
+  /* ==========================================================
+     FETCH ABSENSI SETIAP KELAS / TANGGAL BERUBAH
+  ========================================================== */
+
   useEffect(() => {
     if (kelasId) {
       fetchAbsensi();
     }
   }, [kelasId, fetchAbsensi]);
 
-  /**
-   * ============================================================
-   * KELAS YANG SEDANG DIPILIH
-   * ============================================================
-   */
+  /* ==========================================================
+     KELAS YANG DIPILIH
+  ========================================================== */
+
   const selectedKelas = useMemo(() => {
     return kelas.find(
       (item) => item?.id === kelasId,
     );
   }, [kelas, kelasId]);
 
-  /**
-   * ============================================================
-   * REKAP ABSENSI
-   * ============================================================
-   */
+  /* ==========================================================
+     REKAP ABSENSI
+  ========================================================== */
+
   const rekap = useMemo(() => {
     const result = {
       total: absensi.length,
@@ -432,11 +498,10 @@ export default function GuruAbsensiPage() {
     return result;
   }, [absensi]);
 
-  /**
-   * ============================================================
-   * RIWAYAT TANGGAL
-   * ============================================================
-   */
+  /* ==========================================================
+     RIWAYAT TANGGAL
+  ========================================================== */
+
   const riwayatTanggal = useMemo(() => {
     const map = new Map();
 
@@ -465,11 +530,10 @@ export default function GuruAbsensiPage() {
     );
   }, [absensi]);
 
-  /**
-   * ============================================================
-   * SORT DATA ABSENSI
-   * ============================================================
-   */
+  /* ==========================================================
+     SORT DATA ABSENSI
+  ========================================================== */
+
   const daftarAbsensi = useMemo(() => {
     return [...absensi].sort(
       (a, b) =>
@@ -486,11 +550,10 @@ export default function GuruAbsensiPage() {
     );
   }, [absensi]);
 
-  /**
-   * ============================================================
-   * PILIH KELAS
-   * ============================================================
-   */
+  /* ==========================================================
+     PILIH KELAS
+  ========================================================== */
+
   const handleChangeKelas = (e) => {
     const value = e.target.value;
 
@@ -499,12 +562,6 @@ export default function GuruAbsensiPage() {
 
     setErrorAbsensi("");
 
-    /**
-     * Update URL juga.
-     *
-     * Contoh:
-     * /guru/absensi?kelasId=uuid
-     */
     if (value) {
       router.replace(
         `/guru/absensi?kelasId=${encodeURIComponent(
@@ -516,11 +573,10 @@ export default function GuruAbsensiPage() {
     }
   };
 
-  /**
-   * ============================================================
-   * PILIH TANGGAL DARI RIWAYAT
-   * ============================================================
-   */
+  /* ==========================================================
+     PILIH TANGGAL DARI RIWAYAT
+  ========================================================== */
+
   const pilihTanggal = (value) => {
     if (!value) return;
 
@@ -545,11 +601,10 @@ export default function GuruAbsensiPage() {
     );
   };
 
-  /**
-   * ============================================================
-   * TAMBAH ABSENSI
-   * ============================================================
-   */
+  /* ==========================================================
+     TAMBAH ABSENSI
+  ========================================================== */
+
   const handleTambahAbsensi = () => {
     if (!kelasId) {
       setErrorAbsensi(
@@ -565,11 +620,10 @@ export default function GuruAbsensiPage() {
     );
   };
 
-  /**
-   * ============================================================
-   * REFRESH SEMUA
-   * ============================================================
-   */
+  /* ==========================================================
+     REFRESH
+  ========================================================== */
+
   const handleRefresh = async () => {
     await fetchKelas();
 
@@ -578,11 +632,16 @@ export default function GuruAbsensiPage() {
     }
   };
 
+  /* ==========================================================
+     RENDER
+  ========================================================== */
+
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden">
+    <div className="flex h-screen theme-page overflow-hidden">
       {/* ======================================================
           SIDEBAR
       ====================================================== */}
+
       <Sidebar
         active="absensi"
         setActive={() => {}}
@@ -596,6 +655,7 @@ export default function GuruAbsensiPage() {
         {/* ====================================================
             HEADER
         ==================================================== */}
+
         <Header
           toggleSidebar={() =>
             setSidebarOpen((prev) => !prev)
@@ -613,25 +673,29 @@ export default function GuruAbsensiPage() {
             {/* =================================================
                 PAGE HEADER
             ================================================= */}
+
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
               <div className="min-w-0">
                 <div className="flex items-center gap-2.5">
-                  <div className="p-2 rounded-lg bg-blue-600 text-white shadow-sm flex-shrink-0">
+                  <div
+                    className={`p-2 rounded-lg ${themePrimarySoft} ${themePrimaryText} ${themeSmallShadow} flex-shrink-0`}
+                  >
                     <ClipboardCheck size={18} />
                   </div>
 
-                  <h1 className="text-xl sm:text-2xl font-semibold text-slate-800">
+                  <h1 className="text-xl sm:text-2xl font-semibold theme-text">
                     Absensi
                   </h1>
                 </div>
 
-                <p className="text-sm text-slate-500 mt-1 ml-[42px]">
+                <p className="text-sm theme-text-secondary mt-1 ml-[42px]">
                   Kelola dan lihat data absensi
                   siswa berdasarkan kelas.
                 </p>
               </div>
 
               {/* ACTION */}
+
               <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
                 <button
                   type="button"
@@ -640,7 +704,7 @@ export default function GuruAbsensiPage() {
                     !kelasId ||
                     loadingKelas
                   }
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-white bg-blue-600 border border-blue-600 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm"
+                  className={`flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-[var(--color-card)] ${themePrimaryGradient} border border-transparent rounded-lg ${themePrimaryShadow} hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-all`}
                 >
                   <Plus size={16} />
                   Tambah Absensi
@@ -653,7 +717,7 @@ export default function GuruAbsensiPage() {
                     loadingKelas ||
                     loadingAbsensi
                   }
-                  className="flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-lg hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  className={`flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium theme-text-secondary theme-card border ${themeNeutralBorder} rounded-lg ${themeNeutralHover} disabled:opacity-50 disabled:cursor-not-allowed transition-colors ${themeSmallShadow}`}
                 >
                   <RefreshCw
                     size={15}
@@ -673,18 +737,22 @@ export default function GuruAbsensiPage() {
             {/* =================================================
                 FILTER
             ================================================= */}
-            <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm">
+
+            <div
+              className={`theme-card rounded-xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}
+            >
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {/* KELAS */}
+
                 <div>
-                  <label className="block text-xs font-medium text-slate-500 mb-1.5">
+                  <label className="block text-xs font-medium theme-text-secondary mb-1.5">
                     Kelas
                   </label>
 
                   <div className="relative">
                     <GraduationCap
                       size={16}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+                      className="absolute left-3 top-1/2 -translate-y-1/2 theme-text-muted pointer-events-none"
                     />
 
                     <select
@@ -696,7 +764,7 @@ export default function GuruAbsensiPage() {
                         loadingKelas ||
                         kelas.length === 0
                       }
-                      className="appearance-none w-full pl-10 pr-10 py-2.5 text-sm text-slate-700 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 disabled:opacity-60"
+                      className={`appearance-none w-full pl-10 pr-10 py-2.5 text-sm theme-input rounded-lg focus:outline-none ${themeFocus} disabled:opacity-60`}
                     >
                       {loadingKelas ? (
                         <option value="">
@@ -738,14 +806,17 @@ export default function GuruAbsensiPage() {
 
                     <ChevronDown
                       size={16}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+                      className="absolute right-3 top-1/2 -translate-y-1/2 theme-text-muted pointer-events-none"
                     />
                   </div>
 
                   {/* INFO KELAS */}
+
                   {selectedKelas && (
                     <div className="mt-2 flex flex-wrap items-center gap-2">
-                      <span className="inline-flex items-center gap-1.5 text-[11px] text-blue-600 bg-blue-50 border border-blue-100 px-2 py-1 rounded-md">
+                      <span
+                        className={`inline-flex items-center gap-1.5 text-[11px] ${themePrimaryText} ${themePrimarySoft} ${themePrimarySoftBorder} border px-2 py-1 rounded-md`}
+                      >
                         <GraduationCap
                           size={12}
                         />
@@ -755,7 +826,7 @@ export default function GuruAbsensiPage() {
                       </span>
 
                       {selectedKelas.tingkat && (
-                        <span className="text-[11px] text-slate-400">
+                        <span className="text-[11px] theme-text-muted">
                           Tingkat{" "}
                           {
                             selectedKelas.tingkat
@@ -766,7 +837,7 @@ export default function GuruAbsensiPage() {
                       {selectedKelas
                         .waliKelas
                         ?.namaLengkap && (
-                        <span className="text-[11px] text-slate-400">
+                        <span className="text-[11px] theme-text-muted">
                           Wali Kelas:{" "}
                           {
                             selectedKelas
@@ -780,15 +851,16 @@ export default function GuruAbsensiPage() {
                 </div>
 
                 {/* TANGGAL */}
+
                 <div>
-                  <label className="block text-xs font-medium text-slate-500 mb-1.5">
+                  <label className="block text-xs font-medium theme-text-secondary mb-1.5">
                     Tanggal
                   </label>
 
                   <div className="relative">
                     <CalendarDays
                       size={15}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
+                      className="absolute left-3 top-1/2 -translate-y-1/2 theme-text-muted pointer-events-none"
                     />
 
                     <input
@@ -800,7 +872,7 @@ export default function GuruAbsensiPage() {
                         )
                       }
                       disabled={!kelasId}
-                      className="w-full pl-9 pr-3 py-2.5 text-sm text-slate-700 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 disabled:opacity-60"
+                      className={`w-full pl-9 pr-3 py-2.5 text-sm theme-input rounded-lg focus:outline-none ${themeFocus} disabled:opacity-60`}
                     />
                   </div>
 
@@ -810,7 +882,7 @@ export default function GuruAbsensiPage() {
                       onClick={() =>
                         setTanggal("")
                       }
-                      className="mt-2 text-[11px] font-medium text-blue-600 hover:text-blue-700"
+                      className={`mt-2 text-[11px] font-medium ${themePrimaryText} hover:opacity-80 transition-opacity`}
                     >
                       Tampilkan semua
                       tanggal
@@ -823,20 +895,23 @@ export default function GuruAbsensiPage() {
             {/* =================================================
                 ERROR KELAS
             ================================================= */}
+
             {errorKelas && (
-              <div className="flex items-start gap-3 p-4 bg-rose-50 border border-rose-200 rounded-xl">
+              <div
+                className={`flex items-start gap-3 p-4 ${themeDangerSurface} ${themeDangerBorder} border rounded-xl`}
+              >
                 <AlertCircle
                   size={18}
-                  className="text-rose-500 mt-0.5 flex-shrink-0"
+                  className="theme-danger mt-0.5 flex-shrink-0"
                 />
 
                 <div>
-                  <p className="text-sm font-medium text-rose-700">
+                  <p className="text-sm font-medium theme-danger">
                     Gagal mengambil data
                     kelas
                   </p>
 
-                  <p className="text-xs text-rose-600 mt-1">
+                  <p className="text-xs theme-text-secondary mt-1">
                     {errorKelas}
                   </p>
                 </div>
@@ -846,20 +921,23 @@ export default function GuruAbsensiPage() {
             {/* =================================================
                 ERROR ABSENSI
             ================================================= */}
+
             {errorAbsensi && (
-              <div className="flex items-start gap-3 p-4 bg-rose-50 border border-rose-200 rounded-xl">
+              <div
+                className={`flex items-start gap-3 p-4 ${themeDangerSurface} ${themeDangerBorder} border rounded-xl`}
+              >
                 <AlertCircle
                   size={18}
-                  className="text-rose-500 mt-0.5 flex-shrink-0"
+                  className="theme-danger mt-0.5 flex-shrink-0"
                 />
 
                 <div>
-                  <p className="text-sm font-medium text-rose-700">
+                  <p className="text-sm font-medium theme-danger">
                     Gagal mengambil data
                     absensi
                   </p>
 
-                  <p className="text-xs text-rose-600 mt-1">
+                  <p className="text-xs theme-text-secondary mt-1">
                     {errorAbsensi}
                   </p>
                 </div>
@@ -869,22 +947,27 @@ export default function GuruAbsensiPage() {
             {/* =================================================
                 BELUM ADA KELAS
             ================================================= */}
+
             {!loadingKelas &&
               kelas.length === 0 &&
               !errorKelas && (
-                <div className="bg-white border border-slate-200 rounded-xl p-8 text-center">
-                  <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-blue-50 flex items-center justify-center">
+                <div
+                  className={`theme-card border ${themeNeutralBorder} rounded-xl p-8 text-center ${themeCardShadow}`}
+                >
+                  <div
+                    className={`w-12 h-12 mx-auto mb-3 rounded-full ${themePrimarySoft} flex items-center justify-center`}
+                  >
                     <Users
                       size={20}
-                      className="text-blue-500"
+                      className={themePrimaryText}
                     />
                   </div>
 
-                  <h2 className="text-sm font-semibold text-slate-700">
+                  <h2 className="text-sm font-semibold theme-text">
                     Belum ada kelas
                   </h2>
 
-                  <p className="text-xs text-slate-400 mt-1 max-w-md mx-auto">
+                  <p className="text-xs theme-text-muted mt-1 max-w-md mx-auto">
                     Backend belum
                     mengembalikan data
                     kelas untuk sekolah
@@ -896,19 +979,22 @@ export default function GuruAbsensiPage() {
             {/* =================================================
                 LOADING ABSENSI
             ================================================= */}
+
             {loadingAbsensi && (
-              <div className="bg-white rounded-xl border border-slate-200 p-8 text-center">
+              <div
+                className={`theme-card rounded-xl border ${themeNeutralBorder} p-8 text-center ${themeCardShadow}`}
+              >
                 <RefreshCw
                   size={24}
-                  className="mx-auto text-blue-500 animate-spin"
+                  className={`mx-auto ${themePrimaryText} animate-spin`}
                 />
 
-                <p className="text-sm text-slate-500 mt-3">
+                <p className="text-sm theme-text-secondary mt-3">
                   Mengambil data absensi...
                 </p>
 
                 {selectedKelas && (
-                  <p className="text-xs text-slate-400 mt-1">
+                  <p className="text-xs theme-text-muted mt-1">
                     {selectedKelas.nama ||
                       "-"}
                   </p>
@@ -919,6 +1005,7 @@ export default function GuruAbsensiPage() {
             {/* =================================================
                 CONTENT
             ================================================= */}
+
             {!loadingKelas &&
               !loadingAbsensi &&
               kelasId &&
@@ -927,25 +1014,32 @@ export default function GuruAbsensiPage() {
                   {/* =================================================
                       SUMMARY
                   ================================================= */}
+
                   <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
                     {/* TOTAL */}
-                    <div className="bg-white rounded-xl border border-slate-200/80 p-3.5 shadow-sm flex items-center gap-3">
-                      <div className="p-2 rounded-lg border bg-slate-100 text-slate-500 border-slate-200">
+
+                    <div
+                      className={`theme-card rounded-xl border ${themeNeutralBorder} p-3.5 ${themeCardShadow} flex items-center gap-3`}
+                    >
+                      <div
+                        className={`p-2 rounded-lg border ${themeNeutralSurface} ${themeNeutralBorder} theme-text-secondary`}
+                      >
                         <Users size={16} />
                       </div>
 
                       <div>
-                        <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
+                        <p className="text-[11px] font-medium theme-text-muted uppercase tracking-wider">
                           Total
                         </p>
 
-                        <p className="text-lg font-bold text-slate-800">
+                        <p className="text-lg font-bold theme-text">
                           {rekap.total}
                         </p>
                       </div>
                     </div>
 
                     {/* STATUS */}
+
                     {Object.entries(
                       STATUS_CONFIG,
                     ).map(
@@ -956,7 +1050,7 @@ export default function GuruAbsensiPage() {
                         return (
                           <div
                             key={key}
-                            className="bg-white rounded-xl border border-slate-200/80 p-3.5 shadow-sm flex items-center gap-3"
+                            className={`theme-card rounded-xl border ${themeNeutralBorder} p-3.5 ${themeCardShadow} flex items-center gap-3`}
                           >
                             <div
                               className={`p-2 rounded-lg border ${config.badge}`}
@@ -965,13 +1059,13 @@ export default function GuruAbsensiPage() {
                             </div>
 
                             <div>
-                              <p className="text-[11px] font-medium text-slate-400 uppercase tracking-wider">
+                              <p className="text-[11px] font-medium theme-text-muted uppercase tracking-wider">
                                 {
                                   config.label
                                 }
                               </p>
 
-                              <p className="text-lg font-bold text-slate-800">
+                              <p className="text-lg font-bold theme-text">
                                 {
                                   rekap[
                                     key
@@ -988,14 +1082,19 @@ export default function GuruAbsensiPage() {
                   {/* =================================================
                       DATA ABSENSI
                   ================================================= */}
-                  <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden">
-                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 sm:p-5 border-b border-slate-100">
+
+                  <div
+                    className={`theme-card rounded-xl border ${themeNeutralBorder} ${themeCardShadow} overflow-hidden`}
+                  >
+                    <div
+                      className={`flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 sm:p-5 border-b ${themeDivider}`}
+                    >
                       <div>
-                        <h2 className="text-sm font-semibold text-slate-800">
+                        <h2 className="text-sm font-semibold theme-text">
                           Data Absensi Kelas
                         </h2>
 
-                        <p className="text-xs text-slate-400 mt-0.5">
+                        <p className="text-xs theme-text-muted mt-0.5">
                           {selectedKelas
                             ?.nama
                             ? `Kelas ${selectedKelas.nama}`
@@ -1010,7 +1109,7 @@ export default function GuruAbsensiPage() {
                       </div>
 
                       {lastUpdated && (
-                        <span className="text-[11px] text-slate-400">
+                        <span className="text-[11px] theme-text-muted">
                           Diperbarui{" "}
                           {formatJam(
                             lastUpdated,
@@ -1019,22 +1118,26 @@ export default function GuruAbsensiPage() {
                       )}
                     </div>
 
+                    {/* EMPTY */}
+
                     {daftarAbsensi.length ===
                     0 ? (
                       <div className="p-10 text-center">
-                        <div className="w-12 h-12 mx-auto rounded-full bg-slate-100 flex items-center justify-center">
+                        <div
+                          className={`w-12 h-12 mx-auto rounded-full ${themeNeutralSurface} flex items-center justify-center`}
+                        >
                           <ClipboardCheck
                             size={20}
-                            className="text-slate-400"
+                            className="theme-text-muted"
                           />
                         </div>
 
-                        <p className="text-sm font-medium text-slate-600 mt-3">
+                        <p className="text-sm font-medium theme-text-secondary mt-3">
                           Belum ada data
                           absensi
                         </p>
 
-                        <p className="text-xs text-slate-400 mt-1">
+                        <p className="text-xs theme-text-muted mt-1">
                           Tidak ada record
                           absensi untuk
                           kelas dan
@@ -1047,7 +1150,7 @@ export default function GuruAbsensiPage() {
                           onClick={
                             handleTambahAbsensi
                           }
-                          className="inline-flex items-center gap-2 mt-4 px-3.5 py-2 text-xs font-medium text-blue-600 bg-blue-50 border border-blue-100 rounded-lg hover:bg-blue-100 transition-colors"
+                          className={`inline-flex items-center gap-2 mt-4 px-3.5 py-2 text-xs font-medium ${themePrimaryText} ${themePrimarySoft} border ${themePrimarySoftBorder} rounded-lg hover:opacity-80 transition-opacity`}
                         >
                           <Plus size={14} />
                           Tambah Absensi
@@ -1057,30 +1160,32 @@ export default function GuruAbsensiPage() {
                       <div className="overflow-x-auto">
                         <table className="w-full min-w-[850px]">
                           <thead>
-                            <tr className="border-b border-slate-100 bg-slate-50/70">
-                              <th className="text-left px-5 py-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                            <tr
+                              className={`${themeNeutralSurface} border-b ${themeDivider}`}
+                            >
+                              <th className="text-left px-5 py-3 text-[11px] font-semibold theme-text-muted uppercase tracking-wider">
                                 Siswa
                               </th>
 
-                              <th className="text-left px-5 py-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                              <th className="text-left px-5 py-3 text-[11px] font-semibold theme-text-muted uppercase tracking-wider">
                                 Tanggal
                               </th>
 
-                              <th className="text-left px-5 py-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                              <th className="text-left px-5 py-3 text-[11px] font-semibold theme-text-muted uppercase tracking-wider">
                                 Status
                               </th>
 
-                              <th className="text-left px-5 py-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                              <th className="text-left px-5 py-3 text-[11px] font-semibold theme-text-muted uppercase tracking-wider">
                                 Metode
                               </th>
 
-                              <th className="text-left px-5 py-3 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
+                              <th className="text-left px-5 py-3 text-[11px] font-semibold theme-text-muted uppercase tracking-wider">
                                 Keterangan
                               </th>
                             </tr>
                           </thead>
 
-                          <tbody className="divide-y divide-slate-100">
+                          <tbody>
                             {daftarAbsensi.map(
                               (
                                 item,
@@ -1126,12 +1231,15 @@ export default function GuruAbsensiPage() {
                                       item?.id ||
                                       index
                                     }
-                                    className="hover:bg-slate-50/60 transition-colors"
+                                    className={`border-b ${themeDivider} ${themeNeutralHover} transition-colors`}
                                   >
                                     {/* SISWA */}
+
                                     <td className="px-5 py-4">
                                       <div className="flex items-center gap-3">
-                                        <div className="w-9 h-9 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
+                                        <div
+                                          className={`w-9 h-9 rounded-full ${themePrimarySoft} ${themePrimaryText} flex items-center justify-center flex-shrink-0`}
+                                        >
                                           <UserCheck
                                             size={
                                               16
@@ -1140,13 +1248,13 @@ export default function GuruAbsensiPage() {
                                         </div>
 
                                         <div className="min-w-0">
-                                          <p className="text-sm font-medium text-slate-800 truncate">
+                                          <p className="text-sm font-medium theme-text truncate">
                                             {siswa?.namaLengkap ||
                                               item?.namaLengkap ||
                                               "-"}
                                           </p>
 
-                                          <p className="text-[11px] text-slate-400">
+                                          <p className="text-[11px] theme-text-muted">
                                             NISN:{" "}
                                             {siswa?.nisn ||
                                               item?.nisn ||
@@ -1157,16 +1265,17 @@ export default function GuruAbsensiPage() {
                                     </td>
 
                                     {/* TANGGAL */}
+
                                     <td className="px-5 py-4">
                                       <div>
-                                        <p className="text-xs font-medium text-slate-700">
+                                        <p className="text-xs font-medium theme-text-secondary">
                                           {formatTanggal(
                                             item?.tanggal,
                                           )}
                                         </p>
 
                                         {item?.dibuatPada && (
-                                          <p className="text-[11px] text-slate-400 mt-0.5">
+                                          <p className="text-[11px] theme-text-muted mt-0.5">
                                             {formatJam(
                                               item.dibuatPada,
                                             )}
@@ -1176,11 +1285,12 @@ export default function GuruAbsensiPage() {
                                     </td>
 
                                     {/* STATUS */}
+
                                     <td className="px-5 py-4">
                                       <span
                                         className={`inline-flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-medium rounded-full border ${
                                           config?.badge ||
-                                          "bg-slate-50 text-slate-500 border-slate-200"
+                                          `${themeNeutralSurface} theme-text-secondary ${themeNeutralBorder}`
                                         }`}
                                       >
                                         <StatusIcon
@@ -1196,13 +1306,14 @@ export default function GuruAbsensiPage() {
                                     </td>
 
                                     {/* METODE */}
+
                                     <td className="px-5 py-4">
-                                      <span className="inline-flex items-center gap-1.5 text-xs text-slate-600">
+                                      <span className="inline-flex items-center gap-1.5 text-xs theme-text-secondary">
                                         <MetodeIcon
                                           size={
                                             13
                                           }
-                                          className="text-slate-400"
+                                          className="theme-text-muted"
                                         />
 
                                         {metodeConfig?.label ||
@@ -1212,8 +1323,9 @@ export default function GuruAbsensiPage() {
                                     </td>
 
                                     {/* KETERANGAN */}
+
                                     <td className="px-5 py-4">
-                                      <span className="text-xs text-slate-500">
+                                      <span className="text-xs theme-text-secondary">
                                         {item?.keterangan ||
                                           "-"}
                                       </span>
@@ -1231,19 +1343,24 @@ export default function GuruAbsensiPage() {
                   {/* =================================================
                       RIWAYAT
                   ================================================= */}
-                  <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden">
-                    <div className="flex items-center gap-2 p-4 sm:p-5 border-b border-slate-100">
+
+                  <div
+                    className={`theme-card rounded-xl border ${themeNeutralBorder} ${themeCardShadow} overflow-hidden`}
+                  >
+                    <div
+                      className={`flex items-center gap-2 p-4 sm:p-5 border-b ${themeDivider}`}
+                    >
                       <History
                         size={16}
-                        className="text-slate-400"
+                        className="theme-text-muted"
                       />
 
                       <div>
-                        <h2 className="text-sm font-semibold text-slate-800">
+                        <h2 className="text-sm font-semibold theme-text">
                           Riwayat Data
                         </h2>
 
-                        <p className="text-xs text-slate-400 mt-0.5">
+                        <p className="text-xs theme-text-muted mt-0.5">
                           Riwayat tanggal absensi
                           dari backend
                         </p>
@@ -1253,13 +1370,13 @@ export default function GuruAbsensiPage() {
                     {riwayatTanggal.length ===
                     0 ? (
                       <div className="p-6 text-center">
-                        <p className="text-xs text-slate-400">
+                        <p className="text-xs theme-text-muted">
                           Belum ada riwayat
                           absensi.
                         </p>
                       </div>
                     ) : (
-                      <div className="divide-y divide-slate-100">
+                      <div>
                         {riwayatTanggal.map(
                           (item) => {
                             const tanggalItem =
@@ -1290,14 +1407,20 @@ export default function GuruAbsensiPage() {
                                     item.tanggal,
                                   )
                                 }
-                                className={`w-full flex items-center justify-between gap-3 px-5 py-4 text-left hover:bg-slate-50 transition-colors ${
+                                className={`w-full flex items-center justify-between gap-3 px-5 py-4 text-left border-b ${themeDivider} last:border-b-0 ${themeNeutralHover} transition-colors ${
                                   isActive
-                                    ? "bg-blue-50/60"
+                                    ? themePrimarySoft
                                     : ""
                                 }`}
                               >
                                 <div className="flex items-center gap-3">
-                                  <div className="p-2 rounded-lg bg-slate-100 text-slate-500">
+                                  <div
+                                    className={`p-2 rounded-lg ${
+                                      isActive
+                                        ? `${themePrimarySoft} ${themePrimaryText}`
+                                        : `${themeNeutralSurface} theme-text-secondary`
+                                    }`}
+                                  >
                                     <CalendarDays
                                       size={
                                         15
@@ -1306,13 +1429,13 @@ export default function GuruAbsensiPage() {
                                   </div>
 
                                   <div>
-                                    <p className="text-xs font-medium text-slate-700">
+                                    <p className="text-xs font-medium theme-text-secondary">
                                       {formatTanggal(
                                         item.tanggal,
                                       )}
                                     </p>
 
-                                    <p className="text-[11px] text-slate-400 mt-0.5">
+                                    <p className="text-[11px] theme-text-muted mt-0.5">
                                       {
                                         item.jumlah
                                       }{" "}
@@ -1323,7 +1446,9 @@ export default function GuruAbsensiPage() {
                                 </div>
 
                                 {isActive && (
-                                  <span className="text-[10px] font-semibold text-blue-600 bg-blue-50 border border-blue-200 px-2 py-1 rounded-full">
+                                  <span
+                                    className={`text-[10px] font-semibold ${themePrimaryText} ${themePrimarySoft} ${themePrimarySoftBorder} border px-2 py-1 rounded-full`}
+                                  >
                                     Dipilih
                                   </span>
                                 )}

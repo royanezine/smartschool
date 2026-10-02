@@ -92,14 +92,14 @@ function QRCodePlaceholder() {
   ];
 
   return (
-    <div className="w-[82px] h-[82px] bg-white rounded-lg p-1.5 grid grid-cols-7 gap-[2px] border border-slate-200">
+    <div className="w-[82px] h-[82px] bg-[var(--color-card)] rounded-lg p-1.5 grid grid-cols-7 gap-[2px] border theme-border">
       {Array.from({ length: 49 }).map((_, index) => (
         <div
           key={index}
           className={`rounded-[1px] ${
             patterns.includes(index)
-              ? "bg-slate-900"
-              : "bg-white"
+              ? "bg-[var(--color-text)]"
+              : "bg-[var(--color-card)]"
           }`}
         />
       ))}
@@ -116,22 +116,22 @@ function TeacherCard({ guru }) {
   return (
     <div
       id="teacher-card-front"
-      className="relative w-[430px] max-w-full aspect-[1.586/1] rounded-2xl overflow-hidden bg-white shadow-2xl border border-slate-200 print:shadow-none print:border-0"
+      className="relative w-[430px] max-w-full aspect-[1.586/1] rounded-2xl overflow-hidden theme-card shadow-[0_10px_30px_color-mix(in_srgb,var(--color-text)_14%,transparent)] theme-border print:shadow-none print:border-0"
     >
 
       {/* BACKGROUND */}
 
       <div className="absolute inset-0 overflow-hidden">
 
-        <div className="absolute -right-24 -top-28 w-72 h-72 rounded-full bg-[#155DFC]/10" />
+        <div className="absolute -right-24 -top-28 w-72 h-72 rounded-full bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]" />
 
-        <div className="absolute -left-24 -bottom-32 w-80 h-80 rounded-full bg-[#155DFC]/5" />
+        <div className="absolute -left-24 -bottom-32 w-80 h-80 rounded-full bg-[color-mix(in_srgb,var(--color-primary)_5%,transparent)]" />
 
-        <div className="absolute right-0 top-0 w-[48%] h-full bg-gradient-to-br from-[#155DFC] to-[#0d47c9] clip-card" />
+        <div className="absolute right-0 top-0 w-[48%] h-full theme-primary clip-card" />
 
-        <div className="absolute right-[25%] -top-20 w-44 h-44 rounded-full border-[22px] border-white/10" />
+        <div className="absolute right-[25%] -top-20 w-44 h-44 rounded-full border-[22px] border-[var(--color-card)]/10" />
 
-        <div className="absolute right-[5%] bottom-[-70px] w-48 h-48 rounded-full border-[28px] border-white/10" />
+        <div className="absolute right-[5%] bottom-[-70px] w-48 h-48 rounded-full border-[28px] border-[var(--color-card)]/10" />
 
       </div>
 
@@ -145,11 +145,11 @@ function TeacherCard({ guru }) {
 
         <div className="flex items-center gap-3">
 
-          <div className="w-11 h-11 rounded-xl bg-white flex items-center justify-center shadow-sm">
+          <div className="w-11 h-11 rounded-xl bg-[var(--color-card)] flex items-center justify-center shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)]">
 
             <School
               size={24}
-              className="text-[#155DFC]"
+              className="text-[var(--color-primary)]"
             />
 
           </div>
@@ -157,15 +157,15 @@ function TeacherCard({ guru }) {
 
           <div>
 
-            <p className="text-[9px] font-bold uppercase tracking-[0.18em] text-slate-500">
+            <p className="text-[9px] font-bold uppercase tracking-[0.18em] theme-text-muted">
               SMARTSCHOOL
             </p>
 
-            <h3 className="text-sm font-extrabold text-slate-900">
+            <h3 className="text-sm font-extrabold theme-text">
               KARTU IDENTITAS GURU
             </h3>
 
-            <p className="text-[8px] text-slate-500">
+            <p className="text-[8px] theme-text-muted">
               Teacher Identity Card
             </p>
 
@@ -181,11 +181,11 @@ function TeacherCard({ guru }) {
 
           {/* FOTO */}
 
-          <div className="relative w-[92px] h-[115px] rounded-xl overflow-hidden border-4 border-white shadow-lg bg-gradient-to-br from-slate-100 to-slate-200 flex-shrink-0">
+          <div className="relative w-[92px] h-[115px] rounded-xl overflow-hidden border-4 border-[var(--color-card)] shadow-lg bg-gradient-to-br from-[var(--color-border-soft)] to-[var(--color-card-soft)] flex-shrink-0">
 
             <div className="absolute inset-0 flex items-center justify-center">
 
-              <span className="text-2xl font-bold text-slate-400">
+              <span className="text-2xl font-bold theme-text-muted">
                 {getInitials(guru.nama)}
               </span>
 
@@ -198,11 +198,11 @@ function TeacherCard({ guru }) {
 
           <div className="min-w-0">
 
-            <p className="text-[8px] uppercase tracking-wider text-slate-400 font-semibold">
+            <p className="text-[8px] uppercase tracking-wider theme-text-muted font-semibold">
               Nama Lengkap
             </p>
 
-            <h2 className="text-[17px] font-extrabold text-slate-900 leading-tight max-w-[200px]">
+            <h2 className="text-[17px] font-extrabold theme-text leading-tight max-w-[200px]">
               {guru.nama}
             </h2>
 
@@ -212,11 +212,11 @@ function TeacherCard({ guru }) {
 
               <div className="flex items-center gap-2">
 
-                <span className="text-[8px] text-slate-400 w-12">
+                <span className="text-[8px] theme-text-muted w-12">
                   NIP
                 </span>
 
-                <span className="text-[9px] font-bold text-slate-700">
+                <span className="text-[9px] font-bold theme-text-secondary">
                   {guru.nip}
                 </span>
 
@@ -225,11 +225,11 @@ function TeacherCard({ guru }) {
 
               <div className="flex items-center gap-2">
 
-                <span className="text-[8px] text-slate-400 w-12">
+                <span className="text-[8px] theme-text-muted w-12">
                   NUPTK
                 </span>
 
-                <span className="text-[9px] font-bold text-slate-700">
+                <span className="text-[9px] font-bold theme-text-secondary">
                   {guru.nuptk}
                 </span>
 
@@ -238,11 +238,11 @@ function TeacherCard({ guru }) {
 
               <div className="flex items-center gap-2">
 
-                <span className="text-[8px] text-slate-400 w-12">
+                <span className="text-[8px] theme-text-muted w-12">
                   MAPEL
                 </span>
 
-                <span className="text-[9px] font-semibold text-slate-700">
+                <span className="text-[9px] font-semibold theme-text-secondary">
                   {guru.mapel}
                 </span>
 
@@ -261,11 +261,11 @@ function TeacherCard({ guru }) {
 
           <div>
 
-            <p className="text-[8px] text-slate-400">
+            <p className="text-[8px] theme-text-muted">
               Jabatan
             </p>
 
-            <p className="text-[9px] font-bold text-slate-700">
+            <p className="text-[9px] font-bold theme-text-secondary">
               {guru.jabatan}
             </p>
 
@@ -276,7 +276,7 @@ function TeacherCard({ guru }) {
 
             <QRCodePlaceholder />
 
-            <span className="text-[6px] text-slate-400 mt-1">
+            <span className="text-[6px] theme-text-muted mt-1">
               SCAN TO VERIFY
             </span>
 
@@ -291,7 +291,7 @@ function TeacherCard({ guru }) {
 
       <div className="absolute right-4 top-4 z-20">
 
-        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-white/15 backdrop-blur-sm border border-white/20 text-white text-[7px] font-bold uppercase tracking-wider">
+        <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full bg-[color-mix(in_srgb,var(--color-card)_15%,transparent)] backdrop-blur-sm border border-[color-mix(in_srgb,var(--color-card)_20%,transparent)] text-white text-[7px] font-bold uppercase tracking-wider">
 
           <ShieldCheck size={9} />
 
@@ -314,14 +314,14 @@ function TeacherCardBack({ guru }) {
   return (
     <div
       id="teacher-card-back"
-      className="relative w-[430px] max-w-full aspect-[1.586/1] rounded-2xl overflow-hidden bg-white shadow-2xl border border-slate-200 print:shadow-none print:border-0"
+      className="relative w-[430px] max-w-full aspect-[1.586/1] rounded-2xl overflow-hidden theme-card shadow-[0_10px_30px_color-mix(in_srgb,var(--color-text)_14%,transparent)] theme-border print:shadow-none print:border-0"
     >
 
       {/* HEADER */}
 
-      <div className="h-[30%] bg-gradient-to-r from-[#155DFC] to-[#0d47c9] relative overflow-hidden">
+      <div className="h-[30%] theme-primary relative overflow-hidden">
 
-        <div className="absolute -right-10 -top-16 w-44 h-44 rounded-full border-[20px] border-white/10" />
+        <div className="absolute -right-10 -top-16 w-44 h-44 rounded-full border-[20px] border-[var(--color-card)]/10" />
 
         <div className="relative z-10 p-5 text-white">
 
@@ -340,7 +340,7 @@ function TeacherCardBack({ guru }) {
 
       {/* STRIPE */}
 
-      <div className="h-7 bg-slate-900 mt-3" />
+      <div className="h-7 bg-[var(--color-text)] mt-3" />
 
 
       {/* DATA */}
@@ -352,11 +352,11 @@ function TeacherCardBack({ guru }) {
 
           <div>
 
-            <p className="text-[7px] text-slate-400 uppercase">
+            <p className="text-[7px] theme-text-muted uppercase">
               NIP
             </p>
 
-            <p className="text-[9px] font-bold text-slate-700">
+            <p className="text-[9px] font-bold theme-text-secondary">
               {guru.nip}
             </p>
 
@@ -365,11 +365,11 @@ function TeacherCardBack({ guru }) {
 
           <div>
 
-            <p className="text-[7px] text-slate-400 uppercase">
+            <p className="text-[7px] theme-text-muted uppercase">
               NUPTK
             </p>
 
-            <p className="text-[9px] font-bold text-slate-700">
+            <p className="text-[9px] font-bold theme-text-secondary">
               {guru.nuptk}
             </p>
 
@@ -378,11 +378,11 @@ function TeacherCardBack({ guru }) {
 
           <div>
 
-            <p className="text-[7px] text-slate-400 uppercase">
+            <p className="text-[7px] theme-text-muted uppercase">
               Tempat / Tanggal Lahir
             </p>
 
-            <p className="text-[9px] font-semibold text-slate-700">
+            <p className="text-[9px] font-semibold theme-text-secondary">
               {guru.tempatLahir},{" "}
               {guru.tanggalLahir}
             </p>
@@ -392,11 +392,11 @@ function TeacherCardBack({ guru }) {
 
           <div>
 
-            <p className="text-[7px] text-slate-400 uppercase">
+            <p className="text-[7px] theme-text-muted uppercase">
               Agama
             </p>
 
-            <p className="text-[9px] font-bold text-slate-700">
+            <p className="text-[9px] font-bold theme-text-secondary">
               {guru.agama}
             </p>
 
@@ -405,11 +405,11 @@ function TeacherCardBack({ guru }) {
 
           <div>
 
-            <p className="text-[7px] text-slate-400 uppercase">
+            <p className="text-[7px] theme-text-muted uppercase">
               Mata Pelajaran
             </p>
 
-            <p className="text-[9px] font-bold text-slate-700">
+            <p className="text-[9px] font-bold theme-text-secondary">
               {guru.mapel}
             </p>
 
@@ -418,11 +418,11 @@ function TeacherCardBack({ guru }) {
 
           <div>
 
-            <p className="text-[7px] text-slate-400 uppercase">
+            <p className="text-[7px] theme-text-muted uppercase">
               Telepon
             </p>
 
-            <p className="text-[9px] font-bold text-slate-700">
+            <p className="text-[9px] font-bold theme-text-secondary">
               {guru.noTelepon}
             </p>
 
@@ -431,11 +431,11 @@ function TeacherCardBack({ guru }) {
 
           <div className="col-span-2">
 
-            <p className="text-[7px] text-slate-400 uppercase">
+            <p className="text-[7px] theme-text-muted uppercase">
               Email
             </p>
 
-            <p className="text-[9px] font-semibold text-slate-700">
+            <p className="text-[9px] font-semibold theme-text-secondary">
               {guru.email}
             </p>
 
@@ -444,11 +444,11 @@ function TeacherCardBack({ guru }) {
 
           <div className="col-span-2">
 
-            <p className="text-[7px] text-slate-400 uppercase">
+            <p className="text-[7px] theme-text-muted uppercase">
               Alamat
             </p>
 
-            <p className="text-[9px] font-semibold text-slate-700">
+            <p className="text-[9px] font-semibold theme-text-secondary">
               {guru.alamat}
             </p>
 
@@ -459,9 +459,9 @@ function TeacherCardBack({ guru }) {
 
         {/* FOOTER */}
 
-        <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between">
+        <div className="mt-4 pt-3 border-t theme-border-soft flex items-center justify-between">
 
-          <p className="text-[7px] text-slate-400 max-w-[230px] leading-relaxed">
+          <p className="text-[7px] theme-text-muted max-w-[230px] leading-relaxed">
 
             Kartu ini merupakan identitas resmi tenaga
             pendidik SmartSchool. Jika ditemukan,
@@ -472,11 +472,11 @@ function TeacherCardBack({ guru }) {
 
           <div className="text-right">
 
-            <p className="text-[7px] text-slate-400">
+            <p className="text-[7px] theme-text-muted">
               STATUS
             </p>
 
-            <p className="text-[9px] font-bold text-emerald-600 uppercase">
+            <p className="text-[9px] font-bold text-[var(--color-success)] uppercase">
               {guru.status}
             </p>
 
@@ -499,17 +499,17 @@ function InfoItem({ icon, label, value }) {
   return (
     <div className="flex items-center gap-3">
 
-      <div className="w-9 h-9 rounded-lg bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400">
+      <div className="w-9 h-9 rounded-lg theme-page border theme-border-soft flex items-center justify-center theme-text-muted">
         {icon}
       </div>
 
       <div className="min-w-0">
 
-        <p className="text-[11px] text-slate-400">
+        <p className="text-[11px] theme-text-muted">
           {label}
         </p>
 
-        <p className="text-sm font-semibold text-slate-700 truncate">
+        <p className="text-sm font-semibold theme-text-secondary truncate">
           {value || "-"}
         </p>
 
@@ -607,7 +607,7 @@ function GuruCardPageContent() {
 
     return (
 
-      <div className="flex h-screen bg-slate-50">
+      <div className="flex h-screen theme-page">
 
         <Sidebar
           active="guru"
@@ -637,7 +637,7 @@ function GuruCardPageContent() {
 
             <Loader2
               size={32}
-              className="animate-spin text-blue-600"
+              className="animate-spin text-[var(--color-primary)]"
             />
 
           </main>
@@ -659,7 +659,7 @@ function GuruCardPageContent() {
 
     return (
 
-      <div className="flex h-screen bg-slate-50">
+      <div className="flex h-screen theme-page">
 
         <Sidebar
           active="guru"
@@ -689,22 +689,22 @@ function GuruCardPageContent() {
 
             <div className="text-center">
 
-              <div className="w-16 h-16 mx-auto rounded-full bg-slate-100 flex items-center justify-center mb-4">
+              <div className="w-16 h-16 mx-auto rounded-full theme-card-soft flex items-center justify-center mb-4">
 
                 <CreditCard
                   size={28}
-                  className="text-slate-400"
+                  className="theme-text-muted"
                 />
 
               </div>
 
 
-              <h1 className="text-lg font-bold text-slate-800">
+              <h1 className="text-lg font-bold theme-text">
                 Data guru tidak ditemukan
               </h1>
 
 
-              <p className="text-sm text-slate-500 mt-1 mb-5">
+              <p className="text-sm theme-text-muted mt-1 mb-5">
                 Data guru yang dipilih tidak tersedia.
               </p>
 
@@ -713,7 +713,7 @@ function GuruCardPageContent() {
                 onClick={() =>
                   router.push("/admin/guru")
                 }
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[#155DFC] text-white text-sm font-semibold"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-[var(--color-primary)] text-white text-sm font-semibold"
               >
 
                 <ArrowLeft size={16} />
@@ -741,7 +741,7 @@ function GuruCardPageContent() {
 
   return (
 
-    <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
+    <div className="flex h-screen w-full theme-page overflow-hidden">
 
 
       {/* SIDEBAR */}
@@ -799,7 +799,7 @@ function GuruCardPageContent() {
               onClick={() =>
                 router.push("/admin/guru/kartu-identitas")
               }
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-600 text-sm font-semibold hover:bg-slate-50 transition"
+              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border theme-border bg-[var(--color-card)] theme-text-secondary text-sm font-semibold hover:bg-[var(--color-sidebar-active)] transition"
             >
               <ArrowLeft size={16} />
               Kembali
@@ -808,11 +808,11 @@ function GuruCardPageContent() {
 
                 <div>
 
-                  <h1 className="text-2xl font-bold text-slate-800">
+                  <h1 className="text-2xl font-bold theme-text">
                     ID Card Guru
                   </h1>
 
-                  <p className="text-sm text-slate-500 mt-0.5">
+                  <p className="text-sm theme-text-muted mt-0.5">
                     Preview kartu identitas guru.
                   </p>
 
@@ -826,7 +826,7 @@ function GuruCardPageContent() {
 
                 <button
                   onClick={handlePrint}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-600 text-sm font-semibold hover:bg-slate-50 transition"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border theme-border bg-[var(--color-card)] theme-text-secondary text-sm font-semibold hover:bg-[var(--color-sidebar-active)] transition"
                 >
 
                   <Printer size={16} />
@@ -838,7 +838,7 @@ function GuruCardPageContent() {
 
                 <button
                   onClick={handlePrint}
-                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-gradient-to-r from-[#155DFC] to-[#0d47c9] text-white text-sm font-semibold shadow-lg shadow-[#155DFC]/20"
+                  className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg theme-primary text-white text-sm font-semibold shadow-[0_10px_30px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]"
                 >
 
                   <Download size={16} />
@@ -856,28 +856,28 @@ function GuruCardPageContent() {
                 CARD PREVIEW
             ================================================= */}
 
-            <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+            <div className="bg-[var(--color-card)] rounded-2xl border theme-border shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)] overflow-hidden">
 
 
               {/* HEADER PREVIEW */}
 
-              <div className="print:hidden px-5 py-4 border-b border-slate-100">
+              <div className="print:hidden px-5 py-4 border-b theme-border-soft">
 
                 <div className="flex items-center gap-2">
 
                   <CreditCard
                     size={17}
-                    className="text-[#155DFC]"
+                    className="text-[var(--color-primary)]"
                   />
 
-                  <h2 className="text-sm font-bold text-slate-800">
+                  <h2 className="text-sm font-bold theme-text">
                     Preview Kartu
                   </h2>
 
                 </div>
 
 
-                <p className="text-xs text-slate-500 mt-1">
+                <p className="text-xs theme-text-muted mt-1">
                   Tampilan kartu depan dan belakang sebelum dicetak.
                 </p>
 
@@ -897,11 +897,11 @@ function GuruCardPageContent() {
 
                     <div className="print:hidden flex items-center gap-2">
 
-                      <span className="w-6 h-6 rounded-full bg-[#eaf1ff] text-[#155DFC] flex items-center justify-center text-[10px] font-bold">
+                      <span className="w-6 h-6 rounded-full theme-info text-[var(--color-primary)] flex items-center justify-center text-[10px] font-bold">
                         01
                       </span>
 
-                      <span className="text-xs font-bold text-slate-600">
+                      <span className="text-xs font-bold theme-text-secondary">
                         Bagian Depan
                       </span>
 
@@ -919,11 +919,11 @@ function GuruCardPageContent() {
 
                     <div className="print:hidden flex items-center gap-2">
 
-                      <span className="w-6 h-6 rounded-full bg-[#eaf1ff] text-[#155DFC] flex items-center justify-center text-[10px] font-bold">
+                      <span className="w-6 h-6 rounded-full theme-info text-[var(--color-primary)] flex items-center justify-center text-[10px] font-bold">
                         02
                       </span>
 
-                      <span className="text-xs font-bold text-slate-600">
+                      <span className="text-xs font-bold theme-text-secondary">
                         Bagian Belakang
                       </span>
 
@@ -945,16 +945,16 @@ function GuruCardPageContent() {
                 INFORMASI GURU
             ================================================= */}
 
-            <div className="print:hidden mt-5 bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden">
+            <div className="print:hidden mt-5 bg-[var(--color-card)] rounded-xl border theme-border shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)] overflow-hidden">
 
 
-              <div className="px-5 py-4 border-b border-slate-100">
+              <div className="px-5 py-4 border-b theme-border-soft">
 
-                <h2 className="text-sm font-bold text-slate-800">
+                <h2 className="text-sm font-bold theme-text">
                   Informasi Guru
                 </h2>
 
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className="text-xs theme-text-muted mt-0.5">
                   Data yang digunakan pada kartu identitas.
                 </p>
 
@@ -1051,7 +1051,7 @@ function GuruCardPageContent() {
 
                               <button
                     onClick={() => router.push("/admin/guru")}
-                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border border-slate-200 bg-white text-slate-600 text-sm font-semibold hover:bg-slate-50 transition"
+                    className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg border theme-border bg-[var(--color-card)] theme-text-secondary text-sm font-semibold hover:bg-[var(--color-sidebar-active)] transition"
                   >
                     <ArrowLeft size={16} />
                     Kembali ke Daftar Guru
@@ -1060,7 +1060,7 @@ function GuruCardPageContent() {
 
               <button
                 onClick={handlePrint}
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-gradient-to-r from-[#155DFC] to-[#0d47c9] text-white text-sm font-semibold shadow-lg shadow-[#155DFC]/20"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg theme-primary text-white text-sm font-semibold shadow-[0_10px_30px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]"
               >
 
                 <Printer size={16} />
@@ -1126,7 +1126,7 @@ function GuruCardPageContent() {
 }
 export default function GuruCardPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-slate-50" />}>
+    <Suspense fallback={<div className="min-h-screen theme-page" />}>
       <GuruCardPageContent />
     </Suspense>
   );

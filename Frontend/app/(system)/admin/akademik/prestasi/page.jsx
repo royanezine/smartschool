@@ -3,31 +3,49 @@
 import { useState, useMemo } from "react";
 import Header from "../../../../components/Header";
 import Sidebar from "../../../../components/Sidebar";
-import { Search, Filter, Award, Trophy, Plus, X } from "lucide-react";
+import {
+  Search,
+  Filter,
+  Award,
+  Trophy,
+  Plus,
+  X,
+} from "lucide-react";
 
 /**
  * app/admin/akademik/prestasi/page.jsx
  *
- * Halaman Prestasi — mencatat pencapaian siswa dalam perlombaan, lengkap
- * dengan tingkat lomba (Kabupaten/Kota, Provinsi, Nasional, Internasional),
- * juara/peringkat yang diraih, dan bulan-tahun perolehannya.
+ * Halaman Prestasi — mencatat pencapaian siswa dalam perlombaan.
  *
- * Kelas memakai nama jurusan SMK (RPL, TKJ) supaya konsisten dengan
- * halaman Nilai. Warna teks tabel & label digelapin (slate-700/800/900)
- * supaya lebih kontras dan tidak "pucat".
+ * Theme:
+ * Menggunakan global Light/Dark theme SmartSchool melalui
+ * class theme-* dari globals.css.
  *
  * CATATAN DATA:
- * MOCK_PRESTASI di bawah masih dummy. Kalau backend/API sudah siap, tinggal
- * ganti `useState(MOCK_PRESTASI)` dengan fetch ke endpoint yang sesuai —
- * bentuk data per entri dipertahankan sama supaya UI di bawah tidak perlu
- * diubah. Form tambah prestasi (modal) sudah disiapkan strukturnya, tinggal
- * disambungkan ke endpoint POST saat backend tersedia (lihat `handleSimpan`).
+ * MOCK_PRESTASI masih dummy. Kalau backend/API sudah siap,
+ * tinggal ganti useState(MOCK_PRESTASI) dengan fetch endpoint.
  */
 
-const TINGKAT_OPTIONS = ["Kabupaten/Kota", "Provinsi", "Nasional", "Internasional"];
+const TINGKAT_OPTIONS = [
+  "Kabupaten/Kota",
+  "Provinsi",
+  "Nasional",
+  "Internasional",
+];
+
 const BULAN_OPTIONS = [
-  "Januari", "Februari", "Maret", "April", "Mei", "Juni",
-  "Juli", "Agustus", "September", "Oktober", "November", "Desember",
+  "Januari",
+  "Februari",
+  "Maret",
+  "April",
+  "Mei",
+  "Juni",
+  "Juli",
+  "Agustus",
+  "September",
+  "Oktober",
+  "November",
+  "Desember",
 ];
 
 const MOCK_PRESTASI = [
@@ -123,7 +141,8 @@ const MOCK_PRESTASI = [
     id: 9,
     namaSiswa: "Indra Kusuma",
     kelas: "XII RPL 1",
-    namaLomba: "Lomba Kompetensi Siswa (LKS) - IT Software Solutions",
+    namaLomba:
+      "Lomba Kompetensi Siswa (LKS) - IT Software Solutions",
     tingkat: "Nasional",
     juara: "Juara 2",
     bulan: "Agustus",
@@ -156,7 +175,8 @@ const MOCK_PRESTASI = [
     id: 12,
     namaSiswa: "Larasati Dewi",
     kelas: "XII RPL 2",
-    namaLomba: "Olimpiade Sains Terapan (OST) - Informatika",
+    namaLomba:
+      "Olimpiade Sains Terapan (OST) - Informatika",
     tingkat: "Nasional",
     juara: "Juara 1",
     bulan: "Juli",
@@ -231,8 +251,19 @@ const MOCK_PRESTASI = [
   },
 ];
 
-const KELAS_OPTIONS = ["Semua Kelas", ...Array.from(new Set(MOCK_PRESTASI.map((p) => p.kelas))).sort()];
-const TAHUN_OPTIONS = ["Semua Tahun", ...Array.from(new Set(MOCK_PRESTASI.map((p) => p.tahun))).sort((a, b) => b - a)];
+const KELAS_OPTIONS = [
+  "Semua Kelas",
+  ...Array.from(
+    new Set(MOCK_PRESTASI.map((p) => p.kelas))
+  ).sort(),
+];
+
+const TAHUN_OPTIONS = [
+  "Semua Tahun",
+  ...Array.from(
+    new Set(MOCK_PRESTASI.map((p) => p.tahun))
+  ).sort((a, b) => b - a),
+];
 
 const emptyForm = {
   namaSiswa: "",
@@ -249,43 +280,93 @@ export default function PrestasiPage() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [data, setData] = useState(MOCK_PRESTASI);
   const [search, setSearch] = useState("");
-  const [kelasFilter, setKelasFilter] = useState("Semua Kelas");
-  const [tingkatFilter, setTingkatFilter] = useState("Semua Tingkat");
-  const [tahunFilter, setTahunFilter] = useState("Semua Tahun");
+  const [kelasFilter, setKelasFilter] =
+    useState("Semua Kelas");
+  const [tingkatFilter, setTingkatFilter] =
+    useState("Semua Tingkat");
+  const [tahunFilter, setTahunFilter] =
+    useState("Semua Tahun");
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
 
-  const toggleSidebar = () => setIsCollapsed(!isCollapsed);
+  const toggleSidebar = () =>
+    setIsCollapsed(!isCollapsed);
 
   const filteredData = useMemo(() => {
     return data
       .filter((p) => {
         const matchSearch =
-          p.namaSiswa.toLowerCase().includes(search.toLowerCase()) ||
-          p.namaLomba.toLowerCase().includes(search.toLowerCase());
-        const matchKelas = kelasFilter === "Semua Kelas" || p.kelas === kelasFilter;
-        const matchTingkat = tingkatFilter === "Semua Tingkat" || p.tingkat === tingkatFilter;
-        const matchTahun = tahunFilter === "Semua Tahun" || p.tahun === tahunFilter;
-        return matchSearch && matchKelas && matchTingkat && matchTahun;
+          p.namaSiswa
+            .toLowerCase()
+            .includes(search.toLowerCase()) ||
+          p.namaLomba
+            .toLowerCase()
+            .includes(search.toLowerCase());
+
+        const matchKelas =
+          kelasFilter === "Semua Kelas" ||
+          p.kelas === kelasFilter;
+
+        const matchTingkat =
+          tingkatFilter === "Semua Tingkat" ||
+          p.tingkat === tingkatFilter;
+
+        const matchTahun =
+          tahunFilter === "Semua Tahun" ||
+          p.tahun === tahunFilter;
+
+        return (
+          matchSearch &&
+          matchKelas &&
+          matchTingkat &&
+          matchTahun
+        );
       })
-      .sort((a, b) => b.tahun - a.tahun || BULAN_OPTIONS.indexOf(b.bulan) - BULAN_OPTIONS.indexOf(a.bulan));
-  }, [data, search, kelasFilter, tingkatFilter, tahunFilter]);
+      .sort(
+        (a, b) =>
+          b.tahun - a.tahun ||
+          BULAN_OPTIONS.indexOf(b.bulan) -
+            BULAN_OPTIONS.indexOf(a.bulan)
+      );
+  }, [
+    data,
+    search,
+    kelasFilter,
+    tingkatFilter,
+    tahunFilter,
+  ]);
 
   // ===== Statistik ringkas =====
   const totalPrestasi = data.length;
-  const totalJuara1 = data.filter((p) => p.juara === "Juara 1").length;
-  const siswaBerprestasi = new Set(data.map((p) => p.namaSiswa)).size;
+
+  const totalJuara1 = data.filter(
+    (p) => p.juara === "Juara 1"
+  ).length;
+
+  const siswaBerprestasi = new Set(
+    data.map((p) => p.namaSiswa)
+  ).size;
 
   const handleSimpan = () => {
     if (!form.namaSiswa || !form.namaLomba) return;
+
     // TODO: ganti dengan POST ke API saat backend tersedia.
-    setData((prev) => [{ id: Date.now(), ...form, tahun: Number(form.tahun) }, ...prev]);
+    setData((prev) => [
+      {
+        id: Date.now(),
+        ...form,
+        tahun: Number(form.tahun),
+      },
+      ...prev,
+    ]);
+
     setForm(emptyForm);
     setShowForm(false);
   };
 
   return (
-    <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
+    <div className="flex h-screen w-full theme-page overflow-hidden">
+      {/* SIDEBAR */}
       <Sidebar
         active="akademikPrestasi"
         setActive={() => {}}
@@ -293,28 +374,52 @@ export default function PrestasiPage() {
         setCollapsed={setIsCollapsed}
         role="admin"
       />
+
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+        {/* HEADER */}
         <Header
           toggleSidebar={toggleSidebar}
           notifications={[]}
-          user={{ name: "Admin Sekolah", email: "admin@smartschool.com", avatar: "AD" }}
+          user={{
+            name: "Admin Sekolah",
+            email: "admin@smartschool.com",
+            avatar: "AD",
+          }}
         />
+
         <main className="flex-1 overflow-y-auto">
           <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-            {/* HEADER */}
+            {/* HEADER HALAMAN */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-200">
+                <div className="p-2.5 rounded-xl theme-primary shadow-lg">
                   <Trophy size={20} />
                 </div>
+
                 <div>
-                  <h1 className="text-2xl font-bold text-slate-900">Prestasi</h1>
-                  <p className="text-sm text-slate-600">Catatan prestasi siswa dari berbagai tingkat perlombaan.</p>
+                  <h1 className="text-2xl font-bold theme-text">
+                    Prestasi
+                  </h1>
+
+                  <p className="text-sm theme-text-muted">
+                    Catatan prestasi siswa dari berbagai
+                    tingkat perlombaan.
+                  </p>
                 </div>
               </div>
+
               <button
                 onClick={() => setShowForm(true)}
-                className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold shadow-sm shadow-blue-200 transition-colors self-start sm:self-auto"
+                className="
+                  flex items-center justify-center gap-2
+                  px-4 py-2.5
+                  rounded-xl
+                  theme-primary
+                  text-sm font-semibold
+                  shadow-sm
+                  transition-colors
+                  self-start sm:self-auto
+                "
               >
                 <Plus size={16} />
                 Tambah Prestasi
@@ -323,53 +428,112 @@ export default function PrestasiPage() {
 
             {/* STATISTIK RINGKAS */}
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm">
+              {/* TOTAL PRESTASI */}
+              <div className="theme-card rounded-xl border theme-border p-4 shadow-sm">
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-lg bg-amber-50 text-amber-600">
+                  <div className="p-1.5 rounded-lg theme-warning">
                     <Award size={16} />
                   </div>
-                  <p className="text-[11px] font-medium text-slate-500 tracking-wide">Total Prestasi</p>
+
+                  <p className="text-[11px] font-medium theme-text-muted tracking-wide">
+                    Total Prestasi
+                  </p>
                 </div>
-                <p className="text-2xl font-bold text-slate-900 mt-1.5">{totalPrestasi}</p>
+
+                <p className="text-2xl font-bold theme-text mt-1.5">
+                  {totalPrestasi}
+                </p>
               </div>
-              <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm">
+
+              {/* JUARA 1 */}
+              <div className="theme-card rounded-xl border theme-border p-4 shadow-sm">
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-lg bg-emerald-50 text-emerald-600">
+                  <div className="p-1.5 rounded-lg theme-success">
                     <Trophy size={16} />
                   </div>
-                  <p className="text-[11px] font-medium text-slate-500 tracking-wide">Juara 1</p>
+
+                  <p className="text-[11px] font-medium theme-text-muted tracking-wide">
+                    Juara 1
+                  </p>
                 </div>
-                <p className="text-2xl font-bold text-slate-900 mt-1.5">{totalJuara1}</p>
+
+                <p className="text-2xl font-bold theme-text mt-1.5">
+                  {totalJuara1}
+                </p>
               </div>
-              <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm">
+
+              {/* SISWA BERPRESTASI */}
+              <div className="theme-card rounded-xl border theme-border p-4 shadow-sm">
                 <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-lg bg-blue-50 text-blue-600">
+                  <div className="p-1.5 rounded-lg theme-info">
                     <Award size={16} />
                   </div>
-                  <p className="text-[11px] font-medium text-slate-500 tracking-wide">Siswa Berprestasi</p>
+
+                  <p className="text-[11px] font-medium theme-text-muted tracking-wide">
+                    Siswa Berprestasi
+                  </p>
                 </div>
-                <p className="text-2xl font-bold text-slate-900 mt-1.5">{siswaBerprestasi}</p>
+
+                <p className="text-2xl font-bold theme-text mt-1.5">
+                  {siswaBerprestasi}
+                </p>
               </div>
             </div>
 
             {/* FILTER BAR */}
-            <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm flex flex-col lg:flex-row gap-3">
+            <div className="theme-card rounded-xl border theme-border p-4 shadow-sm flex flex-col lg:flex-row gap-3">
+              {/* SEARCH */}
               <div className="relative flex-1">
-                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Search
+                  size={16}
+                  className="
+                    absolute left-3 top-1/2
+                    -translate-y-1/2
+                    theme-text-muted
+                  "
+                />
+
                 <input
                   type="text"
                   value={search}
-                  onChange={(e) => setSearch(e.target.value)}
+                  onChange={(e) =>
+                    setSearch(e.target.value)
+                  }
                   placeholder="Cari nama siswa atau nama lomba..."
-                  className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 text-slate-800"
+                  className="
+                    w-full
+                    pl-9 pr-3 py-2
+                    text-sm
+                    rounded-lg
+                    border
+                    theme-input
+                    focus:outline-none
+                  "
                 />
               </div>
+
+              {/* FILTER */}
               <div className="flex flex-wrap items-center gap-2">
-                <Filter size={15} className="text-slate-400 hidden lg:block" />
+                <Filter
+                  size={15}
+                  className="theme-text-muted hidden lg:block"
+                />
+
+                {/* KELAS */}
                 <select
                   value={kelasFilter}
-                  onChange={(e) => setKelasFilter(e.target.value)}
-                  className="text-sm rounded-lg border border-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 bg-white text-slate-800 font-medium"
+                  onChange={(e) =>
+                    setKelasFilter(e.target.value)
+                  }
+                  className="
+                    text-sm
+                    rounded-lg
+                    border
+                    theme-input
+                    px-3 py-2
+                    focus:outline-none
+                    font-medium
+                  "
                 >
                   {KELAS_OPTIONS.map((k) => (
                     <option key={k} value={k}>
@@ -377,21 +541,52 @@ export default function PrestasiPage() {
                     </option>
                   ))}
                 </select>
+
+                {/* TINGKAT */}
                 <select
                   value={tingkatFilter}
-                  onChange={(e) => setTingkatFilter(e.target.value)}
-                  className="text-sm rounded-lg border border-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 bg-white text-slate-800 font-medium"
+                  onChange={(e) =>
+                    setTingkatFilter(e.target.value)
+                  }
+                  className="
+                    text-sm
+                    rounded-lg
+                    border
+                    theme-input
+                    px-3 py-2
+                    focus:outline-none
+                    font-medium
+                  "
                 >
-                  {["Semua Tingkat", ...TINGKAT_OPTIONS].map((t) => (
+                  {[
+                    "Semua Tingkat",
+                    ...TINGKAT_OPTIONS,
+                  ].map((t) => (
                     <option key={t} value={t}>
                       {t}
                     </option>
                   ))}
                 </select>
+
+                {/* TAHUN */}
                 <select
                   value={tahunFilter}
-                  onChange={(e) => setTahunFilter(e.target.value === "Semua Tahun" ? "Semua Tahun" : Number(e.target.value))}
-                  className="text-sm rounded-lg border border-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 bg-white text-slate-800 font-medium"
+                  onChange={(e) =>
+                    setTahunFilter(
+                      e.target.value === "Semua Tahun"
+                        ? "Semua Tahun"
+                        : Number(e.target.value)
+                    )
+                  }
+                  className="
+                    text-sm
+                    rounded-lg
+                    border
+                    theme-input
+                    px-3 py-2
+                    focus:outline-none
+                    font-medium
+                  "
                 >
                   {TAHUN_OPTIONS.map((t) => (
                     <option key={t} value={t}>
@@ -403,49 +598,107 @@ export default function PrestasiPage() {
             </div>
 
             {/* TABEL PRESTASI */}
-            <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden">
+            <div className="theme-card rounded-xl border theme-border shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-                      <th className="text-left font-semibold px-4 py-3">Siswa</th>
-                      <th className="text-left font-semibold px-4 py-3">Nama Lomba</th>
-                      <th className="text-left font-semibold px-4 py-3">Tingkat</th>
-                      <th className="text-left font-semibold px-4 py-3">Juara</th>
-                      <th className="text-left font-semibold px-4 py-3">Bulan / Tahun</th>
-                      <th className="text-left font-semibold px-4 py-3">Penyelenggara</th>
+                      <th className="text-left font-semibold px-4 py-3">
+                        Siswa
+                      </th>
+
+                      <th className="text-left font-semibold px-4 py-3">
+                        Nama Lomba
+                      </th>
+
+                      <th className="text-left font-semibold px-4 py-3">
+                        Tingkat
+                      </th>
+
+                      <th className="text-left font-semibold px-4 py-3">
+                        Juara
+                      </th>
+
+                      <th className="text-left font-semibold px-4 py-3">
+                        Bulan / Tahun
+                      </th>
+
+                      <th className="text-left font-semibold px-4 py-3">
+                        Penyelenggara
+                      </th>
                     </tr>
                   </thead>
+
                   <tbody>
-                    {filteredData.map((p, idx) => (
+                    {filteredData.map((p) => (
                       <tr
                         key={p.id}
-                        className={`border-b border-slate-100 last:border-0 transition-colors hover:bg-blue-100/60 ${
-                          idx % 2 === 0 ? "bg-blue-50/60" : "bg-white"
-                        }`}
+                        className="
+                          border-b
+                          theme-border-soft
+                          last:border-0
+                          transition-colors
+                          theme-table-hover
+                        "
                       >
+                        {/* SISWA */}
                         <td className="px-4 py-3">
-                          <p className="font-semibold text-slate-900">{p.namaSiswa}</p>
-                          <p className="text-xs text-slate-600">{p.kelas}</p>
+                          <p className="font-semibold theme-text">
+                            {p.namaSiswa}
+                          </p>
+
+                          <p className="text-xs theme-text-muted">
+                            {p.kelas}
+                          </p>
                         </td>
-                        <td className="px-4 py-3 text-slate-800 font-medium max-w-[240px]">{p.namaLomba}</td>
-                        <td className="px-4 py-3 text-slate-800 font-medium whitespace-nowrap">{p.tingkat}</td>
+
+                        {/* NAMA LOMBA */}
+                        <td className="px-4 py-3 theme-text-secondary font-medium max-w-[240px]">
+                          {p.namaLomba}
+                        </td>
+
+                        {/* TINGKAT */}
+                        <td className="px-4 py-3 theme-text-secondary font-medium whitespace-nowrap">
+                          {p.tingkat}
+                        </td>
+
+                        {/* JUARA */}
                         <td className="px-4 py-3">
-                          <div className="flex items-center gap-1.5 text-slate-800 font-semibold">
-                            <Trophy size={13} className="text-amber-500" />
+                          <div className="flex items-center gap-1.5 theme-text-secondary font-semibold">
+                            <Trophy
+                              size={13}
+                              className="text-[var(--color-warning)]"
+                            />
                             {p.juara}
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-slate-800 font-medium whitespace-nowrap">
+
+                        {/* TANGGAL */}
+                        <td className="px-4 py-3 theme-text-secondary font-medium whitespace-nowrap">
                           {p.bulan} {p.tahun}
                         </td>
-                        <td className="px-4 py-3 text-slate-700 text-xs max-w-[200px]">{p.penyelenggara}</td>
+
+                        {/* PENYELENGGARA */}
+                        <td className="px-4 py-3 theme-text-muted text-xs max-w-[200px]">
+                          {p.penyelenggara}
+                        </td>
                       </tr>
                     ))}
+
+                    {/* EMPTY STATE */}
                     {filteredData.length === 0 && (
                       <tr>
-                        <td colSpan={6} className="px-4 py-10 text-center text-sm text-slate-400">
-                          Tidak ada data prestasi yang cocok dengan filter ini.
+                        <td
+                          colSpan={6}
+                          className="
+                            px-4 py-10
+                            text-center
+                            text-sm
+                            theme-text-muted
+                          "
+                        >
+                          Tidak ada data prestasi yang cocok
+                          dengan filter ini.
                         </td>
                       </tr>
                     )}
@@ -460,58 +713,169 @@ export default function PrestasiPage() {
       {/* MODAL TAMBAH PRESTASI */}
       {showForm && (
         <>
-          <div onClick={() => setShowForm(false)} className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm" />
+          {/* OVERLAY */}
+          <div
+            onClick={() => setShowForm(false)}
+            className="
+              fixed inset-0 z-40
+              bg-slate-900/40
+              backdrop-blur-sm
+            "
+          />
+
+          {/* MODAL WRAPPER */}
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-              <div className="flex items-center justify-between px-5 h-16 border-b border-slate-100 sticky top-0 bg-white">
-                <h2 className="text-sm font-semibold text-slate-900">Tambah Prestasi</h2>
+            <div
+              className="
+                theme-card
+                rounded-2xl
+                shadow-2xl
+                w-full
+                max-w-lg
+                max-h-[90vh]
+                overflow-y-auto
+              "
+            >
+              {/* MODAL HEADER */}
+              <div
+                className="
+                  flex items-center justify-between
+                  px-5 h-16
+                  border-b
+                  theme-border-soft
+                  sticky top-0
+                  theme-card
+                  z-10
+                "
+              >
+                <h2 className="text-sm font-semibold theme-text">
+                  Tambah Prestasi
+                </h2>
+
                 <button
                   onClick={() => setShowForm(false)}
-                  className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-900 transition-colors"
+                  className="
+                    p-1.5
+                    rounded-lg
+                    theme-text-muted
+                    theme-header-hover
+                    transition-colors
+                  "
                 >
                   <X size={18} />
                 </button>
               </div>
 
+              {/* FORM */}
               <div className="p-5 space-y-4">
+                {/* NAMA SISWA */}
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 mb-1.5 block">Nama Siswa</label>
+                  <label className="text-xs font-semibold theme-text-secondary mb-1.5 block">
+                    Nama Siswa
+                  </label>
+
                   <input
                     type="text"
                     value={form.namaSiswa}
-                    onChange={(e) => setForm({ ...form, namaSiswa: e.target.value })}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        namaSiswa: e.target.value,
+                      })
+                    }
                     placeholder="Contoh: Alya Ramadhani"
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 text-slate-800"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-slate-700 mb-1.5 block">Kelas</label>
-                  <input
-                    type="text"
-                    value={form.kelas}
-                    onChange={(e) => setForm({ ...form, kelas: e.target.value })}
-                    placeholder="Contoh: X RPL 1 / XI TKJ 2"
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 text-slate-800"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-slate-700 mb-1.5 block">Nama Lomba</label>
-                  <input
-                    type="text"
-                    value={form.namaLomba}
-                    onChange={(e) => setForm({ ...form, namaLomba: e.target.value })}
-                    placeholder="Contoh: LKS Web Technology"
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 text-slate-800"
+                    className="
+                      w-full
+                      px-3 py-2
+                      text-sm
+                      rounded-lg
+                      border
+                      theme-input
+                      focus:outline-none
+                    "
                   />
                 </div>
 
+                {/* KELAS */}
+                <div>
+                  <label className="text-xs font-semibold theme-text-secondary mb-1.5 block">
+                    Kelas
+                  </label>
+
+                  <input
+                    type="text"
+                    value={form.kelas}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        kelas: e.target.value,
+                      })
+                    }
+                    placeholder="Contoh: X RPL 1 / XI TKJ 2"
+                    className="
+                      w-full
+                      px-3 py-2
+                      text-sm
+                      rounded-lg
+                      border
+                      theme-input
+                      focus:outline-none
+                    "
+                  />
+                </div>
+
+                {/* NAMA LOMBA */}
+                <div>
+                  <label className="text-xs font-semibold theme-text-secondary mb-1.5 block">
+                    Nama Lomba
+                  </label>
+
+                  <input
+                    type="text"
+                    value={form.namaLomba}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        namaLomba: e.target.value,
+                      })
+                    }
+                    placeholder="Contoh: LKS Web Technology"
+                    className="
+                      w-full
+                      px-3 py-2
+                      text-sm
+                      rounded-lg
+                      border
+                      theme-input
+                      focus:outline-none
+                    "
+                  />
+                </div>
+
+                {/* TINGKAT + JUARA */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-semibold text-slate-700 mb-1.5 block">Tingkat</label>
+                    <label className="text-xs font-semibold theme-text-secondary mb-1.5 block">
+                      Tingkat
+                    </label>
+
                     <select
                       value={form.tingkat}
-                      onChange={(e) => setForm({ ...form, tingkat: e.target.value })}
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 bg-white text-slate-800"
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          tingkat: e.target.value,
+                        })
+                      }
+                      className="
+                        w-full
+                        px-3 py-2
+                        text-sm
+                        rounded-lg
+                        border
+                        theme-input
+                        focus:outline-none
+                      "
                     >
                       {TINGKAT_OPTIONS.map((t) => (
                         <option key={t} value={t}>
@@ -520,14 +884,38 @@ export default function PrestasiPage() {
                       ))}
                     </select>
                   </div>
+
                   <div>
-                    <label className="text-xs font-semibold text-slate-700 mb-1.5 block">Juara</label>
+                    <label className="text-xs font-semibold theme-text-secondary mb-1.5 block">
+                      Juara
+                    </label>
+
                     <select
                       value={form.juara}
-                      onChange={(e) => setForm({ ...form, juara: e.target.value })}
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 bg-white text-slate-800"
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          juara: e.target.value,
+                        })
+                      }
+                      className="
+                        w-full
+                        px-3 py-2
+                        text-sm
+                        rounded-lg
+                        border
+                        theme-input
+                        focus:outline-none
+                      "
                     >
-                      {["Juara 1", "Juara 2", "Juara 3", "Harapan 1", "Harapan 2", "Peserta Terbaik"].map((j) => (
+                      {[
+                        "Juara 1",
+                        "Juara 2",
+                        "Juara 3",
+                        "Harapan 1",
+                        "Harapan 2",
+                        "Peserta Terbaik",
+                      ].map((j) => (
                         <option key={j} value={j}>
                           {j}
                         </option>
@@ -536,13 +924,30 @@ export default function PrestasiPage() {
                   </div>
                 </div>
 
+                {/* BULAN + TAHUN */}
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <label className="text-xs font-semibold text-slate-700 mb-1.5 block">Bulan</label>
+                    <label className="text-xs font-semibold theme-text-secondary mb-1.5 block">
+                      Bulan
+                    </label>
+
                     <select
                       value={form.bulan}
-                      onChange={(e) => setForm({ ...form, bulan: e.target.value })}
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 bg-white text-slate-800"
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          bulan: e.target.value,
+                        })
+                      }
+                      className="
+                        w-full
+                        px-3 py-2
+                        text-sm
+                        rounded-lg
+                        border
+                        theme-input
+                        focus:outline-none
+                      "
                     >
                       {BULAN_OPTIONS.map((b) => (
                         <option key={b} value={b}>
@@ -551,39 +956,96 @@ export default function PrestasiPage() {
                       ))}
                     </select>
                   </div>
+
                   <div>
-                    <label className="text-xs font-semibold text-slate-700 mb-1.5 block">Tahun</label>
+                    <label className="text-xs font-semibold theme-text-secondary mb-1.5 block">
+                      Tahun
+                    </label>
+
                     <input
                       type="number"
                       value={form.tahun}
-                      onChange={(e) => setForm({ ...form, tahun: e.target.value })}
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 text-slate-800"
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          tahun: e.target.value,
+                        })
+                      }
+                      className="
+                        w-full
+                        px-3 py-2
+                        text-sm
+                        rounded-lg
+                        border
+                        theme-input
+                        focus:outline-none
+                      "
                     />
                   </div>
                 </div>
 
+                {/* PENYELENGGARA */}
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 mb-1.5 block">Penyelenggara</label>
+                  <label className="text-xs font-semibold theme-text-secondary mb-1.5 block">
+                    Penyelenggara
+                  </label>
+
                   <input
                     type="text"
                     value={form.penyelenggara}
-                    onChange={(e) => setForm({ ...form, penyelenggara: e.target.value })}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        penyelenggara: e.target.value,
+                      })
+                    }
                     placeholder="Contoh: Dinas Pendidikan Kab. Bandung"
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 text-slate-800"
+                    className="
+                      w-full
+                      px-3 py-2
+                      text-sm
+                      rounded-lg
+                      border
+                      theme-input
+                      focus:outline-none
+                    "
                   />
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-slate-100">
+              {/* MODAL FOOTER */}
+              <div
+                className="
+                  flex items-center justify-end gap-2
+                  px-5 py-4
+                  border-t
+                  theme-border-soft
+                "
+              >
                 <button
                   onClick={() => setShowForm(false)}
-                  className="px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"
+                  className="
+                    px-4 py-2
+                    text-sm font-semibold
+                    theme-text-secondary
+                    theme-header-hover
+                    rounded-lg
+                    transition-colors
+                  "
                 >
                   Batal
                 </button>
+
                 <button
                   onClick={handleSimpan}
-                  className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-sm shadow-blue-200"
+                  className="
+                    px-4 py-2
+                    text-sm font-semibold
+                    theme-primary
+                    rounded-lg
+                    transition-colors
+                    shadow-sm
+                  "
                 >
                   Simpan
                 </button>

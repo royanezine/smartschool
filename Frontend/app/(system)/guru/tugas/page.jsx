@@ -20,18 +20,80 @@ import {
   GraduationCap,
   Inbox,
   ListChecks,
-  Loader2,
   Pencil,
   Plus,
   RefreshCw,
   Search,
-  Send,
   Sparkles,
   Users,
   X,
 } from "lucide-react";
 
 import { getTugasGuru } from "../../../../services/tugas.service";
+
+/* =========================================================
+   THEME HELPERS
+========================================================= */
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
 /* =========================================================
    HELPERS
@@ -211,7 +273,10 @@ const getProgress = (tugas) => {
     return 0;
   }
 
-  return Math.min(100, Math.round((submitted / total) * 100));
+  return Math.min(
+    100,
+    Math.round((submitted / total) * 100)
+  );
 };
 
 const getDeadlineState = (tugas) => {
@@ -301,12 +366,19 @@ function KelasSearchDropdown({
 
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (!event.target.closest("[data-kelas-dropdown]")) {
+      if (
+        !event.target.closest(
+          "[data-kelas-dropdown]"
+        )
+      ) {
         setOpen(false);
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener(
+      "mousedown",
+      handleClickOutside
+    );
 
     return () => {
       document.removeEventListener(
@@ -329,21 +401,16 @@ function KelasSearchDropdown({
     >
       <button
         type="button"
-        onClick={() => setOpen((prev) => !prev)}
-        className="
-          flex h-11 w-full items-center justify-between
-          rounded-xl border border-slate-200 bg-white
-          px-3.5 text-left text-sm
-          transition-all duration-200
-          hover:border-blue-300
-          focus:outline-none focus:ring-2 focus:ring-blue-100
-        "
+        onClick={() =>
+          setOpen((prev) => !prev)
+        }
+        className={`theme-input flex h-11 w-full items-center justify-between rounded-xl border px-3.5 text-left text-sm transition-all duration-200 ${themeNeutralBorder} ${themeFocus}`}
       >
         <span
           className={
             value
-              ? "truncate text-slate-700"
-              : "text-slate-400"
+              ? "theme-text truncate"
+              : "theme-text-placeholder truncate"
           }
         >
           {value || "Semua Kelas"}
@@ -351,7 +418,7 @@ function KelasSearchDropdown({
 
         <ChevronDown
           size={17}
-          className={`shrink-0 text-slate-400 transition-transform ${
+          className={`theme-text-muted shrink-0 transition-transform ${
             open ? "rotate-180" : ""
           }`}
         />
@@ -359,38 +426,26 @@ function KelasSearchDropdown({
 
       {open && (
         <div
-          className="
-            absolute left-0 right-0 z-50 mt-2
-            overflow-hidden rounded-xl border border-slate-200
-            bg-white shadow-xl shadow-slate-200/60
-          "
+          className={`theme-card absolute left-0 right-0 z-50 mt-2 overflow-hidden rounded-xl border ${themeNeutralBorder} ${themeCardShadow}`}
         >
-          <div className="border-b border-slate-100 p-2">
+          <div
+            className={`border-b p-2 ${themeDivider}`}
+          >
             <div className="relative">
               <Search
                 size={15}
-                className="
-                  pointer-events-none absolute left-3
-                  top-1/2 -translate-y-1/2
-                  text-slate-400
-                "
+                className="theme-text-muted pointer-events-none absolute left-3 top-1/2 -translate-y-1/2"
               />
 
               <input
                 type="text"
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) =>
+                  setSearch(e.target.value)
+                }
                 placeholder="Cari kelas..."
                 autoFocus
-                className="
-                  h-9 w-full rounded-lg
-                  border border-slate-200
-                  bg-slate-50 pl-9 pr-3
-                  text-sm text-slate-700
-                  outline-none
-                  focus:border-blue-400
-                  focus:bg-white
-                "
+                className={`theme-input h-9 w-full rounded-lg border pl-9 pr-3 text-sm outline-none ${themeNeutralBorder} ${themeFocus}`}
               />
             </div>
           </div>
@@ -399,16 +454,11 @@ function KelasSearchDropdown({
             <button
               type="button"
               onClick={() => selectValue("")}
-              className={`
-                flex w-full items-center rounded-lg
-                px-3 py-2.5 text-left text-sm
-                transition
-                ${
-                  !value
-                    ? "bg-blue-50 font-medium text-blue-600"
-                    : "text-slate-600 hover:bg-slate-50"
-                }
-              `}
+              className={`flex w-full items-center rounded-lg px-3 py-2.5 text-left text-sm transition ${
+                !value
+                  ? `${themePrimarySoft} font-medium ${themePrimaryText}`
+                  : `theme-text-secondary ${themeNeutralHover}`
+              }`}
             >
               Semua Kelas
             </button>
@@ -418,23 +468,20 @@ function KelasSearchDropdown({
                 <button
                   type="button"
                   key={item}
-                  onClick={() => selectValue(item)}
-                  className={`
-                    flex w-full items-center rounded-lg
-                    px-3 py-2.5 text-left text-sm
-                    transition
-                    ${
-                      value === item
-                        ? "bg-blue-50 font-medium text-blue-600"
-                        : "text-slate-600 hover:bg-slate-50"
-                    }
-                  `}
+                  onClick={() =>
+                    selectValue(item)
+                  }
+                  className={`flex w-full items-center rounded-lg px-3 py-2.5 text-left text-sm transition ${
+                    value === item
+                      ? `${themePrimarySoft} font-medium ${themePrimaryText}`
+                      : `theme-text-secondary ${themeNeutralHover}`
+                  }`}
                 >
                   {item}
                 </button>
               ))
             ) : (
-              <div className="px-3 py-5 text-center text-sm text-slate-400">
+              <div className="theme-text-muted px-3 py-5 text-center text-sm">
                 Kelas tidak ditemukan
               </div>
             )}
@@ -451,33 +498,58 @@ function KelasSearchDropdown({
 
 function TaskSkeleton() {
   return (
-    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white">
+    <div
+      className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder}`}
+    >
       <div className="animate-pulse p-5">
         <div className="mb-5 flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <div className="h-11 w-11 rounded-xl bg-slate-200" />
+            <div
+              className={`h-11 w-11 rounded-xl ${themeNeutralSurface}`}
+            />
 
             <div>
-              <div className="h-3 w-24 rounded bg-slate-200" />
-              <div className="mt-2 h-4 w-32 rounded bg-slate-200" />
+              <div
+                className={`h-3 w-24 rounded ${themeNeutralSurface}`}
+              />
+
+              <div
+                className={`mt-2 h-4 w-32 rounded ${themeNeutralSurface}`}
+              />
             </div>
           </div>
 
-          <div className="h-6 w-20 rounded-full bg-slate-200" />
+          <div
+            className={`h-6 w-20 rounded-full ${themeNeutralSurface}`}
+          />
         </div>
 
-        <div className="h-5 w-4/5 rounded bg-slate-200" />
+        <div
+          className={`h-5 w-4/5 rounded ${themeNeutralSurface}`}
+        />
 
         <div className="mt-3 space-y-2">
-          <div className="h-3 w-full rounded bg-slate-200" />
-          <div className="h-3 w-3/4 rounded bg-slate-200" />
+          <div
+            className={`h-3 w-full rounded ${themeNeutralSurface}`}
+          />
+
+          <div
+            className={`h-3 w-3/4 rounded ${themeNeutralSurface}`}
+          />
         </div>
 
-        <div className="mt-5 h-16 rounded-xl bg-slate-100" />
+        <div
+          className={`mt-5 h-16 rounded-xl ${themeNeutralSurface}`}
+        />
 
         <div className="mt-5 flex gap-2">
-          <div className="h-10 flex-1 rounded-lg bg-slate-200" />
-          <div className="h-10 w-20 rounded-lg bg-slate-200" />
+          <div
+            className={`h-10 flex-1 rounded-lg ${themeNeutralSurface}`}
+          />
+
+          <div
+            className={`h-10 w-20 rounded-lg ${themeNeutralSurface}`}
+          />
         </div>
       </div>
     </div>
@@ -499,8 +571,10 @@ export default function GuruTugasPage() {
   const [success, setSuccess] = useState("");
 
   const [searchQuery, setSearchQuery] = useState("");
-  const [selectedKelas, setSelectedKelas] = useState("");
-  const [selectedStatus, setSelectedStatus] = useState("");
+  const [selectedKelas, setSelectedKelas] =
+    useState("");
+  const [selectedStatus, setSelectedStatus] =
+    useState("");
 
   /* =======================================================
      LOAD DATA
@@ -527,13 +601,18 @@ export default function GuruTugasPage() {
           ? response.data.data
           : Array.isArray(response?.result)
           ? response.result
-          : Array.isArray(response?.data?.result)
+          : Array.isArray(
+              response?.data?.result
+            )
           ? response.data.result
           : [];
 
         setTugas(data);
       } catch (err) {
-        console.error("Gagal mengambil data tugas:", err);
+        console.error(
+          "Gagal mengambil data tugas:",
+          err
+        );
 
         setError(
           err?.message ||
@@ -600,14 +679,14 @@ export default function GuruTugasPage() {
       .trim();
 
     return tugas.filter((item) => {
-      const judul = getJudulTugas(item)
-        .toLowerCase();
+      const judul =
+        getJudulTugas(item).toLowerCase();
 
-      const deskripsi = getDeskripsiTugas(item)
-        .toLowerCase();
+      const deskripsi =
+        getDeskripsiTugas(item).toLowerCase();
 
-      const mapel = getMapelNama(item)
-        .toLowerCase();
+      const mapel =
+        getMapelNama(item).toLowerCase();
 
       const kelas = getKelasNama(item);
 
@@ -618,7 +697,9 @@ export default function GuruTugasPage() {
         judul.includes(keyword) ||
         deskripsi.includes(keyword) ||
         mapel.includes(keyword) ||
-        kelas.toLowerCase().includes(keyword);
+        kelas
+          .toLowerCase()
+          .includes(keyword);
 
       const matchesKelas =
         !selectedKelas ||
@@ -673,7 +754,8 @@ export default function GuruTugasPage() {
     const progress =
       totalSiswa > 0
         ? Math.round(
-            (totalPengumpulan / totalSiswa) * 100
+            (totalPengumpulan / totalSiswa) *
+              100
           )
         : 0;
 
@@ -727,7 +809,7 @@ export default function GuruTugasPage() {
   ======================================================= */
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-slate-50">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar
         active="tugas"
         role="guru"
@@ -743,7 +825,7 @@ export default function GuruTugasPage() {
           notifications={[]}
         />
 
-        <main className="flex-1 overflow-x-hidden overflow-y-auto">
+        <main className="theme-page flex-1 overflow-x-hidden overflow-y-auto">
           <div className="mx-auto w-full max-w-7xl space-y-6 p-4 sm:p-6 lg:p-8">
 
             {/* =================================================
@@ -751,163 +833,67 @@ export default function GuruTugasPage() {
             ================================================== */}
 
             <section
-              className="
-                relative overflow-hidden rounded-2xl
-                border border-white/10
-                bg-gradient-to-br
-                from-slate-950
-                via-[#182a4e]
-                to-[#0a1e47]
-                p-6 shadow-xl
-                sm:p-8
-              "
+              className={`relative overflow-hidden rounded-2xl border p-6 sm:p-8 ${themePrimaryGradient} ${themePrimaryShadow} ${themePrimarySoftBorder}`}
             >
-              {/* Background decoration */}
-
               <div
-                className="
-                  pointer-events-none absolute
-                  -right-20 -top-24
-                  h-72 w-72 rounded-full
-                  bg-blue-400/20 blur-3xl
-                "
+                className="pointer-events-none absolute -right-20 -top-24 h-72 w-72 rounded-full bg-[color-mix(in_srgb,var(--color-info)_18%,transparent)] blur-3xl]"
               />
 
               <div
-                className="
-                  pointer-events-none absolute
-                  -bottom-32 left-1/3
-                  h-80 w-80 rounded-full
-                  bg-indigo-500/20 blur-3xl
-                "
+                className="pointer-events-none absolute -bottom-32 left-1/3 h-80 w-80 rounded-full bg-[color-mix(in_srgb,var(--color-primary)_18%,transparent)] blur-3xl]"
               />
 
               <div
-                className="
-                  pointer-events-none absolute
-                  right-1/4 top-1/2
-                  h-32 w-32 rounded-full
-                  bg-white/5 blur-2xl
-                "
+                className="pointer-events-none absolute right-1/4 top-1/2 h-32 w-32 rounded-full bg-[color-mix(in_srgb,var(--color-card)_8%,transparent)] blur-2xl]"
               />
 
               <div className="relative z-10">
                 <div className="flex flex-col gap-6 xl:flex-row xl:items-start xl:justify-between">
 
-                  {/* Hero title */}
+                  {/* TITLE */}
 
                   <div className="min-w-0">
                     <div className="mb-4 flex flex-wrap items-center gap-3">
-                      <div
-                        className="
-                          flex h-12 w-12 shrink-0
-                          items-center justify-center
-                          rounded-xl border
-                          border-white/15
-                          bg-white/10
-                          backdrop-blur
-                        "
-                      >
-                        <ClipboardList
-                          size={25}
-                          className="text-white"
-                        />
+                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-[color-mix(in_srgb,var(--color-card)_18%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)] text-[var(--color-card)] backdrop-blur">
+                        <ClipboardList size={25} />
                       </div>
 
-                      <span
-                        className="
-                          rounded-full border
-                          border-blue-200/20
-                          bg-blue-400/10
-                          px-3 py-1
-                          text-xs font-semibold
-                          tracking-wide
-                          text-blue-100
-                        "
-                      >
+                      <span className="rounded-full border border-[color-mix(in_srgb,var(--color-card)_18%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_9%,transparent)] px-3 py-1 text-xs font-semibold tracking-wide text-[var(--color-card)]">
                         GURU
                       </span>
                     </div>
 
-                    <h1
-                      className="
-                        text-2xl font-bold
-                        tracking-tight text-white
-                        sm:text-3xl
-                      "
-                    >
+                    <h1 className="text-2xl font-bold tracking-tight text-[var(--color-card)] sm:text-3xl">
                       Tugas & Pengumpulan
                     </h1>
 
-                    <p
-                      className="
-                        mt-2 max-w-2xl
-                        text-sm leading-6
-                        text-blue-100/80
-                        sm:text-base
-                      "
-                    >
+                    <p className="mt-2 max-w-2xl text-sm leading-6 text-[color-mix(in_srgb,var(--color-card)_78%,transparent)] sm:text-base">
                       Buat tugas, pantau deadline,
                       dan lihat progres pengumpulan
                       siswa dalam satu halaman.
                     </p>
 
-                    {/* Mini info */}
-
                     <div className="mt-5 flex flex-wrap gap-2">
-                      <div
-                        className="
-                          inline-flex items-center gap-2
-                          rounded-lg border
-                          border-white/10
-                          bg-white/10
-                          px-3 py-2
-                          text-xs text-white/80
-                          backdrop-blur
-                        "
-                      >
+                      <div className="inline-flex items-center gap-2 rounded-lg border border-[color-mix(in_srgb,var(--color-card)_12%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_9%,transparent)] px-3 py-2 text-xs text-[color-mix(in_srgb,var(--color-card)_82%,transparent)] backdrop-blur">
                         <ListChecks size={14} />
                         {summary.total} tugas
                       </div>
 
-                      <div
-                        className="
-                          inline-flex items-center gap-2
-                          rounded-lg border
-                          border-white/10
-                          bg-white/10
-                          px-3 py-2
-                          text-xs text-white/80
-                          backdrop-blur
-                        "
-                      >
+                      <div className="inline-flex items-center gap-2 rounded-lg border border-[color-mix(in_srgb,var(--color-card)_12%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_9%,transparent)] px-3 py-2 text-xs text-[color-mix(in_srgb,var(--color-card)_82%,transparent)] backdrop-blur">
                         <BarChart3 size={14} />
                         {summary.progress}% progres
                       </div>
                     </div>
                   </div>
 
-                  {/* Hero actions */}
+                  {/* ACTIONS */}
 
                   <div className="flex shrink-0 flex-wrap gap-2">
                     <button
                       type="button"
                       onClick={() => loadTugas(true)}
                       disabled={refreshing}
-                      className="
-                        inline-flex h-10
-                        items-center justify-center
-                        gap-2 rounded-xl
-                        border border-white/15
-                        bg-white/10
-                        px-4 text-sm font-medium
-                        text-white
-                        backdrop-blur
-                        transition-all
-                        hover:bg-white/15
-                        disabled:cursor-not-allowed
-                        disabled:opacity-60
-                      "
+                      className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-[color-mix(in_srgb,var(--color-card)_16%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)] px-4 text-sm font-medium text-[var(--color-card)] backdrop-blur transition-all hover:bg-[color-mix(in_srgb,var(--color-card)_16%,transparent)] disabled:cursor-not-allowed disabled:opacity-60"
                     >
                       <RefreshCw
                         size={16}
@@ -930,18 +916,7 @@ export default function GuruTugasPage() {
                           "/guru/tugas/tambah"
                         )
                       }
-                      className="
-                        inline-flex h-10
-                        items-center justify-center
-                        gap-2 rounded-xl
-                        bg-white px-4
-                        text-sm font-semibold
-                        text-[#155DFC]
-                        shadow-lg shadow-blue-950/20
-                        transition-all
-                        hover:bg-blue-50
-                        active:scale-[0.98]
-                      "
+                      className={`inline-flex h-10 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold text-[var(--color-card)] transition-all active:scale-[0.98] ${themePrimaryGradient} ${themePrimaryShadow}`}
                     >
                       <Plus size={17} />
                       Buat Tugas
@@ -949,90 +924,57 @@ export default function GuruTugasPage() {
                   </div>
                 </div>
 
-                {/* Hero statistics */}
+                {/* STATISTICS */}
 
-                <div
-                  className="
-                    mt-8 grid grid-cols-2
-                    gap-3 lg:grid-cols-4
-                  "
-                >
-                  <div
-                    className="
-                      rounded-xl border
-                      border-white/10
-                      bg-white/10
-                      p-4 backdrop-blur-sm
-                    "
-                  >
-                    <div className="flex items-center gap-2 text-blue-100/70">
+                <div className="mt-8 grid grid-cols-2 gap-3 lg:grid-cols-4">
+                  <div className="rounded-xl border border-[color-mix(in_srgb,var(--color-card)_12%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_9%,transparent)] p-4 backdrop-blur-sm">
+                    <div className="flex items-center gap-2 text-[color-mix(in_srgb,var(--color-card)_70%,transparent)]">
                       <ClipboardList size={15} />
                       <span className="text-xs font-medium">
                         Total Tugas
                       </span>
                     </div>
 
-                    <p className="mt-2 text-2xl font-bold text-white">
+                    <p className="mt-2 text-2xl font-bold text-[var(--color-card)]">
                       {summary.total}
                     </p>
                   </div>
 
-                  <div
-                    className="
-                      rounded-xl border
-                      border-white/10
-                      bg-white/10
-                      p-4 backdrop-blur-sm
-                    "
-                  >
-                    <div className="flex items-center gap-2 text-blue-100/70">
+                  <div className="rounded-xl border border-[color-mix(in_srgb,var(--color-card)_12%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_9%,transparent)] p-4 backdrop-blur-sm">
+                    <div className="flex items-center gap-2 text-[color-mix(in_srgb,var(--color-card)_70%,transparent)]">
                       <Clock size={15} />
                       <span className="text-xs font-medium">
                         Sedang Berjalan
                       </span>
                     </div>
 
-                    <p className="mt-2 text-2xl font-bold text-white">
+                    <p className="mt-2 text-2xl font-bold text-[var(--color-card)]">
                       {summary.berjalan}
                     </p>
                   </div>
 
-                  <div
-                    className="
-                      rounded-xl border
-                      border-white/10
-                      bg-white/10
-                      p-4 backdrop-blur-sm
-                    "
-                  >
-                    <div className="flex items-center gap-2 text-blue-100/70">
+                  <div className="rounded-xl border border-[color-mix(in_srgb,var(--color-card)_12%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_9%,transparent)] p-4 backdrop-blur-sm">
+                    <div className="flex items-center gap-2 text-[color-mix(in_srgb,var(--color-card)_70%,transparent)]">
                       <CalendarDays size={15} />
                       <span className="text-xs font-medium">
                         Berakhir
                       </span>
                     </div>
 
-                    <p className="mt-2 text-2xl font-bold text-white">
+                    <p className="mt-2 text-2xl font-bold text-[var(--color-card)]">
                       {summary.berakhir}
                     </p>
                   </div>
 
-                  <div
-                    className="
-                      rounded-xl border
-                      border-white/10
-                      bg-white/10
-                      p-4 backdrop-blur-sm
-                    "
-                  >
-                    <div className="flex items-center gap-2 text-blue-100/70">
+                  <div className="rounded-xl border border-[color-mix(in_srgb,var(--color-card)_12%,transparent)] bg-[color-mix(in_srgb,var(--color-card)_9%,transparent)] p-4 backdrop-blur-sm">
+                    <div className="flex items-center gap-2 text-[color-mix(in_srgb,var(--color-card)_70%,transparent)]">
                       <CheckCircle2 size={15} />
                       <span className="text-xs font-medium">
                         Pengumpulan
                       </span>
                     </div>
 
-                    <p className="mt-2 text-2xl font-bold text-white">
+                    <p className="mt-2 text-2xl font-bold text-[var(--color-card)]">
                       {summary.totalPengumpulan}
                     </p>
                   </div>
@@ -1041,36 +983,25 @@ export default function GuruTugasPage() {
             </section>
 
             {/* =================================================
-                ALERT ERROR
+                ERROR
             ================================================== */}
 
             {error && (
               <div
-                className="
-                  flex items-start gap-3
-                  rounded-xl border
-                  border-rose-200
-                  bg-rose-50
-                  p-4
-                "
+                className={`flex items-start gap-3 rounded-xl border p-4 ${themeDangerSurface} ${themeDangerBorder} theme-danger`}
               >
                 <div
-                  className="
-                    flex h-9 w-9 shrink-0
-                    items-center justify-center
-                    rounded-lg bg-rose-100
-                    text-rose-600
-                  "
+                  className={`theme-card flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${themeDangerBorder}`}
                 >
                   <AlertCircle size={18} />
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-rose-700">
+                  <p className="text-sm font-semibold">
                     Terjadi kesalahan
                   </p>
 
-                  <p className="mt-1 text-sm leading-5 text-rose-600">
+                  <p className="mt-1 text-sm leading-5 opacity-80">
                     {error}
                   </p>
                 </div>
@@ -1078,13 +1009,7 @@ export default function GuruTugasPage() {
                 <button
                   type="button"
                   onClick={() => setError("")}
-                  className="
-                    shrink-0 rounded-lg p-1
-                    text-rose-400
-                    transition
-                    hover:bg-rose-100
-                    hover:text-rose-600
-                  "
+                  className={`rounded-lg p-1 transition ${themeNeutralHover}`}
                 >
                   <X size={17} />
                 </button>
@@ -1097,31 +1022,20 @@ export default function GuruTugasPage() {
 
             {success && (
               <div
-                className="
-                  flex items-start gap-3
-                  rounded-xl border
-                  border-emerald-200
-                  bg-emerald-50
-                  p-4
-                "
+                className={`flex items-start gap-3 rounded-xl border p-4 ${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder}`}
               >
                 <div
-                  className="
-                    flex h-9 w-9 shrink-0
-                    items-center justify-center
-                    rounded-lg bg-emerald-100
-                    text-emerald-600
-                  "
+                  className={`theme-card flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border ${themeSuccessBorder}`}
                 >
                   <CheckCircle2 size={18} />
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <p className="text-sm font-semibold text-emerald-700">
+                  <p className="text-sm font-semibold">
                     Berhasil
                   </p>
 
-                  <p className="mt-1 text-sm text-emerald-600">
+                  <p className="mt-1 text-sm opacity-80">
                     {success}
                   </p>
                 </div>
@@ -1133,33 +1047,25 @@ export default function GuruTugasPage() {
             ================================================== */}
 
             <section
-              className="
-                rounded-2xl
-                border border-slate-200/80
-                bg-white
-                shadow-sm
-              "
+              className={`theme-card rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
             >
-              <div className="border-b border-slate-100 p-5 sm:p-6">
+              <div
+                className={`border-b p-5 sm:p-6 ${themeDivider}`}
+              >
                 <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex items-center gap-3">
                     <div
-                      className="
-                        flex h-10 w-10
-                        items-center justify-center
-                        rounded-xl bg-blue-50
-                        text-[#155DFC]
-                      "
+                      className={`flex h-10 w-10 items-center justify-center rounded-xl border ${themePrimarySoft} ${themePrimarySoftBorder} ${themePrimaryText}`}
                     >
                       <Filter size={18} />
                     </div>
 
                     <div>
-                      <h2 className="text-sm font-semibold text-slate-800">
+                      <h2 className="theme-text text-sm font-semibold">
                         Filter Tugas
                       </h2>
 
-                      <p className="mt-0.5 text-xs text-slate-500">
+                      <p className="theme-text-secondary mt-0.5 text-xs">
                         Cari dan saring tugas berdasarkan
                         kelas atau status.
                       </p>
@@ -1170,17 +1076,7 @@ export default function GuruTugasPage() {
                     <button
                       type="button"
                       onClick={resetFilter}
-                      className="
-                        inline-flex items-center
-                        gap-1.5 self-start
-                        rounded-lg px-2.5 py-1.5
-                        text-xs font-medium
-                        text-slate-500
-                        transition
-                        hover:bg-slate-100
-                        hover:text-slate-700
-                        sm:self-auto
-                      "
+                      className={`theme-text-secondary inline-flex items-center gap-1.5 self-start rounded-lg px-2.5 py-1.5 text-xs font-medium transition sm:self-auto ${themeNeutralHover} hover:text-[var(--color-primary)]`}
                     >
                       <X size={14} />
                       Reset filter
@@ -1190,17 +1086,12 @@ export default function GuruTugasPage() {
               </div>
 
               <div className="p-5 sm:p-6">
-                <div
-                  className="
-                    grid grid-cols-1 gap-4
-                    md:grid-cols-2
-                    xl:grid-cols-3
-                  "
-                >
-                  {/* Kelas */}
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+
+                  {/* KELAS */}
 
                   <div>
-                    <label className="mb-2 block text-xs font-semibold text-slate-600">
+                    <label className="theme-text-secondary mb-2 block text-xs font-semibold">
                       Kelas
                     </label>
 
@@ -1211,10 +1102,10 @@ export default function GuruTugasPage() {
                     />
                   </div>
 
-                  {/* Status */}
+                  {/* STATUS */}
 
                   <div>
-                    <label className="mb-2 block text-xs font-semibold text-slate-600">
+                    <label className="theme-text-secondary mb-2 block text-xs font-semibold">
                       Status
                     </label>
 
@@ -1226,26 +1117,16 @@ export default function GuruTugasPage() {
                             e.target.value
                           )
                         }
-                        className="
-                          h-11 w-full appearance-none
-                          rounded-xl border
-                          border-slate-200
-                          bg-white px-3.5 pr-10
-                          text-sm text-slate-700
-                          outline-none
-                          transition
-                          hover:border-blue-300
-                          focus:border-blue-400
-                          focus:ring-2
-                          focus:ring-blue-100
-                        "
+                        className={`theme-input h-11 w-full appearance-none rounded-xl border px-3.5 pr-10 text-sm outline-none transition ${themeNeutralBorder} ${themeFocus}`}
                       >
                         <option value="">
                           Semua Status
                         </option>
+
                         <option value="Terkirim">
                           Sedang Berjalan
                         </option>
+
                         <option value="Berakhir">
                           Berakhir
                         </option>
@@ -1253,34 +1134,22 @@ export default function GuruTugasPage() {
 
                       <ChevronDown
                         size={17}
-                        className="
-                          pointer-events-none
-                          absolute right-3
-                          top-1/2
-                          -translate-y-1/2
-                          text-slate-400
-                        "
+                        className="theme-text-muted pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
                       />
                     </div>
                   </div>
 
-                  {/* Search */}
+                  {/* SEARCH */}
 
                   <div>
-                    <label className="mb-2 block text-xs font-semibold text-slate-600">
+                    <label className="theme-text-secondary mb-2 block text-xs font-semibold">
                       Pencarian
                     </label>
 
                     <div className="relative">
                       <Search
                         size={17}
-                        className="
-                          pointer-events-none
-                          absolute left-3
-                          top-1/2
-                          -translate-y-1/2
-                          text-slate-400
-                        "
+                        className="theme-text-muted pointer-events-none absolute left-3 top-1/2 -translate-y-1/2"
                       />
 
                       <input
@@ -1292,54 +1161,28 @@ export default function GuruTugasPage() {
                           )
                         }
                         placeholder="Cari judul atau mata pelajaran..."
-                        className="
-                          h-11 w-full
-                          rounded-xl border
-                          border-slate-200
-                          bg-white
-                          pl-10 pr-3
-                          text-sm text-slate-700
-                          outline-none
-                          transition
-                          placeholder:text-slate-400
-                          hover:border-blue-300
-                          focus:border-blue-400
-                          focus:ring-2
-                          focus:ring-blue-100
-                        "
+                        className={`theme-input h-11 w-full rounded-xl border pl-10 pr-3 text-sm outline-none transition placeholder:text-[var(--color-text-placeholder)] ${themeNeutralBorder} ${themeFocus}`}
                       />
                     </div>
                   </div>
                 </div>
 
-                {/* Filter result */}
+                {/* FILTER RESULT */}
 
                 <div className="mt-5 flex flex-wrap items-center gap-2">
-                  <span className="text-xs text-slate-400">
+                  <span className="theme-text-muted text-xs">
                     Menampilkan
                   </span>
 
                   <span
-                    className="
-                      rounded-full
-                      bg-blue-50
-                      px-2.5 py-1
-                      text-xs font-semibold
-                      text-blue-600
-                    "
+                    className={`rounded-full border px-2.5 py-1 text-xs font-semibold ${themePrimarySoft} ${themePrimarySoftBorder} ${themePrimaryText}`}
                   >
                     {filteredTugas.length} tugas
                   </span>
 
                   {selectedKelas && (
                     <span
-                      className="
-                        rounded-full
-                        border border-slate-200
-                        bg-slate-50
-                        px-2.5 py-1
-                        text-xs text-slate-600
-                      "
+                      className={`theme-text-secondary rounded-full border px-2.5 py-1 text-xs ${themeNeutralSurface} ${themeNeutralBorder}`}
                     >
                       {selectedKelas}
                     </span>
@@ -1347,13 +1190,7 @@ export default function GuruTugasPage() {
 
                   {selectedStatus && (
                     <span
-                      className="
-                        rounded-full
-                        border border-slate-200
-                        bg-slate-50
-                        px-2.5 py-1
-                        text-xs text-slate-600
-                      "
+                      className={`theme-text-secondary rounded-full border px-2.5 py-1 text-xs ${themeNeutralSurface} ${themeNeutralBorder}`}
                     >
                       {selectedStatus}
                     </span>
@@ -1369,45 +1206,37 @@ export default function GuruTugasPage() {
             <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <div className="flex items-center gap-2">
-                  <h2 className="text-lg font-bold text-slate-800">
+                  <h2 className="theme-text text-lg font-bold">
                     Daftar Tugas
                   </h2>
 
                   {!loading && (
                     <span
-                      className="
-                        rounded-full
-                        bg-slate-100
-                        px-2 py-0.5
-                        text-xs font-medium
-                        text-slate-500
-                      "
+                      className={`theme-text-secondary rounded-full px-2 py-0.5 text-xs font-medium ${themeNeutralSurface}`}
                     >
                       {filteredTugas.length}
                     </span>
                   )}
                 </div>
 
-                <p className="mt-1 text-sm text-slate-500">
+                <p className="theme-text-secondary mt-1 text-sm">
                   Kelola tugas dan pantau pengumpulan
                   siswa.
                 </p>
               </div>
 
-              {!loading && filteredTugas.length > 0 && (
-                <div
-                  className="
-                    inline-flex items-center gap-2
-                    text-xs text-slate-500
-                  "
-                >
-                  <BarChart3 size={14} />
-                  Rata-rata pengumpulan{" "}
-                  <span className="font-semibold text-slate-700">
-                    {summary.progress}%
-                  </span>
-                </div>
-              )}
+              {!loading &&
+                filteredTugas.length > 0 && (
+                  <div className="theme-text-secondary inline-flex items-center gap-2 text-xs">
+                    <BarChart3 size={14} />
+
+                    Rata-rata pengumpulan{" "}
+
+                    <span className="theme-text font-semibold">
+                      {summary.progress}%
+                    </span>
+                  </div>
+                )}
             </div>
 
             {/* =================================================
@@ -1415,13 +1244,7 @@ export default function GuruTugasPage() {
             ================================================== */}
 
             {loading ? (
-              <div
-                className="
-                  grid grid-cols-1 gap-5
-                  md:grid-cols-2
-                  xl:grid-cols-3
-                "
-              >
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
                 {Array.from({ length: 6 }).map(
                   (_, index) => (
                     <TaskSkeleton
@@ -1432,26 +1255,14 @@ export default function GuruTugasPage() {
               </div>
             ) : filteredTugas.length === 0 ? (
               /* =================================================
-                  EMPTY STATE
+                 EMPTY
               ================================================== */
 
               <section
-                className="
-                  rounded-2xl
-                  border border-dashed
-                  border-slate-300
-                  bg-white
-                  px-6 py-14
-                  text-center
-                "
+                className={`theme-card rounded-2xl border border-dashed px-6 py-14 text-center ${themeNeutralBorder}`}
               >
                 <div
-                  className="
-                    mx-auto flex h-16 w-16
-                    items-center justify-center
-                    rounded-2xl bg-slate-100
-                    text-slate-400
-                  "
+                  className={`mx-auto flex h-16 w-16 items-center justify-center rounded-2xl ${themeNeutralSurface} theme-text-muted`}
                 >
                   {hasFilter ? (
                     <Search size={27} />
@@ -1460,13 +1271,13 @@ export default function GuruTugasPage() {
                   )}
                 </div>
 
-                <h3 className="mt-5 text-base font-semibold text-slate-800">
+                <h3 className="theme-text mt-5 text-base font-semibold">
                   {hasFilter
                     ? "Tugas tidak ditemukan"
                     : "Belum ada tugas"}
                 </h3>
 
-                <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
+                <p className="theme-text-secondary mx-auto mt-2 max-w-md text-sm leading-6">
                   {hasFilter
                     ? "Tidak ada tugas yang sesuai dengan filter atau pencarian yang digunakan."
                     : "Belum ada tugas yang dibuat. Mulai buat tugas pertama untuk siswa."}
@@ -1477,17 +1288,7 @@ export default function GuruTugasPage() {
                     <button
                       type="button"
                       onClick={resetFilter}
-                      className="
-                        inline-flex h-10
-                        items-center gap-2
-                        rounded-xl
-                        border border-slate-200
-                        bg-white px-4
-                        text-sm font-medium
-                        text-slate-600
-                        transition
-                        hover:bg-slate-50
-                      "
+                      className={`theme-card theme-text-secondary inline-flex h-10 items-center gap-2 rounded-xl border px-4 text-sm font-medium transition ${themeNeutralBorder} ${themeNeutralHover}`}
                     >
                       <RefreshCw size={15} />
                       Reset Filter
@@ -1502,18 +1303,7 @@ export default function GuruTugasPage() {
                           "/guru/tugas/tambah"
                         )
                       }
-                      className="
-                        inline-flex h-10
-                        items-center gap-2
-                        rounded-xl
-                        bg-[#155DFC]
-                        px-4
-                        text-sm font-semibold
-                        text-white
-                        shadow-sm
-                        transition
-                        hover:bg-[#0d47c9]
-                      "
+                      className={`inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-semibold text-[var(--color-card)] transition ${themePrimaryGradient} ${themePrimaryShadow}`}
                     >
                       <Plus size={16} />
                       Buat Tugas
@@ -1523,391 +1313,294 @@ export default function GuruTugasPage() {
               </section>
             ) : (
               /* =================================================
-                  TASK GRID
+                 TASK GRID
               ================================================== */
 
-              <div
-                className="
-                  grid grid-cols-1 gap-5
-                  md:grid-cols-2
-                  xl:grid-cols-3
-                "
-              >
-                {filteredTugas.map((item, index) => {
-                  const id = getTugasId(item);
+              <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+                {filteredTugas.map(
+                  (item, index) => {
+                    const id = getTugasId(item);
 
-                  const judul =
-                    getJudulTugas(item);
+                    const judul =
+                      getJudulTugas(item);
 
-                  const mapel =
-                    getMapelNama(item);
+                    const mapel =
+                      getMapelNama(item);
 
-                  const kelas =
-                    getKelasNama(item);
+                    const kelas =
+                      getKelasNama(item);
 
-                  const deskripsi =
-                    getDeskripsiTugas(item);
+                    const deskripsi =
+                      getDeskripsiTugas(item);
 
-                  const deadline =
-                    getDeadline(item);
+                    const deadline =
+                      getDeadline(item);
 
-                  const status =
-                    getStatusTugas(item);
+                    const status =
+                      getStatusTugas(item);
 
-                  const submitted =
-                    getJumlahPengumpulan(item);
+                    const submitted =
+                      getJumlahPengumpulan(item);
 
-                  const totalSiswa =
-                    getTotalSiswa(item);
+                    const totalSiswa =
+                      getTotalSiswa(item);
 
-                  const progress =
-                    getProgress(item);
+                    const progress =
+                      getProgress(item);
 
-                  const deadlineState =
-                    getDeadlineState(item);
+                    const deadlineState =
+                      getDeadlineState(item);
 
-                  return (
-                    <article
-                      key={id || `tugas-${index}`}
-                      className="
-                        group flex h-full
-                        flex-col overflow-hidden
-                        rounded-2xl
-                        border border-slate-200/80
-                        bg-white
-                        shadow-sm
-                        transition-all duration-200
-                        hover:-translate-y-0.5
-                        hover:border-blue-200
-                        hover:shadow-lg
-                        hover:shadow-slate-200/60
-                      "
-                    >
-                      {/* Card top */}
+                    const statusClass =
+                      status === "Berakhir"
+                        ? `${themeDangerSurface} theme-danger ${themeDangerBorder}`
+                        : `${themePrimarySoft} ${themePrimaryText} ${themePrimarySoftBorder}`;
 
-                      <div className="p-5">
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="flex min-w-0 items-center gap-3">
-                            <div
-                              className="
-                                flex h-11 w-11
-                                shrink-0 items-center
-                                justify-center
-                                rounded-xl
-                                bg-blue-50
-                                text-[#155DFC]
-                                transition
-                                group-hover:bg-blue-100
-                              "
-                            >
-                              <ClipboardList
-                                size={20}
-                              />
-                            </div>
+                    const deadlineSurface =
+                      deadlineState.type ===
+                      "expired"
+                        ? `${themeDangerSurface} ${themeDangerBorder} theme-danger`
+                        : deadlineState.type ===
+                          "urgent"
+                        ? `${themeWarningSurface} ${themeWarningBorder} text-[var(--color-warning)]`
+                        : deadlineState.type ===
+                          "soon"
+                        ? `${themeWarningSurface} ${themeWarningBorder} text-[var(--color-warning)]`
+                        : `${themeNeutralSurface} ${themeNeutralBorder}`;
 
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-1.5 text-xs text-slate-400">
-                                <GraduationCap
-                                  size={13}
+                    const deadlineText =
+                      deadlineState.type ===
+                      "expired"
+                        ? "theme-danger"
+                        : deadlineState.type ===
+                            "urgent" ||
+                          deadlineState.type ===
+                            "soon"
+                        ? "text-[var(--color-warning)]"
+                        : "theme-text";
+
+                    const deadlineIcon =
+                      deadlineState.type ===
+                      "expired"
+                        ? "theme-danger"
+                        : deadlineState.type ===
+                            "urgent" ||
+                          deadlineState.type ===
+                            "soon"
+                        ? "text-[var(--color-warning)]"
+                        : "theme-text-muted";
+
+                    return (
+                      <article
+                        key={
+                          id ||
+                          `tugas-${index}`
+                        }
+                        className={`theme-card group flex h-full flex-col overflow-hidden rounded-2xl border transition-all duration-200 hover:-translate-y-0.5 ${themeNeutralBorder} ${themeCardShadow}`}
+                      >
+                        {/* CARD TOP */}
+
+                        <div className="p-5">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex min-w-0 items-center gap-3">
+                              <div
+                                className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border ${themePrimarySoft} ${themePrimarySoftBorder} ${themePrimaryText}`}
+                              >
+                                <ClipboardList
+                                  size={20}
                                 />
-
-                                <span className="truncate">
-                                  {mapel}
-                                </span>
                               </div>
-
-                              <div className="mt-1 flex items-center gap-1.5">
-                                <Users
-                                  size={12}
-                                  className="text-slate-400"
-                                />
-
-                                <span className="truncate text-xs font-medium text-slate-600">
-                                  {kelas}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-
-                          {/* Status */}
-
-                          <span
-                            className={`
-                              shrink-0 rounded-full
-                              border px-2.5 py-1
-                              text-[11px] font-semibold
-                              ${
-                                status ===
-                                "Berakhir"
-                                  ? "border-rose-200 bg-rose-50 text-rose-600"
-                                  : "border-blue-200 bg-blue-50 text-blue-600"
-                              }
-                            `}
-                          >
-                            {status === "Berakhir"
-                              ? "Berakhir"
-                              : "Berjalan"}
-                          </span>
-                        </div>
-
-                        {/* Title */}
-
-                        <h3
-                          className="
-                            mt-5 line-clamp-2
-                            min-h-[48px]
-                            text-base font-bold
-                            leading-6
-                            text-slate-800
-                            transition
-                            group-hover:text-[#155DFC]
-                          "
-                        >
-                          {judul}
-                        </h3>
-
-                        {/* Description */}
-
-                        <p
-                          className="
-                            mt-2 line-clamp-2
-                            min-h-[40px]
-                            text-sm leading-5
-                            text-slate-500
-                          "
-                        >
-                          {deskripsi ||
-                            "Tidak ada deskripsi tugas."}
-                        </p>
-
-                        {/* Deadline */}
-
-                        <div
-                          className={`
-                            mt-5 rounded-xl
-                            border p-3
-                            ${
-                              deadlineState.type ===
-                              "expired"
-                                ? "border-rose-100 bg-rose-50/60"
-                                : deadlineState.type ===
-                                  "urgent"
-                                ? "border-amber-100 bg-amber-50/70"
-                                : deadlineState.type ===
-                                  "soon"
-                                ? "border-amber-100 bg-amber-50/50"
-                                : "border-slate-100 bg-slate-50"
-                            }
-                          `}
-                        >
-                          <div className="flex items-center justify-between gap-3">
-                            <div className="flex min-w-0 items-center gap-2">
-                              <CalendarDays
-                                size={15}
-                                className={
-                                  deadlineState.type ===
-                                  "expired"
-                                    ? "shrink-0 text-rose-500"
-                                    : deadlineState.type ===
-                                      "urgent"
-                                    ? "shrink-0 text-amber-600"
-                                    : "shrink-0 text-slate-400"
-                                }
-                              />
 
                               <div className="min-w-0">
-                                <p className="text-[11px] font-medium text-slate-400">
-                                  Deadline
-                                </p>
+                                <div className="theme-text-muted flex items-center gap-1.5 text-xs">
+                                  <GraduationCap
+                                    size={13}
+                                  />
 
-                                <p
-                                  className={`
-                                    mt-0.5 truncate
-                                    text-xs font-semibold
-                                    ${
-                                      deadlineState.type ===
-                                      "expired"
-                                        ? "text-rose-600"
-                                        : deadlineState.type ===
-                                          "urgent"
-                                        ? "text-amber-700"
-                                        : "text-slate-700"
-                                    }
-                                  `}
-                                >
-                                  {formatTanggal(
-                                    deadline
-                                  )}
-                                </p>
+                                  <span className="truncate">
+                                    {mapel}
+                                  </span>
+                                </div>
+
+                                <div className="mt-1 flex items-center gap-1.5">
+                                  <Users
+                                    size={12}
+                                    className="theme-text-muted"
+                                  />
+
+                                  <span className="theme-text-secondary truncate text-xs font-medium">
+                                    {kelas}
+                                  </span>
+                                </div>
                               </div>
+                            </div>
+
+                            {/* STATUS */}
+
+                            <span
+                              className={`shrink-0 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${statusClass}`}
+                            >
+                              {status ===
+                              "Berakhir"
+                                ? "Berakhir"
+                                : "Berjalan"}
+                            </span>
+                          </div>
+
+                          {/* TITLE */}
+
+                          <h3 className={`theme-text mt-5 line-clamp-2 min-h-[48px] text-base font-bold leading-6 transition-colors group-hover:text-[var(--color-primary)]`}>
+                            {judul}
+                          </h3>
+
+                          {/* DESCRIPTION */}
+
+                          <p className="theme-text-secondary mt-2 line-clamp-2 min-h-[40px] text-sm leading-5">
+                            {deskripsi ||
+                              "Tidak ada deskripsi tugas."}
+                          </p>
+
+                          {/* DEADLINE */}
+
+                          <div
+                            className={`mt-5 rounded-xl border p-3 ${deadlineSurface}`}
+                          >
+                            <div className="flex items-center justify-between gap-3">
+                              <div className="flex min-w-0 items-center gap-2">
+                                <CalendarDays
+                                  size={15}
+                                  className={`shrink-0 ${deadlineIcon}`}
+                                />
+
+                                <div className="min-w-0">
+                                  <p className="theme-text-muted text-[11px] font-medium">
+                                    Deadline
+                                  </p>
+
+                                  <p
+                                    className={`mt-0.5 truncate text-xs font-semibold ${deadlineText}`}
+                                  >
+                                    {formatTanggal(
+                                      deadline
+                                    )}
+                                  </p>
+                                </div>
+                              </div>
+
+                              {deadline && (
+                                <span
+                                  className={`shrink-0 text-[10px] font-medium ${deadlineText}`}
+                                >
+                                  {
+                                    deadlineState.label
+                                  }
+                                </span>
+                              )}
                             </div>
 
                             {deadline && (
-                              <span
-                                className={`
-                                  shrink-0 text-[10px]
-                                  font-medium
-                                  ${
-                                    deadlineState.type ===
-                                    "expired"
-                                      ? "text-rose-500"
-                                      : deadlineState.type ===
-                                        "urgent"
-                                      ? "text-amber-600"
-                                      : deadlineState.type ===
-                                        "soon"
-                                      ? "text-amber-600"
-                                      : "text-slate-400"
-                                  }
-                                `}
-                              >
-                                {
-                                  deadlineState.label
-                                }
-                              </span>
+                              <p className="theme-text-muted mt-2 pl-[23px] text-[10px]">
+                                {formatTanggalLengkap(
+                                  deadline
+                                )}
+                              </p>
                             )}
                           </div>
-
-                          {deadline && (
-                            <p className="mt-2 pl-[23px] text-[10px] text-slate-400">
-                              {formatTanggalLengkap(
-                                deadline
-                              )}
-                            </p>
-                          )}
                         </div>
-                      </div>
 
-                      {/* Submission section */}
+                        {/* SUBMISSION */}
 
-                      <div
-                        className="
-                          mt-auto
-                          border-t border-slate-100
-                          bg-slate-50/50
-                          px-5 py-4
-                        "
-                      >
-                        <div className="flex items-center justify-between gap-3">
-                          <div className="flex items-center gap-2">
-                            <div
-                              className="
-                                flex h-8 w-8
-                                items-center justify-center
-                                rounded-lg
-                                bg-white
-                                text-[#155DFC]
-                                shadow-sm
-                              "
-                            >
-                              <FileCheck2
-                                size={15}
-                              />
+                        <div
+                          className={`mt-auto border-t px-5 py-4 ${themeDivider} ${themeNeutralSurface}`}
+                        >
+                          <div className="flex items-center justify-between gap-3">
+                            <div className="flex items-center gap-2">
+                              <div
+                                className={`theme-card flex h-8 w-8 items-center justify-center rounded-lg border ${themePrimarySoftBorder} ${themePrimaryText} ${themeSmallShadow}`}
+                              >
+                                <FileCheck2
+                                  size={15}
+                                />
+                              </div>
+
+                              <div>
+                                <p className="theme-text-muted text-[11px]">
+                                  Pengumpulan
+                                </p>
+
+                                <p className="theme-text text-xs font-semibold">
+                                  {submitted}
+
+                                  {totalSiswa >
+                                  0
+                                    ? ` / ${totalSiswa}`
+                                    : ""}{" "}
+                                  siswa
+                                </p>
+                              </div>
                             </div>
 
-                            <div>
-                              <p className="text-[11px] text-slate-400">
-                                Pengumpulan
-                              </p>
-
-                              <p className="text-xs font-semibold text-slate-700">
-                                {submitted}
-                                {totalSiswa > 0
-                                  ? ` / ${totalSiswa}`
-                                  : ""}{" "}
-                                siswa
-                              </p>
-                            </div>
+                            <span className={`text-sm font-bold ${themePrimaryText}`}>
+                              {progress}%
+                            </span>
                           </div>
 
-                          <span className="text-sm font-bold text-[#155DFC]">
-                            {progress}%
-                          </span>
-                        </div>
+                          {/* PROGRESS */}
 
-                        {/* Progress bar */}
-
-                        <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-200">
                           <div
-                            className="
-                              h-full rounded-full
-                              bg-gradient-to-r
-                              from-[#155DFC]
-                              to-blue-400
-                              transition-all
-                            "
-                            style={{
-                              width: `${progress}%`,
-                            }}
-                          />
-                        </div>
-
-                        {totalSiswa === 0 && (
-                          <p className="mt-2 text-[10px] text-slate-400">
-                            Data jumlah siswa belum
-                            tersedia.
-                          </p>
-                        )}
-
-                        {/* Actions */}
-
-                        <div className="mt-4 flex gap-2">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              handleView(item)
-                            }
-                            disabled={!id}
-                            className="
-                              inline-flex h-9
-                              flex-1 items-center
-                              justify-center gap-1.5
-                              rounded-lg
-                              border border-slate-200
-                              bg-white
-                              text-xs font-semibold
-                              text-slate-600
-                              transition
-                              hover:border-blue-200
-                              hover:bg-blue-50
-                              hover:text-[#155DFC]
-                              disabled:cursor-not-allowed
-                              disabled:opacity-50
-                            "
+                            className={`mt-3 h-1.5 overflow-hidden rounded-full ${themeNeutralSurface}`}
                           >
-                            <Eye size={14} />
-                            Lihat
-                          </button>
+                            <div
+                              className={`h-full rounded-full ${themePrimaryGradient} transition-all`}
+                              style={{
+                                width: `${progress}%`,
+                              }}
+                            />
+                          </div>
 
-                          <button
-                            type="button"
-                            onClick={() =>
-                              handleEdit(item)
-                            }
-                            disabled={!id}
-                            className="
-                              inline-flex h-9
-                              items-center
-                              justify-center gap-1.5
-                              rounded-lg
-                              bg-blue-50
-                              px-4
-                              text-xs font-semibold
-                              text-[#155DFC]
-                              transition
-                              hover:bg-blue-100
-                              disabled:cursor-not-allowed
-                              disabled:opacity-50
-                            "
-                          >
-                            <Pencil size={14} />
-                            Edit
-                          </button>
+                          {totalSiswa === 0 && (
+                            <p className="theme-text-muted mt-2 text-[10px]">
+                              Data jumlah siswa
+                              belum tersedia.
+                            </p>
+                          )}
+
+                          {/* ACTIONS */}
+
+                          <div className="mt-4 flex gap-2">
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleView(
+                                  item
+                                )
+                              }
+                              disabled={!id}
+                              className={`theme-card theme-text-secondary inline-flex h-9 flex-1 items-center justify-center gap-1.5 rounded-lg border text-xs font-semibold transition ${themeNeutralBorder} ${themeNeutralHover} hover:text-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-50`}
+                            >
+                              <Eye size={14} />
+                              Lihat
+                            </button>
+
+                            <button
+                              type="button"
+                              onClick={() =>
+                                handleEdit(
+                                  item
+                                )
+                              }
+                              disabled={!id}
+                              className={`inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border px-4 text-xs font-semibold transition ${themePrimarySoft} ${themePrimarySoftBorder} ${themePrimaryText} hover:bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)] disabled:cursor-not-allowed disabled:opacity-50`}
+                            >
+                              <Pencil size={14} />
+                              Edit
+                            </button>
+                          </div>
                         </div>
-                      </div>
-                    </article>
-                  );
-                })}
+                      </article>
+                    );
+                  }
+                )}
               </div>
             )}
 
@@ -1917,35 +1610,22 @@ export default function GuruTugasPage() {
 
             {!loading && tugas.length > 0 && (
               <section
-                className="
-                  rounded-2xl
-                  border border-slate-200/80
-                  bg-white
-                  p-5
-                  shadow-sm
-                  sm:p-6
-                "
+                className={`theme-card rounded-2xl border p-5 sm:p-6 ${themeNeutralBorder} ${themeCardShadow}`}
               >
                 <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
                   <div className="flex items-center gap-3">
                     <div
-                      className="
-                        flex h-10 w-10
-                        items-center justify-center
-                        rounded-xl
-                        bg-blue-50
-                        text-[#155DFC]
-                      "
+                      className={`flex h-10 w-10 items-center justify-center rounded-xl border ${themePrimarySoft} ${themePrimarySoftBorder} ${themePrimaryText}`}
                     >
                       <Sparkles size={18} />
                     </div>
 
                     <div>
-                      <p className="text-sm font-semibold text-slate-800">
+                      <p className="theme-text text-sm font-semibold">
                         Ringkasan aktivitas tugas
                       </p>
 
-                      <p className="mt-1 text-xs text-slate-500">
+                      <p className="theme-text-secondary mt-1 text-xs">
                         Pantau perkembangan tugas yang
                         sedang diberikan kepada siswa.
                       </p>
@@ -1953,32 +1633,40 @@ export default function GuruTugasPage() {
                   </div>
 
                   <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-                    <div className="min-w-[100px] rounded-xl bg-slate-50 px-4 py-3">
-                      <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                    <div
+                      className={`min-w-[100px] rounded-xl px-4 py-3 ${themeNeutralSurface}`}
+                    >
+                      <p className="theme-text-muted text-[10px] font-medium uppercase tracking-wide">
                         Aktif
                       </p>
 
-                      <p className="mt-1 text-lg font-bold text-slate-800">
+                      <p className="theme-text mt-1 text-lg font-bold">
                         {summary.berjalan}
                       </p>
                     </div>
 
-                    <div className="min-w-[100px] rounded-xl bg-slate-50 px-4 py-3">
-                      <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                    <div
+                      className={`min-w-[100px] rounded-xl px-4 py-3 ${themeNeutralSurface}`}
+                    >
+                      <p className="theme-text-muted text-[10px] font-medium uppercase tracking-wide">
                         Berakhir
                       </p>
 
-                      <p className="mt-1 text-lg font-bold text-slate-800">
+                      <p className="theme-text mt-1 text-lg font-bold">
                         {summary.berakhir}
                       </p>
                     </div>
 
-                    <div className="col-span-2 min-w-[100px] rounded-xl bg-blue-50 px-4 py-3 sm:col-span-1">
-                      <p className="text-[10px] font-medium uppercase tracking-wide text-blue-400">
+                    <div
+                      className={`col-span-2 min-w-[100px] rounded-xl px-4 py-3 sm:col-span-1 ${themePrimarySoft} ${themePrimarySoftBorder} border`}
+                    >
+                      <p className={`${themePrimaryText} text-[10px] font-medium uppercase tracking-wide`}>
                         Pengumpulan
                       </p>
 
-                      <p className="mt-1 text-lg font-bold text-[#155DFC]">
+                      <p
+                        className={`mt-1 text-lg font-bold ${themePrimaryText}`}
+                      >
                         {summary.totalPengumpulan}
                       </p>
                     </div>
@@ -1987,7 +1675,6 @@ export default function GuruTugasPage() {
               </section>
             )}
 
-            {/* Bottom spacing */}
             <div className="h-2" />
           </div>
         </main>

@@ -1,209 +1,142 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import Sidebar from "../../../../components/Sidebar";
-import Header from "../../../../components/Header";
-
+import { useEffect, useMemo, useState } from "react";
 import {
   BookOpen,
   Search,
-  RotateCcw,
-  Eye,
+  Plus,
   Pencil,
   Trash2,
+  Eye,
   X,
-  CheckCircle2,
-  Clock3,
-  AlertTriangle,
-  CalendarDays,
-  UserRound,
+  RefreshCw,
   ChevronDown,
   Library,
-  ReceiptText,
-  CircleDollarSign,
+  CheckCircle2,
+  Archive,
+  ExternalLink,
+  FileText,
+  AlertTriangle,
 } from "lucide-react";
 
-/* =========================================================
-   DATA DUMMY
-========================================================= */
+import {
+  getBuku,
+  getBukuById,
+  createBuku,
+  updateBuku,
+  deleteBuku,
+} from "../../../../../services/perpustakaan.service";
 
-const initialReturns = [
-  {
-    id: 1,
-    kode: "PG-0001",
-    kodePinjam: "PJ-0004",
-    siswa: "Dimas Pratama",
-    nis: "20240004",
-    kelas: "9B",
-    buku: "Pemrograman Dasar",
-    kodeBuku: "BK-0004",
-    tanggalPinjam: "2026-08-20",
-    jatuhTempo: "2026-08-27",
-    tanggalKembali: "2026-08-26",
-    kondisi: "Baik",
-    keterlambatan: 0,
-    denda: 0,
-    status: "Selesai",
-    petugas: "Admin Perpustakaan",
-  },
-  {
-    id: 2,
-    kode: "PG-0002",
-    kodePinjam: "PJ-0006",
-    siswa: "Fajar Ramadhan",
-    nis: "20240006",
-    kelas: "10A",
-    buku: "Dasar-Dasar Akuntansi",
-    kodeBuku: "BK-0006",
-    tanggalPinjam: "2026-08-15",
-    jatuhTempo: "2026-08-22",
-    tanggalKembali: "2026-08-22",
-    kondisi: "Baik",
-    keterlambatan: 0,
-    denda: 0,
-    status: "Selesai",
-    petugas: "Admin Perpustakaan",
-  },
-  {
-    id: 3,
-    kode: "PG-0003",
-    kodePinjam: "PJ-0009",
-    siswa: "Rizky Maulana",
-    nis: "20240009",
-    kelas: "11A",
-    buku: "Kimia untuk SMA",
-    kodeBuku: "BK-0009",
-    tanggalPinjam: "2026-08-15",
-    jatuhTempo: "2026-08-22",
-    tanggalKembali: "2026-08-25",
-    kondisi: "Baik",
-    keterlambatan: 3,
-    denda: 15000,
-    status: "Terlambat",
-    petugas: "Admin Perpustakaan",
-  },
-  {
-    id: 4,
-    kode: "PG-0004",
-    kodePinjam: "PJ-0010",
-    siswa: "Siti Aisyah",
-    nis: "20240010",
-    kelas: "11B",
-    buku: "Biologi Dasar",
-    kodeBuku: "BK-0010",
-    tanggalPinjam: "2026-08-10",
-    jatuhTempo: "2026-08-17",
-    tanggalKembali: "2026-08-20",
-    kondisi: "Rusak Ringan",
-    keterlambatan: 3,
-    denda: 25000,
-    status: "Terlambat",
-    petugas: "Admin Perpustakaan",
-  },
-  {
-    id: 5,
-    kode: "PG-0005",
-    kodePinjam: "PJ-0011",
-    siswa: "Nadia Putri",
-    nis: "20240011",
-    kelas: "12A",
-    buku: "Bahasa Inggris Advanced",
-    kodeBuku: "BK-0011",
-    tanggalPinjam: "2026-08-28",
-    jatuhTempo: "2026-09-04",
-    tanggalKembali: "2026-09-03",
-    kondisi: "Baik",
-    keterlambatan: 0,
-    denda: 0,
-    status: "Selesai",
-    petugas: "Admin Perpustakaan",
-  },
-  {
-    id: 6,
-    kode: "PG-0006",
-    kodePinjam: "PJ-0012",
-    siswa: "Rian Setiawan",
-    nis: "20240012",
-    kelas: "12A",
-    buku: "Algoritma dan Pemrograman",
-    kodeBuku: "BK-0012",
-    tanggalPinjam: "2026-08-12",
-    jatuhTempo: "2026-08-19",
-    tanggalKembali: "2026-08-24",
-    kondisi: "Baik",
-    keterlambatan: 5,
-    denda: 25000,
-    status: "Terlambat",
-    petugas: "Admin Perpustakaan",
-  },
-  {
-    id: 7,
-    kode: "PG-0007",
-    kodePinjam: "PJ-0013",
-    siswa: "Aldi Prakoso",
-    nis: "20240013",
-    kelas: "10B",
-    buku: "Fisika Dasar",
-    kodeBuku: "BK-0003",
-    tanggalPinjam: "2026-09-01",
-    jatuhTempo: "2026-09-08",
-    tanggalKembali: "2026-09-07",
-    kondisi: "Baik",
-    keterlambatan: 0,
-    denda: 0,
-    status: "Selesai",
-    petugas: "Admin Perpustakaan",
-  },
-];
+import Sidebar from "../../../../components/Sidebar";
+import Header from "../../../../components/Header";
 
-/* =========================================================
-   FORM
-========================================================= */
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]";
+const themePrimaryHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
+const themeTextHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+const themeCardShadow =
+  "shadow-[0_6px_24px_color-mix(in_srgb,var(--color-text)_6%,transparent)]";
+const themePrimaryShadow =
+  "shadow-[0_10px_25px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]";
 
-const emptyForm = {
-  siswa: "",
-  nis: "",
-  kelas: "9A",
-  buku: "",
-  kodeBuku: "",
-  kodePinjam: "",
-  tanggalPinjam: "",
-  jatuhTempo: "",
-  tanggalKembali: "2026-09-07",
-  kondisi: "Baik",
-  keterlambatan: "0",
-  denda: "0",
-  status: "Selesai",
-  petugas: "Admin Perpustakaan",
-};
+function normalizeBook(book) {
+  return {
+    ...book,
+    id: book?.id ?? book?.bukuId ?? "",
+    kodeBuku: book?.kodeBuku ?? book?.kode ?? "",
+    judul: book?.judul ?? "",
+    penulis: book?.penulis ?? "",
+    penerbit: book?.penerbit ?? "",
+    tahunTerbit: book?.tahunTerbit ?? "",
+    isbn: book?.isbn ?? "",
+    tipe: String(book?.tipe ?? "FISIK").toUpperCase(),
+    kategori: book?.kategori ?? "",
+    deskripsi: book?.deskripsi ?? "",
+    coverUrl: book?.coverUrl ?? "",
+    urlEbook: book?.urlEbook ?? "",
+    jumlah: Number(book?.jumlah ?? 0),
+    jumlahTersedia: Number(book?.jumlahTersedia ?? 0),
+    status: String(book?.status ?? "aktif").toLowerCase(),
+  };
+}
 
-/* =========================================================
-   STAT CARD
-========================================================= */
+function getDipinjam(book) {
+  return Math.max(
+    0,
+    Number(book?.jumlah ?? 0) - Number(book?.jumlahTersedia ?? 0),
+  );
+}
 
-function StatCard({ icon: Icon, label, value, type }) {
+function getErrorMessage(error) {
+  if (error instanceof Error) return error.message;
+  if (typeof error === "string") return error;
+  return (
+    error?.message ||
+    error?.error ||
+    "Terjadi kesalahan pada server."
+  );
+}
+
+function formatTipe(tipe) {
+  return tipe === "EBOOK" ? "E-Book" : "Buku Fisik";
+}
+
+function formatStatus(status) {
+  if (status === "aktif") return "Aktif";
+  if (status === "nonaktif") return "Nonaktif";
+  return status
+    ? status.charAt(0).toUpperCase() + status.slice(1)
+    : "-";
+}
+
+function StatCard({ icon: Icon, label, value, type = "blue" }) {
   const styles = {
-    blue: "bg-blue-50 text-blue-600",
-    green: "bg-emerald-50 text-emerald-600",
-    orange: "bg-orange-50 text-orange-600",
-    red: "bg-rose-50 text-rose-600",
+    blue: {
+      iconBg: themePrimarySoft,
+      iconText: "text-[var(--color-primary)]",
+      value: "theme-text",
+    },
+    green: {
+      iconBg:
+        "bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)]",
+      iconText: "text-[var(--color-success)]",
+      value: "text-[var(--color-success)]",
+    },
+    orange: {
+      iconBg:
+        "bg-[color-mix(in_srgb,var(--color-warning)_12%,transparent)]",
+      iconText: "text-[var(--color-warning)]",
+      value: "text-[var(--color-warning)]",
+    },
+    purple: {
+      iconBg:
+        "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
+      iconText: "text-[var(--color-primary)]",
+      value: "text-[var(--color-primary)]",
+    },
   };
 
+  const style = styles[type];
+
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-[0_1px_3px_rgba(15,23,42,0.08)] sm:p-5">
+    <div
+      className={`theme-card theme-border rounded-xl border p-4 ${themeCardShadow} sm:p-5`}
+    >
       <div className="flex items-center gap-3">
         <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${styles[type]}`}
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${style.iconBg} ${style.iconText}`}
         >
           <Icon size={19} />
         </div>
-
         <div>
-          <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
+          <p className="theme-text-muted text-[11px] font-medium uppercase tracking-wide">
             {label}
           </p>
-
-          <p className="mt-1 text-2xl font-bold tracking-tight text-slate-900">
+          <p className={`mt-1 text-2xl font-bold tracking-tight ${style.value}`}>
             {value}
           </p>
         </div>
@@ -212,711 +145,654 @@ function StatCard({ icon: Icon, label, value, type }) {
   );
 }
 
-/* =========================================================
-   STATUS
-========================================================= */
-
 function StatusBadge({ status }) {
-  if (status === "Terlambat") {
-    return (
-      <span className="inline-flex items-center gap-1.5 rounded-full border border-orange-200 bg-orange-50 px-2.5 py-1 text-xs font-medium text-orange-700">
-        <AlertTriangle size={13} />
-        Terlambat
-      </span>
-    );
-  }
+  const active = status === "aktif";
 
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
-      <CheckCircle2 size={13} />
-      Selesai
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${
+        active
+          ? "border-[color-mix(in_srgb,var(--color-success)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] text-[var(--color-success)]"
+          : "theme-border theme-card-soft theme-text-muted"
+      }`}
+    >
+      {active ? <CheckCircle2 size={13} /> : <Archive size={13} />}
+      {formatStatus(status)}
     </span>
   );
 }
 
-/* =========================================================
-   CONDITION BADGE
-========================================================= */
-
-function ConditionBadge({ kondisi }) {
-  if (kondisi === "Rusak Berat") {
-    return (
-      <span className="inline-flex rounded-full border border-rose-200 bg-rose-50 px-2.5 py-1 text-xs font-medium text-rose-700">
-        Rusak Berat
-      </span>
-    );
-  }
-
-  if (kondisi === "Rusak Ringan") {
-    return (
-      <span className="inline-flex rounded-full border border-orange-200 bg-orange-50 px-2.5 py-1 text-xs font-medium text-orange-700">
-        Rusak Ringan
-      </span>
-    );
-  }
+function TypeBadge({ tipe }) {
+  const ebook = tipe === "EBOOK";
 
   return (
-    <span className="inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
-      Baik
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium ${
+        ebook
+          ? "border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] text-[var(--color-primary)]"
+          : "theme-border theme-card-soft theme-text-secondary"
+      }`}
+    >
+      {ebook ? <FileText size={12} /> : <BookOpen size={12} />}
+      {formatTipe(tipe)}
     </span>
   );
 }
 
-/* =========================================================
-   FORM MODAL
-========================================================= */
-
-function ReturnForm({
+function BookForm({
   initial,
-  editMode,
   onCancel,
   onSave,
+  editMode,
+  saving,
+  error,
 }) {
   const [form, setForm] = useState(initial);
 
+  useEffect(() => {
+    setForm(initial);
+  }, [initial]);
+
   const update = (key) => (event) => {
+    const value = event.target.value;
+
     setForm((current) => ({
       ...current,
-      [key]: event.target.value,
+      [key]: value,
+      ...(key === "tipe" && value === "EBOOK" ? { jumlah: 0 } : {}),
     }));
   };
 
   const submit = (event) => {
     event.preventDefault();
 
-    if (!form.siswa.trim()) return;
-    if (!form.buku.trim()) return;
+    if (!form.kodeBuku?.trim()) return;
+    if (!form.judul?.trim()) return;
+    if (!form.penulis?.trim()) return;
+    if (!form.kategori?.trim()) return;
 
-    onSave({
-      ...form,
-      keterlambatan: Number(form.keterlambatan) || 0,
-      denda: Number(form.denda) || 0,
-    });
+    if (form.tipe === "EBOOK" && !form.urlEbook?.trim()) return;
+
+    onSave(form);
   };
+
+  const inputClass =
+    "theme-input theme-border theme-text h-11 w-full rounded-lg border px-3.5 text-sm outline-none transition placeholder:text-[var(--color-text-placeholder)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
+
+  const selectClass =
+    "theme-input theme-border theme-text h-11 w-full appearance-none rounded-lg border px-3.5 pr-9 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
+
+  const labelClass = "theme-text-secondary mb-2 block text-xs font-semibold";
 
   return (
     <form onSubmit={submit} className="space-y-5">
-      {/* PEMINJAM */}
+      {error && (
+        <div className="flex items-start gap-2 rounded-lg border border-[color-mix(in_srgb,var(--color-danger,#ef4444)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-danger,#ef4444)_8%,transparent)] p-3 text-sm theme-danger">
+          <AlertTriangle size={17} className="mt-0.5 shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-2 block text-xs font-semibold text-slate-600">
-            Nama Siswa
-          </label>
-
+          <label className={labelClass}>Kode Buku *</label>
           <input
             required
-            value={form.siswa}
-            onChange={update("siswa")}
-            placeholder="Nama siswa"
-            className="h-11 w-full rounded-lg border border-slate-300 px-3.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-          />
-        </div>
-
-        <div>
-          <label className="mb-2 block text-xs font-semibold text-slate-600">
-            NIS
-          </label>
-
-          <input
-            value={form.nis}
-            onChange={update("nis")}
-            placeholder="Nomor induk siswa"
-            className="h-11 w-full rounded-lg border border-slate-300 px-3.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-          />
-        </div>
-      </div>
-
-      {/* KELAS */}
-
-      <div>
-        <label className="mb-2 block text-xs font-semibold text-slate-600">
-          Kelas
-        </label>
-
-        <div className="relative">
-          <select
-            value={form.kelas}
-            onChange={update("kelas")}
-            className="h-11 w-full appearance-none rounded-lg border border-slate-300 bg-white px-3.5 pr-9 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-          >
-            <option>9A</option>
-            <option>9B</option>
-            <option>9C</option>
-            <option>10A</option>
-            <option>10B</option>
-            <option>10C</option>
-            <option>11A</option>
-            <option>11B</option>
-            <option>12A</option>
-            <option>12B</option>
-          </select>
-
-          <ChevronDown
-            size={15}
-            className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
-          />
-        </div>
-      </div>
-
-      {/* BUKU */}
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div>
-          <label className="mb-2 block text-xs font-semibold text-slate-600">
-            Judul Buku
-          </label>
-
-          <input
-            required
-            value={form.buku}
-            onChange={update("buku")}
-            placeholder="Judul buku"
-            className="h-11 w-full rounded-lg border border-slate-300 px-3.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-          />
-        </div>
-
-        <div>
-          <label className="mb-2 block text-xs font-semibold text-slate-600">
-            Kode Buku
-          </label>
-
-          <input
             value={form.kodeBuku}
             onChange={update("kodeBuku")}
-            placeholder="BK-0001"
-            className="h-11 w-full rounded-lg border border-slate-300 px-3.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            placeholder="Contoh: BK-0011"
+            className={inputClass}
+          />
+        </div>
+
+        <div>
+          <label className={labelClass}>ISBN</label>
+          <input
+            value={form.isbn}
+            onChange={update("isbn")}
+            placeholder="978-602-xxxx-xx-x"
+            className={inputClass}
           />
         </div>
       </div>
 
-      {/* KODE TRANSAKSI */}
-
       <div>
-        <label className="mb-2 block text-xs font-semibold text-slate-600">
-          Kode Peminjaman
-        </label>
-
+        <label className={labelClass}>Judul Buku *</label>
         <input
-          value={form.kodePinjam}
-          onChange={update("kodePinjam")}
-          placeholder="PJ-0001"
-          className="h-11 w-full rounded-lg border border-slate-300 px-3.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+          required
+          value={form.judul}
+          onChange={update("judul")}
+          placeholder="Masukkan judul buku"
+          className={inputClass}
         />
       </div>
 
-      {/* TANGGAL */}
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div>
+          <label className={labelClass}>Penulis *</label>
+          <input
+            required
+            value={form.penulis}
+            onChange={update("penulis")}
+            placeholder="Nama penulis"
+            className={inputClass}
+          />
+        </div>
+
+        <div>
+          <label className={labelClass}>Penerbit</label>
+          <input
+            value={form.penerbit}
+            onChange={update("penerbit")}
+            placeholder="Nama penerbit"
+            className={inputClass}
+          />
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div>
-          <label className="mb-2 block text-xs font-semibold text-slate-600">
-            Tanggal Pinjam
-          </label>
-
+          <label className={labelClass}>Tahun Terbit</label>
           <input
-            type="date"
-            value={form.tanggalPinjam}
-            onChange={update("tanggalPinjam")}
-            className="h-11 w-full rounded-lg border border-slate-300 px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            type="number"
+            min="0"
+            value={form.tahunTerbit}
+            onChange={update("tahunTerbit")}
+            placeholder="2025"
+            className={inputClass}
           />
         </div>
 
         <div>
-          <label className="mb-2 block text-xs font-semibold text-slate-600">
-            Jatuh Tempo
-          </label>
-
-          <input
-            type="date"
-            value={form.jatuhTempo}
-            onChange={update("jatuhTempo")}
-            className="h-11 w-full rounded-lg border border-slate-300 px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-          />
-        </div>
-
-        <div>
-          <label className="mb-2 block text-xs font-semibold text-slate-600">
-            Tanggal Pengembalian
-          </label>
-
-          <input
-            type="date"
-            value={form.tanggalKembali}
-            onChange={update("tanggalKembali")}
-            className="h-11 w-full rounded-lg border border-slate-300 px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-          />
-        </div>
-      </div>
-
-      {/* CONDITION */}
-
-      <div>
-        <label className="mb-2 block text-xs font-semibold text-slate-600">
-          Kondisi Buku
-        </label>
-
-        <div className="relative">
-          <select
-            value={form.kondisi}
-            onChange={update("kondisi")}
-            className="h-11 w-full appearance-none rounded-lg border border-slate-300 bg-white px-3.5 pr-9 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-          >
-            <option>Baik</option>
-            <option>Rusak Ringan</option>
-            <option>Rusak Berat</option>
-            <option>Hilang</option>
-          </select>
-
-          <ChevronDown
-            size={15}
-            className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
-          />
-        </div>
-      </div>
-
-      {/* LATE + FINE */}
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div>
-          <label className="mb-2 block text-xs font-semibold text-slate-600">
-            Keterlambatan
-          </label>
-
+          <label className={labelClass}>Tipe *</label>
           <div className="relative">
-            <input
-              type="number"
-              min="0"
-              value={form.keterlambatan}
-              onChange={update("keterlambatan")}
-              className="h-11 w-full rounded-lg border border-slate-300 px-3.5 pr-14 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            <select
+              value={form.tipe}
+              onChange={update("tipe")}
+              className={selectClass}
+            >
+              <option value="FISIK">Buku Fisik</option>
+              <option value="EBOOK">E-Book</option>
+            </select>
+            <ChevronDown
+              size={15}
+              className="theme-text-muted pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
             />
-
-            <span className="absolute right-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400">
-              hari
-            </span>
           </div>
         </div>
 
         <div>
-          <label className="mb-2 block text-xs font-semibold text-slate-600">
-            Denda
-          </label>
-
+          <label className={labelClass}>Status *</label>
           <div className="relative">
-            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400">
-              Rp
-            </span>
-
-            <input
-              type="number"
-              min="0"
-              value={form.denda}
-              onChange={update("denda")}
-              className="h-11 w-full rounded-lg border border-slate-300 pl-10 pr-3.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            <select
+              value={form.status}
+              onChange={update("status")}
+              className={selectClass}
+            >
+              <option value="aktif">Aktif</option>
+              <option value="nonaktif">Nonaktif</option>
+            </select>
+            <ChevronDown
+              size={15}
+              className="theme-text-muted pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
             />
           </div>
         </div>
       </div>
 
-      {/* PETUGAS */}
-
       <div>
-        <label className="mb-2 block text-xs font-semibold text-slate-600">
-          Petugas
-        </label>
-
+        <label className={labelClass}>Kategori *</label>
         <input
-          value={form.petugas}
-          onChange={update("petugas")}
-          className="h-11 w-full rounded-lg border border-slate-300 px-3.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+          required
+          value={form.kategori}
+          onChange={update("kategori")}
+          placeholder="Contoh: Matematika, IPA, Sejarah"
+          className={inputClass}
+        />
+        <p className="theme-text-muted mt-1.5 text-[11px]">
+          Kategori mengikuti data yang tersimpan di backend.
+        </p>
+      </div>
+
+      <div>
+        <label className={labelClass}>Jumlah Eksemplar</label>
+        <input
+          type="number"
+          min="0"
+          disabled={form.tipe === "EBOOK"}
+          value={form.tipe === "EBOOK" ? 0 : form.jumlah}
+          onChange={update("jumlah")}
+          placeholder="10"
+          className={`${inputClass} disabled:cursor-not-allowed disabled:opacity-60`}
+        />
+        <p className="theme-text-muted mt-1.5 text-[11px]">
+          Jumlah tersedia dan jumlah dipinjam dihitung oleh backend.
+          {form.tipe === "EBOOK" ? " E-Book otomatis memiliki jumlah 0." : ""}
+        </p>
+      </div>
+
+      {form.tipe === "EBOOK" && (
+        <div>
+          <label className={labelClass}>URL E-Book *</label>
+          <input
+            required
+            type="url"
+            value={form.urlEbook}
+            onChange={update("urlEbook")}
+            placeholder="https://..."
+            className={inputClass}
+          />
+        </div>
+      )}
+
+      <div>
+        <label className={labelClass}>URL Cover</label>
+        <input
+          type="url"
+          value={form.coverUrl}
+          onChange={update("coverUrl")}
+          placeholder="https://..."
+          className={inputClass}
         />
       </div>
 
-      {/* FOOTER */}
+      <div>
+        <label className={labelClass}>Deskripsi</label>
+        <textarea
+          value={form.deskripsi}
+          onChange={update("deskripsi")}
+          placeholder="Deskripsi buku..."
+          rows={4}
+          className={`${inputClass} h-auto py-3`}
+        />
+      </div>
 
-      <div className="flex flex-col-reverse gap-2 border-t border-slate-200 pt-5 sm:flex-row sm:justify-end">
+      <div className="flex flex-col-reverse gap-2 border-t border-[var(--color-border-soft)] pt-5 sm:flex-row sm:justify-end">
         <button
           type="button"
           onClick={onCancel}
-          className="h-10 rounded-lg border border-slate-300 px-5 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+          disabled={saving}
+          className={`theme-card theme-border theme-text-secondary h-10 rounded-lg border px-5 text-sm font-medium transition ${themeTextHover} disabled:opacity-50`}
         >
           Batal
         </button>
 
         <button
           type="submit"
-          className="h-10 rounded-lg bg-blue-600 px-5 text-sm font-semibold text-white transition hover:bg-blue-700"
+          disabled={saving}
+          className={`flex h-10 items-center justify-center gap-2 rounded-lg bg-[var(--color-primary)] px-5 text-sm font-semibold text-[var(--color-card)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60 ${themePrimaryShadow}`}
         >
-          {editMode
-            ? "Simpan Perubahan"
-            : "Simpan Pengembalian"}
+          {saving && <RefreshCw size={15} className="animate-spin" />}
+          {saving ? "Menyimpan..." : editMode ? "Simpan Perubahan" : "Simpan Buku"}
         </button>
       </div>
     </form>
   );
 }
 
-/* =========================================================
-   DETAIL MODAL
-========================================================= */
-
-function DetailModal({ item, onClose }) {
-  if (!item) return null;
+function DetailModal({ book, loading, onClose }) {
+  if (!book && !loading) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-[2px]">
-      <div className="max-h-[92vh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white px-5 py-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4 backdrop-blur-[2px]">
+      <div
+        className={`theme-card theme-border max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl border ${themeCardShadow}`}
+      >
+        <div className="theme-card sticky top-0 z-10 flex items-center justify-between border-b border-[var(--color-border-soft)] px-5 py-4">
           <div>
-            <h2 className="text-lg font-bold text-slate-900">
-              Detail Pengembalian
-            </h2>
-
-            <p className="mt-0.5 text-xs text-slate-500">
-              Informasi lengkap transaksi pengembalian
+            <h2 className="theme-text text-lg font-bold">Detail Data Buku</h2>
+            <p className="theme-text-muted mt-0.5 text-xs">
+              Informasi dari backend perpustakaan
             </p>
           </div>
 
           <button
             type="button"
             onClick={onClose}
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+            className={`theme-text-muted flex h-9 w-9 items-center justify-center rounded-lg transition ${themeTextHover}`}
           >
             <X size={18} />
           </button>
         </div>
 
-        <div className="p-5 sm:p-6">
-          {/* BOOK */}
-
-          <div className="flex gap-4">
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white">
-              <BookOpen size={27} />
-            </div>
-
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-md bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
-                  {item.kode}
-                </span>
-
-                <StatusBadge status={item.status} />
-              </div>
-
-              <h3 className="mt-2 text-lg font-bold text-slate-900">
-                {item.buku}
-              </h3>
-
-              <p className="mt-0.5 text-xs text-slate-400">
-                {item.kodeBuku}
-              </p>
-            </div>
+        {loading && !book ? (
+          <div className="px-6 py-16 text-center">
+            <RefreshCw size={24} className="theme-text-muted mx-auto animate-spin" />
+            <p className="theme-text-secondary mt-3 text-sm">
+              Memuat detail buku...
+            </p>
           </div>
-
-          {/* USER */}
-
-          <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-4">
-            <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-blue-600 shadow-sm">
-                <UserRound size={18} />
+        ) : book ? (
+          <div className="p-5 sm:p-6">
+            <div className="flex flex-col gap-4 sm:flex-row">
+              <div className="flex h-36 w-full shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[var(--color-primary)] text-[var(--color-card)] sm:w-28">
+                {book.coverUrl ? (
+                  <img
+                    src={book.coverUrl}
+                    alt={book.judul}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <BookOpen size={45} strokeWidth={1.5} />
+                )}
               </div>
 
-              <div>
-                <p className="text-sm font-semibold text-slate-800">
-                  {item.siswa}
-                </p>
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap gap-2">
+                  <span
+                    className={`${themePrimarySoft} ${themePrimarySoftBorder} rounded-md border px-2.5 py-1 text-xs font-semibold text-[var(--color-primary)]`}
+                  >
+                    {book.kodeBuku}
+                  </span>
+                  <TypeBadge tipe={book.tipe} />
+                  <StatusBadge status={book.status} />
+                </div>
 
-                <p className="mt-0.5 text-xs text-slate-400">
-                  NIS {item.nis} • Kelas {item.kelas}
+                <h3 className="theme-text mt-3 text-xl font-bold leading-7">
+                  {book.judul}
+                </h3>
+                <p className="theme-text-secondary mt-1 text-sm">
+                  {book.penulis}
                 </p>
               </div>
             </div>
-          </div>
 
-          {/* DATE */}
-
-          <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <div className="rounded-xl border border-slate-200 p-4">
-              <div className="flex items-center gap-2 text-slate-400">
-                <CalendarDays size={15} />
-
-                <span className="text-xs">
-                  Tanggal Pinjam
-                </span>
-              </div>
-
-              <p className="mt-2 text-sm font-semibold text-slate-700">
-                {item.tanggalPinjam}
-              </p>
+            <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-4 border-t border-[var(--color-border-soft)] pt-5 sm:grid-cols-2">
+              <Info label="ISBN" value={book.isbn} />
+              <Info label="Penerbit" value={book.penerbit} />
+              <Info label="Tahun Terbit" value={book.tahunTerbit} />
+              <Info label="Kategori" value={book.kategori} />
+              <Info label="Tipe" value={formatTipe(book.tipe)} />
+              <Info label="Status" value={formatStatus(book.status)} />
             </div>
 
-            <div className="rounded-xl border border-orange-100 bg-orange-50 p-4">
-              <div className="flex items-center gap-2 text-orange-500">
-                <Clock3 size={15} />
-
-                <span className="text-xs">
-                  Jatuh Tempo
-                </span>
-              </div>
-
-              <p className="mt-2 text-sm font-semibold text-orange-700">
-                {item.jatuhTempo}
+            <div className="mt-6">
+              <p className="theme-text-muted mb-3 text-xs font-semibold uppercase tracking-wide">
+                Informasi Stok
               </p>
+
+              <div className="grid grid-cols-3 gap-2">
+                <StockBox label="Total" value={book.jumlah} />
+                <StockBox
+                  label="Tersedia"
+                  value={book.jumlahTersedia}
+                  type="success"
+                />
+                <StockBox
+                  label="Dipinjam"
+                  value={getDipinjam(book)}
+                  type="warning"
+                />
+              </div>
             </div>
 
-            <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-4">
-              <div className="flex items-center gap-2 text-emerald-500">
-                <RotateCcw size={15} />
-
-                <span className="text-xs">
-                  Dikembalikan
-                </span>
+            {book.deskripsi && (
+              <div className="theme-border mt-5 rounded-xl border p-4">
+                <p className="theme-text-muted text-xs">Deskripsi</p>
+                <p className="theme-text-secondary mt-2 whitespace-pre-wrap text-sm leading-6">
+                  {book.deskripsi}
+                </p>
               </div>
+            )}
 
-              <p className="mt-2 text-sm font-semibold text-emerald-700">
-                {item.tanggalKembali}
-              </p>
+            <div className="mt-5 flex flex-wrap justify-end gap-2">
+              {book.urlEbook && (
+                <a
+                  href={book.urlEbook}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex h-10 items-center gap-2 rounded-lg bg-[var(--color-primary)] px-4 text-sm font-semibold text-[var(--color-card)] transition hover:brightness-110"
+                >
+                  <ExternalLink size={15} />
+                  Buka E-Book
+                </a>
+              )}
+
+              <button
+                type="button"
+                onClick={onClose}
+                className={`theme-card theme-border theme-text-secondary h-10 rounded-lg border px-5 text-sm font-medium transition ${themeTextHover}`}
+              >
+                Tutup
+              </button>
             </div>
           </div>
-
-          {/* CONDITION */}
-
-          <div className="mt-4 flex items-center justify-between rounded-xl border border-slate-200 px-4 py-3">
-            <span className="text-sm text-slate-500">
-              Kondisi Buku
-            </span>
-
-            <ConditionBadge kondisi={item.kondisi} />
-          </div>
-
-          {/* LATE */}
-
-          <div className="mt-3 flex items-center justify-between rounded-xl border border-slate-200 px-4 py-3">
-            <span className="text-sm text-slate-500">
-              Keterlambatan
-            </span>
-
-            <span className="text-sm font-semibold text-slate-700">
-              {item.keterlambatan} hari
-            </span>
-          </div>
-
-          {/* FINE */}
-
-          <div className="mt-3 flex items-center justify-between rounded-xl border border-slate-200 px-4 py-3">
-            <span className="text-sm text-slate-500">
-              Total Denda
-            </span>
-
-            <span
-              className={`text-sm font-bold ${
-                item.denda > 0
-                  ? "text-rose-600"
-                  : "text-emerald-600"
-              }`}
-            >
-              Rp {item.denda.toLocaleString("id-ID")}
-            </span>
-          </div>
-
-          {/* PETUGAS */}
-
-          <div className="mt-5 flex items-center justify-between border-t border-slate-200 pt-4">
-            <span className="text-xs text-slate-400">
-              Petugas
-            </span>
-
-            <span className="text-xs font-medium text-slate-600">
-              {item.petugas}
-            </span>
-          </div>
-
-          <div className="mt-5 flex justify-end">
-            <button
-              type="button"
-              onClick={onClose}
-              className="h-10 rounded-lg border border-slate-300 px-5 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
-            >
-              Tutup
-            </button>
-          </div>
-        </div>
+        ) : null}
       </div>
     </div>
   );
 }
 
-/* =========================================================
-   MAIN
-========================================================= */
+function Info({ label, value }) {
+  return (
+    <div>
+      <p className="theme-text-muted text-xs">{label}</p>
+      <p className="theme-text-secondary mt-1 text-sm font-medium">
+        {value || "-"}
+      </p>
+    </div>
+  );
+}
 
-export default function PengembalianPage() {
-  const [returns, setReturns] = useState(initialReturns);
+function StockBox({ label, value, type }) {
+  const classes =
+    type === "success"
+      ? "border-[color-mix(in_srgb,var(--color-success)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_8%,transparent)] text-[var(--color-success)]"
+      : type === "warning"
+        ? "border-[color-mix(in_srgb,var(--color-warning)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)] text-[var(--color-warning)]"
+        : "theme-card-soft theme-border theme-text";
+
+  return (
+    <div className={`rounded-xl border p-4 text-center ${classes}`}>
+      <p className="text-xs opacity-80">{label}</p>
+      <p className="mt-1 text-xl font-bold">{value}</p>
+    </div>
+  );
+}
+
+export default function DataBukuPage() {
+  const [books, setBooks] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
   const [search, setSearch] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("Semua");
+  const [typeFilter, setTypeFilter] = useState("Semua");
   const [statusFilter, setStatusFilter] = useState("Semua");
-  const [conditionFilter, setConditionFilter] =
-    useState("Semua");
 
   const [modal, setModal] = useState(null);
-  const [activeItem, setActiveItem] = useState(null);
-  const [detailItem, setDetailItem] = useState(null);
-  const [deleteItem, setDeleteItem] = useState(null);
+  const [activeBook, setActiveBook] = useState(null);
+  const [saving, setSaving] = useState(false);
+  const [formError, setFormError] = useState("");
 
-  /* =========================================================
-     FILTER
-  ========================================================= */
+  const [detailBook, setDetailBook] = useState(null);
+  const [detailLoading, setDetailLoading] = useState(false);
 
-  const filteredReturns = useMemo(() => {
+  const [deleteBook, setDeleteBook] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
+  async function loadBooks() {
+    try {
+      setLoading(true);
+      setError("");
+
+      const result = await getBuku();
+
+      const normalized = Array.isArray(result)
+        ? result.map(normalizeBook)
+        : [];
+
+      setBooks(normalized);
+    } catch (err) {
+      console.error("Gagal mengambil data buku:", err);
+      setError(getErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  useEffect(() => {
+    loadBooks();
+  }, []);
+
+  const categories = useMemo(() => {
+    return [...new Set(
+      books.map((book) => book.kategori).filter(Boolean),
+    )].sort((a, b) => a.localeCompare(b));
+  }, [books]);
+
+  const filteredBooks = useMemo(() => {
     const query = search.trim().toLowerCase();
 
-    return returns.filter((item) => {
+    return books.filter((book) => {
       const matchSearch =
         !query ||
-        item.kode.toLowerCase().includes(query) ||
-        item.kodePinjam.toLowerCase().includes(query) ||
-        item.siswa.toLowerCase().includes(query) ||
-        item.nis.toLowerCase().includes(query) ||
-        item.buku.toLowerCase().includes(query) ||
-        item.kodeBuku.toLowerCase().includes(query);
+        book.kodeBuku.toLowerCase().includes(query) ||
+        book.judul.toLowerCase().includes(query) ||
+        book.penulis.toLowerCase().includes(query);
+
+      const matchCategory =
+        categoryFilter === "Semua" || book.kategori === categoryFilter;
+
+      const matchType =
+        typeFilter === "Semua" || book.tipe === typeFilter;
 
       const matchStatus =
-        statusFilter === "Semua" ||
-        item.status === statusFilter;
+        statusFilter === "Semua" || book.status === statusFilter;
 
-      const matchCondition =
-        conditionFilter === "Semua" ||
-        item.kondisi === conditionFilter;
-
-      return (
-        matchSearch &&
-        matchStatus &&
-        matchCondition
-      );
+      return matchSearch && matchCategory && matchType && matchStatus;
     });
-  }, [
-    returns,
-    search,
-    statusFilter,
-    conditionFilter,
-  ]);
+  }, [books, search, categoryFilter, typeFilter, statusFilter]);
 
-  /* =========================================================
-     STAT
-  ========================================================= */
-
-  const totalPengembalian = returns.length;
-
-  const selesai = returns.filter(
-    (item) => item.status === "Selesai"
-  ).length;
-
-  const terlambat = returns.filter(
-    (item) => item.status === "Terlambat"
-  ).length;
-
-  const totalDenda = returns.reduce(
-    (total, item) => total + item.denda,
-    0
+  const totalJudul = books.length;
+  const totalAktif = books.filter((book) => book.status === "aktif").length;
+  const totalTersedia = books.reduce(
+    (sum, book) => sum + Number(book.jumlahTersedia || 0),
+    0,
+  );
+  const totalDipinjam = books.reduce(
+    (sum, book) => sum + getDipinjam(book),
+    0,
   );
 
-  /* =========================================================
-     ADD
-  ========================================================= */
-
   const openAdd = () => {
-    const nextNumber = returns.length + 1;
-
-    setActiveItem({
-      ...emptyForm,
-      kode: `PG-${String(nextNumber).padStart(4, "0")}`,
+    setFormError("");
+    setActiveBook({
+      kodeBuku: "",
+      isbn: "",
+      judul: "",
+      penulis: "",
+      penerbit: "",
+      tahunTerbit: "",
+      tipe: "FISIK",
+      kategori: "",
+      deskripsi: "",
+      coverUrl: "",
+      urlEbook: "",
+      jumlah: 0,
+      jumlahTersedia: 0,
+      status: "aktif",
     });
-
     setModal("add");
   };
 
-  /* =========================================================
-     EDIT
-  ========================================================= */
-
-  const openEdit = (item) => {
-    setActiveItem({
-      ...item,
-    });
-
+  const openEdit = (book) => {
+    setFormError("");
+    setActiveBook(normalizeBook(book));
     setModal("edit");
   };
 
-  /* =========================================================
-     SAVE
-  ========================================================= */
-
-  const saveReturn = (form) => {
-    if (modal === "add") {
-      setReturns((current) => [
-        {
-          ...form,
-          id: Date.now(),
-        },
-        ...current,
-      ]);
-    } else {
-      setReturns((current) =>
-        current.map((item) =>
-          item.id === form.id
-            ? {
-                ...item,
-                ...form,
-              }
-            : item
-        )
-      );
-    }
-
-    closeModal();
-  };
-
-  /* =========================================================
-     CLOSE
-  ========================================================= */
-
   const closeModal = () => {
+    if (saving) return;
     setModal(null);
-    setActiveItem(null);
+    setActiveBook(null);
+    setFormError("");
   };
 
-  /* =========================================================
-     DELETE
-  ========================================================= */
+  const saveBook = async (form) => {
+    try {
+      setSaving(true);
+      setFormError("");
 
-  const confirmDelete = () => {
-    if (!deleteItem) return;
+      const payload = {
+        kodeBuku: form.kodeBuku.trim(),
+        judul: form.judul.trim(),
+        penulis: form.penulis.trim(),
+        penerbit: form.penerbit?.trim() || "",
+        isbn: form.isbn?.trim() || "",
+        tipe: form.tipe,
+        kategori: form.kategori.trim(),
+        deskripsi: form.deskripsi?.trim() || "",
+        coverUrl: form.coverUrl?.trim() || "",
+        urlEbook: form.urlEbook?.trim() || "",
+        jumlah:
+          form.tipe === "EBOOK" ? 0 : Number(form.jumlah || 0),
+        status: form.status || "aktif",
+      };
 
-    setReturns((current) =>
-      current.filter(
-        (item) => item.id !== deleteItem.id
-      )
-    );
+      if (form.tahunTerbit !== "" && form.tahunTerbit != null) {
+        payload.tahunTerbit = Number(form.tahunTerbit);
+      }
 
-    setDeleteItem(null);
+      if (modal === "add") {
+        await createBuku(payload);
+      } else {
+        await updateBuku(String(form.id), payload);
+      }
+
+      await loadBooks();
+      closeModal();
+    } catch (err) {
+      console.error("Gagal menyimpan buku:", err);
+      setFormError(getErrorMessage(err));
+    } finally {
+      setSaving(false);
+    }
   };
 
-  /* =========================================================
-     RESET
-  ========================================================= */
+  const openDetail = async (book) => {
+    try {
+      setDetailLoading(true);
+      setDetailBook(normalizeBook(book));
+
+      const result = await getBukuById(String(book.id));
+      setDetailBook(normalizeBook(result));
+    } catch (err) {
+      console.error("Gagal mengambil detail buku:", err);
+      setError(getErrorMessage(err));
+      setDetailBook(null);
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteBook) return;
+
+    try {
+      setDeleting(true);
+      setError("");
+
+      await deleteBuku(String(deleteBook.id));
+      setDeleteBook(null);
+      await loadBooks();
+    } catch (err) {
+      console.error("Gagal menghapus buku:", err);
+      setError(getErrorMessage(err));
+    } finally {
+      setDeleting(false);
+    }
+  };
 
   const resetFilter = () => {
     setSearch("");
+    setCategoryFilter("Semua");
+    setTypeFilter("Semua");
     setStatusFilter("Semua");
-    setConditionFilter("Semua");
   };
 
-  /* =========================================================
-     RENDER
-  ========================================================= */
-
   return (
-    <div className="flex min-h-screen bg-[#F5F8FC]">
+    <div className="theme-page flex min-h-screen">
       <Sidebar />
 
       <div className="flex min-w-0 flex-1 flex-col">
@@ -924,387 +800,372 @@ export default function PengembalianPage() {
 
         <main className="min-w-0 flex-1 px-4 py-5 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-[1400px]">
-
-            {/* HEADER */}
-
             <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm">
-                  <RotateCcw size={23} />
+                <div
+                  className={`flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--color-primary)] text-[var(--color-card)] ${themePrimaryShadow}`}
+                >
+                  <Library size={23} />
                 </div>
 
                 <div>
-                  <h1 className="text-[25px] font-bold tracking-tight text-slate-900">
-                    Pengembalian Buku
+                  <h1 className="theme-text text-[25px] font-bold tracking-tight">
+                    Data Buku Perpustakaan
                   </h1>
-
-                  <p className="mt-0.5 text-sm text-slate-500">
-                    Kelola pengembalian buku dan denda perpustakaan
+                  <p className="theme-text-secondary mt-0.5 text-sm">
+                    Kelola koleksi buku perpustakaan sekolah
                   </p>
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={openAdd}
-                className="flex h-10 items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
-              >
-                <RotateCcw size={17} />
-                Catat Pengembalian
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={loadBooks}
+                  disabled={loading}
+                  className={`theme-card theme-border theme-text-secondary flex h-10 items-center gap-2 rounded-lg border px-3.5 text-sm font-medium transition ${themeTextHover}`}
+                >
+                  <RefreshCw
+                    size={16}
+                    className={loading ? "animate-spin" : ""}
+                  />
+                  <span className="hidden sm:inline">Refresh</span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={openAdd}
+                  className={`flex h-10 items-center gap-2 rounded-lg bg-[var(--color-primary)] px-4 text-sm font-semibold text-[var(--color-card)] transition hover:brightness-110 ${themePrimaryShadow}`}
+                >
+                  <Plus size={17} />
+                  Tambah Buku
+                </button>
+              </div>
             </div>
 
-            {/* STAT */}
+            {error && (
+              <div className="mb-5 flex items-start gap-2 rounded-xl border border-[color-mix(in_srgb,var(--color-warning)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-warning)_8%,transparent)] p-4 text-sm text-[var(--color-warning)]">
+                <AlertTriangle size={18} className="mt-0.5 shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold">Gagal memuat data</p>
+                  <p className="mt-1">{error}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setError("")}
+                  className="shrink-0"
+                >
+                  <X size={17} />
+                </button>
+              </div>
+            )}
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
               <StatCard
-                icon={ReceiptText}
-                label="Total Pengembalian"
-                value={totalPengembalian}
+                icon={BookOpen}
+                label="Judul Buku"
+                value={totalJudul}
                 type="blue"
               />
-
+              <StatCard
+                icon={Library}
+                label="Buku Aktif"
+                value={totalAktif}
+                type="purple"
+              />
               <StatCard
                 icon={CheckCircle2}
-                label="Selesai"
-                value={selesai}
+                label="Buku Tersedia"
+                value={totalTersedia}
                 type="green"
               />
-
               <StatCard
-                icon={AlertTriangle}
-                label="Terlambat"
-                value={terlambat}
+                icon={Archive}
+                label="Sedang Dipinjam"
+                value={totalDipinjam}
                 type="orange"
-              />
-
-              <StatCard
-                icon={CircleDollarSign}
-                label="Total Denda"
-                value={`Rp ${totalDenda.toLocaleString(
-                  "id-ID"
-                )}`}
-                type="red"
               />
             </div>
 
-            {/* FILTER */}
-
-            <div className="mt-5 rounded-xl border border-slate-200 bg-white p-4 shadow-[0_1px_3px_rgba(15,23,42,0.08)]">
+            <div
+              className={`theme-card theme-border mt-5 rounded-xl border p-4 ${themeCardShadow}`}
+            >
               <div className="relative">
                 <Search
                   size={18}
-                  className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                  className="theme-text-muted pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2"
                 />
-
                 <input
                   value={search}
-                  onChange={(event) =>
-                    setSearch(event.target.value)
-                  }
-                  placeholder="Cari transaksi, siswa, NIS, atau judul buku..."
-                  className="h-11 w-full rounded-lg border border-slate-300 bg-white pl-10 pr-4 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder="Cari kode, judul buku, atau penulis..."
+                  className="theme-input theme-border theme-text h-11 w-full rounded-lg border pl-10 pr-4 text-sm outline-none transition placeholder:text-[var(--color-text-placeholder)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]"
                 />
               </div>
 
-              <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:flex">
-                {/* STATUS */}
-
-                <div className="relative xl:w-48">
+              <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:flex xl:items-center">
+                <div className="relative xl:w-56">
                   <select
-                    value={statusFilter}
-                    onChange={(event) =>
-                      setStatusFilter(event.target.value)
-                    }
-                    className="h-10 w-full appearance-none rounded-lg border border-slate-300 bg-white px-3.5 pr-9 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    value={categoryFilter}
+                    onChange={(event) => setCategoryFilter(event.target.value)}
+                    className="theme-input theme-border theme-text h-10 w-full appearance-none rounded-lg border px-3.5 pr-9 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]"
                   >
-                    <option value="Semua">
-                      Semua Status
-                    </option>
-
-                    <option>Selesai</option>
-                    <option>Terlambat</option>
+                    <option value="Semua">Semua Kategori</option>
+                    {categories.map((category) => (
+                      <option key={category} value={category}>
+                        {category}
+                      </option>
+                    ))}
                   </select>
-
                   <ChevronDown
                     size={15}
-                    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+                    className="theme-text-muted pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
                   />
                 </div>
 
-                {/* CONDITION */}
-
-                <div className="relative xl:w-48">
+                <div className="relative xl:w-44">
                   <select
-                    value={conditionFilter}
-                    onChange={(event) =>
-                      setConditionFilter(event.target.value)
-                    }
-                    className="h-10 w-full appearance-none rounded-lg border border-slate-300 bg-white px-3.5 pr-9 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    value={typeFilter}
+                    onChange={(event) => setTypeFilter(event.target.value)}
+                    className="theme-input theme-border theme-text h-10 w-full appearance-none rounded-lg border px-3.5 pr-9 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]"
                   >
-                    <option value="Semua">
-                      Semua Kondisi
-                    </option>
-
-                    <option>Baik</option>
-                    <option>Rusak Ringan</option>
-                    <option>Rusak Berat</option>
-                    <option>Hilang</option>
+                    <option value="Semua">Semua Tipe</option>
+                    <option value="FISIK">Buku Fisik</option>
+                    <option value="EBOOK">E-Book</option>
                   </select>
-
                   <ChevronDown
                     size={15}
-                    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+                    className="theme-text-muted pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
+                  />
+                </div>
+
+                <div className="relative xl:w-44">
+                  <select
+                    value={statusFilter}
+                    onChange={(event) => setStatusFilter(event.target.value)}
+                    className="theme-input theme-border theme-text h-10 w-full appearance-none rounded-lg border px-3.5 pr-9 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]"
+                  >
+                    <option value="Semua">Semua Status</option>
+                    <option value="aktif">Aktif</option>
+                    <option value="nonaktif">Nonaktif</option>
+                  </select>
+                  <ChevronDown
+                    size={15}
+                    className="theme-text-muted pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
                   />
                 </div>
 
                 <button
                   type="button"
                   onClick={resetFilter}
-                  className="h-10 px-3 text-left text-sm font-medium text-blue-600 hover:bg-blue-50 xl:text-center"
+                  className={`h-10 px-3 text-left text-sm font-medium text-[var(--color-primary)] transition ${themePrimaryHover} xl:text-center`}
                 >
                   Reset Filter
                 </button>
 
-                <div className="flex items-center xl:ml-auto">
-                  <span className="text-sm text-slate-500">
-                    {filteredReturns.length} data ditemukan
+                <div className="xl:ml-auto">
+                  <span className="theme-text-secondary text-sm">
+                    {filteredBooks.length} data ditemukan
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* TABLE */}
-
-            <div className="mt-5 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]">
-              <div className="flex flex-col gap-1 border-b border-slate-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div
+              className={`theme-card theme-border mt-5 overflow-hidden rounded-xl border ${themeCardShadow}`}
+            >
+              <div className="theme-border flex flex-col gap-1 border-b px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h2 className="text-sm font-bold text-slate-900">
-                    Riwayat Pengembalian
-                  </h2>
-
-                  <p className="mt-0.5 text-xs text-slate-400">
-                    Daftar buku yang telah dikembalikan
+                  <h2 className="theme-text text-sm font-bold">Koleksi Buku</h2>
+                  <p className="theme-text-muted mt-0.5 text-xs">
+                    Data langsung dari backend perpustakaan
                   </p>
                 </div>
-
-                <div className="flex items-center gap-2 text-xs text-slate-500">
-                  <Library size={14} />
-                  {filteredReturns.length} transaksi
+                <div className="theme-text-secondary flex items-center gap-2 text-xs">
+                  <BookOpen size={14} />
+                  {filteredBooks.length} buku
                 </div>
               </div>
 
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[1200px] text-left">
+                <table className="w-full min-w-[1050px] text-left">
                   <thead>
-                    <tr className="border-b border-slate-200 bg-slate-50">
-                      <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-                        Peminjam
-                      </th>
-
-                      <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                    <tr className="border-b border-[var(--color-border-soft)] bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]">
+                      <th className="theme-text-muted px-5 py-3 text-[11px] font-semibold uppercase tracking-wide">
                         Buku
                       </th>
-
-                      <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-                        Jatuh Tempo
+                      <th className="theme-text-muted px-4 py-3 text-[11px] font-semibold uppercase tracking-wide">
+                        Tipe
                       </th>
-
-                      <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-                        Tgl Kembali
+                      <th className="theme-text-muted px-4 py-3 text-[11px] font-semibold uppercase tracking-wide">
+                        Kategori
                       </th>
-
-                      <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-                        Kondisi
+                      <th className="theme-text-muted px-4 py-3 text-[11px] font-semibold uppercase tracking-wide">
+                        Stok
                       </th>
-
-                      <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-                        Keterlambatan
-                      </th>
-
-                      <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-                        Denda
-                      </th>
-
-                      <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                      <th className="theme-text-muted px-4 py-3 text-[11px] font-semibold uppercase tracking-wide">
                         Status
                       </th>
-
-                      <th className="px-5 py-3 text-right text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                      <th className="theme-text-muted px-5 py-3 text-right text-[11px] font-semibold uppercase tracking-wide">
                         Aksi
                       </th>
                     </tr>
                   </thead>
 
-                  <tbody className="divide-y divide-slate-100">
-                    {filteredReturns.length > 0 ? (
-                      filteredReturns.map((item) => (
-                        <tr
-                          key={item.id}
-                          className="transition hover:bg-slate-50/70"
-                        >
-                          {/* PEMINJAM */}
+                  <tbody className="divide-y divide-[var(--color-border-soft)]">
+                    {loading ? (
+                      <tr>
+                        <td colSpan={6} className="px-5 py-16 text-center">
+                          <RefreshCw
+                            size={24}
+                            className="theme-text-muted mx-auto animate-spin"
+                          />
+                          <p className="theme-text-secondary mt-3 text-sm">
+                            Memuat data buku...
+                          </p>
+                        </td>
+                      </tr>
+                    ) : filteredBooks.length > 0 ? (
+                      filteredBooks.map((book) => {
+                        const borrowed = getDipinjam(book);
+                        const percentage =
+                          book.jumlah > 0
+                            ? Math.min(
+                                100,
+                                (book.jumlahTersedia / book.jumlah) * 100,
+                              )
+                            : 0;
 
-                          <td className="px-5 py-4">
-                            <div className="flex items-center gap-3">
-                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-600">
-                                <UserRound size={18} />
+                        return (
+                          <tr
+                            key={book.id}
+                            className={`transition ${themeTextHover}`}
+                          >
+                            <td className="px-5 py-4">
+                              <div className="flex items-center gap-3">
+                                <div
+                                  className={`flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg ${themePrimarySoft} text-[var(--color-primary)]`}
+                                >
+                                  {book.coverUrl ? (
+                                    <img
+                                      src={book.coverUrl}
+                                      alt=""
+                                      className="h-full w-full object-cover"
+                                    />
+                                  ) : (
+                                    <BookOpen size={19} />
+                                  )}
+                                </div>
+
+                                <div className="min-w-0">
+                                  <p className="theme-text max-w-[300px] truncate text-sm font-semibold">
+                                    {book.judul}
+                                  </p>
+                                  <div className="mt-1 flex items-center gap-2">
+                                    <span className="text-[11px] font-medium text-[var(--color-primary)]">
+                                      {book.kodeBuku}
+                                    </span>
+                                    {book.tahunTerbit && (
+                                      <>
+                                        <span className="theme-text-muted text-[11px]">
+                                          •
+                                        </span>
+                                        <span className="theme-text-muted text-[11px]">
+                                          {book.tahunTerbit}
+                                        </span>
+                                      </>
+                                    )}
+                                  </div>
+                                  <p className="theme-text-muted mt-0.5 text-xs">
+                                    {book.penulis}
+                                  </p>
+                                </div>
                               </div>
+                            </td>
 
-                              <div>
-                                <p className="text-sm font-semibold text-slate-800">
-                                  {item.siswa}
-                                </p>
+                            <td className="px-4 py-4">
+                              <TypeBadge tipe={book.tipe} />
+                            </td>
 
-                                <p className="mt-0.5 text-xs text-slate-400">
-                                  {item.nis} • Kelas {item.kelas}
-                                </p>
+                            <td className="px-4 py-4">
+                              <span className="theme-card-soft theme-border theme-text-secondary inline-flex rounded-md border px-2.5 py-1 text-xs font-medium">
+                                {book.kategori || "-"}
+                              </span>
+                            </td>
 
-                                <p className="mt-0.5 text-[11px] font-medium text-blue-600">
-                                  {item.kode}
+                            <td className="px-4 py-4">
+                              <div className="min-w-[120px]">
+                                <div className="flex items-center justify-between text-xs">
+                                  <span className="theme-text font-semibold">
+                                    {book.jumlahTersedia}
+                                  </span>
+                                  <span className="theme-text-muted">
+                                    / {book.jumlah}
+                                  </span>
+                                </div>
+
+                                <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)]">
+                                  <div
+                                    className="h-full rounded-full bg-[var(--color-primary)]"
+                                    style={{ width: `${percentage}%` }}
+                                  />
+                                </div>
+
+                                <p className="theme-text-muted mt-1 text-[10px]">
+                                  {borrowed} dipinjam
                                 </p>
                               </div>
-                            </div>
-                          </td>
+                            </td>
 
-                          {/* BUKU */}
+                            <td className="px-4 py-4">
+                              <StatusBadge status={book.status} />
+                            </td>
 
-                          <td className="px-4 py-4">
-                            <div className="flex items-center gap-2.5">
-                              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
-                                <BookOpen size={16} />
+                            <td className="px-5 py-4">
+                              <div className="flex items-center justify-end gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() => openDetail(book)}
+                                  title="Detail"
+                                  className={`theme-text-muted flex h-8 w-8 items-center justify-center rounded-md transition ${themePrimaryHover} hover:text-[var(--color-primary)]`}
+                                >
+                                  <Eye size={16} />
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => openEdit(book)}
+                                  title="Edit"
+                                  className={`theme-text-muted flex h-8 w-8 items-center justify-center rounded-md transition ${themePrimaryHover} hover:text-[var(--color-primary)]`}
+                                >
+                                  <Pencil size={16} />
+                                </button>
+
+                                <button
+                                  type="button"
+                                  onClick={() => setDeleteBook(book)}
+                                  title="Hapus"
+                                  className="theme-text-muted theme-danger flex h-8 w-8 items-center justify-center rounded-md transition hover:bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)]"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
                               </div>
-
-                              <div>
-                                <p className="max-w-[240px] truncate text-sm font-medium text-slate-700">
-                                  {item.buku}
-                                </p>
-
-                                <p className="mt-0.5 text-[11px] text-slate-400">
-                                  {item.kodeBuku}
-                                </p>
-                              </div>
-                            </div>
-                          </td>
-
-                          {/* JATUH TEMPO */}
-
-                          <td className="px-4 py-4">
-                            <span className="text-xs text-slate-600">
-                              {item.jatuhTempo}
-                            </span>
-                          </td>
-
-                          {/* KEMBALI */}
-
-                          <td className="px-4 py-4">
-                            <span className="text-xs font-medium text-emerald-600">
-                              {item.tanggalKembali}
-                            </span>
-                          </td>
-
-                          {/* CONDITION */}
-
-                          <td className="px-4 py-4">
-                            <ConditionBadge
-                              kondisi={item.kondisi}
-                            />
-                          </td>
-
-                          {/* LATE */}
-
-                          <td className="px-4 py-4">
-                            <span
-                              className={`text-xs font-semibold ${
-                                item.keterlambatan > 0
-                                  ? "text-orange-600"
-                                  : "text-slate-500"
-                              }`}
-                            >
-                              {item.keterlambatan} hari
-                            </span>
-                          </td>
-
-                          {/* DENDA */}
-
-                          <td className="px-4 py-4">
-                            <span
-                              className={`text-xs font-semibold ${
-                                item.denda > 0
-                                  ? "text-rose-600"
-                                  : "text-emerald-600"
-                              }`}
-                            >
-                              Rp{" "}
-                              {item.denda.toLocaleString(
-                                "id-ID"
-                              )}
-                            </span>
-                          </td>
-
-                          {/* STATUS */}
-
-                          <td className="px-4 py-4">
-                            <StatusBadge
-                              status={item.status}
-                            />
-                          </td>
-
-                          {/* ACTION */}
-
-                          <td className="px-5 py-4">
-                            <div className="flex items-center justify-end gap-1">
-                              <button
-                                type="button"
-                                title="Detail"
-                                onClick={() =>
-                                  setDetailItem(item)
-                                }
-                                className="flex h-8 w-8 items-center justify-center rounded-md text-slate-400 transition hover:bg-blue-50 hover:text-blue-600"
-                              >
-                                <Eye size={16} />
-                              </button>
-
-                              <button
-                                type="button"
-                                title="Edit"
-                                onClick={() =>
-                                  openEdit(item)
-                                }
-                                className="flex h-8 w-8 items-center justify-center rounded-md text-slate-400 transition hover:bg-blue-50 hover:text-blue-600"
-                              >
-                                <Pencil size={16} />
-                              </button>
-
-                              <button
-                                type="button"
-                                title="Hapus"
-                                onClick={() =>
-                                  setDeleteItem(item)
-                                }
-                                className="flex h-8 w-8 items-center justify-center rounded-md text-slate-400 transition hover:bg-rose-50 hover:text-rose-600"
-                              >
-                                <Trash2 size={16} />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
+                            </td>
+                          </tr>
+                        );
+                      })
                     ) : (
                       <tr>
-                        <td
-                          colSpan={9}
-                          className="px-5 py-16 text-center"
-                        >
-                          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                        <td colSpan={6} className="px-5 py-16 text-center">
+                          <div
+                            className={`mx-auto flex h-12 w-12 items-center justify-center rounded-full ${themePrimarySoft} text-[var(--color-primary)]`}
+                          >
                             <Search size={20} />
                           </div>
-
-                          <p className="mt-3 text-sm font-semibold text-slate-700">
-                            Data pengembalian tidak ditemukan
+                          <p className="theme-text mt-3 text-sm font-semibold">
+                            Data buku tidak ditemukan
                           </p>
-
-                          <p className="mt-1 text-xs text-slate-400">
+                          <p className="theme-text-muted mt-1 text-xs">
                             Coba ubah kata kunci atau filter.
                           </p>
                         </td>
@@ -1314,25 +1175,28 @@ export default function PengembalianPage() {
                 </table>
               </div>
 
-              <div className="flex flex-col gap-2 border-t border-slate-200 px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-xs text-slate-400">
+              <div className="theme-border flex flex-col gap-2 border-t px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
+                <p className="theme-text-muted text-xs">
                   Menampilkan{" "}
-                  <span className="font-medium text-slate-600">
-                    {filteredReturns.length}
+                  <span className="theme-text-secondary font-medium">
+                    {filteredBooks.length}
                   </span>{" "}
                   dari{" "}
-                  <span className="font-medium text-slate-600">
-                    {returns.length}
+                  <span className="theme-text-secondary font-medium">
+                    {books.length}
                   </span>{" "}
-                  transaksi
+                  buku
                 </p>
 
-                <p className="text-xs text-slate-400">
-                  Total denda:{" "}
-                  <span className="font-semibold text-rose-600">
-                    Rp{" "}
-                    {totalDenda.toLocaleString("id-ID")}
-                  </span>
+                <p className="theme-text-muted text-xs">
+                  Total{" "}
+                  <span className="theme-text-secondary font-medium">
+                    {books.reduce(
+                      (sum, book) => sum + Number(book.jumlah || 0),
+                      0,
+                    )}
+                  </span>{" "}
+                  eksemplar
                 </p>
               </div>
             </div>
@@ -1340,85 +1204,74 @@ export default function PengembalianPage() {
         </main>
       </div>
 
-      {/* =====================================================
-          ADD / EDIT MODAL
-      ===================================================== */}
-
-      {modal && activeItem && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-[2px]">
-          <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
-            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white px-5 py-4 sm:px-6">
+      {modal && activeBook && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4 backdrop-blur-[2px]">
+          <div
+            className={`theme-card theme-border max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl border ${themeCardShadow}`}
+          >
+            <div className="theme-card sticky top-0 z-10 flex items-center justify-between border-b border-[var(--color-border-soft)] px-5 py-4 sm:px-6">
               <div>
-                <h2 className="text-lg font-bold text-slate-900">
-                  {modal === "add"
-                    ? "Catat Pengembalian"
-                    : "Edit Pengembalian"}
+                <h2 className="theme-text text-lg font-bold">
+                  {modal === "add" ? "Tambah Data Buku" : "Edit Data Buku"}
                 </h2>
-
-                <p className="mt-0.5 text-xs text-slate-500">
+                <p className="theme-text-muted mt-0.5 text-xs">
                   {modal === "add"
-                    ? "Catat transaksi pengembalian buku"
-                    : "Perbarui data pengembalian buku"}
+                    ? "Tambahkan koleksi buku baru ke database"
+                    : "Perbarui data buku yang tersimpan di database"}
                 </p>
               </div>
 
               <button
                 type="button"
                 onClick={closeModal}
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                className={`theme-text-muted flex h-9 w-9 items-center justify-center rounded-lg transition ${themeTextHover}`}
               >
                 <X size={18} />
               </button>
             </div>
 
             <div className="p-5 sm:p-6">
-              <ReturnForm
-                initial={activeItem}
+              <BookForm
+                initial={activeBook}
                 editMode={modal === "edit"}
                 onCancel={closeModal}
-                onSave={saveReturn}
+                onSave={saveBook}
+                saving={saving}
+                error={formError}
               />
             </div>
           </div>
         </div>
       )}
 
-      {/* =====================================================
-          DETAIL
-      ===================================================== */}
-
       <DetailModal
-        item={detailItem}
-        onClose={() => setDetailItem(null)}
+        book={detailBook}
+        loading={detailLoading}
+        onClose={() => {
+          if (!detailLoading) setDetailBook(null);
+        }}
       />
 
-      {/* =====================================================
-          DELETE
-      ===================================================== */}
-
-      {deleteItem && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-[2px]">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+      {deleteBook && (
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/40 p-4 backdrop-blur-[2px]">
+          <div
+            className={`theme-card theme-border w-full max-w-md rounded-2xl border p-6 ${themeCardShadow}`}
+          >
             <div className="flex items-start gap-4">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-rose-50 text-rose-600">
+              <div className="theme-danger flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)]">
                 <Trash2 size={20} />
               </div>
 
               <div>
-                <h2 className="text-lg font-bold text-slate-900">
-                  Hapus data pengembalian?
+                <h2 className="theme-text text-lg font-bold">
+                  Hapus data buku?
                 </h2>
-
-                <p className="mt-1.5 text-sm leading-6 text-slate-500">
-                  Data pengembalian{" "}
-                  <span className="font-semibold text-slate-700">
-                    {deleteItem.kode}
+                <p className="theme-text-secondary mt-1.5 text-sm leading-6">
+                  Data buku{" "}
+                  <span className="theme-text font-semibold">
+                    "{deleteBook.judul}"
                   </span>{" "}
-                  milik{" "}
-                  <span className="font-semibold text-slate-700">
-                    {deleteItem.siswa}
-                  </span>{" "}
-                  akan dihapus.
+                  akan dihapus melalui backend.
                 </p>
               </div>
             </div>
@@ -1426,8 +1279,9 @@ export default function PengembalianPage() {
             <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <button
                 type="button"
-                onClick={() => setDeleteItem(null)}
-                className="h-10 rounded-lg border border-slate-300 px-5 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+                onClick={() => setDeleteBook(null)}
+                disabled={deleting}
+                className={`theme-card theme-border theme-text-secondary h-10 rounded-lg border px-5 text-sm font-medium transition ${themeTextHover} disabled:opacity-50`}
               >
                 Batal
               </button>
@@ -1435,9 +1289,11 @@ export default function PengembalianPage() {
               <button
                 type="button"
                 onClick={confirmDelete}
-                className="h-10 rounded-lg bg-rose-600 px-5 text-sm font-semibold text-white transition hover:bg-rose-700"
+                disabled={deleting}
+                className="theme-danger flex h-10 items-center justify-center gap-2 rounded-lg bg-[var(--color-text)] px-5 text-sm font-semibold text-[var(--color-card)] transition hover:opacity-90 disabled:opacity-50"
               >
-                Ya, Hapus
+                {deleting && <RefreshCw size={15} className="animate-spin" />}
+                {deleting ? "Menghapus..." : "Ya, Hapus"}
               </button>
             </div>
           </div>

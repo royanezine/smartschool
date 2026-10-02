@@ -22,6 +22,65 @@ import Sidebar from "../../../../components/Sidebar";
 
 import { createSiswa } from "../../../../../services/siswa.service";
 
+/* =========================================================
+   THEME HELPERS
+========================================================= */
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themePrimarySurface =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimaryBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_9%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_24%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+
+/* =========================================================
+   MAIN PAGE
+========================================================= */
+
 export default function TambahSiswaPage() {
   const router = useRouter();
 
@@ -62,6 +121,7 @@ export default function TambahSiswaPage() {
   // =========================================================
   // HANDLE INPUT
   // =========================================================
+
   const handleChange = (e) => {
     const { name, value } = e.target;
 
@@ -77,6 +137,7 @@ export default function TambahSiswaPage() {
   // =========================================================
   // HANDLE SUBMIT
   // =========================================================
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -86,6 +147,7 @@ export default function TambahSiswaPage() {
     // ---------------------------------------------
     // VALIDASI FRONTEND
     // ---------------------------------------------
+
     if (!form.namaLengkap.trim()) {
       setError(
         "Nama lengkap wajib diisi."
@@ -134,6 +196,7 @@ export default function TambahSiswaPage() {
       // ---------------------------------------------
       // DATA YANG DIKIRIM KE BACKEND
       // ---------------------------------------------
+
       const payload = {
         namaLengkap:
           form.namaLengkap.trim(),
@@ -197,6 +260,7 @@ export default function TambahSiswaPage() {
       // POST KE BACKEND
       // /api/v1/siswa
       // ---------------------------------------------
+
       const response =
         await createSiswa(payload);
 
@@ -212,6 +276,7 @@ export default function TambahSiswaPage() {
       // ---------------------------------------------
       // KEMBALI KE DATA SISWA
       // ---------------------------------------------
+
       setTimeout(() => {
         router.push(
           "/admin/siswa"
@@ -233,11 +298,12 @@ export default function TambahSiswaPage() {
   };
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-slate-100">
+    <div className="flex h-screen w-full overflow-hidden theme-page">
 
       {/* =====================================================
           SIDEBAR
       ===================================================== */}
+
       <Sidebar
         active="siswa"
         setActive={() => {}}
@@ -250,9 +316,11 @@ export default function TambahSiswaPage() {
       {/* =====================================================
           MAIN
       ===================================================== */}
+
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
 
         {/* HEADER */}
+
         <Header
           toggleSidebar={() =>
             setIsCollapsed(
@@ -269,6 +337,7 @@ export default function TambahSiswaPage() {
         />
 
         {/* CONTENT */}
+
         <main className="min-h-0 flex-1 overflow-y-auto">
 
           <div className="w-full px-3 py-4 sm:px-4 md:px-6 lg:px-8 xl:px-10">
@@ -278,6 +347,7 @@ export default function TambahSiswaPage() {
               {/* =================================================
                   TOP HEADER
               ================================================= */}
+
               <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
                 <div className="flex items-center gap-3">
@@ -289,27 +359,31 @@ export default function TambahSiswaPage() {
                         "/admin/siswa"
                       )
                     }
-                    className="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-300 bg-white text-slate-600 transition hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600"
+                    className={`flex h-10 w-10 items-center justify-center rounded-xl border ${themeNeutralBorder} theme-card theme-text-secondary transition ${themeNeutralHover} hover:text-[var(--color-primary)]`}
                   >
                     <ArrowLeft
                       size={19}
                     />
                   </button>
 
-                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-200">
+                  <div
+                    className={`flex h-11 w-11 items-center justify-center rounded-xl ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
+                  >
                     <UserPlus
                       size={21}
                     />
                   </div>
 
                   <div>
-                    <h1 className="text-xl font-semibold text-slate-800 sm:text-2xl">
+
+                    <h1 className="text-xl font-semibold theme-text sm:text-2xl">
                       Tambah Siswa
                     </h1>
 
-                    <p className="text-xs text-slate-600 sm:text-sm">
+                    <p className="text-xs theme-text-secondary sm:text-sm">
                       Tambahkan data siswa baru
                     </p>
+
                   </div>
 
                 </div>
@@ -319,22 +393,27 @@ export default function TambahSiswaPage() {
               {/* =================================================
                   ERROR
               ================================================= */}
+
               {error && (
-                <div className="mb-5 flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 p-4">
+                <div
+                  className={`mb-5 flex items-start gap-3 rounded-xl border ${themeWarningBorder} ${themeWarningSurface} p-4`}
+                >
 
                   <AlertCircle
                     size={20}
-                    className="mt-0.5 shrink-0 text-rose-600"
+                    className="mt-0.5 shrink-0 text-[var(--color-warning)]"
                   />
 
                   <div>
-                    <p className="text-sm font-semibold text-rose-700">
+
+                    <p className="text-sm font-semibold theme-text">
                       Gagal menyimpan
                     </p>
 
-                    <p className="mt-1 text-sm text-rose-600">
+                    <p className="mt-1 text-sm theme-text-secondary">
                       {error}
                     </p>
+
                   </div>
 
                 </div>
@@ -343,22 +422,27 @@ export default function TambahSiswaPage() {
               {/* =================================================
                   SUCCESS
               ================================================= */}
+
               {success && (
-                <div className="mb-5 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+                <div
+                  className={`mb-5 flex items-start gap-3 rounded-xl border ${themeSuccessBorder} ${themeSuccessSurface} p-4`}
+                >
 
                   <CheckCircle2
                     size={20}
-                    className="mt-0.5 shrink-0 text-emerald-600"
+                    className="mt-0.5 shrink-0 text-[var(--color-success)]"
                   />
 
                   <div>
-                    <p className="text-sm font-semibold text-emerald-700">
+
+                    <p className="text-sm font-semibold theme-text">
                       Berhasil
                     </p>
 
-                    <p className="mt-1 text-sm text-emerald-600">
+                    <p className="mt-1 text-sm theme-text-secondary">
                       {success}
                     </p>
+
                   </div>
 
                 </div>
@@ -367,6 +451,7 @@ export default function TambahSiswaPage() {
               {/* =================================================
                   FORM
               ================================================= */}
+
               <form
                 onSubmit={
                   handleSubmit
@@ -377,26 +462,35 @@ export default function TambahSiswaPage() {
                 {/* =================================================
                     DATA UTAMA
                 ================================================= */}
-                <section className="overflow-hidden rounded-2xl border border-slate-300 bg-white shadow-sm">
 
-                  <div className="border-b border-slate-200 bg-slate-50 px-5 py-4">
+                <section
+                  className={`overflow-hidden rounded-2xl border ${themeNeutralBorder} theme-card ${themeCardShadow}`}
+                >
+
+                  <div
+                    className={`border-b ${themeDivider} ${themeNeutralSurface} px-5 py-4`}
+                  >
 
                     <div className="flex items-center gap-3">
 
-                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-100 text-blue-600">
+                      <div
+                        className={`flex h-9 w-9 items-center justify-center rounded-lg ${themePrimarySurface} text-[var(--color-primary)]`}
+                      >
                         <User
                           size={18}
                         />
                       </div>
 
                       <div>
-                        <h2 className="font-semibold text-slate-800">
+
+                        <h2 className="font-semibold theme-text">
                           Data Utama
                         </h2>
 
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs theme-text-muted">
                           Informasi dasar siswa
                         </p>
+
                       </div>
 
                     </div>
@@ -406,6 +500,7 @@ export default function TambahSiswaPage() {
                   <div className="grid gap-5 p-5 md:grid-cols-2">
 
                     {/* NAMA */}
+
                     <InputField
                       label="Nama Lengkap"
                       name="namaLengkap"
@@ -425,6 +520,7 @@ export default function TambahSiswaPage() {
                     />
 
                     {/* EMAIL */}
+
                     <InputField
                       label="Email"
                       name="email"
@@ -445,6 +541,7 @@ export default function TambahSiswaPage() {
                     />
 
                     {/* NISN */}
+
                     <InputField
                       label="NISN"
                       name="nisn"
@@ -464,6 +561,7 @@ export default function TambahSiswaPage() {
                     />
 
                     {/* NIS */}
+
                     <InputField
                       label="NIS"
                       name="nis"
@@ -482,20 +580,24 @@ export default function TambahSiswaPage() {
                     />
 
                     {/* KELAS ID */}
+
                     <div className="md:col-span-2">
 
-                      <label className="mb-1.5 block text-sm font-medium text-slate-700">
+                      <label className="mb-1.5 block text-sm font-medium theme-text-secondary">
+
                         ID Kelas
-                        <span className="ml-1 text-rose-500">
+
+                        <span className="ml-1 theme-danger">
                           *
                         </span>
+
                       </label>
 
                       <div className="relative">
 
                         <Users
                           size={17}
-                          className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                          className="absolute left-3.5 top-1/2 -translate-y-1/2 theme-text-muted"
                         />
 
                         <input
@@ -508,13 +610,13 @@ export default function TambahSiswaPage() {
                             handleChange
                           }
                           placeholder="Masukkan UUID kelas"
-                          className="w-full rounded-xl border border-slate-300 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                          className={`w-full rounded-xl theme-input py-2.5 pl-10 pr-4 text-sm theme-text outline-none transition placeholder:text-[var(--color-text-placeholder)] ${themeFocus}`}
                           required
                         />
 
                       </div>
 
-                      <p className="mt-1.5 text-xs text-slate-500">
+                      <p className="mt-1.5 text-xs theme-text-muted">
                         Isi dengan UUID kelas yang
                         terdaftar di backend.
                       </p>
@@ -522,6 +624,7 @@ export default function TambahSiswaPage() {
                     </div>
 
                     {/* NIK */}
+
                     <InputField
                       label="NIK"
                       name="nik"
@@ -546,26 +649,35 @@ export default function TambahSiswaPage() {
                 {/* =================================================
                     DATA AYAH
                 ================================================= */}
-                <section className="overflow-hidden rounded-2xl border border-slate-300 bg-white shadow-sm">
 
-                  <div className="border-b border-slate-200 bg-slate-50 px-5 py-4">
+                <section
+                  className={`overflow-hidden rounded-2xl border ${themeNeutralBorder} theme-card ${themeCardShadow}`}
+                >
+
+                  <div
+                    className={`border-b ${themeDivider} ${themeNeutralSurface} px-5 py-4`}
+                  >
 
                     <div className="flex items-center gap-3">
 
-                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-indigo-100 text-indigo-600">
+                      <div
+                        className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeInfoSurface} text-[var(--color-info)]`}
+                      >
                         <Users
                           size={18}
                         />
                       </div>
 
                       <div>
-                        <h2 className="font-semibold text-slate-800">
+
+                        <h2 className="font-semibold theme-text">
                           Data Ayah
                         </h2>
 
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs theme-text-muted">
                           Informasi orang tua siswa
                         </p>
+
                       </div>
 
                     </div>
@@ -615,26 +727,35 @@ export default function TambahSiswaPage() {
                 {/* =================================================
                     DATA IBU
                 ================================================= */}
-                <section className="overflow-hidden rounded-2xl border border-slate-300 bg-white shadow-sm">
 
-                  <div className="border-b border-slate-200 bg-slate-50 px-5 py-4">
+                <section
+                  className={`overflow-hidden rounded-2xl border ${themeNeutralBorder} theme-card ${themeCardShadow}`}
+                >
+
+                  <div
+                    className={`border-b ${themeDivider} ${themeNeutralSurface} px-5 py-4`}
+                  >
 
                     <div className="flex items-center gap-3">
 
-                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-pink-100 text-pink-600">
+                      <div
+                        className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeInfoSurface} text-[var(--color-info)]`}
+                      >
                         <Users
                           size={18}
                         />
                       </div>
 
                       <div>
-                        <h2 className="font-semibold text-slate-800">
+
+                        <h2 className="font-semibold theme-text">
                           Data Ibu
                         </h2>
 
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs theme-text-muted">
                           Informasi orang tua siswa
                         </p>
+
                       </div>
 
                     </div>
@@ -684,26 +805,35 @@ export default function TambahSiswaPage() {
                 {/* =================================================
                     ALAMAT
                 ================================================= */}
-                <section className="overflow-hidden rounded-2xl border border-slate-300 bg-white shadow-sm">
 
-                  <div className="border-b border-slate-200 bg-slate-50 px-5 py-4">
+                <section
+                  className={`overflow-hidden rounded-2xl border ${themeNeutralBorder} theme-card ${themeCardShadow}`}
+                >
+
+                  <div
+                    className={`border-b ${themeDivider} ${themeNeutralSurface} px-5 py-4`}
+                  >
 
                     <div className="flex items-center gap-3">
 
-                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100 text-emerald-600">
+                      <div
+                        className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeSuccessSurface} text-[var(--color-success)]`}
+                      >
                         <MapPin
                           size={18}
                         />
                       </div>
 
                       <div>
-                        <h2 className="font-semibold text-slate-800">
+
+                        <h2 className="font-semibold theme-text">
                           Alamat
                         </h2>
 
-                        <p className="text-xs text-slate-500">
+                        <p className="text-xs theme-text-muted">
                           Informasi tempat tinggal
                         </p>
+
                       </div>
 
                     </div>
@@ -713,6 +843,7 @@ export default function TambahSiswaPage() {
                   <div className="grid gap-5 p-5 md:grid-cols-2">
 
                     {/* ALAMAT KTP */}
+
                     <TextareaField
                       label="Alamat KTP"
                       name="alamatKtp"
@@ -726,6 +857,7 @@ export default function TambahSiswaPage() {
                     />
 
                     {/* ALAMAT DOMISILI */}
+
                     <TextareaField
                       label="Alamat Domisili"
                       name="alamatDomisili"
@@ -739,6 +871,7 @@ export default function TambahSiswaPage() {
                     />
 
                     {/* KECAMATAN */}
+
                     <InputField
                       label="Kecamatan"
                       name="kecamatan"
@@ -752,6 +885,7 @@ export default function TambahSiswaPage() {
                     />
 
                     {/* KELURAHAN */}
+
                     <InputField
                       label="Kelurahan"
                       name="kelurahan"
@@ -765,6 +899,7 @@ export default function TambahSiswaPage() {
                     />
 
                     {/* KOTA */}
+
                     <InputField
                       label="Kota"
                       name="kota"
@@ -784,20 +919,23 @@ export default function TambahSiswaPage() {
                 {/* =================================================
                     INFO PASSWORD
                 ================================================= */}
-                <div className="flex items-start gap-3 rounded-xl border border-blue-200 bg-blue-50 p-4">
+
+                <div
+                  className={`flex items-start gap-3 rounded-xl border ${themeInfoBorder} ${themeInfoSurface} p-4`}
+                >
 
                   <AlertCircle
                     size={19}
-                    className="mt-0.5 shrink-0 text-blue-600"
+                    className="mt-0.5 shrink-0 text-[var(--color-info)]"
                   />
 
                   <div>
 
-                    <p className="text-sm font-semibold text-blue-700">
+                    <p className="text-sm font-semibold theme-text">
                       Password akun siswa
                     </p>
 
-                    <p className="mt-1 text-xs leading-relaxed text-blue-600">
+                    <p className="mt-1 text-xs leading-relaxed theme-text-secondary">
                       Berdasarkan backend, password awal
                       siswa akan otomatis dibuat menggunakan
                       NISN yang didaftarkan.
@@ -810,6 +948,7 @@ export default function TambahSiswaPage() {
                 {/* =================================================
                     ACTION
                 ================================================= */}
+
                 <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
 
                   <button
@@ -820,7 +959,7 @@ export default function TambahSiswaPage() {
                       )
                     }
                     disabled={loading}
-                    className="rounded-xl border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                    className={`rounded-xl border ${themeNeutralBorder} theme-card px-5 py-2.5 text-sm font-medium theme-text-secondary transition ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-50`}
                   >
                     Batal
                   </button>
@@ -828,7 +967,7 @@ export default function TambahSiswaPage() {
                   <button
                     type="submit"
                     disabled={loading}
-                    className="flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 py-2.5 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700 hover:shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
+                    className={`flex items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-6 py-2.5 text-sm font-medium text-[var(--color-card)] ${themeSmallShadow} transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60`}
                   >
 
                     {loading ? (
@@ -867,9 +1006,10 @@ export default function TambahSiswaPage() {
   );
 }
 
-// =========================================================
-// INPUT FIELD
-// =========================================================
+/* =========================================================
+   INPUT FIELD
+========================================================= */
+
 function InputField({
   label,
   name,
@@ -883,12 +1023,12 @@ function InputField({
   return (
     <div>
 
-      <label className="mb-1.5 block text-sm font-medium text-slate-700">
+      <label className="mb-1.5 block text-sm font-medium theme-text-secondary">
 
         {label}
 
         {required && (
-          <span className="ml-1 text-rose-500">
+          <span className="ml-1 theme-danger">
             *
           </span>
         )}
@@ -898,7 +1038,7 @@ function InputField({
       <div className="relative">
 
         {icon && (
-          <div className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+          <div className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 theme-text-muted">
             {icon}
           </div>
         )}
@@ -910,11 +1050,11 @@ function InputField({
           onChange={onChange}
           placeholder={placeholder}
           required={required}
-          className={`w-full rounded-xl border border-slate-300 bg-white py-2.5 ${
+          className={`w-full rounded-xl theme-input py-2.5 ${
             icon
               ? "pl-10"
               : "pl-4"
-          } pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20`}
+          } pr-4 text-sm theme-text outline-none transition placeholder:text-[var(--color-text-placeholder)] ${themeFocus}`}
         />
 
       </div>
@@ -923,9 +1063,10 @@ function InputField({
   );
 }
 
-// =========================================================
-// TEXTAREA FIELD
-// =========================================================
+/* =========================================================
+   TEXTAREA FIELD
+========================================================= */
+
 function TextareaField({
   label,
   name,
@@ -937,12 +1078,12 @@ function TextareaField({
   return (
     <div>
 
-      <label className="mb-1.5 block text-sm font-medium text-slate-700">
+      <label className="mb-1.5 block text-sm font-medium theme-text-secondary">
 
         {label}
 
         {required && (
-          <span className="ml-1 text-rose-500">
+          <span className="ml-1 theme-danger">
             *
           </span>
         )}
@@ -956,7 +1097,7 @@ function TextareaField({
         placeholder={placeholder}
         required={required}
         rows={4}
-        className="w-full resize-none rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+        className={`w-full resize-none rounded-xl theme-input px-4 py-3 text-sm theme-text outline-none transition placeholder:text-[var(--color-text-placeholder)] ${themeFocus}`}
       />
 
     </div>

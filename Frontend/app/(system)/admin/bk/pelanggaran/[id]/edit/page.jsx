@@ -13,7 +13,7 @@ import {
 } from "../../../../../../../services/bk.service";
 
 const inputClass =
-  "w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-900 shadow-sm outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-100/60";
+  "theme-input w-full rounded-xl border px-4 py-2.5 text-sm font-medium shadow-sm outline-none transition placeholder:text-theme-text-placeholder hover:bg-[var(--color-input-hover)] focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-primary)]/10";
 
 export default function EditPelanggaranPage() {
   const router = useRouter();
@@ -43,6 +43,7 @@ export default function EditPelanggaranPage() {
   // =========================================================
   // LOAD DATA
   // =========================================================
+
   useEffect(() => {
     if (!id) return;
 
@@ -105,6 +106,7 @@ export default function EditPelanggaranPage() {
   // =========================================================
   // CHANGE FORM
   // =========================================================
+
   function handleChange(field, value) {
     setForm((prev) => ({
       ...prev,
@@ -115,6 +117,7 @@ export default function EditPelanggaranPage() {
   // =========================================================
   // CHANGE KATEGORI
   // =========================================================
+
   function handleKategoriChange(value) {
     const selectedKategori = kategori.find(
       (item) => String(item.id) === String(value)
@@ -124,8 +127,6 @@ export default function EditPelanggaranPage() {
       ...prev,
       kategoriPelanggaranId: value,
 
-      // Sesuai halaman tambah:
-      // ketika kategori berubah, poin mengikuti kategori.
       poin:
         selectedKategori?.poin !== undefined &&
         selectedKategori?.poin !== null
@@ -137,6 +138,7 @@ export default function EditPelanggaranPage() {
   // =========================================================
   // SUBMIT
   // =========================================================
+
   async function handleSubmit(event) {
     event.preventDefault();
 
@@ -144,7 +146,6 @@ export default function EditPelanggaranPage() {
       setSaving(true);
       setError("");
 
-      // Validasi frontend
       if (!id) {
         throw new Error("ID pelanggaran tidak ditemukan.");
       }
@@ -157,10 +158,6 @@ export default function EditPelanggaranPage() {
         throw new Error("Tanggal pelanggaran wajib diisi.");
       }
 
-      // =====================================================
-      // PENTING:
-      // BE UPDATE TIDAK MENERIMA siswaId
-      // =====================================================
       const payload = {
         kategoriPelanggaranId: form.kategoriPelanggaranId,
 
@@ -216,6 +213,7 @@ export default function EditPelanggaranPage() {
   // =========================================================
   // SELECTED CATEGORY
   // =========================================================
+
   const selectedKategori = kategori.find(
     (item) =>
       String(item.id) === String(form.kategoriPelanggaranId)
@@ -224,8 +222,9 @@ export default function EditPelanggaranPage() {
   // =========================================================
   // RENDER
   // =========================================================
+
   return (
-    <div className="flex h-screen overflow-hidden bg-white">
+    <div className="theme-page flex h-screen overflow-hidden">
       <Sidebar role="admin" active="bk" />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
@@ -237,13 +236,14 @@ export default function EditPelanggaranPage() {
             {/* =====================================================
                 HEADER
             ===================================================== */}
+
             <div className="mb-7 flex items-start gap-4">
               <button
                 type="button"
                 onClick={() =>
                   router.push("/admin/bk/pelanggaran")
                 }
-                className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"
+                className="theme-card theme-text-secondary theme-border mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border shadow-sm transition hover:bg-[var(--color-header-hover)] hover:text-theme-text"
               >
                 <svg
                   className="h-4 w-4"
@@ -261,7 +261,7 @@ export default function EditPelanggaranPage() {
               </button>
 
               <div className="flex items-start gap-4">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-blue-500 to-blue-600 text-white shadow-lg shadow-blue-500/25">
+                <div className="theme-primary relative flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl shadow-lg shadow-blue-500/20">
                   <svg
                     className="h-6 w-6"
                     fill="none"
@@ -278,11 +278,11 @@ export default function EditPelanggaranPage() {
                 </div>
 
                 <div>
-                  <h1 className="text-[26px] font-bold leading-tight tracking-tight text-slate-900">
+                  <h1 className="theme-text text-[26px] font-bold leading-tight tracking-tight">
                     Edit Pelanggaran
                   </h1>
 
-                  <p className="mt-1 text-sm font-medium text-slate-500">
+                  <p className="theme-text-muted mt-1 text-sm font-medium">
                     Perbarui data pelanggaran siswa
                   </p>
                 </div>
@@ -292,8 +292,9 @@ export default function EditPelanggaranPage() {
             {/* =====================================================
                 ERROR
             ===================================================== */}
+
             {error && (
-              <div className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3.5 text-sm font-semibold text-red-700 shadow-sm">
+              <div className="theme-danger mb-6 flex items-start gap-3 rounded-xl border px-4 py-3.5 text-sm font-semibold shadow-sm">
                 <svg
                   className="mt-0.5 h-4 w-4 shrink-0"
                   fill="none"
@@ -315,10 +316,11 @@ export default function EditPelanggaranPage() {
             {/* =====================================================
                 LOADING
             ===================================================== */}
+
             {loading ? (
-              <div className="rounded-2xl border border-slate-200 bg-white p-12 text-center shadow-xl shadow-slate-200/40">
-                <div className="inline-flex items-center gap-2 text-sm font-medium text-slate-500">
-                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-slate-300 border-t-blue-600" />
+              <div className="theme-card theme-border rounded-2xl border p-12 text-center shadow-xl">
+                <div className="theme-text-muted inline-flex items-center gap-2 text-sm font-medium">
+                  <span className="h-4 w-4 animate-spin rounded-full border-2 border-[var(--color-border)] border-t-[var(--color-primary)]" />
                   Memuat data pelanggaran...
                 </div>
               </div>
@@ -328,13 +330,16 @@ export default function EditPelanggaranPage() {
                 {/* =================================================
                     FORM
                 ================================================= */}
+
                 <form
                   onSubmit={handleSubmit}
-                  className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl shadow-slate-200/40"
+                  className="theme-card theme-border overflow-hidden rounded-2xl border shadow-xl"
                 >
+
                   {/* FORM HEADER */}
-                  <div className="flex items-center gap-3 border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white px-6 py-5">
-                    <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-blue-600 ring-1 ring-blue-100">
+
+                  <div className="theme-card-soft theme-border flex items-center gap-3 border-b px-6 py-5">
+                    <div className="theme-info flex h-9 w-9 items-center justify-center rounded-lg ring-1 ring-[var(--color-info)]/20">
                       <svg
                         className="h-4 w-4"
                         fill="none"
@@ -351,28 +356,29 @@ export default function EditPelanggaranPage() {
                     </div>
 
                     <div>
-                      <h2 className="text-sm font-bold text-slate-900">
+                      <h2 className="theme-text text-sm font-bold">
                         Informasi Pelanggaran
                       </h2>
 
-                      <p className="text-xs font-medium text-slate-500">
+                      <p className="theme-text-muted text-xs font-medium">
                         Perbarui data berikut dengan benar
                       </p>
                     </div>
                   </div>
 
                   {/* FORM CONTENT */}
+
                   <div className="grid gap-5 p-6 md:grid-cols-2">
 
-                    {/* =================================================
-                        SISWA
-                    ================================================= */}
+                    {/* SISWA */}
+
                     <div className="md:col-span-2">
                       <Field
                         label="Siswa"
                         required
                       >
                         <div className="grid gap-3 md:grid-cols-[1fr_180px]">
+
                           <input
                             value={
                               form.siswaNama ||
@@ -380,7 +386,7 @@ export default function EditPelanggaranPage() {
                               "-"
                             }
                             readOnly
-                            className={`${inputClass} cursor-not-allowed bg-slate-50 text-slate-600`}
+                            className={`${inputClass} cursor-not-allowed opacity-80`}
                           />
 
                           <input
@@ -390,11 +396,12 @@ export default function EditPelanggaranPage() {
                                 : "NIS -"
                             }
                             readOnly
-                            className={`${inputClass} cursor-not-allowed bg-slate-50 text-slate-500`}
+                            className={`${inputClass} cursor-not-allowed opacity-70`}
                           />
+
                         </div>
 
-                        <p className="mt-2 text-xs font-medium text-slate-400">
+                        <p className="theme-text-placeholder mt-2 text-xs font-medium">
                           Siswa tidak dapat diubah pada proses edit
                           karena endpoint BE hanya memperbarui data
                           pelanggaran selain siswa.
@@ -402,9 +409,8 @@ export default function EditPelanggaranPage() {
                       </Field>
                     </div>
 
-                    {/* =================================================
-                        KATEGORI
-                    ================================================= */}
+                    {/* KATEGORI */}
+
                     <Field
                       label="Kategori Pelanggaran"
                       required
@@ -432,9 +438,8 @@ export default function EditPelanggaranPage() {
                       </select>
                     </Field>
 
-                    {/* =================================================
-                        TANGGAL
-                    ================================================= */}
+                    {/* TANGGAL */}
+
                     <Field
                       label="Tanggal"
                       required
@@ -453,9 +458,8 @@ export default function EditPelanggaranPage() {
                       />
                     </Field>
 
-                    {/* =================================================
-                        POIN
-                    ================================================= */}
+                    {/* POIN */}
+
                     <Field label="Poin">
                       <input
                         type="number"
@@ -472,18 +476,17 @@ export default function EditPelanggaranPage() {
                       />
 
                       {selectedKategori && (
-                        <p className="mt-1.5 text-xs font-medium text-slate-400">
+                        <p className="theme-text-muted mt-1.5 text-xs font-medium">
                           Poin kategori:{" "}
-                          <span className="font-bold text-slate-600">
+                          <span className="theme-text-secondary font-bold">
                             {selectedKategori.poin}
                           </span>
                         </p>
                       )}
                     </Field>
 
-                    {/* =================================================
-                        STATUS
-                    ================================================= */}
+                    {/* STATUS */}
+
                     <Field label="Status">
                       <select
                         value={form.status}
@@ -513,9 +516,8 @@ export default function EditPelanggaranPage() {
                       </select>
                     </Field>
 
-                    {/* =================================================
-                        KRONOLOGI
-                    ================================================= */}
+                    {/* KRONOLOGI */}
+
                     <div className="md:col-span-2">
                       <Field label="Kronologi">
                         <textarea
@@ -533,9 +535,8 @@ export default function EditPelanggaranPage() {
                       </Field>
                     </div>
 
-                    {/* =================================================
-                        TINDAK LANJUT
-                    ================================================= */}
+                    {/* TINDAK LANJUT */}
+
                     <div className="md:col-span-2">
                       <Field label="Tindak Lanjut">
                         <textarea
@@ -553,9 +554,8 @@ export default function EditPelanggaranPage() {
                       </Field>
                     </div>
 
-                    {/* =================================================
-                        CATATAN
-                    ================================================= */}
+                    {/* CATATAN */}
+
                     <div className="md:col-span-2">
                       <Field label="Catatan">
                         <textarea
@@ -574,10 +574,10 @@ export default function EditPelanggaranPage() {
                     </div>
                   </div>
 
-                  {/* =================================================
-                      FOOTER
-                  ================================================= */}
-                  <div className="flex justify-end gap-3 border-t border-slate-100 bg-gradient-to-r from-slate-50 to-white px-6 py-4">
+                  {/* FOOTER */}
+
+                  <div className="theme-card-soft theme-border flex justify-end gap-3 border-t px-6 py-4">
+
                     <button
                       type="button"
                       onClick={() =>
@@ -586,7 +586,7 @@ export default function EditPelanggaranPage() {
                         )
                       }
                       disabled={saving}
-                      className="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-bold text-slate-600 shadow-sm transition hover:border-slate-300 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="theme-card theme-text-secondary theme-border rounded-xl border px-5 py-2.5 text-sm font-bold shadow-sm transition hover:bg-[var(--color-header-hover)] hover:text-theme-text disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       Batal
                     </button>
@@ -594,7 +594,7 @@ export default function EditPelanggaranPage() {
                     <button
                       type="submit"
                       disabled={saving}
-                      className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 px-5 py-2.5 text-sm font-bold text-white shadow-lg shadow-blue-500/25 transition hover:shadow-xl hover:shadow-blue-500/30 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="theme-primary inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-bold shadow-lg shadow-blue-500/20 transition hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50"
                     >
                       {saving ? (
                         <>
@@ -627,16 +627,19 @@ export default function EditPelanggaranPage() {
                 {/* =================================================
                     SIDE PREVIEW
                 ================================================= */}
+
                 <aside className="space-y-5">
 
                   {/* PREVIEW */}
-                  <div className="relative overflow-hidden rounded-2xl border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/40">
-                    <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-gradient-to-br from-blue-100 to-blue-50 opacity-60" />
+
+                  <div className="theme-card theme-border relative overflow-hidden rounded-2xl border p-6 shadow-xl">
+
+                    <div className="theme-info absolute -right-8 -top-8 h-24 w-24 rounded-full opacity-30" />
 
                     <div className="relative">
 
                       <div className="mb-4 flex items-center gap-2">
-                        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                        <div className="theme-info flex h-7 w-7 items-center justify-center rounded-lg">
                           <svg
                             className="h-3.5 w-3.5"
                             fill="none"
@@ -653,19 +656,20 @@ export default function EditPelanggaranPage() {
                             <path
                               strokeLinecap="round"
                               strokeLinejoin="round"
-                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+                              d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7 1.274 4.057 5.064 7 9.542 7 4.477 0 8.268-2.943 9.542-7z"
                             />
                           </svg>
                         </div>
 
-                        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                        <h3 className="theme-text-muted text-xs font-bold uppercase tracking-wider">
                           Live Preview
                         </h3>
                       </div>
 
                       {/* SISWA PREVIEW */}
-                      <div className="flex items-center gap-3 border-b border-slate-100 pb-4">
-                        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-500 to-blue-600 text-base font-bold text-white shadow-md shadow-blue-500/25">
+
+                      <div className="theme-border flex items-center gap-3 border-b pb-4">
+                        <div className="theme-primary flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-base font-bold shadow-md shadow-blue-500/20">
                           {getInitials(
                             form.siswaNama ||
                               form.siswaId
@@ -673,13 +677,13 @@ export default function EditPelanggaranPage() {
                         </div>
 
                         <div className="min-w-0">
-                          <p className="truncate text-sm font-bold text-slate-900">
+                          <p className="theme-text truncate text-sm font-bold">
                             {form.siswaNama ||
                               form.siswaId ||
                               "Siswa"}
                           </p>
 
-                          <p className="truncate text-xs font-medium text-slate-500">
+                          <p className="theme-text-muted truncate text-xs font-medium">
                             {selectedKategori?.nama ||
                               "Kategori belum dipilih"}
                           </p>
@@ -687,6 +691,7 @@ export default function EditPelanggaranPage() {
                       </div>
 
                       {/* PREVIEW ROWS */}
+
                       <div className="space-y-3 pt-4">
 
                         <PreviewRow
@@ -726,12 +731,13 @@ export default function EditPelanggaranPage() {
                   </div>
 
                   {/* INFO */}
-                  <div className="relative overflow-hidden rounded-2xl border border-amber-100 bg-gradient-to-br from-amber-50 to-amber-50/40 p-5">
+
+                  <div className="theme-warning relative overflow-hidden rounded-2xl border p-5">
                     <div className="flex items-start gap-3">
 
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-amber-600 shadow-sm">
+                      <div className="theme-card flex h-9 w-9 shrink-0 items-center justify-center rounded-xl shadow-sm">
                         <svg
-                          className="h-4 w-4"
+                          className="h-4 w-4 text-[var(--color-warning)]"
                           fill="none"
                           stroke="currentColor"
                           strokeWidth="2"
@@ -746,11 +752,11 @@ export default function EditPelanggaranPage() {
                       </div>
 
                       <div>
-                        <h4 className="text-sm font-bold text-amber-900">
+                        <h4 className="theme-text text-sm font-bold">
                           Perhatian
                         </h4>
 
-                        <p className="mt-1 text-xs leading-5 text-amber-800/80">
+                        <p className="theme-text-secondary mt-1 text-xs leading-5">
                           Perubahan akan langsung dikirim
                           ke backend dan memperbarui
                           riwayat pelanggaran siswa.
@@ -779,11 +785,14 @@ function Field({
 }) {
   return (
     <div>
-      <label className="mb-2 block text-sm font-semibold text-slate-800">
+      <label className="theme-text mb-2 block text-sm font-semibold">
         {label}
 
         {required && (
-          <span className="ml-1 text-red-500">
+          <span
+            className="ml-1 text-[var(--color-danger)]"
+            aria-hidden="true"
+          >
             *
           </span>
         )}
@@ -805,16 +814,16 @@ function PreviewRow({
 }) {
   return (
     <div className="flex items-start justify-between gap-3 text-sm">
-      <span className="font-medium text-slate-500">
+      <span className="theme-text-muted font-medium">
         {label}
       </span>
 
       {badge ? (
-        <span className="inline-flex rounded-full bg-blue-50 px-2.5 py-0.5 text-xs font-bold text-blue-700 ring-1 ring-blue-100">
+        <span className="theme-info inline-flex rounded-full px-2.5 py-0.5 text-xs font-bold ring-1 ring-[var(--color-info)]/20">
           {value}
         </span>
       ) : (
-        <span className="max-w-[190px] truncate text-right font-semibold text-slate-900">
+        <span className="theme-text max-w-[190px] truncate text-right font-semibold">
           {value}
         </span>
       )}

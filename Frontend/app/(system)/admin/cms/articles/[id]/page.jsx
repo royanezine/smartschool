@@ -70,27 +70,25 @@ function getStatusLabel(status) {
 
 function StatusBadge({ status }) {
   const isPublished =
-    String(status || "").toLowerCase() ===
-      "published" ||
-    String(status || "").toLowerCase() ===
-      "terbit" ||
-    String(status || "").toLowerCase() ===
-      "aktif";
+    String(status || "").toLowerCase() === "published" ||
+    String(status || "").toLowerCase() === "terbit" ||
+    String(status || "").toLowerCase() === "aktif";
 
   return (
     <span
-      className={`inline-flex items-center gap-2 px-3 py-1.5 text-xs font-bold ${
+      className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold ${
         isPublished
-          ? "bg-emerald-50 text-emerald-600"
-          : "bg-amber-50 text-amber-600"
+          ? "theme-success"
+          : "theme-warning"
       }`}
     >
       <span
-        className={`h-1.5 w-1.5 rounded-full ${
-          isPublished
-            ? "bg-emerald-500"
-            : "bg-amber-500"
-        }`}
+        className="h-1.5 w-1.5 rounded-full"
+        style={{
+          backgroundColor: isPublished
+            ? "var(--color-success)"
+            : "var(--color-warning)",
+        }}
       />
 
       {isPublished ? "Terbit" : "Draft"}
@@ -141,8 +139,7 @@ export default function ArticleDetailPage() {
 
       const found = articles.find(
         (item) =>
-          String(item.id) ===
-          String(articleId)
+          String(item.id) === String(articleId)
       );
 
       if (!found) {
@@ -210,7 +207,7 @@ export default function ArticleDetailPage() {
 
   if (loading) {
     return (
-      <div className="flex h-screen overflow-hidden bg-[#F8FAFC]">
+      <div className="theme-page flex h-screen overflow-hidden">
         <Sidebar
           role="cms"
           collapsed={!sidebarOpen}
@@ -233,14 +230,17 @@ export default function ArticleDetailPage() {
             />
           </div>
 
-          <main className="flex flex-1 items-center justify-center overflow-y-auto p-6">
+          <main className="theme-page flex flex-1 items-center justify-center overflow-y-auto p-6">
             <div className="text-center">
               <Loader2
                 size={32}
-                className="mx-auto animate-spin text-blue-600"
+                className="mx-auto animate-spin"
+                style={{
+                  color: "var(--color-primary)",
+                }}
               />
 
-              <p className="mt-4 text-sm font-medium text-slate-500">
+              <p className="theme-text-muted mt-4 text-sm font-medium">
                 Memuat detail artikel...
               </p>
             </div>
@@ -256,7 +256,7 @@ export default function ArticleDetailPage() {
 
   if (error || !article) {
     return (
-      <div className="flex h-screen overflow-hidden bg-[#F8FAFC]">
+      <div className="theme-page flex h-screen overflow-hidden">
         <Sidebar
           role="cms"
           collapsed={!sidebarOpen}
@@ -279,37 +279,60 @@ export default function ArticleDetailPage() {
             />
           </div>
 
-          <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+          <main className="theme-page flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
             <button
+              type="button"
               onClick={() =>
                 router.push("/admin/cms/articles")
               }
-              className="mb-6 inline-flex items-center gap-2 text-sm font-semibold text-slate-600 transition hover:text-blue-600"
+              className="
+                theme-text-secondary
+                mb-6
+                inline-flex
+                items-center
+                gap-2
+                text-sm
+                font-semibold
+                transition
+              "
             >
               <ArrowLeft size={17} />
 
               Kembali ke Artikel
             </button>
 
-            <div className="border border-red-100 bg-white p-8 text-center shadow-sm">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center bg-red-50 text-red-500">
+            <div className="theme-card theme-border rounded-2xl border p-8 text-center shadow-sm">
+              <div className="theme-danger mx-auto flex h-14 w-14 items-center justify-center rounded-xl">
                 <AlertCircle size={26} />
               </div>
 
-              <h2 className="mt-4 text-lg font-bold text-[#0F172A]">
+              <h2 className="theme-text mt-4 text-lg font-bold">
                 Artikel Tidak Ditemukan
               </h2>
 
-              <p className="mx-auto mt-2 max-w-md text-sm leading-6 text-slate-500">
+              <p className="theme-text-muted mx-auto mt-2 max-w-md text-sm leading-6">
                 {error ||
                   "Artikel yang kamu cari tidak tersedia."}
               </p>
 
               <button
+                type="button"
                 onClick={() =>
                   router.push("/admin/cms/articles")
                 }
-                className="mt-5 inline-flex items-center gap-2 bg-[#2563EB] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#1D4ED8]"
+                className="
+                  theme-primary
+                  mt-5
+                  inline-flex
+                  items-center
+                  gap-2
+                  rounded-xl
+                  px-5
+                  py-2.5
+                  text-sm
+                  font-semibold
+                  transition
+                "
               >
                 <ArrowLeft size={16} />
 
@@ -337,7 +360,7 @@ export default function ArticleDetailPage() {
     "";
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#F8FAFC]">
+    <div className="theme-page flex h-screen overflow-hidden">
       {/* =====================================================
           SIDEBAR
       ===================================================== */}
@@ -376,15 +399,26 @@ export default function ArticleDetailPage() {
             MAIN (SCROLL INTERNAL)
         =================================================== */}
 
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+        <main className="theme-page flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           {/* TOP BAR */}
 
           <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <button
+              type="button"
               onClick={() =>
                 router.push("/admin/cms/articles")
               }
-              className="inline-flex w-fit items-center gap-2 text-sm font-semibold text-slate-600 transition hover:text-blue-600"
+              className="
+                theme-text-secondary
+                inline-flex
+                w-fit
+                items-center
+                gap-2
+                text-sm
+                font-semibold
+                transition
+                hover:opacity-80
+              "
             >
               <ArrowLeft size={17} />
 
@@ -393,12 +427,26 @@ export default function ArticleDetailPage() {
 
             <div className="flex flex-wrap gap-2">
               <button
+                type="button"
                 onClick={() =>
                   router.push(
                     `/admin/cms/articles/${article.id}/edit`
                   )
                 }
-                className="inline-flex items-center gap-2 border border-blue-100 bg-blue-50 px-4 py-2.5 text-sm font-semibold text-blue-600 transition hover:bg-blue-100"
+                className="
+                  theme-info
+                  inline-flex
+                  items-center
+                  gap-2
+                  rounded-xl
+                  border
+                  px-4
+                  py-2.5
+                  text-sm
+                  font-semibold
+                  transition
+                  hover:opacity-80
+                "
               >
                 <Pencil size={16} />
 
@@ -406,9 +454,25 @@ export default function ArticleDetailPage() {
               </button>
 
               <button
+                type="button"
                 onClick={handleDelete}
                 disabled={deleting}
-                className="inline-flex items-center gap-2 border border-red-100 bg-red-50 px-4 py-2.5 text-sm font-semibold text-red-600 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-50"
+                className="
+                  theme-danger
+                  inline-flex
+                  items-center
+                  gap-2
+                  rounded-xl
+                  border
+                  px-4
+                  py-2.5
+                  text-sm
+                  font-semibold
+                  transition
+                  hover:opacity-80
+                  disabled:cursor-not-allowed
+                  disabled:opacity-50
+                "
               >
                 {deleting ? (
                   <Loader2
@@ -419,7 +483,9 @@ export default function ArticleDetailPage() {
                   <Trash2 size={16} />
                 )}
 
-                {deleting ? "Menghapus..." : "Hapus"}
+                {deleting
+                  ? "Menghapus..."
+                  : "Hapus"}
               </button>
             </div>
           </div>
@@ -429,11 +495,18 @@ export default function ArticleDetailPage() {
           <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
             {/* CONTENT */}
 
-            <article className="overflow-hidden border border-slate-200 bg-white shadow-sm">
+            <article className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
               {/* IMAGE */}
 
               {imageUrl ? (
-                <div className="aspect-[16/7] w-full overflow-hidden bg-slate-100">
+                <div
+                  className="
+                    theme-card-soft
+                    aspect-[16/7]
+                    w-full
+                    overflow-hidden
+                  "
+                >
                   <img
                     src={imageUrl}
                     alt={article.judul}
@@ -445,14 +518,14 @@ export default function ArticleDetailPage() {
                   />
                 </div>
               ) : (
-                <div className="flex aspect-[16/7] w-full items-center justify-center bg-slate-100">
+                <div className="theme-card-soft flex aspect-[16/7] w-full items-center justify-center">
                   <div className="text-center">
                     <ImageIcon
                       size={40}
-                      className="mx-auto text-slate-300"
+                      className="theme-text-placeholder mx-auto"
                     />
 
-                    <p className="mt-2 text-sm text-slate-400">
+                    <p className="theme-text-placeholder mt-2 text-sm">
                       Tidak ada gambar utama
                     </p>
                   </div>
@@ -463,7 +536,7 @@ export default function ArticleDetailPage() {
                 {/* CATEGORY + STATUS */}
 
                 <div className="mb-4 flex flex-wrap items-center gap-2">
-                  <span className="inline-flex items-center gap-1.5 bg-blue-50 px-3 py-1.5 text-xs font-bold text-blue-600">
+                  <span className="theme-info inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-bold">
                     <Tag size={13} />
 
                     {categoryName}
@@ -476,13 +549,13 @@ export default function ArticleDetailPage() {
 
                 {/* TITLE */}
 
-                <h1 className="text-2xl font-bold leading-tight tracking-tight text-[#0F172A] sm:text-3xl lg:text-4xl">
+                <h1 className="theme-text text-2xl font-bold leading-tight tracking-tight sm:text-3xl lg:text-4xl">
                   {article.judul}
                 </h1>
 
                 {/* META */}
 
-                <div className="mt-5 flex flex-wrap gap-x-5 gap-y-2 border-b border-slate-100 pb-5 text-xs text-slate-400">
+                <div className="theme-border-soft theme-text-muted mt-5 flex flex-wrap gap-x-5 gap-y-2 border-b pb-5 text-xs">
                   <span className="inline-flex items-center gap-1.5">
                     <CalendarDays size={14} />
 
@@ -510,8 +583,8 @@ export default function ArticleDetailPage() {
                 {/* SUMMARY */}
 
                 {article.ringkasan && (
-                  <div className="mt-6 border-l-4 border-blue-500 bg-blue-50/60 px-5 py-4">
-                    <p className="text-sm font-medium leading-7 text-slate-600">
+                  <div className="theme-info mt-6 rounded-r-xl border-l-4 px-5 py-4">
+                    <p className="text-sm font-medium leading-7">
                       {article.ringkasan}
                     </p>
                   </div>
@@ -519,10 +592,17 @@ export default function ArticleDetailPage() {
 
                 {/* CONTENT */}
 
-                <div className="mt-7">
+                <div className="theme-text mt-7">
                   {article.konten ? (
                     <div
-                      className="prose prose-slate max-w-none text-sm leading-7 sm:text-base"
+                      className="
+                        prose
+                        max-w-none
+                        text-sm
+                        leading-7
+                        sm:text-base
+                        dark:prose-invert
+                      "
                       dangerouslySetInnerHTML={{
                         __html: article.konten,
                       }}
@@ -531,10 +611,10 @@ export default function ArticleDetailPage() {
                     <div className="py-10 text-center">
                       <FileText
                         size={34}
-                        className="mx-auto text-slate-300"
+                        className="theme-text-placeholder mx-auto"
                       />
 
-                      <p className="mt-3 text-sm text-slate-400">
+                      <p className="theme-text-placeholder mt-3 text-sm">
                         Artikel belum memiliki konten.
                       </p>
                     </div>
@@ -548,14 +628,14 @@ export default function ArticleDetailPage() {
             <aside className="space-y-5">
               {/* INFO */}
 
-              <div className="border border-slate-200 bg-white shadow-sm">
-                <div className="border-b border-slate-100 px-5 py-4">
-                  <h2 className="text-sm font-bold text-[#0F172A]">
+              <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
+                <div className="theme-card-soft theme-border-soft border-b px-5 py-4">
+                  <h2 className="theme-text text-sm font-bold">
                     Informasi Artikel
                   </h2>
                 </div>
 
-                <div className="divide-y divide-slate-100">
+                <div className="divide-y divide-[var(--color-border-soft)]">
                   <InfoRow
                     label="Status"
                     value={
@@ -597,30 +677,44 @@ export default function ArticleDetailPage() {
 
               {/* QUICK ACTION */}
 
-              <div className="border border-slate-200 bg-white p-5 shadow-sm">
+              <div className="theme-card theme-border rounded-2xl border p-5 shadow-sm">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center bg-blue-50 text-blue-600">
+                  <div className="theme-info flex h-10 w-10 items-center justify-center rounded-xl">
                     <FileText size={18} />
                   </div>
 
                   <div>
-                    <p className="text-sm font-bold text-[#0F172A]">
+                    <p className="theme-text text-sm font-bold">
                       Kelola Artikel
                     </p>
 
-                    <p className="mt-0.5 text-xs text-slate-400">
+                    <p className="theme-text-muted mt-0.5 text-xs">
                       Perbarui informasi artikel
                     </p>
                   </div>
                 </div>
 
                 <button
+                  type="button"
                   onClick={() =>
                     router.push(
                       `/admin/cms/articles/${article.id}/edit`
                     )
                   }
-                  className="mt-5 flex h-11 w-full items-center justify-center gap-2 bg-[#2563EB] text-sm font-semibold text-white transition hover:bg-[#1D4ED8]"
+                  className="
+                    theme-primary
+                    mt-5
+                    flex
+                    h-11
+                    w-full
+                    items-center
+                    justify-center
+                    gap-2
+                    rounded-xl
+                    text-sm
+                    font-semibold
+                    transition
+                  "
                 >
                   <Pencil size={16} />
 
@@ -638,11 +732,11 @@ export default function ArticleDetailPage() {
 function InfoRow({ label, value }) {
   return (
     <div className="px-5 py-4">
-      <p className="text-[11px] font-bold uppercase tracking-wide text-slate-400">
+      <p className="theme-text-muted text-[11px] font-bold uppercase tracking-wide">
         {label}
       </p>
 
-      <div className="mt-1.5 break-words text-sm font-medium text-slate-600">
+      <div className="theme-text-secondary mt-1.5 break-words text-sm font-medium">
         {value}
       </div>
     </div>

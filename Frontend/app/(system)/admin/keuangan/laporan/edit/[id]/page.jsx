@@ -8,7 +8,6 @@ import {
   Trash2,
   Calendar,
   CreditCard,
-  Wallet,
   FileText,
   AlertCircle,
   CheckCircle,
@@ -17,6 +16,7 @@ import {
 
 import Header from "../../../../../../components/Header";
 import Sidebar from "../../../../../../components/Sidebar";
+import { THEME_CLASSES } from "../../../../../../lib/constants/theme";
 
 // Data dummy (sama dengan data di halaman utama)
 // Dalam aplikasi nyata, ini akan diambil dari API / database
@@ -97,7 +97,6 @@ export default function EditLaporanPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
-  // Form state
   const [formData, setFormData] = useState({
     tanggal: "",
     deskripsi: "",
@@ -107,7 +106,6 @@ export default function EditLaporanPage() {
     status: "Lunas",
   });
 
-  // Data transaksi asli (untuk referensi)
   const [originalData, setOriginalData] = useState(null);
 
   const toggleSidebar = () => setIsCollapsed((prev) => !prev);
@@ -116,11 +114,11 @@ export default function EditLaporanPage() {
   // LOAD DATA
   // =============================================================
   useEffect(() => {
-    // Cari data berdasarkan ID
     const found = DUMMY_DATA.find((item) => item.id === id);
 
     if (found) {
       setOriginalData(found);
+
       setFormData({
         tanggal: found.tanggal,
         deskripsi: found.deskripsi,
@@ -129,9 +127,9 @@ export default function EditLaporanPage() {
         metode: found.metode,
         status: found.status,
       });
+
       setLoading(false);
     } else {
-      // Data tidak ditemukan
       setError("Transaksi tidak ditemukan");
       setLoading(false);
     }
@@ -142,11 +140,12 @@ export default function EditLaporanPage() {
   // =============================================================
   const handleChange = (e) => {
     const { name, value } = e.target;
+
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
-    // Hapus pesan error/success saat user mengetik
+
     setError("");
     setSuccess("");
   };
@@ -156,36 +155,36 @@ export default function EditLaporanPage() {
   // =============================================================
   const handleSubmit = (e) => {
     e.preventDefault();
+
     setSaving(true);
     setError("");
     setSuccess("");
 
-    // Validasi
     if (!formData.tanggal) {
       setError("Tanggal harus diisi");
       setSaving(false);
       return;
     }
+
     if (!formData.deskripsi.trim()) {
       setError("Deskripsi harus diisi");
       setSaving(false);
       return;
     }
+
     if (!formData.jumlah || parseInt(formData.jumlah) <= 0) {
       setError("Jumlah harus diisi dengan angka positif");
       setSaving(false);
       return;
     }
 
-    // Simulasi proses update (delay 1 detik)
     setTimeout(() => {
-      // Di sini Anda bisa update state global, panggil API, atau simpan ke database
-      // Untuk demo, kita hanya tampilkan pesan sukses
+      setSuccess("Transaksi berhasil diperbarui!");
 
-      setSuccess("✅ Transaksi berhasil diperbarui!");
+      const index = DUMMY_DATA.findIndex(
+        (item) => item.id === id
+      );
 
-      // Update data di DUMMY_DATA (sebagai simulasi)
-      const index = DUMMY_DATA.findIndex((item) => item.id === id);
       if (index !== -1) {
         DUMMY_DATA[index] = {
           ...DUMMY_DATA[index],
@@ -200,7 +199,6 @@ export default function EditLaporanPage() {
 
       setSaving(false);
 
-      // Redirect ke halaman utama setelah 1.5 detik
       setTimeout(() => {
         router.push("/laporan-keuangan");
       }, 1500);
@@ -211,12 +209,19 @@ export default function EditLaporanPage() {
   // HANDLER: Hapus transaksi
   // =============================================================
   const handleDelete = () => {
-    if (window.confirm("Apakah Anda yakin ingin menghapus transaksi ini?")) {
-      // Hapus dari DUMMY_DATA
-      const index = DUMMY_DATA.findIndex((item) => item.id === id);
+    if (
+      window.confirm(
+        "Apakah Anda yakin ingin menghapus transaksi ini?"
+      )
+    ) {
+      const index = DUMMY_DATA.findIndex(
+        (item) => item.id === id
+      );
+
       if (index !== -1) {
         DUMMY_DATA.splice(index, 1);
       }
+
       router.push("/laporan-keuangan");
     }
   };
@@ -233,46 +238,62 @@ export default function EditLaporanPage() {
   // =============================================================
   if (loading) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-slate-50">
+      <div className={`${THEME_CLASSES.page} flex h-screen w-full items-center justify-center`}>
         <div className="flex flex-col items-center gap-4">
-          <div className="h-12 w-12 animate-spin rounded-full border-4 border-[#155DFC] border-t-transparent"></div>
-          <p className="text-sm text-slate-500">Memuat data transaksi...</p>
+
+          <div className="theme-loading-spinner h-12 w-12 animate-spin rounded-full border-4 border-t-transparent" />
+
+          <p className={`${THEME_CLASSES.textMuted} text-sm`}>
+            Memuat data transaksi...
+          </p>
+
         </div>
       </div>
     );
   }
 
   // =============================================================
-  // RENDER: Error (data tidak ditemukan)
+  // RENDER: Error
   // =============================================================
   if (error && !originalData) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-slate-50">
-        <div className="max-w-md rounded-2xl border border-red-200 bg-red-50 p-8 text-center">
-          <AlertCircle size={48} className="mx-auto text-red-500" />
-          <h2 className="mt-4 text-xl font-bold text-red-700">
+      <div className={`${THEME_CLASSES.page} flex h-screen w-full items-center justify-center`}>
+        <div className={`${THEME_CLASSES.danger} max-w-md rounded-2xl border p-8 text-center`}>
+
+          <AlertCircle
+            size={48}
+            className="mx-auto"
+          />
+
+          <h2 className={`${THEME_CLASSES.text} mt-4 text-xl font-bold`}>
             Transaksi Tidak Ditemukan
           </h2>
-          <p className="mt-2 text-sm text-red-600">
+
+          <p className={`${THEME_CLASSES.textSecondary} mt-2 text-sm`}>
             Data transaksi dengan ID #{id} tidak ditemukan.
           </p>
+
           <button
-            onClick={() => router.push("/keuangan/laporan")}
-            className="mt-4 inline-flex items-center gap-2 rounded-lg bg-[#155DFC] px-4 py-2 text-sm font-medium text-white transition hover:bg-[#0d47c9]"
+            onClick={() =>
+              router.push("/keuangan/laporan")
+            }
+            className={`${THEME_CLASSES.primary} mt-4 inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition`}
           >
             <ArrowLeft size={16} />
             Kembali ke Laporan
           </button>
+
         </div>
       </div>
     );
   }
 
   // =============================================================
-  // RENDER: Form Edit
+  // RENDER: FORM EDIT
   // =============================================================
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-slate-50">
+    <div className={`${THEME_CLASSES.page} flex h-screen w-full overflow-hidden`}>
+
       <Sidebar
         active="laporanKeuangan"
         setActive={() => {}}
@@ -281,6 +302,7 @@ export default function EditLaporanPage() {
       />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+
         <Header
           toggleSidebar={toggleSidebar}
           notifications={[]}
@@ -291,30 +313,40 @@ export default function EditLaporanPage() {
           }}
         />
 
-        <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden bg-gradient-to-br from-slate-50 via-white to-slate-50/50">
+        <main className={`${THEME_CLASSES.page} min-h-0 flex-1 overflow-y-auto overflow-x-hidden`}>
+
           <div className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6 lg:px-8">
+
             {/* =========================================================
                 HEADER
             ========================================================= */}
-            <div className="mb-6 flex flex-col gap-4 rounded-2xl bg-gradient-to-r from-[#0F172A] to-[#1E293B] p-6 sm:p-8">
+            <div className="theme-header-panel mb-6 flex flex-col gap-4 rounded-2xl p-6 sm:p-8">
+
               <div className="flex items-center gap-4">
+
                 <button
                   onClick={handleCancel}
-                  className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white/10 text-white transition hover:bg-white/20"
+                  className="theme-header-action flex h-12 w-12 shrink-0 items-center justify-center rounded-xl transition"
                 >
                   <ArrowLeft size={24} />
                 </button>
+
                 <div>
-                  <p className="text-xs font-semibold uppercase tracking-wider text-blue-300">
+
+                  <p className="theme-text-primary text-xs font-semibold uppercase tracking-wider">
                     Edit Transaksi
                   </p>
-                  <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
+
+                  <h1 className="theme-header-title text-2xl font-bold tracking-tight sm:text-3xl">
                     Edit Detail Transaksi
                   </h1>
-                  <p className="mt-1 text-sm text-slate-300">
+
+                  <p className="theme-header-description mt-1 text-sm">
                     ID #{id} • {originalData?.deskripsi}
                   </p>
+
                 </div>
+
               </div>
             </div>
 
@@ -322,179 +354,276 @@ export default function EditLaporanPage() {
                 FORM
             ========================================================= */}
             <form onSubmit={handleSubmit} className="space-y-6">
-              {/* Notifikasi */}
+
+              {/* NOTIFIKASI ERROR */}
               {error && (
-                <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-red-700">
-                  <AlertCircle size={20} className="mt-0.5 shrink-0" />
-                  <p className="text-sm">{error}</p>
+                <div className={`${THEME_CLASSES.danger} flex items-start gap-3 rounded-xl border p-4`}>
+
+                  <AlertCircle
+                    size={20}
+                    className="mt-0.5 shrink-0"
+                  />
+
+                  <p className="text-sm">
+                    {error}
+                  </p>
+
                 </div>
               )}
 
+              {/* NOTIFIKASI SUCCESS */}
               {success && (
-                <div className="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-700">
-                  <CheckCircle size={20} className="mt-0.5 shrink-0" />
-                  <p className="text-sm">{success}</p>
+                <div className={`${THEME_CLASSES.success} flex items-start gap-3 rounded-xl border p-4`}>
+
+                  <CheckCircle
+                    size={20}
+                    className="mt-0.5 shrink-0"
+                  />
+
+                  <p className="text-sm">
+                    {success}
+                  </p>
+
                 </div>
               )}
 
-              {/* Grid Form */}
-              <div className="grid grid-cols-1 gap-5 rounded-2xl border border-slate-200/80 bg-white p-6 shadow-sm sm:p-8">
-                {/* Tanggal */}
+              {/* =========================================================
+                  GRID FORM
+              ========================================================= */}
+              <div className={`${THEME_CLASSES.card} grid grid-cols-1 gap-5 rounded-2xl border p-6 shadow-sm sm:p-8`}>
+
+                {/* TANGGAL */}
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                    Tanggal Transaksi <span className="text-red-500">*</span>
+
+                  <label className={`${THEME_CLASSES.textSecondary} mb-1.5 block text-sm font-medium`}>
+                    Tanggal Transaksi{" "}
+                    <span className="theme-text-danger">
+                      *
+                    </span>
                   </label>
+
                   <div className="relative">
+
                     <Calendar
                       size={18}
-                      className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                      className="theme-text-muted absolute left-3.5 top-1/2 -translate-y-1/2"
                     />
+
                     <input
                       type="date"
                       name="tanggal"
                       value={formData.tanggal}
                       onChange={handleChange}
-                      className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#155DFC] focus:ring-4 focus:ring-[#155DFC]/10"
+                      className={`${THEME_CLASSES.input} theme-focus-primary w-full rounded-xl py-2.5 pl-10 pr-4 text-sm outline-none transition`}
                       required
                     />
+
                   </div>
                 </div>
 
-                {/* Deskripsi */}
+                {/* DESKRIPSI */}
                 <div>
-                  <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                    Deskripsi <span className="text-red-500">*</span>
+
+                  <label className={`${THEME_CLASSES.textSecondary} mb-1.5 block text-sm font-medium`}>
+                    Deskripsi{" "}
+                    <span className="theme-text-danger">
+                      *
+                    </span>
                   </label>
+
                   <div className="relative">
+
                     <FileText
                       size={18}
-                      className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                      className="theme-text-muted absolute left-3.5 top-1/2 -translate-y-1/2"
                     />
+
                     <input
                       type="text"
                       name="deskripsi"
                       value={formData.deskripsi}
                       onChange={handleChange}
                       placeholder="Masukkan deskripsi transaksi"
-                      className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#155DFC] focus:ring-4 focus:ring-[#155DFC]/10"
+                      className={`${THEME_CLASSES.input} theme-focus-primary w-full rounded-xl py-2.5 pl-10 pr-4 text-sm outline-none transition`}
                       required
                     />
+
                   </div>
                 </div>
 
-                {/* Kategori & Jumlah (2 kolom) */}
+                {/* KATEGORI & JUMLAH */}
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                      Kategori <span className="text-red-500">*</span>
+
+                    <label className={`${THEME_CLASSES.textSecondary} mb-1.5 block text-sm font-medium`}>
+                      Kategori{" "}
+                      <span className="theme-text-danger">
+                        *
+                      </span>
                     </label>
+
                     <select
                       name="kategori"
                       value={formData.kategori}
                       onChange={handleChange}
-                      className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none transition focus:border-[#155DFC] focus:ring-4 focus:ring-[#155DFC]/10"
+                      className={`${THEME_CLASSES.input} theme-focus-primary w-full rounded-xl px-4 py-2.5 text-sm outline-none transition`}
                     >
-                      <option value="Pemasukan">📈 Pemasukan</option>
-                      <option value="Pengeluaran">📉 Pengeluaran</option>
+                      <option value="Pemasukan">
+                        📈 Pemasukan
+                      </option>
+
+                      <option value="Pengeluaran">
+                        📉 Pengeluaran
+                      </option>
                     </select>
+
                   </div>
 
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                      Jumlah (Rp) <span className="text-red-500">*</span>
+
+                    <label className={`${THEME_CLASSES.textSecondary} mb-1.5 block text-sm font-medium`}>
+                      Jumlah (Rp){" "}
+                      <span className="theme-text-danger">
+                        *
+                      </span>
                     </label>
+
                     <div className="relative">
-                      <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400">
+
+                      <span className="theme-text-muted absolute left-3.5 top-1/2 -translate-y-1/2">
                         Rp
                       </span>
+
                       <input
                         type="number"
                         name="jumlah"
                         value={formData.jumlah}
                         onChange={handleChange}
                         placeholder="0"
-                        className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#155DFC] focus:ring-4 focus:ring-[#155DFC]/10"
+                        className={`${THEME_CLASSES.input} theme-focus-primary w-full rounded-xl py-2.5 pl-10 pr-4 text-sm outline-none transition`}
                         required
                         min="1"
                       />
+
                     </div>
                   </div>
+
                 </div>
 
-                {/* Metode & Status (2 kolom) */}
+                {/* METODE & STATUS */}
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-slate-700">
+
+                    <label className={`${THEME_CLASSES.textSecondary} mb-1.5 block text-sm font-medium`}>
                       Metode Pembayaran
                     </label>
+
                     <div className="relative">
+
                       <CreditCard
                         size={18}
-                        className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                        className="theme-text-muted absolute left-3.5 top-1/2 -translate-y-1/2"
                       />
+
                       <select
                         name="metode"
                         value={formData.metode}
                         onChange={handleChange}
-                        className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-700 outline-none transition focus:border-[#155DFC] focus:ring-4 focus:ring-[#155DFC]/10"
+                        className={`${THEME_CLASSES.input} theme-focus-primary w-full rounded-xl py-2.5 pl-10 pr-4 text-sm outline-none transition`}
                       >
-                        <option value="Transfer">💳 Transfer</option>
-                        <option value="Tunai">💵 Tunai</option>
-                        <option value="Kartu Kredit">💳 Kartu Kredit</option>
-                        <option value="E-Wallet">📱 E-Wallet</option>
+                        <option value="Transfer">
+                          💳 Transfer
+                        </option>
+
+                        <option value="Tunai">
+                          💵 Tunai
+                        </option>
+
+                        <option value="Kartu Kredit">
+                          💳 Kartu Kredit
+                        </option>
+
+                        <option value="E-Wallet">
+                          📱 E-Wallet
+                        </option>
                       </select>
+
                     </div>
                   </div>
 
                   <div>
-                    <label className="mb-1.5 block text-sm font-medium text-slate-700">
+
+                    <label className={`${THEME_CLASSES.textSecondary} mb-1.5 block text-sm font-medium`}>
                       Status
                     </label>
+
                     <select
                       name="status"
                       value={formData.status}
                       onChange={handleChange}
-                      className="w-full rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none transition focus:border-[#155DFC] focus:ring-4 focus:ring-[#155DFC]/10"
+                      className={`${THEME_CLASSES.input} theme-focus-primary w-full rounded-xl px-4 py-2.5 text-sm outline-none transition`}
                     >
-                      <option value="Lunas">✅ Lunas</option>
-                      <option value="Pending">⏳ Pending</option>
-                      <option value="Batal">❌ Batal</option>
+                      <option value="Lunas">
+                        ✅ Lunas
+                      </option>
+
+                      <option value="Pending">
+                        ⏳ Pending
+                      </option>
+
+                      <option value="Batal">
+                        ❌ Batal
+                      </option>
                     </select>
+
                   </div>
+
                 </div>
 
-                {/* Informasi tambahan */}
-                <div className="rounded-xl bg-slate-50 p-4 text-sm text-slate-500">
-                  <p>
-                    <span className="font-medium text-slate-700">ID Transaksi:</span> #{id}
+                {/* INFORMASI TAMBAHAN */}
+                <div className={`${THEME_CLASSES.cardSoft} rounded-xl border p-4 text-sm`}>
+
+                  <p className={THEME_CLASSES.textSecondary}>
+                    <span className="font-medium">
+                      ID Transaksi:
+                    </span>{" "}
+                    #{id}
                   </p>
-                  <p className="mt-1 text-xs text-slate-400">
+
+                  <p className={`${THEME_CLASSES.textMuted} mt-1 text-xs`}>
                     * Field bertanda wajib diisi
                   </p>
+
                 </div>
+
               </div>
 
               {/* =========================================================
                   BUTTONS
               ========================================================= */}
               <div className="flex flex-wrap items-center justify-between gap-3">
+
                 <div className="flex gap-3">
+
                   <button
                     type="button"
                     onClick={handleCancel}
-                    className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-6 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+                    className={`${THEME_CLASSES.input} theme-input-hover inline-flex items-center gap-2 rounded-xl px-6 py-2.5 text-sm font-medium transition`}
                   >
                     <XCircle size={18} />
                     Batal
                   </button>
+
                   <button
                     type="submit"
                     disabled={saving}
-                    className="inline-flex items-center gap-2 rounded-xl bg-[#155DFC] px-6 py-2.5 text-sm font-medium text-white shadow-lg shadow-blue-500/25 transition hover:bg-[#0d47c9] disabled:opacity-60 disabled:cursor-not-allowed"
+                    className="theme-primary inline-flex items-center gap-2 rounded-xl px-6 py-2.5 text-sm font-medium shadow-lg transition disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {saving ? (
                       <>
-                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                        <div className="theme-spinner h-4 w-4 animate-spin rounded-full border-2 border-t-transparent" />
                         Menyimpan...
                       </>
                     ) : (
@@ -504,28 +633,34 @@ export default function EditLaporanPage() {
                       </>
                     )}
                   </button>
+
                 </div>
 
                 <button
                   type="button"
                   onClick={handleDelete}
-                  className="inline-flex items-center gap-2 rounded-xl border border-red-200 bg-red-50 px-6 py-2.5 text-sm font-medium text-red-600 transition hover:bg-red-100"
+                  className="theme-danger theme-hover-danger inline-flex items-center gap-2 rounded-xl border px-6 py-2.5 text-sm font-medium transition"
                 >
                   <Trash2 size={18} />
                   Hapus Transaksi
                 </button>
+
               </div>
             </form>
 
             {/* =========================================================
                 FOOTER
             ========================================================= */}
-            <footer className="mt-8 border-t border-slate-200/50 pt-6 text-center text-xs text-slate-400">
-              © 2026 SmartSchool • Edit Laporan Keuangan
+            <footer className="theme-border mt-8 border-t pt-6 text-center text-xs">
+              <span className="theme-text-muted">
+                © 2026 SmartSchool • Edit Laporan Keuangan
+              </span>
             </footer>
+
           </div>
         </main>
       </div>
     </div>
   );
 }
+

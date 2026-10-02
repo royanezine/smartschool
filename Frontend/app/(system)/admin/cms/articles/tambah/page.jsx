@@ -38,7 +38,8 @@ export default function TambahArtikelPage() {
     kategoriArtikelId: "",
   });
 
-  const [loadingCategories, setLoadingCategories] = useState(true);
+  const [loadingCategories, setLoadingCategories] =
+    useState(true);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
@@ -55,7 +56,10 @@ export default function TambahArtikelPage() {
 
       setCategories(extractList(data));
     } catch (error) {
-      console.error("Gagal mengambil kategori:", error);
+      console.error(
+        "Gagal mengambil kategori:",
+        error
+      );
 
       alert(
         error?.message ||
@@ -161,7 +165,7 @@ export default function TambahArtikelPage() {
     form.status === "dipublikasikan";
 
   return (
-    <div className="fixed inset-0 overflow-hidden bg-[#F8FAFC]">
+    <div className="theme-page fixed inset-0 overflow-hidden">
 
       {/* =====================================================
           SIDEBAR
@@ -183,7 +187,7 @@ export default function TambahArtikelPage() {
           min-w-0
           flex-col
           overflow-hidden
-          bg-[#F8FAFC]
+          theme-page
           lg:left-[260px]
         "
       >
@@ -231,9 +235,9 @@ export default function TambahArtikelPage() {
                     gap-2
                     text-sm
                     font-semibold
-                    text-slate-500
+                    theme-text-muted
                     transition
-                    hover:text-[#2563EB]
+                    hover:opacity-80
                     disabled:cursor-not-allowed
                     disabled:opacity-50
                   "
@@ -251,7 +255,7 @@ export default function TambahArtikelPage() {
                       font-bold
                       uppercase
                       tracking-[0.15em]
-                      text-slate-400
+                      theme-text-placeholder
                     "
                   >
                     CMS ADMIN
@@ -262,7 +266,7 @@ export default function TambahArtikelPage() {
                       mt-0.5
                       text-xs
                       font-semibold
-                      text-slate-600
+                      theme-text-secondary
                     "
                   >
                     Artikel / Tambah
@@ -292,23 +296,28 @@ export default function TambahArtikelPage() {
                   "
                 >
 
-                  <span className="text-blue-600">
+                  <span
+                    style={{
+                      color:
+                        "var(--color-primary)",
+                    }}
+                  >
                     CMS
                   </span>
 
-                  <span className="text-slate-300">
+                  <span className="theme-text-placeholder">
                     /
                   </span>
 
-                  <span className="text-slate-400">
+                  <span className="theme-text-muted">
                     Artikel
                   </span>
 
-                  <span className="text-slate-300">
+                  <span className="theme-text-placeholder">
                     /
                   </span>
 
-                  <span className="text-slate-400">
+                  <span className="theme-text-muted">
                     Tambah
                   </span>
 
@@ -319,7 +328,7 @@ export default function TambahArtikelPage() {
                     text-[26px]
                     font-bold
                     tracking-tight
-                    text-[#0F172A]
+                    theme-text
                     sm:text-[30px]
                   "
                 >
@@ -332,7 +341,7 @@ export default function TambahArtikelPage() {
                     max-w-2xl
                     text-sm
                     leading-6
-                    text-slate-500
+                    theme-text-secondary
                   "
                 >
                   Buat dan publikasikan konten
@@ -362,12 +371,12 @@ export default function TambahArtikelPage() {
 
                   <div
                     className="
+                      theme-card
+                      theme-border
                       min-w-0
                       overflow-hidden
                       rounded-xl
                       border
-                      border-slate-200
-                      bg-white
                       shadow-[0_1px_3px_rgba(15,23,42,0.04)]
                     "
                   >
@@ -376,8 +385,9 @@ export default function TambahArtikelPage() {
 
                     <div
                       className="
+                        theme-card-soft
+                        theme-border-soft
                         border-b
-                        border-slate-100
                         px-5
                         py-4
                         sm:px-6
@@ -388,7 +398,7 @@ export default function TambahArtikelPage() {
                         className="
                           text-sm
                           font-bold
-                          text-[#0F172A]
+                          theme-text
                         "
                       >
                         Informasi Artikel
@@ -398,7 +408,7 @@ export default function TambahArtikelPage() {
                         className="
                           mt-0.5
                           text-xs
-                          text-slate-400
+                          theme-text-muted
                         "
                       >
                         Lengkapi informasi utama
@@ -425,12 +435,18 @@ export default function TambahArtikelPage() {
                             font-bold
                             uppercase
                             tracking-wide
-                            text-slate-500
+                            theme-text-secondary
                           "
                         >
                           Judul Artikel
 
-                          <span className="ml-1 text-red-500">
+                          <span
+                            className="ml-1"
+                            style={{
+                              color:
+                                "var(--color-danger)",
+                            }}
+                          >
                             *
                           </span>
                         </label>
@@ -443,24 +459,20 @@ export default function TambahArtikelPage() {
                           placeholder="Masukkan judul artikel"
                           disabled={saving}
                           className="
+                            theme-input
                             h-12
                             w-full
                             rounded-lg
                             border
-                            border-slate-200
-                            bg-white
                             px-4
                             text-sm
                             font-medium
-                            text-slate-700
                             outline-none
                             transition
-                            placeholder:text-slate-400
-                            hover:border-slate-300
-                            focus:border-blue-500
-                            focus:ring-4
-                            focus:ring-blue-50
-                            disabled:bg-slate-50
+                            placeholder:theme-text-placeholder
+                            disabled:cursor-not-allowed
+                            disabled:opacity-60
+                            focus:border-[var(--color-primary)]
                           "
                         />
 
@@ -468,7 +480,7 @@ export default function TambahArtikelPage() {
                           className="
                             mt-2
                             text-[11px]
-                            text-slate-400
+                            theme-text-muted
                           "
                         >
                           Gunakan judul yang singkat,
@@ -499,7 +511,7 @@ export default function TambahArtikelPage() {
                               font-bold
                               uppercase
                               tracking-wide
-                              text-slate-500
+                              theme-text-secondary
                             "
                           >
                             Ringkasan
@@ -508,7 +520,7 @@ export default function TambahArtikelPage() {
                           <span
                             className="
                               text-[10px]
-                              text-slate-400
+                              theme-text-muted
                             "
                           >
                             Opsional
@@ -524,24 +536,20 @@ export default function TambahArtikelPage() {
                           placeholder="Tuliskan ringkasan singkat artikel..."
                           disabled={saving}
                           className="
+                            theme-input
                             w-full
                             resize-y
                             rounded-lg
                             border
-                            border-slate-200
-                            bg-white
                             p-4
                             text-sm
                             leading-6
-                            text-slate-700
                             outline-none
                             transition
-                            placeholder:text-slate-400
-                            hover:border-slate-300
-                            focus:border-blue-500
-                            focus:ring-4
-                            focus:ring-blue-50
-                            disabled:bg-slate-50
+                            placeholder:theme-text-placeholder
+                            disabled:cursor-not-allowed
+                            disabled:opacity-60
+                            focus:border-[var(--color-primary)]
                           "
                         />
 
@@ -549,7 +557,7 @@ export default function TambahArtikelPage() {
                           className="
                             mt-2
                             text-[11px]
-                            text-slate-400
+                            theme-text-muted
                           "
                         >
                           Ringkasan digunakan sebagai
@@ -580,12 +588,18 @@ export default function TambahArtikelPage() {
                               font-bold
                               uppercase
                               tracking-wide
-                              text-slate-500
+                              theme-text-secondary
                             "
                           >
                             Konten Artikel
 
-                            <span className="ml-1 text-red-500">
+                            <span
+                              className="ml-1"
+                              style={{
+                                color:
+                                  "var(--color-danger)",
+                              }}
+                            >
                               *
                             </span>
                           </label>
@@ -593,7 +607,7 @@ export default function TambahArtikelPage() {
                           <span
                             className="
                               text-[10px]
-                              text-slate-400
+                              theme-text-muted
                             "
                           >
                             Isi utama
@@ -609,24 +623,20 @@ export default function TambahArtikelPage() {
                           placeholder="Tulis isi artikel di sini..."
                           disabled={saving}
                           className="
+                            theme-input
                             w-full
                             resize-y
                             rounded-lg
                             border
-                            border-slate-200
-                            bg-white
                             p-4
                             text-sm
                             leading-7
-                            text-slate-700
                             outline-none
                             transition
-                            placeholder:text-slate-400
-                            hover:border-slate-300
-                            focus:border-blue-500
-                            focus:ring-4
-                            focus:ring-blue-50
-                            disabled:bg-slate-50
+                            placeholder:theme-text-placeholder
+                            disabled:cursor-not-allowed
+                            disabled:opacity-60
+                            focus:border-[var(--color-primary)]
                           "
                         />
 
@@ -643,7 +653,7 @@ export default function TambahArtikelPage() {
                           <p
                             className="
                               text-[11px]
-                              text-slate-400
+                              theme-text-muted
                             "
                           >
                             Konten dikirim sebagai
@@ -655,11 +665,10 @@ export default function TambahArtikelPage() {
                               shrink-0
                               text-[11px]
                               font-medium
-                              text-slate-400
+                              theme-text-muted
                             "
                           >
-                            {form.konten.length}
-                            {" "}
+                            {form.konten.length}{" "}
                             karakter
                           </span>
 
@@ -689,7 +698,7 @@ export default function TambahArtikelPage() {
                               font-bold
                               uppercase
                               tracking-wide
-                              text-slate-500
+                              theme-text-secondary
                             "
                           >
                             Gambar Utama
@@ -698,7 +707,7 @@ export default function TambahArtikelPage() {
                           <span
                             className="
                               text-[10px]
-                              text-slate-400
+                              theme-text-muted
                             "
                           >
                             Opsional
@@ -715,7 +724,7 @@ export default function TambahArtikelPage() {
                               left-3.5
                               top-1/2
                               -translate-y-1/2
-                              text-slate-400
+                              theme-text-muted
                             "
                           />
 
@@ -727,24 +736,20 @@ export default function TambahArtikelPage() {
                             placeholder="https://contoh.com/gambar.jpg"
                             disabled={saving}
                             className="
+                              theme-input
                               h-11
                               w-full
                               rounded-lg
                               border
-                              border-slate-200
-                              bg-white
                               pl-10
                               pr-10
                               text-sm
-                              text-slate-700
                               outline-none
                               transition
-                              placeholder:text-slate-400
-                              hover:border-slate-300
-                              focus:border-blue-500
-                              focus:ring-4
-                              focus:ring-blue-50
-                              disabled:bg-slate-50
+                              placeholder:theme-text-placeholder
+                              disabled:cursor-not-allowed
+                              disabled:opacity-60
+                              focus:border-[var(--color-primary)]
                             "
                           />
 
@@ -764,10 +769,9 @@ export default function TambahArtikelPage() {
                                 items-center
                                 justify-center
                                 rounded-md
-                                text-slate-400
+                                theme-text-muted
                                 transition
-                                hover:bg-slate-100
-                                hover:text-slate-600
+                                theme-sidebar-hover
                                 disabled:opacity-50
                               "
                               title="Hapus URL gambar"
@@ -783,7 +787,7 @@ export default function TambahArtikelPage() {
                             mt-2
                             text-[11px]
                             leading-5
-                            text-slate-400
+                            theme-text-muted
                           "
                         >
                           Masukkan URL gambar utama.
@@ -797,12 +801,12 @@ export default function TambahArtikelPage() {
                         {form.gambarUtama && (
                           <div
                             className="
+                              theme-card-soft
+                              theme-border
                               mt-4
                               overflow-hidden
                               rounded-lg
                               border
-                              border-slate-200
-                              bg-slate-50
                             "
                           >
 
@@ -866,13 +870,13 @@ export default function TambahArtikelPage() {
 
                   <div
                     className="
+                      theme-card
+                      theme-border
                       h-fit
                       min-w-0
                       overflow-hidden
                       rounded-xl
                       border
-                      border-slate-200
-                      bg-white
                       shadow-[0_1px_3px_rgba(15,23,42,0.04)]
                       xl:sticky
                       xl:top-5
@@ -883,8 +887,9 @@ export default function TambahArtikelPage() {
 
                     <div
                       className="
+                        theme-card-soft
+                        theme-border-soft
                         border-b
-                        border-slate-100
                         px-5
                         py-4
                       "
@@ -894,7 +899,7 @@ export default function TambahArtikelPage() {
                         className="
                           text-sm
                           font-bold
-                          text-[#0F172A]
+                          theme-text
                         "
                       >
                         Pengaturan
@@ -904,7 +909,7 @@ export default function TambahArtikelPage() {
                         className="
                           mt-0.5
                           text-xs
-                          text-slate-400
+                          theme-text-muted
                         "
                       >
                         Atur kategori dan status
@@ -929,7 +934,7 @@ export default function TambahArtikelPage() {
                             font-bold
                             uppercase
                             tracking-wide
-                            text-slate-500
+                            theme-text-secondary
                           "
                         >
                           Kategori
@@ -944,23 +949,18 @@ export default function TambahArtikelPage() {
                             saving
                           }
                           className="
+                            theme-input
                             h-11
                             w-full
                             rounded-lg
                             border
-                            border-slate-200
-                            bg-white
                             px-3
                             text-sm
-                            text-slate-700
                             outline-none
                             transition
-                            hover:border-slate-300
-                            focus:border-blue-500
-                            focus:ring-4
-                            focus:ring-blue-50
-                            disabled:bg-slate-50
-                            disabled:text-slate-400
+                            disabled:cursor-not-allowed
+                            disabled:opacity-60
+                            focus:border-[var(--color-primary)]
                           "
                         >
 
@@ -986,7 +986,7 @@ export default function TambahArtikelPage() {
                             className="
                               mt-2
                               text-[11px]
-                              text-slate-400
+                              theme-text-muted
                             "
                           >
                             Memuat kategori...
@@ -995,10 +995,14 @@ export default function TambahArtikelPage() {
                           0 ? (
                           <p
                             className="
+                              theme-warning
                               mt-2
+                              inline-block
+                              rounded-md
+                              px-2
+                              py-1
                               text-[11px]
                               leading-5
-                              text-amber-600
                             "
                           >
                             Belum ada kategori
@@ -1009,7 +1013,7 @@ export default function TambahArtikelPage() {
                             className="
                               mt-2
                               text-[11px]
-                              text-slate-400
+                              theme-text-muted
                             "
                           >
                             Pilih kategori yang
@@ -1022,7 +1026,7 @@ export default function TambahArtikelPage() {
 
                       {/* DIVIDER */}
 
-                      <div className="my-6 border-t border-slate-100" />
+                      <div className="theme-border-soft my-6 border-t" />
 
                       {/* =================================================
                           STATUS
@@ -1038,7 +1042,7 @@ export default function TambahArtikelPage() {
                             font-bold
                             uppercase
                             tracking-wide
-                            text-slate-500
+                            theme-text-secondary
                           "
                         >
                           Status Publikasi
@@ -1050,23 +1054,19 @@ export default function TambahArtikelPage() {
                           onChange={handleChange}
                           disabled={saving}
                           className="
+                            theme-input
                             h-11
                             w-full
                             rounded-lg
                             border
-                            border-slate-200
-                            bg-white
                             px-3
                             text-sm
                             font-medium
-                            text-slate-700
                             outline-none
                             transition
-                            hover:border-slate-300
-                            focus:border-blue-500
-                            focus:ring-4
-                            focus:ring-blue-50
-                            disabled:bg-slate-50
+                            disabled:cursor-not-allowed
+                            disabled:opacity-60
+                            focus:border-[var(--color-primary)]
                           "
                         >
 
@@ -1087,7 +1087,7 @@ export default function TambahArtikelPage() {
                             mt-2
                             text-[11px]
                             leading-5
-                            text-slate-400
+                            theme-text-muted
                           "
                         >
                           Pilih Published agar artikel
@@ -1103,11 +1103,11 @@ export default function TambahArtikelPage() {
 
                       <div
                         className="
+                          theme-card-soft
+                          theme-border
                           mt-6
                           rounded-lg
                           border
-                          border-slate-200
-                          bg-slate-50
                           p-4
                         "
                       >
@@ -1118,7 +1118,7 @@ export default function TambahArtikelPage() {
                             font-bold
                             uppercase
                             tracking-[0.12em]
-                            text-slate-400
+                            theme-text-muted
                           "
                         >
                           Status Saat Ini
@@ -1134,23 +1134,24 @@ export default function TambahArtikelPage() {
                         >
 
                           <span
-                            className={`
+                            className="
                               h-2
                               w-2
                               rounded-full
-                              ${
+                            "
+                            style={{
+                              backgroundColor:
                                 isPublished
-                                  ? "bg-emerald-500"
-                                  : "bg-amber-500"
-                              }
-                            `}
+                                  ? "var(--color-success)"
+                                  : "var(--color-warning)",
+                            }}
                           />
 
                           <span
                             className="
                               text-sm
                               font-semibold
-                              text-slate-700
+                              theme-text
                             "
                           >
                             {isPublished
@@ -1165,7 +1166,7 @@ export default function TambahArtikelPage() {
                             mt-2
                             text-[11px]
                             leading-5
-                            text-slate-400
+                            theme-text-muted
                           "
                         >
                           Nilai yang dikirim ke backend:
@@ -1173,12 +1174,18 @@ export default function TambahArtikelPage() {
 
                         <code
                           className="
+                            theme-card
+                            theme-border
                             mt-1
                             block
                             break-all
+                            rounded-md
+                            border
+                            px-2
+                            py-1
                             text-[11px]
                             font-semibold
-                            text-slate-500
+                            theme-text-secondary
                           "
                         >
                           {form.status}
@@ -1192,9 +1199,9 @@ export default function TambahArtikelPage() {
 
                       <div
                         className="
+                          theme-border-soft
                           mt-6
                           border-t
-                          border-slate-100
                           pt-5
                         "
                       >
@@ -1203,6 +1210,7 @@ export default function TambahArtikelPage() {
                           type="submit"
                           disabled={saving}
                           className="
+                            theme-primary
                             flex
                             h-11
                             w-full
@@ -1210,15 +1218,11 @@ export default function TambahArtikelPage() {
                             justify-center
                             gap-2
                             rounded-lg
-                            bg-[#2563EB]
                             px-4
                             text-sm
                             font-semibold
-                            text-white
                             shadow-sm
                             transition
-                            hover:bg-[#1D4ED8]
-                            hover:shadow
                             disabled:cursor-not-allowed
                             disabled:opacity-60
                           "
@@ -1252,19 +1256,19 @@ export default function TambahArtikelPage() {
                           }
                           disabled={saving}
                           className="
+                            theme-card
+                            theme-border
                             mt-2
                             h-11
                             w-full
                             rounded-lg
                             border
-                            border-slate-200
-                            bg-white
                             text-sm
                             font-semibold
-                            text-slate-600
+                            theme-text-secondary
                             transition
-                            hover:bg-slate-50
-                            hover:text-slate-700
+                            theme-table-hover
+                            disabled:cursor-not-allowed
                             disabled:opacity-50
                           "
                         >
@@ -1287,9 +1291,9 @@ export default function TambahArtikelPage() {
 
               <div
                 className="
+                  theme-border-soft
                   mt-6
                   border-t
-                  border-slate-200
                   pt-4
                 "
               >
@@ -1297,7 +1301,7 @@ export default function TambahArtikelPage() {
                 <p
                   className="
                     text-[11px]
-                    text-slate-400
+                    theme-text-muted
                   "
                 >
                   CMS Admin • Pengelolaan Artikel

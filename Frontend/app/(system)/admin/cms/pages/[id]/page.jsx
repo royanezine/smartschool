@@ -158,9 +158,8 @@ export default function PageDetail() {
   const getStatusStyle = () => {
     if (isPublished()) {
       return {
-        wrapper:
-          "border border-emerald-200 bg-emerald-50 text-emerald-700",
-        dot: "bg-emerald-500",
+        wrapper: "theme-success border",
+        dot: "bg-[var(--color-success)]",
       };
     }
 
@@ -168,16 +167,14 @@ export default function PageDetail() {
 
     if (value === "draft") {
       return {
-        wrapper:
-          "border border-amber-200 bg-amber-50 text-amber-700",
-        dot: "bg-amber-500",
+        wrapper: "theme-warning border",
+        dot: "bg-[var(--color-warning)]",
       };
     }
 
     return {
-      wrapper:
-        "border border-slate-200 bg-slate-50 text-slate-600",
-      dot: "bg-slate-400",
+      wrapper: "theme-card-soft theme-text-secondary border",
+      dot: "bg-[var(--color-text-muted)]",
     };
   };
 
@@ -291,7 +288,7 @@ export default function PageDetail() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen w-full bg-[#f6f8fc]">
+      <div className="theme-page flex min-h-screen w-full">
         <Sidebar
           active={active}
           setActive={setActive}
@@ -311,15 +308,15 @@ export default function PageDetail() {
 
           <main className="flex flex-1 items-center justify-center p-6">
             <div className="flex flex-col items-center text-center">
-              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-50 ring-1 ring-blue-100">
-                <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+              <div className="theme-info mb-4 flex h-14 w-14 items-center justify-center rounded-2xl">
+                <Loader2 className="h-6 w-6 animate-spin" />
               </div>
 
-              <h2 className="text-sm font-bold text-slate-800">
+              <h2 className="theme-text text-sm font-bold">
                 Memuat detail halaman...
               </h2>
 
-              <p className="mt-1 text-xs text-slate-400">
+              <p className="theme-text-muted mt-1 text-xs">
                 Mengambil data dari CMS backend.
               </p>
             </div>
@@ -335,7 +332,7 @@ export default function PageDetail() {
 
   if (!page) {
     return (
-      <div className="flex min-h-screen w-full bg-[#f6f8fc]">
+      <div className="theme-page flex min-h-screen w-full">
         <Sidebar
           active={active}
           setActive={setActive}
@@ -354,16 +351,16 @@ export default function PageDetail() {
           />
 
           <main className="flex flex-1 items-center justify-center p-6">
-            <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-red-50">
-                <AlertCircle className="h-6 w-6 text-red-500" />
+            <div className="theme-card theme-border w-full max-w-md rounded-3xl border p-8 text-center shadow-sm">
+              <div className="theme-danger mx-auto flex h-14 w-14 items-center justify-center rounded-2xl">
+                <AlertCircle className="h-6 w-6" />
               </div>
 
-              <h2 className="mt-5 text-lg font-bold text-slate-900">
+              <h2 className="theme-text mt-5 text-lg font-bold">
                 Halaman tidak ditemukan
               </h2>
 
-              <p className="mt-2 text-sm leading-6 text-slate-500">
+              <p className="theme-text-secondary mt-2 text-sm leading-6">
                 {error ||
                   "Data halaman tidak tersedia atau sudah dihapus."}
               </p>
@@ -372,7 +369,7 @@ export default function PageDetail() {
                 <button
                   type="button"
                   onClick={() => fetchPage(true)}
-                  className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+                  className="theme-card theme-border theme-text-secondary inline-flex items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition theme-sidebar-hover"
                 >
                   <RefreshCw className="h-4 w-4" />
                   Coba Lagi
@@ -380,7 +377,7 @@ export default function PageDetail() {
 
                 <Link
                   href="/cmsAdmin/pages"
-                  className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
+                  className="theme-primary inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition"
                 >
                   <ArrowLeft className="h-4 w-4" />
                   Kembali
@@ -400,7 +397,7 @@ export default function PageDetail() {
   const statusStyle = getStatusStyle();
 
   return (
-    <div className="flex min-h-screen w-full bg-[#f6f8fc]">
+    <div className="theme-page flex min-h-screen w-full">
       {/* ========================================================
           SIDEBAR
       ======================================================== */}
@@ -445,7 +442,7 @@ export default function PageDetail() {
               <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <Link
                   href="/cmsAdmin/pages"
-                  className="inline-flex w-fit items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-blue-600"
+                  className="theme-text-muted inline-flex w-fit items-center gap-2 text-sm font-semibold transition hover:text-[var(--color-primary)]"
                 >
                   <ArrowLeft className="h-4 w-4" />
                   Kembali ke Halaman
@@ -455,13 +452,11 @@ export default function PageDetail() {
                   type="button"
                   onClick={() => fetchPage(true)}
                   disabled={refreshing}
-                  className="inline-flex w-fit items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2 text-xs font-semibold text-slate-600 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  className="theme-card theme-border theme-text-secondary inline-flex w-fit items-center gap-2 rounded-xl border px-3.5 py-2 text-xs font-semibold shadow-sm transition theme-sidebar-hover disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   <RefreshCw
                     className={`h-3.5 w-3.5 ${
-                      refreshing
-                        ? "animate-spin"
-                        : ""
+                      refreshing ? "animate-spin" : ""
                     }`}
                   />
 
@@ -474,17 +469,17 @@ export default function PageDetail() {
               ================================================== */}
 
               {error && (
-                <div className="mb-5 flex items-start gap-3 rounded-2xl border border-red-100 bg-red-50 p-4">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-red-100">
-                    <AlertCircle className="h-4 w-4 text-red-600" />
+                <div className="theme-danger mb-5 flex items-start gap-3 rounded-2xl border p-4">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-danger)_15%,transparent)]">
+                    <AlertCircle className="h-4 w-4" />
                   </div>
 
                   <div className="min-w-0 flex-1">
-                    <h3 className="text-sm font-bold text-red-800">
+                    <h3 className="text-sm font-bold">
                       Terjadi kesalahan
                     </h3>
 
-                    <p className="mt-1 text-xs leading-5 text-red-600">
+                    <p className="mt-1 text-xs leading-5">
                       {error}
                     </p>
                   </div>
@@ -492,7 +487,7 @@ export default function PageDetail() {
                   <button
                     type="button"
                     onClick={() => setError("")}
-                    className="text-red-400 transition hover:text-red-600"
+                    className="transition hover:opacity-70"
                   >
                     <X className="h-4 w-4" />
                   </button>
@@ -503,32 +498,36 @@ export default function PageDetail() {
                   PAGE HEADER
               ================================================== */}
 
-              <section className="mb-6 overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
-                <div className="relative overflow-hidden bg-gradient-to-br from-[#0f172a] via-[#172554] to-[#081b4f] px-5 py-7 sm:px-7 sm:py-8 lg:px-9">
-                  <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-blue-400/10 blur-3xl" />
+              <section className="theme-card theme-border mb-6 overflow-hidden rounded-3xl border shadow-sm">
+                <div className="relative overflow-hidden bg-gradient-to-br from-[var(--color-sidebar)] via-[var(--color-sidebar-active)] to-[var(--color-card-soft)] px-5 py-7 sm:px-7 sm:py-8 lg:px-9">
+                  <div
+                    className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full blur-3xl"
+                    style={{
+                      background:
+                        "color-mix(in srgb, var(--color-primary) 10%, transparent)",
+                    }}
+                  />
 
-                  <div className="pointer-events-none absolute -bottom-32 left-1/3 h-72 w-72 rounded-full bg-cyan-400/10 blur-3xl" />
+                  <div
+                    className="pointer-events-none absolute -bottom-32 left-1/3 h-72 w-72 rounded-full blur-3xl"
+                    style={{
+                      background:
+                        "color-mix(in srgb, var(--color-info) 10%, transparent)",
+                    }}
+                  />
 
                   <div className="relative">
                     <div className="mb-4 flex flex-wrap items-center gap-2">
-                      <span className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-[11px] font-semibold text-blue-100">
+                      <span className="theme-primary-outline inline-flex items-center gap-2 rounded-full border bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] px-3 py-1.5 text-[11px] font-semibold">
                         <LayoutTemplate className="h-3.5 w-3.5" />
                         Halaman Statis
                       </span>
 
                       <span
-                        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-semibold ${
-                          isPublished()
-                            ? "border-emerald-400/20 bg-emerald-400/10 text-emerald-200"
-                            : "border-amber-400/20 bg-amber-400/10 text-amber-200"
-                        }`}
+                        className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-[11px] font-semibold ${statusStyle.wrapper}`}
                       >
                         <span
-                          className={`h-1.5 w-1.5 rounded-full ${
-                            isPublished()
-                              ? "bg-emerald-400"
-                              : "bg-amber-400"
-                          }`}
+                          className={`h-1.5 w-1.5 rounded-full ${statusStyle.dot}`}
                         />
 
                         {getStatusLabel()}
@@ -537,18 +536,18 @@ export default function PageDetail() {
 
                     <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
                       <div className="min-w-0">
-                        <h1 className="break-words text-2xl font-bold tracking-tight text-white sm:text-3xl lg:text-4xl">
+                        <h1 className="theme-text break-words text-2xl font-bold tracking-tight sm:text-3xl lg:text-4xl">
                           {getTitle()}
                         </h1>
 
-                        <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-300">
+                        <div className="theme-text-secondary mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs">
                           <span className="inline-flex items-center gap-1.5">
                             <Globe2 className="h-3.5 w-3.5" />
 
                             /{getSlug()}
                           </span>
 
-                          <span className="hidden h-1 w-1 rounded-full bg-slate-500 sm:block" />
+                          <span className="theme-text-muted hidden h-1 w-1 rounded-full sm:block" />
 
                           <span className="inline-flex items-center gap-1.5">
                             <FileText className="h-3.5 w-3.5" />
@@ -562,7 +561,7 @@ export default function PageDetail() {
                         <Link
                           href={getWebsiteUrl()}
                           target="_blank"
-                          className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/15 bg-white/10 px-4 py-2.5 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/15"
+                          className="theme-card theme-border theme-text-secondary inline-flex items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold shadow-sm transition theme-sidebar-hover"
                         >
                           <ExternalLink className="h-4 w-4" />
                           Buka Website
@@ -570,7 +569,7 @@ export default function PageDetail() {
 
                         <Link
                           href={`/cmsAdmin/pages/${page.id}/edit`}
-                          className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-950/20 transition hover:bg-blue-500"
+                          className="theme-primary inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold shadow-lg transition"
                         >
                           <Pencil className="h-4 w-4" />
                           Edit Halaman
@@ -584,50 +583,50 @@ export default function PageDetail() {
                     META
                 ================================================== */}
 
-                <div className="grid grid-cols-1 divide-y divide-slate-100 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+                <div className="theme-card grid grid-cols-1 divide-y divide-[var(--color-border-soft)] sm:grid-cols-3 sm:divide-x sm:divide-y-0">
                   <div className="flex items-center gap-3 px-5 py-4 sm:px-6">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                    <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-xl">
                       <CalendarDays className="h-4 w-4" />
                     </div>
 
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                      <p className="theme-text-muted text-[10px] font-bold uppercase tracking-wider">
                         Dibuat
                       </p>
 
-                      <p className="mt-0.5 text-xs font-semibold text-slate-700">
+                      <p className="theme-text-secondary mt-0.5 text-xs font-semibold">
                         {formatDate(page?.dibuatPada)}
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-3 px-5 py-4 sm:px-6">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
+                    <div className="theme-card-soft theme-text-secondary flex h-9 w-9 shrink-0 items-center justify-center rounded-xl">
                       <Clock3 className="h-4 w-4" />
                     </div>
 
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                      <p className="theme-text-muted text-[10px] font-bold uppercase tracking-wider">
                         Diperbarui
                       </p>
 
-                      <p className="mt-0.5 text-xs font-semibold text-slate-700">
+                      <p className="theme-text-secondary mt-0.5 text-xs font-semibold">
                         {formatDate(page?.diubahPada)}
                       </p>
                     </div>
                   </div>
 
                   <div className="flex items-center gap-3 px-5 py-4 sm:px-6">
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                    <div className="theme-success flex h-9 w-9 shrink-0 items-center justify-center rounded-xl">
                       <CheckCircle2 className="h-4 w-4" />
                     </div>
 
                     <div>
-                      <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                      <p className="theme-text-muted text-[10px] font-bold uppercase tracking-wider">
                         Status
                       </p>
 
-                      <p className="mt-0.5 text-xs font-semibold text-slate-700">
+                      <p className="theme-text-secondary mt-0.5 text-xs font-semibold">
                         {getStatusLabel()}
                       </p>
                     </div>
@@ -645,25 +644,25 @@ export default function PageDetail() {
                     CONTENT
                 ================================================== */}
 
-                <section className="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                  <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4 sm:px-6">
+                <section className="theme-card theme-border min-w-0 overflow-hidden rounded-2xl border shadow-sm">
+                  <div className="theme-border flex items-center justify-between border-b px-5 py-4 sm:px-6">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                      <div className="theme-info flex h-9 w-9 items-center justify-center rounded-xl">
                         <FileText className="h-4 w-4" />
                       </div>
 
                       <div>
-                        <h2 className="text-sm font-bold text-slate-800">
+                        <h2 className="theme-text text-sm font-bold">
                           Konten Halaman
                         </h2>
 
-                        <p className="text-[11px] text-slate-400">
+                        <p className="theme-text-muted text-[11px]">
                           Isi halaman yang tersimpan di CMS
                         </p>
                       </div>
                     </div>
 
-                    <span className="hidden text-[10px] font-semibold uppercase tracking-wider text-slate-400 sm:block">
+                    <span className="theme-text-muted hidden text-[10px] font-semibold uppercase tracking-wider sm:block">
                       CMS Content
                     </span>
                   </div>
@@ -673,10 +672,10 @@ export default function PageDetail() {
                       <article
                         className="
                           cms-content
+                          theme-text-secondary
                           max-w-none
                           text-[15px]
                           leading-8
-                          text-slate-700
 
                           [&_p]:mb-5
 
@@ -685,26 +684,26 @@ export default function PageDetail() {
                           [&_h1]:text-3xl
                           [&_h1]:font-bold
                           [&_h1]:leading-tight
-                          [&_h1]:text-slate-900
+                          [&_h1]:text-[var(--color-text)]
 
                           [&_h2]:mb-4
                           [&_h2]:mt-8
                           [&_h2]:text-2xl
                           [&_h2]:font-bold
                           [&_h2]:leading-tight
-                          [&_h2]:text-slate-900
+                          [&_h2]:text-[var(--color-text)]
 
                           [&_h3]:mb-3
                           [&_h3]:mt-6
                           [&_h3]:text-xl
                           [&_h3]:font-bold
-                          [&_h3]:text-slate-900
+                          [&_h3]:text-[var(--color-text)]
 
                           [&_h4]:mb-2
                           [&_h4]:mt-5
                           [&_h4]:text-lg
                           [&_h4]:font-bold
-                          [&_h4]:text-slate-900
+                          [&_h4]:text-[var(--color-text)]
 
                           [&_ul]:mb-5
                           [&_ul]:list-disc
@@ -719,43 +718,43 @@ export default function PageDetail() {
                           [&_li]:pl-1
 
                           [&_a]:font-semibold
-                          [&_a]:text-blue-600
+                          [&_a]:text-[var(--color-primary)]
                           [&_a]:underline
                           [&_a]:underline-offset-2
-                          [&_a]:hover:text-blue-700
+                          [&_a]:hover:text-[var(--color-primary-hover)]
 
                           [&_strong]:font-bold
-                          [&_strong]:text-slate-900
+                          [&_strong]:text-[var(--color-text)]
 
                           [&_blockquote]:my-6
                           [&_blockquote]:border-l-4
-                          [&_blockquote]:border-blue-500
-                          [&_blockquote]:bg-blue-50
+                          [&_blockquote]:border-[var(--color-primary)]
+                          [&_blockquote]:bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]
                           [&_blockquote]:px-5
                           [&_blockquote]:py-4
-                          [&_blockquote]:text-slate-600
+                          [&_blockquote]:text-[var(--color-text-secondary)]
 
                           [&_img]:my-6
                           [&_img]:h-auto
                           [&_img]:max-w-full
                           [&_img]:rounded-2xl
                           [&_img]:border
-                          [&_img]:border-slate-200
+                          [&_img]:border-[var(--color-border)]
 
                           [&_table]:my-6
                           [&_table]:w-full
                           [&_table]:border-collapse
 
                           [&_th]:border
-                          [&_th]:border-slate-200
-                          [&_th]:bg-slate-50
+                          [&_th]:border-[var(--color-border)]
+                          [&_th]:bg-[var(--color-table-header)]
                           [&_th]:px-4
                           [&_th]:py-3
                           [&_th]:text-left
                           [&_th]:font-semibold
 
                           [&_td]:border
-                          [&_td]:border-slate-200
+                          [&_td]:border-[var(--color-border)]
                           [&_td]:px-4
                           [&_td]:py-3
                         "
@@ -765,15 +764,15 @@ export default function PageDetail() {
                       />
                     ) : (
                       <div className="flex min-h-[300px] flex-col items-center justify-center text-center">
-                        <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100">
-                          <FileText className="h-6 w-6 text-slate-400" />
+                        <div className="theme-card-soft flex h-14 w-14 items-center justify-center rounded-2xl">
+                          <FileText className="theme-text-muted h-6 w-6" />
                         </div>
 
-                        <h3 className="mt-4 text-sm font-bold text-slate-700">
+                        <h3 className="theme-text-secondary mt-4 text-sm font-bold">
                           Belum ada konten
                         </h3>
 
-                        <p className="mt-1 max-w-sm text-xs leading-5 text-slate-400">
+                        <p className="theme-text-muted mt-1 max-w-sm text-xs leading-5">
                           Halaman ini belum memiliki isi.
                           Silakan edit halaman untuk menambahkan
                           konten.
@@ -781,7 +780,7 @@ export default function PageDetail() {
 
                         <Link
                           href={`/cmsAdmin/pages/${page.id}/edit`}
-                          className="mt-5 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-blue-700"
+                          className="theme-primary mt-5 inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition"
                         >
                           <Pencil className="h-3.5 w-3.5" />
                           Tambahkan Konten
@@ -799,18 +798,18 @@ export default function PageDetail() {
 
                   {/* STATUS CARD */}
 
-                  <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <section className="theme-card theme-border rounded-2xl border p-5 shadow-sm">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                      <div className="theme-info flex h-9 w-9 items-center justify-center rounded-xl">
                         <Eye className="h-4 w-4" />
                       </div>
 
                       <div>
-                        <h3 className="text-sm font-bold text-slate-800">
+                        <h3 className="theme-text text-sm font-bold">
                           Status Publikasi
                         </h3>
 
-                        <p className="text-[11px] text-slate-400">
+                        <p className="theme-text-muted text-[11px]">
                           Status halaman saat ini
                         </p>
                       </div>
@@ -828,8 +827,8 @@ export default function PageDetail() {
                       </span>
                     </div>
 
-                    <div className="mt-4 border-t border-slate-100 pt-4">
-                      <p className="text-xs leading-5 text-slate-500">
+                    <div className="theme-border mt-4 border-t pt-4">
+                      <p className="theme-text-secondary text-xs leading-5">
                         {isPublished()
                           ? "Halaman ini dapat ditampilkan pada website sekolah."
                           : "Halaman masih dalam status draft dan belum dipublikasikan."}
@@ -839,25 +838,25 @@ export default function PageDetail() {
 
                   {/* URL CARD */}
 
-                  <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <section className="theme-card theme-border rounded-2xl border p-5 shadow-sm">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-sky-50 text-sky-600">
+                      <div className="theme-info flex h-9 w-9 items-center justify-center rounded-xl">
                         <Globe2 className="h-4 w-4" />
                       </div>
 
                       <div>
-                        <h3 className="text-sm font-bold text-slate-800">
+                        <h3 className="theme-text text-sm font-bold">
                           URL Halaman
                         </h3>
 
-                        <p className="text-[11px] text-slate-400">
+                        <p className="theme-text-muted text-[11px]">
                           Slug dari backend CMS
                         </p>
                       </div>
                     </div>
 
-                    <div className="mt-4 rounded-xl bg-slate-50 p-3">
-                      <p className="break-all text-xs leading-5 text-slate-600">
+                    <div className="theme-card-soft mt-4 rounded-xl p-3">
+                      <p className="theme-text-secondary break-all text-xs leading-5">
                         /{getSlug()}
                       </p>
                     </div>
@@ -865,7 +864,7 @@ export default function PageDetail() {
                     <Link
                       href={getWebsiteUrl()}
                       target="_blank"
-                      className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-600 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700"
+                      className="theme-card theme-border theme-text-secondary mt-3 inline-flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-xs font-semibold transition theme-sidebar-hover"
                     >
                       <ExternalLink className="h-3.5 w-3.5" />
                       Lihat di Website
@@ -874,56 +873,51 @@ export default function PageDetail() {
 
                   {/* INFORMATION CARD */}
 
-                  <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <section className="theme-card theme-border rounded-2xl border p-5 shadow-sm">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
+                      <div className="theme-card-soft theme-text-secondary flex h-9 w-9 items-center justify-center rounded-xl">
                         <CalendarDays className="h-4 w-4" />
                       </div>
 
                       <div>
-                        <h3 className="text-sm font-bold text-slate-800">
+                        <h3 className="theme-text text-sm font-bold">
                           Informasi
                         </h3>
 
-                        <p className="text-[11px] text-slate-400">
+                        <p className="theme-text-muted text-[11px]">
                           Metadata halaman
                         </p>
                       </div>
                     </div>
 
                     <div className="mt-5 space-y-4">
-
                       <div>
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        <p className="theme-text-muted text-[10px] font-bold uppercase tracking-wider">
                           ID
                         </p>
 
-                        <p className="mt-1 break-all text-xs font-medium text-slate-600">
+                        <p className="theme-text-secondary mt-1 break-all text-xs font-medium">
                           {page?.id || "-"}
                         </p>
                       </div>
 
                       <div>
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        <p className="theme-text-muted text-[10px] font-bold uppercase tracking-wider">
                           Dibuat Pada
                         </p>
 
-                        <p className="mt-1 text-xs font-medium text-slate-600">
-                          {formatDateTime(
-                            page?.dibuatPada
-                          )}
+                        <p className="theme-text-secondary mt-1 text-xs font-medium">
+                          {formatDateTime(page?.dibuatPada)}
                         </p>
                       </div>
 
                       <div>
-                        <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        <p className="theme-text-muted text-[10px] font-bold uppercase tracking-wider">
                           Diubah Pada
                         </p>
 
-                        <p className="mt-1 text-xs font-medium text-slate-600">
-                          {formatDateTime(
-                            page?.diubahPada
-                          )}
+                        <p className="theme-text-secondary mt-1 text-xs font-medium">
+                          {formatDateTime(page?.diubahPada)}
                         </p>
                       </div>
                     </div>
@@ -931,34 +925,32 @@ export default function PageDetail() {
 
                   {/* ACTION CARD */}
 
-                  <section className="rounded-2xl border border-red-100 bg-white p-5 shadow-sm">
+                  <section className="theme-card theme-border rounded-2xl border p-5 shadow-sm">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-red-50 text-red-600">
+                      <div className="theme-danger flex h-9 w-9 items-center justify-center rounded-xl">
                         <Trash2 className="h-4 w-4" />
                       </div>
 
                       <div>
-                        <h3 className="text-sm font-bold text-slate-800">
+                        <h3 className="theme-text text-sm font-bold">
                           Zona Tindakan
                         </h3>
 
-                        <p className="text-[11px] text-slate-400">
+                        <p className="theme-text-muted text-[11px]">
                           Tindakan pada halaman
                         </p>
                       </div>
                     </div>
 
-                    <p className="mt-4 text-xs leading-5 text-slate-500">
+                    <p className="theme-text-secondary mt-4 text-xs leading-5">
                       Hapus halaman jika sudah tidak diperlukan
                       lagi dari CMS.
                     </p>
 
                     <button
                       type="button"
-                      onClick={() =>
-                        setDeleteTarget(true)
-                      }
-                      className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-xs font-semibold text-red-600 transition hover:bg-red-100"
+                      onClick={() => setDeleteTarget(true)}
+                      className="theme-danger mt-4 inline-flex w-full items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-xs font-semibold transition hover:opacity-80"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
                       Hapus Halaman
@@ -972,7 +964,7 @@ export default function PageDetail() {
               ================================================== */}
 
               <footer className="py-8 text-center">
-                <p className="text-[11px] text-slate-400">
+                <p className="theme-text-muted text-[11px]">
                   © 2026 SmartSchool • CMS Management
                 </p>
               </footer>
@@ -987,41 +979,39 @@ export default function PageDetail() {
 
       {deleteTarget && (
         <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-md overflow-hidden rounded-3xl bg-white shadow-2xl">
+          <div className="theme-card theme-border w-full max-w-md overflow-hidden rounded-3xl border shadow-2xl">
 
             <div className="p-6">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-red-50">
-                <Trash2 className="h-5 w-5 text-red-600" />
+              <div className="theme-danger flex h-12 w-12 items-center justify-center rounded-2xl">
+                <Trash2 className="h-5 w-5" />
               </div>
 
-              <h3 className="mt-4 text-lg font-bold text-slate-900">
+              <h3 className="theme-text mt-4 text-lg font-bold">
                 Hapus halaman?
               </h3>
 
-              <p className="mt-2 text-sm leading-6 text-slate-500">
+              <p className="theme-text-secondary mt-2 text-sm leading-6">
                 Kamu akan menghapus halaman{" "}
-                <span className="font-semibold text-slate-700">
+                <span className="theme-text font-semibold">
                   "{getTitle()}"
                 </span>
                 .
               </p>
 
-              <div className="mt-4 rounded-xl border border-amber-100 bg-amber-50 p-3">
-                <p className="text-xs leading-5 text-amber-700">
+              <div className="theme-warning mt-4 rounded-xl border p-3">
+                <p className="text-xs leading-5">
                   Pastikan halaman ini memang sudah tidak
                   diperlukan sebelum melanjutkan.
                 </p>
               </div>
             </div>
 
-            <div className="flex flex-col gap-2 border-t border-slate-100 bg-slate-50/50 p-4 sm:flex-row sm:justify-end">
+            <div className="theme-card-soft theme-border flex flex-col gap-2 border-t p-4 sm:flex-row sm:justify-end">
               <button
                 type="button"
                 disabled={deleting}
-                onClick={() =>
-                  setDeleteTarget(false)
-                }
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+                onClick={() => setDeleteTarget(false)}
+                className="theme-card theme-border theme-text-secondary rounded-xl border px-4 py-2.5 text-sm font-medium transition theme-sidebar-hover disabled:opacity-50"
               >
                 Batal
               </button>
@@ -1030,7 +1020,7 @@ export default function PageDetail() {
                 type="button"
                 disabled={deleting}
                 onClick={handleDelete}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-red-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-60"
+                className="inline-flex items-center justify-center gap-2 rounded-xl bg-[var(--color-danger)] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {deleting ? (
                   <>

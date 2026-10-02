@@ -2,9 +2,30 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-
 import Header from "../../../../../../components/Header";
 import Sidebar from "../../../../../../components/Sidebar";
+
+// =========================================================
+// THEME HELPERS
+// =========================================================
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]";
+
+const themePrimaryHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
+
+const themeTextHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_6px_24px_color-mix(in_srgb,var(--color-text)_6%,transparent)]";
+
+const themePrimaryShadow =
+  "shadow-[0_10px_25px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]";
 
 export default function EditFaceIdPage() {
   const params = useParams();
@@ -17,14 +38,11 @@ export default function EditFaceIdPage() {
   const streamRef = useRef(null);
 
   const [user, setUser] = useState(null);
-
   const [loading, setLoading] = useState(true);
   const [cameraLoading, setCameraLoading] = useState(false);
   const [saving, setSaving] = useState(false);
-
   const [cameraActive, setCameraActive] = useState(false);
   const [capturedImage, setCapturedImage] = useState(null);
-
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -36,9 +54,6 @@ export default function EditFaceIdPage() {
     process.env.NEXT_PUBLIC_API_URL ||
     "http://localhost:5000"
   ).replace(/\/+$/, "");
-
-  // app.ts:
-  // app.use("/api/users", userRoutes);
 
   const API_PREFIX = `${API_URL}/api`;
 
@@ -79,63 +94,36 @@ export default function EditFaceIdPage() {
       const token = getToken();
 
       if (!token) {
-        throw new Error(
-          "Token login tidak ditemukan."
-        );
+        throw new Error("Token login tidak ditemukan.");
       }
 
-      const requestUrl =
-        `${API_PREFIX}/users/${id}`;
+      const requestUrl = `${API_PREFIX}/users/${id}`;
 
-      console.log(
-        "GET USER:",
-        requestUrl
-      );
+      console.log("GET USER:", requestUrl);
 
-      const response = await fetch(
-        requestUrl,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        }
-      );
+      const response = await fetch(requestUrl, {
+        method: "GET",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
 
       const contentType =
-        response.headers.get(
-          "content-type"
-        ) || "";
+        response.headers.get("content-type") || "";
 
-      const responseText =
-        await response.text();
+      const responseText = await response.text();
 
-      console.log(
-        "USER STATUS:",
-        response.status
-      );
-
-      console.log(
-        "USER RESPONSE:",
-        responseText
-      );
+      console.log("USER STATUS:", response.status);
+      console.log("USER RESPONSE:", responseText);
 
       let result;
 
-      if (
-        contentType.includes(
-          "application/json"
-        )
-      ) {
+      if (contentType.includes("application/json")) {
         try {
-          result = JSON.parse(
-            responseText
-          );
+          result = JSON.parse(responseText);
         } catch {
-          throw new Error(
-            "Response JSON tidak valid."
-          );
+          throw new Error("Response JSON tidak valid.");
         }
       } else {
         throw new Error(
@@ -159,10 +147,7 @@ export default function EditFaceIdPage() {
 
       setUser(userData);
     } catch (err) {
-      console.error(
-        "FETCH USER ERROR:",
-        err
-      );
+      console.error("FETCH USER ERROR:", err);
 
       setError(
         err?.message ||
@@ -183,9 +168,7 @@ export default function EditFaceIdPage() {
       setSuccess("");
       setCameraLoading(true);
 
-      console.log(
-        "Memulai kamera..."
-      );
+      console.log("Memulai kamera...");
 
       if (
         !navigator.mediaDevices ||
@@ -200,19 +183,10 @@ export default function EditFaceIdPage() {
       if (streamRef.current) {
         streamRef.current
           .getTracks()
-          .forEach((track) =>
-            track.stop()
-          );
+          .forEach((track) => track.stop());
 
         streamRef.current = null;
       }
-
-      /*
-       * Pastikan video sudah tersedia.
-       *
-       * Karena video sekarang selalu dirender,
-       * ref seharusnya sudah tersedia.
-       */
 
       if (!videoRef.current) {
         throw new Error(
@@ -221,20 +195,18 @@ export default function EditFaceIdPage() {
       }
 
       const stream =
-        await navigator.mediaDevices.getUserMedia(
-          {
-            video: {
-              facingMode: "user",
-              width: {
-                ideal: 1280,
-              },
-              height: {
-                ideal: 720,
-              },
+        await navigator.mediaDevices.getUserMedia({
+          video: {
+            facingMode: "user",
+            width: {
+              ideal: 1280,
             },
-            audio: false,
-          }
-        );
+            height: {
+              ideal: 720,
+            },
+          },
+          audio: false,
+        });
 
       console.log(
         "Stream kamera berhasil:",
@@ -243,9 +215,7 @@ export default function EditFaceIdPage() {
 
       streamRef.current = stream;
 
-      videoRef.current.srcObject =
-        stream;
-
+      videoRef.current.srcObject = stream;
       videoRef.current.muted = true;
       videoRef.current.playsInline = true;
 
@@ -257,35 +227,24 @@ export default function EditFaceIdPage() {
 
       setCameraActive(true);
     } catch (err) {
-      console.error(
-        "CAMERA ERROR:",
-        err
-      );
+      console.error("CAMERA ERROR:", err);
 
-      if (
-        err?.name ===
-        "NotAllowedError"
-      ) {
+      if (err?.name === "NotAllowedError") {
         setError(
           "Akses kamera ditolak. Izinkan kamera melalui pengaturan browser."
         );
-      } else if (
-        err?.name ===
-        "NotFoundError"
-      ) {
+      } else if (err?.name === "NotFoundError") {
         setError(
           "Kamera tidak ditemukan di perangkat."
         );
       } else if (
-        err?.name ===
-        "NotReadableError"
+        err?.name === "NotReadableError"
       ) {
         setError(
           "Kamera sedang digunakan aplikasi lain. Tutup aplikasi yang menggunakan kamera."
         );
       } else if (
-        err?.name ===
-        "OverconstrainedError"
+        err?.name === "OverconstrainedError"
       ) {
         setError(
           "Pengaturan kamera tidak didukung perangkat."
@@ -317,8 +276,7 @@ export default function EditFaceIdPage() {
     }
 
     if (videoRef.current) {
-      videoRef.current.srcObject =
-        null;
+      videoRef.current.srcObject = null;
     }
 
     setCameraActive(false);
@@ -333,35 +291,24 @@ export default function EditFaceIdPage() {
     const canvas = canvasRef.current;
 
     if (!video || !canvas) {
-      setError(
-        "Kamera belum siap."
-      );
+      setError("Kamera belum siap.");
       return;
     }
 
-    if (
-      !video.videoWidth ||
-      !video.videoHeight
-    ) {
+    if (!video.videoWidth || !video.videoHeight) {
       setError(
         "Video kamera belum siap. Tunggu sebentar lalu coba lagi."
       );
       return;
     }
 
-    canvas.width =
-      video.videoWidth;
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
 
-    canvas.height =
-      video.videoHeight;
-
-    const context =
-      canvas.getContext("2d");
+    const context = canvas.getContext("2d");
 
     if (!context) {
-      setError(
-        "Gagal mengambil foto."
-      );
+      setError("Gagal mengambil foto.");
       return;
     }
 
@@ -373,21 +320,16 @@ export default function EditFaceIdPage() {
       canvas.height
     );
 
-    const imageData =
-      canvas.toDataURL(
-        "image/jpeg",
-        0.9
-      );
-
-    setCapturedImage(
-      imageData
+    const imageData = canvas.toDataURL(
+      "image/jpeg",
+      0.9
     );
+
+    setCapturedImage(imageData);
 
     stopCamera();
 
-    setSuccess(
-      "Foto berhasil diambil."
-    );
+    setSuccess("Foto berhasil diambil.");
   };
 
   // =========================================================
@@ -398,7 +340,6 @@ export default function EditFaceIdPage() {
     setCapturedImage(null);
     setError("");
     setSuccess("");
-
     startCamera();
   };
 
@@ -427,14 +368,9 @@ export default function EditFaceIdPage() {
         );
       }
 
-      /*
-       * Base64 → Blob
-       */
-
+      // Base64 → Blob
       const blobResponse =
-        await fetch(
-          capturedImage
-        );
+        await fetch(capturedImage);
 
       const blob =
         await blobResponse.blob();
@@ -447,18 +383,11 @@ export default function EditFaceIdPage() {
         }
       );
 
-      const formData =
-        new FormData();
+      const formData = new FormData();
 
-      /*
-       * Backend:
-       * uploadFaceId.single("foto")
-       */
-
-      formData.append(
-        "foto",
-        file
-      );
+      // Backend:
+      // uploadFaceId.single("foto")
+      formData.append("foto", file);
 
       const requestUrl =
         `${API_PREFIX}/users/${id}/face-id`;
@@ -468,17 +397,16 @@ export default function EditFaceIdPage() {
         requestUrl
       );
 
-      const response =
-        await fetch(
-          requestUrl,
-          {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-            body: formData,
-          }
-        );
+      const response = await fetch(
+        requestUrl,
+        {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          body: formData,
+        }
+      );
 
       const contentType =
         response.headers.get(
@@ -562,95 +490,92 @@ export default function EditFaceIdPage() {
   // DELETE FACE ID
   // =========================================================
 
-  const handleDeleteFaceId =
-    async () => {
-      const confirmed =
-        window.confirm(
-          "Yakin ingin menghapus Face ID pengguna ini?"
+  const handleDeleteFaceId = async () => {
+    const confirmed = window.confirm(
+      "Yakin ingin menghapus Face ID pengguna ini?"
+    );
+
+    if (!confirmed) return;
+
+    try {
+      setSaving(true);
+      setError("");
+      setSuccess("");
+
+      const token = getToken();
+
+      if (!token) {
+        throw new Error(
+          "Token login tidak ditemukan."
         );
+      }
 
-      if (!confirmed) return;
+      const requestUrl =
+        `${API_PREFIX}/users/${id}/face-id`;
 
-      try {
-        setSaving(true);
-        setError("");
-        setSuccess("");
-
-        const token = getToken();
-
-        if (!token) {
-          throw new Error(
-            "Token login tidak ditemukan."
-          );
+      const response = await fetch(
+        requestUrl,
+        {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
         }
+      );
 
-        const requestUrl =
-          `${API_PREFIX}/users/${id}/face-id`;
+      const contentType =
+        response.headers.get(
+          "content-type"
+        ) || "";
 
-        const response =
-          await fetch(
-            requestUrl,
-            {
-              method: "DELETE",
-              headers: {
-                Authorization: `Bearer ${token}`,
-              },
-            }
+      const responseText =
+        await response.text();
+
+      let result;
+
+      if (
+        contentType.includes(
+          "application/json"
+        )
+      ) {
+        result =
+          JSON.parse(
+            responseText
           );
+      } else {
+        throw new Error(
+          `API tidak mengembalikan JSON. Status: ${response.status}`
+        );
+      }
 
-        const contentType =
-          response.headers.get(
-            "content-type"
-          ) || "";
-
-        const responseText =
-          await response.text();
-
-        let result;
-
-        if (
-          contentType.includes(
-            "application/json"
-          )
-        ) {
-          result =
-            JSON.parse(
-              responseText
-            );
-        } else {
-          throw new Error(
-            `API tidak mengembalikan JSON. Status: ${response.status}`
-          );
-        }
-
-        if (!response.ok) {
-          throw new Error(
-            result?.message ||
-              result?.error ||
-              "Gagal menghapus Face ID."
-          );
-        }
-
-        setSuccess(
+      if (!response.ok) {
+        throw new Error(
           result?.message ||
-            "Face ID berhasil dihapus."
-        );
-
-        await fetchUser();
-      } catch (err) {
-        console.error(
-          "DELETE FACE ID ERROR:",
-          err
-        );
-
-        setError(
-          err?.message ||
+            result?.error ||
             "Gagal menghapus Face ID."
         );
-      } finally {
-        setSaving(false);
       }
-    };
+
+      setSuccess(
+        result?.message ||
+          "Face ID berhasil dihapus."
+      );
+
+      await fetchUser();
+    } catch (err) {
+      console.error(
+        "DELETE FACE ID ERROR:",
+        err
+      );
+
+      setError(
+        err?.message ||
+          "Gagal menghapus Face ID."
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
 
   // =========================================================
   // LOADING
@@ -658,17 +583,22 @@ export default function EditFaceIdPage() {
 
   if (loading) {
     return (
-      <div className="flex h-screen overflow-hidden bg-slate-50">
-        <Sidebar role="admin" active="face-id" />
+      <div className="theme-page flex h-screen overflow-hidden">
+        <Sidebar
+          role="admin"
+          active="face-id"
+        />
 
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
           <Header />
 
           <main className="flex flex-1 items-center justify-center overflow-y-auto p-6">
             <div className="text-center">
-              <div className="w-10 h-10 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto mb-4" />
+              <div
+                className="mx-auto mb-4 h-10 w-10 animate-spin rounded-full border-4 border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] border-t-[var(--color-primary)]"
+              />
 
-              <p className="text-slate-600">
+              <p className="theme-text-secondary">
                 Memuat data pengguna...
               </p>
             </div>
@@ -684,35 +614,43 @@ export default function EditFaceIdPage() {
 
   if (!user) {
     return (
-      <div className="flex h-screen overflow-hidden bg-slate-50">
-        <Sidebar role="admin" active="face-id" />
+      <div className="theme-page flex h-screen overflow-hidden">
+        <Sidebar
+          role="admin"
+          active="face-id"
+        />
 
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
           <Header />
 
           <main className="flex-1 overflow-y-auto">
             <div className="mx-auto max-w-3xl px-4 py-8 sm:px-6 lg:px-8">
+
               <button
                 onClick={() =>
                   router.push(
                     "/admin/pengguna/face-id"
                   )
                 }
-                className="mb-6 text-sm text-blue-600 hover:text-blue-800"
+                className="theme-text-secondary mb-6 text-sm transition hover:text-[var(--color-primary)]"
               >
                 ← Kembali
               </button>
 
-              <div className="bg-white border border-red-200 rounded-2xl p-8 text-center shadow-sm">
-                <div className="text-4xl mb-4">
-                  ⚠️
+              <div
+                className={`theme-card ${themeCardShadow} rounded-2xl border p-8 text-center`}
+              >
+                <div className="theme-danger mb-4 inline-flex h-12 w-12 items-center justify-center rounded-xl">
+                  <span className="text-xl">
+                    !
+                  </span>
                 </div>
 
-                <h2 className="text-xl font-semibold text-slate-800 mb-2">
+                <h2 className="theme-text mb-2 text-xl font-semibold">
                   Data pengguna tidak ditemukan
                 </h2>
 
-                <p className="text-sm text-slate-500">
+                <p className="theme-text-secondary text-sm">
                   {error ||
                     "Gagal mengambil data pengguna."}
                 </p>
@@ -756,8 +694,11 @@ export default function EditFaceIdPage() {
   // =========================================================
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50">
-      <Sidebar role="admin" active="face-id" />
+    <div className="theme-page flex h-screen overflow-hidden">
+      <Sidebar
+        role="admin"
+        active="face-id"
+      />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <Header />
@@ -774,16 +715,16 @@ export default function EditFaceIdPage() {
                     "/admin/pengguna/face-id"
                   )
                 }
-                className="text-sm text-slate-500 hover:text-blue-600 mb-3"
+                className="theme-text-secondary mb-3 text-sm transition hover:text-[var(--color-primary)]"
               >
                 ← Kembali ke Face ID
               </button>
 
-              <h1 className="text-2xl font-bold text-slate-900">
+              <h1 className="theme-text text-2xl font-bold">
                 Perbarui Face ID
               </h1>
 
-              <p className="text-sm text-slate-500 mt-1">
+              <p className="theme-text-secondary mt-1 text-sm">
                 Perbarui data Face ID pengguna
               </p>
             </div>
@@ -791,33 +732,38 @@ export default function EditFaceIdPage() {
             {/* ALERT */}
 
             {error && (
-              <div className="mb-6 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+              <div className="theme-danger mb-6 rounded-xl border px-4 py-3 text-sm">
                 {error}
               </div>
             )}
 
             {success && (
-              <div className="mb-6 rounded-xl border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+              <div className="theme-success mb-6 rounded-xl border px-4 py-3 text-sm">
                 {success}
               </div>
             )}
 
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
 
               {/* USER INFO */}
 
-              <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 h-fit">
-                <h2 className="font-semibold text-slate-900 mb-5">
+              <div
+                className={`theme-card ${themeCardShadow} h-fit rounded-2xl border p-6`}
+              >
+                <h2 className="theme-text mb-5 font-semibold">
                   Data Pengguna
                 </h2>
 
-                <div className="flex items-center gap-4 mb-6">
-                  <div className="w-14 h-14 rounded-full bg-blue-100 flex items-center justify-center text-blue-700 font-bold text-xl overflow-hidden">
+                <div className="mb-6 flex items-center gap-4">
+
+                  <div
+                    className={`flex h-14 w-14 items-center justify-center overflow-hidden rounded-full ${themePrimarySoft} text-xl font-bold text-[var(--color-primary)]`}
+                  >
                     {user?.foto ? (
                       <img
                         src={user.foto}
                         alt={userName}
-                        className="w-full h-full object-cover"
+                        className="h-full w-full object-cover"
                       />
                     ) : (
                       userName
@@ -827,34 +773,34 @@ export default function EditFaceIdPage() {
                   </div>
 
                   <div className="min-w-0">
-                    <h3 className="font-semibold text-slate-900 truncate">
+                    <h3 className="theme-text truncate font-semibold">
                       {userName}
                     </h3>
 
-                    <p className="text-sm text-slate-500 truncate">
+                    <p className="theme-text-secondary truncate text-sm">
                       {userEmail}
                     </p>
                   </div>
                 </div>
 
                 <div className="space-y-4 text-sm">
+
                   <div>
-                    <p className="text-slate-400 mb-1">
+                    <p className="theme-text-muted mb-1">
                       Username
                     </p>
 
-                    <p className="text-slate-700 font-medium">
-                      {user?.username ||
-                        "-"}
+                    <p className="theme-text font-medium">
+                      {user?.username || "-"}
                     </p>
                   </div>
 
                   <div>
-                    <p className="text-slate-400 mb-1">
+                    <p className="theme-text-muted mb-1">
                       Peran
                     </p>
 
-                    <p className="text-slate-700 font-medium">
+                    <p className="theme-text font-medium">
                       {user?.peran?.nama ||
                         user?.role ||
                         user?.jabatan ||
@@ -863,53 +809,47 @@ export default function EditFaceIdPage() {
                   </div>
 
                   <div>
-                    <p className="text-slate-400 mb-1">
+                    <p className="theme-text-muted mb-1">
                       Status Face ID
                     </p>
 
                     <span
-                      className={`inline-flex px-3 py-1 rounded-full text-xs font-medium ${
+                      className={
                         currentFaceId
-                          ? "bg-green-100 text-green-700"
-                          : "bg-slate-100 text-slate-600"
-                      }`}
+                          ? "theme-success inline-flex rounded-full border px-3 py-1 text-xs font-medium"
+                          : "theme-card-soft theme-text-secondary inline-flex rounded-full border px-3 py-1 text-xs font-medium"
+                      }
                     >
                       {currentFaceId
                         ? "Sudah terdaftar"
                         : "Belum terdaftar"}
                     </span>
                   </div>
+
                 </div>
               </div>
 
               {/* FACE ID */}
 
-              <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
-
+              <div
+                className={`theme-card ${themeCardShadow} rounded-2xl border p-6 lg:col-span-2`}
+              >
                 <div className="mb-6">
-                  <h2 className="font-semibold text-slate-900">
+                  <h2 className="theme-text font-semibold">
                     Foto Face ID
                   </h2>
 
-                  <p className="text-sm text-slate-500 mt-1">
+                  <p className="theme-text-secondary mt-1 text-sm">
                     Ambil foto wajah baru untuk memperbarui Face ID.
                   </p>
                 </div>
 
-                {/* =================================================
-                    VIDEO
-                    ================================================= */}
+                {/* VIDEO */}
 
-                <div className="w-full max-w-2xl mx-auto">
-
-                  {/*
-                   * VIDEO SELALU ADA.
-                   *
-                   * Ini bagian penting dari perbaikan.
-                   */}
+                <div className="mx-auto w-full max-w-2xl">
 
                   <div
-                    className={`relative rounded-2xl overflow-hidden bg-black aspect-video ${
+                    className={`relative aspect-video overflow-hidden rounded-2xl bg-black ${
                       cameraActive
                         ? "block"
                         : "hidden"
@@ -920,13 +860,13 @@ export default function EditFaceIdPage() {
                       autoPlay
                       playsInline
                       muted
-                      className="w-full h-full object-cover"
+                      className="h-full w-full object-cover"
                     />
 
                     {/* FACE GUIDE */}
 
-                    <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
-                      <div className="w-64 h-80 border-2 border-white/80 rounded-[45%]" />
+                    <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
+                      <div className="h-80 w-64 rounded-[45%] border-2 border-white/80" />
                     </div>
 
                     {/* CAMERA BUTTON */}
@@ -935,108 +875,102 @@ export default function EditFaceIdPage() {
                       <button
                         type="button"
                         onClick={capturePhoto}
-                        className="w-16 h-16 rounded-full bg-white border-4 border-slate-300 shadow-lg hover:scale-105 transition"
+                        className="flex h-16 w-16 items-center justify-center rounded-full border-4 border-[var(--color-border)] bg-white shadow-lg transition hover:scale-105"
                       >
-                        <div className="w-11 h-11 rounded-full bg-blue-600 mx-auto" />
+                        <div className="h-11 w-11 rounded-full bg-[var(--color-primary)]" />
                       </button>
                     </div>
                   </div>
 
-                  {/* =================================================
-                      CURRENT FACE ID
-                      ================================================= */}
+                  {/* CURRENT FACE ID */}
 
                   {!cameraActive &&
                     !capturedImage &&
                     currentFacePhoto && (
                       <div className="mb-6">
-                        <p className="text-sm font-medium text-slate-700 mb-3">
+                        <p className="theme-text mb-3 text-sm font-medium">
                           Foto Face ID saat ini
                         </p>
 
-                        <div className="w-full max-w-sm aspect-square rounded-2xl overflow-hidden bg-slate-100 border border-slate-200">
+                        <div className="theme-card-soft aspect-square w-full max-w-sm overflow-hidden rounded-2xl border">
                           <img
                             src={currentFacePhoto}
                             alt="Face ID saat ini"
-                            className="w-full h-full object-cover"
+                            className="h-full w-full object-cover"
                           />
                         </div>
                       </div>
                     )}
 
-                  {/* =================================================
-                      CAPTURED PHOTO
-                      ================================================= */}
+                  {/* CAPTURED PHOTO */}
 
                   {capturedImage &&
                     !cameraActive && (
                       <div className="space-y-4">
-                        <div className="relative rounded-2xl overflow-hidden bg-slate-100 aspect-video">
+
+                        <div className="theme-card-soft relative aspect-video overflow-hidden rounded-2xl border">
                           <img
                             src={capturedImage}
                             alt="Foto Face ID baru"
-                            className="w-full h-full object-cover"
+                            className="h-full w-full object-cover"
                           />
                         </div>
 
                         <div className="flex gap-3">
+
                           <button
                             type="button"
-                            onClick={
-                              retakePhoto
-                            }
+                            onClick={retakePhoto}
                             disabled={saving}
-                            className="flex-1 px-4 py-3 rounded-xl border border-slate-300 text-slate-700 font-medium hover:bg-slate-50 disabled:opacity-50"
+                            className={`theme-card theme-text-secondary flex-1 rounded-xl border px-4 py-3 font-medium transition ${themeTextHover} disabled:opacity-50`}
                           >
                             Ambil Ulang
                           </button>
 
                           <button
                             type="button"
-                            onClick={
-                              handleSave
-                            }
+                            onClick={handleSave}
                             disabled={saving}
-                            className="flex-1 px-4 py-3 rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-700 disabled:opacity-50"
+                            className={`flex-1 rounded-xl bg-[var(--color-primary)] px-4 py-3 font-medium text-white transition ${themePrimaryHover} ${themePrimaryShadow} disabled:opacity-50`}
                           >
                             {saving
                               ? "Menyimpan..."
                               : "Simpan Face ID"}
                           </button>
+
                         </div>
                       </div>
                     )}
 
-                  {/* =================================================
-                      OPEN CAMERA
-                      ================================================= */}
+                  {/* OPEN CAMERA */}
 
                   {!cameraActive &&
                     !capturedImage && (
-                      <div className="border-2 border-dashed border-slate-300 rounded-2xl p-10 text-center">
-
-                        <div className="w-16 h-16 rounded-full bg-blue-50 text-blue-600 flex items-center justify-center mx-auto mb-4 text-2xl">
-                          📷
+                      <div
+                        className={`rounded-2xl border-2 border-dashed p-10 text-center ${themePrimarySoftBorder}`}
+                      >
+                        <div
+                          className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full ${themePrimarySoft}`}
+                        >
+                          <span className="text-2xl">
+                            📷
+                          </span>
                         </div>
 
-                        <h3 className="font-semibold text-slate-800 mb-2">
+                        <h3 className="theme-text mb-2 font-semibold">
                           Ambil Foto Face ID Baru
                         </h3>
 
-                        <p className="text-sm text-slate-500 max-w-md mx-auto mb-6">
+                        <p className="theme-text-secondary mx-auto mb-6 max-w-md text-sm">
                           Pastikan wajah terlihat jelas,
                           pencahayaan cukup, dan menghadap kamera.
                         </p>
 
                         <button
                           type="button"
-                          onClick={
-                            startCamera
-                          }
-                          disabled={
-                            cameraLoading
-                          }
-                          className="px-6 py-3 rounded-xl bg-blue-600 text-white font-medium hover:bg-blue-700 disabled:opacity-50"
+                          onClick={startCamera}
+                          disabled={cameraLoading}
+                          className={`rounded-xl bg-[var(--color-primary)] px-6 py-3 font-medium text-white transition ${themePrimaryHover} ${themePrimaryShadow} disabled:opacity-50`}
                         >
                           {cameraLoading
                             ? "Membuka Kamera..."
@@ -1046,32 +980,29 @@ export default function EditFaceIdPage() {
                     )}
                 </div>
 
-                {/* =================================================
-                    DELETE
-                    ================================================= */}
+                {/* DELETE */}
 
                 {currentFaceId && (
-                  <div className="mt-8 pt-6 border-t border-slate-200">
-                    <h3 className="text-sm font-semibold text-slate-800 mb-1">
+                  <div className="theme-border mt-8 border-t pt-6">
+                    <h3 className="theme-text mb-1 text-sm font-semibold">
                       Hapus Face ID
                     </h3>
 
-                    <p className="text-sm text-slate-500 mb-4">
+                    <p className="theme-text-secondary mb-4 text-sm">
                       Face ID pengguna akan dinonaktifkan.
                     </p>
 
                     <button
                       type="button"
-                      onClick={
-                        handleDeleteFaceId
-                      }
+                      onClick={handleDeleteFaceId}
                       disabled={saving}
-                      className="px-4 py-2.5 rounded-xl border border-red-200 text-red-600 font-medium hover:bg-red-50 disabled:opacity-50"
+                      className="theme-danger rounded-xl border px-4 py-2.5 font-medium transition disabled:opacity-50"
                     >
                       Hapus Face ID
                     </button>
                   </div>
                 )}
+
               </div>
             </div>
           </div>

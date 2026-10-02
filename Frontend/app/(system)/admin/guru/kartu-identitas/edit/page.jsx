@@ -29,28 +29,20 @@ import {
 /**
  * app/admin/guru/kartu-identitas/edit/page.jsx
  *
- * Halaman Edit Pegawai â€” dibuka dari tombol "Edit" di halaman Detail
+ * Halaman Edit Pegawai — dibuka dari tombol "Edit" di halaman Detail
  * (kartu-identitas/[id]/page.jsx), yang mengarah ke
  * /admin/guru/kartu-identitas/edit?id={id}.
  *
- * PENTING â€” ROUTE STATIS, BUKAN DYNAMIC SEGMENT:
- * Sama seperti halaman card, id pegawai dikirim lewat QUERY STRING
- * (?id=...), bukan lewat path, jadi dibaca pakai useSearchParams() dan
- * karena itu logic utama ada di EditContent yang dibungkus <Suspense>.
+ * Route statis menggunakan query string (?id=...).
  *
- * Form ini mencakup semua field yang ada di MOCK_PEGAWAI supaya konsisten
- * dengan apa yang ditampilkan di halaman Detail & ID Card:
- *   - Foto profil (bisa diganti, disimpan ke localStorage key "ki_foto_{id}"
- *     sama seperti mekanisme di halaman detail)
- *   - Informasi utama: nama, NIP, tipe, jabatan, level, status
- *   - Data diri: NIK, tempat/tanggal lahir, jenis kelamin, agama,
- *     status pernikahan, pendidikan terakhir
- *   - Informasi kepegawaian: unit/bidang, golongan, tanggal masuk kerja
- *   - Kontak & alamat: telepon, email, alamat
+ * Form mencakup semua field yang ada di MOCK_PEGAWAI:
+ * - Foto profil
+ * - Informasi utama
+ * - Data diri
+ * - Informasi kepegawaian
+ * - Kontak & alamat
  *
- * Data masih dummy (MOCK_PEGAWAI) â€” submit form di sini hanya simulasi
- * (console.log + redirect balik ke detail) sampai nanti disambungkan ke
- * API sungguhan.
+ * Data masih dummy dan submit masih simulasi sampai API backend tersedia.
  */
 
 const MOCK_PEGAWAI = [
@@ -74,7 +66,8 @@ const MOCK_PEGAWAI = [
     jenisKelamin: "Perempuan",
     agama: "Islam",
     statusNikah: "Menikah",
-    pendidikanTerakhir: "S1 Pendidikan Matematika â€” Universitas Siliwangi",
+    pendidikanTerakhir:
+      "S1 Pendidikan Matematika — Universitas Siliwangi",
   },
   {
     id: 2,
@@ -96,7 +89,8 @@ const MOCK_PEGAWAI = [
     jenisKelamin: "Laki-laki",
     agama: "Islam",
     statusNikah: "Menikah",
-    pendidikanTerakhir: "S1 Ekonomi â€” Universitas Galuh",
+    pendidikanTerakhir:
+      "S1 Ekonomi — Universitas Galuh",
   },
   {
     id: 3,
@@ -118,7 +112,8 @@ const MOCK_PEGAWAI = [
     jenisKelamin: "Perempuan",
     agama: "Islam",
     statusNikah: "Belum Menikah",
-    pendidikanTerakhir: "S1 Biologi â€” Universitas Siliwangi",
+    pendidikanTerakhir:
+      "S1 Biologi — Universitas Siliwangi",
   },
   {
     id: 4,
@@ -140,7 +135,8 @@ const MOCK_PEGAWAI = [
     jenisKelamin: "Laki-laki",
     agama: "Islam",
     statusNikah: "Menikah",
-    pendidikanTerakhir: "S1 Pendidikan Bahasa Indonesia â€” Universitas Galuh",
+    pendidikanTerakhir:
+      "S1 Pendidikan Bahasa Indonesia — Universitas Galuh",
   },
   {
     id: 5,
@@ -162,7 +158,8 @@ const MOCK_PEGAWAI = [
     jenisKelamin: "Perempuan",
     agama: "Islam",
     statusNikah: "Belum Menikah",
-    pendidikanTerakhir: "S1 Seni Rupa â€” Institut Seni Budaya Indonesia",
+    pendidikanTerakhir:
+      "S1 Seni Rupa — Institut Seni Budaya Indonesia",
   },
   {
     id: 6,
@@ -184,7 +181,8 @@ const MOCK_PEGAWAI = [
     jenisKelamin: "Laki-laki",
     agama: "Islam",
     statusNikah: "Menikah",
-    pendidikanTerakhir: "S1 Pendidikan Jasmani â€” Universitas Galuh",
+    pendidikanTerakhir:
+      "S1 Pendidikan Jasmani — Universitas Galuh",
   },
 ];
 
@@ -192,55 +190,127 @@ const PHOTO_KEY_PREFIX = "ki_foto_";
 
 const OPSI_TIPE = ["Guru", "Staff"];
 const OPSI_STATUS = ["aktif", "nonaktif"];
-const OPSI_JENIS_KELAMIN = ["Laki-laki", "Perempuan"];
-const OPSI_AGAMA = ["Islam", "Kristen", "Katolik", "Hindu", "Buddha", "Konghucu"];
-const OPSI_STATUS_NIKAH = ["Belum Menikah", "Menikah", "Cerai Hidup", "Cerai Mati"];
-const OPSI_GOLONGAN = ["II/a", "II/b", "II/c", "II/d", "III/a", "III/b", "III/c", "III/d", "IV/a", "IV/b"];
+const OPSI_JENIS_KELAMIN = [
+  "Laki-laki",
+  "Perempuan",
+];
+const OPSI_AGAMA = [
+  "Islam",
+  "Kristen",
+  "Katolik",
+  "Hindu",
+  "Buddha",
+  "Konghucu",
+];
+const OPSI_STATUS_NIKAH = [
+  "Belum Menikah",
+  "Menikah",
+  "Cerai Hidup",
+  "Cerai Mati",
+];
+const OPSI_GOLONGAN = [
+  "II/a",
+  "II/b",
+  "II/c",
+  "II/d",
+  "III/a",
+  "III/b",
+  "III/c",
+  "III/d",
+  "IV/a",
+  "IV/b",
+];
 
-// Placeholder foto profil generik, konsisten dengan halaman detail & card.
+/* =========================================================
+   FOTO PLACEHOLDER
+========================================================= */
+
 function FotoPlaceholder() {
   return (
-    <svg viewBox="0 0 200 200" className="w-full h-full" xmlns="http://www.w3.org/2000/svg">
-      <rect width="200" height="200" fill="#c9ced6" />
-      <circle cx="100" cy="80" r="38" fill="#f3f4f6" />
-      <path d="M30 200c0-51.7 31.3-93.6 70-93.6s70 41.9 70 93.6H30z" fill="#f3f4f6" />
-    </svg>
+    <div className="theme-card-soft flex h-full w-full items-center justify-center">
+      <svg
+        viewBox="0 0 200 200"
+        className="h-full w-full"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <rect
+          width="200"
+          height="200"
+          fill="var(--color-card-soft)"
+        />
+
+        <circle
+          cx="100"
+          cy="80"
+          r="38"
+          fill="var(--color-text-placeholder)"
+          opacity="0.65"
+        />
+
+        <path
+          d="M30 200c0-51.7 31.3-93.6 70-93.6s70 41.9 70 93.6H30z"
+          fill="var(--color-text-placeholder)"
+          opacity="0.65"
+        />
+      </svg>
+    </div>
   );
 }
 
-function FotoEditor({ pegawaiId, foto, onChange }) {
+/* =========================================================
+   FOTO EDITOR
+========================================================= */
+
+function FotoEditor({
+  pegawaiId,
+  foto,
+  onChange,
+}) {
   const fileInputRef = useRef(null);
 
-  const handlePilihFoto = () => fileInputRef.current?.click();
+  const handlePilihFoto = () =>
+    fileInputRef.current?.click();
 
   const handleFotoChange = (e) => {
     const file = e.target.files?.[0];
+
     if (!file) return;
+
     const reader = new FileReader();
-    reader.onload = () => onChange(reader.result);
+
+    reader.onload = () =>
+      onChange(reader.result);
+
     reader.readAsDataURL(file);
   };
 
-  const handleHapusFoto = () => onChange(null);
+  const handleHapusFoto = () =>
+    onChange(null);
 
   return (
     <div className="flex items-center gap-5">
-      <div className="relative w-24 h-24 sm:w-28 sm:h-28 shrink-0">
-        <div className="w-full h-full rounded-2xl overflow-hidden shadow-lg shadow-slate-900/10 border-2 border-white ring-1 ring-slate-200">
+      <div className="relative h-24 w-24 shrink-0 sm:h-28 sm:w-28">
+        <div className="theme-card-soft theme-border h-full w-full overflow-hidden rounded-2xl border-2 shadow-lg">
           {foto ? (
-            <img src={foto} alt="Foto profil" className="w-full h-full object-cover" />
+            <img
+              src={foto}
+              alt="Foto profil"
+              className="h-full w-full object-cover"
+            />
           ) : (
             <FotoPlaceholder />
           )}
         </div>
+
         <button
           type="button"
           onClick={handlePilihFoto}
           title="Ubah foto"
-          className="absolute -bottom-1.5 -right-1.5 w-8 h-8 rounded-full bg-[#155DFC] hover:bg-[#0d47c9] text-white flex items-center justify-center shadow-md transition-colors"
+          className="theme-primary absolute -bottom-1.5 -right-1.5 flex h-8 w-8 items-center justify-center rounded-full shadow-md transition"
         >
           <Camera size={14} />
         </button>
+
         <input
           ref={fileInputRef}
           type="file"
@@ -249,16 +319,22 @@ function FotoEditor({ pegawaiId, foto, onChange }) {
           className="hidden"
         />
       </div>
+
       <div className="space-y-1.5">
-        <p className="text-sm font-medium text-slate-700">Foto Profil</p>
-        <p className="text-xs text-slate-400 max-w-xs">
-          Format JPG/PNG, disarankan rasio 1:1. Klik ikon kamera untuk mengganti foto.
+        <p className="theme-text text-sm font-medium">
+          Foto Profil
         </p>
+
+        <p className="theme-text-muted max-w-xs text-xs">
+          Format JPG/PNG, disarankan rasio 1:1. Klik ikon
+          kamera untuk mengganti foto.
+        </p>
+
         {foto && (
           <button
             type="button"
             onClick={handleHapusFoto}
-            className="inline-flex items-center gap-1.5 text-xs font-medium text-red-500 hover:text-red-600 transition-colors"
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-[var(--color-danger)] transition-colors hover:opacity-80"
           >
             <X size={12} />
             Hapus foto
@@ -269,43 +345,98 @@ function FotoEditor({ pegawaiId, foto, onChange }) {
   );
 }
 
-function FieldWrapper({ icon: Icon, label, required, children, className = "" }) {
+/* =========================================================
+   FIELD WRAPPER
+========================================================= */
+
+function FieldWrapper({
+  icon: Icon,
+  label,
+  required,
+  children,
+  className = "",
+}) {
   return (
     <div className={className}>
-      <label className="flex items-center gap-1.5 text-xs font-medium text-slate-500 mb-1.5">
-        {Icon && <Icon size={13} className="text-slate-400" />}
+      <label className="theme-text-secondary mb-1.5 flex items-center gap-1.5 text-xs font-medium">
+        {Icon && (
+          <Icon
+            size={13}
+            className="theme-text-muted"
+          />
+        )}
+
         {label}
-        {required && <span className="text-red-400">*</span>}
+
+        {required && (
+          <span className="text-[var(--color-danger)]">
+            *
+          </span>
+        )}
       </label>
+
       {children}
     </div>
   );
 }
 
-const inputClass =
-  "w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#155DFC]/30 focus:border-[#155DFC] transition-colors";
+/* =========================================================
+   INPUT CLASS
+========================================================= */
 
-function SectionCard({ icon: Icon, title, children }) {
+const inputClass =
+  "theme-input w-full rounded-xl border px-3.5 py-2.5 text-sm transition-colors focus:outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20";
+
+/* =========================================================
+   SECTION CARD
+========================================================= */
+
+function SectionCard({
+  icon: Icon,
+  title,
+  children,
+}) {
   return (
-    <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden">
-      <div className="px-5 sm:px-6 py-4 border-b border-slate-100 flex items-center gap-2.5">
-        <Icon size={16} className="text-[#155DFC]" />
-        <h2 className="text-sm font-semibold text-slate-800">{title}</h2>
+    <div className="theme-card theme-border overflow-hidden rounded-xl border shadow-sm">
+      <div className="theme-border flex items-center gap-2.5 border-b px-5 py-4 sm:px-6">
+        <Icon
+          size={16}
+          className="text-[var(--color-primary)]"
+        />
+
+        <h2 className="theme-text text-sm font-semibold">
+          {title}
+        </h2>
       </div>
-      <div className="p-5 sm:p-6">{children}</div>
+
+      <div className="p-5 sm:p-6">
+        {children}
+      </div>
     </div>
   );
 }
 
+/* =========================================================
+   EDIT CONTENT
+========================================================= */
+
 function EditContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  const [isCollapsed, setIsCollapsed] =
+    useState(false);
+
   const [saving, setSaving] = useState(false);
 
   const pegawaiAsli = useMemo(() => {
-    const id = Number(searchParams.get("id"));
-    return MOCK_PEGAWAI.find((p) => p.id === id);
+    const id = Number(
+      searchParams.get("id")
+    );
+
+    return MOCK_PEGAWAI.find(
+      (p) => p.id === id
+    );
   }, [searchParams]);
 
   const [form, setForm] = useState(null);
@@ -313,60 +444,101 @@ function EditContent() {
 
   useEffect(() => {
     if (!pegawaiAsli) return;
+
     setForm({ ...pegawaiAsli });
+
     try {
-      const saved = window.localStorage.getItem(`${PHOTO_KEY_PREFIX}${pegawaiAsli.id}`);
-      if (saved) setFoto(saved);
+      const saved =
+        window.localStorage.getItem(
+          `${PHOTO_KEY_PREFIX}${pegawaiAsli.id}`
+        );
+
+      if (saved) {
+        setFoto(saved);
+      }
     } catch (err) {
-      console.error("Gagal memuat foto pegawai:", err);
+      console.error(
+        "Gagal memuat foto pegawai:",
+        err
+      );
     }
   }, [pegawaiAsli]);
 
   const updateField = (field) => (e) => {
-    const value = e?.target ? e.target.value : e;
-    setForm((prev) => ({ ...prev, [field]: value }));
+    const value = e?.target
+      ? e.target.value
+      : e;
+
+    setForm((prev) => ({
+      ...prev,
+      [field]: value,
+    }));
   };
 
-  const toggleSidebar = () => setIsCollapsed(!isCollapsed);
+  const toggleSidebar = () =>
+    setIsCollapsed(!isCollapsed);
 
   const handleBack = () => {
     if (pegawaiAsli) {
-      router.push(`/admin/guru/kartu-identitas/${pegawaiAsli.id}`);
+      router.push(
+        `/admin/guru/kartu-identitas/${pegawaiAsli.id}`
+      );
     } else {
-      router.push("/admin/guru/kartu-identitas");
+      router.push(
+        "/admin/guru/kartu-identitas"
+      );
     }
   };
 
-  const handleBatal = () => handleBack();
+  const handleBatal = () =>
+    handleBack();
 
   const handleSimpan = (e) => {
     e.preventDefault();
+
     if (!form) return;
+
     setSaving(true);
 
-    // Simpan foto ke localStorage, sama seperti mekanisme di halaman detail.
     try {
       if (foto) {
-        window.localStorage.setItem(`${PHOTO_KEY_PREFIX}${form.id}`, foto);
+        window.localStorage.setItem(
+          `${PHOTO_KEY_PREFIX}${form.id}`,
+          foto
+        );
       } else {
-        window.localStorage.removeItem(`${PHOTO_KEY_PREFIX}${form.id}`);
+        window.localStorage.removeItem(
+          `${PHOTO_KEY_PREFIX}${form.id}`
+        );
       }
     } catch (err) {
-      console.error("Gagal menyimpan foto pegawai:", err);
+      console.error(
+        "Gagal menyimpan foto pegawai:",
+        err
+      );
     }
 
-    // TODO: ganti dengan pemanggilan API sungguhan saat backend tersedia.
-    console.log("Data pegawai disimpan (dummy):", form);
+    console.log(
+      "Data pegawai disimpan (dummy):",
+      form
+    );
 
     setTimeout(() => {
       setSaving(false);
-      router.push(`/admin/guru/kartu-identitas/${form.id}`);
+
+      router.push(
+        `/admin/guru/kartu-identitas/${form.id}`
+      );
     }, 500);
   };
 
+  /* =======================================================
+     DATA TIDAK DITEMUKAN
+  ======================================================= */
+
   if (!pegawaiAsli) {
     return (
-      <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
+      <div className="theme-page flex h-screen w-full overflow-hidden">
         <Sidebar
           active="guruKartuIdentitas"
           setActive={() => {}}
@@ -374,23 +546,36 @@ function EditContent() {
           setCollapsed={setIsCollapsed}
           role="admin"
         />
-        <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+
+        <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
           <Header
             toggleSidebar={toggleSidebar}
             notifications={[]}
-            user={{ name: "Admin Sekolah", email: "admin@smartschool.com", avatar: "AD" }}
+            user={{
+              name: "Admin Sekolah",
+              email: "admin@smartschool.com",
+              avatar: "AD",
+            }}
           />
+
           <main className="flex-1 overflow-y-auto">
             <div className="p-4 sm:p-6 lg:p-8">
-              <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm p-10 text-center">
-                <p className="text-sm text-slate-500 mb-4">
-                  Data pegawai tidak ditemukan. Pastikan kamu membuka halaman ini lewat tombol
-                  &quot;Edit&quot; di halaman Detail Pegawai.
+              <div className="theme-card theme-border rounded-xl border p-10 text-center shadow-sm">
+                <p className="theme-text-secondary mb-4 text-sm">
+                  Data pegawai tidak ditemukan.
+                  Pastikan kamu membuka halaman ini lewat
+                  tombol &quot;Edit&quot; di halaman Detail
+                  Pegawai.
                 </p>
+
                 <button
                   type="button"
-                  onClick={() => router.push("/admin/guru/kartu-identitas")}
-                  className="inline-flex items-center gap-2 px-4 py-2 bg-[#155DFC] hover:bg-[#0d47c9] text-white rounded-xl text-sm font-medium transition-all"
+                  onClick={() =>
+                    router.push(
+                      "/admin/guru/kartu-identitas"
+                    )
+                  }
+                  className="theme-primary inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium transition"
                 >
                   <ArrowLeft size={16} />
                   Kembali ke Kartu Identitas
@@ -406,7 +591,7 @@ function EditContent() {
   if (!form) return null;
 
   return (
-    <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar
         active="guruKartuIdentitas"
         setActive={() => {}}
@@ -414,268 +599,467 @@ function EditContent() {
         setCollapsed={setIsCollapsed}
         role="admin"
       />
-      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+
+      <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
         <Header
           toggleSidebar={toggleSidebar}
           notifications={[]}
-          user={{ name: "Admin Sekolah", email: "admin@smartschool.com", avatar: "AD" }}
+          user={{
+            name: "Admin Sekolah",
+            email: "admin@smartschool.com",
+            avatar: "AD",
+          }}
         />
+
         <main className="flex-1 overflow-y-auto">
-          <form onSubmit={handleSimpan} className="p-4 sm:p-6 lg:p-8 space-y-6 pb-28">
-            {/* BACK */}
+          <form
+            onSubmit={handleSimpan}
+            className="space-y-6 p-4 pb-28 sm:p-6 lg:p-8"
+          >
+            {/* =================================================
+                BACK
+            ================================================= */}
+
             <button
               type="button"
               onClick={handleBack}
-              className="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-[#155DFC] transition-colors w-fit"
+              className="theme-text-secondary flex w-fit items-center gap-2 text-sm font-medium transition-colors hover:text-[var(--color-primary)]"
             >
               <ArrowLeft size={16} />
               Kembali ke Detail Pegawai
             </button>
 
-            {/* TITLE */}
+            {/* =================================================
+                TITLE
+            ================================================= */}
+
             <div>
-              <h1 className="text-2xl font-bold text-slate-800">Edit Data Pegawai</h1>
-              <p className="text-sm text-slate-500">
-                {pegawaiAsli.nama} â€¢ <span className="font-mono">{pegawaiAsli.nip}</span>
+              <h1 className="theme-text text-2xl font-bold">
+                Edit Data Pegawai
+              </h1>
+
+              <p className="theme-text-muted text-sm">
+                {pegawaiAsli.nama} •{" "}
+                <span className="font-mono">
+                  {pegawaiAsli.nip}
+                </span>
               </p>
             </div>
 
-            {/* FOTO PROFIL */}
-            <SectionCard icon={User} title="Foto Profil">
-              <FotoEditor pegawaiId={form.id} foto={foto} onChange={setFoto} />
+            {/* =================================================
+                FOTO PROFIL
+            ================================================= */}
+
+            <SectionCard
+              icon={User}
+              title="Foto Profil"
+            >
+              <FotoEditor
+                pegawaiId={form.id}
+                foto={foto}
+                onChange={setFoto}
+              />
             </SectionCard>
 
-            {/* INFORMASI UTAMA */}
-            <SectionCard icon={BadgeCheck} title="Informasi Utama">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-                <FieldWrapper icon={User} label="Nama Lengkap" required className="sm:col-span-2">
+            {/* =================================================
+                INFORMASI UTAMA
+            ================================================= */}
+
+            <SectionCard
+              icon={BadgeCheck}
+              title="Informasi Utama"
+            >
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
+                <FieldWrapper
+                  icon={User}
+                  label="Nama Lengkap"
+                  required
+                  className="sm:col-span-2"
+                >
                   <input
                     type="text"
                     value={form.nama}
-                    onChange={updateField("nama")}
+                    onChange={updateField(
+                      "nama"
+                    )}
                     className={inputClass}
                     placeholder="Contoh: Sarah Amelia, S.Pd"
                     required
                   />
                 </FieldWrapper>
 
-                <FieldWrapper icon={Fingerprint} label="NIP" required>
+                <FieldWrapper
+                  icon={Fingerprint}
+                  label="NIP"
+                  required
+                >
                   <input
                     type="text"
                     value={form.nip}
-                    onChange={updateField("nip")}
+                    onChange={updateField(
+                      "nip"
+                    )}
                     className={`${inputClass} font-mono`}
                     placeholder="18 digit NIP"
                     required
                   />
                 </FieldWrapper>
 
-                <FieldWrapper icon={Fingerprint} label="NIK" required>
+                <FieldWrapper
+                  icon={Fingerprint}
+                  label="NIK"
+                  required
+                >
                   <input
                     type="text"
                     value={form.nik}
-                    onChange={updateField("nik")}
+                    onChange={updateField(
+                      "nik"
+                    )}
                     className={`${inputClass} font-mono`}
                     placeholder="16 digit NIK"
                     required
                   />
                 </FieldWrapper>
 
-                <FieldWrapper icon={Briefcase} label="Jabatan" required>
+                <FieldWrapper
+                  icon={Briefcase}
+                  label="Jabatan"
+                  required
+                >
                   <input
                     type="text"
                     value={form.jabatan}
-                    onChange={updateField("jabatan")}
+                    onChange={updateField(
+                      "jabatan"
+                    )}
                     className={inputClass}
                     placeholder="Contoh: Guru Matematika"
                     required
                   />
                 </FieldWrapper>
 
-                <FieldWrapper icon={GraduationCap} label="Tipe">
+                <FieldWrapper
+                  icon={GraduationCap}
+                  label="Tipe"
+                >
                   <select
                     value={form.tipe}
-                    onChange={updateField("tipe")}
-                    className={`${inputClass} bg-white`}
+                    onChange={updateField(
+                      "tipe"
+                    )}
+                    className={inputClass}
                   >
-                    {OPSI_TIPE.map((opt) => (
-                      <option key={opt} value={opt}>
-                        {opt}
-                      </option>
-                    ))}
+                    {OPSI_TIPE.map(
+                      (opt) => (
+                        <option
+                          key={opt}
+                          value={opt}
+                        >
+                          {opt}
+                        </option>
+                      )
+                    )}
                   </select>
                 </FieldWrapper>
 
-                <FieldWrapper icon={GraduationCap} label="Level">
+                <FieldWrapper
+                  icon={GraduationCap}
+                  label="Level"
+                >
                   <input
                     type="text"
                     value={form.level}
-                    onChange={updateField("level")}
+                    onChange={updateField(
+                      "level"
+                    )}
                     className={inputClass}
                     placeholder="Contoh: Guru / Staff"
                   />
                 </FieldWrapper>
 
-                <FieldWrapper icon={BadgeCheck} label="Status Kepegawaian">
+                <FieldWrapper
+                  icon={BadgeCheck}
+                  label="Status Kepegawaian"
+                >
                   <select
                     value={form.status}
-                    onChange={updateField("status")}
-                    className={`${inputClass} bg-white`}
+                    onChange={updateField(
+                      "status"
+                    )}
+                    className={inputClass}
                   >
-                    {OPSI_STATUS.map((opt) => (
-                      <option key={opt} value={opt}>
-                        {opt === "aktif" ? "Aktif" : "Nonaktif"}
-                      </option>
-                    ))}
+                    {OPSI_STATUS.map(
+                      (opt) => (
+                        <option
+                          key={opt}
+                          value={opt}
+                        >
+                          {opt === "aktif"
+                            ? "Aktif"
+                            : "Nonaktif"}
+                        </option>
+                      )
+                    )}
                   </select>
                 </FieldWrapper>
               </div>
             </SectionCard>
 
-            {/* DATA DIRI */}
-            <SectionCard icon={User} title="Data Diri">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-                <FieldWrapper icon={MapPin} label="Tempat Lahir">
+            {/* =================================================
+                DATA DIRI
+            ================================================= */}
+
+            <SectionCard
+              icon={User}
+              title="Data Diri"
+            >
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
+                <FieldWrapper
+                  icon={MapPin}
+                  label="Tempat Lahir"
+                >
                   <input
                     type="text"
-                    value={form.tempatLahir}
-                    onChange={updateField("tempatLahir")}
+                    value={
+                      form.tempatLahir
+                    }
+                    onChange={updateField(
+                      "tempatLahir"
+                    )}
                     className={inputClass}
                     placeholder="Contoh: Tasikmalaya"
                   />
                 </FieldWrapper>
 
-                <FieldWrapper icon={Cake} label="Tanggal Lahir">
+                <FieldWrapper
+                  icon={Cake}
+                  label="Tanggal Lahir"
+                >
                   <input
                     type="date"
                     value={form.tglLahir}
-                    onChange={updateField("tglLahir")}
+                    onChange={updateField(
+                      "tglLahir"
+                    )}
                     className={inputClass}
                   />
                 </FieldWrapper>
 
                 <FieldWrapper
-                  icon={form.jenisKelamin === "Perempuan" ? Venus : Mars}
+                  icon={
+                    form.jenisKelamin ===
+                    "Perempuan"
+                      ? Venus
+                      : Mars
+                  }
                   label="Jenis Kelamin"
                 >
                   <select
-                    value={form.jenisKelamin}
-                    onChange={updateField("jenisKelamin")}
-                    className={`${inputClass} bg-white`}
+                    value={
+                      form.jenisKelamin
+                    }
+                    onChange={updateField(
+                      "jenisKelamin"
+                    )}
+                    className={inputClass}
                   >
-                    {OPSI_JENIS_KELAMIN.map((opt) => (
-                      <option key={opt} value={opt}>
-                        {opt}
-                      </option>
-                    ))}
+                    {OPSI_JENIS_KELAMIN.map(
+                      (opt) => (
+                        <option
+                          key={opt}
+                          value={opt}
+                        >
+                          {opt}
+                        </option>
+                      )
+                    )}
                   </select>
                 </FieldWrapper>
 
-                <FieldWrapper icon={BookOpen} label="Agama">
+                <FieldWrapper
+                  icon={BookOpen}
+                  label="Agama"
+                >
                   <select
                     value={form.agama}
-                    onChange={updateField("agama")}
-                    className={`${inputClass} bg-white`}
+                    onChange={updateField(
+                      "agama"
+                    )}
+                    className={inputClass}
                   >
-                    {OPSI_AGAMA.map((opt) => (
-                      <option key={opt} value={opt}>
-                        {opt}
-                      </option>
-                    ))}
+                    {OPSI_AGAMA.map(
+                      (opt) => (
+                        <option
+                          key={opt}
+                          value={opt}
+                        >
+                          {opt}
+                        </option>
+                      )
+                    )}
                   </select>
                 </FieldWrapper>
 
-                <FieldWrapper icon={Heart} label="Status Pernikahan">
+                <FieldWrapper
+                  icon={Heart}
+                  label="Status Pernikahan"
+                >
                   <select
-                    value={form.statusNikah}
-                    onChange={updateField("statusNikah")}
-                    className={`${inputClass} bg-white`}
+                    value={
+                      form.statusNikah
+                    }
+                    onChange={updateField(
+                      "statusNikah"
+                    )}
+                    className={inputClass}
                   >
-                    {OPSI_STATUS_NIKAH.map((opt) => (
-                      <option key={opt} value={opt}>
-                        {opt}
-                      </option>
-                    ))}
+                    {OPSI_STATUS_NIKAH.map(
+                      (opt) => (
+                        <option
+                          key={opt}
+                          value={opt}
+                        >
+                          {opt}
+                        </option>
+                      )
+                    )}
                   </select>
                 </FieldWrapper>
 
-                <FieldWrapper icon={GraduationCap} label="Pendidikan Terakhir">
+                <FieldWrapper
+                  icon={GraduationCap}
+                  label="Pendidikan Terakhir"
+                >
                   <input
                     type="text"
-                    value={form.pendidikanTerakhir}
-                    onChange={updateField("pendidikanTerakhir")}
+                    value={
+                      form.pendidikanTerakhir
+                    }
+                    onChange={updateField(
+                      "pendidikanTerakhir"
+                    )}
                     className={inputClass}
-                    placeholder="Contoh: S1 Pendidikan Matematika â€” Universitas Siliwangi"
+                    placeholder="Contoh: S1 Pendidikan Matematika — Universitas Siliwangi"
                   />
                 </FieldWrapper>
               </div>
             </SectionCard>
 
-            {/* INFORMASI KEPEGAWAIAN */}
-            <SectionCard icon={Building2} title="Informasi Kepegawaian">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-                <FieldWrapper icon={Building2} label="Unit / Bidang" className="sm:col-span-2">
+            {/* =================================================
+                INFORMASI KEPEGAWAIAN
+            ================================================= */}
+
+            <SectionCard
+              icon={Building2}
+              title="Informasi Kepegawaian"
+            >
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
+                <FieldWrapper
+                  icon={Building2}
+                  label="Unit / Bidang"
+                  className="sm:col-span-2"
+                >
                   <input
                     type="text"
                     value={form.unit}
-                    onChange={updateField("unit")}
+                    onChange={updateField(
+                      "unit"
+                    )}
                     className={inputClass}
                     placeholder="Contoh: Mata Pelajaran Matematika"
                   />
                 </FieldWrapper>
 
-                <FieldWrapper icon={BadgeCheck} label="Golongan">
+                <FieldWrapper
+                  icon={BadgeCheck}
+                  label="Golongan"
+                >
                   <select
                     value={form.golongan}
-                    onChange={updateField("golongan")}
-                    className={`${inputClass} bg-white`}
+                    onChange={updateField(
+                      "golongan"
+                    )}
+                    className={inputClass}
                   >
-                    {OPSI_GOLONGAN.map((opt) => (
-                      <option key={opt} value={opt}>
-                        {opt}
-                      </option>
-                    ))}
+                    {OPSI_GOLONGAN.map(
+                      (opt) => (
+                        <option
+                          key={opt}
+                          value={opt}
+                        >
+                          {opt}
+                        </option>
+                      )
+                    )}
                   </select>
                 </FieldWrapper>
 
-                <FieldWrapper icon={CalendarDays} label="Tanggal Masuk Kerja">
+                <FieldWrapper
+                  icon={CalendarDays}
+                  label="Tanggal Masuk Kerja"
+                >
                   <input
                     type="date"
                     value={form.tglMasuk}
-                    onChange={updateField("tglMasuk")}
+                    onChange={updateField(
+                      "tglMasuk"
+                    )}
                     className={inputClass}
                   />
                 </FieldWrapper>
               </div>
             </SectionCard>
 
-            {/* KONTAK & ALAMAT */}
-            <SectionCard icon={Phone} title="Kontak & Alamat">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
-                <FieldWrapper icon={Phone} label="Nomor Telepon">
+            {/* =================================================
+                KONTAK & ALAMAT
+            ================================================= */}
+
+            <SectionCard
+              icon={Phone}
+              title="Kontak & Alamat"
+            >
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-5">
+                <FieldWrapper
+                  icon={Phone}
+                  label="Nomor Telepon"
+                >
                   <input
                     type="tel"
                     value={form.telp}
-                    onChange={updateField("telp")}
+                    onChange={updateField(
+                      "telp"
+                    )}
                     className={inputClass}
                     placeholder="Contoh: 0812-3456-7890"
                   />
                 </FieldWrapper>
 
-                <FieldWrapper icon={Mail} label="Email">
+                <FieldWrapper
+                  icon={Mail}
+                  label="Email"
+                >
                   <input
                     type="email"
                     value={form.email}
-                    onChange={updateField("email")}
+                    onChange={updateField(
+                      "email"
+                    )}
                     className={inputClass}
                     placeholder="nama@smartschool.sch.id"
                   />
                 </FieldWrapper>
 
-                <FieldWrapper icon={MapPin} label="Alamat" className="sm:col-span-2">
+                <FieldWrapper
+                  icon={MapPin}
+                  label="Alamat"
+                  className="sm:col-span-2"
+                >
                   <textarea
                     value={form.alamat}
-                    onChange={updateField("alamat")}
+                    onChange={updateField(
+                      "alamat"
+                    )}
                     rows={3}
                     className={`${inputClass} resize-none`}
                     placeholder="Alamat lengkap"
@@ -686,23 +1070,30 @@ function EditContent() {
           </form>
         </main>
 
-        {/* ACTION BAR â€” sticky di bawah supaya selalu terlihat saat mengisi form panjang */}
-        <div className="border-t border-slate-200 bg-white/90 backdrop-blur px-4 sm:px-6 lg:px-8 py-3.5 flex items-center justify-end gap-2.5">
+        {/* =====================================================
+            ACTION BAR
+        ===================================================== */}
+
+        <div className="theme-header theme-border flex items-center justify-end gap-2.5 border-t px-4 py-3.5 backdrop-blur sm:px-6 lg:px-8">
           <button
             type="button"
             onClick={handleBatal}
-            className="px-4 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 transition-colors"
+            className="theme-card theme-border theme-text-secondary theme-sidebar-hover rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors"
           >
             Batal
           </button>
+
           <button
             type="button"
             onClick={handleSimpan}
             disabled={saving}
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#155DFC] to-[#0d47c9] text-white text-sm font-semibold hover:brightness-110 disabled:opacity-60 disabled:cursor-not-allowed transition-all"
+            className="theme-primary inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition disabled:cursor-not-allowed disabled:opacity-60"
           >
             <Save size={15} />
-            {saving ? "Menyimpan..." : "Simpan Perubahan"}
+
+            {saving
+              ? "Menyimpan..."
+              : "Simpan Perubahan"}
           </button>
         </div>
       </div>
@@ -710,16 +1101,17 @@ function EditContent() {
   );
 }
 
-function EditPegawaiPageContent() {
-  return (
-    <Suspense fallback={null}>
-      <EditContent />
-    </Suspense>
-  );
-}
+/* =========================================================
+   PAGE
+========================================================= */
+
 export default function Edit() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-slate-50" />}>
+    <Suspense
+      fallback={
+        <div className="theme-page min-h-screen" />
+      }
+    >
       <EditContent />
     </Suspense>
   );

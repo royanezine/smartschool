@@ -155,18 +155,18 @@ function getGrade(finalScore) {
 
 function getGradeStyle(grade) {
   if (grade === "A") {
-    return "bg-emerald-50 text-emerald-700 border-emerald-200";
+    return "theme-success";
   }
 
   if (grade === "B") {
-    return "bg-blue-50 text-blue-700 border-blue-200";
+    return "theme-info";
   }
 
   if (grade === "C") {
-    return "bg-amber-50 text-amber-700 border-amber-200";
+    return "theme-warning";
   }
 
-  return "bg-rose-50 text-rose-700 border-rose-200";
+  return "theme-danger";
 }
 
 /* =========================================================
@@ -181,31 +181,31 @@ function StatCard({
 }) {
   const styles = {
     blue: {
-      box: "bg-blue-50",
-      icon: "text-blue-600",
-      value: "text-slate-900",
+      box: "theme-info",
+      icon: "text-[var(--color-info)]",
+      value: "theme-text",
     },
     green: {
-      box: "bg-emerald-50",
-      icon: "text-emerald-600",
-      value: "text-emerald-700",
+      box: "theme-success",
+      icon: "text-[var(--color-success)]",
+      value: "text-[var(--color-success)]",
     },
     orange: {
-      box: "bg-amber-50",
-      icon: "text-amber-600",
-      value: "text-amber-700",
+      box: "theme-warning",
+      icon: "text-[var(--color-warning)]",
+      value: "text-[var(--color-warning)]",
     },
     purple: {
-      box: "bg-indigo-50",
-      icon: "text-indigo-600",
-      value: "text-indigo-700",
+      box: "theme-card-soft",
+      icon: "text-[var(--color-primary)]",
+      value: "text-[var(--color-primary)]",
     },
   };
 
   const style = styles[type];
 
   return (
-    <div className="min-w-0 rounded-xl border border-slate-200 bg-white px-4 py-4 shadow-[0_1px_3px_rgba(15,23,42,0.08)] sm:px-5">
+    <div className="theme-card theme-border min-w-0 rounded-xl border px-4 py-4 theme-shadow-sm">
       <div className="flex items-center gap-3">
         <div
           className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${style.box} ${style.icon}`}
@@ -214,7 +214,7 @@ function StatCard({
         </div>
 
         <div className="min-w-0">
-          <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
+          <p className="theme-text-muted text-[11px] font-medium uppercase tracking-wide">
             {label}
           </p>
 
@@ -244,7 +244,7 @@ function ScoreInput({
       max="100"
       value={value}
       onChange={(e) => onChange(e.target.value)}
-      className="h-9 w-20 rounded-md border border-slate-300 bg-white px-2 text-center text-sm font-medium text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+      className="theme-input h-9 w-20 rounded-md px-2 text-center text-sm font-medium outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
     />
   );
 }
@@ -384,7 +384,7 @@ export default function EntryNilaiPage() {
   ========================================================= */
 
   return (
-    <div className="flex min-h-screen bg-[#F5F8FC]">
+    <div className="theme-page flex min-h-screen w-full">
       <Sidebar />
 
       <div className="flex min-w-0 flex-1 flex-col">
@@ -399,7 +399,7 @@ export default function EntryNilaiPage() {
 
             <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex min-w-0 items-center gap-3">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm">
+                <div className="theme-primary flex h-12 w-12 shrink-0 items-center justify-center rounded-xl theme-shadow-sm">
                   <GraduationCap
                     size={23}
                     strokeWidth={2}
@@ -407,11 +407,11 @@ export default function EntryNilaiPage() {
                 </div>
 
                 <div className="min-w-0">
-                  <h1 className="text-[24px] font-bold tracking-tight text-slate-900 sm:text-[27px]">
+                  <h1 className="theme-text text-[24px] font-bold tracking-tight sm:text-[27px]">
                     Entry Nilai
                   </h1>
 
-                  <p className="text-sm text-slate-500">
+                  <p className="theme-text-muted text-sm">
                     Kelola dan input nilai siswa untuk e-Rapor
                   </p>
                 </div>
@@ -421,7 +421,7 @@ export default function EntryNilaiPage() {
                 <button
                   type="button"
                   onClick={resetFilter}
-                  className="flex h-10 items-center gap-2 rounded-lg border border-slate-300 bg-white px-3.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+                  className="theme-card theme-border theme-text-secondary theme-sidebar-hover flex h-10 items-center gap-2 rounded-lg border px-3.5 text-sm font-medium transition"
                 >
                   <RefreshCw size={16} />
 
@@ -433,7 +433,7 @@ export default function EntryNilaiPage() {
                 <button
                   type="button"
                   onClick={handleSave}
-                  className="flex h-10 items-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+                  className="theme-primary flex h-10 items-center gap-2 rounded-lg px-4 text-sm font-semibold theme-shadow-sm transition"
                 >
                   <Save size={17} />
                   Simpan Nilai
@@ -446,7 +446,7 @@ export default function EntryNilaiPage() {
             ================================================= */}
 
             {saved && (
-              <div className="mb-5 flex items-center gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+              <div className="theme-success mb-5 flex items-center gap-3 rounded-xl border px-4 py-3 text-sm">
                 <CircleCheck size={18} />
 
                 <div>
@@ -454,7 +454,7 @@ export default function EntryNilaiPage() {
                     Nilai berhasil disimpan
                   </p>
 
-                  <p className="text-xs text-emerald-600">
+                  <p className="text-xs opacity-80">
                     Data nilai sementara berhasil diperbarui.
                   </p>
                 </div>
@@ -499,14 +499,13 @@ export default function EntryNilaiPage() {
                 FILTER CARD
             ================================================= */}
 
-            <div className="mt-5 rounded-xl border border-slate-200 bg-white p-4 shadow-[0_1px_3px_rgba(15,23,42,0.08)] sm:p-5">
-
+            <div className="theme-card theme-border mt-5 rounded-xl border p-4 theme-shadow-sm sm:p-5">
               <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-4">
 
                 {/* TAHUN AJARAN */}
 
                 <div>
-                  <label className="mb-2 block text-xs font-semibold text-slate-600">
+                  <label className="theme-text-secondary mb-2 block text-xs font-semibold">
                     Tahun Ajaran
                   </label>
 
@@ -516,7 +515,7 @@ export default function EntryNilaiPage() {
                       onChange={(e) =>
                         setTahunAjaran(e.target.value)
                       }
-                      className="h-10 w-full appearance-none rounded-lg border border-slate-300 bg-white px-3.5 pr-9 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      className="theme-input h-10 w-full appearance-none rounded-lg px-3.5 pr-9 text-sm outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
                     >
                       <option value="2025/2026">
                         2025/2026
@@ -533,7 +532,7 @@ export default function EntryNilaiPage() {
 
                     <ChevronDown
                       size={15}
-                      className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+                      className="theme-text-muted pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
                     />
                   </div>
                 </div>
@@ -541,7 +540,7 @@ export default function EntryNilaiPage() {
                 {/* SEMESTER */}
 
                 <div>
-                  <label className="mb-2 block text-xs font-semibold text-slate-600">
+                  <label className="theme-text-secondary mb-2 block text-xs font-semibold">
                     Semester
                   </label>
 
@@ -551,7 +550,7 @@ export default function EntryNilaiPage() {
                       onChange={(e) =>
                         setSemester(e.target.value)
                       }
-                      className="h-10 w-full appearance-none rounded-lg border border-slate-300 bg-white px-3.5 pr-9 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      className="theme-input h-10 w-full appearance-none rounded-lg px-3.5 pr-9 text-sm outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
                     >
                       <option value="Ganjil">
                         Semester Ganjil
@@ -564,7 +563,7 @@ export default function EntryNilaiPage() {
 
                     <ChevronDown
                       size={15}
-                      className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+                      className="theme-text-muted pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
                     />
                   </div>
                 </div>
@@ -572,7 +571,7 @@ export default function EntryNilaiPage() {
                 {/* KELAS */}
 
                 <div>
-                  <label className="mb-2 block text-xs font-semibold text-slate-600">
+                  <label className="theme-text-secondary mb-2 block text-xs font-semibold">
                     Kelas
                   </label>
 
@@ -582,7 +581,7 @@ export default function EntryNilaiPage() {
                       onChange={(e) =>
                         setKelas(e.target.value)
                       }
-                      className="h-10 w-full appearance-none rounded-lg border border-slate-300 bg-white px-3.5 pr-9 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      className="theme-input h-10 w-full appearance-none rounded-lg px-3.5 pr-9 text-sm outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
                     >
                       <option value="XII PPLG 1">
                         XII PPLG 1
@@ -603,7 +602,7 @@ export default function EntryNilaiPage() {
 
                     <ChevronDown
                       size={15}
-                      className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+                      className="theme-text-muted pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
                     />
                   </div>
                 </div>
@@ -611,7 +610,7 @@ export default function EntryNilaiPage() {
                 {/* MAPEL */}
 
                 <div>
-                  <label className="mb-2 block text-xs font-semibold text-slate-600">
+                  <label className="theme-text-secondary mb-2 block text-xs font-semibold">
                     Mata Pelajaran
                   </label>
 
@@ -621,7 +620,7 @@ export default function EntryNilaiPage() {
                       onChange={(e) =>
                         setMapel(e.target.value)
                       }
-                      className="h-10 w-full appearance-none rounded-lg border border-slate-300 bg-white px-3.5 pr-9 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                      className="theme-input h-10 w-full appearance-none rounded-lg px-3.5 pr-9 text-sm outline-none focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
                     >
                       <option value="Pemrograman Web">
                         Pemrograman Web
@@ -642,11 +641,10 @@ export default function EntryNilaiPage() {
 
                     <ChevronDown
                       size={15}
-                      className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+                      className="theme-text-muted pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
                     />
                   </div>
                 </div>
-
               </div>
 
               {/* SEARCH */}
@@ -655,7 +653,7 @@ export default function EntryNilaiPage() {
                 <div className="relative flex-1">
                   <Search
                     size={18}
-                    className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                    className="theme-text-muted pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2"
                   />
 
                   <input
@@ -664,12 +662,12 @@ export default function EntryNilaiPage() {
                       setSearch(e.target.value)
                     }
                     placeholder="Cari nama siswa, NIS, atau NISN..."
-                    className="h-11 w-full rounded-lg border border-slate-300 bg-white pl-10 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="theme-input h-11 w-full rounded-lg pl-10 pr-4 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
                   />
                 </div>
 
                 <div className="shrink-0">
-                  <span className="text-sm font-medium text-slate-500">
+                  <span className="theme-text-muted text-sm font-medium">
                     {filteredStudents.length} siswa ditemukan
                   </span>
                 </div>
@@ -680,46 +678,47 @@ export default function EntryNilaiPage() {
                 SUBJECT INFO
             ================================================= */}
 
-            <div className="mt-5 rounded-xl border border-blue-100 bg-blue-50/70 px-5 py-4">
+            <div className="theme-info theme-border mt-5 rounded-xl border px-5 py-4">
               <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-
                 <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-white text-blue-600 shadow-sm">
-                    <BookOpen size={19} />
+                  <div className="theme-card flex h-10 w-10 shrink-0 items-center justify-center rounded-lg theme-shadow-sm">
+                    <BookOpen
+                      size={19}
+                      className="text-[var(--color-info)]"
+                    />
                   </div>
 
                   <div>
-                    <p className="text-xs font-medium text-blue-600">
+                    <p className="theme-text text-xs font-medium">
                       {semester} • {tahunAjaran}
                     </p>
 
-                    <h2 className="mt-0.5 text-sm font-bold text-slate-900">
+                    <h2 className="theme-text mt-0.5 text-sm font-bold">
                       {mapel}
                     </h2>
 
-                    <p className="mt-0.5 text-xs text-slate-500">
+                    <p className="theme-text-muted mt-0.5 text-xs">
                       Kelas {kelas} • Pengisian nilai e-Rapor
                     </p>
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 rounded-lg border border-blue-100 bg-white px-3 py-2">
+                <div className="theme-card theme-border flex items-center gap-2 rounded-lg border px-3 py-2">
                   <ClipboardCheck
                     size={17}
-                    className="text-blue-600"
+                    className="text-[var(--color-info)]"
                   />
 
                   <div>
-                    <p className="text-[11px] text-slate-400">
+                    <p className="theme-text-muted text-[11px]">
                       Bobot Nilai
                     </p>
 
-                    <p className="text-xs font-semibold text-slate-700">
+                    <p className="theme-text-secondary text-xs font-semibold">
                       Tugas 25% • UTS 25% • UAS 30% • Praktik 20%
                     </p>
                   </div>
                 </div>
-
               </div>
             </div>
 
@@ -727,14 +726,11 @@ export default function EntryNilaiPage() {
                 TABLE
             ================================================= */}
 
-            <div className="mt-5 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]">
-
+            <div className="theme-card theme-border mt-5 overflow-hidden rounded-xl border theme-shadow-sm">
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[1150px] border-collapse text-left">
-
                   <thead>
-                    <tr className="bg-blue-600 text-xs font-semibold uppercase tracking-wide text-white">
-
+                    <tr className="theme-table-header text-xs font-semibold uppercase tracking-wide">
                       <th className="w-16 px-4 py-3.5 text-center">
                         No
                       </th>
@@ -774,12 +770,10 @@ export default function EntryNilaiPage() {
                       <th className="px-4 py-3.5 text-right">
                         Aksi
                       </th>
-
                     </tr>
                   </thead>
 
                   <tbody>
-
                     {filteredStudents.map(
                       (student, index) => {
                         const finalScore =
@@ -791,12 +785,11 @@ export default function EntryNilaiPage() {
                         return (
                           <tr
                             key={student.id}
-                            className="border-b border-slate-100 transition last:border-0 hover:bg-slate-50"
+                            className="theme-table-hover border-b border-[var(--color-border-soft)] transition last:border-0"
                           >
-
                             {/* NO */}
 
-                            <td className="px-4 py-4 text-center text-sm font-medium text-slate-500">
+                            <td className="theme-text-muted px-4 py-4 text-center text-sm font-medium">
                               {index + 1}
                             </td>
 
@@ -804,29 +797,27 @@ export default function EntryNilaiPage() {
 
                             <td className="px-4 py-4">
                               <div className="flex items-center gap-3">
-
-                                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-sm font-bold text-blue-600">
+                                <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-sm font-bold">
                                   {student.nama
                                     .charAt(0)
                                     .toUpperCase()}
                                 </div>
 
                                 <div className="min-w-0">
-                                  <p className="truncate text-sm font-semibold text-slate-900">
+                                  <p className="theme-text truncate text-sm font-semibold">
                                     {student.nama}
                                   </p>
 
-                                  <p className="mt-0.5 text-xs text-slate-400">
+                                  <p className="theme-text-muted mt-0.5 text-xs">
                                     NISN {student.nisn}
                                   </p>
                                 </div>
-
                               </div>
                             </td>
 
                             {/* NIS */}
 
-                            <td className="px-4 py-4 text-sm text-slate-600">
+                            <td className="theme-text-secondary px-4 py-4 text-sm">
                               {student.nis}
                             </td>
 
@@ -893,7 +884,7 @@ export default function EntryNilaiPage() {
                             {/* NILAI AKHIR */}
 
                             <td className="px-4 py-4 text-center">
-                              <span className="text-sm font-bold text-slate-900">
+                              <span className="theme-text text-sm font-bold">
                                 {finalScore}
                               </span>
                             </td>
@@ -914,7 +905,6 @@ export default function EntryNilaiPage() {
 
                             <td className="px-4 py-4">
                               <div className="flex items-center justify-end">
-
                                 <button
                                   type="button"
                                   title="Lihat detail nilai"
@@ -923,14 +913,12 @@ export default function EntryNilaiPage() {
                                       student
                                     )
                                   }
-                                  className="flex h-8 w-8 items-center justify-center rounded-md text-slate-500 transition hover:bg-blue-50 hover:text-blue-600"
+                                  className="theme-text-muted theme-sidebar-hover flex h-8 w-8 items-center justify-center rounded-md transition hover:text-[var(--color-primary)]"
                                 >
                                   <Eye size={16} />
                                 </button>
-
                               </div>
                             </td>
-
                           </tr>
                         );
                       }
@@ -944,75 +932,68 @@ export default function EntryNilaiPage() {
                           colSpan={10}
                           className="px-5 py-16 text-center"
                         >
-                          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                          <div className="theme-card-soft theme-text-muted mx-auto flex h-12 w-12 items-center justify-center rounded-full">
                             <Search size={21} />
                           </div>
 
-                          <p className="mt-3 text-sm font-semibold text-slate-700">
+                          <p className="theme-text-secondary mt-3 text-sm font-semibold">
                             Siswa tidak ditemukan
                           </p>
 
-                          <p className="mt-1 text-xs text-slate-400">
+                          <p className="theme-text-muted mt-1 text-xs">
                             Coba ubah kata kunci pencarian.
                           </p>
                         </td>
                       </tr>
                     )}
-
                   </tbody>
                 </table>
               </div>
 
               {/* FOOTER */}
 
-              <div className="flex flex-col gap-2 border-t border-slate-100 px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
-
-                <p className="text-xs text-slate-400">
+              <div className="theme-border-soft flex flex-col gap-2 border-t px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
+                <p className="theme-text-muted text-xs">
                   Menampilkan{" "}
-                  <span className="font-medium text-slate-600">
+                  <span className="theme-text-secondary font-medium">
                     {filteredStudents.length}
                   </span>{" "}
                   dari{" "}
-                  <span className="font-medium text-slate-600">
+                  <span className="theme-text-secondary font-medium">
                     {students.length}
                   </span>{" "}
                   siswa
                 </p>
 
-                <p className="text-xs text-slate-400">
+                <p className="theme-text-muted text-xs">
                   Nilai akhir dihitung otomatis berdasarkan bobot.
                 </p>
-
               </div>
-
             </div>
 
             {/* =================================================
                 INFO
             ================================================= */}
 
-            <div className="mt-5 rounded-xl border border-slate-200 bg-white px-5 py-4">
+            <div className="theme-card theme-border mt-5 rounded-xl border px-5 py-4">
               <div className="flex gap-3">
-
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
+                <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
                   <GraduationCap size={18} />
                 </div>
 
                 <div>
-                  <p className="text-sm font-semibold text-slate-800">
+                  <p className="theme-text text-sm font-semibold">
                     Informasi Entry Nilai
                   </p>
 
-                  <p className="mt-1 text-xs leading-5 text-slate-500">
+                  <p className="theme-text-muted mt-1 text-xs leading-5">
                     Masukkan nilai Tugas, UTS, UAS, dan Praktik.
                     Nilai akhir akan dihitung otomatis sesuai
                     bobot penilaian yang telah ditentukan.
                   </p>
                 </div>
-
               </div>
             </div>
-
           </div>
         </main>
       </div>
@@ -1022,20 +1003,24 @@ export default function EntryNilaiPage() {
       ===================================================== */}
 
       {modalStudent && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-[2px]">
-
-          <div className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl">
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4 backdrop-blur-[2px]"
+          style={{
+            backgroundColor:
+              "color-mix(in srgb, var(--color-text) 40%, transparent)",
+          }}
+        >
+          <div className="theme-card w-full max-w-lg overflow-hidden rounded-2xl theme-shadow-lg">
 
             {/* HEADER */}
 
-            <div className="flex items-center justify-between border-b border-slate-200 px-5 py-4 sm:px-6">
-
+            <div className="theme-border flex items-center justify-between border-b px-5 py-4 sm:px-6">
               <div>
-                <h2 className="text-lg font-bold text-slate-900">
+                <h2 className="theme-text text-lg font-bold">
                   Detail Nilai Siswa
                 </h2>
 
-                <p className="mt-0.5 text-xs text-slate-500">
+                <p className="theme-text-muted mt-0.5 text-xs">
                   {modalStudent.nama}
                 </p>
               </div>
@@ -1045,39 +1030,34 @@ export default function EntryNilaiPage() {
                 onClick={() =>
                   setModalStudent(null)
                 }
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                className="theme-text-muted theme-sidebar-hover flex h-9 w-9 items-center justify-center rounded-lg transition hover:text-[var(--color-text)]"
               >
                 <X size={18} />
               </button>
-
             </div>
 
             {/* BODY */}
 
             <div className="p-5 sm:p-6">
-
-              <div className="mb-5 flex items-center gap-3 rounded-xl bg-slate-50 p-4">
-
-                <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-blue-600 text-white">
+              <div className="theme-card-soft mb-5 flex items-center gap-3 rounded-xl p-4">
+                <div className="theme-primary flex h-11 w-11 items-center justify-center rounded-lg">
                   <GraduationCap size={20} />
                 </div>
 
                 <div>
-                  <p className="text-sm font-semibold text-slate-900">
+                  <p className="theme-text text-sm font-semibold">
                     {modalStudent.nama}
                   </p>
 
-                  <p className="mt-0.5 text-xs text-slate-500">
+                  <p className="theme-text-muted mt-0.5 text-xs">
                     NIS {modalStudent.nis} • {kelas}
                   </p>
                 </div>
-
               </div>
 
               {/* SCORE GRID */}
 
               <div className="grid grid-cols-2 gap-3">
-
                 <ScoreDetail
                   label="Tugas"
                   value={modalStudent.tugas}
@@ -1101,25 +1081,23 @@ export default function EntryNilaiPage() {
                   value={modalStudent.praktik}
                   weight="20%"
                 />
-
               </div>
 
               {/* FINAL */}
 
-              <div className="mt-4 flex items-center justify-between rounded-xl border border-blue-100 bg-blue-50 px-4 py-4">
-
+              <div className="theme-info theme-border mt-4 flex items-center justify-between rounded-xl border px-4 py-4">
                 <div>
-                  <p className="text-xs text-blue-600">
+                  <p className="theme-text text-xs">
                     Nilai Akhir
                   </p>
 
-                  <p className="mt-1 text-2xl font-bold text-blue-700">
+                  <p className="theme-text mt-1 text-2xl font-bold">
                     {calculateFinal(modalStudent)}
                   </p>
                 </div>
 
                 <div className="text-right">
-                  <p className="text-xs text-slate-500">
+                  <p className="theme-text-muted text-xs">
                     Predikat
                   </p>
 
@@ -1139,30 +1117,57 @@ export default function EntryNilaiPage() {
                     )}
                   </span>
                 </div>
-
               </div>
-
             </div>
 
             {/* FOOTER */}
 
-            <div className="flex justify-end border-t border-slate-200 px-5 py-4 sm:px-6">
-
+            <div className="theme-border flex justify-end border-t px-5 py-4 sm:px-6">
               <button
                 type="button"
                 onClick={() =>
                   setModalStudent(null)
                 }
-                className="h-10 rounded-lg border border-slate-300 px-5 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+                className="theme-card theme-border theme-text-secondary theme-sidebar-hover h-10 rounded-lg border px-5 text-sm font-medium transition"
               >
                 Tutup
               </button>
-
             </div>
-
           </div>
         </div>
       )}
+
+      <style jsx global>{`
+        /* =====================================================
+           THEME SHADOWS
+           Shadows intentionally derive their color from the
+           active theme token instead of a fixed light/dark color.
+        ===================================================== */
+        .theme-shadow-sm {
+          box-shadow:
+            0 1px 3px 0 color-mix(
+              in srgb,
+              var(--color-text) 8%,
+              transparent
+            );
+        }
+
+        .theme-shadow-lg {
+          box-shadow:
+            0 20px 45px 0 color-mix(
+              in srgb,
+              var(--color-text) 18%,
+              transparent
+            );
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .theme-shadow-sm,
+          .theme-shadow-lg {
+            transition: none !important;
+          }
+        }
+      `}</style>
     </div>
   );
 }
@@ -1177,22 +1182,20 @@ function ScoreDetail({
   weight,
 }) {
   return (
-    <div className="rounded-lg border border-slate-200 bg-white p-4">
-
+    <div className="theme-card theme-border rounded-lg border p-4">
       <div className="flex items-center justify-between">
-        <p className="text-xs font-medium text-slate-500">
+        <p className="theme-text-muted text-xs font-medium">
           {label}
         </p>
 
-        <span className="text-[10px] font-medium text-slate-400">
+        <span className="theme-text-placeholder text-[10px] font-medium">
           {weight}
         </span>
       </div>
 
-      <p className="mt-2 text-xl font-bold text-slate-900">
+      <p className="theme-text mt-2 text-xl font-bold">
         {value}
       </p>
-
     </div>
   );
 }

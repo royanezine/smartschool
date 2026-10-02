@@ -1,16 +1,13 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Sidebar from "../../../../components/Sidebar";
 import Header from "../../../../components/Header";
-
 import {
   BookOpen,
   Search,
   Plus,
   Eye,
-  Pencil,
-  Trash2,
   X,
   RefreshCw,
   ChevronDown,
@@ -21,152 +18,255 @@ import {
   RotateCcw,
   UserRound,
   CalendarDays,
+  Loader2,
 } from "lucide-react";
+import {
+  getBuku,
+  getPeminjaman,
+  pinjamBuku,
+  kembalikanBuku,
+} from "../../../../../services/perpustakaan.service";
 
 /* =========================================================
-   DATA DUMMY
+   THEME HELPERS
 ========================================================= */
 
-const initialLoans = [
-  {
-    id: 1,
-    kode: "PJ-0001",
-    siswa: "Andi Saputra",
-    nis: "20240001",
-    kelas: "9A",
-    buku: "Matematika untuk SMA Kelas X",
-    kodeBuku: "BK-0001",
-    tanggalPinjam: "2026-09-01",
-    jatuhTempo: "2026-09-08",
-    tanggalKembali: "",
-    status: "Dipinjam",
-    denda: 0,
-    petugas: "Admin Perpustakaan",
-  },
-  {
-    id: 2,
-    kode: "PJ-0002",
-    siswa: "Budi Santoso",
-    nis: "20240002",
-    kelas: "9A",
-    buku: "Fisika Dasar",
-    kodeBuku: "BK-0003",
-    tanggalPinjam: "2026-09-02",
-    jatuhTempo: "2026-09-09",
-    tanggalKembali: "",
-    status: "Dipinjam",
-    denda: 0,
-    petugas: "Admin Perpustakaan",
-  },
-  {
-    id: 3,
-    kode: "PJ-0003",
-    siswa: "Citra Lestari",
-    nis: "20240003",
-    kelas: "9B",
-    buku: "Bahasa Indonesia untuk Pelajar",
-    kodeBuku: "BK-0002",
-    tanggalPinjam: "2026-08-25",
-    jatuhTempo: "2026-09-01",
-    tanggalKembali: "",
-    status: "Terlambat",
-    denda: 15000,
-    petugas: "Admin Perpustakaan",
-  },
-  {
-    id: 4,
-    kode: "PJ-0004",
-    siswa: "Dimas Pratama",
-    nis: "20240004",
-    kelas: "9B",
-    buku: "Pemrograman Dasar",
-    kodeBuku: "BK-0004",
-    tanggalPinjam: "2026-08-20",
-    jatuhTempo: "2026-08-27",
-    tanggalKembali: "2026-08-26",
-    status: "Dikembalikan",
-    denda: 0,
-    petugas: "Admin Perpustakaan",
-  },
-  {
-    id: 5,
-    kode: "PJ-0005",
-    siswa: "Eka Wulandari",
-    nis: "20240005",
-    kelas: "10A",
-    buku: "Sejarah Indonesia",
-    kodeBuku: "BK-0005",
-    tanggalPinjam: "2026-08-29",
-    jatuhTempo: "2026-09-05",
-    tanggalKembali: "",
-    status: "Dipinjam",
-    denda: 0,
-    petugas: "Admin Perpustakaan",
-  },
-  {
-    id: 6,
-    kode: "PJ-0006",
-    siswa: "Fajar Ramadhan",
-    nis: "20240006",
-    kelas: "10A",
-    buku: "Dasar-Dasar Akuntansi",
-    kodeBuku: "BK-0006",
-    tanggalPinjam: "2026-08-15",
-    jatuhTempo: "2026-08-22",
-    tanggalKembali: "2026-08-22",
-    status: "Dikembalikan",
-    denda: 0,
-    petugas: "Admin Perpustakaan",
-  },
-  {
-    id: 7,
-    kode: "PJ-0007",
-    siswa: "Gita Maharani",
-    nis: "20240007",
-    kelas: "10B",
-    buku: "English for Students",
-    kodeBuku: "BK-0007",
-    tanggalPinjam: "2026-09-03",
-    jatuhTempo: "2026-09-10",
-    tanggalKembali: "",
-    status: "Dipinjam",
-    denda: 0,
-    petugas: "Admin Perpustakaan",
-  },
-  {
-    id: 8,
-    kode: "PJ-0008",
-    siswa: "Hendra Wijaya",
-    nis: "20240008",
-    kelas: "10B",
-    buku: "Teknik Komputer dan Jaringan",
-    kodeBuku: "BK-0008",
-    tanggalPinjam: "2026-08-18",
-    jatuhTempo: "2026-08-25",
-    tanggalKembali: "",
-    status: "Terlambat",
-    denda: 20000,
-    petugas: "Admin Perpustakaan",
-  },
-];
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]";
+
+const themePrimaryHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themePrimaryShadow =
+  "shadow-[0_10px_25px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_6px_24px_color-mix(in_srgb,var(--color-text)_6%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
+
+const dangerText = "text-[var(--color-danger,#ef4444)]";
+const dangerBorder =
+  "border-[color-mix(in_srgb,var(--color-danger,#ef4444)_25%,transparent)]";
+const dangerSoft =
+  "bg-[color-mix(in_srgb,var(--color-danger,#ef4444)_10%,transparent)]";
 
 /* =========================================================
-   FORM
+   HELPERS
 ========================================================= */
 
-const emptyForm = {
-  siswa: "",
-  nis: "",
-  kelas: "9A",
-  buku: "",
-  kodeBuku: "",
-  tanggalPinjam: "2026-09-07",
-  jatuhTempo: "2026-09-14",
-  tanggalKembali: "",
-  status: "Dipinjam",
-  denda: "0",
-  petugas: "Admin Perpustakaan",
-};
+function unwrapValue(response) {
+  if (response?.data !== undefined) return response.data;
+  return response;
+}
+
+function toArray(value) {
+  const first = unwrapValue(value);
+  if (Array.isArray(first)) return first;
+  if (Array.isArray(first?.data)) return first.data;
+  if (Array.isArray(first?.rows)) return first.rows;
+  return [];
+}
+
+function asString(value, fallback = "") {
+  if (value === null || value === undefined) return fallback;
+  return String(value);
+}
+
+function formatDate(value) {
+  if (!value) return "-";
+
+  const raw = asString(value);
+  const date = new Date(raw);
+
+  if (Number.isNaN(date.getTime())) return raw.slice(0, 10) || raw;
+
+  return new Intl.DateTimeFormat("id-ID", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(date);
+}
+
+function formatDateInput(value) {
+  if (!value) return "";
+  const raw = asString(value);
+  return raw.length >= 10 ? raw.slice(0, 10) : raw;
+}
+
+function formatRupiah(value) {
+  const numeric = Number(value) || 0;
+  return `Rp ${numeric.toLocaleString("id-ID")}`;
+}
+
+function normalizeStatus(value, loan) {
+  const raw = asString(value).trim().toLowerCase();
+
+  if (
+    raw === "dikembalikan" ||
+    raw === "returned" ||
+    raw === "kembali" ||
+    raw === "selesai"
+  ) {
+    return "Dikembalikan";
+  }
+
+  if (
+    raw === "terlambat" ||
+    raw === "overdue" ||
+    raw === "late"
+  ) {
+    return "Terlambat";
+  }
+
+  if (raw === "dipinjam" || raw === "borrowed" || raw === "aktif") {
+    return "Dipinjam";
+  }
+
+  // Bila backend tidak mengirim status, bantu tampilkan transaksi lewat tanggal.
+  const due = loan?.jatuhTempo;
+  if (due && !loan?.tanggalKembali) {
+    const dueDate = new Date(due);
+    if (!Number.isNaN(dueDate.getTime())) {
+      const dueEnd = new Date(dueDate);
+      dueEnd.setHours(23, 59, 59, 999);
+      if (dueEnd.getTime() < Date.now()) return "Terlambat";
+    }
+  }
+
+  return loan?.tanggalKembali ? "Dikembalikan" : "Dipinjam";
+}
+
+function normalizeLoan(item) {
+  const raw = item || {};
+
+  const buku = raw?.buku || raw?.book || raw?.bukuDetail || {};
+  const pengguna =
+    raw?.pengguna ||
+    raw?.user ||
+    raw?.peminjam ||
+    raw?.siswa ||
+    raw?.anggota ||
+    {};
+
+  const kelas =
+    pengguna?.kelas?.nama ||
+    pengguna?.kelas?.namaKelas ||
+    pengguna?.kelas?.kode ||
+    pengguna?.namaKelas ||
+    pengguna?.kelasNama ||
+    raw?.kelas?.nama ||
+    raw?.kelas ||
+    "-";
+
+  const tanggalPinjam =
+    raw?.tanggalPinjam ||
+    raw?.tanggalPeminjaman ||
+    raw?.createdAt ||
+    raw?.created_at ||
+    null;
+
+  const jatuhTempo =
+    raw?.jatuhTempo ||
+    raw?.tanggalJatuhTempo ||
+    raw?.dueDate ||
+    raw?.tanggalHarusKembali ||
+    null;
+
+  const tanggalKembali =
+    raw?.tanggalKembali ||
+    raw?.returnedAt ||
+    raw?.tanggalPengembalian ||
+    null;
+
+  const normalized = {
+    id: raw?.id ?? raw?.peminjamanId ?? null,
+    kode:
+      raw?.kode ||
+      raw?.kodePeminjaman ||
+      raw?.nomorPeminjaman ||
+      raw?.noPeminjaman ||
+      "-",
+    penggunaId:
+      raw?.penggunaId ||
+      pengguna?.id ||
+      pengguna?.penggunaId ||
+      "",
+    siswa:
+      pengguna?.nama ||
+      pengguna?.namaLengkap ||
+      pengguna?.name ||
+      raw?.namaSiswa ||
+      raw?.siswaNama ||
+      "-",
+    nis:
+      pengguna?.nis ||
+      pengguna?.nomorInduk ||
+      pengguna?.nisn ||
+      raw?.nis ||
+      raw?.nomorInduk ||
+      "-",
+    kelas,
+    bukuId: raw?.bukuId || buku?.id || buku?.bukuId || "",
+    buku:
+      buku?.judul ||
+      buku?.title ||
+      raw?.judulBuku ||
+      raw?.namaBuku ||
+      "-",
+    kodeBuku:
+      buku?.kodeBuku ||
+      buku?.kode ||
+      raw?.kodeBuku ||
+      "-",
+    tanggalPinjam,
+    jatuhTempo,
+    tanggalKembali,
+    status: normalizeStatus(raw?.status, {
+      jatuhTempo,
+      tanggalKembali,
+    }),
+    denda: Number(raw?.denda ?? raw?.fine ?? 0) || 0,
+    petugas:
+      raw?.petugas?.nama ||
+      raw?.petugas?.namaLengkap ||
+      raw?.petugas ||
+      raw?.admin?.nama ||
+      "-",
+    raw,
+  };
+
+  return normalized;
+}
+
+function normalizeBook(item) {
+  const raw = item || {};
+  return {
+    ...raw,
+    id: raw?.id ?? raw?.bukuId ?? null,
+    kodeBuku: raw?.kodeBuku ?? raw?.kode ?? "-",
+    judul: raw?.judul ?? raw?.title ?? "Tanpa Judul",
+    tipe: asString(raw?.tipe).toUpperCase(),
+    status: asString(raw?.status).toLowerCase(),
+    jumlah: Number(raw?.jumlah ?? 0) || 0,
+    jumlahTersedia: Number(
+      raw?.jumlahTersedia ?? raw?.tersedia ?? raw?.jumlah ?? 0,
+    ),
+  };
+}
+
+function getErrorMessage(error, fallback) {
+  if (!error) return fallback;
+  if (typeof error === "string") return error;
+  return error?.message || error?.error || fallback;
+}
 
 /* =========================================================
    STAT CARD
@@ -174,27 +274,42 @@ const emptyForm = {
 
 function StatCard({ icon: Icon, label, value, type }) {
   const styles = {
-    blue: "bg-blue-50 text-blue-600",
-    orange: "bg-orange-50 text-orange-600",
-    green: "bg-emerald-50 text-emerald-600",
-    red: "bg-rose-50 text-rose-600",
+    blue: {
+      bg: themePrimarySoft,
+      text: "text-[var(--color-primary)]",
+    },
+    orange: {
+      bg: "bg-[color-mix(in_srgb,var(--color-warning)_12%,transparent)]",
+      text: "text-[var(--color-warning)]",
+    },
+    green: {
+      bg: "bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)]",
+      text: "text-[var(--color-success)]",
+    },
+    red: {
+      bg: dangerSoft,
+      text: dangerText,
+    },
   };
 
+  const style = styles[type] || styles.blue;
+
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-[0_1px_3px_rgba(15,23,42,0.08)] sm:p-5">
+    <div
+      className={`theme-card theme-border rounded-xl border p-4 ${themeCardShadow} sm:p-5`}
+    >
       <div className="flex items-center gap-3">
         <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${styles[type]}`}
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${style.bg} ${style.text}`}
         >
           <Icon size={19} />
         </div>
 
         <div>
-          <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
+          <p className="theme-text-muted text-[11px] font-medium uppercase tracking-wide">
             {label}
           </p>
-
-          <p className="mt-1 text-2xl font-bold tracking-tight text-slate-900">
+          <p className="theme-text mt-1 text-2xl font-bold tracking-tight">
             {value}
           </p>
         </div>
@@ -210,7 +325,9 @@ function StatCard({ icon: Icon, label, value, type }) {
 function StatusBadge({ status }) {
   if (status === "Dipinjam") {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">
+      <span
+        className={`inline-flex items-center gap-1.5 rounded-full border ${themePrimarySoftBorder} ${themePrimarySoft} px-2.5 py-1 text-xs font-medium text-[var(--color-primary)]`}
+      >
         <Clock3 size={13} />
         Dipinjam
       </span>
@@ -219,7 +336,9 @@ function StatusBadge({ status }) {
 
   if (status === "Terlambat") {
     return (
-      <span className="inline-flex items-center gap-1.5 rounded-full border border-rose-200 bg-rose-50 px-2.5 py-1 text-xs font-medium text-rose-700">
+      <span
+        className={`inline-flex items-center gap-1.5 rounded-full border ${dangerBorder} ${dangerSoft} px-2.5 py-1 text-xs font-medium ${dangerText}`}
+      >
         <AlertTriangle size={13} />
         Terlambat
       </span>
@@ -227,7 +346,7 @@ function StatusBadge({ status }) {
   }
 
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-full border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
+    <span className="inline-flex items-center gap-1.5 rounded-full border border-[color-mix(in_srgb,var(--color-success)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] px-2.5 py-1 text-xs font-medium text-[var(--color-success)]">
       <CheckCircle2 size={13} />
       Dikembalikan
     </span>
@@ -235,247 +354,138 @@ function StatusBadge({ status }) {
 }
 
 /* =========================================================
-   FORM MODAL
+   LOAN FORM
 ========================================================= */
 
-function LoanForm({ initial, editMode, onCancel, onSave }) {
-  const [form, setForm] = useState(initial);
+function LoanForm({ books, initial, onCancel, onSave, saving }) {
+  const [penggunaId, setPenggunaId] = useState(initial?.penggunaId || "");
+  const [bukuId, setBukuId] = useState(initial?.bukuId || "");
 
-  const update = (key) => (event) => {
-    setForm((current) => ({
-      ...current,
-      [key]: event.target.value,
-    }));
-  };
+  const availableBooks = useMemo(
+    () =>
+      books.filter(
+        (book) =>
+          book?.id &&
+          book?.status === "aktif" &&
+          book?.tipe === "FISIK" &&
+          Number(book?.jumlahTersedia || 0) > 0,
+      ),
+    [books],
+  );
+
+  const selectedBook = useMemo(
+    () => availableBooks.find((book) => book.id === bukuId) || null,
+    [availableBooks, bukuId],
+  );
 
   const submit = (event) => {
     event.preventDefault();
 
-    if (!form.siswa.trim()) return;
-    if (!form.buku.trim()) return;
+    if (!bukuId) return;
+    if (!penggunaId.trim()) return;
 
     onSave({
-      ...form,
-      denda: Number(form.denda) || 0,
+      bukuId,
+      penggunaId: penggunaId.trim(),
     });
   };
 
+  const inputClass = `theme-input theme-border theme-text ${themeFocus} h-11 w-full rounded-lg border px-3.5 text-sm outline-none transition placeholder:text-[var(--color-text-placeholder)]`;
+
+  const selectClass = `theme-input theme-border theme-text ${themeFocus} h-11 w-full appearance-none rounded-lg border px-3.5 pr-9 text-sm outline-none`;
+
   return (
     <form onSubmit={submit} className="space-y-5">
-      {/* SISWA */}
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div>
-          <label className="mb-2 block text-xs font-semibold text-slate-600">
-            Nama Siswa
-          </label>
-
-          <input
-            required
-            value={form.siswa}
-            onChange={update("siswa")}
-            placeholder="Nama siswa"
-            className="h-11 w-full rounded-lg border border-slate-300 px-3.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-          />
-        </div>
-
-        <div>
-          <label className="mb-2 block text-xs font-semibold text-slate-600">
-            NIS
-          </label>
-
-          <input
-            value={form.nis}
-            onChange={update("nis")}
-            placeholder="Nomor induk siswa"
-            className="h-11 w-full rounded-lg border border-slate-300 px-3.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-          />
-        </div>
+      <div>
+        <label className="theme-text-secondary mb-2 block text-xs font-semibold">
+          ID Pengguna
+        </label>
+        <input
+          required
+          value={penggunaId}
+          onChange={(event) => setPenggunaId(event.target.value)}
+          placeholder="UUID pengguna/siswa"
+          className={inputClass}
+        />
+        <p className="theme-text-muted mt-1.5 text-[11px] leading-5">
+          Backend peminjaman menerima <span className="theme-text-secondary">penggunaId</span> sebagai identitas peminjam.
+        </p>
       </div>
 
-      {/* KELAS */}
-
       <div>
-        <label className="mb-2 block text-xs font-semibold text-slate-600">
-          Kelas
+        <label className="theme-text-secondary mb-2 block text-xs font-semibold">
+          Buku
         </label>
 
         <div className="relative">
           <select
-            value={form.kelas}
-            onChange={update("kelas")}
-            className="h-11 w-full appearance-none rounded-lg border border-slate-300 bg-white px-3.5 pr-9 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            required
+            value={bukuId}
+            onChange={(event) => setBukuId(event.target.value)}
+            className={selectClass}
           >
-            <option>9A</option>
-            <option>9B</option>
-            <option>9C</option>
-            <option>10A</option>
-            <option>10B</option>
-            <option>10C</option>
-            <option>11A</option>
-            <option>11B</option>
-            <option>12A</option>
-            <option>12B</option>
+            <option value="">Pilih buku fisik yang tersedia</option>
+            {availableBooks.map((book) => (
+              <option key={book.id} value={book.id}>
+                {book.kodeBuku} — {book.judul} ({book.jumlahTersedia} tersedia)
+              </option>
+            ))}
           </select>
 
           <ChevronDown
             size={15}
-            className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+            className="theme-text-muted pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
           />
         </div>
+
+        {availableBooks.length === 0 && (
+          <p className="theme-text-muted mt-1.5 text-[11px]">
+            Tidak ada buku FISIK berstatus aktif dengan stok tersedia.
+          </p>
+        )}
       </div>
 
-      {/* BUKU */}
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div>
-          <label className="mb-2 block text-xs font-semibold text-slate-600">
-            Judul Buku
-          </label>
-
-          <input
-            required
-            value={form.buku}
-            onChange={update("buku")}
-            placeholder="Judul buku"
-            className="h-11 w-full rounded-lg border border-slate-300 px-3.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-          />
-        </div>
-
-        <div>
-          <label className="mb-2 block text-xs font-semibold text-slate-600">
-            Kode Buku
-          </label>
-
-          <input
-            value={form.kodeBuku}
-            onChange={update("kodeBuku")}
-            placeholder="BK-0001"
-            className="h-11 w-full rounded-lg border border-slate-300 px-3.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-          />
-        </div>
-      </div>
-
-      {/* TANGGAL */}
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div>
-          <label className="mb-2 block text-xs font-semibold text-slate-600">
-            Tanggal Pinjam
-          </label>
-
-          <input
-            type="date"
-            value={form.tanggalPinjam}
-            onChange={update("tanggalPinjam")}
-            className="h-11 w-full rounded-lg border border-slate-300 px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-          />
-        </div>
-
-        <div>
-          <label className="mb-2 block text-xs font-semibold text-slate-600">
-            Jatuh Tempo
-          </label>
-
-          <input
-            type="date"
-            value={form.jatuhTempo}
-            onChange={update("jatuhTempo")}
-            className="h-11 w-full rounded-lg border border-slate-300 px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-          />
-        </div>
-
-        <div>
-          <label className="mb-2 block text-xs font-semibold text-slate-600">
-            Tanggal Kembali
-          </label>
-
-          <input
-            type="date"
-            value={form.tanggalKembali}
-            onChange={update("tanggalKembali")}
-            className="h-11 w-full rounded-lg border border-slate-300 px-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-          />
-        </div>
-      </div>
-
-      {/* STATUS + DENDA */}
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div>
-          <label className="mb-2 block text-xs font-semibold text-slate-600">
-            Status
-          </label>
-
-          <div className="relative">
-            <select
-              value={form.status}
-              onChange={update("status")}
-              className="h-11 w-full appearance-none rounded-lg border border-slate-300 bg-white px-3.5 pr-9 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+      {selectedBook && (
+        <div className={`theme-card-soft theme-border rounded-xl border p-4`}>
+          <div className="flex items-start gap-3">
+            <div
+              className={`theme-card theme-border flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border text-[var(--color-primary)]`}
             >
-              <option>Dipinjam</option>
-              <option>Terlambat</option>
-              <option>Dikembalikan</option>
-            </select>
-
-            <ChevronDown
-              size={15}
-              className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
-            />
+              <BookOpen size={18} />
+            </div>
+            <div className="min-w-0">
+              <p className="theme-text text-sm font-semibold">{selectedBook.judul}</p>
+              <p className="theme-text-muted mt-0.5 text-xs">
+                {selectedBook.kodeBuku} • {selectedBook.jumlahTersedia} tersedia
+              </p>
+            </div>
           </div>
         </div>
+      )}
 
-        <div>
-          <label className="mb-2 block text-xs font-semibold text-slate-600">
-            Denda
-          </label>
-
-          <div className="relative">
-            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-xs text-slate-400">
-              Rp
-            </span>
-
-            <input
-              type="number"
-              min="0"
-              value={form.denda}
-              onChange={update("denda")}
-              className="h-11 w-full rounded-lg border border-slate-300 pl-10 pr-3.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-            />
-          </div>
-        </div>
+      <div className="theme-card-soft theme-border rounded-xl border p-4">
+        <p className="theme-text-secondary text-xs leading-5">
+          Tanggal pinjam, jatuh tempo, status, stok, dan pengembalian mengikuti data serta aturan backend. Form ini hanya mengirim field yang memang diterima endpoint peminjaman.
+        </p>
       </div>
 
-      {/* PETUGAS */}
-
-      <div>
-        <label className="mb-2 block text-xs font-semibold text-slate-600">
-          Petugas
-        </label>
-
-        <input
-          value={form.petugas}
-          onChange={update("petugas")}
-          className="h-11 w-full rounded-lg border border-slate-300 px-3.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-        />
-      </div>
-
-      {/* FOOTER */}
-
-      <div className="flex flex-col-reverse gap-2 border-t border-slate-200 pt-5 sm:flex-row sm:justify-end">
+      <div className="theme-border-soft flex flex-col-reverse gap-2 border-t pt-5 sm:flex-row sm:justify-end">
         <button
           type="button"
           onClick={onCancel}
-          className="h-10 rounded-lg border border-slate-300 px-5 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+          disabled={saving}
+          className={`theme-card theme-border theme-text-secondary ${themeNeutralHover} h-10 rounded-lg border px-5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60`}
         >
           Batal
         </button>
 
         <button
           type="submit"
-          className="h-10 rounded-lg bg-blue-600 px-5 text-sm font-semibold text-white transition hover:bg-blue-700"
+          disabled={saving || availableBooks.length === 0}
+          className={`bg-[var(--color-primary)] text-[var(--color-card)] ${themePrimaryShadow} flex h-10 items-center justify-center gap-2 rounded-lg px-5 text-sm font-semibold transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60`}
         >
-          {editMode ? "Simpan Perubahan" : "Simpan Peminjaman"}
+          {saving ? <Loader2 size={16} className="animate-spin" /> : <Plus size={16} />}
+          {saving ? "Menyimpan..." : "Simpan Peminjaman"}
         </button>
       </div>
     </form>
@@ -490,150 +500,138 @@ function DetailModal({ loan, onClose }) {
   if (!loan) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-[2px]">
-      <div className="max-h-[92vh] w-full max-w-xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white px-5 py-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4 backdrop-blur-[2px]">
+      <div
+        className={`theme-card theme-border max-h-[92vh] w-full max-w-xl overflow-y-auto rounded-2xl border ${themeCardShadow}`}
+      >
+        <div className="theme-card theme-border-soft sticky top-0 z-10 flex items-center justify-between border-b px-5 py-4">
           <div>
-            <h2 className="text-lg font-bold text-slate-900">
-              Detail Peminjaman
-            </h2>
-
-            <p className="mt-0.5 text-xs text-slate-500">
-              Informasi transaksi peminjaman buku
+            <h2 className="theme-text text-lg font-bold">Detail Peminjaman</h2>
+            <p className="theme-text-secondary mt-0.5 text-xs">
+              Data transaksi dari backend perpustakaan
             </p>
           </div>
 
           <button
             type="button"
             onClick={onClose}
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+            className={`theme-text-muted flex h-9 w-9 items-center justify-center rounded-lg transition ${themeNeutralHover} hover:text-[var(--color-text)]`}
           >
             <X size={18} />
           </button>
         </div>
 
         <div className="p-5 sm:p-6">
-          {/* BOOK HEADER */}
-
           <div className="flex gap-4">
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white">
+            <div
+              className={`bg-[var(--color-primary)] text-[var(--color-card)] ${themePrimaryShadow} flex h-16 w-16 shrink-0 items-center justify-center rounded-xl`}
+            >
               <BookOpen size={27} />
             </div>
 
             <div className="min-w-0 flex-1">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="rounded-md bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">
-                  {loan.kode}
+                <span
+                  className={`rounded-md border ${themePrimarySoftBorder} ${themePrimarySoft} px-2.5 py-1 text-xs font-semibold text-[var(--color-primary)]`}
+                >
+                  {loan.kode !== "-" ? loan.kode : `ID ${asString(loan.id).slice(0, 8)}`}
                 </span>
-
                 <StatusBadge status={loan.status} />
               </div>
 
-              <h3 className="mt-2 text-lg font-bold text-slate-900">
-                {loan.buku}
-              </h3>
-
-              <p className="mt-0.5 text-xs text-slate-400">
-                {loan.kodeBuku}
-              </p>
+              <h3 className="theme-text mt-2 text-lg font-bold">{loan.buku}</h3>
+              <p className="theme-text-muted mt-0.5 text-xs">{loan.kodeBuku}</p>
             </div>
           </div>
 
-          {/* SISWA */}
-
-          <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-4">
+          <div className="theme-card-soft theme-border mt-6 rounded-xl border p-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-full bg-white text-blue-600 shadow-sm">
+              <div
+                className="theme-card theme-border flex h-10 w-10 items-center justify-center rounded-full border text-[var(--color-primary)] shadow-sm"
+              >
                 <UserRound size={18} />
               </div>
 
-              <div>
-                <p className="text-sm font-semibold text-slate-800">
-                  {loan.siswa}
-                </p>
-
-                <p className="mt-0.5 text-xs text-slate-400">
+              <div className="min-w-0">
+                <p className="theme-text text-sm font-semibold">{loan.siswa}</p>
+                <p className="theme-text-muted mt-0.5 text-xs">
                   NIS {loan.nis} • Kelas {loan.kelas}
                 </p>
               </div>
             </div>
           </div>
 
-          {/* DATE */}
-
           <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
-            <div className="rounded-xl border border-slate-200 p-4">
-              <div className="flex items-center gap-2 text-slate-400">
+            <div className="theme-card theme-border rounded-xl border p-4">
+              <div className="theme-text-muted flex items-center gap-2">
                 <CalendarDays size={15} />
-
-                <span className="text-xs">
-                  Tanggal Pinjam
-                </span>
+                <span className="text-xs">Tanggal Pinjam</span>
               </div>
-
-              <p className="mt-2 text-sm font-semibold text-slate-700">
-                {loan.tanggalPinjam}
+              <p className="theme-text-secondary mt-2 text-sm font-semibold">
+                {formatDate(loan.tanggalPinjam)}
               </p>
             </div>
 
-            <div className="rounded-xl border border-orange-100 bg-orange-50 p-4">
-              <div className="flex items-center gap-2 text-orange-500">
+            <div className="rounded-xl border border-[color-mix(in_srgb,var(--color-warning)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)] p-4">
+              <div className="flex items-center gap-2 text-[var(--color-warning)]">
                 <Clock3 size={15} />
-
-                <span className="text-xs">
-                  Jatuh Tempo
-                </span>
+                <span className="text-xs">Jatuh Tempo</span>
               </div>
-
-              <p className="mt-2 text-sm font-semibold text-orange-700">
-                {loan.jatuhTempo}
+              <p className="mt-2 text-sm font-semibold text-[var(--color-warning)]">
+                {formatDate(loan.jatuhTempo)}
               </p>
             </div>
 
-            <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-4">
-              <div className="flex items-center gap-2 text-emerald-500">
+            <div className="rounded-xl border border-[color-mix(in_srgb,var(--color-success)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] p-4">
+              <div className="flex items-center gap-2 text-[var(--color-success)]">
                 <RotateCcw size={15} />
-
-                <span className="text-xs">
-                  Dikembalikan
-                </span>
+                <span className="text-xs">Dikembalikan</span>
               </div>
-
-              <p className="mt-2 text-sm font-semibold text-emerald-700">
-                {loan.tanggalKembali || "-"}
+              <p className="mt-2 text-sm font-semibold text-[var(--color-success)]">
+                {formatDate(loan.tanggalKembali)}
               </p>
             </div>
           </div>
 
-          {/* DENDA */}
-
-          <div className="mt-4 flex items-center justify-between rounded-xl border border-slate-200 px-4 py-3">
-            <span className="text-sm text-slate-500">
-              Total Denda
-            </span>
-
-            <span className="text-sm font-bold text-slate-900">
-              Rp {loan.denda.toLocaleString("id-ID")}
-            </span>
+          <div className="theme-card theme-border mt-4 flex items-center justify-between rounded-xl border px-4 py-3">
+            <span className="theme-text-secondary text-sm">Total Denda</span>
+            <span className="theme-text text-sm font-bold">{formatRupiah(loan.denda)}</span>
           </div>
 
-          {/* PETUGAS */}
-
-          <div className="mt-4 flex items-center justify-between border-t border-slate-200 pt-4">
-            <span className="text-xs text-slate-400">
-              Petugas
-            </span>
-
-            <span className="text-xs font-medium text-slate-600">
-              {loan.petugas}
-            </span>
+          <div className="theme-card-soft theme-border mt-4 rounded-xl border p-4">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              <div>
+                <p className="theme-text-muted text-xs">Peminjaman ID</p>
+                <p className="theme-text-secondary mt-1 break-all text-xs font-medium">
+                  {asString(loan.id, "-")}
+                </p>
+              </div>
+              <div>
+                <p className="theme-text-muted text-xs">Pengguna ID</p>
+                <p className="theme-text-secondary mt-1 break-all text-xs font-medium">
+                  {asString(loan.penggunaId, "-")}
+                </p>
+              </div>
+              <div>
+                <p className="theme-text-muted text-xs">Buku ID</p>
+                <p className="theme-text-secondary mt-1 break-all text-xs font-medium">
+                  {asString(loan.bukuId, "-")}
+                </p>
+              </div>
+              <div>
+                <p className="theme-text-muted text-xs">Petugas</p>
+                <p className="theme-text-secondary mt-1 text-xs font-medium">
+                  {loan.petugas}
+                </p>
+              </div>
+            </div>
           </div>
 
           <div className="mt-5 flex justify-end">
             <button
               type="button"
               onClick={onClose}
-              className="h-10 rounded-lg border border-slate-300 px-5 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+              className={`theme-card theme-border theme-text-secondary ${themeNeutralHover} h-10 rounded-lg border px-5 text-sm font-medium transition`}
             >
               Tutup
             </button>
@@ -645,24 +643,119 @@ function DetailModal({ loan, onClose }) {
 }
 
 /* =========================================================
+   RETURN CONFIRMATION
+========================================================= */
+
+function ReturnModal({ loan, onClose, onConfirm, saving }) {
+  if (!loan) return null;
+
+  return (
+    <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/40 p-4 backdrop-blur-[2px]">
+      <div className={`theme-card theme-border w-full max-w-md rounded-2xl border p-6 ${themeCardShadow}`}>
+        <div className="flex items-start gap-4">
+          <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-full ${dangerSoft} ${dangerText}`}>
+            <RotateCcw size={20} />
+          </div>
+
+          <div className="min-w-0">
+            <h2 className="theme-text text-lg font-bold">Kembalikan buku?</h2>
+            <p className="theme-text-secondary mt-1.5 text-sm leading-6">
+              Transaksi untuk <span className="theme-text font-semibold">{loan.siswa}</span> dengan buku <span className="theme-text font-semibold">{loan.buku}</span> akan diproses sebagai pengembalian melalui backend.
+            </p>
+          </div>
+        </div>
+
+        <div className="mt-5 rounded-xl border border-[color-mix(in_srgb,var(--color-success)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] p-4">
+          <p className="theme-text-secondary text-xs leading-5">
+            Backend akan menangani perubahan stok dan data pengembalian. Tidak ada perubahan stok secara manual dari frontend.
+          </p>
+        </div>
+
+        <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <button
+            type="button"
+            onClick={onClose}
+            disabled={saving}
+            className={`theme-card theme-border theme-text-secondary ${themeNeutralHover} h-10 rounded-lg border px-5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60`}
+          >
+            Batal
+          </button>
+
+          <button
+            type="button"
+            onClick={onConfirm}
+            disabled={saving}
+            className="bg-[var(--color-primary)] text-[var(--color-card)] h-10 rounded-lg px-5 text-sm font-semibold transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {saving ? "Memproses..." : "Ya, Kembalikan"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================
    MAIN PAGE
 ========================================================= */
 
 export default function PinjamPage() {
-  const [loans, setLoans] = useState(initialLoans);
+  const [loans, setLoans] = useState([]);
+  const [books, setBooks] = useState([]);
 
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("Semua");
   const [classFilter, setClassFilter] = useState("Semua");
 
   const [modal, setModal] = useState(null);
-  const [activeLoan, setActiveLoan] = useState(null);
   const [detailLoan, setDetailLoan] = useState(null);
-  const [deleteLoan, setDeleteLoan] = useState(null);
+  const [returnLoan, setReturnLoan] = useState(null);
 
-  /* =========================================================
-     FILTER
-  ========================================================= */
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  const loadData = async (showRefresh = false) => {
+    if (showRefresh) setRefreshing(true);
+    else setLoading(true);
+
+    setError("");
+
+    try {
+      const [loanResponse, bookResponse] = await Promise.all([
+        getPeminjaman(),
+        getBuku(),
+      ]);
+
+      setLoans(toArray(loanResponse).map(normalizeLoan));
+      setBooks(toArray(bookResponse).map(normalizeBook));
+    } catch (err) {
+      setError(
+        getErrorMessage(
+          err,
+          "Gagal mengambil data peminjaman dari backend.",
+        ),
+      );
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, []);
+
+  const classOptions = useMemo(() => {
+    const values = loans
+      .map((loan) => loan.kelas)
+      .filter((value) => value && value !== "-");
+
+    return Array.from(new Set(values)).sort((a, b) =>
+      a.localeCompare(b, "id-ID", { numeric: true }),
+    );
+  }, [loans]);
 
   const filteredLoans = useMemo(() => {
     const query = search.trim().toLowerCase();
@@ -670,145 +763,28 @@ export default function PinjamPage() {
     return loans.filter((loan) => {
       const matchSearch =
         !query ||
-        loan.kode.toLowerCase().includes(query) ||
-        loan.siswa.toLowerCase().includes(query) ||
-        loan.nis.toLowerCase().includes(query) ||
-        loan.buku.toLowerCase().includes(query) ||
-        loan.kodeBuku.toLowerCase().includes(query);
+        asString(loan.kode).toLowerCase().includes(query) ||
+        asString(loan.id).toLowerCase().includes(query) ||
+        asString(loan.siswa).toLowerCase().includes(query) ||
+        asString(loan.nis).toLowerCase().includes(query) ||
+        asString(loan.penggunaId).toLowerCase().includes(query) ||
+        asString(loan.buku).toLowerCase().includes(query) ||
+        asString(loan.kodeBuku).toLowerCase().includes(query);
 
       const matchStatus =
-        statusFilter === "Semua" ||
-        loan.status === statusFilter;
+        statusFilter === "Semua" || loan.status === statusFilter;
 
       const matchClass =
-        classFilter === "Semua" ||
-        loan.kelas === classFilter;
+        classFilter === "Semua" || loan.kelas === classFilter;
 
       return matchSearch && matchStatus && matchClass;
     });
   }, [loans, search, statusFilter, classFilter]);
 
-  /* =========================================================
-     STATISTIC
-  ========================================================= */
-
   const totalPeminjaman = loans.length;
-
-  const sedangDipinjam = loans.filter(
-    (loan) => loan.status === "Dipinjam"
-  ).length;
-
-  const terlambat = loans.filter(
-    (loan) => loan.status === "Terlambat"
-  ).length;
-
-  const dikembalikan = loans.filter(
-    (loan) => loan.status === "Dikembalikan"
-  ).length;
-
-  /* =========================================================
-     ADD
-  ========================================================= */
-
-  const openAdd = () => {
-    const nextNumber = loans.length + 1;
-
-    setActiveLoan({
-      ...emptyForm,
-      kode: `PJ-${String(nextNumber).padStart(4, "0")}`,
-    });
-
-    setModal("add");
-  };
-
-  /* =========================================================
-     EDIT
-  ========================================================= */
-
-  const openEdit = (loan) => {
-    setActiveLoan({
-      ...loan,
-    });
-
-    setModal("edit");
-  };
-
-  /* =========================================================
-     CLOSE MODAL
-  ========================================================= */
-
-  const closeModal = () => {
-    setModal(null);
-    setActiveLoan(null);
-  };
-
-  /* =========================================================
-     SAVE
-  ========================================================= */
-
-  const saveLoan = (form) => {
-    if (modal === "add") {
-      setLoans((current) => [
-        {
-          ...form,
-          id: Date.now(),
-        },
-        ...current,
-      ]);
-    } else {
-      setLoans((current) =>
-        current.map((loan) =>
-          loan.id === form.id
-            ? {
-                ...loan,
-                ...form,
-              }
-            : loan
-        )
-      );
-    }
-
-    closeModal();
-  };
-
-  /* =========================================================
-     RETURN BOOK
-  ========================================================= */
-
-  const returnBook = (loan) => {
-    setLoans((current) =>
-      current.map((item) =>
-        item.id === loan.id
-          ? {
-              ...item,
-              status: "Dikembalikan",
-              tanggalKembali: "2026-09-07",
-              denda: 0,
-            }
-          : item
-      )
-    );
-  };
-
-  /* =========================================================
-     DELETE
-  ========================================================= */
-
-  const confirmDelete = () => {
-    if (!deleteLoan) return;
-
-    setLoans((current) =>
-      current.filter(
-        (loan) => loan.id !== deleteLoan.id
-      )
-    );
-
-    setDeleteLoan(null);
-  };
-
-  /* =========================================================
-     RESET
-  ========================================================= */
+  const sedangDipinjam = loans.filter((loan) => loan.status === "Dipinjam").length;
+  const terlambat = loans.filter((loan) => loan.status === "Terlambat").length;
+  const dikembalikan = loans.filter((loan) => loan.status === "Dikembalikan").length;
 
   const resetFilter = () => {
     setSearch("");
@@ -816,12 +792,61 @@ export default function PinjamPage() {
     setClassFilter("Semua");
   };
 
-  /* =========================================================
-     RENDER
-  ========================================================= */
+  const openAdd = () => {
+    setError("");
+    setModal("add");
+  };
+
+  const closeModal = () => {
+    if (saving) return;
+    setModal(null);
+  };
+
+  const saveLoan = async (payload) => {
+    setSaving(true);
+    setError("");
+
+    try {
+      await pinjamBuku(payload);
+      setModal(null);
+      await loadData(true);
+    } catch (err) {
+      setError(
+        getErrorMessage(
+          err,
+          "Gagal membuat transaksi peminjaman.",
+        ),
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const confirmReturn = async () => {
+    if (!returnLoan?.id) return;
+
+    setSaving(true);
+    setError("");
+
+    try {
+      await kembalikanBuku(String(returnLoan.id));
+      setReturnLoan(null);
+      if (detailLoan?.id === returnLoan.id) setDetailLoan(null);
+      await loadData(true);
+    } catch (err) {
+      setError(
+        getErrorMessage(
+          err,
+          "Gagal memproses pengembalian buku.",
+        ),
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
 
   return (
-    <div className="flex min-h-screen bg-[#F5F8FC]">
+    <div className="theme-page flex min-h-screen">
       <Sidebar />
 
       <div className="flex min-w-0 flex-1 flex-col">
@@ -829,23 +854,20 @@ export default function PinjamPage() {
 
         <main className="min-w-0 flex-1 px-4 py-5 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-[1400px]">
-
-            {/* =================================================
-                HEADER
-            ================================================= */}
-
+            {/* HEADER */}
             <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm">
+                <div
+                  className={`bg-[var(--color-primary)] text-[var(--color-card)] ${themePrimaryShadow} flex h-12 w-12 items-center justify-center rounded-xl`}
+                >
                   <BookOpen size={23} />
                 </div>
 
                 <div>
-                  <h1 className="text-[25px] font-bold tracking-tight text-slate-900">
+                  <h1 className="theme-text text-[25px] font-bold tracking-tight">
                     Peminjaman Buku
                   </h1>
-
-                  <p className="mt-0.5 text-sm text-slate-500">
+                  <p className="theme-text-secondary mt-0.5 text-sm">
                     Kelola transaksi peminjaman dan pengembalian buku
                   </p>
                 </div>
@@ -854,20 +876,19 @@ export default function PinjamPage() {
               <div className="flex items-center gap-2">
                 <button
                   type="button"
-                  onClick={resetFilter}
-                  className="flex h-10 items-center gap-2 rounded-lg border border-slate-300 bg-white px-3.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+                  onClick={() => loadData(true)}
+                  disabled={loading || refreshing}
+                  className={`theme-card theme-border theme-text-secondary ${themeNeutralHover} flex h-10 items-center gap-2 rounded-lg border px-3.5 text-sm font-medium transition disabled:cursor-not-allowed disabled:opacity-60`}
                 >
-                  <RefreshCw size={16} />
-
-                  <span className="hidden sm:inline">
-                    Reset
-                  </span>
+                  <RefreshCw size={16} className={refreshing ? "animate-spin" : ""} />
+                  <span className="hidden sm:inline">Refresh</span>
                 </button>
 
                 <button
                   type="button"
                   onClick={openAdd}
-                  className="flex h-10 items-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+                  disabled={loading || books.length === 0}
+                  className={`bg-[var(--color-primary)] text-[var(--color-card)] ${themePrimaryShadow} flex h-10 items-center gap-2 rounded-lg px-4 text-sm font-semibold transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60`}
                 >
                   <Plus size={17} />
                   Pinjam Buku
@@ -875,10 +896,25 @@ export default function PinjamPage() {
               </div>
             </div>
 
-            {/* =================================================
-                STATISTICS
-            ================================================= */}
+            {error && (
+              <div className={`mb-5 flex items-start gap-3 rounded-xl border ${dangerBorder} ${dangerSoft} p-4`}>
+                <AlertTriangle size={18} className={`mt-0.5 shrink-0 ${dangerText}`} />
+                <div className="min-w-0 flex-1">
+                  <p className={`text-sm font-semibold ${dangerText}`}>Terjadi kesalahan</p>
+                  <p className="theme-text-secondary mt-1 break-words text-xs leading-5">{error}</p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setError("")}
+                  className={`theme-text-muted ${themeNeutralHover} flex h-7 w-7 shrink-0 items-center justify-center rounded-md transition`}
+                  aria-label="Tutup pesan error"
+                >
+                  <X size={15} />
+                </button>
+              </div>
+            )}
 
+            {/* STATISTICS */}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
               <StatCard
                 icon={Library}
@@ -886,21 +922,18 @@ export default function PinjamPage() {
                 value={totalPeminjaman}
                 type="blue"
               />
-
               <StatCard
                 icon={Clock3}
                 label="Sedang Dipinjam"
                 value={sedangDipinjam}
                 type="orange"
               />
-
               <StatCard
                 icon={AlertTriangle}
                 label="Terlambat"
                 value={terlambat}
                 type="red"
               />
-
               <StatCard
                 icon={CheckCircle2}
                 label="Dikembalikan"
@@ -909,118 +942,89 @@ export default function PinjamPage() {
               />
             </div>
 
-            {/* =================================================
-                FILTER
-            ================================================= */}
-
-            <div className="mt-5 rounded-xl border border-slate-200 bg-white p-4 shadow-[0_1px_3px_rgba(15,23,42,0.08)]">
+            {/* FILTER */}
+            <div
+              className={`theme-card theme-border mt-5 rounded-xl border p-4 ${themeCardShadow}`}
+            >
               <div className="relative">
                 <Search
                   size={18}
-                  className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                  className="theme-text-muted pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2"
                 />
-
                 <input
                   value={search}
-                  onChange={(event) =>
-                    setSearch(event.target.value)
-                  }
-                  placeholder="Cari kode transaksi, siswa, NIS, atau judul buku..."
-                  className="h-11 w-full rounded-lg border border-slate-300 bg-white pl-10 pr-4 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  onChange={(event) => setSearch(event.target.value)}
+                  placeholder="Cari siswa, NIS, ID pengguna, judul, atau kode buku..."
+                  className={`theme-input theme-border theme-text ${themeFocus} h-11 w-full rounded-lg border pl-10 pr-4 text-sm outline-none transition placeholder:text-[var(--color-text-placeholder)]`}
                 />
               </div>
 
               <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3 xl:flex">
-                {/* STATUS */}
-
                 <div className="relative xl:w-48">
                   <select
                     value={statusFilter}
-                    onChange={(event) =>
-                      setStatusFilter(event.target.value)
-                    }
-                    className="h-10 w-full appearance-none rounded-lg border border-slate-300 bg-white px-3.5 pr-9 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    onChange={(event) => setStatusFilter(event.target.value)}
+                    className={`theme-input theme-border theme-text ${themeFocus} h-10 w-full appearance-none rounded-lg border px-3.5 pr-9 text-sm outline-none`}
                   >
-                    <option value="Semua">
-                      Semua Status
-                    </option>
-
-                    <option>Dipinjam</option>
-                    <option>Terlambat</option>
-                    <option>Dikembalikan</option>
+                    <option value="Semua">Semua Status</option>
+                    <option value="Dipinjam">Dipinjam</option>
+                    <option value="Terlambat">Terlambat</option>
+                    <option value="Dikembalikan">Dikembalikan</option>
                   </select>
-
                   <ChevronDown
                     size={15}
-                    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+                    className="theme-text-muted pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
                   />
                 </div>
 
-                {/* CLASS */}
-
-                <div className="relative xl:w-40">
+                <div className="relative xl:w-48">
                   <select
                     value={classFilter}
-                    onChange={(event) =>
-                      setClassFilter(event.target.value)
-                    }
-                    className="h-10 w-full appearance-none rounded-lg border border-slate-300 bg-white px-3.5 pr-9 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    onChange={(event) => setClassFilter(event.target.value)}
+                    className={`theme-input theme-border theme-text ${themeFocus} h-10 w-full appearance-none rounded-lg border px-3.5 pr-9 text-sm outline-none`}
                   >
-                    <option value="Semua">
-                      Semua Kelas
-                    </option>
-
-                    <option>9A</option>
-                    <option>9B</option>
-                    <option>9C</option>
-                    <option>10A</option>
-                    <option>10B</option>
-                    <option>10C</option>
-                    <option>11A</option>
-                    <option>11B</option>
-                    <option>12A</option>
-                    <option>12B</option>
+                    <option value="Semua">Semua Kelas</option>
+                    {classOptions.map((kelas) => (
+                      <option key={kelas} value={kelas}>
+                        {kelas}
+                      </option>
+                    ))}
                   </select>
-
                   <ChevronDown
                     size={15}
-                    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+                    className="theme-text-muted pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
                   />
                 </div>
 
                 <button
                   type="button"
                   onClick={resetFilter}
-                  className="h-10 px-3 text-left text-sm font-medium text-blue-600 hover:bg-blue-50 xl:text-center"
+                  className={`h-10 rounded-lg px-3 text-left text-sm font-medium text-[var(--color-primary)] ${themePrimaryHover} transition xl:text-center`}
                 >
                   Reset Filter
                 </button>
 
                 <div className="flex items-center xl:ml-auto">
-                  <span className="text-sm text-slate-500">
+                  <span className="theme-text-muted text-sm">
                     {filteredLoans.length} transaksi ditemukan
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* =================================================
-                TABLE
-            ================================================= */}
-
-            <div className="mt-5 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]">
-              <div className="flex flex-col gap-1 border-b border-slate-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+            {/* TABLE */}
+            <div
+              className={`theme-card theme-border mt-5 overflow-hidden rounded-xl border ${themeCardShadow}`}
+            >
+              <div className="theme-border-soft flex flex-col gap-1 border-b px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h2 className="text-sm font-bold text-slate-900">
-                    Daftar Peminjaman
-                  </h2>
-
-                  <p className="mt-0.5 text-xs text-slate-400">
-                    Riwayat transaksi peminjaman buku siswa
+                  <h2 className="theme-text text-sm font-bold">Daftar Peminjaman</h2>
+                  <p className="theme-text-muted mt-0.5 text-xs">
+                    Riwayat transaksi peminjaman buku dari backend
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2 text-xs text-slate-500">
+                <div className="theme-text-secondary flex items-center gap-2 text-xs">
                   <Library size={14} />
                   {filteredLoans.length} transaksi
                 </div>
@@ -1029,214 +1033,160 @@ export default function PinjamPage() {
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[1150px] text-left">
                   <thead>
-                    <tr className="border-b border-slate-200 bg-slate-50">
-                      <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                    <tr className="theme-border-soft border-b bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]">
+                      <th className="theme-text-muted px-5 py-3 text-[11px] font-semibold uppercase tracking-wide">
                         Peminjam
                       </th>
-
-                      <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                      <th className="theme-text-muted px-4 py-3 text-[11px] font-semibold uppercase tracking-wide">
                         Buku
                       </th>
-
-                      <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                      <th className="theme-text-muted px-4 py-3 text-[11px] font-semibold uppercase tracking-wide">
                         Tanggal Pinjam
                       </th>
-
-                      <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                      <th className="theme-text-muted px-4 py-3 text-[11px] font-semibold uppercase tracking-wide">
                         Jatuh Tempo
                       </th>
-
-                      <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                      <th className="theme-text-muted px-4 py-3 text-[11px] font-semibold uppercase tracking-wide">
                         Kembali
                       </th>
-
-                      <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                      <th className="theme-text-muted px-4 py-3 text-[11px] font-semibold uppercase tracking-wide">
                         Status
                       </th>
-
-                      <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                      <th className="theme-text-muted px-4 py-3 text-[11px] font-semibold uppercase tracking-wide">
                         Denda
                       </th>
-
-                      <th className="px-5 py-3 text-right text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                      <th className="theme-text-muted px-5 py-3 text-right text-[11px] font-semibold uppercase tracking-wide">
                         Aksi
                       </th>
                     </tr>
                   </thead>
 
-                  <tbody className="divide-y divide-slate-100">
-                    {filteredLoans.length > 0 ? (
+                  <tbody className="divide-y divide-[var(--color-border-soft)]">
+                    {loading ? (
+                      <tr>
+                        <td colSpan={8} className="px-5 py-16 text-center">
+                          <div className="theme-text-muted inline-flex items-center gap-2 text-sm">
+                            <Loader2 size={18} className="animate-spin" />
+                            Mengambil data peminjaman...
+                          </div>
+                        </td>
+                      </tr>
+                    ) : filteredLoans.length > 0 ? (
                       filteredLoans.map((loan) => (
                         <tr
-                          key={loan.id}
-                          className="transition hover:bg-slate-50/70"
+                          key={String(loan.id)}
+                          className="transition hover:bg-[color-mix(in_srgb,var(--color-primary)_5%,transparent)]"
                         >
-                          {/* PEMINJAM */}
-
                           <td className="px-5 py-4">
                             <div className="flex items-center gap-3">
-                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-50 text-blue-600">
+                              <div
+                                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${themePrimarySoft} text-[var(--color-primary)]`}
+                              >
                                 <UserRound size={18} />
                               </div>
-
-                              <div>
-                                <p className="text-sm font-semibold text-slate-800">
+                              <div className="min-w-0">
+                                <p className="theme-text truncate text-sm font-semibold">
                                   {loan.siswa}
                                 </p>
-
-                                <p className="mt-0.5 text-xs text-slate-400">
+                                <p className="theme-text-muted mt-0.5 text-xs">
                                   {loan.nis} • Kelas {loan.kelas}
                                 </p>
-
-                                <p className="mt-0.5 text-[11px] font-medium text-blue-600">
-                                  {loan.kode}
+                                <p className="mt-0.5 break-all text-[11px] font-medium text-[var(--color-primary)]">
+                                  {loan.penggunaId || loan.kode || `ID ${asString(loan.id).slice(0, 8)}`}
                                 </p>
                               </div>
                             </div>
                           </td>
 
-                          {/* BUKU */}
-
                           <td className="px-4 py-4">
                             <div className="flex items-center gap-2.5">
-                              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-500">
+                              <div className="theme-card-soft theme-border theme-text-muted flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border">
                                 <BookOpen size={16} />
                               </div>
-
-                              <div>
-                                <p className="max-w-[250px] truncate text-sm font-medium text-slate-700">
+                              <div className="min-w-0">
+                                <p className="theme-text-secondary max-w-[250px] truncate text-sm font-medium">
                                   {loan.buku}
                                 </p>
-
-                                <p className="mt-0.5 text-[11px] text-slate-400">
+                                <p className="theme-text-muted mt-0.5 text-[11px]">
                                   {loan.kodeBuku}
                                 </p>
                               </div>
                             </div>
                           </td>
 
-                          {/* TANGGAL PINJAM */}
-
                           <td className="px-4 py-4">
-                            <span className="text-xs text-slate-600">
-                              {loan.tanggalPinjam}
+                            <span className="theme-text-secondary text-xs">
+                              {formatDate(loan.tanggalPinjam)}
                             </span>
                           </td>
-
-                          {/* JATUH TEMPO */}
 
                           <td className="px-4 py-4">
                             <span
                               className={`text-xs font-medium ${
                                 loan.status === "Terlambat"
-                                  ? "text-rose-600"
-                                  : "text-slate-600"
+                                  ? dangerText
+                                  : "theme-text-secondary"
                               }`}
                             >
-                              {loan.jatuhTempo}
+                              {formatDate(loan.jatuhTempo)}
                             </span>
                           </td>
-
-                          {/* KEMBALI */}
 
                           <td className="px-4 py-4">
-                            <span className="text-xs text-slate-500">
-                              {loan.tanggalKembali || "-"}
+                            <span className="theme-text-muted text-xs">
+                              {formatDate(loan.tanggalKembali)}
                             </span>
                           </td>
-
-                          {/* STATUS */}
 
                           <td className="px-4 py-4">
                             <StatusBadge status={loan.status} />
                           </td>
 
-                          {/* DENDA */}
-
                           <td className="px-4 py-4">
                             <span
                               className={`text-xs font-semibold ${
-                                loan.denda > 0
-                                  ? "text-rose-600"
-                                  : "text-slate-500"
+                                loan.denda > 0 ? dangerText : "theme-text-muted"
                               }`}
                             >
-                              Rp{" "}
-                              {loan.denda.toLocaleString(
-                                "id-ID"
-                              )}
+                              {formatRupiah(loan.denda)}
                             </span>
                           </td>
-
-                          {/* ACTION */}
 
                           <td className="px-5 py-4">
                             <div className="flex items-center justify-end gap-1">
                               <button
                                 type="button"
                                 title="Detail"
-                                onClick={() =>
-                                  setDetailLoan(loan)
-                                }
-                                className="flex h-8 w-8 items-center justify-center rounded-md text-slate-400 transition hover:bg-blue-50 hover:text-blue-600"
+                                onClick={() => setDetailLoan(loan)}
+                                className={`theme-text-muted ${themeNeutralHover} flex h-8 w-8 items-center justify-center rounded-md transition hover:text-[var(--color-primary)]`}
                               >
                                 <Eye size={16} />
                               </button>
 
-                              {loan.status !==
-                                "Dikembalikan" && (
+                              {loan.status !== "Dikembalikan" && loan.id && (
                                 <button
                                   type="button"
                                   title="Kembalikan Buku"
-                                  onClick={() =>
-                                    returnBook(loan)
-                                  }
-                                  className="flex h-8 w-8 items-center justify-center rounded-md text-slate-400 transition hover:bg-emerald-50 hover:text-emerald-600"
+                                  onClick={() => setReturnLoan(loan)}
+                                  className="theme-text-muted flex h-8 w-8 items-center justify-center rounded-md transition hover:bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] hover:text-[var(--color-success)]"
                                 >
                                   <RotateCcw size={16} />
                                 </button>
                               )}
-
-                              <button
-                                type="button"
-                                title="Edit"
-                                onClick={() =>
-                                  openEdit(loan)
-                                }
-                                className="flex h-8 w-8 items-center justify-center rounded-md text-slate-400 transition hover:bg-blue-50 hover:text-blue-600"
-                              >
-                                <Pencil size={16} />
-                              </button>
-
-                              <button
-                                type="button"
-                                title="Hapus"
-                                onClick={() =>
-                                  setDeleteLoan(loan)
-                                }
-                                className="flex h-8 w-8 items-center justify-center rounded-md text-slate-400 transition hover:bg-rose-50 hover:text-rose-600"
-                              >
-                                <Trash2 size={16} />
-                              </button>
                             </div>
                           </td>
                         </tr>
                       ))
                     ) : (
                       <tr>
-                        <td
-                          colSpan={8}
-                          className="px-5 py-16 text-center"
-                        >
-                          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                        <td colSpan={8} className="px-5 py-16 text-center">
+                          <div className="theme-card-soft theme-border theme-text-muted mx-auto flex h-12 w-12 items-center justify-center rounded-full border">
                             <Search size={20} />
                           </div>
-
-                          <p className="mt-3 text-sm font-semibold text-slate-700">
+                          <p className="theme-text-secondary mt-3 text-sm font-semibold">
                             Data peminjaman tidak ditemukan
                           </p>
-
-                          <p className="mt-1 text-xs text-slate-400">
+                          <p className="theme-text-muted mt-1 text-xs">
                             Coba ubah kata kunci atau filter.
                           </p>
                         </td>
@@ -1246,24 +1196,12 @@ export default function PinjamPage() {
                 </table>
               </div>
 
-              <div className="flex flex-col gap-2 border-t border-slate-200 px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-xs text-slate-400">
-                  Menampilkan{" "}
-                  <span className="font-medium text-slate-600">
-                    {filteredLoans.length}
-                  </span>{" "}
-                  dari{" "}
-                  <span className="font-medium text-slate-600">
-                    {loans.length}
-                  </span>{" "}
-                  transaksi
+              <div className="theme-border-soft flex flex-col gap-2 border-t px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
+                <p className="theme-text-muted text-xs">
+                  Menampilkan <span className="theme-text-secondary font-medium">{filteredLoans.length}</span> dari <span className="theme-text-secondary font-medium">{loans.length}</span> transaksi
                 </p>
-
-                <p className="text-xs text-slate-400">
-                  Terlambat:{" "}
-                  <span className="font-medium text-rose-600">
-                    {terlambat}
-                  </span>
+                <p className="theme-text-muted text-xs">
+                  Terlambat: <span className={`${dangerText} font-medium`}>{terlambat}</span>
                 </p>
               </div>
             </div>
@@ -1271,32 +1209,25 @@ export default function PinjamPage() {
         </main>
       </div>
 
-      {/* =====================================================
-          ADD / EDIT MODAL
-      ===================================================== */}
-
-      {modal && activeLoan && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-[2px]">
-          <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
-            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white px-5 py-4 sm:px-6">
+      {/* ADD MODAL */}
+      {modal === "add" && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4 backdrop-blur-[2px]">
+          <div
+            className={`theme-card theme-border max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl border ${themeCardShadow}`}
+          >
+            <div className="theme-card theme-border-soft sticky top-0 z-10 flex items-center justify-between border-b px-5 py-4 sm:px-6">
               <div>
-                <h2 className="text-lg font-bold text-slate-900">
-                  {modal === "add"
-                    ? "Pinjam Buku"
-                    : "Edit Peminjaman"}
-                </h2>
-
-                <p className="mt-0.5 text-xs text-slate-500">
-                  {modal === "add"
-                    ? "Buat transaksi peminjaman buku baru"
-                    : "Perbarui data transaksi peminjaman"}
+                <h2 className="theme-text text-lg font-bold">Pinjam Buku</h2>
+                <p className="theme-text-secondary mt-0.5 text-xs">
+                  Buat transaksi peminjaman baru melalui API backend
                 </p>
               </div>
 
               <button
                 type="button"
                 onClick={closeModal}
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                disabled={saving}
+                className={`theme-text-muted ${themeNeutralHover} flex h-9 w-9 items-center justify-center rounded-lg transition hover:text-[var(--color-text)] disabled:opacity-50`}
               >
                 <X size={18} />
               </button>
@@ -1304,76 +1235,27 @@ export default function PinjamPage() {
 
             <div className="p-5 sm:p-6">
               <LoanForm
-                initial={activeLoan}
-                editMode={modal === "edit"}
+                books={books}
+                initial={{}}
                 onCancel={closeModal}
                 onSave={saveLoan}
+                saving={saving}
               />
             </div>
           </div>
         </div>
       )}
 
-      {/* =====================================================
-          DETAIL
-      ===================================================== */}
+      <DetailModal loan={detailLoan} onClose={() => setDetailLoan(null)} />
 
-      <DetailModal
-        loan={detailLoan}
-        onClose={() => setDetailLoan(null)}
+      <ReturnModal
+        loan={returnLoan}
+        onClose={() => {
+          if (!saving) setReturnLoan(null);
+        }}
+        onConfirm={confirmReturn}
+        saving={saving}
       />
-
-      {/* =====================================================
-          DELETE MODAL
-      ===================================================== */}
-
-      {deleteLoan && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-[2px]">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
-            <div className="flex items-start gap-4">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-rose-50 text-rose-600">
-                <Trash2 size={20} />
-              </div>
-
-              <div>
-                <h2 className="text-lg font-bold text-slate-900">
-                  Hapus transaksi?
-                </h2>
-
-                <p className="mt-1.5 text-sm leading-6 text-slate-500">
-                  Transaksi{" "}
-                  <span className="font-semibold text-slate-700">
-                    {deleteLoan.kode}
-                  </span>{" "}
-                  milik{" "}
-                  <span className="font-semibold text-slate-700">
-                    {deleteLoan.siswa}
-                  </span>{" "}
-                  akan dihapus.
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-              <button
-                type="button"
-                onClick={() => setDeleteLoan(null)}
-                className="h-10 rounded-lg border border-slate-300 px-5 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
-              >
-                Batal
-              </button>
-
-              <button
-                type="button"
-                onClick={confirmDelete}
-                className="h-10 rounded-lg bg-rose-600 px-5 text-sm font-semibold text-white transition hover:bg-rose-700"
-              >
-                Ya, Hapus
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

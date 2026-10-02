@@ -3,9 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import Sidebar from "../../../components/Sidebar";
-import Header from "../../../components/Header";
-
 import {
   Shield,
   ShieldCheck,
@@ -36,9 +33,7 @@ import {
   XCircle,
   Loader2,
   AlertCircle,
-  Plus,
   Activity,
-  UserRound,
   Settings2,
   ArrowUpRight,
   Database,
@@ -49,6 +44,70 @@ import {
   getRoles,
   deleteRole,
 } from "../../../../services/role.service";
+
+/* ============================================================
+   THEME HELPERS
+============================================================ */
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
 /* ============================================================
    ICON MAP
@@ -72,18 +131,18 @@ const iconMap = {
 
 const statusStyle = {
   aktif: {
-    bg: "bg-emerald-50",
-    text: "text-emerald-700",
-    border: "border-emerald-200",
-    dot: "bg-emerald-500",
+    bg: themeSuccessSurface,
+    text: "text-[var(--color-success)]",
+    border: themeSuccessBorder,
+    dot: "bg-[var(--color-success)]",
     icon: CheckCircle2,
   },
 
   nonaktif: {
-    bg: "bg-rose-50",
-    text: "text-rose-700",
-    border: "border-rose-200",
-    dot: "bg-rose-500",
+    bg: themeDangerSurface,
+    text: "theme-text-muted",
+    border: themeDangerBorder,
+    dot: "bg-[var(--color-text-muted)]",
     icon: XCircle,
   },
 };
@@ -161,9 +220,6 @@ function mapRoleFromApi(role) {
 export default function ManajemenAksesPage() {
   const router = useRouter();
 
-  const [activeMenu, setActiveMenu] = useState("manajemen-akses");
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-
   const [roles, setRoles] = useState([]);
 
   const [loading, setLoading] = useState(true);
@@ -184,27 +240,6 @@ export default function ManajemenAksesPage() {
   const [openMenuId, setOpenMenuId] = useState(null);
   const [deletingId, setDeletingId] = useState(null);
 
-  const notifications = [
-    {
-      id: 1,
-      title: "Pembaruan Sistem v2.0",
-      desc: "Dikirim 2 jam lalu",
-      read: false,
-    },
-    {
-      id: 2,
-      title: "Pengingat: Backup Data",
-      desc: "Dikirim 1 hari lalu",
-      read: false,
-    },
-    {
-      id: 3,
-      title: "Role baru ditambahkan",
-      desc: "Dikirim 3 hari lalu",
-      read: true,
-    },
-  ];
-
   /* ============================================================
      LOAD DATA
   ============================================================ */
@@ -222,7 +257,10 @@ export default function ManajemenAksesPage() {
 
       setRoles(mappedRoles);
     } catch (error) {
-      console.error("Gagal mengambil data role:", error);
+      console.error(
+        "Gagal mengambil data role:",
+        error
+      );
 
       setErrorMessage(
         error?.message ||
@@ -250,10 +288,16 @@ export default function ManajemenAksesPage() {
 
     checkScreen();
 
-    window.addEventListener("resize", checkScreen);
+    window.addEventListener(
+      "resize",
+      checkScreen
+    );
 
     return () => {
-      window.removeEventListener("resize", checkScreen);
+      window.removeEventListener(
+        "resize",
+        checkScreen
+      );
     };
   }, []);
 
@@ -268,10 +312,16 @@ export default function ManajemenAksesPage() {
       setOpenMenuId(null);
     };
 
-    window.addEventListener("click", closeMenu);
+    window.addEventListener(
+      "click",
+      closeMenu
+    );
 
     return () => {
-      window.removeEventListener("click", closeMenu);
+      window.removeEventListener(
+        "click",
+        closeMenu
+      );
     };
   }, [openMenuId]);
 
@@ -291,12 +341,14 @@ export default function ManajemenAksesPage() {
     ).length;
 
     const pengguna = roles.reduce(
-      (sum, role) => sum + Number(role.pengguna || 0),
+      (sum, role) =>
+        sum + Number(role.pengguna || 0),
       0
     );
 
     const izin = roles.reduce(
-      (sum, role) => sum + Number(role.izin || 0),
+      (sum, role) =>
+        sum + Number(role.izin || 0),
       0
     );
 
@@ -314,10 +366,14 @@ export default function ManajemenAksesPage() {
   ============================================================ */
 
   const filteredData = useMemo(() => {
-    const keyword = searchQuery.toLowerCase().trim();
+    const keyword = searchQuery
+      .toLowerCase()
+      .trim();
 
     return roles.filter((item) => {
-      const nama = String(item.nama || "").toLowerCase();
+      const nama = String(
+        item.nama || ""
+      ).toLowerCase();
 
       const namaTampilan = String(
         item.namaTampilan || ""
@@ -338,43 +394,58 @@ export default function ManajemenAksesPage() {
 
       return matchSearch && matchStatus;
     });
-  }, [roles, searchQuery, filterStatus]);
+  }, [
+    roles,
+    searchQuery,
+    filterStatus,
+  ]);
 
   /* ============================================================
      SORT
   ============================================================ */
 
   const sortedData = useMemo(() => {
-    return [...filteredData].sort((a, b) => {
-      let valueA;
-      let valueB;
+    return [...filteredData].sort(
+      (a, b) => {
+        let valueA;
+        let valueB;
 
-      if (
-        sortField === "pengguna" ||
-        sortField === "izin"
-      ) {
-        valueA = Number(a[sortField] || 0);
-        valueB = Number(b[sortField] || 0);
-      } else {
-        valueA = String(
-          a[sortField] || ""
-        ).toLowerCase();
+        if (
+          sortField === "pengguna" ||
+          sortField === "izin"
+        ) {
+          valueA = Number(
+            a[sortField] || 0
+          );
 
-        valueB = String(
-          b[sortField] || ""
-        ).toLowerCase();
+          valueB = Number(
+            b[sortField] || 0
+          );
+        } else {
+          valueA = String(
+            a[sortField] || ""
+          ).toLowerCase();
+
+          valueB = String(
+            b[sortField] || ""
+          ).toLowerCase();
+        }
+
+        if (valueA < valueB) {
+          return sortOrder === "asc"
+            ? -1
+            : 1;
+        }
+
+        if (valueA > valueB) {
+          return sortOrder === "asc"
+            ? 1
+            : -1;
+        }
+
+        return 0;
       }
-
-      if (valueA < valueB) {
-        return sortOrder === "asc" ? -1 : 1;
-      }
-
-      if (valueA > valueB) {
-        return sortOrder === "asc" ? 1 : -1;
-      }
-
-      return 0;
-    });
+    );
   }, [
     filteredData,
     sortField,
@@ -388,7 +459,8 @@ export default function ManajemenAksesPage() {
   const totalPages = Math.max(
     1,
     Math.ceil(
-      sortedData.length / itemsPerPage
+      sortedData.length /
+        itemsPerPage
     )
   );
 
@@ -396,12 +468,18 @@ export default function ManajemenAksesPage() {
     if (currentPage > totalPages) {
       setCurrentPage(totalPages);
     }
-  }, [currentPage, totalPages]);
+  }, [
+    currentPage,
+    totalPages,
+  ]);
 
-  const paginatedData = sortedData.slice(
-    (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
-  );
+  const paginatedData =
+    sortedData.slice(
+      (currentPage - 1) *
+        itemsPerPage,
+      currentPage *
+        itemsPerPage
+    );
 
   /* ============================================================
      SORT HANDLER
@@ -410,7 +488,9 @@ export default function ManajemenAksesPage() {
   const handleSort = (field) => {
     if (sortField === field) {
       setSortOrder((prev) =>
-        prev === "asc" ? "desc" : "asc"
+        prev === "asc"
+          ? "desc"
+          : "asc"
       );
     } else {
       setSortField(field);
@@ -425,17 +505,19 @@ export default function ManajemenAksesPage() {
   ============================================================ */
 
   const renderSortIcon = (field) => {
-    if (sortField !== field) return null;
+    if (sortField !== field) {
+      return null;
+    }
 
     return sortOrder === "asc" ? (
       <ArrowUp
         size={13}
-        className="text-blue-500"
+        className={themePrimaryText}
       />
     ) : (
       <ArrowDown
         size={13}
-        className="text-blue-500"
+        className={themePrimaryText}
       />
     );
   };
@@ -455,9 +537,10 @@ export default function ManajemenAksesPage() {
   ============================================================ */
 
   const handleDelete = async (role) => {
-    const confirmed = window.confirm(
-      `Apakah kamu yakin ingin menghapus role "${role.nama}"?`
-    );
+    const confirmed =
+      window.confirm(
+        `Apakah kamu yakin ingin menghapus role "${role.nama}"?`
+      );
 
     if (!confirmed) return;
 
@@ -468,7 +551,8 @@ export default function ManajemenAksesPage() {
 
       setRoles((prev) =>
         prev.filter(
-          (item) => item.id !== role.id
+          (item) =>
+            item.id !== role.id
         )
       );
 
@@ -493,7 +577,9 @@ export default function ManajemenAksesPage() {
   ============================================================ */
 
   const handleExport = () => {
-    if (sortedData.length === 0) return;
+    if (sortedData.length === 0) {
+      return;
+    }
 
     const header = [
       "Nama Role",
@@ -504,14 +590,16 @@ export default function ManajemenAksesPage() {
       "Status",
     ];
 
-    const rows = sortedData.map((item) => [
-      item.nama,
-      item.namaTampilan,
-      item.deskripsi,
-      item.izin,
-      item.pengguna,
-      getStatusLabel(item.status),
-    ]);
+    const rows = sortedData.map(
+      (item) => [
+        item.nama,
+        item.namaTampilan,
+        item.deskripsi,
+        item.izin,
+        item.pengguna,
+        getStatusLabel(item.status),
+      ]
+    );
 
     const escapeCsv = (value) =>
       `"${String(value).replace(
@@ -519,16 +607,22 @@ export default function ManajemenAksesPage() {
         '""'
       )}"`;
 
-    const csvContent = [header, ...rows]
+    const csvContent = [
+      header,
+      ...rows,
+    ]
       .map((row) =>
-        row.map(escapeCsv).join(",")
+        row
+          .map(escapeCsv)
+          .join(",")
       )
       .join("\n");
 
     const blob = new Blob(
       ["\uFEFF" + csvContent],
       {
-        type: "text/csv;charset=utf-8;",
+        type:
+          "text/csv;charset=utf-8;",
       }
     );
 
@@ -545,11 +639,15 @@ export default function ManajemenAksesPage() {
         .toISOString()
         .slice(0, 10)}.csv`;
 
-    document.body.appendChild(link);
+    document.body.appendChild(
+      link
+    );
 
     link.click();
 
-    document.body.removeChild(link);
+    document.body.removeChild(
+      link
+    );
 
     URL.revokeObjectURL(url);
   };
@@ -575,7 +673,10 @@ export default function ManajemenAksesPage() {
   ============================================================ */
 
   const getRoleIcon = (iconName) => {
-    return iconMap[iconName] || Shield;
+    return (
+      iconMap[iconName] ||
+      Shield
+    );
   };
 
   /* ============================================================
@@ -583,974 +684,1560 @@ export default function ManajemenAksesPage() {
   ============================================================ */
 
   return (
-    <div className="flex min-h-screen bg-[#F5F8FC] text-slate-900">
-      {/* ========================================================
-          SIDEBAR
-      ======================================================== */}
-
-      <Sidebar
-        active={activeMenu}
-        setActive={setActiveMenu}
-        collapsed={!sidebarOpen}
-        setCollapsed={() =>
-          setSidebarOpen((prev) => !prev)
-        }
-      />
-
-      {/* ========================================================
-          MAIN
-      ======================================================== */}
-
-      <div className="flex-1 min-w-0 flex flex-col">
-        <Header
-          toggleSidebar={() =>
-            setSidebarOpen((prev) => !prev)
-          }
-          notifications={notifications}
-          user={{
-            name: "Sarah",
-            email: "sarah@smartschool.com",
-            avatar: "SA",
-          }}
-        />
-
-        <main className="flex-1 w-full">
-          <div className="w-full max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-10 py-5 sm:py-7 lg:py-8">
-
-            {/* ==================================================
-                PREMIUM HERO
-            ================================================== */}
-
-            <section className="relative overflow-hidden rounded-[24px] bg-[#0F172A] shadow-[0_20px_50px_-25px_rgba(15,23,42,0.55)] mb-6">
-              
-              {/* Background glow */}
-
-              <div className="absolute -top-24 -right-20 w-80 h-80 rounded-full bg-blue-600/20 blur-3xl pointer-events-none" />
-
-              <div className="absolute -bottom-32 left-1/3 w-96 h-96 rounded-full bg-indigo-600/10 blur-3xl pointer-events-none" />
-
-              {/* Grid */}
-
-              <div
-                className="absolute inset-0 opacity-[0.045] pointer-events-none"
-                style={{
-                  backgroundImage:
-                    "linear-gradient(rgba(255,255,255,.8) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.8) 1px, transparent 1px)",
-                  backgroundSize:
-                    "36px 36px",
-                }}
-              />
-
-              <div className="relative p-5 sm:p-7 lg:p-8">
-                <div className="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-7">
-
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2 mb-4">
-                      <span className="inline-flex items-center gap-2 rounded-full border border-blue-400/20 bg-blue-500/10 px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-blue-300">
-                        <ShieldCheck size={13} />
-                        Security & Access
-                      </span>
-
-                      <span className="hidden sm:inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/5 px-3 py-1.5 text-[10px] font-medium text-slate-300">
-                        <Activity size={12} />
-                        SmartSchool
-                      </span>
-                    </div>
-
-                    <div className="flex items-start gap-4">
-                      <div className="hidden sm:flex w-14 h-14 shrink-0 rounded-2xl bg-blue-600/15 border border-blue-400/20 items-center justify-center text-blue-300">
-                        <Shield
-                          size={27}
-                          strokeWidth={1.8}
-                        />
-                      </div>
-
-                      <div>
-                        <h1 className="text-2xl sm:text-3xl lg:text-[34px] font-semibold tracking-tight text-white">
-                          Manajemen Akses
-                        </h1>
-
-                        <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
-                          Kelola role, pengguna, dan
-                          hak akses sistem SmartSchool
-                          secara terpusat dan terstruktur.
-                        </p>
-
-                        <div className="flex flex-wrap items-center gap-3 mt-4">
-                          <div className="flex items-center gap-2 text-xs text-slate-300">
-                            <div className="w-6 h-6 rounded-md bg-white/10 flex items-center justify-center">
-                              <Database size={12} />
-                            </div>
-                            Data terintegrasi
-                          </div>
-
-                          <div className="w-1 h-1 rounded-full bg-slate-500" />
-
-                          <div className="flex items-center gap-2 text-xs text-slate-300">
-                            <div className="w-6 h-6 rounded-md bg-white/10 flex items-center justify-center">
-                              <Lock size={12} />
-                            </div>
-                            Kontrol akses
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* ACTION */}
-
-                  <div className="flex flex-col sm:flex-row gap-2.5 xl:shrink-0">
-                    <button
-                      type="button"
-                      onClick={handleExport}
-                      disabled={
-                        loading ||
-                        sortedData.length === 0
-                      }
-                      className="inline-flex items-center justify-center gap-2 h-11 px-4 rounded-xl border border-white/10 bg-white/5 text-slate-200 text-sm font-medium backdrop-blur-sm hover:bg-white/10 hover:border-white/20 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                    >
-                      <FileSpreadsheet
-                        size={16}
-                      />
-                      Export Data
-                    </button>
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        router.push(
-                          "/super-admin/manajemenAkses/tambah-role"
-                        )
-                      }
-                      className="inline-flex items-center justify-center gap-2 h-11 px-4 rounded-xl bg-blue-600 text-white text-sm font-semibold shadow-lg shadow-blue-950/30 hover:bg-blue-500 hover:-translate-y-0.5 transition-all"
-                    >
-                      <ShieldPlus size={17} />
-                      Tambah Role
-                    </button>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            {/* ==================================================
-                STATISTICS
-            ================================================== */}
-
-            <section className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 mb-6">
-
-              <PremiumStatCard
-                label="Total Role"
-                value={statistics.total}
-                description="Role terdaftar"
-                icon={Shield}
-                accent="blue"
-              />
-
-              <PremiumStatCard
-                label="Role Aktif"
-                value={statistics.aktif}
-                description="Sedang digunakan"
-                icon={BadgeCheck}
-                accent="green"
-              />
-
-              <PremiumStatCard
-                label="Total Pengguna"
-                value={statistics.pengguna.toLocaleString(
-                  "id-ID"
-                )}
-                description="Pengguna terkait"
-                icon={Users}
-                accent="indigo"
-              />
-
-              <PremiumStatCard
-                label="Total Izin"
-                value={statistics.izin}
-                description="Hak akses terdaftar"
-                icon={Key}
-                accent="slate"
-              />
-
-            </section>
-
-            {/* ==================================================
-                INFORMATION
-            ================================================== */}
-
-            <section className="relative overflow-hidden rounded-2xl border border-blue-100 bg-white shadow-sm mb-6">
-              <div className="absolute right-0 top-0 w-44 h-full bg-gradient-to-l from-blue-50/80 to-transparent pointer-events-none" />
-
-              <div className="relative flex items-start gap-4 p-4 sm:p-5">
-                <div className="w-10 h-10 shrink-0 rounded-xl bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center">
-                  <Sparkles
-                    size={18}
-                    strokeWidth={1.8}
-                  />
-                </div>
-
-                <div className="flex-1 min-w-0">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="text-sm font-semibold text-slate-800">
-                      Pengaturan akses sistem
-                    </h2>
-
-                    <span className="text-[9px] font-semibold uppercase tracking-wider text-blue-600 bg-blue-50 border border-blue-100 rounded-full px-2 py-0.5">
-                      Security
-                    </span>
-                  </div>
-
-                  <p className="text-xs sm:text-sm text-slate-500 leading-5 mt-1">
-                    Pastikan setiap role hanya
-                    memiliki izin sesuai dengan
-                    kebutuhan dan tanggung jawab
-                    pengguna.
-                  </p>
-                </div>
-
-                <div className="hidden sm:flex w-8 h-8 rounded-lg bg-slate-50 border border-slate-100 items-center justify-center text-slate-400">
-                  <Settings2 size={15} />
-                </div>
-              </div>
-            </section>
-
-            {/* ==================================================
-                ERROR
-            ================================================== */}
-
-            {errorMessage && (
-              <section className="mb-6 rounded-2xl border border-rose-200 bg-white shadow-sm overflow-hidden">
-                <div className="h-1 bg-rose-500" />
-
-                <div className="flex items-start gap-3 p-4">
-                  <div className="w-9 h-9 shrink-0 rounded-xl bg-rose-50 border border-rose-100 text-rose-600 flex items-center justify-center">
-                    <AlertCircle size={17} />
-                  </div>
-
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-semibold text-slate-800">
-                      Gagal mengambil data role
-                    </p>
-
-                    <p className="text-xs text-slate-500 mt-1">
-                      {errorMessage}
-                    </p>
-
-                    <button
-                      type="button"
-                      onClick={loadRoles}
-                      className="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold text-blue-600 hover:text-blue-700"
-                    >
-                      <RotateCcw size={12} />
-                      Coba lagi
-                    </button>
-                  </div>
-                </div>
-              </section>
-            )}
-
-            {/* ==================================================
-                FILTER PANEL
-            ================================================== */}
-
-            <section className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden mb-5">
-
-              <div className="p-4 sm:p-5">
-
-                <div className="flex flex-col xl:flex-row xl:items-center gap-3">
-
-                  {/* SEARCH */}
-
-                  <div className="relative flex-1 min-w-0">
-                    <Search
-                      size={17}
-                      className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
-                    />
-
-                    <input
-                      type="text"
-                      value={searchQuery}
-                      onChange={(e) => {
-                        setSearchQuery(
-                          e.target.value
-                        );
-                        setCurrentPage(1);
-                      }}
-                      placeholder="Cari role, nama tampilan, atau deskripsi..."
-                      className="w-full h-11 pl-10 pr-4 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 transition-all"
-                    />
-                  </div>
-
-                  {/* FILTER */}
-
-                  <div className="flex flex-col sm:flex-row gap-2.5">
-
-                    <div className="relative">
-                      <Filter
-                        size={15}
-                        className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
-                      />
-
-                      <select
-                        value={filterStatus}
-                        onChange={(e) => {
-                          setFilterStatus(
-                            e.target.value
-                          );
-                          setCurrentPage(1);
-                        }}
-                        className="w-full sm:w-[170px] h-11 pl-9 pr-8 rounded-xl bg-slate-50 border border-slate-200 text-sm text-slate-600 focus:outline-none focus:bg-white focus:border-blue-400 focus:ring-4 focus:ring-blue-500/10 transition-all cursor-pointer appearance-none"
-                      >
-                        <option value="Semua">
-                          Semua Status
-                        </option>
-
-                        <option value="aktif">
-                          Aktif
-                        </option>
-
-                        <option value="nonaktif">
-                          Nonaktif
-                        </option>
-                      </select>
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={resetFilters}
-                      className="inline-flex items-center justify-center gap-2 h-11 px-4 rounded-xl text-sm font-medium text-slate-500 border border-slate-200 bg-white hover:bg-slate-50 hover:text-slate-700 transition-all"
-                    >
-                      <RotateCcw size={14} />
-                      Reset
-                    </button>
-
-                  </div>
-                </div>
-
-                {/* FILTER FOOTER */}
-
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mt-4 pt-4 border-t border-slate-100">
-
-                  <div className="flex items-center gap-2">
-                    <span className="flex items-center justify-center w-7 h-7 rounded-lg bg-blue-50 text-blue-600">
-                      <Layers3 size={13} />
-                    </span>
-
-                    <p className="text-xs text-slate-500">
-                      Menampilkan{" "}
-                      <span className="font-semibold text-slate-800">
-                        {filteredData.length}
-                      </span>{" "}
-                      role
-                    </p>
-                  </div>
-
-                  <div className="flex items-center gap-2 text-[11px] text-slate-400">
-                    <ArrowUp size={12} />
-                    <span>
-                      Klik judul kolom untuk
-                      mengurutkan
-                    </span>
-                  </div>
-
-                </div>
-              </div>
-            </section>
-
-            {/* ==================================================
-                DATA TABLE
-            ================================================== */}
-
-            <section className="bg-white border border-slate-200/80 rounded-2xl shadow-sm overflow-hidden">
-
-              {/* TABLE HEADER */}
-
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 sm:px-5 py-4 border-b border-slate-200 bg-slate-50/70">
-
-                <div>
-                  <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-blue-600 text-white flex items-center justify-center shadow-sm">
-                      <Shield
-                        size={15}
-                        strokeWidth={1.9}
-                      />
-                    </div>
-
-                    <div>
-                      <h2 className="text-sm font-semibold text-slate-800">
-                        Daftar Role
-                      </h2>
-
-                      <p className="text-[10px] text-slate-400 mt-0.5">
-                        Role dan kontrol akses
-                        sistem
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="inline-flex items-center gap-2 text-[10px] font-medium text-slate-500 bg-white border border-slate-200 rounded-lg px-3 py-2">
-                  <Activity
-                    size={12}
-                    className="text-emerald-500"
-                  />
-                  Data terhubung ke server
-                </div>
-
-              </div>
-
-              {loading ? (
-                <LoadingState />
-              ) : isMobile ? (
-                <MobileRoleList
-                  data={paginatedData}
-                  getRoleIcon={getRoleIcon}
-                  deletingId={deletingId}
-                  handleDelete={handleDelete}
-                  router={router}
-                />
-              ) : (
-                <div className="overflow-x-auto">
-
-                  <table className="w-full min-w-[850px]">
-
-                    <thead>
-                      <tr className="bg-slate-50/80 border-b border-slate-200">
-
-                        <SortableHeader
-                          label="Role"
-                          field="nama"
-                          sortField={
-                            sortField
-                          }
-                          onSort={
-                            handleSort
-                          }
-                          icon={
-                            renderSortIcon
-                          }
-                        />
-
-                        <th className="hidden xl:table-cell px-5 py-3.5 text-left text-[10px] font-semibold text-slate-500 uppercase tracking-[0.12em]">
-                          Deskripsi
-                        </th>
-
-                        <SortableHeader
-                          label="Izin"
-                          field="izin"
-                          sortField={
-                            sortField
-                          }
-                          onSort={
-                            handleSort
-                          }
-                          icon={
-                            renderSortIcon
-                          }
-                        />
-
-                        <SortableHeader
-                          label="Pengguna"
-                          field="pengguna"
-                          sortField={
-                            sortField
-                          }
-                          onSort={
-                            handleSort
-                          }
-                          icon={
-                            renderSortIcon
-                          }
-                        />
-
-                        <SortableHeader
-                          label="Status"
-                          field="status"
-                          sortField={
-                            sortField
-                          }
-                          onSort={
-                            handleSort
-                          }
-                          icon={
-                            renderSortIcon
-                          }
-                        />
-
-                        <th className="px-5 py-3.5 text-right text-[10px] font-semibold text-slate-500 uppercase tracking-[0.12em]">
-                          Aksi
-                        </th>
-
-                      </tr>
-                    </thead>
-
-                    <tbody className="divide-y divide-slate-100">
-
-                      {paginatedData.length ===
-                      0 ? (
-                        <tr>
-                          <td colSpan={6}>
-                            <EmptyState />
-                          </td>
-                        </tr>
-                      ) : (
-                        paginatedData.map(
-                          (item) => {
-                            const IconComponent =
-                              getRoleIcon(
-                                item.ikon
-                              );
-
-                            const style =
-                              statusStyle[
-                                item.status
-                              ] ||
-                              statusStyle.nonaktif;
-
-                            const StatusIcon =
-                              style.icon;
-
-                            return (
-                              <tr
-                                key={
-                                  item.id
-                                }
-                                className="group hover:bg-blue-50/30 transition-colors"
-                              >
-
-                                {/* ROLE */}
-
-                                <td className="px-5 py-4">
-
-                                  <div className="flex items-center gap-3 min-w-[210px]">
-
-                                    <div className="relative w-11 h-11 shrink-0 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 text-blue-600 flex items-center justify-center group-hover:border-blue-200 group-hover:shadow-sm transition-all">
-                                      <IconComponent
-                                        size={
-                                          18
-                                        }
-                                        strokeWidth={
-                                          1.9
-                                        }
-                                      />
-
-                                      <span className="absolute -right-1 -bottom-1 w-3.5 h-3.5 rounded-full bg-white flex items-center justify-center">
-                                        <span className="w-2 h-2 rounded-full bg-blue-500" />
-                                      </span>
-                                    </div>
-
-                                    <div className="min-w-0">
-                                      <p className="text-sm font-semibold text-slate-800 truncate">
-                                        {
-                                          item.nama
-                                        }
-                                      </p>
-
-                                      <p className="text-[11px] text-slate-400 mt-0.5 truncate">
-                                        {
-                                          item.namaTampilan
-                                        }
-                                      </p>
-                                    </div>
-
-                                  </div>
-
-                                </td>
-
-                                {/* DESCRIPTION */}
-
-                                <td className="hidden xl:table-cell px-5 py-4 max-w-[300px]">
-
-                                  <p className="text-xs text-slate-500 leading-relaxed line-clamp-2">
-                                    {
-                                      item.deskripsi
-                                    }
-                                  </p>
-
-                                </td>
-
-                                {/* IZIN */}
-
-                                <td className="px-5 py-4">
-
-                                  <div className="inline-flex items-center gap-2">
-
-                                    <div className="w-8 h-8 rounded-lg bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center">
-                                      <Key
-                                        size={
-                                          13
-                                        }
-                                      />
-                                    </div>
-
-                                    <span className="text-sm font-semibold text-slate-700">
-                                      {
-                                        item.izin
-                                      }
-                                    </span>
-
-                                  </div>
-
-                                </td>
-
-                                {/* USERS */}
-
-                                <td className="px-5 py-4">
-
-                                  <div className="inline-flex items-center gap-2">
-
-                                    <div className="w-8 h-8 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-600 flex items-center justify-center">
-                                      <Users
-                                        size={
-                                          13
-                                        }
-                                      />
-                                    </div>
-
-                                    <span className="text-sm font-semibold text-slate-700">
-                                      {item.pengguna.toLocaleString(
-                                        "id-ID"
-                                      )}
-                                    </span>
-
-                                  </div>
-
-                                </td>
-
-                                {/* STATUS */}
-
-                                <td className="px-5 py-4">
-
-                                  <span
-                                    className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-full border text-[10px] font-semibold ${style.bg} ${style.text} ${style.border}`}
-                                  >
-                                    <span
-                                      className={`w-1.5 h-1.5 rounded-full ${style.dot}`}
-                                    />
-
-                                    <StatusIcon
-                                      size={
-                                        11
-                                      }
-                                    />
-
-                                    {getStatusLabel(
-                                      item.status
-                                    )}
-                                  </span>
-
-                                </td>
-
-                                {/* ACTION */}
-
-                                <td className="px-5 py-4">
-
-                                  <div className="flex items-center justify-end gap-1 relative">
-
-                                    <ActionButton
-                                      title="Detail"
-                                      onClick={() =>
-                                        router.push(
-                                          `/super-admin/manajemenAkses/${item.id}`
-                                        )
-                                      }
-                                    >
-                                      <Eye
-                                        size={
-                                          15
-                                        }
-                                      />
-                                    </ActionButton>
-
-                                    <ActionButton
-                                      title="Edit"
-                                      hover="blue"
-                                      onClick={() =>
-                                        router.push(
-                                          `/super-admin/manajemenAkses/edit-role?id=${item.id}`
-                                        )
-                                      }
-                                    >
-                                      <Edit
-                                        size={
-                                          15
-                                        }
-                                      />
-                                    </ActionButton>
-
-                                    <ActionButton
-                                      title="Hapus"
-                                      hover="rose"
-                                      onClick={() =>
-                                        handleDelete(
-                                          item
-                                        )
-                                      }
-                                    >
-                                      {deletingId ===
-                                      item.id ? (
-                                        <Loader2
-                                          size={
-                                            15
-                                          }
-                                          className="animate-spin"
-                                        />
-                                      ) : (
-                                        <Trash2
-                                          size={
-                                            15
-                                          }
-                                        />
-                                      )}
-                                    </ActionButton>
-
-                                    <ActionButton
-                                      title="Lainnya"
-                                      onClick={(
-                                        e
-                                      ) => {
-                                        e.stopPropagation();
-
-                                        setOpenMenuId(
-                                          (
-                                            prev
-                                          ) =>
-                                            prev ===
-                                            item.id
-                                              ? null
-                                              : item.id
-                                        );
-                                      }}
-                                    >
-                                      <MoreHorizontal
-                                        size={
-                                          15
-                                        }
-                                      />
-                                    </ActionButton>
-
-                                    {openMenuId ===
-                                      item.id && (
-                                      <div
-                                        onClick={(
-                                          e
-                                        ) =>
-                                          e.stopPropagation()
-                                        }
-                                        className="absolute right-0 top-10 z-20 w-48 rounded-xl border border-slate-200 bg-white shadow-[0_15px_40px_-15px_rgba(15,23,42,0.3)] py-1.5"
-                                      >
-                                        <button
-                                          type="button"
-                                          onClick={() => {
-                                            router.push(
-                                              `/super-admin/manajemenAkses/${item.id}`
-                                            );
-
-                                            setOpenMenuId(
-                                              null
-                                            );
-                                          }}
-                                          className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-medium text-slate-600 hover:bg-blue-50 hover:text-blue-700 transition-colors"
-                                        >
-                                          <Key
-                                            size={
-                                              14
-                                            }
-                                          />
-                                          Kelola Izin
-                                        </button>
-
-                                        <button
-                                          type="button"
-                                          onClick={() => {
-                                            router.push(
-                                              `/super-admin/manajemenAkses/edit-role?id=${item.id}`
-                                            );
-
-                                            setOpenMenuId(
-                                              null
-                                            );
-                                          }}
-                                          className="w-full flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-medium text-slate-600 hover:bg-slate-50 hover:text-slate-800 transition-colors"
-                                        >
-                                          <Settings2
-                                            size={
-                                              14
-                                            }
-                                          />
-                                          Pengaturan Role
-                                        </button>
-                                      </div>
-                                    )}
-
-                                  </div>
-
-                                </td>
-
-                              </tr>
-                            );
-                          }
-                        )
-                      )}
-
-                    </tbody>
-
-                  </table>
-
-                </div>
-              )}
-
-              {/* ==================================================
-                  PAGINATION
-              ================================================== */}
-
-              <div className="px-4 sm:px-5 py-4 border-t border-slate-200 bg-white">
-
-                <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-
-                  <p className="text-xs text-slate-500">
-                    Menampilkan{" "}
-                    <span className="font-semibold text-slate-700">
-                      {sortedData.length ===
-                      0
-                        ? 0
-                        : (currentPage -
-                            1) *
-                            itemsPerPage +
-                          1}
-                    </span>
-
-                    {" - "}
-
-                    <span className="font-semibold text-slate-700">
-                      {Math.min(
-                        currentPage *
-                          itemsPerPage,
-                        sortedData.length
-                      )}
-                    </span>
-
-                    {" dari "}
-
-                    <span className="font-semibold text-slate-700">
-                      {
-                        sortedData.length
-                      }
-                    </span>{" "}
-                    data
-                  </p>
-
-                  <div className="flex items-center gap-1">
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setCurrentPage(
-                          (prev) =>
-                            Math.max(
-                              1,
-                              prev - 1
-                            )
-                        )
-                      }
-                      disabled={
-                        currentPage === 1
-                      }
-                      className="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                    >
-                      <ChevronLeft
-                        size={15}
-                      />
-                    </button>
-
-                    {Array.from({
-                      length: totalPages,
-                    }).map(
-                      (_, index) => {
-                        const page =
-                          index + 1;
-
-                        return (
-                          <button
-                            key={page}
-                            type="button"
-                            onClick={() =>
-                              setCurrentPage(
-                                page
-                              )
-                            }
-                            className={`w-9 h-9 rounded-lg text-xs font-semibold transition-all ${
-                              currentPage ===
-                              page
-                                ? "bg-blue-600 text-white shadow-sm shadow-blue-600/20"
-                                : "text-slate-500 hover:bg-slate-100"
-                            }`}
-                          >
-                            {page}
-                          </button>
-                        );
-                      }
-                    )}
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setCurrentPage(
-                          (prev) =>
-                            Math.min(
-                              totalPages,
-                              prev + 1
-                            )
-                        )
-                      }
-                      disabled={
-                        currentPage ===
-                          totalPages ||
-                        sortedData.length ===
-                          0
-                      }
-                      className="w-9 h-9 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-50 hover:text-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                    >
-                      <ChevronRight
-                        size={15}
-                      />
-                    </button>
-
-                  </div>
-
-                </div>
-
-              </div>
-            </section>
-
-            {/* ==================================================
-                FOOTER
-            ================================================== */}
-
-            <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-5 pb-2">
-
-              <div className="flex items-center gap-2">
-                <div className="w-5 h-5 rounded-md bg-blue-600 text-white flex items-center justify-center">
-                  <Shield size={11} />
-                </div>
-
-                <p className="text-[11px] font-medium text-slate-500">
-                  SmartSchool
-                  <span className="text-slate-300 mx-1">
-                    •
+    <div className="theme-page theme-text min-h-full">
+      <div className="w-full max-w-[1600px] mx-auto px-4 py-5 sm:px-6 sm:py-7 lg:px-8 lg:py-8">
+
+        {/* ==================================================
+            PREMIUM HERO
+        ================================================== */}
+
+        <section
+          className={`
+            relative overflow-hidden rounded-[24px]
+            ${themePrimaryGradient}
+            ${themePrimaryShadow}
+            mb-6
+          `}
+        >
+          {/* Background glow */}
+
+          <div
+            className="
+              absolute
+              -top-24
+              -right-20
+              w-80
+              h-80
+              rounded-full
+              bg-[color-mix(in_srgb,var(--color-card)_14%,transparent)]
+              blur-3xl
+              pointer-events-none
+            "
+          />
+
+          <div
+            className="
+              absolute
+              -bottom-32
+              left-1/3
+              w-96
+              h-96
+              rounded-full
+              bg-[color-mix(in_srgb,var(--color-info)_16%,transparent)]
+              blur-3xl
+              pointer-events-none
+            "
+          />
+
+          {/* Grid */}
+
+          <div
+            className="
+              absolute
+              inset-0
+              opacity-[0.045]
+              pointer-events-none
+            "
+            style={{
+              backgroundImage:
+                "linear-gradient(color-mix(in srgb, var(--color-card) 80%, transparent) 1px, transparent 1px), linear-gradient(90deg, color-mix(in srgb, var(--color-card) 80%, transparent) 1px, transparent 1px)",
+              backgroundSize:
+                "36px 36px",
+            }}
+          />
+
+          <div className="relative p-5 sm:p-7 lg:p-8">
+            <div className="flex flex-col xl:flex-row xl:items-end xl:justify-between gap-7">
+
+              <div className="min-w-0">
+
+                <div className="flex items-center gap-2 mb-4">
+
+                  <span
+                    className="
+                      inline-flex
+                      items-center
+                      gap-2
+                      rounded-full
+                      border
+                      border-[color-mix(in_srgb,var(--color-card)_22%,transparent)]
+                      bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)]
+                      px-3
+                      py-1.5
+                      text-[10px]
+                      font-semibold
+                      uppercase
+                      tracking-[0.14em]
+                      text-[var(--color-card)]
+                    "
+                  >
+                    <ShieldCheck size={13} />
+                    Security & Access
                   </span>
-                  Manajemen Akses
-                </p>
+
+                  <span
+                    className="
+                      hidden
+                      sm:inline-flex
+                      items-center
+                      gap-1.5
+                      rounded-full
+                      border
+                      border-[color-mix(in_srgb,var(--color-card)_12%,transparent)]
+                      bg-[color-mix(in_srgb,var(--color-card)_6%,transparent)]
+                      px-3
+                      py-1.5
+                      text-[10px]
+                      font-medium
+                      text-[color-mix(in_srgb,var(--color-card)_78%,transparent)]
+                    "
+                  >
+                    <Activity size={12} />
+                    SmartSchool
+                  </span>
+
+                </div>
+
+                <div className="flex items-start gap-4">
+
+                  <div
+                    className="
+                      hidden
+                      sm:flex
+                      w-14
+                      h-14
+                      shrink-0
+                      rounded-2xl
+                      bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)]
+                      border
+                      border-[color-mix(in_srgb,var(--color-card)_20%,transparent)]
+                      items-center
+                      justify-center
+                      text-[var(--color-card)]
+                    "
+                  >
+                    <Shield
+                      size={27}
+                      strokeWidth={1.8}
+                    />
+                  </div>
+
+                  <div>
+
+                    <h1
+                      className="
+                        text-2xl
+                        sm:text-3xl
+                        lg:text-[34px]
+                        font-semibold
+                        tracking-tight
+                        text-[var(--color-card)]
+                      "
+                    >
+                      Manajemen Akses
+                    </h1>
+
+                    <p
+                      className="
+                        mt-2
+                        max-w-2xl
+                        text-sm
+                        leading-6
+                        text-[color-mix(in_srgb,var(--color-card)_78%,transparent)]
+                      "
+                    >
+                      Kelola role, pengguna, dan
+                      hak akses sistem SmartSchool
+                      secara terpusat dan
+                      terstruktur.
+                    </p>
+
+                    <div className="flex flex-wrap items-center gap-3 mt-4">
+
+                      <div
+                        className="
+                          flex
+                          items-center
+                          gap-2
+                          text-xs
+                          text-[color-mix(in_srgb,var(--color-card)_78%,transparent)]
+                        "
+                      >
+                        <div
+                          className="
+                            w-6
+                            h-6
+                            rounded-md
+                            bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)]
+                            flex
+                            items-center
+                            justify-center
+                          "
+                        >
+                          <Database size={12} />
+                        </div>
+
+                        Data terintegrasi
+                      </div>
+
+                      <div
+                        className="
+                          w-1
+                          h-1
+                          rounded-full
+                          bg-[color-mix(in_srgb,var(--color-card)_45%,transparent)]
+                        "
+                      />
+
+                      <div
+                        className="
+                          flex
+                          items-center
+                          gap-2
+                          text-xs
+                          text-[color-mix(in_srgb,var(--color-card)_78%,transparent)]
+                        "
+                      >
+                        <div
+                          className="
+                            w-6
+                            h-6
+                            rounded-md
+                            bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)]
+                            flex
+                            items-center
+                            justify-center
+                          "
+                        >
+                          <Lock size={12} />
+                        </div>
+
+                        Kontrol akses
+                      </div>
+
+                    </div>
+
+                  </div>
+                </div>
               </div>
 
-              <p className="text-[11px] text-slate-400">
-                Data diambil dari server
+              {/* ACTION */}
+
+              <div className="flex flex-col sm:flex-row gap-2.5 xl:shrink-0">
+
+                <button
+                  type="button"
+                  onClick={handleExport}
+                  disabled={
+                    loading ||
+                    sortedData.length === 0
+                  }
+                  className="
+                    inline-flex
+                    items-center
+                    justify-center
+                    gap-2
+                    h-11
+                    px-4
+                    rounded-xl
+                    border
+                    border-[color-mix(in_srgb,var(--color-card)_14%,transparent)]
+                    bg-[color-mix(in_srgb,var(--color-card)_7%,transparent)]
+                    text-[color-mix(in_srgb,var(--color-card)_88%,transparent)]
+                    text-sm
+                    font-medium
+                    backdrop-blur-sm
+                    hover:bg-[color-mix(in_srgb,var(--color-card)_12%,transparent)]
+                    hover:border-[color-mix(in_srgb,var(--color-card)_22%,transparent)]
+                    transition-all
+                    disabled:opacity-40
+                    disabled:cursor-not-allowed
+                  "
+                >
+                  <FileSpreadsheet size={16} />
+                  Export Data
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    router.push(
+                      "/super-admin/manajemenAkses/tambah-role"
+                    )
+                  }
+                  className="
+                    inline-flex
+                    items-center
+                    justify-center
+                    gap-2
+                    h-11
+                    px-4
+                    rounded-xl
+                    bg-[var(--color-card)]
+                    text-[var(--color-primary)]
+                    text-sm
+                    font-semibold
+                    shadow-lg
+                    hover:-translate-y-0.5
+                    transition-all
+                  "
+                >
+                  <ShieldPlus size={17} />
+                  Tambah Role
+                </button>
+
+              </div>
+
+            </div>
+          </div>
+        </section>
+
+        {/* ==================================================
+            STATISTICS
+        ================================================== */}
+
+        <section className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4 mb-6">
+
+          <PremiumStatCard
+            label="Total Role"
+            value={statistics.total}
+            description="Role terdaftar"
+            icon={Shield}
+            accent="primary"
+          />
+
+          <PremiumStatCard
+            label="Role Aktif"
+            value={statistics.aktif}
+            description="Sedang digunakan"
+            icon={BadgeCheck}
+            accent="success"
+          />
+
+          <PremiumStatCard
+            label="Total Pengguna"
+            value={statistics.pengguna.toLocaleString(
+              "id-ID"
+            )}
+            description="Pengguna terkait"
+            icon={Users}
+            accent="info"
+          />
+
+          <PremiumStatCard
+            label="Total Izin"
+            value={statistics.izin}
+            description="Hak akses terdaftar"
+            icon={Key}
+            accent="neutral"
+          />
+
+        </section>
+
+        {/* ==================================================
+            INFORMATION
+        ================================================== */}
+
+        <section
+          className={`
+            relative
+            overflow-hidden
+            rounded-2xl
+            theme-card
+            theme-border
+            ${themeCardShadow}
+            mb-6
+          `}
+        >
+          <div
+            className="
+              absolute
+              right-0
+              top-0
+              w-44
+              h-full
+              bg-[linear-gradient(to_left,color-mix(in_srgb,var(--color-primary)_7%,transparent),transparent)]
+              pointer-events-none
+            "
+          />
+
+          <div className="relative flex items-start gap-4 p-4 sm:p-5">
+
+            <div
+              className={`
+                w-10
+                h-10
+                shrink-0
+                rounded-xl
+                ${themePrimarySoft}
+                ${themePrimarySoftBorder}
+                ${themePrimaryText}
+                flex
+                items-center
+                justify-center
+              `}
+            >
+              <Sparkles
+                size={18}
+                strokeWidth={1.8}
+              />
+            </div>
+
+            <div className="flex-1 min-w-0">
+
+              <div className="flex flex-wrap items-center gap-2">
+
+                <h2 className="text-sm font-semibold theme-text">
+                  Pengaturan akses sistem
+                </h2>
+
+                <span
+                  className={`
+                    text-[9px]
+                    font-semibold
+                    uppercase
+                    tracking-wider
+                    ${themePrimaryText}
+                    ${themePrimarySoft}
+                    ${themePrimarySoftBorder}
+                    rounded-full
+                    px-2
+                    py-0.5
+                  `}
+                >
+                  Security
+                </span>
+
+              </div>
+
+              <p className="text-xs sm:text-sm theme-text-muted leading-5 mt-1">
+                Pastikan setiap role hanya
+                memiliki izin sesuai dengan
+                kebutuhan dan tanggung jawab
+                pengguna.
               </p>
 
             </div>
 
+            <div
+              className="
+                hidden
+                sm:flex
+                w-8
+                h-8
+                rounded-lg
+                theme-neutral-surface
+                theme-border
+                items-center
+                justify-center
+                theme-text-muted
+              "
+            >
+              <Settings2 size={15} />
+            </div>
+
           </div>
-        </main>
+        </section>
+
+        {/* ==================================================
+            ERROR
+        ================================================== */}
+
+        {errorMessage && (
+          <section
+            className={`
+              mb-6
+              rounded-2xl
+              ${themeDangerBorder}
+              theme-card
+              ${themeCardShadow}
+              overflow-hidden
+            `}
+          >
+            <div className="h-1 bg-[var(--color-warning)]" />
+
+            <div className="flex items-start gap-3 p-4">
+
+              <div
+                className={`
+                  w-9
+                  h-9
+                  shrink-0
+                  rounded-xl
+                  ${themeWarningSurface}
+                  ${themeWarningBorder}
+                  text-[var(--color-warning)]
+                  flex
+                  items-center
+                  justify-center
+                `}
+              >
+                <AlertCircle size={17} />
+              </div>
+
+              <div className="flex-1 min-w-0">
+
+                <p className="text-sm font-semibold theme-text">
+                  Gagal mengambil data role
+                </p>
+
+                <p className="text-xs theme-text-muted mt-1">
+                  {errorMessage}
+                </p>
+
+                <button
+                  type="button"
+                  onClick={loadRoles}
+                  className={`
+                    mt-2
+                    inline-flex
+                    items-center
+                    gap-1.5
+                    text-xs
+                    font-semibold
+                    ${themePrimaryText}
+                    hover:opacity-80
+                  `}
+                >
+                  <RotateCcw size={12} />
+                  Coba lagi
+                </button>
+
+              </div>
+
+            </div>
+          </section>
+        )}
+
+        {/* ==================================================
+            FILTER PANEL
+        ================================================== */}
+
+        <section
+          className={`
+            theme-card
+            ${themeNeutralBorder}
+            rounded-2xl
+            ${themeCardShadow}
+            overflow-hidden
+            mb-5
+          `}
+        >
+
+          <div className="p-4 sm:p-5">
+
+            <div className="flex flex-col xl:flex-row xl:items-center gap-3">
+
+              {/* SEARCH */}
+
+              <div className="relative flex-1 min-w-0">
+
+                <Search
+                  size={17}
+                  className="
+                    absolute
+                    left-3.5
+                    top-1/2
+                    -translate-y-1/2
+                    theme-text-placeholder
+                  "
+                />
+
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(
+                      e.target.value
+                    );
+                    setCurrentPage(1);
+                  }}
+                  placeholder="Cari role, nama tampilan, atau deskripsi..."
+                  className={`
+                    w-full
+                    h-11
+                    pl-10
+                    pr-4
+                    rounded-xl
+                    theme-input
+                    theme-text
+                    text-sm
+                    ${themeFocus}
+                    transition-all
+                  `}
+                />
+
+              </div>
+
+              {/* FILTER */}
+
+              <div className="flex flex-col sm:flex-row gap-2.5">
+
+                <div className="relative">
+
+                  <Filter
+                    size={15}
+                    className="
+                      absolute
+                      left-3
+                      top-1/2
+                      -translate-y-1/2
+                      theme-text-placeholder
+                      pointer-events-none
+                    "
+                  />
+
+                  <select
+                    value={filterStatus}
+                    onChange={(e) => {
+                      setFilterStatus(
+                        e.target.value
+                      );
+                      setCurrentPage(1);
+                    }}
+                    className={`
+                      w-full
+                      sm:w-[170px]
+                      h-11
+                      pl-9
+                      pr-8
+                      rounded-xl
+                      theme-input
+                      theme-text-secondary
+                      text-sm
+                      ${themeFocus}
+                      transition-all
+                      cursor-pointer
+                      appearance-none
+                    `}
+                  >
+                    <option value="Semua">
+                      Semua Status
+                    </option>
+
+                    <option value="aktif">
+                      Aktif
+                    </option>
+
+                    <option value="nonaktif">
+                      Nonaktif
+                    </option>
+                  </select>
+
+                </div>
+
+                <button
+                  type="button"
+                  onClick={resetFilters}
+                  className="
+                    inline-flex
+                    items-center
+                    justify-center
+                    gap-2
+                    h-11
+                    px-4
+                    rounded-xl
+                    text-sm
+                    font-medium
+                    theme-text-muted
+                    theme-border
+                    theme-card
+                    hover:text-[var(--color-primary)]
+                    hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
+                    transition-all
+                  "
+                >
+                  <RotateCcw size={14} />
+                  Reset
+                </button>
+
+              </div>
+
+            </div>
+
+            {/* FILTER FOOTER */}
+
+            <div
+              className={`
+                flex
+                flex-col
+                sm:flex-row
+                sm:items-center
+                justify-between
+                gap-3
+                mt-4
+                pt-4
+                ${themeDivider}
+              `}
+            >
+
+              <div className="flex items-center gap-2">
+
+                <span
+                  className={`
+                    flex
+                    items-center
+                    justify-center
+                    w-7
+                    h-7
+                    rounded-lg
+                    ${themePrimarySoft}
+                    ${themePrimaryText}
+                  `}
+                >
+                  <Layers3 size={13} />
+                </span>
+
+                <p className="text-xs theme-text-muted">
+
+                  Menampilkan{" "}
+
+                  <span className="font-semibold theme-text">
+                    {filteredData.length}
+                  </span>{" "}
+
+                  role
+
+                </p>
+
+              </div>
+
+              <div className="flex items-center gap-2 text-[11px] theme-text-muted">
+
+                <ArrowUp size={12} />
+
+                <span>
+                  Klik judul kolom untuk
+                  mengurutkan
+                </span>
+
+              </div>
+
+            </div>
+
+          </div>
+        </section>
+
+        {/* ==================================================
+            DATA TABLE
+        ================================================== */}
+
+        <section
+          className={`
+            theme-card
+            ${themeNeutralBorder}
+            rounded-2xl
+            ${themeCardShadow}
+            overflow-hidden
+          `}
+        >
+
+          {/* TABLE HEADER */}
+
+          <div
+            className={`
+              flex
+              flex-col
+              sm:flex-row
+              sm:items-center
+              justify-between
+              gap-3
+              px-4
+              sm:px-5
+              py-4
+              border-b
+              ${themeDivider}
+              ${themeNeutralSurface}
+            `}
+          >
+
+            <div>
+
+              <div className="flex items-center gap-2">
+
+                <div
+                  className={`
+                    w-8
+                    h-8
+                    rounded-lg
+                    ${themePrimaryGradient}
+                    text-[var(--color-card)]
+                    flex
+                    items-center
+                    justify-center
+                    ${themeSmallShadow}
+                  `}
+                >
+                  <Shield
+                    size={15}
+                    strokeWidth={1.9}
+                  />
+                </div>
+
+                <div>
+
+                  <h2 className="text-sm font-semibold theme-text">
+                    Daftar Role
+                  </h2>
+
+                  <p className="text-[10px] theme-text-muted mt-0.5">
+                    Role dan kontrol akses
+                    sistem
+                  </p>
+
+                </div>
+
+              </div>
+
+            </div>
+
+            <div
+              className="
+                inline-flex
+                items-center
+                gap-2
+                text-[10px]
+                font-medium
+                theme-text-muted
+                theme-card
+                theme-border
+                rounded-lg
+                px-3
+                py-2
+              "
+            >
+              <Activity
+                size={12}
+                className="text-[var(--color-success)]"
+              />
+
+              Data terhubung ke server
+            </div>
+
+          </div>
+
+          {loading ? (
+            <LoadingState />
+          ) : isMobile ? (
+            <MobileRoleList
+              data={paginatedData}
+              getRoleIcon={getRoleIcon}
+              deletingId={deletingId}
+              handleDelete={handleDelete}
+              router={router}
+            />
+          ) : (
+            <div className="overflow-x-auto">
+
+              <table className="w-full min-w-[850px]">
+
+                <thead>
+                  <tr
+                    className={`
+                      ${themeNeutralSurface}
+                      border-b
+                      ${themeDivider}
+                    `}
+                  >
+
+                    <SortableHeader
+                      label="Role"
+                      field="nama"
+                      sortField={
+                        sortField
+                      }
+                      onSort={
+                        handleSort
+                      }
+                      icon={
+                        renderSortIcon
+                      }
+                    />
+
+                    <th
+                      className="
+                        hidden
+                        xl:table-cell
+                        px-5
+                        py-3.5
+                        text-left
+                        text-[10px]
+                        font-semibold
+                        theme-text-muted
+                        uppercase
+                        tracking-[0.12em]
+                      "
+                    >
+                      Deskripsi
+                    </th>
+
+                    <SortableHeader
+                      label="Izin"
+                      field="izin"
+                      sortField={
+                        sortField
+                      }
+                      onSort={
+                        handleSort
+                      }
+                      icon={
+                        renderSortIcon
+                      }
+                    />
+
+                    <SortableHeader
+                      label="Pengguna"
+                      field="pengguna"
+                      sortField={
+                        sortField
+                      }
+                      onSort={
+                        handleSort
+                      }
+                      icon={
+                        renderSortIcon
+                      }
+                    />
+
+                    <SortableHeader
+                      label="Status"
+                      field="status"
+                      sortField={
+                        sortField
+                      }
+                      onSort={
+                        handleSort
+                      }
+                      icon={
+                        renderSortIcon
+                      }
+                    />
+
+                    <th
+                      className="
+                        px-5
+                        py-3.5
+                        text-right
+                        text-[10px]
+                        font-semibold
+                        theme-text-muted
+                        uppercase
+                        tracking-[0.12em]
+                      "
+                    >
+                      Aksi
+                    </th>
+
+                  </tr>
+                </thead>
+
+                <tbody
+                  className={`
+                    divide-y
+                    ${themeDivider}
+                  `}
+                >
+
+                  {paginatedData.length ===
+                  0 ? (
+                    <tr>
+                      <td colSpan={6}>
+                        <EmptyState />
+                      </td>
+                    </tr>
+                  ) : (
+                    paginatedData.map(
+                      (item) => {
+                        const IconComponent =
+                          getRoleIcon(
+                            item.ikon
+                          );
+
+                        const style =
+                          statusStyle[
+                            item.status
+                          ] ||
+                          statusStyle.nonaktif;
+
+                        const StatusIcon =
+                          style.icon;
+
+                        return (
+                          <tr
+                            key={
+                              item.id
+                            }
+                            className="
+                              group
+                              hover:bg-[color-mix(in_srgb,var(--color-primary)_4%,transparent)]
+                              transition-colors
+                            "
+                          >
+
+                            {/* ROLE */}
+
+                            <td className="px-5 py-4">
+
+                              <div className="flex items-center gap-3 min-w-[210px]">
+
+                                <div
+                                  className="
+                                    relative
+                                    w-11
+                                    h-11
+                                    shrink-0
+                                    rounded-xl
+                                    bg-[linear-gradient(135deg,color-mix(in_srgb,var(--color-primary)_8%,transparent),color-mix(in_srgb,var(--color-info)_8%,transparent))]
+                                    border
+                                    border-[color-mix(in_srgb,var(--color-primary)_18%,transparent)]
+                                    text-[var(--color-primary)]
+                                    flex
+                                    items-center
+                                    justify-center
+                                    group-hover:border-[color-mix(in_srgb,var(--color-primary)_30%,transparent)]
+                                    group-hover:shadow-[0_2px_10px_color-mix(in_srgb,var(--color-primary)_10%,transparent)]
+                                    transition-all
+                                  "
+                                >
+                                  <IconComponent
+                                    size={18}
+                                    strokeWidth={1.9}
+                                  />
+
+                                  <span
+                                    className="
+                                      absolute
+                                      -right-1
+                                      -bottom-1
+                                      w-3.5
+                                      h-3.5
+                                      rounded-full
+                                      theme-card
+                                      flex
+                                      items-center
+                                      justify-center
+                                    "
+                                  >
+                                    <span
+                                      className="
+                                        w-2
+                                        h-2
+                                        rounded-full
+                                        bg-[var(--color-primary)]
+                                      "
+                                    />
+                                  </span>
+
+                                </div>
+
+                                <div className="min-w-0">
+
+                                  <p className="text-sm font-semibold theme-text truncate">
+                                    {item.nama}
+                                  </p>
+
+                                  <p className="text-[11px] theme-text-muted mt-0.5 truncate">
+                                    {
+                                      item.namaTampilan
+                                    }
+                                  </p>
+
+                                </div>
+
+                              </div>
+
+                            </td>
+
+                            {/* DESCRIPTION */}
+
+                            <td className="hidden xl:table-cell px-5 py-4 max-w-[300px]">
+
+                              <p className="text-xs theme-text-muted leading-relaxed line-clamp-2">
+                                {
+                                  item.deskripsi
+                                }
+                              </p>
+
+                            </td>
+
+                            {/* IZIN */}
+
+                            <td className="px-5 py-4">
+
+                              <div className="inline-flex items-center gap-2">
+
+                                <div
+                                  className={`
+                                    w-8
+                                    h-8
+                                    rounded-lg
+                                    ${themePrimarySoft}
+                                    ${themePrimarySoftBorder}
+                                    ${themePrimaryText}
+                                    flex
+                                    items-center
+                                    justify-center
+                                  `}
+                                >
+                                  <Key size={13} />
+                                </div>
+
+                                <span className="text-sm font-semibold theme-text-secondary">
+                                  {item.izin}
+                                </span>
+
+                              </div>
+
+                            </td>
+
+                            {/* USERS */}
+
+                            <td className="px-5 py-4">
+
+                              <div className="inline-flex items-center gap-2">
+
+                                <div
+                                  className={`
+                                    w-8
+                                    h-8
+                                    rounded-lg
+                                    ${themeInfoSurface}
+                                    ${themeInfoBorder}
+                                    text-[var(--color-info)]
+                                    flex
+                                    items-center
+                                    justify-center
+                                  `}
+                                >
+                                  <Users size={13} />
+                                </div>
+
+                                <span className="text-sm font-semibold theme-text-secondary">
+                                  {item.pengguna.toLocaleString(
+                                    "id-ID"
+                                  )}
+                                </span>
+
+                              </div>
+
+                            </td>
+
+                            {/* STATUS */}
+
+                            <td className="px-5 py-4">
+
+                              <span
+                                className={`
+                                  inline-flex
+                                  items-center
+                                  gap-1.5
+                                  px-2.5
+                                  py-1.5
+                                  rounded-full
+                                  border
+                                  text-[10px]
+                                  font-semibold
+                                  ${style.bg}
+                                  ${style.text}
+                                  ${style.border}
+                                `}
+                              >
+                                <span
+                                  className={`
+                                    w-1.5
+                                    h-1.5
+                                    rounded-full
+                                    ${style.dot}
+                                  `}
+                                />
+
+                                <StatusIcon
+                                  size={11}
+                                />
+
+                                {getStatusLabel(
+                                  item.status
+                                )}
+                              </span>
+
+                            </td>
+
+                            {/* ACTION */}
+
+                            <td className="px-5 py-4">
+
+                              <div className="flex items-center justify-end gap-1 relative">
+
+                                <ActionButton
+                                  title="Detail"
+                                  onClick={() =>
+                                    router.push(
+                                      `/super-admin/manajemenAkses/${item.id}`
+                                    )
+                                  }
+                                >
+                                  <Eye size={15} />
+                                </ActionButton>
+
+                                <ActionButton
+                                  title="Edit"
+                                  hover="primary"
+                                  onClick={() =>
+                                    router.push(
+                                      `/super-admin/manajemenAkses/edit-role?id=${item.id}`
+                                    )
+                                  }
+                                >
+                                  <Edit size={15} />
+                                </ActionButton>
+
+                                <ActionButton
+                                  title="Hapus"
+                                  hover="danger"
+                                  onClick={() =>
+                                    handleDelete(
+                                      item
+                                    )
+                                  }
+                                >
+                                  {deletingId ===
+                                  item.id ? (
+                                    <Loader2
+                                      size={15}
+                                      className="animate-spin"
+                                    />
+                                  ) : (
+                                    <Trash2
+                                      size={15}
+                                    />
+                                  )}
+                                </ActionButton>
+
+                                <ActionButton
+                                  title="Lainnya"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+
+                                    setOpenMenuId(
+                                      (prev) =>
+                                        prev ===
+                                        item.id
+                                          ? null
+                                          : item.id
+                                    );
+                                  }}
+                                >
+                                  <MoreHorizontal
+                                    size={15}
+                                  />
+                                </ActionButton>
+
+                                {openMenuId ===
+                                  item.id && (
+                                  <div
+                                    onClick={(e) =>
+                                      e.stopPropagation()
+                                    }
+                                    className="
+                                      absolute
+                                      right-0
+                                      top-10
+                                      z-20
+                                      w-48
+                                      rounded-xl
+                                      theme-card
+                                      theme-border
+                                      shadow-[0_15px_40px_color-mix(in_srgb,var(--color-text)_18%,transparent)]
+                                      py-1.5
+                                    "
+                                  >
+
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        router.push(
+                                          `/super-admin/manajemenAkses/${item.id}`
+                                        );
+
+                                        setOpenMenuId(
+                                          null
+                                        );
+                                      }}
+                                      className="
+                                        w-full
+                                        flex
+                                        items-center
+                                        gap-2.5
+                                        px-3.5
+                                        py-2.5
+                                        text-xs
+                                        font-medium
+                                        theme-text-secondary
+                                        hover:bg-[color-mix(in_srgb,var(--color-primary)_7%,transparent)]
+                                        hover:text-[var(--color-primary)]
+                                        transition-colors
+                                      "
+                                    >
+                                      <Key size={14} />
+                                      Kelola Izin
+                                    </button>
+
+                                    <button
+                                      type="button"
+                                      onClick={() => {
+                                        router.push(
+                                          `/super-admin/manajemenAkses/edit-role?id=${item.id}`
+                                        );
+
+                                        setOpenMenuId(
+                                          null
+                                        );
+                                      }}
+                                      className="
+                                        w-full
+                                        flex
+                                        items-center
+                                        gap-2.5
+                                        px-3.5
+                                        py-2.5
+                                        text-xs
+                                        font-medium
+                                        theme-text-secondary
+                                        hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
+                                        hover:text-[var(--color-primary)]
+                                        transition-colors
+                                      "
+                                    >
+                                      <Settings2 size={14} />
+                                      Pengaturan Role
+                                    </button>
+
+                                  </div>
+                                )}
+
+                              </div>
+
+                            </td>
+
+                          </tr>
+                        );
+                      }
+                    )
+                  )}
+
+                </tbody>
+
+              </table>
+
+            </div>
+          )}
+
+          {/* ==================================================
+              PAGINATION
+          ================================================== */}
+
+          <div
+            className={`
+              px-4
+              sm:px-5
+              py-4
+              border-t
+              ${themeDivider}
+              theme-card
+            `}
+          >
+
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
+
+              <p className="text-xs theme-text-muted">
+
+                Menampilkan{" "}
+
+                <span className="font-semibold theme-text-secondary">
+                  {sortedData.length === 0
+                    ? 0
+                    : (currentPage - 1) *
+                        itemsPerPage +
+                      1}
+                </span>
+
+                {" - "}
+
+                <span className="font-semibold theme-text-secondary">
+                  {Math.min(
+                    currentPage *
+                      itemsPerPage,
+                    sortedData.length
+                  )}
+                </span>
+
+                {" dari "}
+
+                <span className="font-semibold theme-text-secondary">
+                  {sortedData.length}
+                </span>{" "}
+                data
+
+              </p>
+
+              <div className="flex items-center gap-1">
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCurrentPage(
+                      (prev) =>
+                        Math.max(
+                          1,
+                          prev - 1
+                        )
+                    )
+                  }
+                  disabled={
+                    currentPage === 1
+                  }
+                  className="
+                    w-9
+                    h-9
+                    flex
+                    items-center
+                    justify-center
+                    rounded-lg
+                    theme-border
+                    theme-text-muted
+                    hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
+                    hover:text-[var(--color-primary)]
+                    disabled:opacity-40
+                    disabled:cursor-not-allowed
+                    transition-colors
+                  "
+                >
+                  <ChevronLeft size={15} />
+                </button>
+
+                {Array.from({
+                  length: totalPages,
+                }).map(
+                  (_, index) => {
+                    const page =
+                      index + 1;
+
+                    return (
+                      <button
+                        key={page}
+                        type="button"
+                        onClick={() =>
+                          setCurrentPage(
+                            page
+                          )
+                        }
+                        className={`
+                          w-9
+                          h-9
+                          rounded-lg
+                          text-xs
+                          font-semibold
+                          transition-all
+                          ${
+                            currentPage ===
+                            page
+                              ? `${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`
+                              : `theme-text-muted hover:bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] hover:text-[var(--color-primary)]`
+                          }
+                        `}
+                      >
+                        {page}
+                      </button>
+                    );
+                  }
+                )}
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setCurrentPage(
+                      (prev) =>
+                        Math.min(
+                          totalPages,
+                          prev + 1
+                        )
+                    )
+                  }
+                  disabled={
+                    currentPage ===
+                      totalPages ||
+                    sortedData.length ===
+                      0
+                  }
+                  className="
+                    w-9
+                    h-9
+                    flex
+                    items-center
+                    justify-center
+                    rounded-lg
+                    theme-border
+                    theme-text-muted
+                    hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
+                    hover:text-[var(--color-primary)]
+                    disabled:opacity-40
+                    disabled:cursor-not-allowed
+                    transition-colors
+                  "
+                >
+                  <ChevronRight size={15} />
+                </button>
+
+              </div>
+
+            </div>
+
+          </div>
+        </section>
+
+        {/* ==================================================
+            FOOTER
+        ================================================== */}
+
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-2 pt-5 pb-2">
+
+          <div className="flex items-center gap-2">
+
+            <div
+              className={`
+                w-5
+                h-5
+                rounded-md
+                ${themePrimaryGradient}
+                text-[var(--color-card)]
+                flex
+                items-center
+                justify-center
+              `}
+            >
+              <Shield size={11} />
+            </div>
+
+            <p className="text-[11px] font-medium theme-text-muted">
+
+              SmartSchool
+
+              <span className="theme-text-placeholder mx-1">
+                •
+              </span>
+
+              Manajemen Akses
+
+            </p>
+
+          </div>
+
+          <p className="text-[11px] theme-text-muted">
+            Data diambil dari server
+          </p>
+
+        </div>
+
       </div>
     </div>
   );
@@ -1565,48 +2252,100 @@ function PremiumStatCard({
   value,
   description,
   icon: Icon,
-  accent = "blue",
+  accent = "primary",
 }) {
   const styles = {
-    blue: {
-      icon:
-        "bg-blue-50 text-blue-600 border-blue-100",
-      line: "bg-blue-500",
+    primary: {
+      icon: `
+        bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]
+        text-[var(--color-primary)]
+        border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
+      `,
+      line: "bg-[var(--color-primary)]",
     },
 
-    green: {
-      icon:
-        "bg-emerald-50 text-emerald-600 border-emerald-100",
-      line: "bg-emerald-500",
+    success: {
+      icon: `
+        bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]
+        text-[var(--color-success)]
+        border-[color-mix(in_srgb,var(--color-success)_20%,transparent)]
+      `,
+      line: "bg-[var(--color-success)]",
     },
 
-    indigo: {
-      icon:
-        "bg-indigo-50 text-indigo-600 border-indigo-100",
-      line: "bg-indigo-500",
+    info: {
+      icon: `
+        bg-[color-mix(in_srgb,var(--color-info)_9%,transparent)]
+        text-[var(--color-info)]
+        border-[color-mix(in_srgb,var(--color-info)_20%,transparent)]
+      `,
+      line: "bg-[var(--color-info)]",
     },
 
-    slate: {
-      icon:
-        "bg-slate-100 text-slate-600 border-slate-200",
-      line: "bg-slate-500",
+    neutral: {
+      icon: `
+        bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
+        theme-text-secondary
+        border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]
+      `,
+      line:
+        "bg-[var(--color-text-muted)]",
     },
   };
 
   const style =
-    styles[accent] || styles.blue;
+    styles[accent] ||
+    styles.primary;
 
   return (
-    <div className="group relative overflow-hidden bg-white border border-slate-200/80 rounded-2xl p-4 sm:p-5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
+    <div
+      className="
+        group
+        relative
+        overflow-hidden
+        theme-card
+        theme-border
+        rounded-2xl
+        p-4
+        sm:p-5
+        shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]
+        hover:shadow-[0_8px_24px_color-mix(in_srgb,var(--color-text)_8%,transparent)]
+        hover:-translate-y-0.5
+        transition-all
+        duration-300
+      "
+    >
 
       <div
-        className={`absolute left-0 top-0 w-1 h-full ${style.line} opacity-80`}
+        className={`
+          absolute
+          left-0
+          top-0
+          w-1
+          h-full
+          ${style.line}
+          opacity-80
+        `}
       />
 
       <div className="flex items-center gap-3">
 
         <div
-          className={`w-11 h-11 sm:w-12 sm:h-12 shrink-0 rounded-xl border flex items-center justify-center ${style.icon} group-hover:scale-105 transition-transform`}
+          className={`
+            w-11
+            h-11
+            sm:w-12
+            sm:h-12
+            shrink-0
+            rounded-xl
+            border
+            flex
+            items-center
+            justify-center
+            ${style.icon}
+            group-hover:scale-105
+            transition-transform
+          `}
         >
           <Icon
             size={19}
@@ -1615,17 +2354,19 @@ function PremiumStatCard({
         </div>
 
         <div className="min-w-0">
-          <p className="text-[10px] sm:text-[11px] font-semibold text-slate-400 uppercase tracking-[0.12em] truncate">
+
+          <p className="text-[10px] sm:text-[11px] font-semibold theme-text-muted uppercase tracking-[0.12em] truncate">
             {label}
           </p>
 
-          <p className="text-xl sm:text-2xl font-semibold text-slate-900 tracking-tight mt-0.5">
+          <p className="text-xl sm:text-2xl font-semibold theme-text tracking-tight mt-0.5">
             {value}
           </p>
 
-          <p className="hidden sm:block text-[10px] text-slate-400 mt-0.5 truncate">
+          <p className="hidden sm:block text-[10px] theme-text-muted mt-0.5 truncate">
             {description}
           </p>
+
         </div>
 
       </div>
@@ -1650,7 +2391,12 @@ function MobileRoleList({
   }
 
   return (
-    <div className="divide-y divide-slate-100">
+    <div
+      className={`
+        divide-y
+        ${themeDivider}
+      `}
+    >
 
       {data.map((item) => {
         const IconComponent =
@@ -1660,17 +2406,37 @@ function MobileRoleList({
           statusStyle[item.status] ||
           statusStyle.nonaktif;
 
-        const StatusIcon = style.icon;
+        const StatusIcon =
+          style.icon;
 
         return (
           <div
             key={item.id}
-            className="p-4 sm:p-5 hover:bg-blue-50/20 transition-colors"
+            className="
+              p-4
+              sm:p-5
+              hover:bg-[color-mix(in_srgb,var(--color-primary)_4%,transparent)]
+              transition-colors
+            "
           >
 
             <div className="flex items-start gap-3">
 
-              <div className="w-11 h-11 shrink-0 rounded-xl bg-gradient-to-br from-blue-50 to-indigo-50 border border-blue-100 text-blue-600 flex items-center justify-center">
+              <div
+                className="
+                  w-11
+                  h-11
+                  shrink-0
+                  rounded-xl
+                  bg-[linear-gradient(135deg,color-mix(in_srgb,var(--color-primary)_8%,transparent),color-mix(in_srgb,var(--color-info)_8%,transparent))]
+                  border
+                  border-[color-mix(in_srgb,var(--color-primary)_18%,transparent)]
+                  text-[var(--color-primary)]
+                  flex
+                  items-center
+                  justify-center
+                "
+              >
                 <IconComponent
                   size={18}
                   strokeWidth={1.9}
@@ -1682,25 +2448,44 @@ function MobileRoleList({
                 <div className="flex items-start justify-between gap-3">
 
                   <div className="min-w-0">
-                    <h3 className="text-sm font-semibold text-slate-800 truncate">
+
+                    <h3 className="text-sm font-semibold theme-text truncate">
                       {item.nama}
                     </h3>
 
-                    <p className="text-[11px] text-slate-400 mt-0.5 truncate">
+                    <p className="text-[11px] theme-text-muted mt-0.5 truncate">
                       {item.namaTampilan}
                     </p>
+
                   </div>
 
                   <span
-                    className={`shrink-0 inline-flex items-center gap-1.5 px-2 py-1.5 rounded-full border text-[9px] font-semibold ${style.bg} ${style.text} ${style.border}`}
+                    className={`
+                      shrink-0
+                      inline-flex
+                      items-center
+                      gap-1.5
+                      px-2
+                      py-1.5
+                      rounded-full
+                      border
+                      text-[9px]
+                      font-semibold
+                      ${style.bg}
+                      ${style.text}
+                      ${style.border}
+                    `}
                   >
                     <span
-                      className={`w-1.5 h-1.5 rounded-full ${style.dot}`}
+                      className={`
+                        w-1.5
+                        h-1.5
+                        rounded-full
+                        ${style.dot}
+                      `}
                     />
 
-                    <StatusIcon
-                      size={10}
-                    />
+                    <StatusIcon size={10} />
 
                     {item.status ===
                     "aktif"
@@ -1710,19 +2495,48 @@ function MobileRoleList({
 
                 </div>
 
-                <p className="text-xs text-slate-500 mt-3 leading-relaxed">
+                <p className="text-xs theme-text-muted mt-3 leading-relaxed">
                   {item.deskripsi}
                 </p>
 
                 <div className="flex flex-wrap items-center gap-2 mt-3">
 
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-blue-50 border border-blue-100 text-blue-700 text-[10px] font-semibold">
+                  <span
+                    className={`
+                      inline-flex
+                      items-center
+                      gap-1.5
+                      px-2.5
+                      py-1.5
+                      rounded-lg
+                      ${themePrimarySoft}
+                      ${themePrimarySoftBorder}
+                      ${themePrimaryText}
+                      text-[10px]
+                      font-semibold
+                    `}
+                  >
                     <Key size={11} />
                     {item.izin} izin
                   </span>
 
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-indigo-50 border border-indigo-100 text-indigo-700 text-[10px] font-semibold">
+                  <span
+                    className={`
+                      inline-flex
+                      items-center
+                      gap-1.5
+                      px-2.5
+                      py-1.5
+                      rounded-lg
+                      ${themeInfoSurface}
+                      ${themeInfoBorder}
+                      text-[var(--color-info)]
+                      text-[10px]
+                      font-semibold
+                    `}
+                  >
                     <Users size={11} />
+
                     {item.pengguna.toLocaleString(
                       "id-ID"
                     )}{" "}
@@ -1731,7 +2545,17 @@ function MobileRoleList({
 
                 </div>
 
-                <div className="flex items-center gap-1.5 mt-4 pt-3 border-t border-slate-100">
+                <div
+                  className={`
+                    flex
+                    items-center
+                    gap-1.5
+                    mt-4
+                    pt-3
+                    border-t
+                    ${themeDivider}
+                  `}
+                >
 
                   <ActionButton
                     title="Detail"
@@ -1757,7 +2581,7 @@ function MobileRoleList({
 
                   <ActionButton
                     title="Hapus"
-                    hover="rose"
+                    hover="danger"
                     onClick={() =>
                       handleDelete(item)
                     }
@@ -1780,12 +2604,25 @@ function MobileRoleList({
                         `/super-admin/manajemenAkses/${item.id}`
                       )
                     }
-                    className="ml-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-semibold text-blue-600 bg-blue-50 hover:bg-blue-100 transition-colors"
+                    className="
+                      ml-auto
+                      inline-flex
+                      items-center
+                      gap-1.5
+                      px-3
+                      py-1.5
+                      rounded-lg
+                      text-[10px]
+                      font-semibold
+                      text-[var(--color-primary)]
+                      bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]
+                      hover:bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]
+                      transition-colors
+                    "
                   >
                     Kelola
-                    <ArrowUpRight
-                      size={11}
-                    />
+
+                    <ArrowUpRight size={11} />
                   </button>
 
                 </div>
@@ -1816,13 +2653,29 @@ function SortableHeader({
   return (
     <th
       onClick={() => onSort(field)}
-      className="px-5 py-3.5 text-left text-[10px] font-semibold text-slate-500 uppercase tracking-[0.12em] cursor-pointer hover:text-blue-600 select-none whitespace-nowrap transition-colors"
+      className="
+        px-5
+        py-3.5
+        text-left
+        text-[10px]
+        font-semibold
+        theme-text-muted
+        uppercase
+        tracking-[0.12em]
+        cursor-pointer
+        hover:text-[var(--color-primary)]
+        select-none
+        whitespace-nowrap
+        transition-colors
+      "
     >
       <span className="inline-flex items-center gap-1.5">
+
         {label}
 
         {sortField === field &&
           icon(field)}
+
       </span>
     </th>
   );
@@ -1836,14 +2689,20 @@ function ActionButton({
   children,
   title,
   onClick,
-  hover = "blue",
+  hover = "primary",
 }) {
   const hoverMap = {
-    blue:
-      "hover:bg-blue-50 hover:text-blue-600 hover:border-blue-100",
+    primary: `
+      hover:bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]
+      hover:text-[var(--color-primary)]
+      hover:border-[color-mix(in_srgb,var(--color-primary)_18%,transparent)]
+    `,
 
-    rose:
-      "hover:bg-rose-50 hover:text-rose-600 hover:border-rose-100",
+    danger: `
+      hover:bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]
+      hover:text-[var(--color-warning)]
+      hover:border-[color-mix(in_srgb,var(--color-warning)_20%,transparent)]
+    `,
   };
 
   return (
@@ -1851,7 +2710,19 @@ function ActionButton({
       type="button"
       onClick={onClick}
       title={title}
-      className={`w-8 h-8 rounded-lg border border-transparent flex items-center justify-center text-slate-400 transition-all ${hoverMap[hover]}`}
+      className={`
+        w-8
+        h-8
+        rounded-lg
+        border
+        border-transparent
+        flex
+        items-center
+        justify-center
+        theme-text-muted
+        transition-all
+        ${hoverMap[hover]}
+      `}
     >
       {children}
     </button>
@@ -1866,20 +2737,46 @@ function LoadingState() {
   return (
     <div className="flex flex-col items-center justify-center py-20 px-5">
 
-      <div className="relative w-14 h-14 rounded-2xl bg-blue-50 border border-blue-100 text-blue-600 flex items-center justify-center mb-4">
-        <div className="absolute inset-0 rounded-2xl border border-blue-200 animate-ping opacity-30" />
+      <div
+        className={`
+          relative
+          w-14
+          h-14
+          rounded-2xl
+          ${themePrimarySoft}
+          ${themePrimarySoftBorder}
+          ${themePrimaryText}
+          flex
+          items-center
+          justify-center
+          mb-4
+        `}
+      >
+
+        <div
+          className="
+            absolute
+            inset-0
+            rounded-2xl
+            border
+            border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]
+            animate-ping
+            opacity-30
+          "
+        />
 
         <Loader2
           size={23}
           className="animate-spin"
         />
+
       </div>
 
-      <p className="text-sm font-semibold text-slate-700">
+      <p className="text-sm font-semibold theme-text-secondary">
         Memuat data role...
       </p>
 
-      <p className="text-xs text-slate-400 mt-1.5 text-center">
+      <p className="text-xs theme-text-muted mt-1.5 text-center">
         Sedang mengambil data dari server
         SmartSchool.
       </p>
@@ -1896,22 +2793,54 @@ function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center py-20 px-5">
 
-      <div className="relative w-14 h-14 rounded-2xl bg-slate-100 border border-slate-200 text-slate-400 flex items-center justify-center mb-4">
+      <div
+        className="
+          relative
+          w-14
+          h-14
+          rounded-2xl
+          bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
+          border
+          border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]
+          theme-text-muted
+          flex
+          items-center
+          justify-center
+          mb-4
+        "
+      >
+
         <Search size={21} />
 
-        <div className="absolute -right-1 -bottom-1 w-5 h-5 rounded-full bg-white border border-slate-200 flex items-center justify-center">
+        <div
+          className="
+            absolute
+            -right-1
+            -bottom-1
+            w-5
+            h-5
+            rounded-full
+            theme-card
+            border
+            border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]
+            flex
+            items-center
+            justify-center
+          "
+        >
           <XCircle
             size={11}
-            className="text-slate-400"
+            className="theme-text-muted"
           />
         </div>
+
       </div>
 
-      <p className="text-sm font-semibold text-slate-700">
+      <p className="text-sm font-semibold theme-text-secondary">
         Tidak ada role ditemukan
       </p>
 
-      <p className="text-xs text-slate-400 mt-1.5 text-center max-w-sm leading-relaxed">
+      <p className="text-xs theme-text-muted mt-1.5 text-center max-w-sm leading-relaxed">
         Coba ubah kata kunci pencarian
         atau filter status untuk melihat
         data lainnya.

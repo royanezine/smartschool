@@ -64,48 +64,61 @@ export default function PengumumanPage() {
 
   const stats = {
     total: announcements.length,
-    published: announcements.filter((item) => item.status === "published").length,
-    scheduled: announcements.filter((item) => item.status === "scheduled").length,
-    draft: announcements.filter((item) => item.status === "draft").length,
+    published: announcements.filter(
+      (item) => item.status === "published"
+    ).length,
+    scheduled: announcements.filter(
+      (item) => item.status === "scheduled"
+    ).length,
+    draft: announcements.filter(
+      (item) => item.status === "draft"
+    ).length,
   };
 
   const filteredData = announcements.filter((item) => {
     const keyword = search.toLowerCase().trim();
     const matchSearch = item.title.toLowerCase().includes(keyword);
-    const matchStatus = filterStatus === "Semua" || item.status === filterStatus;
+    const matchStatus =
+      filterStatus === "Semua" || item.status === filterStatus;
+
     return matchSearch && matchStatus;
   });
 
   const handleDelete = (id) => {
     if (!confirm("Yakin ingin menghapus pengumuman ini?")) return;
-    setAnnouncements((prev) => prev.filter((item) => item.id !== id));
+
+    setAnnouncements((prev) =>
+      prev.filter((item) => item.id !== id)
+    );
   };
 
   const getStatusStyle = (status) => {
     switch (status) {
       case "published":
         return {
-          wrapper: "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/60",
-          dot: "bg-emerald-500",
+          wrapper: "theme-success border",
+          dot: "bg-[var(--color-success)]",
           label: "Published",
         };
+
       case "scheduled":
         return {
-          wrapper: "bg-sky-50 text-sky-700 ring-1 ring-sky-200/60",
-          dot: "bg-sky-500",
+          wrapper: "theme-info border",
+          dot: "bg-[var(--color-info)]",
           label: "Terjadwal",
         };
+
       default:
         return {
-          wrapper: "bg-amber-50 text-amber-700 ring-1 ring-amber-200/60",
-          dot: "bg-amber-500",
+          wrapper: "theme-warning border",
+          dot: "bg-[var(--color-warning)]",
           label: "Draft",
         };
     }
   };
 
   return (
-    <div className="flex min-h-screen w-full bg-white">
+    <div className="flex min-h-screen w-full theme-page">
       {/* SIDEBAR */}
       <Sidebar
         active={active}
@@ -116,7 +129,7 @@ export default function PengumumanPage() {
 
       {/* MAIN CONTENT */}
       <div className="flex-1 min-w-0 flex flex-col">
-        {/* ===== HEADER dengan CMS Admin ===== */}
+        {/* HEADER */}
         <Header
           title="Pengumuman"
           user={{
@@ -127,35 +140,64 @@ export default function PengumumanPage() {
           notifications={[]}
         />
 
-        <main className="flex-1 min-w-0 overflow-y-auto p-4 md:p-6 lg:p-8 bg-white">
+        <main className="flex-1 min-w-0 overflow-y-auto p-4 md:p-6 lg:p-8 theme-page">
           <div className="w-full min-w-0 max-w-7xl mx-auto space-y-6">
-
             {/* BREADCRUMB */}
-            <nav className="flex items-center gap-2 text-xs sm:text-sm text-slate-500">
-              <a href="/cmsAdmin" className="hover:text-blue-700 transition">Dashboard</a>
-              <ChevronRight className="w-3.5 h-3.5 text-slate-300" />
-              <span className="text-blue-700 font-semibold">Pengumuman</span>
+            <nav className="flex items-center gap-2 text-xs sm:text-sm theme-text-muted">
+              <a
+                href="/cmsAdmin"
+                className="hover:text-[var(--color-primary)] transition"
+              >
+                Dashboard
+              </a>
+
+              <ChevronRight className="w-3.5 h-3.5 theme-text-placeholder" />
+
+              <span className="text-[var(--color-primary)] font-semibold">
+                Pengumuman
+              </span>
             </nav>
 
             {/* HEADER CARD */}
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 lg:p-8">
+            <div className="theme-card rounded-2xl border theme-border shadow-sm p-6 lg:p-8">
               <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
                 <div className="flex items-start gap-4 min-w-0">
-                  <div className="shrink-0 p-3 rounded-2xl bg-gradient-to-br from-blue-700 to-blue-800 text-white shadow-lg shadow-blue-200/50">
+                  <div className="shrink-0 p-3 rounded-2xl theme-primary shadow-lg">
                     <Megaphone className="w-6 h-6" />
                   </div>
+
                   <div className="min-w-0">
-                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-blue-50 border border-blue-100 text-[10px] font-bold uppercase tracking-wider text-blue-700 mb-1.5">
+                    <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full theme-info border text-[10px] font-bold uppercase tracking-wider mb-1.5">
                       <Sparkles className="w-3 h-3" />
                       CMS Website
                     </div>
-                    <h1 className="text-2xl sm:text-3xl font-bold text-slate-900">Kelola Pengumuman</h1>
-                    <p className="text-sm text-slate-500 mt-1">Kelola semua pengumuman untuk siswa dan guru</p>
+
+                    <h1 className="text-2xl sm:text-3xl font-bold theme-text">
+                      Kelola Pengumuman
+                    </h1>
+
+                    <p className="text-sm theme-text-muted mt-1">
+                      Kelola semua pengumuman untuk siswa dan guru
+                    </p>
                   </div>
                 </div>
+
                 <button
-                  onClick={() => router.push("/cmsAdmin/pengumuman/tambah")}
-                  className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-700 to-blue-800 text-white rounded-xl hover:shadow-lg hover:shadow-blue-200/50 transition-all shadow-md font-semibold text-sm whitespace-nowrap"
+                  onClick={() =>
+                    router.push("/cmsAdmin/pengumuman/tambah")
+                  }
+                  className="
+                    inline-flex items-center justify-center gap-2
+                    px-5 py-2.5
+                    theme-primary
+                    rounded-xl
+                    hover:shadow-lg
+                    transition-all
+                    shadow-md
+                    font-semibold
+                    text-sm
+                    whitespace-nowrap
+                  "
                 >
                   <Plus className="w-4 h-4" />
                   Buat Pengumuman
@@ -163,48 +205,119 @@ export default function PengumumanPage() {
               </div>
 
               {/* STATISTICS */}
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-6 border-t border-slate-100">
-                <div className="bg-white rounded-xl border border-slate-200/60 p-4 hover:shadow-md transition-all hover:-translate-y-0.5">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mt-6 pt-6 border-t theme-border">
+                {/* TOTAL */}
+                <div
+                  className="
+                    theme-card-soft
+                    rounded-xl
+                    border theme-border
+                    p-4
+                    hover:shadow-md
+                    transition-all
+                    hover:-translate-y-0.5
+                  "
+                >
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-blue-50 text-blue-700">
+                    <div className="p-2 rounded-lg theme-info">
                       <LayoutGrid className="w-4 h-4" />
                     </div>
+
                     <div>
-                      <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Total</p>
-                      <p className="text-2xl font-bold text-slate-900">{stats.total}</p>
+                      <p className="text-[10px] font-semibold theme-text-muted uppercase tracking-wider">
+                        Total
+                      </p>
+
+                      <p className="text-2xl font-bold theme-text">
+                        {stats.total}
+                      </p>
                     </div>
                   </div>
                 </div>
-                <div className="bg-white rounded-xl border border-slate-200/60 p-4 hover:shadow-md transition-all hover:-translate-y-0.5">
+
+                {/* PUBLISHED */}
+                <div
+                  className="
+                    theme-card-soft
+                    rounded-xl
+                    border theme-border
+                    p-4
+                    hover:shadow-md
+                    transition-all
+                    hover:-translate-y-0.5
+                  "
+                >
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-emerald-50 text-emerald-600">
+                    <div className="p-2 rounded-lg theme-success">
                       <CheckCircle2 className="w-4 h-4" />
                     </div>
+
                     <div>
-                      <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Published</p>
-                      <p className="text-2xl font-bold text-emerald-600">{stats.published}</p>
+                      <p className="text-[10px] font-semibold theme-text-muted uppercase tracking-wider">
+                        Published
+                      </p>
+
+                      <p className="text-2xl font-bold text-[var(--color-success)]">
+                        {stats.published}
+                      </p>
                     </div>
                   </div>
                 </div>
-                <div className="bg-white rounded-xl border border-slate-200/60 p-4 hover:shadow-md transition-all hover:-translate-y-0.5">
+
+                {/* SCHEDULED */}
+                <div
+                  className="
+                    theme-card-soft
+                    rounded-xl
+                    border theme-border
+                    p-4
+                    hover:shadow-md
+                    transition-all
+                    hover:-translate-y-0.5
+                  "
+                >
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-sky-50 text-sky-600">
+                    <div className="p-2 rounded-lg theme-info">
                       <Clock className="w-4 h-4" />
                     </div>
+
                     <div>
-                      <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Terjadwal</p>
-                      <p className="text-2xl font-bold text-sky-600">{stats.scheduled}</p>
+                      <p className="text-[10px] font-semibold theme-text-muted uppercase tracking-wider">
+                        Terjadwal
+                      </p>
+
+                      <p className="text-2xl font-bold text-[var(--color-info)]">
+                        {stats.scheduled}
+                      </p>
                     </div>
                   </div>
                 </div>
-                <div className="bg-white rounded-xl border border-slate-200/60 p-4 hover:shadow-md transition-all hover:-translate-y-0.5">
+
+                {/* DRAFT */}
+                <div
+                  className="
+                    theme-card-soft
+                    rounded-xl
+                    border theme-border
+                    p-4
+                    hover:shadow-md
+                    transition-all
+                    hover:-translate-y-0.5
+                  "
+                >
                   <div className="flex items-center gap-3">
-                    <div className="p-2 rounded-lg bg-amber-50 text-amber-600">
+                    <div className="p-2 rounded-lg theme-warning">
                       <FileText className="w-4 h-4" />
                     </div>
+
                     <div>
-                      <p className="text-[10px] font-semibold text-slate-400 uppercase tracking-wider">Draft</p>
-                      <p className="text-2xl font-bold text-amber-600">{stats.draft}</p>
+                      <p className="text-[10px] font-semibold theme-text-muted uppercase tracking-wider">
+                        Draft
+                      </p>
+
+                      <p className="text-2xl font-bold text-[var(--color-warning)]">
+                        {stats.draft}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -212,104 +325,271 @@ export default function PengumumanPage() {
             </div>
 
             {/* SEARCH & FILTER */}
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-4 flex flex-col sm:flex-row gap-3 items-center">
+            <div
+              className="
+                theme-card
+                rounded-2xl
+                border theme-border
+                shadow-sm
+                p-4
+                flex flex-col sm:flex-row
+                gap-3
+                items-center
+              "
+            >
               <div className="relative flex-1 w-full">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 theme-text-muted" />
+
                 <input
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Cari judul pengumuman..."
-                  className="w-full pl-9 pr-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-800 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition"
+                  className="
+                    theme-input
+                    w-full
+                    pl-9 pr-4 py-2.5
+                    rounded-xl
+                    border
+                    text-sm
+                    outline-none
+                    focus:border-[var(--color-primary)]
+                    transition
+                  "
                 />
               </div>
+
               <div className="flex items-center gap-2 w-full sm:w-auto">
-                <Filter className="w-4 h-4 text-slate-400 shrink-0" />
+                <Filter className="w-4 h-4 theme-text-muted shrink-0" />
+
                 <select
                   value={filterStatus}
-                  onChange={(e) => setFilterStatus(e.target.value)}
-                  className="flex-1 sm:flex-none px-3 py-2.5 rounded-xl border border-slate-200 bg-white text-sm text-slate-800 outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 cursor-pointer"
+                  onChange={(e) =>
+                    setFilterStatus(e.target.value)
+                  }
+                  className="
+                    theme-input
+                    flex-1 sm:flex-none
+                    px-3 py-2.5
+                    rounded-xl
+                    border
+                    text-sm
+                    outline-none
+                    focus:border-[var(--color-primary)]
+                    cursor-pointer
+                  "
                 >
                   <option value="Semua">Semua Status</option>
                   <option value="published">Published</option>
                   <option value="draft">Draft</option>
                   <option value="scheduled">Terjadwal</option>
                 </select>
-                <span className="hidden lg:inline-flex text-xs text-slate-400 px-2 whitespace-nowrap">
+
+                <span className="hidden lg:inline-flex text-xs theme-text-muted px-2 whitespace-nowrap">
                   {filteredData.length} data
                 </span>
               </div>
             </div>
 
             {/* TABLE */}
-            <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div className="theme-card rounded-2xl border theme-border shadow-sm overflow-hidden">
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[680px] border-collapse">
-                  <thead className="bg-slate-50/80 border-b border-slate-200">
+                  <thead className="theme-table-header border-b theme-border">
                     <tr>
                       <th className="px-4 py-3.5 text-left min-w-[230px]">
-                        <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Judul</span>
+                        <span className="text-[10px] font-semibold theme-text-secondary uppercase tracking-wider">
+                          Judul
+                        </span>
                       </th>
+
                       <th className="px-4 py-3.5 text-left min-w-[120px]">
-                        <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Kategori</span>
+                        <span className="text-[10px] font-semibold theme-text-secondary uppercase tracking-wider">
+                          Kategori
+                        </span>
                       </th>
+
                       <th className="px-4 py-3.5 text-left min-w-[120px]">
-                        <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Status</span>
+                        <span className="text-[10px] font-semibold theme-text-secondary uppercase tracking-wider">
+                          Status
+                        </span>
                       </th>
+
                       <th className="px-4 py-3.5 text-left min-w-[120px]">
-                        <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Tanggal</span>
+                        <span className="text-[10px] font-semibold theme-text-secondary uppercase tracking-wider">
+                          Tanggal
+                        </span>
                       </th>
+
                       <th className="px-4 py-3.5 text-right min-w-[120px]">
-                        <span className="text-[10px] font-semibold text-slate-500 uppercase tracking-wider">Aksi</span>
+                        <span className="text-[10px] font-semibold theme-text-secondary uppercase tracking-wider">
+                          Aksi
+                        </span>
                       </th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+
+                  <tbody>
                     {filteredData.length > 0 ? (
                       filteredData.map((item) => {
                         const statusStyle = getStatusStyle(item.status);
+
                         return (
-                          <tr key={item.id} className="group hover:bg-blue-50/30 transition-colors duration-200">
+                          <tr
+                            key={item.id}
+                            className="
+                              group
+                              border-b theme-border-soft
+                              theme-table-hover
+                              transition-colors duration-200
+                            "
+                          >
+                            {/* JUDUL */}
                             <td className="px-4 py-4 align-middle">
                               <div className="flex items-center gap-3 min-w-0">
-                                <div className="shrink-0 w-9 h-9 rounded-xl bg-gradient-to-br from-blue-100 to-blue-200 text-blue-700 flex items-center justify-center text-sm font-bold shadow-sm">
+                                <div
+                                  className="
+                                    shrink-0
+                                    w-9 h-9
+                                    rounded-xl
+                                    theme-info
+                                    border
+                                    flex items-center justify-center
+                                    text-sm font-bold
+                                    shadow-sm
+                                  "
+                                >
                                   {item.title.charAt(0).toUpperCase()}
                                 </div>
+
                                 <div className="min-w-0 flex-1">
-                                  <p className="text-sm font-semibold text-slate-800 group-hover:text-blue-700 transition-colors truncate max-w-[280px] sm:max-w-[360px] lg:max-w-[500px] xl:max-w-[700px]">
+                                  <p
+                                    className="
+                                      text-sm font-semibold
+                                      theme-text
+                                      group-hover:text-[var(--color-primary)]
+                                      transition-colors
+                                      truncate
+                                      max-w-[280px]
+                                      sm:max-w-[360px]
+                                      lg:max-w-[500px]
+                                      xl:max-w-[700px]
+                                    "
+                                  >
                                     {item.title}
                                   </p>
+
                                   <div className="flex items-center gap-2 mt-1.5 md:hidden flex-wrap">
-                                    <span className={`inline-flex items-center gap-1 text-[10px] px-2 py-1 rounded-full font-medium ${statusStyle.wrapper}`}>
-                                      <span className={`w-1.5 h-1.5 rounded-full ${statusStyle.dot}`} />
+                                    <span
+                                      className={`
+                                        inline-flex items-center gap-1
+                                        text-[10px]
+                                        px-2 py-1
+                                        rounded-full
+                                        font-medium
+                                        ${statusStyle.wrapper}
+                                      `}
+                                    >
+                                      <span
+                                        className={`
+                                          w-1.5 h-1.5
+                                          rounded-full
+                                          ${statusStyle.dot}
+                                        `}
+                                      />
+
                                       {statusStyle.label}
                                     </span>
-                                    <span className="text-[10px] text-slate-400">{item.date}</span>
+
+                                    <span className="text-[10px] theme-text-muted">
+                                      {item.date}
+                                    </span>
                                   </div>
                                 </div>
                               </div>
                             </td>
-                            <td className="px-4 py-4 text-sm text-slate-500 whitespace-nowrap">
+
+                            {/* KATEGORI */}
+                            <td className="px-4 py-4 text-sm theme-text-secondary whitespace-nowrap">
                               {item.category}
                             </td>
+
+                            {/* STATUS */}
                             <td className="px-4 py-4">
-                              <span className={`hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] sm:text-xs font-medium whitespace-nowrap ${statusStyle.wrapper}`}>
-                                <span className={`w-1.5 h-1.5 rounded-full ${statusStyle.dot}`} />
+                              <span
+                                className={`
+                                  hidden md:inline-flex
+                                  items-center gap-1.5
+                                  px-2.5 py-1
+                                  rounded-full
+                                  text-[10px] sm:text-xs
+                                  font-medium
+                                  whitespace-nowrap
+                                  ${statusStyle.wrapper}
+                                `}
+                              >
+                                <span
+                                  className={`
+                                    w-1.5 h-1.5
+                                    rounded-full
+                                    ${statusStyle.dot}
+                                  `}
+                                />
+
                                 {statusStyle.label}
                               </span>
                             </td>
-                            <td className="px-4 py-4 text-xs text-slate-500 whitespace-nowrap">
+
+                            {/* TANGGAL */}
+                            <td className="px-4 py-4 text-xs theme-text-secondary whitespace-nowrap">
                               {item.date}
                             </td>
+
+                            {/* AKSI */}
                             <td className="px-4 py-4">
                               <div className="flex items-center justify-end gap-0.5 sm:gap-1">
-                                <button className="p-1.5 sm:p-2 rounded-lg text-slate-400 hover:text-blue-700 hover:bg-blue-50 transition-colors" title="Detail">
+                                <button
+                                  className="
+                                    p-1.5 sm:p-2
+                                    rounded-lg
+                                    theme-text-muted
+                                    hover:text-[var(--color-primary)]
+                                    hover:bg-[var(--color-sidebar-active)]
+                                    transition-colors
+                                  "
+                                  title="Detail"
+                                >
                                   <Eye className="w-4 h-4" />
                                 </button>
-                                <button className="p-1.5 sm:p-2 rounded-lg text-slate-400 hover:text-blue-700 hover:bg-blue-50 transition-colors" title="Edit">
+
+                                <button
+                                  className="
+                                    p-1.5 sm:p-2
+                                    rounded-lg
+                                    theme-text-muted
+                                    hover:text-[var(--color-primary)]
+                                    hover:bg-[var(--color-sidebar-active)]
+                                    transition-colors
+                                  "
+                                  title="Edit"
+                                >
                                   <Pencil className="w-4 h-4" />
                                 </button>
-                                <button onClick={() => handleDelete(item.id)} className="p-1.5 sm:p-2 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors" title="Hapus">
+
+                                <button
+                                  onClick={() =>
+                                    handleDelete(item.id)
+                                  }
+                                  className="
+                                    p-1.5 sm:p-2
+                                    rounded-lg
+                                    theme-text-muted
+                                    hover:text-[var(--color-danger)]
+                                    hover:bg-[var(--color-danger-background)]
+                                    transition-colors
+                                  "
+                                  title="Hapus"
+                                >
                                   <Trash2 className="w-4 h-4" />
                                 </button>
                               </div>
@@ -319,10 +599,19 @@ export default function PengumumanPage() {
                       })
                     ) : (
                       <tr>
-                        <td colSpan="5" className="px-6 py-12 text-center">
-                          <Megaphone className="w-12 h-12 text-slate-300 mx-auto mb-3" />
-                          <p className="text-sm font-medium text-slate-600">Tidak ada pengumuman ditemukan</p>
-                          <p className="text-xs text-slate-400 mt-1">Coba ubah kata kunci atau filter status</p>
+                        <td
+                          colSpan="5"
+                          className="px-6 py-12 text-center"
+                        >
+                          <Megaphone className="w-12 h-12 theme-text-placeholder mx-auto mb-3" />
+
+                          <p className="text-sm font-medium theme-text-secondary">
+                            Tidak ada pengumuman ditemukan
+                          </p>
+
+                          <p className="text-xs theme-text-muted mt-1">
+                            Coba ubah kata kunci atau filter status
+                          </p>
                         </td>
                       </tr>
                     )}
@@ -331,19 +620,40 @@ export default function PengumumanPage() {
               </div>
 
               {/* TABLE FOOTER */}
-              <div className="px-4 py-3 border-t border-slate-200 bg-slate-50/60 flex items-center justify-between gap-3">
-                <span className="text-xs text-slate-400 truncate">
+              <div
+                className="
+                  px-4 py-3
+                  border-t theme-border
+                  theme-table-header
+                  flex items-center justify-between
+                  gap-3
+                "
+              >
+                <span className="text-xs theme-text-muted truncate">
                   Menampilkan {filteredData.length} pengumuman
                 </span>
-                <span className="shrink-0 text-[10px] font-medium text-slate-400 bg-white px-3 py-1 rounded-full border border-slate-200/60 flex items-center gap-1.5">
-                  <TrendingUp className="w-3 h-3 text-blue-500" />
+
+                <span
+                  className="
+                    shrink-0
+                    text-[10px]
+                    font-medium
+                    theme-card
+                    theme-text-muted
+                    px-3 py-1
+                    rounded-full
+                    border theme-border
+                    flex items-center gap-1.5
+                  "
+                >
+                  <TrendingUp className="w-3 h-3 text-[var(--color-primary)]" />
                   Data simulasi
                 </span>
               </div>
             </div>
 
             {/* FOOTER */}
-            <footer className="pt-4 border-t border-slate-200/60 text-center text-xs text-slate-400">
+            <footer className="pt-4 border-t theme-border-soft text-center text-xs theme-text-muted">
               © 2026 SmartSchool CMS • Pengumuman
             </footer>
           </div>

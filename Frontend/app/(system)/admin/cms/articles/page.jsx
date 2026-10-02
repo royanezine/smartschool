@@ -73,17 +73,15 @@ export default function ArtikelPage() {
     if (isPublishedStatus(status)) {
       return {
         label: "Published",
-        className:
-          "bg-emerald-50 text-emerald-700 border-emerald-100",
-        dot: "bg-emerald-500",
+        className: "theme-success",
+        dotColor: "var(--color-success)",
       };
     }
 
     return {
       label: "Draft",
-      className:
-        "bg-amber-50 text-amber-700 border-amber-100",
-      dot: "bg-amber-500",
+      className: "theme-warning",
+      dotColor: "var(--color-warning)",
     };
   }
 
@@ -375,7 +373,8 @@ export default function ArtikelPage() {
   ========================================================= */
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50">
+    <div className="theme-page flex h-screen overflow-hidden">
+
       {/* =====================================================
           SIDEBAR
       ===================================================== */}
@@ -397,7 +396,8 @@ export default function ArtikelPage() {
           CONTENT
       ===================================================== */}
 
-      <div className="flex h-screen min-w-0 flex-1 flex-col overflow-hidden">
+      <div className="theme-page flex h-screen min-w-0 flex-1 flex-col overflow-hidden">
+
         {/* ===================================================
             HEADER (STICKY)
         =================================================== */}
@@ -411,21 +411,23 @@ export default function ArtikelPage() {
         </div>
 
         {/* ===================================================
-            MAIN (SCROLL INTERNAL)
+            MAIN
         =================================================== */}
 
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+        <main className="theme-page flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
+
           {/* =================================================
               HEADER
           ================================================= */}
 
           <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+
             <div>
-              <h1 className="text-2xl font-bold text-slate-900">
+              <h1 className="theme-text text-2xl font-bold">
                 Artikel
               </h1>
 
-              <p className="mt-1 text-sm text-slate-500">
+              <p className="theme-text-secondary mt-1 text-sm">
                 Kelola artikel dan informasi yang
                 ditampilkan pada website sekolah.
               </p>
@@ -434,14 +436,30 @@ export default function ArtikelPage() {
             <button
               type="button"
               onClick={() =>
-                router.push("/admin/cms/articles/tambah")
+                router.push(
+                  "/admin/cms/articles/tambah"
+                )
               }
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+              className="
+                theme-primary
+                inline-flex
+                items-center
+                justify-center
+                gap-2
+                rounded-xl
+                px-4
+                py-2.5
+                text-sm
+                font-semibold
+                shadow-sm
+                transition
+              "
             >
               <Plus size={18} />
 
               Tambah Artikel
             </button>
+
           </div>
 
           {/* =================================================
@@ -449,7 +467,21 @@ export default function ArtikelPage() {
           ================================================= */}
 
           {error && (
-            <div className="mb-6 flex items-start justify-between gap-4 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            <div
+              className="
+                theme-danger
+                mb-6
+                flex
+                items-start
+                justify-between
+                gap-4
+                rounded-xl
+                border
+                px-4
+                py-3
+                text-sm
+              "
+            >
               <span>{error}</span>
 
               <button
@@ -467,79 +499,149 @@ export default function ArtikelPage() {
           ================================================= */}
 
           <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-3">
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+
+            {/* TOTAL */}
+
+            <div
+              className="
+                theme-card
+                theme-border
+                rounded-2xl
+                border
+                p-5
+                shadow-sm
+              "
+            >
               <div className="flex items-center justify-between">
+
                 <div>
-                  <p className="text-sm font-medium text-slate-500">
+                  <p className="theme-text-muted text-sm font-medium">
                     Total Artikel
                   </p>
 
-                  <p className="mt-2 text-2xl font-bold text-slate-900">
+                  <p className="theme-text mt-2 text-2xl font-bold">
                     {totalArticles}
                   </p>
                 </div>
 
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                <div className="theme-info flex h-11 w-11 items-center justify-center rounded-xl">
                   <FileText size={21} />
                 </div>
+
               </div>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            {/* PUBLISHED */}
+
+            <div
+              className="
+                theme-card
+                theme-border
+                rounded-2xl
+                border
+                p-5
+                shadow-sm
+              "
+            >
               <div className="flex items-center justify-between">
+
                 <div>
-                  <p className="text-sm font-medium text-slate-500">
+                  <p className="theme-text-muted text-sm font-medium">
                     Published
                   </p>
 
-                  <p className="mt-2 text-2xl font-bold text-slate-900">
+                  <p className="theme-text mt-2 text-2xl font-bold">
                     {publishedArticles}
                   </p>
                 </div>
 
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                <div className="theme-success flex h-11 w-11 items-center justify-center rounded-xl">
                   <CheckCircle2 size={21} />
                 </div>
+
               </div>
             </div>
 
-            <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+            {/* DRAFT */}
+
+            <div
+              className="
+                theme-card
+                theme-border
+                rounded-2xl
+                border
+                p-5
+                shadow-sm
+              "
+            >
               <div className="flex items-center justify-between">
+
                 <div>
-                  <p className="text-sm font-medium text-slate-500">
+                  <p className="theme-text-muted text-sm font-medium">
                     Draft
                   </p>
 
-                  <p className="mt-2 text-2xl font-bold text-slate-900">
+                  <p className="theme-text mt-2 text-2xl font-bold">
                     {draftArticles}
                   </p>
                 </div>
 
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+                <div className="theme-warning flex h-11 w-11 items-center justify-center rounded-xl">
                   <Clock3 size={21} />
                 </div>
+
               </div>
             </div>
+
           </div>
 
           {/* =================================================
               FILTER
           ================================================= */}
 
-          <div className="mb-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-            <div className="mb-4 flex items-center gap-2 text-sm font-semibold text-slate-800">
+          <div
+            className="
+              theme-card
+              theme-border
+              mb-6
+              rounded-2xl
+              border
+              p-4
+              shadow-sm
+            "
+          >
+
+            <div
+              className="
+                theme-text
+                mb-4
+                flex
+                items-center
+                gap-2
+                text-sm
+                font-semibold
+              "
+            >
               <Filter size={17} />
 
               Filter Artikel
             </div>
 
             <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+
               {/* SEARCH */}
 
               <div className="relative">
+
                 <Search
                   size={18}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  className="
+                    theme-text-muted
+                    absolute
+                    left-3
+                    top-1/2
+                    -translate-y-1/2
+                  "
                 />
 
                 <input
@@ -549,8 +651,21 @@ export default function ArtikelPage() {
                     setSearch(e.target.value)
                   }
                   placeholder="Cari artikel..."
-                  className="h-11 w-full rounded-xl border border-slate-200 bg-white pl-10 pr-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  className="
+                    theme-input
+                    h-11
+                    w-full
+                    rounded-xl
+                    border
+                    pl-10
+                    pr-4
+                    text-sm
+                    outline-none
+                    transition
+                    focus:border-[var(--color-primary)]
+                  "
                 />
+
               </div>
 
               {/* STATUS */}
@@ -560,7 +675,18 @@ export default function ArtikelPage() {
                 onChange={(e) =>
                   setStatusFilter(e.target.value)
                 }
-                className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="
+                  theme-input
+                  h-11
+                  w-full
+                  rounded-xl
+                  border
+                  px-4
+                  text-sm
+                  outline-none
+                  transition
+                  focus:border-[var(--color-primary)]
+                "
               >
                 <option value="all">
                   Semua Status
@@ -582,7 +708,18 @@ export default function ArtikelPage() {
                 onChange={(e) =>
                   setCategoryFilter(e.target.value)
                 }
-                className="h-11 w-full rounded-xl border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                className="
+                  theme-input
+                  h-11
+                  w-full
+                  rounded-xl
+                  border
+                  px-4
+                  text-sm
+                  outline-none
+                  transition
+                  focus:border-[var(--color-primary)]
+                "
               >
                 <option value="all">
                   Semua Kategori
@@ -600,23 +737,49 @@ export default function ArtikelPage() {
                     </option>
                   ))}
               </select>
+
             </div>
+
           </div>
 
           {/* =================================================
               ARTICLE TABLE
           ================================================= */}
 
-          <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+          <div
+            className="
+              theme-card
+              theme-border
+              overflow-hidden
+              rounded-2xl
+              border
+              shadow-sm
+            "
+          >
+
             {/* TABLE HEADER */}
 
-            <div className="flex flex-col gap-2 border-b border-slate-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div
+              className="
+                theme-border
+                flex
+                flex-col
+                gap-2
+                border-b
+                px-5
+                py-4
+                sm:flex-row
+                sm:items-center
+                sm:justify-between
+              "
+            >
+
               <div>
-                <h2 className="text-base font-bold text-slate-900">
+                <h2 className="theme-text text-base font-bold">
                   Daftar Artikel
                 </h2>
 
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="theme-text-muted mt-1 text-xs">
                   Menampilkan{" "}
                   {paginatedArticles.length} dari{" "}
                   {filteredArticles.length} artikel
@@ -627,7 +790,27 @@ export default function ArtikelPage() {
                 type="button"
                 onClick={fetchArticles}
                 disabled={loading}
-                className="inline-flex items-center justify-center gap-2 self-start rounded-lg border border-slate-200 px-3 py-2 text-sm font-medium text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 sm:self-auto"
+                className="
+                  theme-card
+                  theme-border
+                  theme-text-secondary
+                  theme-table-hover
+                  inline-flex
+                  items-center
+                  justify-center
+                  gap-2
+                  self-start
+                  rounded-lg
+                  border
+                  px-3
+                  py-2
+                  text-sm
+                  font-medium
+                  transition
+                  disabled:cursor-not-allowed
+                  disabled:opacity-50
+                  sm:self-auto
+                "
               >
                 <RefreshCw
                   size={16}
@@ -638,72 +821,100 @@ export default function ArtikelPage() {
 
                 Refresh
               </button>
+
             </div>
 
             {/* LOADING */}
 
             {loading ? (
               <div className="flex min-h-[300px] items-center justify-center">
+
                 <div className="flex flex-col items-center gap-3">
+
                   <RefreshCw
                     size={28}
-                    className="animate-spin text-blue-600"
+                    className="animate-spin"
+                    style={{
+                      color:
+                        "var(--color-primary)",
+                    }}
                   />
 
-                  <p className="text-sm text-slate-500">
+                  <p className="theme-text-muted text-sm">
                     Memuat artikel...
                   </p>
+
                 </div>
+
               </div>
             ) : paginatedArticles.length === 0 ? (
+
               /* EMPTY */
 
-              <div className="flex min-h-[300px] flex-col items-center justify-center px-6 text-center">
-                <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-slate-100 text-slate-400">
+              <div
+                className="
+                  flex
+                  min-h-[300px]
+                  flex-col
+                  items-center
+                  justify-center
+                  px-6
+                  text-center
+                "
+              >
+
+                <div className="theme-card-soft theme-text-muted mb-4 flex h-14 w-14 items-center justify-center rounded-2xl">
                   <FileText size={26} />
                 </div>
 
-                <h3 className="text-base font-semibold text-slate-800">
+                <h3 className="theme-text-secondary text-base font-semibold">
                   Data artikel belum ditemukan
                 </h3>
 
-                <p className="mt-1 max-w-md text-sm text-slate-500">
+                <p className="theme-text-muted mt-1 max-w-md text-sm">
                   Belum ada artikel yang sesuai
                   dengan pencarian atau filter yang
                   kamu pilih.
                 </p>
+
               </div>
+
             ) : (
+
               <>
+
                 {/* DESKTOP TABLE */}
 
                 <div className="hidden overflow-x-auto md:block">
+
                   <table className="w-full min-w-[850px]">
+
                     <thead>
-                      <tr className="border-b border-slate-100 bg-slate-50/70">
-                        <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                      <tr className="theme-table-header border-b">
+                        <th className="theme-text-muted px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide">
                           Artikel
                         </th>
 
-                        <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        <th className="theme-text-muted px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide">
                           Kategori
                         </th>
 
-                        <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        <th className="theme-text-muted px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide">
                           Status
                         </th>
 
-                        <th className="px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        <th className="theme-text-muted px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide">
                           Tanggal
                         </th>
 
-                        <th className="px-5 py-3 text-right text-xs font-semibold uppercase tracking-wide text-slate-500">
+                        <th className="theme-text-muted px-5 py-3 text-right text-xs font-semibold uppercase tracking-wide">
                           Aksi
                         </th>
                       </tr>
                     </thead>
 
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y">
+
                       {paginatedArticles.map(
                         (article) => {
                           const id =
@@ -715,60 +926,103 @@ export default function ArtikelPage() {
                           return (
                             <tr
                               key={id}
-                              className="transition hover:bg-slate-50/70"
+                              className="
+                                theme-table-hover
+                                transition
+                              "
                             >
+
                               <td className="px-5 py-4">
+
                                 <div className="flex items-center gap-3">
-                                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+
+                                  <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
                                     <FileText size={18} />
                                   </div>
 
                                   <div className="min-w-0">
-                                    <p className="truncate font-semibold text-slate-800">
+
+                                    <p className="theme-text truncate font-semibold">
                                       {getArticleTitle(
                                         article
                                       )}
                                     </p>
 
                                     {article?.slug && (
-                                      <p className="mt-0.5 truncate text-xs text-slate-400">
+                                      <p className="theme-text-muted mt-0.5 truncate text-xs">
                                         /{article.slug}
                                       </p>
                                     )}
+
                                   </div>
+
                                 </div>
+
                               </td>
 
                               <td className="px-5 py-4">
-                                <span className="text-sm text-slate-600">
+
+                                <span className="theme-text-secondary text-sm">
                                   {getArticleCategory(
                                     article
                                   )}
                                 </span>
+
                               </td>
 
                               <td className="px-5 py-4">
+
                                 <span
-                                  className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-xs font-semibold ${status.className}`}
+                                  className={`
+                                    inline-flex
+                                    items-center
+                                    gap-2
+                                    rounded-full
+                                    border
+                                    px-2.5
+                                    py-1
+                                    text-xs
+                                    font-semibold
+                                    ${status.className}
+                                  `}
                                 >
+
                                   <span
-                                    className={`h-1.5 w-1.5 rounded-full ${status.dot}`}
+                                    className="
+                                      h-1.5
+                                      w-1.5
+                                      rounded-full
+                                    "
+                                    style={{
+                                      backgroundColor:
+                                        status.dotColor,
+                                    }}
                                   />
 
                                   {status.label}
+
                                 </span>
+
                               </td>
 
                               <td className="px-5 py-4">
-                                <span className="text-sm text-slate-600">
+
+                                <span className="theme-text-secondary text-sm">
                                   {formatDate(
-                                    getArticleDate(article)
+                                    getArticleDate(
+                                      article
+                                    )
                                   )}
                                 </span>
+
                               </td>
 
                               <td className="px-5 py-4">
+
                                 <div className="flex items-center justify-end gap-1">
+
+                                  {/* VIEW */}
+
                                   <button
                                     type="button"
                                     title="Lihat artikel"
@@ -777,10 +1031,25 @@ export default function ArtikelPage() {
                                         `/admin/cms/articles/${id}`
                                       )
                                     }
-                                    className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-800"
+                                    className="
+                                      theme-card
+                                      theme-border
+                                      theme-text-muted
+                                      theme-table-hover
+                                      flex
+                                      h-9
+                                      w-9
+                                      items-center
+                                      justify-center
+                                      rounded-lg
+                                      border
+                                      transition
+                                    "
                                   >
                                     <Eye size={17} />
                                   </button>
+
+                                  {/* EDIT */}
 
                                   <button
                                     type="button"
@@ -790,10 +1059,23 @@ export default function ArtikelPage() {
                                         `/admin/cms/articles/${id}/edit`
                                       )
                                     }
-                                    className="flex h-9 w-9 items-center justify-center rounded-lg text-blue-500 transition hover:bg-blue-50 hover:text-blue-700"
+                                    className="
+                                      theme-info
+                                      flex
+                                      h-9
+                                      w-9
+                                      items-center
+                                      justify-center
+                                      rounded-lg
+                                      border
+                                      transition
+                                      hover:opacity-80
+                                    "
                                   >
                                     <Pencil size={17} />
                                   </button>
+
+                                  {/* DELETE */}
 
                                   <button
                                     type="button"
@@ -804,7 +1086,20 @@ export default function ArtikelPage() {
                                     onClick={() =>
                                       handleDelete(id)
                                     }
-                                    className="flex h-9 w-9 items-center justify-center rounded-lg text-red-500 transition hover:bg-red-50 hover:text-red-700 disabled:cursor-not-allowed disabled:opacity-50"
+                                    className="
+                                      theme-danger
+                                      flex
+                                      h-9
+                                      w-9
+                                      items-center
+                                      justify-center
+                                      rounded-lg
+                                      border
+                                      transition
+                                      hover:opacity-80
+                                      disabled:cursor-not-allowed
+                                      disabled:opacity-50
+                                    "
                                   >
                                     {deletingId === id ? (
                                       <RefreshCw
@@ -815,19 +1110,26 @@ export default function ArtikelPage() {
                                       <Trash2 size={17} />
                                     )}
                                   </button>
+
                                 </div>
+
                               </td>
+
                             </tr>
                           );
                         }
                       )}
+
                     </tbody>
+
                   </table>
+
                 </div>
 
                 {/* MOBILE CARD */}
 
-                <div className="divide-y divide-slate-100 md:hidden">
+                <div className="divide-y">
+
                   {paginatedArticles.map(
                     (article) => {
                       const id =
@@ -837,48 +1139,86 @@ export default function ArtikelPage() {
                         getStatus(article?.status);
 
                       return (
-                        <div key={id} className="p-4">
+                        <div
+                          key={id}
+                          className="
+                            theme-table-hover
+                            p-4
+                            md:hidden
+                          "
+                        >
+
                           <div className="flex gap-3">
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+
+                            <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
                               <FileText size={18} />
                             </div>
 
                             <div className="min-w-0 flex-1">
-                              <h3 className="font-semibold text-slate-800">
+
+                              <h3 className="theme-text font-semibold">
                                 {getArticleTitle(
                                   article
                                 )}
                               </h3>
 
-                              <p className="mt-1 text-xs text-slate-500">
+                              <p className="theme-text-secondary mt-1 text-xs">
                                 {getArticleCategory(
                                   article
                                 )}
                               </p>
 
                               <div className="mt-3 flex flex-wrap items-center gap-2">
+
                                 <span
-                                  className={`inline-flex items-center gap-2 rounded-full border px-2.5 py-1 text-xs font-semibold ${status.className}`}
+                                  className={`
+                                    inline-flex
+                                    items-center
+                                    gap-2
+                                    rounded-full
+                                    border
+                                    px-2.5
+                                    py-1
+                                    text-xs
+                                    font-semibold
+                                    ${status.className}
+                                  `}
                                 >
+
                                   <span
-                                    className={`h-1.5 w-1.5 rounded-full ${status.dot}`}
+                                    className="
+                                      h-1.5
+                                      w-1.5
+                                      rounded-full
+                                    "
+                                    style={{
+                                      backgroundColor:
+                                        status.dotColor,
+                                    }}
                                   />
 
                                   {status.label}
+
                                 </span>
 
-                                <span className="text-xs text-slate-400">
+                                <span className="theme-text-muted text-xs">
                                   {formatDate(
                                     getArticleDate(
                                       article
                                     )
                                   )}
                                 </span>
+
                               </div>
+
                             </div>
+
                           </div>
 
                           <div className="mt-4 flex items-center justify-end gap-2">
+
+                            {/* MOBILE VIEW */}
+
                             <button
                               type="button"
                               onClick={() =>
@@ -886,11 +1226,28 @@ export default function ArtikelPage() {
                                   `/cms/artikel/${id}`
                                 )
                               }
-                              className="inline-flex items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-xs font-medium text-slate-600 hover:bg-slate-50"
+                              className="
+                                theme-card
+                                theme-border
+                                theme-text-secondary
+                                theme-table-hover
+                                inline-flex
+                                items-center
+                                gap-2
+                                rounded-lg
+                                border
+                                px-3
+                                py-2
+                                text-xs
+                                font-medium
+                              "
                             >
                               <Eye size={15} />
+
                               Lihat
                             </button>
+
+                            {/* MOBILE EDIT */}
 
                             <button
                               type="button"
@@ -899,19 +1256,52 @@ export default function ArtikelPage() {
                                   `/cms/artikel/${id}/edit`
                                 )
                               }
-                              className="inline-flex items-center gap-2 rounded-lg border border-blue-100 bg-blue-50 px-3 py-2 text-xs font-medium text-blue-600 hover:bg-blue-100"
+                              className="
+                                theme-info
+                                inline-flex
+                                items-center
+                                gap-2
+                                rounded-lg
+                                border
+                                px-3
+                                py-2
+                                text-xs
+                                font-medium
+                                transition
+                                hover:opacity-80
+                              "
                             >
                               <Pencil size={15} />
+
                               Edit
                             </button>
 
+                            {/* MOBILE DELETE */}
+
                             <button
                               type="button"
-                              disabled={deletingId === id}
+                              disabled={
+                                deletingId === id
+                              }
                               onClick={() =>
                                 handleDelete(id)
                               }
-                              className="inline-flex items-center gap-2 rounded-lg border border-red-100 bg-red-50 px-3 py-2 text-xs font-medium text-red-600 hover:bg-red-100 disabled:opacity-50"
+                              className="
+                                theme-danger
+                                inline-flex
+                                items-center
+                                gap-2
+                                rounded-lg
+                                border
+                                px-3
+                                py-2
+                                text-xs
+                                font-medium
+                                transition
+                                hover:opacity-80
+                                disabled:cursor-not-allowed
+                                disabled:opacity-50
+                              "
                             >
                               {deletingId === id ? (
                                 <RefreshCw
@@ -924,12 +1314,16 @@ export default function ArtikelPage() {
 
                               Hapus
                             </button>
+
                           </div>
+
                         </div>
                       );
                     }
                   )}
+
                 </div>
+
               </>
             )}
 
@@ -937,19 +1331,39 @@ export default function ArtikelPage() {
 
             {!loading &&
               filteredArticles.length > 0 && (
-                <div className="flex flex-col gap-3 border-t border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-                  <p className="text-xs text-slate-500">
+                <div
+                  className="
+                    theme-border-soft
+                    flex
+                    flex-col
+                    gap-3
+                    border-t
+                    px-5
+                    py-4
+                    sm:flex-row
+                    sm:items-center
+                    sm:justify-between
+                  "
+                >
+
+                  <p className="theme-text-muted text-xs">
+
                     Halaman{" "}
-                    <span className="font-semibold text-slate-700">
+
+                    <span className="theme-text font-semibold">
                       {currentPage}
                     </span>{" "}
+
                     dari{" "}
-                    <span className="font-semibold text-slate-700">
+
+                    <span className="theme-text font-semibold">
                       {totalPages}
                     </span>
+
                   </p>
 
                   <div className="flex items-center gap-2">
+
                     <button
                       type="button"
                       disabled={currentPage <= 1}
@@ -958,7 +1372,22 @@ export default function ArtikelPage() {
                           Math.max(1, prev - 1)
                         )
                       }
-                      className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                      className="
+                        theme-card
+                        theme-border
+                        theme-text-muted
+                        theme-table-hover
+                        flex
+                        h-9
+                        w-9
+                        items-center
+                        justify-center
+                        rounded-lg
+                        border
+                        transition
+                        disabled:cursor-not-allowed
+                        disabled:opacity-40
+                      "
                     >
                       <ChevronLeft size={17} />
                     </button>
@@ -976,16 +1405,37 @@ export default function ArtikelPage() {
                           )
                         )
                       }
-                      className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                      className="
+                        theme-card
+                        theme-border
+                        theme-text-muted
+                        theme-table-hover
+                        flex
+                        h-9
+                        w-9
+                        items-center
+                        justify-center
+                        rounded-lg
+                        border
+                        transition
+                        disabled:cursor-not-allowed
+                        disabled:opacity-40
+                      "
                     >
                       <ChevronRight size={17} />
                     </button>
+
                   </div>
+
                 </div>
               )}
+
           </div>
+
         </main>
+
       </div>
+
     </div>
   );
 }

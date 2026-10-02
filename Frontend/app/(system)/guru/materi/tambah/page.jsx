@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import Sidebar from "../../../components/Sidebar";
-import Header from "../../../components/Header";
+import Sidebar from "../../../../components/Sidebar";
+import Header from "../../../../components/Header";
 
 import {
   ArrowLeft,
@@ -29,7 +29,75 @@ import {
   createMateriDenganFile,
   createMateriDenganLink,
   getKelasMapel,
-} from "../../../../services/materiPembelajaran.service";
+} from "../../../../../services/materiPembelajaran.service";
+
+// ============================================================
+// THEME HELPERS
+// ============================================================
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+
+// ============================================================
+// MAIN
+// ============================================================
 
 export default function UploadMateriPage() {
   const router = useRouter();
@@ -135,7 +203,7 @@ export default function UploadMateriPage() {
   };
 
   // ============================================================
-  // GET CURRENT USER ID
+  // CURRENT USER ID
   // ============================================================
 
   const currentUserId = useMemo(() => {
@@ -154,7 +222,7 @@ export default function UploadMateriPage() {
   }, [currentUser]);
 
   // ============================================================
-  // GET CURRENT USER NAME
+  // CURRENT USER NAME
   // ============================================================
 
   const currentUserName = useMemo(() => {
@@ -168,7 +236,7 @@ export default function UploadMateriPage() {
   }, [currentUser]);
 
   // ============================================================
-  // GET CURRENT USER EMAIL
+  // CURRENT USER EMAIL
   // ============================================================
 
   const currentUserEmail = useMemo(() => {
@@ -180,7 +248,7 @@ export default function UploadMateriPage() {
   }, [currentUser]);
 
   // ============================================================
-  // GET AVATAR
+  // AVATAR
   // ============================================================
 
   const currentUserAvatar = useMemo(() => {
@@ -225,10 +293,6 @@ export default function UploadMateriPage() {
         currentUserId
       );
 
-      // ========================================================
-      // CEK USER ID
-      // ========================================================
-
       if (!currentUserId) {
         setKelasMapelList([]);
 
@@ -239,10 +303,6 @@ export default function UploadMateriPage() {
         return;
       }
 
-      // ========================================================
-      // REQUEST
-      // ========================================================
-
       const response =
         await getKelasMapel();
 
@@ -250,10 +310,6 @@ export default function UploadMateriPage() {
         "[UPLOAD MATERI] RESPONSE KELAS MAPEL:",
         response
       );
-
-      // ========================================================
-      // AMBIL ARRAY DARI response.data
-      // ========================================================
 
       const data =
         Array.isArray(response?.data)
@@ -269,10 +325,6 @@ export default function UploadMateriPage() {
         "[UPLOAD MATERI] JUMLAH SEMUA:",
         data.length
       );
-
-      // ========================================================
-      // FILTER GURU LOGIN
-      // ========================================================
 
       const dataGuru =
         data.filter((item) => {
@@ -299,17 +351,9 @@ export default function UploadMateriPage() {
         dataGuru.length
       );
 
-      // ========================================================
-      // SET STATE
-      // ========================================================
-
       setKelasMapelList(
         dataGuru
       );
-
-      // ========================================================
-      // ERROR JIKA KOSONG
-      // ========================================================
 
       if (dataGuru.length === 0) {
         setError(
@@ -405,10 +449,6 @@ export default function UploadMateriPage() {
       return;
     }
 
-    // ========================================================
-    // VALIDATE MIME
-    // ========================================================
-
     if (
       !allowedMimeTypes.includes(
         selectedFile.type
@@ -424,10 +464,6 @@ export default function UploadMateriPage() {
       return;
     }
 
-    // ========================================================
-    // VALIDATE SIZE
-    // ========================================================
-
     if (
       selectedFile.size >
       MAX_FILE_SIZE
@@ -441,10 +477,6 @@ export default function UploadMateriPage() {
 
       return;
     }
-
-    // ========================================================
-    // SET FILE
-    // ========================================================
 
     setFile(
       selectedFile
@@ -678,10 +710,6 @@ export default function UploadMateriPage() {
         form.sumber
       );
 
-      // ========================================================
-      // FILE
-      // ========================================================
-
       if (
         form.sumber ===
         "file"
@@ -705,13 +733,7 @@ export default function UploadMateriPage() {
             file,
           }
         );
-      }
-
-      // ========================================================
-      // LINK
-      // ========================================================
-
-      else {
+      } else {
         await createMateriDenganLink(
           {
             kelasMapelId:
@@ -734,10 +756,6 @@ export default function UploadMateriPage() {
         );
       }
 
-      // ========================================================
-      // SUCCESS
-      // ========================================================
-
       console.log(
         "[UPLOAD MATERI] BERHASIL"
       );
@@ -745,10 +763,6 @@ export default function UploadMateriPage() {
       setSuccess(
         "Materi pembelajaran berhasil ditambahkan."
       );
-
-      // ========================================================
-      // REDIRECT
-      // ========================================================
 
       setTimeout(() => {
         router.push(
@@ -775,10 +789,10 @@ export default function UploadMateriPage() {
   // ============================================================
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-slate-50">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
 
       {/* ======================================================
-          SIDEBAR
+          SIDEBAR GURU
       ====================================================== */}
 
       <Sidebar
@@ -800,7 +814,7 @@ export default function UploadMateriPage() {
       <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
 
         {/* ====================================================
-            HEADER
+            HEADER GURU
         ==================================================== */}
 
         <Header
@@ -829,7 +843,7 @@ export default function UploadMateriPage() {
           <div className="mx-auto w-full max-w-[1600px] p-4 sm:p-6 lg:p-8">
 
             {/* ==================================================
-                HEADER PAGE
+                PAGE HEADER
             ================================================== */}
 
             <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -843,7 +857,7 @@ export default function UploadMateriPage() {
                       "/guru/materi"
                     )
                   }
-                  className="mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-blue-300 hover:bg-blue-50 hover:text-blue-600"
+                  className={`theme-card theme-text-secondary mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition-colors ${themeNeutralBorder} ${themeSmallShadow} ${themeNeutralHover} hover:text-[var(--color-primary)]`}
                   aria-label="Kembali"
                 >
                   <ArrowLeft
@@ -855,26 +869,26 @@ export default function UploadMateriPage() {
 
                   <div className="mb-1 flex items-center gap-2">
 
-                    <span className="text-sm font-semibold text-blue-600">
+                    <span
+                      className={`text-sm font-semibold ${themePrimaryText}`}
+                    >
                       Materi Pembelajaran
                     </span>
 
                   </div>
 
-                  <h1 className="truncate text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+                  <h1 className="theme-text truncate text-2xl font-bold tracking-tight sm:text-3xl">
                     Tambah Materi
                   </h1>
 
-                  <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-500 sm:text-[15px]">
+                  <p className="theme-text-secondary mt-1 max-w-2xl text-sm leading-6 sm:text-[15px]">
                     Tambahkan materi pembelajaran
                     untuk kelas dan mata pelajaran
                     yang kamu ajar.
                   </p>
 
                 </div>
-
               </div>
-
             </div>
 
             {/* ==================================================
@@ -882,20 +896,21 @@ export default function UploadMateriPage() {
             ================================================== */}
 
             {error && (
-              <div className="mb-6 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4">
-
+              <div
+                className={`mb-6 flex items-start gap-3 rounded-2xl border p-4 ${themeDangerSurface} ${themeDangerBorder}`}
+              >
                 <AlertCircle
                   size={20}
-                  className="mt-0.5 shrink-0 text-red-600"
+                  className="theme-danger mt-0.5 shrink-0"
                 />
 
                 <div className="min-w-0 flex-1">
 
-                  <p className="text-sm font-semibold text-red-800">
+                  <p className="theme-danger text-sm font-semibold">
                     Terjadi kesalahan
                   </p>
 
-                  <p className="mt-1 text-sm leading-6 text-red-700">
+                  <p className="theme-danger mt-1 text-sm leading-6">
                     {error}
                   </p>
 
@@ -906,11 +921,10 @@ export default function UploadMateriPage() {
                   onClick={() =>
                     setError("")
                   }
-                  className="shrink-0 text-red-500 transition hover:text-red-700"
+                  className="theme-danger shrink-0 transition-opacity hover:opacity-70"
                 >
                   <X size={18} />
                 </button>
-
               </div>
             )}
 
@@ -919,25 +933,25 @@ export default function UploadMateriPage() {
             ================================================== */}
 
             {success && (
-              <div className="mb-6 flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
-
+              <div
+                className={`mb-6 flex items-start gap-3 rounded-2xl border p-4 ${themeSuccessSurface} ${themeSuccessBorder}`}
+              >
                 <CheckCircle2
                   size={20}
-                  className="mt-0.5 shrink-0 text-emerald-600"
+                  className="mt-0.5 shrink-0 text-[var(--color-success)]"
                 />
 
                 <div className="min-w-0 flex-1">
 
-                  <p className="text-sm font-semibold text-emerald-800">
+                  <p className="text-sm font-semibold text-[var(--color-success)]">
                     Berhasil
                   </p>
 
-                  <p className="mt-1 text-sm leading-6 text-emerald-700">
+                  <p className="mt-1 text-sm leading-6 text-[var(--color-success)]">
                     {success}
                   </p>
 
                 </div>
-
               </div>
             )}
 
@@ -950,7 +964,6 @@ export default function UploadMateriPage() {
                 handleSubmit
               }
             >
-
               <div className="grid min-w-0 grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
 
                 {/* ==================================================
@@ -963,50 +976,48 @@ export default function UploadMateriPage() {
                       INFORMASI DASAR
                   ================================================== */}
 
-                  <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-
-                    <div className="border-b border-slate-200 px-5 py-5 sm:px-6">
-
+                  <section
+                    className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+                  >
+                    <div
+                      className={`border-b px-5 py-5 sm:px-6 ${themeDivider}`}
+                    >
                       <div className="flex items-start gap-3">
 
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                        <div
+                          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
+                        >
                           <BookOpen
                             size={20}
                           />
                         </div>
 
                         <div>
-
-                          <h2 className="text-base font-bold text-slate-900 sm:text-lg">
+                          <h2 className="theme-text text-base font-bold sm:text-lg">
                             Informasi Materi
                           </h2>
 
-                          <p className="mt-1 text-sm leading-6 text-slate-500">
+                          <p className="theme-text-secondary mt-1 text-sm leading-6">
                             Tentukan kelas, mata
                             pelajaran, dan informasi
                             utama dari materi.
                           </p>
-
                         </div>
 
                       </div>
-
                     </div>
 
                     <div className="space-y-5 p-5 sm:p-6">
 
-                      {/* ==================================================
-                          KELAS MAPEL
-                      ================================================== */}
+                      {/* KELAS MAPEL */}
 
                       <div>
-
                         <label
                           htmlFor="kelasMapelId"
-                          className="mb-2 block text-sm font-semibold text-slate-800"
+                          className="theme-text mb-2 block text-sm font-semibold"
                         >
                           Kelas & Mata Pelajaran
-                          <span className="ml-1 text-red-500">
+                          <span className="theme-danger ml-1">
                             *
                           </span>
                         </label>
@@ -1025,9 +1036,8 @@ export default function UploadMateriPage() {
                             saving ||
                             !currentUserId
                           }
-                          className="w-full appearance-none rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm font-medium text-slate-800 outline-none transition focus:border-blue-500 focus:ring-4 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-100"
+                          className={`theme-input w-full appearance-none rounded-xl border px-4 py-3 text-sm font-medium outline-none transition disabled:cursor-not-allowed disabled:opacity-60 ${themeNeutralBorder} ${themeFocus}`}
                         >
-
                           <option value="">
                             {loadingData
                               ? "Memuat kelas yang kamu ajar..."
@@ -1060,27 +1070,26 @@ export default function UploadMateriPage() {
                                 </option>
                               )
                             )}
-
                         </select>
 
-                        <p className="mt-2 text-xs leading-5 text-slate-500">
+                        <p className="theme-text-muted mt-2 text-xs leading-5">
                           Hanya kelas dan mata
                           pelajaran yang diampu oleh
                           akun guru ini yang ditampilkan.
                         </p>
-
                       </div>
 
-                      {/* ==================================================
-                          DETAIL SELECTED
-                      ================================================== */}
+                      {/* SELECTED */}
 
                       {selectedClassMapel && (
-                        <div className="rounded-2xl border border-blue-100 bg-blue-50 p-4">
-
+                        <div
+                          className={`rounded-2xl border p-4 ${themePrimarySoft} ${themePrimarySoftBorder}`}
+                        >
                           <div className="flex items-start gap-3">
 
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-blue-600 shadow-sm">
+                            <div
+                              className={`theme-card flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themePrimaryText} ${themeSmallShadow}`}
+                            >
                               <Users
                                 size={18}
                               />
@@ -1088,17 +1097,19 @@ export default function UploadMateriPage() {
 
                             <div className="min-w-0">
 
-                              <p className="text-xs font-semibold uppercase tracking-wide text-blue-600">
+                              <p
+                                className={`text-xs font-semibold uppercase tracking-wide ${themePrimaryText}`}
+                              >
                                 Kelas terpilih
                               </p>
 
-                              <p className="mt-1 text-sm font-bold text-slate-900">
+                              <p className="theme-text mt-1 text-sm font-bold">
                                 {getKelasName(
                                   selectedClassMapel
                                 )}
                               </p>
 
-                              <p className="mt-1 text-xs text-slate-600">
+                              <p className="theme-text-secondary mt-1 text-xs">
                                 {getMapelName(
                                   selectedClassMapel
                                 )}
@@ -1109,31 +1120,26 @@ export default function UploadMateriPage() {
                               </p>
 
                             </div>
-
                           </div>
-
                         </div>
                       )}
 
-                      {/* ==================================================
-                          JUDUL
-                      ================================================== */}
+                      {/* JUDUL */}
 
                       <div>
-
                         <div className="mb-2 flex items-center justify-between gap-4">
 
                           <label
                             htmlFor="judul"
-                            className="block text-sm font-semibold text-slate-800"
+                            className="theme-text block text-sm font-semibold"
                           >
                             Judul Materi
-                            <span className="ml-1 text-red-500">
+                            <span className="theme-danger ml-1">
                               *
                             </span>
                           </label>
 
-                          <span className="text-xs text-slate-400">
+                          <span className="theme-text-muted text-xs">
                             {
                               form
                                 .judul
@@ -1158,26 +1164,22 @@ export default function UploadMateriPage() {
                             handleChange
                           }
                           placeholder="Contoh: Pengenalan React Hooks"
-                          className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                          className={`theme-input w-full rounded-xl border px-4 py-3 text-sm outline-none transition placeholder:text-[var(--color-text-placeholder)] ${themeNeutralBorder} ${themeFocus}`}
                         />
 
-                        <p className="mt-2 text-xs leading-5 text-slate-500">
+                        <p className="theme-text-muted mt-2 text-xs leading-5">
                           Gunakan judul yang singkat,
                           jelas, dan mudah ditemukan
                           siswa.
                         </p>
-
                       </div>
 
-                      {/* ==================================================
-                          KATEGORI
-                      ================================================== */}
+                      {/* KATEGORI */}
 
                       <div>
-
                         <label
                           htmlFor="kategori"
-                          className="mb-2 block text-sm font-semibold text-slate-800"
+                          className="theme-text mb-2 block text-sm font-semibold"
                         >
                           Bab / Kategori
                         </label>
@@ -1193,26 +1195,22 @@ export default function UploadMateriPage() {
                             handleChange
                           }
                           placeholder="Contoh: Bab 1 — Pengenalan"
-                          className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                          className={`theme-input w-full rounded-xl border px-4 py-3 text-sm outline-none transition placeholder:text-[var(--color-text-placeholder)] ${themeNeutralBorder} ${themeFocus}`}
                         />
 
-                        <p className="mt-2 text-xs leading-5 text-slate-500">
+                        <p className="theme-text-muted mt-2 text-xs leading-5">
                           Membantu mengelompokkan materi
                           berdasarkan bab atau topik
                           pembelajaran.
                         </p>
-
                       </div>
 
-                      {/* ==================================================
-                          DESKRIPSI
-                      ================================================== */}
+                      {/* DESKRIPSI */}
 
                       <div>
-
                         <label
                           htmlFor="deskripsi"
-                          className="mb-2 block text-sm font-semibold text-slate-800"
+                          className="theme-text mb-2 block text-sm font-semibold"
                         >
                           Deskripsi Materi
                         </label>
@@ -1228,60 +1226,55 @@ export default function UploadMateriPage() {
                             handleChange
                           }
                           placeholder="Tuliskan ringkasan singkat mengenai materi yang akan dipelajari siswa..."
-                          className="w-full resize-y rounded-xl border border-slate-300 bg-white px-4 py-3 text-sm leading-6 text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                          className={`theme-input w-full resize-y rounded-xl border px-4 py-3 text-sm leading-6 outline-none transition placeholder:text-[var(--color-text-placeholder)] ${themeNeutralBorder} ${themeFocus}`}
                         />
 
-                        <p className="mt-2 text-xs leading-5 text-slate-500">
+                        <p className="theme-text-muted mt-2 text-xs leading-5">
                           Jelaskan isi atau tujuan materi
                           agar siswa memahami apa yang
                           akan dipelajari.
                         </p>
-
                       </div>
-
                     </div>
-
                   </section>
 
                   {/* ==================================================
                       SUMBER MATERI
                   ================================================== */}
 
-                  <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-
-                    <div className="border-b border-slate-200 px-5 py-5 sm:px-6">
-
+                  <section
+                    className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+                  >
+                    <div
+                      className={`border-b px-5 py-5 sm:px-6 ${themeDivider}`}
+                    >
                       <div className="flex items-start gap-3">
 
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                        <div
+                          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
+                        >
                           <FolderOpen
                             size={20}
                           />
                         </div>
 
                         <div>
-
-                          <h2 className="text-base font-bold text-slate-900 sm:text-lg">
+                          <h2 className="theme-text text-base font-bold sm:text-lg">
                             Sumber Materi
                           </h2>
 
-                          <p className="mt-1 text-sm leading-6 text-slate-500">
+                          <p className="theme-text-secondary mt-1 text-sm leading-6">
                             Pilih apakah materi berasal
                             dari file atau tautan
                             eksternal.
                           </p>
-
                         </div>
-
                       </div>
-
                     </div>
 
                     <div className="p-5 sm:p-6">
 
-                      {/* ==================================================
-                          SOURCE SWITCH
-                      ================================================== */}
+                      {/* SOURCE SWITCH */}
 
                       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
 
@@ -1300,17 +1293,16 @@ export default function UploadMateriPage() {
                           className={`flex items-start gap-3 rounded-xl border p-4 text-left transition ${
                             form.sumber ===
                             "file"
-                              ? "border-blue-500 bg-blue-50 ring-2 ring-blue-100"
-                              : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+                              ? `${themePrimarySoftBorder} ${themePrimarySoft} ring-2 ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]`
+                              : `theme-card ${themeNeutralBorder} ${themeNeutralHover}`
                           }`}
                         >
-
                           <div
                             className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
                               form.sumber ===
                               "file"
-                                ? "bg-blue-600 text-white"
-                                : "bg-slate-100 text-slate-500"
+                                ? `${themePrimaryGradient} text-[var(--color-card)]`
+                                : `${themeNeutralSurface} theme-text-secondary`
                             }`}
                           >
                             <Upload
@@ -1320,17 +1312,16 @@ export default function UploadMateriPage() {
 
                           <div className="min-w-0">
 
-                            <p className="text-sm font-bold text-slate-900">
+                            <p className="theme-text text-sm font-bold">
                               Upload File
                             </p>
 
-                            <p className="mt-1 text-xs leading-5 text-slate-500">
+                            <p className="theme-text-muted mt-1 text-xs leading-5">
                               PDF atau video maksimal
                               100 MB.
                             </p>
 
                           </div>
-
                         </button>
 
                         {/* LINK */}
@@ -1348,17 +1339,16 @@ export default function UploadMateriPage() {
                           className={`flex items-start gap-3 rounded-xl border p-4 text-left transition ${
                             form.sumber ===
                             "link"
-                              ? "border-blue-500 bg-blue-50 ring-2 ring-blue-100"
-                              : "border-slate-200 bg-white hover:border-slate-300 hover:bg-slate-50"
+                              ? `${themePrimarySoftBorder} ${themePrimarySoft} ring-2 ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]`
+                              : `theme-card ${themeNeutralBorder} ${themeNeutralHover}`
                           }`}
                         >
-
                           <div
                             className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${
                               form.sumber ===
                               "link"
-                                ? "bg-blue-600 text-white"
-                                : "bg-slate-100 text-slate-500"
+                                ? `${themePrimaryGradient} text-[var(--color-card)]`
+                                : `${themeNeutralSurface} theme-text-secondary`
                             }`}
                           >
                             <LinkIcon
@@ -1368,24 +1358,20 @@ export default function UploadMateriPage() {
 
                           <div className="min-w-0">
 
-                            <p className="text-sm font-bold text-slate-900">
+                            <p className="theme-text text-sm font-bold">
                               Gunakan Link
                             </p>
 
-                            <p className="mt-1 text-xs leading-5 text-slate-500">
+                            <p className="theme-text-muted mt-1 text-xs leading-5">
                               Masukkan URL materi dari
                               platform lain.
                             </p>
 
                           </div>
-
                         </button>
-
                       </div>
 
-                      {/* ==================================================
-                          FILE UPLOAD
-                      ================================================== */}
+                      {/* FILE UPLOAD */}
 
                       {form.sumber ===
                         "file" && (
@@ -1393,10 +1379,10 @@ export default function UploadMateriPage() {
 
                           <label
                             htmlFor="materi-file"
-                            className="mb-2 block text-sm font-semibold text-slate-800"
+                            className="theme-text mb-2 block text-sm font-semibold"
                           >
                             File Materi
-                            <span className="ml-1 text-red-500">
+                            <span className="theme-danger ml-1">
                               *
                             </span>
                           </label>
@@ -1404,26 +1390,29 @@ export default function UploadMateriPage() {
                           {!file ? (
                             <label
                               htmlFor="materi-file"
-                              className="group flex min-h-[210px] cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed border-slate-300 bg-slate-50 px-5 py-8 text-center transition hover:border-blue-400 hover:bg-blue-50/40"
+                              className={`group flex min-h-[210px] cursor-pointer flex-col items-center justify-center rounded-2xl border-2 border-dashed px-5 py-8 text-center transition ${themeNeutralBorder} ${themeNeutralSurface} hover:border-[var(--color-primary)] hover:bg-[color-mix(in_srgb,var(--color-primary)_5%,transparent)]`}
                             >
-
-                              <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-blue-600 shadow-sm ring-1 ring-slate-200">
+                              <div
+                                className={`theme-card mb-4 flex h-14 w-14 items-center justify-center rounded-2xl ${themePrimaryText} ${themeSmallShadow}`}
+                              >
                                 <Upload
                                   size={24}
                                 />
                               </div>
 
-                              <p className="text-sm font-bold text-slate-800">
+                              <p className="theme-text text-sm font-bold">
                                 Pilih file materi
                               </p>
 
-                              <p className="mt-1 max-w-md text-xs leading-5 text-slate-500">
+                              <p className="theme-text-muted mt-1 max-w-md text-xs leading-5">
                                 PDF atau video MP4,
                                 MPEG, WEBM, dan MOV.
                                 Ukuran maksimal 100 MB.
                               </p>
 
-                              <span className="mt-4 inline-flex items-center rounded-lg bg-white px-4 py-2 text-xs font-semibold text-blue-600 shadow-sm ring-1 ring-slate-200 transition group-hover:bg-blue-600 group-hover:text-white">
+                              <span
+                                className={`mt-4 inline-flex items-center rounded-lg px-4 py-2 text-xs font-semibold transition ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow} group-hover:opacity-90`}
+                              >
                                 Pilih File
                               </span>
 
@@ -1441,15 +1430,16 @@ export default function UploadMateriPage() {
                                 }
                                 className="hidden"
                               />
-
                             </label>
                           ) : (
-                            <div className="flex flex-col gap-4 rounded-2xl border border-blue-200 bg-blue-50 p-4 sm:flex-row sm:items-center sm:justify-between">
-
+                            <div
+                              className={`flex flex-col gap-4 rounded-2xl border p-4 sm:flex-row sm:items-center sm:justify-between ${themePrimarySoft} ${themePrimarySoftBorder}`}
+                            >
                               <div className="flex min-w-0 items-center gap-3">
 
-                                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-white text-blue-600 shadow-sm">
-
+                                <div
+                                  className={`theme-card flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${themePrimaryText} ${themeSmallShadow}`}
+                                >
                                   {file.type ===
                                   "application/pdf" ? (
                                     <FileText
@@ -1464,25 +1454,23 @@ export default function UploadMateriPage() {
                                       }
                                     />
                                   )}
-
                                 </div>
 
                                 <div className="min-w-0">
 
-                                  <p className="truncate text-sm font-semibold text-slate-900">
+                                  <p className="theme-text truncate text-sm font-semibold">
                                     {
                                       file.name
                                     }
                                   </p>
 
-                                  <p className="mt-1 text-xs text-slate-500">
+                                  <p className="theme-text-muted mt-1 text-xs">
                                     {formatFileSize(
                                       file.size
                                     )}
                                   </p>
 
                                 </div>
-
                               </div>
 
                               <button
@@ -1493,29 +1481,25 @@ export default function UploadMateriPage() {
                                 disabled={
                                   saving
                                 }
-                                className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border border-red-200 bg-white px-3 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                className={`theme-danger inline-flex shrink-0 items-center justify-center gap-2 rounded-lg border px-3 py-2 text-xs font-semibold transition ${themeDangerBorder} ${themeNeutralSurface} ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-50`}
                               >
                                 <X
                                   size={15}
                                 />
                                 Hapus File
                               </button>
-
                             </div>
                           )}
 
-                          <p className="mt-2 text-xs leading-5 text-slate-500">
+                          <p className="theme-text-muted mt-2 text-xs leading-5">
                             File akan tersimpan pada
                             server sebagai sumber materi
                             pembelajaran.
                           </p>
-
                         </div>
                       )}
 
-                      {/* ==================================================
-                          LINK
-                      ================================================== */}
+                      {/* LINK */}
 
                       {form.sumber ===
                         "link" && (
@@ -1523,10 +1507,10 @@ export default function UploadMateriPage() {
 
                           <label
                             htmlFor="urlLink"
-                            className="mb-2 block text-sm font-semibold text-slate-800"
+                            className="theme-text mb-2 block text-sm font-semibold"
                           >
                             URL Materi
-                            <span className="ml-1 text-red-500">
+                            <span className="theme-danger ml-1">
                               *
                             </span>
                           </label>
@@ -1535,7 +1519,7 @@ export default function UploadMateriPage() {
 
                             <LinkIcon
                               size={18}
-                              className="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"
+                              className="theme-text-muted pointer-events-none absolute left-4 top-1/2 -translate-y-1/2"
                             />
 
                             <input
@@ -1549,28 +1533,23 @@ export default function UploadMateriPage() {
                                 handleChange
                               }
                               placeholder="https://..."
-                              className="w-full rounded-xl border border-slate-300 bg-white py-3 pl-11 pr-4 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                              className={`theme-input w-full rounded-xl border py-3 pl-11 pr-4 text-sm outline-none transition placeholder:text-[var(--color-text-placeholder)] ${themeNeutralBorder} ${themeFocus}`}
                             />
-
                           </div>
 
-                          <p className="mt-2 text-xs leading-5 text-slate-500">
+                          <p className="theme-text-muted mt-2 text-xs leading-5">
                             Contoh: link video pembelajaran,
                             Google Drive, atau sumber
                             belajar online lainnya.
                           </p>
-
                         </div>
                       )}
-
                     </div>
-
                   </section>
-
                 </div>
 
                 {/* ==================================================
-                    RIGHT
+                    RIGHT SIDEBAR
                 ================================================== */}
 
                 <aside className="min-w-0 space-y-6">
@@ -1579,11 +1558,14 @@ export default function UploadMateriPage() {
                       RINGKASAN
                   ================================================== */}
 
-                  <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-
+                  <section
+                    className={`theme-card rounded-2xl border p-5 ${themeNeutralBorder} ${themeCardShadow}`}
+                  >
                     <div className="flex items-start gap-3">
 
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
+                      <div
+                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themeNeutralSurface} theme-text-secondary`}
+                      >
                         <Info
                           size={20}
                         />
@@ -1591,90 +1573,89 @@ export default function UploadMateriPage() {
 
                       <div className="min-w-0">
 
-                        <h2 className="text-base font-bold text-slate-900">
+                        <h2 className="theme-text text-base font-bold">
                           Ringkasan Materi
                         </h2>
 
-                        <p className="mt-1 text-xs leading-5 text-slate-500">
+                        <p className="theme-text-muted mt-1 text-xs leading-5">
                           Periksa kembali informasi
                           sebelum disimpan.
                         </p>
-
                       </div>
-
                     </div>
 
                     <div className="mt-5 space-y-4">
 
-                      <div className="border-b border-slate-100 pb-4">
-
-                        <p className="text-xs font-medium text-slate-400">
+                      <div
+                        className={`border-b pb-4 ${themeDivider}`}
+                      >
+                        <p className="theme-text-muted text-xs font-medium">
                           Judul
                         </p>
 
-                        <p className="mt-1 break-words text-sm font-semibold leading-6 text-slate-900">
+                        <p className="theme-text mt-1 break-words text-sm font-semibold leading-6">
                           {form.judul ||
                             "Belum diisi"}
                         </p>
-
                       </div>
 
-                      <div className="border-b border-slate-100 pb-4">
-
-                        <p className="text-xs font-medium text-slate-400">
+                      <div
+                        className={`border-b pb-4 ${themeDivider}`}
+                      >
+                        <p className="theme-text-muted text-xs font-medium">
                           Kelas
                         </p>
 
-                        <p className="mt-1 text-sm font-semibold text-slate-900">
+                        <p className="theme-text mt-1 text-sm font-semibold">
                           {selectedClassMapel
                             ? getKelasName(
                                 selectedClassMapel
                               )
                             : "Belum dipilih"}
                         </p>
-
                       </div>
 
-                      <div className="border-b border-slate-100 pb-4">
-
-                        <p className="text-xs font-medium text-slate-400">
+                      <div
+                        className={`border-b pb-4 ${themeDivider}`}
+                      >
+                        <p className="theme-text-muted text-xs font-medium">
                           Mata Pelajaran
                         </p>
 
-                        <p className="mt-1 text-sm font-semibold text-slate-900">
+                        <p className="theme-text mt-1 text-sm font-semibold">
                           {selectedClassMapel
                             ? getMapelName(
                                 selectedClassMapel
                               )
                             : "Belum dipilih"}
                         </p>
-
                       </div>
 
-                      <div className="border-b border-slate-100 pb-4">
-
-                        <p className="text-xs font-medium text-slate-400">
+                      <div
+                        className={`border-b pb-4 ${themeDivider}`}
+                      >
+                        <p className="theme-text-muted text-xs font-medium">
                           Guru
                         </p>
 
-                        <p className="mt-1 text-sm font-semibold text-slate-900">
+                        <p className="theme-text mt-1 text-sm font-semibold">
                           {selectedClassMapel
                             ? getGuruName(
                                 selectedClassMapel
                               )
                             : currentUserName}
                         </p>
-
                       </div>
 
                       <div>
 
-                        <p className="text-xs font-medium text-slate-400">
+                        <p className="theme-text-muted text-xs font-medium">
                           Sumber
                         </p>
 
-                        <div className="mt-2 inline-flex items-center gap-2 rounded-lg bg-slate-100 px-3 py-2 text-xs font-semibold text-slate-700">
-
+                        <div
+                          className={`theme-text-secondary mt-2 inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold ${themeNeutralSurface}`}
+                        >
                           {form.sumber ===
                           "file" ? (
                             <>
@@ -1691,24 +1672,23 @@ export default function UploadMateriPage() {
                               Link
                             </>
                           )}
-
                         </div>
-
                       </div>
-
                     </div>
-
                   </section>
 
                   {/* ==================================================
                       KETENTUAN FILE
                   ================================================== */}
 
-                  <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-
+                  <section
+                    className={`theme-card rounded-2xl border p-5 ${themeNeutralBorder} ${themeCardShadow}`}
+                  >
                     <div className="flex items-start gap-3">
 
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                      <div
+                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
+                      >
                         <FileText
                           size={19}
                         />
@@ -1716,97 +1696,96 @@ export default function UploadMateriPage() {
 
                       <div className="min-w-0">
 
-                        <h2 className="text-base font-bold text-slate-900">
+                        <h2 className="theme-text text-base font-bold">
                           Ketentuan File
                         </h2>
 
-                        <p className="mt-1 text-xs leading-5 text-slate-500">
+                        <p className="theme-text-muted mt-1 text-xs leading-5">
                           Format yang dapat digunakan
                           untuk materi.
                         </p>
-
                       </div>
-
                     </div>
 
                     <div className="mt-5 space-y-3">
 
-                      <div className="flex items-center gap-3 rounded-xl bg-slate-50 p-3">
+                      {/* PDF */}
 
+                      <div
+                        className={`flex items-center gap-3 rounded-xl p-3 ${themeNeutralSurface}`}
+                      >
                         <FileText
                           size={17}
-                          className="shrink-0 text-red-500"
+                          className={`shrink-0 ${themePrimaryText}`}
                         />
 
                         <div>
-
-                          <p className="text-xs font-semibold text-slate-800">
+                          <p className="theme-text text-xs font-semibold">
                             PDF
                           </p>
 
-                          <p className="text-[11px] text-slate-500">
+                          <p className="theme-text-muted text-[11px]">
                             Materi dokumen
                           </p>
-
                         </div>
-
                       </div>
 
-                      <div className="flex items-center gap-3 rounded-xl bg-slate-50 p-3">
+                      {/* VIDEO */}
 
+                      <div
+                        className={`flex items-center gap-3 rounded-xl p-3 ${themeNeutralSurface}`}
+                      >
                         <Film
                           size={17}
-                          className="shrink-0 text-blue-500"
+                          className="shrink-0 text-[var(--color-info)]"
                         />
 
                         <div>
-
-                          <p className="text-xs font-semibold text-slate-800">
+                          <p className="theme-text text-xs font-semibold">
                             Video
                           </p>
 
-                          <p className="text-[11px] text-slate-500">
+                          <p className="theme-text-muted text-[11px]">
                             MP4, MPEG, WEBM, MOV
                           </p>
-
                         </div>
-
                       </div>
 
-                      <div className="flex items-center gap-3 rounded-xl bg-slate-50 p-3">
+                      {/* SIZE */}
 
+                      <div
+                        className={`flex items-center gap-3 rounded-xl p-3 ${themeNeutralSurface}`}
+                      >
                         <CheckCircle2
                           size={17}
-                          className="shrink-0 text-emerald-500"
+                          className="shrink-0 text-[var(--color-success)]"
                         />
 
                         <div>
-
-                          <p className="text-xs font-semibold text-slate-800">
+                          <p className="theme-text text-xs font-semibold">
                             Maksimal 100 MB
                           </p>
 
-                          <p className="text-[11px] text-slate-500">
+                          <p className="theme-text-muted text-[11px]">
                             Ukuran file per materi
                           </p>
-
                         </div>
-
                       </div>
-
                     </div>
-
                   </section>
 
                   {/* ==================================================
                       TIPS
                   ================================================== */}
 
-                  <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-
+                  <section
+                    className={`theme-card rounded-2xl border p-5 ${themeNeutralBorder} ${themeCardShadow}`}
+                  >
                     <div className="flex items-start gap-3">
 
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+                      <div
+                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themeWarningSurface} text-[var(--color-warning)]`}
+                      >
                         <Clock
                           size={19}
                         />
@@ -1814,71 +1793,68 @@ export default function UploadMateriPage() {
 
                       <div className="min-w-0">
 
-                        <h2 className="text-base font-bold text-slate-900">
+                        <h2 className="theme-text text-base font-bold">
                           Tips
                         </h2>
 
-                        <p className="mt-1 text-xs leading-5 text-slate-500">
+                        <p className="theme-text-muted mt-1 text-xs leading-5">
                           Agar materi lebih mudah
                           dipahami siswa.
                         </p>
-
                       </div>
-
                     </div>
 
                     <div className="mt-4 space-y-3">
 
                       <div className="flex items-start gap-2">
+                        <span
+                          className={`mt-1 h-1.5 w-1.5 shrink-0 rounded-full ${themePrimaryGradient}`}
+                        />
 
-                        <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-600" />
-
-                        <p className="text-xs leading-5 text-slate-600">
+                        <p className="theme-text-secondary text-xs leading-5">
                           Gunakan judul materi yang jelas
                           dan spesifik.
                         </p>
-
                       </div>
 
                       <div className="flex items-start gap-2">
+                        <span
+                          className={`mt-1 h-1.5 w-1.5 shrink-0 rounded-full ${themePrimaryGradient}`}
+                        />
 
-                        <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-600" />
-
-                        <p className="text-xs leading-5 text-slate-600">
+                        <p className="theme-text-secondary text-xs leading-5">
                           Tambahkan deskripsi untuk
                           memberikan konteks kepada
                           siswa.
                         </p>
-
                       </div>
 
                       <div className="flex items-start gap-2">
+                        <span
+                          className={`mt-1 h-1.5 w-1.5 shrink-0 rounded-full ${themePrimaryGradient}`}
+                        />
 
-                        <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-blue-600" />
-
-                        <p className="text-xs leading-5 text-slate-600">
+                        <p className="theme-text-secondary text-xs leading-5">
                           Pastikan materi sesuai dengan
                           kelas dan mata pelajaran yang
                           dipilih.
                         </p>
-
                       </div>
-
                     </div>
-
                   </section>
-
                 </aside>
-
               </div>
 
               {/* ==================================================
                   FOOTER ACTION
               ================================================== */}
 
-              <div className="mt-6 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
-
+              <div
+                className={`mt-6 theme-card rounded-2xl border p-4 sm:p-5 ${themeNeutralBorder} ${themeCardShadow}`}
+              >
                 <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-center sm:justify-between">
+
+                  {/* BATAL */}
 
                   <button
                     type="button"
@@ -1890,13 +1866,15 @@ export default function UploadMateriPage() {
                     disabled={
                       saving
                     }
-                    className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    className={`theme-card theme-text-secondary inline-flex h-11 items-center justify-center gap-2 rounded-xl border px-5 text-sm font-semibold transition ${themeNeutralBorder} ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-60`}
                   >
                     <X
                       size={17}
                     />
                     Batal
                   </button>
+
+                  {/* SIMPAN */}
 
                   <button
                     type="submit"
@@ -1907,9 +1885,8 @@ export default function UploadMateriPage() {
                       kelasMapelList.length ===
                         0
                     }
-                    className="inline-flex h-11 items-center justify-center gap-2 rounded-xl bg-blue-600 px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                    className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl px-6 text-sm font-semibold transition ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow} hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60`}
                   >
-
                     {saving ? (
                       <>
                         <Loader2
@@ -1926,21 +1903,13 @@ export default function UploadMateriPage() {
                         Simpan Materi
                       </>
                     )}
-
                   </button>
-
                 </div>
-
               </div>
-
             </form>
-
           </div>
-
         </main>
-
       </div>
-
     </div>
   );
 }

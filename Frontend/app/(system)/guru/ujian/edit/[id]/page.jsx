@@ -15,7 +15,6 @@ import {
   BookOpen,
   Clock3,
   CalendarDays,
-  Award,
   Settings2,
   Eye,
   EyeOff,
@@ -25,6 +24,67 @@ import {
   getUjianById,
   updateUjian,
 } from "../../../../../../services/ujian.service";
+
+/* =========================================================
+   THEME HELPERS
+========================================================= */
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
 /* =========================================================
    HELPER
@@ -58,15 +118,19 @@ function formatDateTimeLocal(value) {
   }
 
   const year = date.getFullYear();
+
   const month = String(
     date.getMonth() + 1
   ).padStart(2, "0");
+
   const day = String(
     date.getDate()
   ).padStart(2, "0");
+
   const hours = String(
     date.getHours()
   ).padStart(2, "0");
+
   const minutes = String(
     date.getMinutes()
   ).padStart(2, "0");
@@ -133,6 +197,7 @@ export default function EditUjianPage() {
         setError(
           "ID ujian tidak ditemukan."
         );
+
         setLoading(false);
         return;
       }
@@ -160,31 +225,40 @@ export default function EditUjianPage() {
         setForm({
           judul:
             data.judul || "",
+
           deskripsi:
             data.deskripsi || "",
+
           jenis:
             data.jenis ||
             "pilihan_ganda",
+
           durasi:
             data.durasi ?? 60,
+
           waktuMulai:
             formatDateTimeLocal(
               data.waktuMulai
             ),
+
           waktuSelesai:
             formatDateTimeLocal(
               data.waktuSelesai
             ),
+
           nilaiKelulusan:
             data.nilaiKelulusan ??
             75,
+
           dipublikasikan:
             Boolean(
               data.dipublikasikan
             ),
+
           modeUjian:
             data.modeUjian ||
             "online",
+
           penilaianOtomatis:
             data.penilaianOtomatis !==
             false,
@@ -214,9 +288,7 @@ export default function EditUjianPage() {
      HANDLE FORM
   ======================================================= */
 
-  function handleChange(
-    e
-  ) {
+  function handleChange(e) {
     const {
       name,
       value,
@@ -226,6 +298,7 @@ export default function EditUjianPage() {
 
     setForm((prev) => ({
       ...prev,
+
       [name]:
         type === "checkbox"
           ? checked
@@ -240,9 +313,7 @@ export default function EditUjianPage() {
      SUBMIT
   ======================================================= */
 
-  async function handleSubmit(
-    e
-  ) {
+  async function handleSubmit(e) {
     e.preventDefault();
 
     if (!id) {
@@ -390,7 +461,7 @@ export default function EditUjianPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-slate-50">
+      <div className="theme-page flex min-h-screen">
         <Sidebar
           role="guru"
           active="ujian"
@@ -422,10 +493,10 @@ export default function EditUjianPage() {
             <div className="text-center">
               <Loader2
                 size={32}
-                className="mx-auto animate-spin text-indigo-600"
+                className={`mx-auto animate-spin ${themePrimaryText}`}
               />
 
-              <p className="mt-3 text-sm font-semibold text-slate-700">
+              <p className="theme-text-secondary mt-3 text-sm font-semibold">
                 Memuat data ujian...
               </p>
             </div>
@@ -440,7 +511,7 @@ export default function EditUjianPage() {
   ======================================================= */
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
+    <div className="theme-page flex min-h-screen">
       {/* SIDEBAR */}
 
       <Sidebar
@@ -472,13 +543,14 @@ export default function EditUjianPage() {
           }}
         />
 
-        <main className="flex-1 overflow-y-auto">
+        <main className="theme-page flex-1 overflow-y-auto">
           <div className="mx-auto w-full max-w-5xl p-4 sm:p-6 lg:p-8">
 
-            {/* HEADER */}
+            {/* =================================================
+                HEADER
+            ================================================= */}
 
             <div className="mb-6">
-
               <button
                 type="button"
                 onClick={() =>
@@ -486,30 +558,27 @@ export default function EditUjianPage() {
                     "/guru/ujian"
                   )
                 }
-                className="mb-5 flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-indigo-600"
+                className={`theme-text-secondary mb-5 flex items-center gap-2 text-sm font-medium transition hover:text-[var(--color-primary)]`}
               >
-                <ArrowLeft
-                  size={17}
-                />
+                <ArrowLeft size={17} />
                 Kembali ke Ujian
               </button>
 
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-
                 <div>
                   <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                      <BookOpen
-                        size={21}
-                      />
+                    <div
+                      className={`flex h-11 w-11 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
+                    >
+                      <BookOpen size={21} />
                     </div>
 
                     <div>
-                      <h1 className="text-xl font-bold text-slate-800 sm:text-2xl">
+                      <h1 className="theme-text text-xl font-bold sm:text-2xl">
                         Edit Ujian
                       </h1>
 
-                      <p className="mt-1 text-sm text-slate-500">
+                      <p className="theme-text-secondary mt-1 text-sm">
                         Perbarui informasi dan pengaturan ujian.
                       </p>
                     </div>
@@ -519,41 +588,44 @@ export default function EditUjianPage() {
                 {ujian && (
                   <div className="flex items-center gap-2">
                     {form.dipublikasikan ? (
-                      <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700">
-                        <Eye
-                          size={14}
-                        />
+                      <span
+                        className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold ${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder}`}
+                      >
+                        <Eye size={14} />
                         Dipublikasikan
                       </span>
                     ) : (
-                      <span className="inline-flex items-center gap-2 rounded-full bg-slate-100 px-3 py-1.5 text-xs font-bold text-slate-600">
-                        <EyeOff
-                          size={14}
-                        />
+                      <span
+                        className={`inline-flex items-center gap-2 rounded-full px-3 py-1.5 text-xs font-bold ${themeNeutralSurface} theme-text-secondary ${themeNeutralBorder}`}
+                      >
+                        <EyeOff size={14} />
                         Draft
                       </span>
                     )}
                   </div>
                 )}
-
               </div>
             </div>
 
-            {/* ALERT */}
+            {/* =================================================
+                ALERT
+            ================================================= */}
 
             {error && (
-              <div className="mb-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4">
+              <div
+                className={`mb-5 flex items-start gap-3 rounded-xl border ${themeDangerBorder} ${themeDangerSurface} p-4`}
+              >
                 <AlertCircle
                   size={19}
-                  className="mt-0.5 shrink-0 text-red-600"
+                  className="theme-danger mt-0.5 shrink-0"
                 />
 
                 <div>
-                  <p className="text-sm font-bold text-red-700">
+                  <p className="theme-danger text-sm font-bold">
                     Terjadi Kesalahan
                   </p>
 
-                  <p className="mt-1 text-sm text-red-600">
+                  <p className="theme-danger mt-1 text-sm">
                     {error}
                   </p>
                 </div>
@@ -561,55 +633,58 @@ export default function EditUjianPage() {
             )}
 
             {success && (
-              <div className="mb-5 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+              <div
+                className={`mb-5 flex items-start gap-3 rounded-xl border ${themeSuccessBorder} ${themeSuccessSurface} p-4`}
+              >
                 <CheckCircle2
                   size={19}
-                  className="mt-0.5 shrink-0 text-emerald-600"
+                  className="mt-0.5 shrink-0 text-[var(--color-success)]"
                 />
 
                 <div>
-                  <p className="text-sm font-bold text-emerald-700">
+                  <p className="text-sm font-bold text-[var(--color-success)]">
                     Berhasil
                   </p>
 
-                  <p className="mt-1 text-sm text-emerald-600">
+                  <p className="mt-1 text-sm text-[var(--color-success)]">
                     {success}
                   </p>
                 </div>
               </div>
             )}
 
-            {/* FORM */}
+            {/* =================================================
+                FORM
+            ================================================= */}
 
-            <form
-              onSubmit={
-                handleSubmit
-              }
-            >
+            <form onSubmit={handleSubmit}>
 
-              {/* INFORMASI DASAR */}
+              {/* =================================================
+                  INFORMASI DASAR
+              ================================================= */}
 
-              <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
-
-                <div className="border-b border-slate-100 px-5 py-5 sm:px-6">
+              <section
+                className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+              >
+                <div
+                  className={`border-b ${themeDivider} px-5 py-5 sm:px-6`}
+                >
                   <div className="flex items-center gap-3">
-
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                      <BookOpen
-                        size={19}
-                      />
+                    <div
+                      className={`flex h-10 w-10 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
+                    >
+                      <BookOpen size={19} />
                     </div>
 
                     <div>
-                      <h2 className="text-sm font-bold text-slate-800">
+                      <h2 className="theme-text text-sm font-bold">
                         Informasi Dasar
                       </h2>
 
-                      <p className="text-xs text-slate-400">
+                      <p className="theme-text-muted text-xs">
                         Informasi utama ujian
                       </p>
                     </div>
-
                   </div>
                 </div>
 
@@ -618,9 +693,9 @@ export default function EditUjianPage() {
                   {/* JUDUL */}
 
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-slate-700">
+                    <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                       Judul Ujian
-                      <span className="ml-1 text-red-500">
+                      <span className="theme-danger ml-1">
                         *
                       </span>
                     </label>
@@ -628,35 +703,27 @@ export default function EditUjianPage() {
                     <input
                       type="text"
                       name="judul"
-                      value={
-                        form.judul
-                      }
-                      onChange={
-                        handleChange
-                      }
+                      value={form.judul}
+                      onChange={handleChange}
                       placeholder="Contoh: Ujian Tengah Semester Fisika"
-                      className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
+                      className={`theme-input w-full rounded-xl border px-4 py-3 text-sm outline-none transition placeholder:text-[var(--color-text-placeholder)] ${themeFocus}`}
                     />
                   </div>
 
                   {/* DESKRIPSI */}
 
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-slate-700">
+                    <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                       Deskripsi
                     </label>
 
                     <textarea
                       name="deskripsi"
-                      value={
-                        form.deskripsi
-                      }
-                      onChange={
-                        handleChange
-                      }
+                      value={form.deskripsi}
+                      onChange={handleChange}
                       rows={4}
                       placeholder="Tuliskan petunjuk atau deskripsi ujian..."
-                      className="w-full resize-none rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-300 focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
+                      className={`theme-input w-full resize-none rounded-xl border px-4 py-3 text-sm outline-none transition placeholder:text-[var(--color-text-placeholder)] ${themeFocus}`}
                     />
                   </div>
 
@@ -665,19 +732,15 @@ export default function EditUjianPage() {
                   <div className="grid gap-5 sm:grid-cols-2">
 
                     <div>
-                      <label className="mb-2 block text-sm font-semibold text-slate-700">
+                      <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                         Jenis Ujian
                       </label>
 
                       <select
                         name="jenis"
-                        value={
-                          form.jenis
-                        }
-                        onChange={
-                          handleChange
-                        }
-                        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
+                        value={form.jenis}
+                        onChange={handleChange}
+                        className={`theme-input w-full rounded-xl border px-4 py-3 text-sm outline-none ${themeFocus}`}
                       >
                         <option value="pilihan_ganda">
                           Pilihan Ganda
@@ -694,19 +757,15 @@ export default function EditUjianPage() {
                     </div>
 
                     <div>
-                      <label className="mb-2 block text-sm font-semibold text-slate-700">
+                      <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                         Mode Ujian
                       </label>
 
                       <select
                         name="modeUjian"
-                        value={
-                          form.modeUjian
-                        }
-                        onChange={
-                          handleChange
-                        }
-                        className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm text-slate-700 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
+                        value={form.modeUjian}
+                        onChange={handleChange}
+                        className={`theme-input w-full rounded-xl border px-4 py-3 text-sm outline-none ${themeFocus}`}
                       >
                         <option value="online">
                           Online
@@ -717,35 +776,36 @@ export default function EditUjianPage() {
                         </option>
                       </select>
                     </div>
-
                   </div>
-
                 </div>
               </section>
 
-              {/* WAKTU & NILAI */}
+              {/* =================================================
+                  WAKTU & NILAI
+              ================================================= */}
 
-              <section className="mt-5 rounded-2xl border border-slate-200 bg-white shadow-sm">
-
-                <div className="border-b border-slate-100 px-5 py-5 sm:px-6">
+              <section
+                className={`theme-card mt-5 overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+              >
+                <div
+                  className={`border-b ${themeDivider} px-5 py-5 sm:px-6`}
+                >
                   <div className="flex items-center gap-3">
-
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
-                      <Clock3
-                        size={19}
-                      />
+                    <div
+                      className={`flex h-10 w-10 items-center justify-center rounded-xl ${themeWarningSurface} text-[var(--color-warning)]`}
+                    >
+                      <Clock3 size={19} />
                     </div>
 
                     <div>
-                      <h2 className="text-sm font-bold text-slate-800">
+                      <h2 className="theme-text text-sm font-bold">
                         Waktu & Penilaian
                       </h2>
 
-                      <p className="text-xs text-slate-400">
+                      <p className="theme-text-muted text-xs">
                         Atur waktu dan nilai kelulusan
                       </p>
                     </div>
-
                   </div>
                 </div>
 
@@ -754,7 +814,7 @@ export default function EditUjianPage() {
                   {/* DURASI */}
 
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-slate-700">
+                    <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                       Durasi
                     </label>
 
@@ -763,16 +823,12 @@ export default function EditUjianPage() {
                         type="number"
                         min="1"
                         name="durasi"
-                        value={
-                          form.durasi
-                        }
-                        onChange={
-                          handleChange
-                        }
-                        className="w-full rounded-xl border border-slate-200 px-4 py-3 pr-16 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
+                        value={form.durasi}
+                        onChange={handleChange}
+                        className={`theme-input w-full rounded-xl border px-4 py-3 pr-16 text-sm outline-none ${themeFocus}`}
                       />
 
-                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-400">
+                      <span className="theme-text-muted absolute right-4 top-1/2 -translate-y-1/2 text-xs font-medium">
                         menit
                       </span>
                     </div>
@@ -781,7 +837,7 @@ export default function EditUjianPage() {
                   {/* NILAI */}
 
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-slate-700">
+                    <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                       Nilai Kelulusan
                     </label>
 
@@ -794,13 +850,11 @@ export default function EditUjianPage() {
                         value={
                           form.nilaiKelulusan
                         }
-                        onChange={
-                          handleChange
-                        }
-                        className="w-full rounded-xl border border-slate-200 px-4 py-3 pr-10 text-sm outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
+                        onChange={handleChange}
+                        className={`theme-input w-full rounded-xl border px-4 py-3 pr-10 text-sm outline-none ${themeFocus}`}
                       />
 
-                      <span className="absolute right-4 top-1/2 -translate-y-1/2 text-xs font-medium text-slate-400">
+                      <span className="theme-text-muted absolute right-4 top-1/2 -translate-y-1/2 text-xs font-medium">
                         %
                       </span>
                     </div>
@@ -809,7 +863,7 @@ export default function EditUjianPage() {
                   {/* MULAI */}
 
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-slate-700">
+                    <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                       Waktu Mulai
                     </label>
 
@@ -819,17 +873,15 @@ export default function EditUjianPage() {
                       value={
                         form.waktuMulai
                       }
-                      onChange={
-                        handleChange
-                      }
-                      className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm text-slate-700 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
+                      onChange={handleChange}
+                      className={`theme-input w-full rounded-xl border px-3 py-3 text-sm outline-none ${themeFocus}`}
                     />
                   </div>
 
                   {/* SELESAI */}
 
                   <div>
-                    <label className="mb-2 block text-sm font-semibold text-slate-700">
+                    <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                       Waktu Selesai
                     </label>
 
@@ -839,39 +891,39 @@ export default function EditUjianPage() {
                       value={
                         form.waktuSelesai
                       }
-                      onChange={
-                        handleChange
-                      }
-                      className="w-full rounded-xl border border-slate-200 px-3 py-3 text-sm text-slate-700 outline-none focus:border-indigo-500 focus:ring-4 focus:ring-indigo-50"
+                      onChange={handleChange}
+                      className={`theme-input w-full rounded-xl border px-3 py-3 text-sm outline-none ${themeFocus}`}
                     />
                   </div>
-
                 </div>
               </section>
 
-              {/* PENGATURAN */}
+              {/* =================================================
+                  PENGATURAN
+              ================================================= */}
 
-              <section className="mt-5 rounded-2xl border border-slate-200 bg-white shadow-sm">
-
-                <div className="border-b border-slate-100 px-5 py-5 sm:px-6">
+              <section
+                className={`theme-card mt-5 overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+              >
+                <div
+                  className={`border-b ${themeDivider} px-5 py-5 sm:px-6`}
+                >
                   <div className="flex items-center gap-3">
-
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-purple-50 text-purple-600">
-                      <Settings2
-                        size={19}
-                      />
+                    <div
+                      className={`flex h-10 w-10 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
+                    >
+                      <Settings2 size={19} />
                     </div>
 
                     <div>
-                      <h2 className="text-sm font-bold text-slate-800">
+                      <h2 className="theme-text text-sm font-bold">
                         Pengaturan
                       </h2>
 
-                      <p className="text-xs text-slate-400">
+                      <p className="theme-text-muted text-xs">
                         Konfigurasi tambahan ujian
                       </p>
                     </div>
-
                   </div>
                 </div>
 
@@ -879,83 +931,85 @@ export default function EditUjianPage() {
 
                   {/* AUTO GRADING */}
 
-                  <label className="flex cursor-pointer items-start gap-4 rounded-xl border border-slate-100 bg-slate-50 p-4 transition hover:border-indigo-100 hover:bg-indigo-50/30">
-
+                  <label
+                    className={`theme-card flex cursor-pointer items-start gap-4 rounded-xl border ${themeNeutralBorder} p-4 transition ${themeNeutralHover} hover:border-[color-mix(in_srgb,var(--color-primary)_24%,transparent)]`}
+                  >
                     <input
                       type="checkbox"
                       name="penilaianOtomatis"
                       checked={
                         form.penilaianOtomatis
                       }
-                      onChange={
-                        handleChange
-                      }
-                      className="mt-1 h-4 w-4 accent-indigo-600"
+                      onChange={handleChange}
+                      className="mt-1 h-4 w-4 accent-[var(--color-primary)]"
                     />
 
                     <div>
-                      <p className="text-sm font-bold text-slate-700">
+                      <p className="theme-text text-sm font-bold">
                         Penilaian otomatis
                       </p>
 
-                      <p className="mt-1 text-xs leading-5 text-slate-400">
+                      <p className="theme-text-muted mt-1 text-xs leading-5">
                         Sistem akan menghitung
                         nilai soal yang dapat
                         dinilai secara otomatis.
                       </p>
                     </div>
-
                   </label>
 
                   {/* PUBLISH */}
 
-                  <label className="flex cursor-pointer items-start gap-4 rounded-xl border border-slate-100 bg-slate-50 p-4 transition hover:border-indigo-100 hover:bg-indigo-50/30">
-
+                  <label
+                    className={`theme-card flex cursor-pointer items-start gap-4 rounded-xl border ${themeNeutralBorder} p-4 transition ${themeNeutralHover} hover:border-[color-mix(in_srgb,var(--color-primary)_24%,transparent)]`}
+                  >
                     <input
                       type="checkbox"
                       name="dipublikasikan"
                       checked={
                         form.dipublikasikan
                       }
-                      onChange={
-                        handleChange
-                      }
-                      className="mt-1 h-4 w-4 accent-indigo-600"
+                      onChange={handleChange}
+                      className="mt-1 h-4 w-4 accent-[var(--color-primary)]"
                     />
 
                     <div>
-                      <p className="text-sm font-bold text-slate-700">
+                      <p className="theme-text text-sm font-bold">
                         Publikasikan ujian
                       </p>
 
-                      <p className="mt-1 text-xs leading-5 text-slate-400">
+                      <p className="theme-text-muted mt-1 text-xs leading-5">
                         Jika aktif, ujian dapat
                         ditampilkan kepada siswa
                         sesuai jadwal yang ditentukan.
                       </p>
                     </div>
-
                   </label>
-
                 </div>
               </section>
 
-              {/* INFO */}
+              {/* =================================================
+                  INFO
+              ================================================= */}
 
-              <div className="mt-5 rounded-xl border border-blue-100 bg-blue-50 p-4">
+              <div
+                className={`mt-5 rounded-xl border ${themeInfoBorder} ${themeInfoSurface} p-4`}
+              >
                 <div className="flex gap-3">
-
                   <CalendarDays
                     size={18}
-                    className="mt-0.5 shrink-0 text-blue-600"
+                    className={`mt-0.5 shrink-0 ${themePrimaryText}`}
                   />
 
                   <div>
-                    <p className="text-sm font-bold text-blue-800">
+                    <p
+                      className={`text-sm font-bold ${themePrimaryText}`}
+                    >
                       Perhatian
                     </p>
 
-                    <p className="mt-1 text-xs leading-5 text-blue-700">
+                    <p
+                      className={`mt-1 text-xs leading-5 ${themePrimaryText}`}
+                    >
                       Perubahan informasi ujian
                       tidak mengubah soal yang
                       sudah dibuat. Untuk mengubah
@@ -963,35 +1017,32 @@ export default function EditUjianPage() {
                       pada halaman ujian.
                     </p>
                   </div>
-
                 </div>
               </div>
 
-              {/* BUTTON */}
+              {/* =================================================
+                  BUTTON
+              ================================================= */}
 
               <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
 
                 <button
                   type="button"
-                  disabled={
-                    saving
-                  }
+                  disabled={saving}
                   onClick={() =>
                     router.push(
                       "/guru/ujian"
                     )
                   }
-                  className="rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className={`theme-card ${themeNeutralBorder} theme-text-secondary w-full rounded-xl border px-5 py-3 text-sm font-semibold transition ${themeNeutralHover} hover:text-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto`}
                 >
                   Batal
                 </button>
 
                 <button
                   type="submit"
-                  disabled={
-                    saving
-                  }
-                  className="flex items-center justify-center gap-2 rounded-xl bg-indigo-600 px-5 py-3 text-sm font-bold text-white shadow-sm transition hover:bg-indigo-700 disabled:cursor-not-allowed disabled:opacity-60"
+                  disabled={saving}
+                  className={`${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow} flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto`}
                 >
                   {saving ? (
                     <>
@@ -1003,23 +1054,21 @@ export default function EditUjianPage() {
                     </>
                   ) : (
                     <>
-                      <Save
-                        size={17}
-                      />
+                      <Save size={17} />
                       Simpan Perubahan
                     </>
                   )}
                 </button>
-
               </div>
-
             </form>
 
-            <footer className="py-8 text-center text-xs text-slate-400">
-              © 2026 SmartSchool •
-              Guru Ujian
-            </footer>
+            {/* =================================================
+                FOOTER
+            ================================================= */}
 
+            <footer className="theme-text-muted py-8 text-center text-xs">
+              © 2026 SmartSchool • Guru Ujian
+            </footer>
           </div>
         </main>
       </div>

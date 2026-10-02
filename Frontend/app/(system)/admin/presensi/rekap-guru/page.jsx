@@ -22,7 +22,6 @@ import {
   Database,
   Activity,
   FileSpreadsheet,
-  TrendingUp,
   UserCheck,
   UserX,
   Loader2,
@@ -252,36 +251,31 @@ const STATUS_CONFIG = {
   hadir: {
     label: "Hadir",
     icon: CheckCircle2,
-    className:
-      "bg-emerald-50 text-emerald-700 border-emerald-200",
+    className: "theme-success",
   },
 
   terlambat: {
     label: "Terlambat",
     icon: Clock3,
-    className:
-      "bg-amber-50 text-amber-700 border-amber-200",
+    className: "theme-warning",
   },
 
   izin: {
     label: "Izin",
     icon: CircleAlert,
-    className:
-      "bg-blue-50 text-blue-700 border-blue-200",
+    className: "theme-info",
   },
 
   sakit: {
     label: "Sakit",
     icon: CircleAlert,
-    className:
-      "bg-orange-50 text-orange-700 border-orange-200",
+    className: "theme-warning",
   },
 
   alpha: {
     label: "Alpha",
     icon: CircleAlert,
-    className:
-      "bg-red-50 text-red-700 border-red-200",
+    className: "theme-danger",
   },
 };
 
@@ -366,12 +360,18 @@ export default function RekapGuruPage() {
         try {
           result = text ? JSON.parse(text) : null;
         } catch {
-  console.error("Response mentah dari server:", text);
+          console.error(
+            "Response mentah dari server:",
+            text
+          );
 
-  throw new Error(
-    `Response dari server bukan JSON yang valid: ${text.slice(0, 500)}`
-  );
-}
+          throw new Error(
+            `Response dari server bukan JSON yang valid: ${text.slice(
+              0,
+              500
+            )}`
+          );
+        }
 
         if (!response.ok) {
           throw new Error(
@@ -388,20 +388,29 @@ export default function RekapGuruPage() {
           rawData = result;
         } else if (Array.isArray(result?.data)) {
           rawData = result.data;
-        } else if (Array.isArray(result?.data?.data)) {
+        } else if (
+          Array.isArray(result?.data?.data)
+        ) {
           rawData = result.data.data;
         } else if (Array.isArray(result?.rows)) {
           rawData = result.rows;
-        } else if (Array.isArray(result?.results)) {
+        } else if (
+          Array.isArray(result?.results)
+        ) {
           rawData = result.results;
         }
 
-        const normalized = rawData.map(normalizeGuru);
+        const normalized = rawData.map(
+          normalizeGuru
+        );
 
         setData(normalized);
         setPage(1);
       } catch (err) {
-        console.error("ERROR FETCH REKAP GURU:", err);
+        console.error(
+          "ERROR FETCH REKAP GURU:",
+          err
+        );
 
         setData([]);
 
@@ -590,7 +599,8 @@ export default function RekapGuruPage() {
       console.error("EXPORT ERROR:", err);
 
       setError(
-        err?.message || "Gagal melakukan export."
+        err?.message ||
+          "Gagal melakukan export."
       );
     } finally {
       setExportLoading(false);
@@ -599,7 +609,8 @@ export default function RekapGuruPage() {
 
   const renderStatus = (status) => {
     const config =
-      STATUS_CONFIG[status] || STATUS_CONFIG.alpha;
+      STATUS_CONFIG[status] ||
+      STATUS_CONFIG.alpha;
 
     const Icon = config.icon;
 
@@ -631,7 +642,7 @@ export default function RekapGuruPage() {
   ======================================================= */
 
   return (
-    <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
+    <div className="flex h-screen w-full theme-page overflow-hidden">
       {/* =====================================================
           SIDEBAR
       ===================================================== */}
@@ -640,7 +651,9 @@ export default function RekapGuruPage() {
         role="admin"
         activeMenu="rekap-guru"
         isOpen={sidebarOpen}
-        onToggle={() => setSidebarOpen(!sidebarOpen)}
+        onToggle={() =>
+          setSidebarOpen(!sidebarOpen)
+        }
       />
 
       {/* =====================================================
@@ -648,37 +661,36 @@ export default function RekapGuruPage() {
       ===================================================== */}
 
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-        {/* HEADER */}
-
         <Header
           title="Rekap Absensi Guru"
-          onMenuClick={() => setSidebarOpen(!sidebarOpen)}
+          onMenuClick={() =>
+            setSidebarOpen(!sidebarOpen)
+          }
         />
 
         {/* =====================================================
-            PAGE (HANYA AREA INI YANG SCROLL)
+            PAGE
         ===================================================== */}
 
         <main className="flex-1 overflow-y-auto">
           <div className="p-4 sm:p-6 lg:p-8 space-y-5 sm:space-y-6">
+
             {/* =================================================
                 PAGE HEADER
             ================================================== */}
 
             <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
-              {/* TITLE */}
-
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#155DFC] to-[#0d47c9] text-white flex items-center justify-center shadow-lg shadow-[#155DFC]/20 shrink-0">
+                <div className="w-11 h-11 rounded-xl theme-primary flex items-center justify-center shadow-lg shrink-0">
                   <Users size={20} />
                 </div>
 
                 <div className="min-w-0">
-                  <h1 className="text-xl sm:text-2xl font-bold text-slate-800 truncate">
+                  <h1 className="text-xl sm:text-2xl font-bold theme-text truncate">
                     Rekap Absensi Guru
                   </h1>
 
-                  <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                  <p className="text-xs sm:text-sm theme-text-muted mt-1">
                     Pantau kehadiran guru berdasarkan tanggal yang dipilih.
                   </p>
                 </div>
@@ -700,13 +712,11 @@ export default function RekapGuruPage() {
                     py-2.5
                     rounded-xl
                     border
-                    border-slate-200
-                    bg-white
-                    text-slate-600
+                    theme-border
+                    theme-input
                     text-sm
                     font-semibold
-                    hover:bg-slate-50
-                    hover:border-slate-300
+                    theme-sidebar-hover
                     transition
                     disabled:cursor-not-allowed
                     disabled:opacity-60
@@ -714,8 +724,13 @@ export default function RekapGuruPage() {
                 >
                   <RefreshCw
                     size={15}
-                    className={loading ? "animate-spin" : ""}
+                    className={
+                      loading
+                        ? "animate-spin"
+                        : ""
+                    }
                   />
+
                   Refresh
                 </button>
 
@@ -723,7 +738,8 @@ export default function RekapGuruPage() {
                   type="button"
                   onClick={handleExport}
                   disabled={
-                    exportLoading || data.length === 0
+                    exportLoading ||
+                    data.length === 0
                   }
                   className="
                     inline-flex
@@ -733,14 +749,10 @@ export default function RekapGuruPage() {
                     px-4
                     py-2.5
                     rounded-xl
-                    bg-gradient-to-r
-                    from-[#155DFC]
-                    to-[#0d47c9]
-                    text-white
+                    theme-primary
                     text-sm
                     font-semibold
                     shadow-sm
-                    hover:brightness-110
                     transition
                     disabled:cursor-not-allowed
                     disabled:opacity-60
@@ -756,7 +768,9 @@ export default function RekapGuruPage() {
                     </>
                   ) : (
                     <>
-                      <FileSpreadsheet size={15} />
+                      <FileSpreadsheet
+                        size={15}
+                      />
                       Export Excel
                     </>
                   )}
@@ -769,18 +783,18 @@ export default function RekapGuruPage() {
             ================================================== */}
 
             {error && (
-              <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4">
+              <div className="flex items-start gap-3 rounded-xl border theme-danger p-4">
                 <CircleAlert
                   size={19}
-                  className="mt-0.5 shrink-0 text-red-600"
+                  className="mt-0.5 shrink-0"
                 />
 
                 <div className="flex-1">
-                  <p className="text-sm font-semibold text-red-800">
+                  <p className="text-sm font-semibold">
                     Terjadi kesalahan
                   </p>
 
-                  <p className="mt-0.5 text-sm text-red-700">
+                  <p className="mt-0.5 text-sm">
                     {error}
                   </p>
                 </div>
@@ -788,7 +802,11 @@ export default function RekapGuruPage() {
                 <button
                   type="button"
                   onClick={() => setError("")}
-                  className="text-red-500 hover:text-red-700"
+                  className="
+                    opacity-70
+                    hover:opacity-100
+                    transition
+                  "
                 >
                   <X size={18} />
                 </button>
@@ -799,13 +817,13 @@ export default function RekapGuruPage() {
                 FILTER TANGGAL
             ================================================== */}
 
-            <section className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+            <section className="theme-card rounded-2xl border theme-border shadow-sm overflow-hidden">
               <div className="p-4 sm:p-5 lg:p-6">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-end">
                   <div className="w-full lg:max-w-xs">
                     <label
                       htmlFor="tanggal"
-                      className="mb-2 block text-xs font-semibold text-slate-600"
+                      className="mb-2 block text-xs font-semibold theme-text-secondary"
                     >
                       Tanggal Absensi
                     </label>
@@ -813,40 +831,47 @@ export default function RekapGuruPage() {
                     <div className="relative">
                       <CalendarDays
                         size={16}
-                        className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                        className="
+                          pointer-events-none
+                          absolute
+                          left-3
+                          top-1/2
+                          -translate-y-1/2
+                          theme-text-placeholder
+                        "
                       />
 
                       <input
                         id="tanggal"
                         type="date"
                         value={tanggal}
-                        onChange={handleTanggalChange}
+                        onChange={
+                          handleTanggalChange
+                        }
                         className="
+                          theme-input
                           h-11
                           w-full
                           rounded-xl
                           border
-                          border-slate-200
-                          bg-white
                           pl-9
                           pr-3
                           text-sm
                           font-medium
-                          text-slate-700
                           outline-none
                           transition
-                          focus:border-[#155DFC]/50
-                          focus:ring-2
-                          focus:ring-[#155DFC]/20
+                          focus:outline-none
                         "
                       />
                     </div>
                   </div>
 
-                  <div className="pb-2 text-xs sm:text-sm text-slate-500">
+                  <div className="pb-2 text-xs sm:text-sm theme-text-muted">
                     Menampilkan data untuk:{" "}
-                    <span className="font-semibold text-slate-700">
-                      {formatTanggalIndonesia(tanggal)}
+                    <span className="font-semibold theme-text">
+                      {formatTanggalIndonesia(
+                        tanggal
+                      )}
                     </span>
                   </div>
                 </div>
@@ -863,7 +888,7 @@ export default function RekapGuruPage() {
                 value={statistics.total}
                 description="Total data guru"
                 icon={Users}
-                iconClass="text-[#155DFC]"
+                iconClass="theme-text"
                 loading={loading}
               />
 
@@ -872,7 +897,7 @@ export default function RekapGuruPage() {
                 value={statistics.hadir}
                 description="Guru hadir"
                 icon={UserCheck}
-                iconClass="text-emerald-500"
+                iconClass="text-[var(--color-success)]"
                 loading={loading}
               />
 
@@ -881,7 +906,7 @@ export default function RekapGuruPage() {
                 value={statistics.terlambat}
                 description="Guru terlambat"
                 icon={Clock3}
-                iconClass="text-amber-500"
+                iconClass="text-[var(--color-warning)]"
                 loading={loading}
               />
 
@@ -890,7 +915,7 @@ export default function RekapGuruPage() {
                 value={statistics.izin}
                 description="Guru izin"
                 icon={CircleAlert}
-                iconClass="text-blue-500"
+                iconClass="text-[var(--color-info)]"
                 loading={loading}
               />
 
@@ -899,7 +924,7 @@ export default function RekapGuruPage() {
                 value={statistics.alpha}
                 description="Guru alpha"
                 icon={UserX}
-                iconClass="text-red-500"
+                iconClass="text-[var(--color-danger)]"
                 loading={loading}
               />
             </div>
@@ -908,7 +933,7 @@ export default function RekapGuruPage() {
                 SEARCH + FILTER STATUS
             ================================================== */}
 
-            <section className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-4">
+            <section className="theme-card rounded-2xl border theme-border shadow-sm p-4">
               <div className="flex flex-col lg:flex-row gap-3">
                 {/* SEARCH */}
 
@@ -920,7 +945,7 @@ export default function RekapGuruPage() {
                       left-3
                       top-1/2
                       -translate-y-1/2
-                      text-slate-400
+                      theme-text-placeholder
                     "
                   />
 
@@ -928,11 +953,14 @@ export default function RekapGuruPage() {
                     type="text"
                     value={search}
                     onChange={(event) => {
-                      setSearch(event.target.value);
+                      setSearch(
+                        event.target.value
+                      );
                       setPage(1);
                     }}
                     placeholder="Cari nama guru, NIP, atau jabatan..."
                     className="
+                      theme-input
                       w-full
                       pl-9
                       pr-10
@@ -940,15 +968,9 @@ export default function RekapGuruPage() {
                       text-sm
                       rounded-xl
                       border
-                      border-slate-200
-                      bg-white
-                      text-slate-800
-                      placeholder:text-slate-400
-                      focus:outline-none
-                      focus:ring-2
-                      focus:ring-[#155DFC]/20
-                      focus:border-[#155DFC]/50
+                      outline-none
                       transition
+                      focus:outline-none
                     "
                   />
 
@@ -964,8 +986,9 @@ export default function RekapGuruPage() {
                         right-3
                         top-1/2
                         -translate-y-1/2
-                        text-slate-400
-                        hover:text-slate-600
+                        theme-text-muted
+                        hover:theme-text
+                        transition
                       "
                     >
                       <X size={15} />
@@ -1002,8 +1025,8 @@ export default function RekapGuruPage() {
                         transition
                         ${
                           statusFilter === value
-                            ? "bg-gradient-to-r from-[#155DFC] to-[#0d47c9] border-[#155DFC] text-white shadow-sm"
-                            : "border-slate-200 bg-white text-slate-600 hover:bg-slate-50"
+                            ? "theme-primary"
+                            : "theme-input theme-sidebar-hover"
                         }
                       `}
                     >
@@ -1018,7 +1041,7 @@ export default function RekapGuruPage() {
                 TABLE
             ================================================== */}
 
-            <section className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+            <section className="theme-card rounded-2xl border theme-border shadow-sm overflow-hidden">
               {/* TABLE HEADER */}
 
               <div
@@ -1028,7 +1051,7 @@ export default function RekapGuruPage() {
                   lg:px-6
                   py-4
                   border-b
-                  border-slate-100
+                  theme-border
                   flex
                   flex-col
                   sm:flex-row
@@ -1044,9 +1067,9 @@ export default function RekapGuruPage() {
                         w-8
                         h-8
                         rounded-lg
-                        bg-[#eaf1ff]
+                        theme-info
                         border
-                        border-[#c7dbff]
+                        theme-border
                         flex
                         items-center
                         justify-center
@@ -1054,22 +1077,25 @@ export default function RekapGuruPage() {
                     >
                       <Database
                         size={15}
-                        className="text-[#155DFC]"
                       />
                     </div>
 
-                    <h2 className="text-sm font-bold text-slate-800">
+                    <h2 className="text-sm font-bold theme-text">
                       Data Rekap Guru
                     </h2>
                   </div>
 
-                  <p className="text-xs text-slate-400 mt-1">
+                  <p className="text-xs theme-text-muted mt-1">
                     Daftar kehadiran guru pada tanggal yang dipilih.
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2 text-xs text-slate-500">
-                  <Activity size={14} className="text-[#155DFC]" />
+                <div className="flex items-center gap-2 text-xs theme-text-muted">
+                  <Activity
+                    size={14}
+                    className="text-[var(--color-primary)]"
+                  />
+
                   Auto-refresh setiap 10 detik
                 </div>
               </div>
@@ -1079,14 +1105,7 @@ export default function RekapGuruPage() {
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[1000px] text-sm border-collapse">
                   <thead>
-                    <tr
-                      className="
-                        bg-gradient-to-r
-                        from-[#155DFC]
-                        to-[#0d47c9]
-                        text-white
-                      "
-                    >
+                    <tr className="theme-primary">
                       <th className="px-4 py-3 text-center font-semibold w-[65px]">
                         No
                       </th>
@@ -1123,50 +1142,50 @@ export default function RekapGuruPage() {
 
                   <tbody>
                     {loading ? (
-                      Array.from({ length: limit }).map(
-                        (_, index) => (
-                          <tr
-                            key={index}
-                            className="border-b border-slate-100 last:border-0"
-                          >
-                            <td className="px-4 py-3 text-center">
-                              <div className="mx-auto h-7 w-7 animate-pulse rounded-lg bg-slate-100" />
-                            </td>
+                      Array.from({
+                        length: limit,
+                      }).map((_, index) => (
+                        <tr
+                          key={index}
+                          className="border-b theme-border last:border-0"
+                        >
+                          <td className="px-4 py-3 text-center">
+                            <div className="mx-auto h-7 w-7 animate-pulse rounded-lg theme-card-soft" />
+                          </td>
 
-                            <td className="px-4 py-3">
-                              <div className="space-y-2">
-                                <div className="h-4 w-36 animate-pulse rounded bg-slate-100" />
+                          <td className="px-4 py-3">
+                            <div className="space-y-2">
+                              <div className="h-4 w-36 animate-pulse rounded theme-card-soft" />
 
-                                <div className="h-3 w-24 animate-pulse rounded bg-slate-100" />
-                              </div>
-                            </td>
+                              <div className="h-3 w-24 animate-pulse rounded theme-card-soft" />
+                            </div>
+                          </td>
 
-                            <td className="px-4 py-3">
-                              <div className="h-4 w-24 animate-pulse rounded bg-slate-100" />
-                            </td>
+                          <td className="px-4 py-3">
+                            <div className="h-4 w-24 animate-pulse rounded theme-card-soft" />
+                          </td>
 
-                            <td className="px-4 py-3">
-                              <div className="h-4 w-28 animate-pulse rounded bg-slate-100" />
-                            </td>
+                          <td className="px-4 py-3">
+                            <div className="h-4 w-28 animate-pulse rounded theme-card-soft" />
+                          </td>
 
-                            <td className="px-4 py-3">
-                              <div className="h-6 w-20 animate-pulse rounded-full bg-slate-100" />
-                            </td>
+                          <td className="px-4 py-3">
+                            <div className="h-6 w-20 animate-pulse rounded-full theme-card-soft" />
+                          </td>
 
-                            <td className="px-4 py-3">
-                              <div className="h-4 w-16 animate-pulse rounded bg-slate-100" />
-                            </td>
+                          <td className="px-4 py-3">
+                            <div className="h-4 w-16 animate-pulse rounded theme-card-soft" />
+                          </td>
 
-                            <td className="px-4 py-3">
-                              <div className="h-4 w-16 animate-pulse rounded bg-slate-100" />
-                            </td>
+                          <td className="px-4 py-3">
+                            <div className="h-4 w-16 animate-pulse rounded theme-card-soft" />
+                          </td>
 
-                            <td className="px-4 py-3">
-                              <div className="mx-auto h-8 w-20 animate-pulse rounded-lg bg-slate-100" />
-                            </td>
-                          </tr>
-                        )
-                      )
+                          <td className="px-4 py-3">
+                            <div className="mx-auto h-8 w-20 animate-pulse rounded-lg theme-card-soft" />
+                          </td>
+                        </tr>
+                      ))
                     ) : paginatedData.length === 0 ? (
                       <tr>
                         <td
@@ -1179,29 +1198,28 @@ export default function RekapGuruPage() {
                                 w-14
                                 h-14
                                 rounded-full
-                                bg-[#eaf1ff]
+                                theme-info
                                 border
-                                border-[#c7dbff]
+                                theme-border
                                 flex
                                 items-center
                                 justify-center
                               "
                             >
-                              <Users
-                                size={24}
-                                className="text-[#155DFC]"
-                              />
+                              <Users size={24} />
                             </div>
 
-                            <h3 className="mt-4 text-base font-bold text-slate-800">
+                            <h3 className="mt-4 text-base font-bold theme-text">
                               Data guru tidak ditemukan
                             </h3>
 
-                            <p className="mt-1 text-xs text-slate-500 text-center">
+                            <p className="mt-1 text-xs theme-text-muted text-center">
                               Tidak ada data absensi guru untuk
                               tanggal{" "}
-                              <span className="font-semibold">
-                                {formatTanggalIndonesia(tanggal)}
+                              <span className="font-semibold theme-text">
+                                {formatTanggalIndonesia(
+                                  tanggal
+                                )}
                               </span>
                               .
                             </p>
@@ -1209,156 +1227,163 @@ export default function RekapGuruPage() {
                         </td>
                       </tr>
                     ) : (
-                      paginatedData.map((guru, index) => (
-                        <tr
-                          key={guru.id}
-                          className="
-                            border-b
-                            border-slate-100
-                            last:border-0
-                            hover:bg-[#eaf1ff]
-                            transition-colors
-                          "
-                        >
-                          {/* NO */}
+                      paginatedData.map(
+                        (guru, index) => (
+                          <tr
+                            key={guru.id}
+                            className="
+                              border-b
+                              theme-border
+                              last:border-0
+                              theme-table-hover
+                              transition-colors
+                            "
+                          >
+                            {/* NO */}
 
-                          <td className="px-4 py-3 text-center">
-                            <span
-                              className="
-                                inline-flex
-                                items-center
-                                justify-center
-                                w-7
-                                h-7
-                                rounded-lg
-                                bg-[#eaf1ff]
-                                border
-                                border-[#c7dbff]
-                                text-[#155DFC]
-                                text-xs
-                                font-bold
-                              "
-                            >
-                              {(page - 1) * limit + index + 1}
-                            </span>
-                          </td>
-
-                          {/* GURU */}
-
-                          <td className="px-4 py-3">
-                            <div className="flex items-center gap-3">
-                              <div
+                            <td className="px-4 py-3 text-center">
+                              <span
                                 className="
-                                  w-10
-                                  h-10
-                                  rounded-full
-                                  bg-gradient-to-br
-                                  from-[#155DFC]
-                                  to-[#0d47c9]
-                                  text-white
-                                  flex
+                                  inline-flex
                                   items-center
                                   justify-center
+                                  w-7
+                                  h-7
+                                  rounded-lg
+                                  theme-info
+                                  border
+                                  theme-border
                                   text-xs
                                   font-bold
-                                  shrink-0
                                 "
                               >
-                                {guru.nama
-                                  .split(" ")
-                                  .slice(0, 2)
-                                  .map((w) => w[0])
-                                  .join("")
-                                  .toUpperCase()}
+                                {(page - 1) *
+                                  limit +
+                                  index +
+                                  1}
+                              </span>
+                            </td>
+
+                            {/* GURU */}
+
+                            <td className="px-4 py-3">
+                              <div className="flex items-center gap-3">
+                                <div
+                                  className="
+                                    w-10
+                                    h-10
+                                    rounded-full
+                                    theme-primary
+                                    flex
+                                    items-center
+                                    justify-center
+                                    text-xs
+                                    font-bold
+                                    shrink-0
+                                  "
+                                >
+                                  {guru.nama
+                                    .split(" ")
+                                    .slice(0, 2)
+                                    .map(
+                                      (w) => w[0]
+                                    )
+                                    .join("")
+                                    .toUpperCase()}
+                                </div>
+
+                                <div className="min-w-0">
+                                  <p className="font-semibold theme-text truncate max-w-[200px]">
+                                    {guru.nama}
+                                  </p>
+
+                                  <p className="text-[11px] theme-text-muted mt-0.5 truncate max-w-[200px]">
+                                    {guru.jabatan}
+                                  </p>
+                                </div>
                               </div>
+                            </td>
 
-                              <div className="min-w-0">
-                                <p className="font-semibold text-slate-800 truncate max-w-[200px]">
-                                  {guru.nama}
-                                </p>
+                            {/* NIP */}
 
-                                <p className="text-[11px] text-slate-400 mt-0.5 truncate max-w-[200px]">
-                                  {guru.jabatan}
-                                </p>
-                              </div>
-                            </div>
-                          </td>
+                            <td className="px-4 py-3 text-xs font-medium theme-text-secondary">
+                              {guru.nip}
+                            </td>
 
-                          {/* NIP */}
+                            {/* JABATAN */}
 
-                          <td className="px-4 py-3 text-xs font-medium text-slate-600">
-                            {guru.nip}
-                          </td>
+                            <td className="px-4 py-3 text-xs theme-text-secondary">
+                              {guru.jabatan}
+                            </td>
 
-                          {/* JABATAN */}
+                            {/* STATUS */}
 
-                          <td className="px-4 py-3 text-xs text-slate-600">
-                            {guru.jabatan}
-                          </td>
+                            <td className="px-4 py-3">
+                              {renderStatus(
+                                guru.status
+                              )}
+                            </td>
 
-                          {/* STATUS */}
+                            {/* JAM MASUK */}
 
-                          <td className="px-4 py-3">
-                            {renderStatus(guru.status)}
-                          </td>
+                            <td className="px-4 py-3">
+                              <span className="inline-flex items-center gap-1.5 text-xs font-semibold theme-text-secondary">
+                                <Clock3
+                                  size={12}
+                                  className="theme-text-muted"
+                                />
 
-                          {/* JAM MASUK */}
+                                {guru.jamMasuk}
+                              </span>
+                            </td>
 
-                          <td className="px-4 py-3">
-                            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700">
-                              <Clock3
-                                size={12}
-                                className="text-slate-400"
-                              />
-                              {guru.jamMasuk}
-                            </span>
-                          </td>
+                            {/* JAM PULANG */}
 
-                          {/* JAM PULANG */}
+                            <td className="px-4 py-3">
+                              <span className="inline-flex items-center gap-1.5 text-xs font-semibold theme-text-secondary">
+                                <Clock3
+                                  size={12}
+                                  className="theme-text-muted"
+                                />
 
-                          <td className="px-4 py-3">
-                            <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-700">
-                              <Clock3
-                                size={12}
-                                className="text-slate-400"
-                              />
-                              {guru.jamPulang}
-                            </span>
-                          </td>
+                                {guru.jamPulang}
+                              </span>
+                            </td>
 
-                          {/* AKSI */}
+                            {/* AKSI */}
 
-                          <td className="px-4 py-3 text-center">
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setSelectedGuru(guru)
-                              }
-                              className="
-                                inline-flex
-                                items-center
-                                gap-1.5
-                                rounded-lg
-                                border
-                                border-slate-200
-                                bg-white
-                                px-3
-                                py-2
-                                text-xs
-                                font-semibold
-                                text-slate-600
-                                transition
-                                hover:border-[#c7dbff]
-                                hover:bg-[#eaf1ff]
-                                hover:text-[#155DFC]
-                              "
-                            >
-                              <Eye size={13} />
-                              Detail
-                            </button>
-                          </td>
-                        </tr>
-                      ))
+                            <td className="px-4 py-3 text-center">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setSelectedGuru(
+                                    guru
+                                  )
+                                }
+                                className="
+                                  inline-flex
+                                  items-center
+                                  gap-1.5
+                                  rounded-lg
+                                  border
+                                  theme-border
+                                  theme-input
+                                  px-3
+                                  py-2
+                                  text-xs
+                                  font-semibold
+                                  theme-text-secondary
+                                  transition
+                                  theme-sidebar-hover
+                                "
+                              >
+                                <Eye size={13} />
+                                Detail
+                              </button>
+                            </td>
+                          </tr>
+                        )
+                      )
                     )}
                   </tbody>
                 </table>
@@ -1368,125 +1393,142 @@ export default function RekapGuruPage() {
                   PAGINATION
               ================================================== */}
 
-              {!loading && filteredData.length > 0 && (
-                <div
-                  className="
-                    px-4
-                    sm:px-5
-                    py-3
-                    border-t
-                    border-slate-100
-                    bg-slate-50/60
-                    flex
-                    flex-col
-                    sm:flex-row
-                    sm:items-center
-                    sm:justify-between
-                    gap-3
-                  "
-                >
-                  <p className="text-xs text-slate-500">
-                    Menampilkan{" "}
-                    <span className="font-semibold text-slate-700">
-                      {(page - 1) * limit + 1}
-                    </span>{" "}
-                    -{" "}
-                    <span className="font-semibold text-slate-700">
-                      {Math.min(
-                        page * limit,
-                        filteredData.length
-                      )}
-                    </span>{" "}
-                    dari{" "}
-                    <span className="font-semibold text-slate-700">
-                      {filteredData.length}
-                    </span>{" "}
-                    guru
-                  </p>
+              {!loading &&
+                filteredData.length > 0 && (
+                  <div
+                    className="
+                      px-4
+                      sm:px-5
+                      py-3
+                      border-t
+                      theme-border
+                      theme-card-soft
+                      flex
+                      flex-col
+                      sm:flex-row
+                      sm:items-center
+                      sm:justify-between
+                      gap-3
+                    "
+                  >
+                    <p className="text-xs theme-text-muted">
+                      Menampilkan{" "}
+                      <span className="font-semibold theme-text">
+                        {(page - 1) * limit + 1}
+                      </span>{" "}
+                      -{" "}
+                      <span className="font-semibold theme-text">
+                        {Math.min(
+                          page * limit,
+                          filteredData.length
+                        )}
+                      </span>{" "}
+                      dari{" "}
+                      <span className="font-semibold theme-text">
+                        {filteredData.length}
+                      </span>{" "}
+                      guru
+                    </p>
 
-                  <div className="flex items-center gap-2">
-                    <select
-                      value={limit}
-                      onChange={(event) => {
-                        setLimit(Number(event.target.value));
-                        setPage(1);
-                      }}
-                      className="
-                        text-xs
-                        rounded-lg
-                        border
-                        border-slate-200
-                        bg-white
-                        px-3
-                        py-2
-                        text-slate-600
-                        outline-none
-                        focus:border-[#155DFC]/50
-                        focus:ring-2
-                        focus:ring-[#155DFC]/20
-                      "
-                    >
-                      <option value={10}>10 / halaman</option>
-                      <option value={20}>20 / halaman</option>
-                      <option value={50}>50 / halaman</option>
-                    </select>
+                    <div className="flex items-center gap-2">
+                      <select
+                        value={limit}
+                        onChange={(event) => {
+                          setLimit(
+                            Number(
+                              event.target.value
+                            )
+                          );
+                          setPage(1);
+                        }}
+                        className="
+                          theme-input
+                          text-xs
+                          rounded-lg
+                          border
+                          px-3
+                          py-2
+                          outline-none
+                          focus:outline-none
+                        "
+                      >
+                        <option value={10}>
+                          10 / halaman
+                        </option>
 
-                    <button
-                      type="button"
-                      disabled={page <= 1}
-                      onClick={() =>
-                        setPage((current) => current - 1)
-                      }
-                      className="
-                        w-8
-                        h-8
-                        rounded-lg
-                        border
-                        border-slate-200
-                        bg-white
-                        text-slate-500
-                        flex
-                        items-center
-                        justify-center
-                        disabled:opacity-40
-                        disabled:cursor-not-allowed
-                        hover:bg-slate-50
-                      "
-                    >
-                      <ChevronLeft size={15} />
-                    </button>
+                        <option value={20}>
+                          20 / halaman
+                        </option>
 
-                    <span className="min-w-[60px] text-center text-xs font-semibold text-slate-600">
-                      {page} / {totalPages}
-                    </span>
+                        <option value={50}>
+                          50 / halaman
+                        </option>
+                      </select>
 
-                    <button
-                      type="button"
-                      disabled={page >= totalPages}
-                      onClick={() =>
-                        setPage((current) => current + 1)
-                      }
-                      className="
-                        w-8
-                        h-8
-                        rounded-lg
-                        border
-                        border-slate-200
-                        bg-white
-                        text-slate-500
-                        flex
-                        items-center
-                        justify-center
-                        disabled:opacity-40
-                        disabled:cursor-not-allowed
-                        hover:bg-slate-50
-                      "
-                    >
-                      <ChevronRight size={15} />
-                    </button>
+                      <button
+                        type="button"
+                        disabled={page <= 1}
+                        onClick={() =>
+                          setPage(
+                            (current) =>
+                              current - 1
+                          )
+                        }
+                        className="
+                          w-8
+                          h-8
+                          rounded-lg
+                          border
+                          theme-border
+                          theme-input
+                          theme-text-muted
+                          flex
+                          items-center
+                          justify-center
+                          disabled:opacity-40
+                          disabled:cursor-not-allowed
+                          theme-sidebar-hover
+                        "
+                      >
+                        <ChevronLeft size={15} />
+                      </button>
+
+                      <span className="min-w-[60px] text-center text-xs font-semibold theme-text-secondary">
+                        {page} / {totalPages}
+                      </span>
+
+                      <button
+                        type="button"
+                        disabled={
+                          page >= totalPages
+                        }
+                        onClick={() =>
+                          setPage(
+                            (current) =>
+                              current + 1
+                          )
+                        }
+                        className="
+                          w-8
+                          h-8
+                          rounded-lg
+                          border
+                          theme-border
+                          theme-input
+                          theme-text-muted
+                          flex
+                          items-center
+                          justify-center
+                          disabled:opacity-40
+                          disabled:cursor-not-allowed
+                          theme-sidebar-hover
+                        "
+                      >
+                        <ChevronRight size={15} />
+                      </button>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
             </section>
           </div>
         </main>
@@ -1498,40 +1540,64 @@ export default function RekapGuruPage() {
 
       {selectedGuru && (
         <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-sm"
+          className="
+            fixed
+            inset-0
+            z-[100]
+            flex
+            items-center
+            justify-center
+            bg-slate-950/40
+            p-4
+            backdrop-blur-sm
+          "
           onMouseDown={(event) => {
-            if (event.target === event.currentTarget) {
+            if (
+              event.target ===
+              event.currentTarget
+            ) {
               setSelectedGuru(null);
             }
           }}
         >
-          <div className="w-full max-w-lg rounded-2xl bg-white shadow-2xl overflow-hidden">
+          <div className="w-full max-w-lg rounded-2xl theme-card shadow-2xl overflow-hidden">
             {/* MODAL HEADER */}
 
-            <div className="flex items-center justify-between border-b border-slate-100 px-6 py-5">
+            <div className="flex items-center justify-between border-b theme-border px-6 py-5">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-[#eaf1ff] border border-[#c7dbff] flex items-center justify-center">
-                  <Eye
-                    size={17}
-                    className="text-[#155DFC]"
-                  />
+                <div className="w-9 h-9 rounded-lg theme-info border theme-border flex items-center justify-center">
+                  <Eye size={17} />
                 </div>
 
                 <div>
-                  <h2 className="text-sm font-bold text-slate-800">
+                  <h2 className="text-sm font-bold theme-text">
                     Detail Absensi Guru
                   </h2>
 
-                  <p className="text-[11px] text-slate-400 mt-0.5">
-                    {formatTanggalIndonesia(tanggal)}
+                  <p className="text-[11px] theme-text-muted mt-0.5">
+                    {formatTanggalIndonesia(
+                      tanggal
+                    )}
                   </p>
                 </div>
               </div>
 
               <button
                 type="button"
-                onClick={() => setSelectedGuru(null)}
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                onClick={() =>
+                  setSelectedGuru(null)
+                }
+                className="
+                  flex
+                  h-9
+                  w-9
+                  items-center
+                  justify-center
+                  rounded-lg
+                  theme-text-muted
+                  theme-sidebar-hover
+                  transition
+                "
               >
                 <X size={18} />
               </button>
@@ -1542,16 +1608,13 @@ export default function RekapGuruPage() {
             <div className="px-6 py-5 space-y-5 max-h-[60vh] overflow-y-auto">
               {/* PROFIL */}
 
-              <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
+              <div className="flex items-center gap-4 p-4 rounded-xl theme-card-soft border theme-border">
                 <div
                   className="
                     w-14
                     h-14
                     rounded-full
-                    bg-gradient-to-br
-                    from-[#155DFC]
-                    to-[#0d47c9]
-                    text-white
+                    theme-primary
                     flex
                     items-center
                     justify-center
@@ -1569,15 +1632,15 @@ export default function RekapGuruPage() {
                 </div>
 
                 <div className="min-w-0">
-                  <p className="text-base font-bold text-slate-800 truncate">
+                  <p className="text-base font-bold theme-text truncate">
                     {selectedGuru.nama}
                   </p>
 
-                  <p className="text-xs text-slate-500 mt-0.5 truncate">
+                  <p className="text-xs theme-text-secondary mt-0.5 truncate">
                     {selectedGuru.jabatan}
                   </p>
 
-                  <p className="text-[11px] text-slate-400 mt-0.5">
+                  <p className="text-[11px] theme-text-muted mt-0.5">
                     NIP: {selectedGuru.nip}
                   </p>
                 </div>
@@ -1586,18 +1649,20 @@ export default function RekapGuruPage() {
               {/* STATUS */}
 
               <div>
-                <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide theme-text-muted">
                   Status Kehadiran
                 </p>
 
-                {renderStatus(selectedGuru.status)}
+                {renderStatus(
+                  selectedGuru.status
+                )}
               </div>
 
               {/* JAM */}
 
               <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-xl border border-slate-200 p-4">
-                  <div className="flex items-center gap-2 text-slate-400">
+                <div className="rounded-xl border theme-border p-4 theme-card">
+                  <div className="flex items-center gap-2 theme-text-muted">
                     <Clock3 size={14} />
 
                     <p className="text-[10px] font-medium uppercase tracking-wide">
@@ -1605,13 +1670,13 @@ export default function RekapGuruPage() {
                     </p>
                   </div>
 
-                  <p className="mt-2 text-lg font-bold text-slate-800">
+                  <p className="mt-2 text-lg font-bold theme-text">
                     {selectedGuru.jamMasuk}
                   </p>
                 </div>
 
-                <div className="rounded-xl border border-slate-200 p-4">
-                  <div className="flex items-center gap-2 text-slate-400">
+                <div className="rounded-xl border theme-border p-4 theme-card">
+                  <div className="flex items-center gap-2 theme-text-muted">
                     <Clock3 size={14} />
 
                     <p className="text-[10px] font-medium uppercase tracking-wide">
@@ -1619,7 +1684,7 @@ export default function RekapGuruPage() {
                     </p>
                   </div>
 
-                  <p className="mt-2 text-lg font-bold text-slate-800">
+                  <p className="mt-2 text-lg font-bold theme-text">
                     {selectedGuru.jamPulang}
                   </p>
                 </div>
@@ -1628,47 +1693,47 @@ export default function RekapGuruPage() {
               {/* RINGKASAN */}
 
               <div>
-                <p className="mb-3 text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                <p className="mb-3 text-[10px] font-semibold uppercase tracking-wide theme-text-muted">
                   Ringkasan Bulan Ini
                 </p>
 
                 <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                  <div className="rounded-xl border border-amber-100 bg-amber-50 p-3">
-                    <p className="text-[10px] text-amber-600 font-medium">
+                  <div className="rounded-xl border theme-border theme-warning p-3">
+                    <p className="text-[10px] font-medium">
                       Terlambat
                     </p>
 
-                    <p className="mt-1 text-lg font-bold text-amber-700">
+                    <p className="mt-1 text-lg font-bold">
                       {selectedGuru.terlambat}
                     </p>
                   </div>
 
-                  <div className="rounded-xl border border-blue-100 bg-blue-50 p-3">
-                    <p className="text-[10px] text-blue-600 font-medium">
+                  <div className="rounded-xl border theme-border theme-info p-3">
+                    <p className="text-[10px] font-medium">
                       Izin
                     </p>
 
-                    <p className="mt-1 text-lg font-bold text-blue-700">
+                    <p className="mt-1 text-lg font-bold">
                       {selectedGuru.izin}
                     </p>
                   </div>
 
-                  <div className="rounded-xl border border-orange-100 bg-orange-50 p-3">
-                    <p className="text-[10px] text-orange-600 font-medium">
+                  <div className="rounded-xl border theme-border theme-warning p-3">
+                    <p className="text-[10px] font-medium">
                       Sakit
                     </p>
 
-                    <p className="mt-1 text-lg font-bold text-orange-700">
+                    <p className="mt-1 text-lg font-bold">
                       {selectedGuru.sakit}
                     </p>
                   </div>
 
-                  <div className="rounded-xl border border-red-100 bg-red-50 p-3">
-                    <p className="text-[10px] text-red-600 font-medium">
+                  <div className="rounded-xl border theme-border theme-danger p-3">
+                    <p className="text-[10px] font-medium">
                       Alpha
                     </p>
 
-                    <p className="mt-1 text-lg font-bold text-red-700">
+                    <p className="mt-1 text-lg font-bold">
                       {selectedGuru.alpha}
                     </p>
                   </div>
@@ -1678,23 +1743,21 @@ export default function RekapGuruPage() {
 
             {/* MODAL FOOTER */}
 
-            <div className="border-t border-slate-100 px-6 py-4 bg-slate-50/70">
+            <div className="border-t theme-border px-6 py-4 theme-card-soft">
               <button
                 type="button"
-                onClick={() => setSelectedGuru(null)}
+                onClick={() =>
+                  setSelectedGuru(null)
+                }
                 className="
                   w-full
                   rounded-xl
-                  bg-gradient-to-r
-                  from-[#155DFC]
-                  to-[#0d47c9]
+                  theme-primary
                   px-4
                   py-2.5
                   text-sm
                   font-semibold
-                  text-white
                   transition
-                  hover:brightness-110
                 "
               >
                 Tutup
@@ -1722,33 +1785,33 @@ function StatCard({
   return (
     <div
       className="
-        bg-white
+        theme-card
         rounded-2xl
         border
-        border-slate-200/80
+        theme-border
         p-4
         sm:p-5
         shadow-sm
-        hover:shadow-md
+        theme-sidebar-hover
         transition-all
         duration-200
       "
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[11px] sm:text-xs font-medium text-slate-500">
+          <p className="text-[11px] sm:text-xs font-medium theme-text-muted">
             {title}
           </p>
 
           {loading ? (
-            <div className="mt-2 h-8 w-16 animate-pulse rounded-lg bg-slate-100" />
+            <div className="mt-2 h-8 w-16 animate-pulse rounded-lg theme-card-soft" />
           ) : (
-            <p className="mt-1.5 text-2xl sm:text-3xl font-bold text-slate-900">
+            <p className="mt-1.5 text-2xl sm:text-3xl font-bold theme-text">
               {value}
             </p>
           )}
 
-          <p className="mt-1 text-[10px] sm:text-xs text-slate-400">
+          <p className="mt-1 text-[10px] sm:text-xs theme-text-muted">
             {description}
           </p>
         </div>
@@ -1758,16 +1821,19 @@ function StatCard({
             w-10
             h-10
             rounded-xl
-            bg-slate-50
+            theme-card-soft
             border
-            border-slate-100
+            theme-border
             flex
             items-center
             justify-center
             shrink-0
           "
         >
-          <Icon size={18} className={iconClass} />
+          <Icon
+            size={18}
+            className={iconClass}
+          />
         </div>
       </div>
     </div>

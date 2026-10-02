@@ -21,8 +21,6 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 
-
-
 const STORAGE_KEY = "siswa_data";
 
 const FALLBACK_SISWA = [
@@ -88,15 +86,11 @@ const loadSiswaList = () => {
   }
 
   try {
-    const stored =
-      localStorage.getItem(STORAGE_KEY);
+    const stored = localStorage.getItem(STORAGE_KEY);
 
-    const data = stored
-      ? JSON.parse(stored)
-      : null;
+    const data = stored ? JSON.parse(stored) : null;
 
-    return Array.isArray(data) &&
-      data.length > 0
+    return Array.isArray(data) && data.length > 0
       ? data
       : FALLBACK_SISWA;
   } catch {
@@ -114,32 +108,18 @@ const seedFromId = (id) => {
   let h = 0;
 
   for (const ch of str) {
-    h =
-      (h * 31 +
-        ch.charCodeAt(0)) %
-      1000000;
+    h = (h * 31 + ch.charCodeAt(0)) % 1000000;
   }
 
   return h + 1;
 };
 
-const pseudoRandom = (
-  seed,
-  min,
-  max
-) => {
-  const x =
-    Math.sin(seed) * 10000;
+const pseudoRandom = (seed, min, max) => {
+  const x = Math.sin(seed) * 10000;
 
-  const frac =
-    x - Math.floor(x);
+  const frac = x - Math.floor(x);
 
-  return (
-    Math.floor(
-      frac *
-        (max - min + 1)
-    ) + min
-  );
+  return Math.floor(frac * (max - min + 1)) + min;
 };
 
 const PRESTASI_POOL = [
@@ -154,40 +134,18 @@ const PRESTASI_POOL = [
 // BUILD SUMMARY
 // =========================================================
 
-const buildRingkasan = (
-  siswaList
-) => {
+const buildRingkasan = (siswaList) => {
   return siswaList.map((s) => {
-    const seed =
-      seedFromId(s.id);
+    const seed = seedFromId(s.id);
 
-    const nilai =
-      pseudoRandom(
-        seed,
-        68,
-        98
-      );
+    const nilai = pseudoRandom(seed, 68, 98);
 
     const prestasi =
-      pseudoRandom(
-        seed + 1,
-        0,
-        100
-      ) < 25
-        ? 1 +
-          pseudoRandom(
-            seed + 5,
-            0,
-            1
-          )
+      pseudoRandom(seed + 1, 0, 100) < 25
+        ? 1 + pseudoRandom(seed + 5, 0, 1)
         : 0;
 
-    const sikapRoll =
-      pseudoRandom(
-        seed + 2,
-        0,
-        99
-      );
+    const sikapRoll = pseudoRandom(seed + 2, 0, 99);
 
     const sikap =
       sikapRoll < 6
@@ -199,19 +157,12 @@ const buildRingkasan = (
         : "Sangat Baik";
 
     const raporSelesai =
-      pseudoRandom(
-        seed + 3,
-        0,
-        99
-      ) < 78;
+      pseudoRandom(seed + 3, 0, 99) < 78;
 
     const prestasiLabel =
       prestasi > 0
         ? PRESTASI_POOL[
-            seedFromId(
-              s.id + "p"
-            ) %
-              PRESTASI_POOL.length
+            seedFromId(s.id + "p") % PRESTASI_POOL.length
           ]
         : null;
 
@@ -231,24 +182,16 @@ const buildRingkasan = (
 // =========================================================
 
 const getInitials = (nama = "") => {
-  const parts =
-    nama.trim().split(" ");
+  const parts = nama.trim().split(" ");
 
   if (parts.length >= 2) {
-    return (
-      parts[0][0] +
-      parts[1][0]
-    ).toUpperCase();
+    return (parts[0][0] + parts[1][0]).toUpperCase();
   }
 
-  return nama
-    .substring(0, 2)
-    .toUpperCase();
+  return nama.substring(0, 2).toUpperCase();
 };
 
-const getAvatarColor = (
-  nama = ""
-) => {
+const getAvatarColor = (nama = "") => {
   const colors = [
     "bg-blue-600",
     "bg-slate-600",
@@ -258,24 +201,18 @@ const getAvatarColor = (
     "bg-teal-600",
   ];
 
-  return colors[
-    nama.length %
-      colors.length
-  ];
+  return colors[nama.length % colors.length];
 };
 
+// =========================================================
+// SIKAP STYLE
+// =========================================================
+
 const SIKAP_STYLE = {
-  "Sangat Baik":
-    "border-emerald-200 bg-emerald-50 text-emerald-700",
-
-  Baik:
-    "border-blue-200 bg-blue-50 text-blue-700",
-
-  Cukup:
-    "border-amber-200 bg-amber-50 text-amber-700",
-
-  "Perlu Perhatian":
-    "border-red-200 bg-red-50 text-red-700",
+  "Sangat Baik": "theme-success",
+  Baik: "theme-info",
+  Cukup: "theme-warning",
+  "Perlu Perhatian": "theme-danger",
 };
 
 // =========================================================
@@ -284,18 +221,18 @@ const SIKAP_STYLE = {
 
 const getScoreStyle = (nilai) => {
   if (nilai >= 90) {
-    return "text-emerald-600";
+    return "text-[var(--color-success)]";
   }
 
   if (nilai >= 80) {
-    return "text-[#155DFC]";
+    return "theme-sidebar-text-active";
   }
 
   if (nilai >= 70) {
-    return "text-amber-600";
+    return "text-[var(--color-warning)]";
   }
 
-  return "text-red-600";
+  return "text-[var(--color-danger)]";
 };
 
 // =========================================================
@@ -305,201 +242,121 @@ const getScoreStyle = (nilai) => {
 export default function AkademikPage() {
   const router = useRouter();
 
-  const [
-    isCollapsed,
-    setIsCollapsed,
-  ] = useState(false);
-
-  const [
-    ringkasan,
-    setRingkasan,
-  ] = useState([]);
-
-  const [search, setSearch] =
-    useState("");
+  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [ringkasan, setRingkasan] = useState([]);
+  const [search, setSearch] = useState("");
 
   // =======================================================
   // LOAD
   // =======================================================
 
   useEffect(() => {
-    setRingkasan(
-      buildRingkasan(
-        loadSiswaList()
-      )
-    );
+    setRingkasan(buildRingkasan(loadSiswaList()));
   }, []);
 
   const toggleSidebar = () => {
-    setIsCollapsed(
-      (prev) => !prev
-    );
+    setIsCollapsed((prev) => !prev);
   };
 
   // =======================================================
   // SUMMARY
   // =======================================================
 
-  const totalSiswa =
-    ringkasan.length;
+  const totalSiswa = ringkasan.length;
 
   const rataRata = totalSiswa
     ? Math.round(
         ringkasan.reduce(
-          (total, item) =>
-            total + item.nilai,
+          (total, item) => total + item.nilai,
           0
-        ) /
-          totalSiswa
+        ) / totalSiswa
       )
     : 0;
 
-  const totalPrestasi =
-    ringkasan.reduce(
-      (total, item) =>
-        total + item.prestasi,
-      0
-    );
+  const totalPrestasi = ringkasan.reduce(
+    (total, item) => total + item.prestasi,
+    0
+  );
 
-  const perluPerhatian =
-    ringkasan.filter(
-      (item) =>
-        item.sikap ===
-        "Perlu Perhatian"
-    ).length;
+  const perluPerhatian = ringkasan.filter(
+    (item) => item.sikap === "Perlu Perhatian"
+  ).length;
 
-  const raporSelesai =
-    totalSiswa
-      ? ringkasan.filter(
-          (item) =>
-            item.raporSelesai
-        ).length
-      : 0;
+  const raporSelesai = totalSiswa
+    ? ringkasan.filter((item) => item.raporSelesai).length
+    : 0;
 
-  const raporPercent =
-    totalSiswa
-      ? Math.round(
-          (raporSelesai /
-            totalSiswa) *
-            100
-        )
-      : 0;
+  const raporPercent = totalSiswa
+    ? Math.round((raporSelesai / totalSiswa) * 100)
+    : 0;
 
   // =======================================================
   // CLASS SUMMARY
   // =======================================================
 
-  const ringkasanKelas =
-    useMemo(() => {
-      const map = {};
+  const ringkasanKelas = useMemo(() => {
+    const map = {};
 
-      ringkasan.forEach(
-        (siswa) => {
-          if (!map[siswa.kelas]) {
-            map[siswa.kelas] = [];
-          }
+    ringkasan.forEach((siswa) => {
+      if (!map[siswa.kelas]) {
+        map[siswa.kelas] = [];
+      }
 
-          map[siswa.kelas].push(
-            siswa
-          );
-        }
+      map[siswa.kelas].push(siswa);
+    });
+
+    return Object.entries(map)
+      .map(([kelas, arr]) => ({
+        kelas,
+
+        jumlah: arr.length,
+
+        rataRata: Math.round(
+          arr.reduce(
+            (total, item) => total + item.nilai,
+            0
+          ) / arr.length
+        ),
+
+        prestasi: arr.reduce(
+          (total, item) => total + item.prestasi,
+          0
+        ),
+
+        perluPerhatian: arr.filter(
+          (item) => item.sikap === "Perlu Perhatian"
+        ).length,
+
+        raporPercent: Math.round(
+          (arr.filter(
+            (item) => item.raporSelesai
+          ).length /
+            arr.length) *
+            100
+        ),
+      }))
+      .sort((a, b) =>
+        a.kelas.localeCompare(b.kelas)
       );
-
-      return Object.entries(
-        map
-      )
-        .map(
-          ([
-            kelas,
-            arr,
-          ]) => ({
-            kelas,
-
-            jumlah:
-              arr.length,
-
-            rataRata:
-              Math.round(
-                arr.reduce(
-                  (
-                    total,
-                    item
-                  ) =>
-                    total +
-                    item.nilai,
-                  0
-                ) / arr.length
-              ),
-
-            prestasi:
-              arr.reduce(
-                (
-                  total,
-                  item
-                ) =>
-                  total +
-                  item.prestasi,
-                0
-              ),
-
-            perluPerhatian:
-              arr.filter(
-                (item) =>
-                  item.sikap ===
-                  "Perlu Perhatian"
-              ).length,
-
-            raporPercent:
-              Math.round(
-                (arr.filter(
-                  (item) =>
-                    item.raporSelesai
-                ).length /
-                  arr.length) *
-                  100
-              ),
-          })
-        )
-        .sort(
-          (a, b) =>
-            a.kelas.localeCompare(
-              b.kelas
-            )
-        );
-    }, [ringkasan]);
+  }, [ringkasan]);
 
   // =======================================================
   // SEARCH
   // =======================================================
 
-  const filtered =
-    useMemo(() => {
-      const keyword =
-        search
-          .toLowerCase()
-          .trim();
+  const filtered = useMemo(() => {
+    const keyword = search.toLowerCase().trim();
 
-      if (!keyword) {
-        return ringkasan;
-      }
+    if (!keyword) {
+      return ringkasan;
+    }
 
-      return ringkasan.filter(
-        (item) =>
-          item.nama
-            .toLowerCase()
-            .includes(
-              keyword
-            ) ||
-          item.kelas
-            .toLowerCase()
-            .includes(
-              keyword
-            )
-      );
-    }, [
-      ringkasan,
-      search,
-    ]);
+    return ringkasan.filter(
+      (item) =>
+        item.nama.toLowerCase().includes(keyword) ||
+        item.kelas.toLowerCase().includes(keyword)
+    );
+  }, [ringkasan, search]);
 
   // =======================================================
   // QUICK LINKS
@@ -538,82 +395,63 @@ export default function AkademikPage() {
   // =======================================================
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-slate-50">
-      {/* =====================================================
-          SIDEBAR
-      ====================================================== */}
+    <div className="theme-page flex h-screen w-full overflow-hidden">
+      {/* SIDEBAR */}
 
       <Sidebar
         active="akademik"
         setActive={() => {}}
         collapsed={isCollapsed}
-        setCollapsed={
-          setIsCollapsed
-        }
+        setCollapsed={setIsCollapsed}
         role="admin"
       />
 
-      {/* =====================================================
-          CONTENT
-      ====================================================== */}
+      {/* CONTENT */}
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <Header
-          toggleSidebar={
-            toggleSidebar
-          }
+          toggleSidebar={toggleSidebar}
           notifications={[]}
           user={{
             name: "Admin Sekolah",
-            email:
-              "admin@smartschool.com",
+            email: "admin@smartschool.com",
             avatar: "AD",
           }}
         />
 
-        {/* ===================================================
-            MAIN
-        ==================================================== */}
+        {/* MAIN */}
 
         <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="mx-auto w-full max-w-[1500px] px-4 py-5 sm:px-6 sm:py-6 lg:px-8 xl:px-10">
             <div className="space-y-6">
 
-              {/* =================================================
-                  PAGE HEADER
-              ================================================== */}
+              {/* PAGE HEADER */}
 
               <section>
                 <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-
                   <div className="flex min-w-0 items-start gap-3">
 
-                    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#155DFC] text-white shadow-sm">
-                      <GraduationCap
-                        size={21}
-                      />
+                    <div className="theme-primary flex h-11 w-11 shrink-0 items-center justify-center rounded-xl shadow-sm">
+                      <GraduationCap size={21} />
                     </div>
 
                     <div className="min-w-0">
-
                       <div className="flex flex-wrap items-center gap-2">
 
-                        <h1 className="text-xl font-bold tracking-tight text-slate-800 sm:text-2xl">
+                        <h1 className="theme-text text-xl font-bold tracking-tight sm:text-2xl">
                           Akademik
                         </h1>
 
-                        <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-1 text-[10px] font-semibold text-[#155DFC]">
+                        <span className="theme-info inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-[10px] font-semibold">
                           Tahun Aktif
                         </span>
 
                       </div>
 
-                      <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-500 sm:text-sm">
-                        Pantau perkembangan akademik
-                        siswa melalui nilai, prestasi,
-                        sikap, dan status rapor.
+                      <p className="theme-text-muted mt-1 max-w-2xl text-xs leading-5 sm:text-sm">
+                        Pantau perkembangan akademik siswa melalui nilai,
+                        prestasi, sikap, dan status rapor.
                       </p>
-
                     </div>
                   </div>
 
@@ -626,49 +464,41 @@ export default function AkademikPage() {
                         "/admin/akademik/monitoringSiswa"
                       )
                     }
-                    className="inline-flex h-10 items-center justify-center gap-2 self-start rounded-lg bg-[#155DFC] px-4 text-xs font-semibold text-white shadow-sm transition hover:bg-[#0d47c9] xl:self-center"
+                    className="theme-primary inline-flex h-10 items-center justify-center gap-2 self-start rounded-lg px-4 text-xs font-semibold shadow-sm transition xl:self-center"
                   >
-                    <ClipboardList
-                      size={15}
-                    />
+                    <ClipboardList size={15} />
 
                     Monitoring Siswa
 
-                    <ArrowUpRight
-                      size={14}
-                    />
+                    <ArrowUpRight size={14} />
                   </button>
-
                 </div>
               </section>
 
-              {/* =================================================
-                  SUMMARY BAR
-              ================================================== */}
+              {/* SUMMARY BAR */}
 
-              <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
-
-                <div className="grid grid-cols-2 divide-x divide-slate-200 sm:grid-cols-3 lg:grid-cols-5">
+              <section className="theme-card overflow-hidden rounded-xl border shadow-sm">
+                <div className="grid grid-cols-2 divide-x divide-[var(--color-border)] sm:grid-cols-3 lg:grid-cols-5">
 
                   {/* TOTAL */}
 
                   <div className="min-w-0 p-4 sm:p-5">
                     <div className="flex items-start gap-3">
 
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-[#155DFC]">
+                      <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
                         <Users size={17} />
                       </div>
 
                       <div className="min-w-0">
-                        <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                        <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wide">
                           Total Siswa
                         </p>
 
-                        <p className="mt-1 text-xl font-bold text-slate-800">
+                        <p className="theme-text mt-1 text-xl font-bold">
                           {totalSiswa}
                         </p>
 
-                        <p className="mt-0.5 text-[10px] text-slate-400">
+                        <p className="theme-text-muted mt-0.5 text-[10px]">
                           Siswa terdata
                         </p>
                       </div>
@@ -681,20 +511,20 @@ export default function AkademikPage() {
                   <div className="min-w-0 p-4 sm:p-5">
                     <div className="flex items-start gap-3">
 
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-[#155DFC]">
+                      <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
                         <TrendingUp size={17} />
                       </div>
 
                       <div className="min-w-0">
-                        <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                        <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wide">
                           Rata-rata Nilai
                         </p>
 
-                        <p className="mt-1 text-xl font-bold text-slate-800">
+                        <p className="theme-text mt-1 text-xl font-bold">
                           {rataRata}
                         </p>
 
-                        <p className="mt-0.5 text-[10px] text-slate-400">
+                        <p className="theme-text-muted mt-0.5 text-[10px]">
                           Nilai akademik
                         </p>
                       </div>
@@ -707,20 +537,20 @@ export default function AkademikPage() {
                   <div className="min-w-0 p-4 sm:p-5">
                     <div className="flex items-start gap-3">
 
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-[#155DFC]">
+                      <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
                         <Award size={17} />
                       </div>
 
                       <div className="min-w-0">
-                        <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                        <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wide">
                           Prestasi
                         </p>
 
-                        <p className="mt-1 text-xl font-bold text-slate-800">
+                        <p className="theme-text mt-1 text-xl font-bold">
                           {totalPrestasi}
                         </p>
 
-                        <p className="mt-0.5 text-[10px] text-slate-400">
+                        <p className="theme-text-muted mt-0.5 text-[10px]">
                           Total capaian
                         </p>
                       </div>
@@ -733,20 +563,20 @@ export default function AkademikPage() {
                   <div className="min-w-0 p-4 sm:p-5">
                     <div className="flex items-start gap-3">
 
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-red-50 text-red-600">
+                      <div className="theme-danger flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
                         <AlertCircle size={17} />
                       </div>
 
                       <div className="min-w-0">
-                        <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                        <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wide">
                           Perlu Perhatian
                         </p>
 
-                        <p className="mt-1 text-xl font-bold text-slate-800">
+                        <p className="theme-text mt-1 text-xl font-bold">
                           {perluPerhatian}
                         </p>
 
-                        <p className="mt-0.5 text-[10px] text-slate-400">
+                        <p className="theme-text-muted mt-0.5 text-[10px]">
                           Siswa perlu ditinjau
                         </p>
                       </div>
@@ -759,111 +589,96 @@ export default function AkademikPage() {
                   <div className="col-span-2 min-w-0 p-4 sm:col-span-1 sm:p-5">
                     <div className="flex items-start gap-3">
 
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600">
+                      <div className="theme-success flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
                         <FileSpreadsheet size={17} />
                       </div>
 
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center justify-between gap-2">
-                          <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+
+                          <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wide">
                             Rapor Selesai
                           </p>
 
-                          <p className="text-sm font-bold text-slate-800">
+                          <p className="theme-text text-sm font-bold">
                             {raporPercent}%
                           </p>
+
                         </div>
 
-                        <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-100">
+                        <div className="theme-card-soft mt-2 h-1.5 overflow-hidden rounded-full">
                           <div
-                            className="h-full rounded-full bg-[#155DFC] transition-all"
+                            className="theme-primary h-full rounded-full transition-all"
                             style={{
                               width: `${raporPercent}%`,
                             }}
                           />
                         </div>
 
-                        <p className="mt-1.5 text-[10px] text-slate-400">
-                          {raporSelesai} dari{" "}
-                          {totalSiswa} siswa
+                        <p className="theme-text-muted mt-1.5 text-[10px]">
+                          {raporSelesai} dari {totalSiswa} siswa
                         </p>
                       </div>
 
                     </div>
                   </div>
-
                 </div>
               </section>
 
-              {/* =================================================
-                  NAVIGATION
-              ================================================== */}
+              {/* NAVIGATION */}
 
               <section className="flex flex-col gap-3">
-
                 <div>
-                  <p className="text-sm font-bold text-slate-800">
+                  <p className="theme-text text-sm font-bold">
                     Modul Akademik
                   </p>
 
-                  <p className="mt-1 text-xs text-slate-400">
+                  <p className="theme-text-muted mt-1 text-xs">
                     Akses cepat ke pengelolaan akademik.
                   </p>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  {quickLinks.map(
-                    (item) => {
-                      const Icon =
-                        item.icon;
+                  {quickLinks.map((item) => {
+                    const Icon = item.icon;
 
-                      return (
-                        <button
-                          key={
-                            item.path
-                          }
-                          type="button"
-                          onClick={() =>
-                            router.push(
-                              item.path
-                            )
-                          }
-                          className="group inline-flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-semibold text-slate-600 shadow-sm transition hover:border-[#c7dbff] hover:bg-[#eaf1ff] hover:text-[#155DFC]"
-                        >
-                          <Icon
-                            size={14}
-                            className="text-slate-400 transition group-hover:text-[#155DFC]"
-                          />
+                    return (
+                      <button
+                        key={item.path}
+                        type="button"
+                        onClick={() =>
+                          router.push(item.path)
+                        }
+                        className="theme-card theme-border theme-text-secondary theme-header-hover group inline-flex items-center gap-2 rounded-lg border px-3.5 py-2.5 text-xs font-semibold shadow-sm transition"
+                      >
+                        <Icon
+                          size={14}
+                          className="theme-text-muted transition group-hover:theme-sidebar-text-active"
+                        />
 
-                          {
-                            item.label
-                          }
-                        </button>
-                      );
-                    }
-                  )}
+                        {item.label}
+                      </button>
+                    );
+                  })}
                 </div>
-
               </section>
 
-              {/* =================================================
-                  CLASS SUMMARY
-              ================================================== */}
+              {/* CLASS SUMMARY */}
 
-              <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+              <section className="theme-card overflow-hidden rounded-xl border shadow-sm">
 
-                <div className="border-b border-slate-100 px-4 py-4 sm:px-5">
-
+                <div className="theme-border-soft border-b px-4 py-4 sm:px-5">
                   <div className="flex flex-col gap-1">
-                    <h2 className="text-sm font-bold text-slate-800">
+
+                    <h2 className="theme-text text-sm font-bold">
                       Ringkasan Per Kelas
                     </h2>
 
-                    <p className="text-xs text-slate-400">
+                    <p className="theme-text-muted text-xs">
                       Perbandingan capaian akademik setiap kelas.
                     </p>
-                  </div>
 
+                  </div>
                 </div>
 
                 <div className="overflow-x-auto">
@@ -871,29 +686,29 @@ export default function AkademikPage() {
                   <table className="w-full min-w-[780px] border-collapse">
 
                     <thead>
-                      <tr className="bg-slate-50">
+                      <tr className="theme-table-header">
 
-                        <th className="border-b border-slate-200 px-5 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        <th className="theme-border-soft border-b px-5 py-3 text-left text-[10px] font-bold uppercase tracking-wider">
                           Kelas
                         </th>
 
-                        <th className="border-b border-slate-200 px-5 py-3 text-center text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        <th className="theme-border-soft border-b px-5 py-3 text-center text-[10px] font-bold uppercase tracking-wider">
                           Siswa
                         </th>
 
-                        <th className="border-b border-slate-200 px-5 py-3 text-center text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        <th className="theme-border-soft border-b px-5 py-3 text-center text-[10px] font-bold uppercase tracking-wider">
                           Rata-rata
                         </th>
 
-                        <th className="border-b border-slate-200 px-5 py-3 text-center text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        <th className="theme-border-soft border-b px-5 py-3 text-center text-[10px] font-bold uppercase tracking-wider">
                           Prestasi
                         </th>
 
-                        <th className="border-b border-slate-200 px-5 py-3 text-center text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        <th className="theme-border-soft border-b px-5 py-3 text-center text-[10px] font-bold uppercase tracking-wider">
                           Perhatian
                         </th>
 
-                        <th className="border-b border-slate-200 px-5 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        <th className="theme-border-soft border-b px-5 py-3 text-left text-[10px] font-bold uppercase tracking-wider">
                           Rapor
                         </th>
 
@@ -902,118 +717,99 @@ export default function AkademikPage() {
 
                     <tbody>
 
-                      {ringkasanKelas.map(
-                        (item) => (
-                          <tr
-                            key={
-                              item.kelas
-                            }
-                            className="transition hover:bg-slate-50"
-                          >
+                      {ringkasanKelas.map((item) => (
+                        <tr
+                          key={item.kelas}
+                          className="theme-table-hover transition"
+                        >
 
-                            <td className="border-b border-slate-100 px-5 py-3.5">
+                          <td className="theme-border-soft border-b px-5 py-3.5">
+                            <div className="flex items-center gap-2.5">
 
-                              <div className="flex items-center gap-2.5">
-
-                                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-[#eaf1ff] text-[#155DFC]">
-                                  <GraduationCap
-                                    size={15}
-                                  />
-                                </div>
-
-                                <span className="text-xs font-bold text-slate-700">
-                                  {
-                                    item.kelas
-                                  }
-                                </span>
-
+                              <div className="theme-info flex h-8 w-8 items-center justify-center rounded-lg">
+                                <GraduationCap size={15} />
                               </div>
 
-                            </td>
-
-                            <td className="border-b border-slate-100 px-5 py-3.5 text-center text-xs font-medium text-slate-600">
-                              {
-                                item.jumlah
-                              }
-                            </td>
-
-                            <td className="border-b border-slate-100 px-5 py-3.5 text-center">
-
-                              <span
-                                className={`text-sm font-bold ${getScoreStyle(
-                                  item.rataRata
-                                )}`}
-                              >
-                                {
-                                  item.rataRata
-                                }
+                              <span className="theme-text-secondary text-xs font-bold">
+                                {item.kelas}
                               </span>
 
-                            </td>
+                            </div>
+                          </td>
 
-                            <td className="border-b border-slate-100 px-5 py-3.5 text-center text-xs text-slate-500">
-                              {
-                                item.prestasi
+                          <td className="theme-border-soft border-b px-5 py-3.5 text-center text-xs font-medium">
+                            <span className="theme-text-secondary">
+                              {item.jumlah}
+                            </span>
+                          </td>
+
+                          <td className="theme-border-soft border-b px-5 py-3.5 text-center">
+
+                            <span
+                              className={`text-sm font-bold ${getScoreStyle(
+                                item.rataRata
+                              )}`}
+                            >
+                              {item.rataRata}
+                            </span>
+
+                          </td>
+
+                          <td className="theme-border-soft border-b px-5 py-3.5 text-center text-xs">
+                            <span className="theme-text-muted">
+                              {item.prestasi}
+                            </span>
+                          </td>
+
+                          <td className="theme-border-soft border-b px-5 py-3.5 text-center">
+
+                            <span
+                              className={
+                                item.perluPerhatian > 0
+                                  ? "text-[var(--color-danger)] text-xs font-bold"
+                                  : "theme-text-muted text-xs font-medium"
                               }
-                            </td>
+                            >
+                              {item.perluPerhatian}
+                            </span>
 
-                            <td className="border-b border-slate-100 px-5 py-3.5 text-center">
+                          </td>
 
-                              <span
-                                className={
-                                  item.perluPerhatian >
-                                  0
-                                    ? "text-xs font-bold text-red-600"
-                                    : "text-xs font-medium text-slate-400"
-                                }
-                              >
-                                {
-                                  item.perluPerhatian
-                                }
-                              </span>
+                          <td className="theme-border-soft border-b px-5 py-3.5">
 
-                            </td>
+                            <div className="flex items-center gap-3">
 
-                            <td className="border-b border-slate-100 px-5 py-3.5">
-
-                              <div className="flex items-center gap-3">
-
-                                <div className="h-1.5 w-20 overflow-hidden rounded-full bg-slate-100">
-                                  <div
-                                    className="h-full rounded-full bg-[#155DFC]"
-                                    style={{
-                                      width: `${item.raporPercent}%`,
-                                    }}
-                                  />
-                                </div>
-
-                                <span className="text-[11px] font-semibold text-slate-600">
-                                  {
-                                    item.raporPercent
-                                  }
-                                  %
-                                </span>
-
+                              <div className="theme-card-soft h-1.5 w-20 overflow-hidden rounded-full">
+                                <div
+                                  className="theme-primary h-full rounded-full"
+                                  style={{
+                                    width: `${item.raporPercent}%`,
+                                  }}
+                                />
                               </div>
 
-                            </td>
+                              <span className="theme-text-secondary text-[11px] font-semibold">
+                                {item.raporPercent}%
+                              </span>
 
-                          </tr>
-                        )
-                      )}
+                            </div>
 
-                      {ringkasanKelas.length ===
-                        0 && (
+                          </td>
+
+                        </tr>
+                      ))}
+
+                      {ringkasanKelas.length === 0 && (
                         <tr>
                           <td
                             colSpan={6}
                             className="px-5 py-12 text-center"
                           >
-                            <p className="text-sm font-semibold text-slate-600">
+                            <p className="theme-text-secondary text-sm font-semibold">
                               Belum ada data kelas
                             </p>
 
-                            <p className="mt-1 text-xs text-slate-400">
+                            <p className="theme-text-muted mt-1 text-xs">
                               Data akan tampil setelah siswa tersedia.
                             </p>
                           </td>
@@ -1025,24 +821,22 @@ export default function AkademikPage() {
                 </div>
               </section>
 
-              {/* =================================================
-                  STUDENT TABLE
-              ================================================== */}
+              {/* STUDENT TABLE */}
 
-              <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+              <section className="theme-card overflow-hidden rounded-xl border shadow-sm">
 
                 {/* HEADER */}
 
-                <div className="border-b border-slate-100 px-4 py-4 sm:px-5">
+                <div className="theme-border-soft border-b px-4 py-4 sm:px-5">
 
                   <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
 
                     <div>
-                      <h2 className="text-sm font-bold text-slate-800">
+                      <h2 className="theme-text text-sm font-bold">
                         Data Akademik Siswa
                       </h2>
 
-                      <p className="mt-1 text-xs text-slate-400">
+                      <p className="theme-text-muted mt-1 text-xs">
                         Ringkasan kondisi akademik setiap siswa.
                       </p>
                     </div>
@@ -1053,22 +847,17 @@ export default function AkademikPage() {
 
                         <Search
                           size={16}
-                          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                          className="theme-text-muted pointer-events-none absolute left-3 top-1/2 -translate-y-1/2"
                         />
 
                         <input
                           type="text"
-                          value={
-                            search
-                          }
+                          value={search}
                           onChange={(e) =>
-                            setSearch(
-                              e.target
-                                .value
-                            )
+                            setSearch(e.target.value)
                           }
                           placeholder="Cari nama atau kelas..."
-                          className="h-10 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-xs text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#155DFC] focus:ring-4 focus:ring-[#155DFC]/10"
+                          className="theme-input h-10 w-full rounded-lg border pl-9 pr-3 text-xs outline-none transition"
                         />
 
                       </div>
@@ -1084,29 +873,29 @@ export default function AkademikPage() {
                   <table className="w-full min-w-[900px] border-collapse">
 
                     <thead>
-                      <tr className="bg-[#f8fafc]">
+                      <tr className="theme-table-header">
 
-                        <th className="border-b border-slate-200 px-5 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        <th className="theme-border-soft border-b px-5 py-3 text-left text-[10px] font-bold uppercase tracking-wider">
                           Siswa
                         </th>
 
-                        <th className="border-b border-slate-200 px-5 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        <th className="theme-border-soft border-b px-5 py-3 text-left text-[10px] font-bold uppercase tracking-wider">
                           Kelas
                         </th>
 
-                        <th className="border-b border-slate-200 px-5 py-3 text-center text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        <th className="theme-border-soft border-b px-5 py-3 text-center text-[10px] font-bold uppercase tracking-wider">
                           Nilai
                         </th>
 
-                        <th className="border-b border-slate-200 px-5 py-3 text-center text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        <th className="theme-border-soft border-b px-5 py-3 text-center text-[10px] font-bold uppercase tracking-wider">
                           Prestasi
                         </th>
 
-                        <th className="border-b border-slate-200 px-5 py-3 text-center text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        <th className="theme-border-soft border-b px-5 py-3 text-center text-[10px] font-bold uppercase tracking-wider">
                           Sikap
                         </th>
 
-                        <th className="border-b border-slate-200 px-5 py-3 text-left text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                        <th className="theme-border-soft border-b px-5 py-3 text-left text-[10px] font-bold uppercase tracking-wider">
                           Rapor
                         </th>
 
@@ -1115,161 +904,134 @@ export default function AkademikPage() {
 
                     <tbody>
 
-                      {filtered.map(
-                        (student) => (
-                          <tr
-                            key={
-                              student.id
-                            }
-                            className="transition hover:bg-[#f7f9ff]"
-                          >
+                      {filtered.map((student) => (
+                        <tr
+                          key={student.id}
+                          className="theme-table-hover transition"
+                        >
 
-                            {/* SISWA */}
+                          {/* SISWA */}
 
-                            <td className="border-b border-slate-100 px-5 py-4">
+                          <td className="theme-border-soft border-b px-5 py-4">
 
-                              <div className="flex items-center gap-3">
+                            <div className="flex items-center gap-3">
 
-                                <div
-                                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${getAvatarColor(
-                                    student.nama
-                                  )} text-[11px] font-bold text-white`}
-                                >
-                                  {getInitials(
-                                    student.nama
-                                  )}
-                                </div>
+                              <div
+                                className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full ${getAvatarColor(
+                                  student.nama
+                                )} text-[11px] font-bold text-white`}
+                              >
+                                {getInitials(student.nama)}
+                              </div>
 
-                                <div className="min-w-0">
+                              <div className="min-w-0">
 
-                                  <p className="truncate text-xs font-bold text-slate-700 sm:text-sm">
-                                    {
-                                      student.nama
-                                    }
-                                  </p>
+                                <p className="theme-text-secondary truncate text-xs font-bold sm:text-sm">
+                                  {student.nama}
+                                </p>
 
-                                  <p className="mt-0.5 text-[10px] text-slate-400">
-                                    ID Siswa:{" "}
-                                    {
-                                      student.id
-                                    }
-                                  </p>
-
-                                </div>
+                                <p className="theme-text-muted mt-0.5 text-[10px]">
+                                  ID Siswa: {student.id}
+                                </p>
 
                               </div>
 
-                            </td>
+                            </div>
+                          </td>
 
-                            {/* KELAS */}
+                          {/* KELAS */}
 
-                            <td className="border-b border-slate-100 px-5 py-4">
+                          <td className="theme-border-soft border-b px-5 py-4">
 
-                              <span className="inline-flex rounded-md border border-[#c7dbff] bg-[#eaf1ff] px-2.5 py-1 text-[10px] font-semibold text-[#155DFC]">
-                                {
-                                  student.kelas
-                                }
-                              </span>
+                            <span className="theme-info inline-flex rounded-md px-2.5 py-1 text-[10px] font-semibold">
+                              {student.kelas}
+                            </span>
 
-                            </td>
+                          </td>
 
-                            {/* NILAI */}
+                          {/* NILAI */}
 
-                            <td className="border-b border-slate-100 px-5 py-4 text-center">
+                          <td className="theme-border-soft border-b px-5 py-4 text-center">
 
+                            <span
+                              className={`text-sm font-bold ${getScoreStyle(
+                                student.nilai
+                              )}`}
+                            >
+                              {student.nilai}
+                            </span>
+
+                          </td>
+
+                          {/* PRESTASI */}
+
+                          <td className="theme-border-soft border-b px-5 py-4 text-center">
+
+                            {student.prestasi > 0 ? (
                               <span
-                                className={`text-sm font-bold ${getScoreStyle(
-                                  student.nilai
-                                )}`}
+                                title={student.prestasiLabel}
+                                className="theme-warning inline-flex items-center justify-center gap-1 rounded-md px-2.5 py-1 text-[10px] font-semibold"
                               >
-                                {
-                                  student.nilai
-                                }
+                                <Award size={12} />
+
+                                {student.prestasi}
                               </span>
+                            ) : (
+                              <span className="theme-text-placeholder text-xs">
+                                -
+                              </span>
+                            )}
 
-                            </td>
+                          </td>
 
-                            {/* PRESTASI */}
+                          {/* SIKAP */}
 
-                            <td className="border-b border-slate-100 px-5 py-4 text-center">
+                          <td className="theme-border-soft border-b px-5 py-4 text-center">
 
-                              {student.prestasi >
-                              0 ? (
-                                <span
-                                  title={
-                                    student.prestasiLabel
-                                  }
-                                  className="inline-flex items-center justify-center gap-1 rounded-md bg-amber-50 px-2.5 py-1 text-[10px] font-semibold text-amber-700"
-                                >
-                                  <Award
-                                    size={12}
+                            <span
+                              className={`inline-flex whitespace-nowrap rounded-full px-2.5 py-1 text-[10px] font-semibold ${SIKAP_STYLE[
+                                student.sikap
+                              ]}`}
+                            >
+                              {student.sikap}
+                            </span>
+
+                          </td>
+
+                          {/* RAPOR */}
+
+                          <td className="theme-border-soft border-b px-5 py-4">
+
+                            <div className="flex items-center gap-2">
+
+                              {student.raporSelesai ? (
+                                <>
+                                  <CheckCircle2
+                                    size={14}
+                                    className="text-[var(--color-success)]"
                                   />
 
-                                  {
-                                    student.prestasi
-                                  }
-                                </span>
+                                  <span className="theme-success rounded-md px-1.5 py-0.5 text-[11px] font-semibold">
+                                    Selesai
+                                  </span>
+                                </>
                               ) : (
-                                <span className="text-xs text-slate-300">
-                                  -
-                                </span>
+                                <>
+                                  <span className="h-2 w-2 rounded-full bg-[var(--color-warning)]" />
+
+                                  <span className="theme-warning rounded-md px-1.5 py-0.5 text-[11px] font-semibold">
+                                    Proses
+                                  </span>
+                                </>
                               )}
 
-                            </td>
+                            </div>
+                          </td>
 
-                            {/* SIKAP */}
+                        </tr>
+                      ))}
 
-                            <td className="border-b border-slate-100 px-5 py-4 text-center">
-
-                              <span
-                                className={`inline-flex whitespace-nowrap rounded-full border px-2.5 py-1 text-[10px] font-semibold ${SIKAP_STYLE[
-                                  student.sikap
-                                ]}`}
-                              >
-                                {
-                                  student.sikap
-                                }
-                              </span>
-
-                            </td>
-
-                            {/* RAPOR */}
-
-                            <td className="border-b border-slate-100 px-5 py-4">
-
-                              <div className="flex items-center gap-2">
-
-                                {student.raporSelesai ? (
-                                  <>
-                                    <CheckCircle2
-                                      size={14}
-                                      className="text-emerald-600"
-                                    />
-
-                                    <span className="text-[11px] font-semibold text-emerald-700">
-                                      Selesai
-                                    </span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <span className="h-2 w-2 rounded-full bg-amber-500" />
-
-                                    <span className="text-[11px] font-semibold text-amber-700">
-                                      Proses
-                                    </span>
-                                  </>
-                                )}
-
-                              </div>
-
-                            </td>
-
-                          </tr>
-                        )
-                      )}
-
-                      {filtered.length ===
-                        0 && (
+                      {filtered.length === 0 && (
                         <tr>
                           <td
                             colSpan={6}
@@ -1277,17 +1039,15 @@ export default function AkademikPage() {
                           >
                             <div className="flex flex-col items-center">
 
-                              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
-                                <Search
-                                  size={20}
-                                />
+                              <div className="theme-card-soft theme-text-muted flex h-12 w-12 items-center justify-center rounded-xl">
+                                <Search size={20} />
                               </div>
 
-                              <p className="mt-3 text-sm font-semibold text-slate-600">
+                              <p className="theme-text-secondary mt-3 text-sm font-semibold">
                                 Data tidak ditemukan
                               </p>
 
-                              <p className="mt-1 text-xs text-slate-400">
+                              <p className="theme-text-muted mt-1 text-xs">
                                 Tidak ada siswa yang sesuai dengan pencarian.
                               </p>
 
@@ -1302,22 +1062,17 @@ export default function AkademikPage() {
 
                 {/* FOOTER */}
 
-                {filtered.length >
-                  0 && (
-                  <div className="flex items-center justify-between border-t border-slate-100 bg-slate-50/50 px-4 py-3 sm:px-5">
+                {filtered.length > 0 && (
+                  <div className="theme-card-soft theme-border-soft flex items-center justify-between border-t px-4 py-3 sm:px-5">
 
-                    <p className="text-[10px] text-slate-400 sm:text-xs">
+                    <p className="theme-text-muted text-[10px] sm:text-xs">
                       Menampilkan{" "}
-                      <span className="font-semibold text-slate-600">
-                        {
-                          filtered.length
-                        }
+                      <span className="theme-text-secondary font-semibold">
+                        {filtered.length}
                       </span>{" "}
                       dari{" "}
-                      <span className="font-semibold text-slate-600">
-                        {
-                          totalSiswa
-                        }
+                      <span className="theme-text-secondary font-semibold">
+                        {totalSiswa}
                       </span>{" "}
                       siswa
                     </p>
@@ -1325,12 +1080,8 @@ export default function AkademikPage() {
                     {search && (
                       <button
                         type="button"
-                        onClick={() =>
-                          setSearch(
-                            ""
-                          )
-                        }
-                        className="text-[10px] font-semibold text-[#155DFC] hover:underline sm:text-xs"
+                        onClick={() => setSearch("")}
+                        className="theme-sidebar-text-active text-[10px] font-semibold hover:underline sm:text-xs"
                       >
                         Hapus pencarian
                       </button>
@@ -1338,15 +1089,12 @@ export default function AkademikPage() {
 
                   </div>
                 )}
-
               </section>
 
-              {/* =================================================
-                  FOOTER
-              ================================================== */}
+              {/* FOOTER */}
 
               <footer className="pb-5 pt-1 text-center">
-                <p className="text-[10px] text-slate-400">
+                <p className="theme-text-muted text-[10px]">
                   © 2026 SmartSchool • Akademik
                 </p>
               </footer>

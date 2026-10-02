@@ -106,7 +106,7 @@ export default function TambahKategoriPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#F8FAFC]">
+    <div className="theme-page min-h-screen">
       {/* SIDEBAR */}
       <Sidebar />
 
@@ -114,7 +114,7 @@ export default function TambahKategoriPage() {
       <div className="min-h-screen lg:ml-[260px]">
         <Header />
 
-        <main className="p-4 sm:p-6 lg:p-8">
+        <main className="theme-page p-4 sm:p-6 lg:p-8">
           {/* =================================================
               TOP NAVIGATION
           ================================================= */}
@@ -124,7 +124,18 @@ export default function TambahKategoriPage() {
               type="button"
               onClick={handleCancel}
               disabled={saving}
-              className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+              className="
+                theme-text-secondary
+                inline-flex
+                items-center
+                gap-2
+                text-sm
+                font-semibold
+                transition
+                hover:opacity-80
+                disabled:cursor-not-allowed
+                disabled:opacity-50
+              "
             >
               <ArrowLeft size={17} />
 
@@ -138,46 +149,50 @@ export default function TambahKategoriPage() {
 
           <div className="mb-7">
             <div className="flex items-start gap-4">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center bg-blue-50 text-blue-600">
+              <div className="theme-info flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border">
                 <Tags size={23} />
               </div>
 
               <div>
                 <div className="mb-1 flex flex-wrap items-center gap-2 text-xs font-medium">
-                  <span className="text-blue-600">
+                  <span
+                    style={{
+                      color: "var(--color-primary)",
+                    }}
+                  >
                     CMS
                   </span>
 
-                  <span className="text-slate-300">
+                  <span className="theme-text-placeholder">
                     /
                   </span>
 
-                  <span className="text-slate-500">
+                  <span className="theme-text-muted">
                     Artikel
                   </span>
 
-                  <span className="text-slate-300">
+                  <span className="theme-text-placeholder">
                     /
                   </span>
 
-                  <span className="text-slate-500">
+                  <span className="theme-text-muted">
                     Kategori
                   </span>
 
-                  <span className="text-slate-300">
+                  <span className="theme-text-placeholder">
                     /
                   </span>
 
-                  <span className="text-slate-500">
+                  <span className="theme-text-muted">
                     Tambah
                   </span>
                 </div>
 
-                <h1 className="text-2xl font-bold tracking-tight text-[#0F172A] sm:text-3xl">
+                <h1 className="theme-text text-2xl font-bold tracking-tight sm:text-3xl">
                   Tambah Kategori Artikel
                 </h1>
 
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500">
+                <p className="theme-text-muted mt-2 max-w-2xl text-sm leading-6">
                   Buat kategori baru untuk
                   mengelompokkan artikel sekolah
                   agar konten CMS lebih terorganisir.
@@ -195,21 +210,21 @@ export default function TambahKategoriPage() {
                 FORM
             ================================================= */}
 
-            <div className="border border-slate-200 bg-white shadow-sm">
+            <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
               {/* FORM HEADER */}
 
-              <div className="border-b border-slate-200 px-5 py-5 sm:px-7">
+              <div className="theme-card-soft theme-border-soft border-b px-5 py-5 sm:px-7">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-9 w-9 items-center justify-center bg-slate-100 text-slate-600">
+                  <div className="theme-card theme-border theme-text-muted flex h-9 w-9 items-center justify-center rounded-lg border">
                     <FolderOpen size={18} />
                   </div>
 
                   <div>
-                    <h2 className="text-sm font-bold text-[#0F172A]">
+                    <h2 className="theme-text text-sm font-bold">
                       Informasi Kategori
                     </h2>
 
-                    <p className="mt-0.5 text-xs text-slate-400">
+                    <p className="theme-text-muted mt-0.5 text-xs">
                       Isi informasi kategori di bawah
                     </p>
                   </div>
@@ -223,18 +238,18 @@ export default function TambahKategoriPage() {
                   {/* ERROR */}
 
                   {error && (
-                    <div className="flex gap-3 border border-red-100 bg-red-50 p-4">
+                    <div className="theme-danger flex gap-3 rounded-xl border p-4">
                       <AlertCircle
                         size={18}
-                        className="mt-0.5 shrink-0 text-red-500"
+                        className="mt-0.5 shrink-0"
                       />
 
                       <div>
-                        <p className="text-sm font-bold text-red-700">
+                        <p className="text-sm font-bold">
                           Gagal menyimpan
                         </p>
 
-                        <p className="mt-1 text-xs leading-5 text-red-600">
+                        <p className="mt-1 text-xs leading-5">
                           {error}
                         </p>
                       </div>
@@ -246,10 +261,16 @@ export default function TambahKategoriPage() {
                   <div>
                     <label
                       htmlFor="nama"
-                      className="mb-2 block text-sm font-semibold text-slate-700"
+                      className="theme-text-secondary mb-2 block text-sm font-semibold"
                     >
                       Nama Kategori
-                      <span className="ml-1 text-red-500">
+                      <span
+                        className="ml-1"
+                        style={{
+                          color:
+                            "var(--color-danger)",
+                        }}
+                      >
                         *
                       </span>
                     </label>
@@ -264,15 +285,29 @@ export default function TambahKategoriPage() {
                       disabled={saving}
                       autoFocus
                       maxLength={100}
-                      className="h-12 w-full border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-50"
+                      className="
+                        theme-input
+                        h-12
+                        w-full
+                        rounded-xl
+                        border
+                        px-4
+                        text-sm
+                        outline-none
+                        transition
+                        placeholder:theme-text-placeholder
+                        focus:border-[var(--color-primary)]
+                        disabled:cursor-not-allowed
+                        disabled:opacity-60
+                      "
                     />
 
                     <div className="mt-2 flex items-center justify-between gap-3">
-                      <p className="text-xs text-slate-400">
+                      <p className="theme-text-muted text-xs">
                         Minimal 3 karakter.
                       </p>
 
-                      <p className="text-xs text-slate-400">
+                      <p className="theme-text-muted text-xs">
                         {form.nama.length}/100
                       </p>
                     </div>
@@ -283,7 +318,7 @@ export default function TambahKategoriPage() {
                   <div>
                     <label
                       htmlFor="status"
-                      className="mb-2 block text-sm font-semibold text-slate-700"
+                      className="theme-text-secondary mb-2 block text-sm font-semibold"
                     >
                       Status
                     </label>
@@ -294,7 +329,20 @@ export default function TambahKategoriPage() {
                       value={form.status}
                       onChange={handleChange}
                       disabled={saving}
-                      className="h-12 w-full border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 disabled:cursor-not-allowed disabled:bg-slate-50"
+                      className="
+                        theme-input
+                        h-12
+                        w-full
+                        rounded-xl
+                        border
+                        px-4
+                        text-sm
+                        outline-none
+                        transition
+                        focus:border-[var(--color-primary)]
+                        disabled:cursor-not-allowed
+                        disabled:opacity-60
+                      "
                     >
                       <option value="aktif">
                         Aktif
@@ -305,7 +353,7 @@ export default function TambahKategoriPage() {
                       </option>
                     </select>
 
-                    <p className="mt-2 text-xs leading-5 text-slate-400">
+                    <p className="theme-text-muted mt-2 text-xs leading-5">
                       Kategori aktif dapat langsung
                       digunakan ketika membuat artikel.
                     </p>
@@ -313,23 +361,23 @@ export default function TambahKategoriPage() {
 
                   {/* PREVIEW */}
 
-                  <div className="border-t border-slate-100 pt-6">
-                    <p className="mb-3 text-xs font-bold uppercase tracking-wider text-slate-400">
+                  <div className="theme-border-soft border-t pt-6">
+                    <p className="theme-text-muted mb-3 text-xs font-bold uppercase tracking-wider">
                       Preview
                     </p>
 
-                    <div className="flex items-center gap-3 border border-slate-200 bg-slate-50 p-4">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center bg-blue-50 text-blue-600">
+                    <div className="theme-card-soft theme-border flex items-center gap-3 rounded-xl border p-4">
+                      <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border">
                         <Tags size={18} />
                       </div>
 
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-bold text-[#0F172A]">
+                        <p className="theme-text truncate text-sm font-bold">
                           {form.nama.trim() ||
                             "Nama kategori"}
                         </p>
 
-                        <p className="mt-1 text-xs text-slate-400">
+                        <p className="theme-text-muted mt-1 text-xs">
                           {form.status ===
                           "aktif"
                             ? "Kategori aktif"
@@ -338,15 +386,13 @@ export default function TambahKategoriPage() {
                       </div>
 
                       <span
-                        className={`shrink-0 px-2.5 py-1 text-[11px] font-bold ${
-                          form.status ===
-                          "aktif"
-                            ? "bg-emerald-50 text-emerald-600"
-                            : "bg-slate-100 text-slate-500"
+                        className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-bold ${
+                          form.status === "aktif"
+                            ? "theme-success"
+                            : "theme-card theme-text-muted theme-border border"
                         }`}
                       >
-                        {form.status ===
-                        "aktif"
+                        {form.status === "aktif"
                           ? "Aktif"
                           : "Nonaktif"}
                       </span>
@@ -358,12 +404,26 @@ export default function TambahKategoriPage() {
                     FORM FOOTER
                 ================================================= */}
 
-                <div className="flex flex-col-reverse gap-2 border-t border-slate-200 bg-slate-50 px-5 py-4 sm:flex-row sm:justify-end sm:px-7">
+                <div className="theme-card-soft theme-border-soft flex flex-col-reverse gap-2 border-t px-5 py-4 sm:flex-row sm:justify-end sm:px-7">
                   <button
                     type="button"
                     onClick={handleCancel}
                     disabled={saving}
-                    className="h-11 border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+                    className="
+                      theme-card
+                      theme-border
+                      theme-text-secondary
+                      h-11
+                      rounded-xl
+                      border
+                      px-5
+                      text-sm
+                      font-semibold
+                      transition
+                      hover:opacity-80
+                      disabled:cursor-not-allowed
+                      disabled:opacity-50
+                    "
                   >
                     Batal
                   </button>
@@ -374,7 +434,22 @@ export default function TambahKategoriPage() {
                       saving ||
                       !form.nama.trim()
                     }
-                    className="inline-flex h-11 items-center justify-center gap-2 bg-[#2563EB] px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1D4ED8] disabled:cursor-not-allowed disabled:opacity-50"
+                    className="
+                      theme-primary
+                      inline-flex
+                      h-11
+                      items-center
+                      justify-center
+                      gap-2
+                      rounded-xl
+                      px-6
+                      text-sm
+                      font-semibold
+                      shadow-sm
+                      transition
+                      disabled:cursor-not-allowed
+                      disabled:opacity-50
+                    "
                   >
                     {saving ? (
                       <>
@@ -404,9 +479,9 @@ export default function TambahKategoriPage() {
             <div className="space-y-5">
               {/* INFO CARD */}
 
-              <div className="border border-slate-200 bg-white shadow-sm">
-                <div className="border-b border-slate-200 px-5 py-4">
-                  <h2 className="text-sm font-bold text-[#0F172A]">
+              <div className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
+                <div className="theme-card-soft theme-border-soft border-b px-5 py-4">
+                  <h2 className="theme-text text-sm font-bold">
                     Tentang Kategori
                   </h2>
                 </div>
@@ -436,14 +511,14 @@ export default function TambahKategoriPage() {
 
               {/* EXAMPLE */}
 
-              <div className="border border-blue-100 bg-blue-50/60 p-5">
+              <div className="theme-info rounded-2xl border p-5">
                 <div className="flex gap-3">
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center bg-white text-blue-600">
+                  <div className="theme-card flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border">
                     <Tags size={17} />
                   </div>
 
                   <div>
-                    <p className="text-sm font-bold text-blue-700">
+                    <p className="text-sm font-bold">
                       Contoh kategori
                     </p>
 
@@ -455,16 +530,24 @@ export default function TambahKategoriPage() {
                         "Kegiatan",
                         "Akademik",
                         "Ekstrakurikuler",
-                      ].map(
-                        (item) => (
-                          <span
-                            key={item}
-                            className="border border-blue-100 bg-white px-2.5 py-1.5 text-[11px] font-semibold text-blue-600"
-                          >
-                            {item}
-                          </span>
-                        )
-                      )}
+                      ].map((item) => (
+                        <span
+                          key={item}
+                          className="
+                            theme-card
+                            theme-border
+                            theme-text-secondary
+                            rounded-lg
+                            border
+                            px-2.5
+                            py-1.5
+                            text-[11px]
+                            font-semibold
+                          "
+                        >
+                          {item}
+                        </span>
+                      ))}
                     </div>
                   </div>
                 </div>
@@ -488,16 +571,16 @@ function InfoItem({
 }) {
   return (
     <div className="flex gap-3">
-      <div className="flex h-7 w-7 shrink-0 items-center justify-center bg-slate-100 text-[10px] font-bold text-slate-500">
+      <div className="theme-card-soft theme-text-muted flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border text-[10px] font-bold">
         {number}
       </div>
 
       <div>
-        <p className="text-sm font-semibold text-slate-700">
+        <p className="theme-text-secondary text-sm font-semibold">
           {title}
         </p>
 
-        <p className="mt-1 text-xs leading-5 text-slate-400">
+        <p className="theme-text-muted mt-1 text-xs leading-5">
           {description}
         </p>
       </div>

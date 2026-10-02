@@ -244,9 +244,7 @@ export default function DetailKelasPage() {
         .filter((item) => {
           const kelasId = getKelasIdFromJadwal(item);
 
-          return (
-            String(kelasId) === String(id)
-          );
+          return String(kelasId) === String(id);
         })
         .map((item) => ({
           ...item,
@@ -354,11 +352,7 @@ export default function DetailKelasPage() {
   // =========================================================
 
   const jumlahSiswa = useMemo(() => {
-    if (
-      Array.isArray(
-        kelas?.anggota
-      )
-    ) {
+    if (Array.isArray(kelas?.anggota)) {
       return kelas.anggota.length;
     }
 
@@ -375,9 +369,7 @@ export default function DetailKelasPage() {
   // =========================================================
 
   const daftarSiswa = useMemo(() => {
-    return Array.isArray(
-      kelas?.anggota
-    )
+    return Array.isArray(kelas?.anggota)
       ? kelas.anggota
       : [];
   }, [kelas]);
@@ -404,8 +396,7 @@ export default function DetailKelasPage() {
   // =========================================================
 
   const getNamaSiswa = (anggota) => {
-    const siswa =
-      getSiswaData(anggota);
+    const siswa = getSiswaData(anggota);
 
     return (
       siswa?.namaLengkap ||
@@ -424,8 +415,7 @@ export default function DetailKelasPage() {
   // =========================================================
 
   const getNisSiswa = (anggota) => {
-    const siswa =
-      getSiswaData(anggota);
+    const siswa = getSiswaData(anggota);
 
     return (
       siswa?.nis ||
@@ -443,8 +433,7 @@ export default function DetailKelasPage() {
   // =========================================================
 
   const getNisnSiswa = (anggota) => {
-    const siswa =
-      getSiswaData(anggota);
+    const siswa = getSiswaData(anggota);
 
     return (
       siswa?.nisn ||
@@ -462,18 +451,14 @@ export default function DetailKelasPage() {
   const getGuruLabel = (value) => {
     if (!value) return "-";
 
-    const found =
-      guruList.find(
-        (guru) =>
-          guru?.nama === value ||
-          guru?.namaLengkap === value ||
-          String(guru?.id) ===
-            String(value)
-      );
+    const found = guruList.find(
+      (guru) =>
+        guru?.nama === value ||
+        guru?.namaLengkap === value ||
+        String(guru?.id) === String(value)
+    );
 
-    return found
-      ? getNama(found)
-      : value;
+    return found ? getNama(found) : value;
   };
 
   // =========================================================
@@ -484,13 +469,9 @@ export default function DetailKelasPage() {
     const counts = {};
 
     jadwal.forEach((item) => {
-      const guru =
-        getGuruName(item);
+      const guru = getGuruName(item);
 
-      if (
-        !guru ||
-        guru === "-"
-      ) {
+      if (!guru || guru === "-") {
         return;
       }
 
@@ -515,16 +496,6 @@ export default function DetailKelasPage() {
       );
       return;
     }
-
-    /*
-      Catatan:
-      Backend kamu saat ini baru kita gunakan
-      untuk GET jadwal melalui getJadwalMengajar().
-
-      Jadi data baru di bawah ini hanya ditambahkan
-      ke tampilan sementara sampai endpoint POST
-      jadwal digunakan.
-    */
 
     const newEntry = {
       id: `local-${Date.now()}`,
@@ -575,13 +546,6 @@ export default function DetailKelasPage() {
     ) {
       return;
     }
-
-    /*
-      Hapus dari tampilan.
-      Untuk data yang berasal dari backend,
-      endpoint DELETE perlu disambungkan
-      jika backend sudah menyediakan endpoint tersebut.
-    */
 
     setJadwal((prev) =>
       prev.filter(
@@ -636,14 +600,12 @@ export default function DetailKelasPage() {
 
   if (loading) {
     return (
-      <div className="flex h-screen w-full overflow-hidden bg-[#F4F7FB]">
+      <div className="theme-page flex h-screen w-full overflow-hidden">
         <Sidebar
           active="kelas"
           setActive={() => {}}
           collapsed={isCollapsed}
-          setCollapsed={
-            setIsCollapsed
-          }
+          setCollapsed={setIsCollapsed}
         />
 
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
@@ -666,10 +628,10 @@ export default function DetailKelasPage() {
             <div className="flex flex-col items-center gap-3">
               <Loader2
                 size={28}
-                className="animate-spin text-[#2563EB]"
+                className="animate-spin text-[var(--color-primary)]"
               />
 
-              <p className="text-sm font-medium text-slate-500">
+              <p className="theme-text-muted text-sm font-medium">
                 Memuat data kelas...
               </p>
             </div>
@@ -683,19 +645,14 @@ export default function DetailKelasPage() {
   // ERROR
   // =========================================================
 
-  if (
-    error ||
-    !kelas
-  ) {
+  if (error || !kelas) {
     return (
-      <div className="flex h-screen w-full overflow-hidden bg-[#F4F7FB]">
+      <div className="theme-page flex h-screen w-full overflow-hidden">
         <Sidebar
           active="kelas"
           setActive={() => {}}
           collapsed={isCollapsed}
-          setCollapsed={
-            setIsCollapsed
-          }
+          setCollapsed={setIsCollapsed}
         />
 
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
@@ -715,19 +672,16 @@ export default function DetailKelasPage() {
           />
 
           <main className="flex min-h-0 flex-1 items-center justify-center overflow-y-auto p-5">
-            <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-7 text-center shadow-sm">
-              <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-rose-50">
-                <AlertCircle
-                  size={28}
-                  className="text-rose-500"
-                />
+            <div className="theme-card theme-border w-full max-w-md rounded-2xl border p-7 text-center shadow-sm">
+              <div className="theme-danger mx-auto flex h-14 w-14 items-center justify-center rounded-2xl">
+                <AlertCircle size={28} />
               </div>
 
-              <h2 className="mt-4 text-lg font-bold text-slate-800">
+              <h2 className="theme-text mt-4 text-lg font-bold">
                 Gagal Memuat Kelas
               </h2>
 
-              <p className="mt-2 text-sm leading-6 text-slate-500">
+              <p className="theme-text-muted mt-2 text-sm leading-6">
                 {error ||
                   "Data kelas tidak ditemukan."}
               </p>
@@ -739,11 +693,9 @@ export default function DetailKelasPage() {
                     "/admin/akademik/kelas"
                   )
                 }
-                className="mt-6 inline-flex items-center gap-2 rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-slate-800"
+                className="theme-primary mt-6 inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition"
               >
-                <ArrowLeft
-                  size={16}
-                />
+                <ArrowLeft size={16} />
                 Kembali
               </button>
             </div>
@@ -758,16 +710,14 @@ export default function DetailKelasPage() {
   // =========================================================
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-[#F4F7FB]">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
       {/* SIDEBAR */}
 
       <Sidebar
         active="kelas"
         setActive={() => {}}
         collapsed={isCollapsed}
-        setCollapsed={
-          setIsCollapsed
-        }
+        setCollapsed={setIsCollapsed}
       />
 
       {/* MAIN */}
@@ -792,9 +742,10 @@ export default function DetailKelasPage() {
 
         {/* CONTENT */}
 
-        <main className="min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
+        <main className="theme-page min-w-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="w-full px-4 py-5 sm:px-5 md:px-7 lg:px-8 xl:px-10">
             <div className="mx-auto w-full max-w-[1600px] space-y-6">
+
               {/* HEADER */}
 
               <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
@@ -806,11 +757,9 @@ export default function DetailKelasPage() {
                         "/admin/akademik/kelas"
                       )
                     }
-                    className="mb-3 inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-[#1E3A8A]"
+                    className="theme-text-muted mb-3 inline-flex items-center gap-2 text-sm font-medium transition hover:text-[var(--color-primary)]"
                   >
-                    <ArrowLeft
-                      size={17}
-                    />
+                    <ArrowLeft size={17} />
 
                     <span>
                       Kembali ke Daftar
@@ -819,12 +768,11 @@ export default function DetailKelasPage() {
                   </button>
 
                   <div className="flex flex-wrap items-center gap-3">
-                    <h1 className="text-xl font-bold tracking-tight text-[#0F172A] sm:text-2xl">
-                      {kelas.nama ||
-                        "-"}
+                    <h1 className="theme-text text-xl font-bold tracking-tight sm:text-2xl">
+                      {kelas.nama || "-"}
                     </h1>
 
-                    <span className="inline-flex items-center rounded-lg border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-semibold text-[#1E3A8A]">
+                    <span className="theme-info inline-flex items-center rounded-lg border px-3 py-1 text-xs font-semibold">
                       {getTingkatLabel(
                         kelas.tingkat,
                         true
@@ -832,30 +780,21 @@ export default function DetailKelasPage() {
                     </span>
 
                     <span
-                      className={`inline-flex items-center gap-1.5 rounded-lg border px-3 py-1 text-xs font-semibold ${
-                        kelas.status ===
-                        "aktif"
-                          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                          : "border-rose-200 bg-rose-50 text-rose-700"
-                      }`}
+                      className={
+                        kelas.status === "aktif"
+                          ? "theme-success inline-flex items-center gap-1.5 rounded-lg border px-3 py-1 text-xs font-semibold"
+                          : "theme-danger inline-flex items-center gap-1.5 rounded-lg border px-3 py-1 text-xs font-semibold"
+                      }
                     >
-                      <span
-                        className={`h-1.5 w-1.5 rounded-full ${
-                          kelas.status ===
-                          "aktif"
-                            ? "bg-emerald-500"
-                            : "bg-rose-500"
-                        }`}
-                      />
+                      <span className="h-1.5 w-1.5 rounded-full bg-current" />
 
-                      {kelas.status ===
-                      "aktif"
+                      {kelas.status === "aktif"
                         ? "Aktif"
                         : "Nonaktif"}
                     </span>
                   </div>
 
-                  <p className="mt-1 text-sm text-slate-500">
+                  <p className="theme-text-muted mt-1 text-sm">
                     Informasi detail dan
                     pengelolaan kelas
                   </p>
@@ -870,7 +809,7 @@ export default function DetailKelasPage() {
                       `/admin/akademik/kelas/edit/${kelas.id}`
                     )
                   }
-                  className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-[#2563EB] hover:bg-blue-50 hover:text-[#1E3A8A]"
+                  className="theme-card theme-border theme-text-secondary inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold shadow-sm transition hover:bg-[var(--color-header-hover)]"
                 >
                   <Edit size={16} />
                   Edit Kelas
@@ -879,27 +818,25 @@ export default function DetailKelasPage() {
 
               {/* OVERVIEW */}
 
-              <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <div className="grid grid-cols-1 divide-y divide-slate-100 sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-4">
+              <section className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
+                <div className="grid grid-cols-1 divide-y divide-[var(--color-border-soft)] sm:grid-cols-2 sm:divide-x sm:divide-y-0 lg:grid-cols-4">
+                  
                   {/* WALI */}
 
                   <div className="flex min-w-0 items-center gap-4 p-5">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-[#2563EB]">
-                      <GraduationCap
-                        size={20}
-                      />
+                    <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+                      <GraduationCap size={20} />
                     </div>
 
                     <div className="min-w-0">
-                      <p className="mb-1 text-xs font-medium text-slate-400">
+                      <p className="theme-text-muted mb-1 text-xs font-medium">
                         Wali Kelas
                       </p>
 
-                      <p className="truncate text-sm font-semibold text-[#0F172A]">
+                      <p className="theme-text truncate text-sm font-semibold">
                         {getNama(
                           kelas.waliKelas
-                        ) ||
-                          "-"}
+                        ) || "-"}
                       </p>
                     </div>
                   </div>
@@ -907,33 +844,25 @@ export default function DetailKelasPage() {
                   {/* TAHUN */}
 
                   <div className="flex min-w-0 items-center gap-4 p-5">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-[#2563EB]">
-                      <Calendar
-                        size={19}
-                      />
+                    <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+                      <Calendar size={19} />
                     </div>
 
                     <div className="min-w-0">
-                      <p className="mb-1 text-xs font-medium text-slate-400">
+                      <p className="theme-text-muted mb-1 text-xs font-medium">
                         Tahun Ajaran
                       </p>
 
-                      <p className="truncate text-sm font-semibold text-[#0F172A]">
+                      <p className="theme-text truncate text-sm font-semibold">
                         {getTahunAjaranName(
                           kelas.tahunAjaran
                         )}
                       </p>
 
-                      {kelas
-                        .tahunAjaran
-                        ?.semester && (
-                        <p className="mt-0.5 text-xs text-slate-400">
+                      {kelas.tahunAjaran?.semester && (
+                        <p className="theme-text-muted mt-0.5 text-xs">
                           Semester{" "}
-                          {
-                            kelas
-                              .tahunAjaran
-                              .semester
-                          }
+                          {kelas.tahunAjaran.semester}
                         </p>
                       )}
                     </div>
@@ -942,20 +871,17 @@ export default function DetailKelasPage() {
                   {/* JUMLAH SISWA */}
 
                   <div className="flex min-w-0 items-center gap-4 p-5">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-[#2563EB]">
-                      <Users
-                        size={19}
-                      />
+                    <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+                      <Users size={19} />
                     </div>
 
                     <div className="min-w-0">
-                      <p className="mb-1 text-xs font-medium text-slate-400">
+                      <p className="theme-text-muted mb-1 text-xs font-medium">
                         Jumlah Siswa
                       </p>
 
-                      <p className="truncate text-sm font-semibold text-[#0F172A]">
-                        {jumlahSiswa}{" "}
-                        siswa
+                      <p className="theme-text truncate text-sm font-semibold">
+                        {jumlahSiswa} siswa
                       </p>
                     </div>
                   </div>
@@ -963,21 +889,17 @@ export default function DetailKelasPage() {
                   {/* KAPASITAS */}
 
                   <div className="flex min-w-0 items-center gap-4 p-5">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-[#2563EB]">
-                      <Users
-                        size={19}
-                      />
+                    <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+                      <Users size={19} />
                     </div>
 
                     <div className="min-w-0">
-                      <p className="mb-1 text-xs font-medium text-slate-400">
+                      <p className="theme-text-muted mb-1 text-xs font-medium">
                         Kapasitas
                       </p>
 
-                      <p className="truncate text-sm font-semibold text-[#0F172A]">
-                        {kelas.kapasitas ??
-                          0}{" "}
-                        siswa
+                      <p className="theme-text truncate text-sm font-semibold">
+                        {kelas.kapasitas ?? 0} siswa
                       </p>
                     </div>
                   </div>
@@ -986,28 +908,24 @@ export default function DetailKelasPage() {
 
               {/* TABS */}
 
-              <div className="border-b border-slate-200">
+              <div className="theme-border border-b">
                 <div className="overflow-x-auto">
                   <nav className="flex min-w-max gap-1">
+
                     {/* INFORMASI */}
 
                     <button
                       type="button"
                       onClick={() =>
-                        setActiveTab(
-                          "kelas"
-                        )
+                        setActiveTab("kelas")
                       }
-                      className={`inline-flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-semibold transition ${
-                        activeTab ===
-                        "kelas"
-                          ? "border-[#2563EB] text-[#1E3A8A]"
-                          : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700"
+                      className={`theme-text-muted inline-flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-semibold transition ${
+                        activeTab === "kelas"
+                          ? "border-[var(--color-primary)] theme-sidebar-text-active"
+                          : "border-transparent hover:border-[var(--color-border)] hover:text-[var(--color-text)]"
                       }`}
                     >
-                      <School
-                        size={16}
-                      />
+                      <School size={16} />
                       Informasi Kelas
                     </button>
 
@@ -1016,20 +934,15 @@ export default function DetailKelasPage() {
                     <button
                       type="button"
                       onClick={() =>
-                        setActiveTab(
-                          "siswa"
-                        )
+                        setActiveTab("siswa")
                       }
-                      className={`inline-flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-semibold transition ${
-                        activeTab ===
-                        "siswa"
-                          ? "border-[#2563EB] text-[#1E3A8A]"
-                          : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700"
+                      className={`theme-text-muted inline-flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-semibold transition ${
+                        activeTab === "siswa"
+                          ? "border-[var(--color-primary)] theme-sidebar-text-active"
+                          : "border-transparent hover:border-[var(--color-border)] hover:text-[var(--color-text)]"
                       }`}
                     >
-                      <Users
-                        size={16}
-                      />
+                      <Users size={16} />
                       Siswa
                     </button>
 
@@ -1038,20 +951,15 @@ export default function DetailKelasPage() {
                     <button
                       type="button"
                       onClick={() =>
-                        setActiveTab(
-                          "guru"
-                        )
+                        setActiveTab("guru")
                       }
-                      className={`inline-flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-semibold transition ${
-                        activeTab ===
-                        "guru"
-                          ? "border-[#2563EB] text-[#1E3A8A]"
-                          : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700"
+                      className={`theme-text-muted inline-flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-semibold transition ${
+                        activeTab === "guru"
+                          ? "border-[var(--color-primary)] theme-sidebar-text-active"
+                          : "border-transparent hover:border-[var(--color-border)] hover:text-[var(--color-text)]"
                       }`}
                     >
-                      <UserCheck
-                        size={16}
-                      />
+                      <UserCheck size={16} />
                       Guru / Wali Kelas
                     </button>
 
@@ -1060,22 +968,16 @@ export default function DetailKelasPage() {
                     <button
                       type="button"
                       onClick={() =>
-                        setActiveTab(
-                          "jadwal"
-                        )
+                        setActiveTab("jadwal")
                       }
-                      className={`inline-flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-semibold transition ${
-                        activeTab ===
-                        "jadwal"
-                          ? "border-[#2563EB] text-[#1E3A8A]"
-                          : "border-transparent text-slate-500 hover:border-slate-300 hover:text-slate-700"
+                      className={`theme-text-muted inline-flex items-center gap-2 border-b-2 px-5 py-3 text-sm font-semibold transition ${
+                        activeTab === "jadwal"
+                          ? "border-[var(--color-primary)] theme-sidebar-text-active"
+                          : "border-transparent hover:border-[var(--color-border)] hover:text-[var(--color-text)]"
                       }`}
                     >
-                      <BookOpen
-                        size={16}
-                      />
-                      Mata Pelajaran /
-                      Jadwal
+                      <BookOpen size={16} />
+                      Mata Pelajaran / Jadwal
                     </button>
                   </nav>
                 </div>
@@ -1083,48 +985,46 @@ export default function DetailKelasPage() {
 
               {/* CONTENT CARD */}
 
-              <section className="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+              <section className="theme-card theme-border min-w-0 overflow-hidden rounded-2xl border shadow-sm">
+
                 {/* =================================================
                     TAB KELAS
                 ================================================= */}
 
-                {activeTab ===
-                  "kelas" && (
+                {activeTab === "kelas" && (
                   <div>
-                    <div className="border-b border-slate-100 px-5 py-5 sm:px-6">
-                      <h2 className="text-base font-bold text-[#0F172A]">
+                    <div className="theme-border-soft border-b px-5 py-5 sm:px-6">
+                      <h2 className="theme-text text-base font-bold">
                         Informasi Kelas
                       </h2>
 
-                      <p className="mt-1 text-sm text-slate-500">
-                        Detail informasi
-                        kelas yang sedang
-                        dipilih.
+                      <p className="theme-text-muted mt-1 text-sm">
+                        Detail informasi kelas yang sedang dipilih.
                       </p>
                     </div>
 
                     <div className="grid grid-cols-1 gap-x-8 md:grid-cols-2">
+
                       {/* NAMA */}
 
-                      <div className="border-b border-slate-100 px-5 py-5 sm:px-6">
-                        <p className="mb-1.5 text-xs font-medium text-slate-400">
+                      <div className="theme-border-soft border-b px-5 py-5 sm:px-6">
+                        <p className="theme-text-muted mb-1.5 text-xs font-medium">
                           Nama Kelas
                         </p>
 
-                        <p className="text-sm font-semibold text-[#0F172A]">
-                          {kelas.nama ||
-                            "-"}
+                        <p className="theme-text text-sm font-semibold">
+                          {kelas.nama || "-"}
                         </p>
                       </div>
 
                       {/* TINGKAT */}
 
-                      <div className="border-b border-slate-100 px-5 py-5 sm:px-6">
-                        <p className="mb-1.5 text-xs font-medium text-slate-400">
+                      <div className="theme-border-soft border-b px-5 py-5 sm:px-6">
+                        <p className="theme-text-muted mb-1.5 text-xs font-medium">
                           Tingkat
                         </p>
 
-                        <p className="text-sm font-semibold text-[#0F172A]">
+                        <p className="theme-text text-sm font-semibold">
                           {getTingkatLabel(
                             kelas.tingkat
                           )}
@@ -1133,91 +1033,74 @@ export default function DetailKelasPage() {
 
                       {/* TAHUN */}
 
-                      <div className="border-b border-slate-100 px-5 py-5 sm:px-6">
-                        <p className="mb-1.5 text-xs font-medium text-slate-400">
+                      <div className="theme-border-soft border-b px-5 py-5 sm:px-6">
+                        <p className="theme-text-muted mb-1.5 text-xs font-medium">
                           Tahun Ajaran
                         </p>
 
-                        <p className="text-sm font-semibold text-[#0F172A]">
+                        <p className="theme-text text-sm font-semibold">
                           {getTahunAjaranName(
                             kelas.tahunAjaran
                           )}
                         </p>
 
-                        {kelas
-                          .tahunAjaran
-                          ?.semester && (
-                          <p className="mt-1 text-xs text-slate-400">
+                        {kelas.tahunAjaran?.semester && (
+                          <p className="theme-text-muted mt-1 text-xs">
                             Semester{" "}
-                            {
-                              kelas
-                                .tahunAjaran
-                                .semester
-                            }
+                            {kelas.tahunAjaran.semester}
                           </p>
                         )}
                       </div>
 
                       {/* WALI */}
 
-                      <div className="border-b border-slate-100 px-5 py-5 sm:px-6">
-                        <p className="mb-1.5 text-xs font-medium text-slate-400">
+                      <div className="theme-border-soft border-b px-5 py-5 sm:px-6">
+                        <p className="theme-text-muted mb-1.5 text-xs font-medium">
                           Wali Kelas
                         </p>
 
-                        <p className="text-sm font-semibold text-[#0F172A]">
+                        <p className="theme-text text-sm font-semibold">
                           {getNama(
                             kelas.waliKelas
-                          ) ||
-                            "-"}
+                          ) || "-"}
                         </p>
                       </div>
 
                       {/* JUMLAH SISWA */}
 
-                      <div className="border-b border-slate-100 px-5 py-5 sm:px-6">
-                        <p className="mb-1.5 text-xs font-medium text-slate-400">
+                      <div className="theme-border-soft border-b px-5 py-5 sm:px-6">
+                        <p className="theme-text-muted mb-1.5 text-xs font-medium">
                           Jumlah Siswa
                         </p>
 
-                        <p className="text-sm font-semibold text-[#0F172A]">
-                          {jumlahSiswa}{" "}
-                          siswa
+                        <p className="theme-text text-sm font-semibold">
+                          {jumlahSiswa} siswa
                         </p>
                       </div>
 
                       {/* KAPASITAS */}
 
-                      <div className="border-b border-slate-100 px-5 py-5 sm:px-6">
-                        <p className="mb-1.5 text-xs font-medium text-slate-400">
+                      <div className="theme-border-soft border-b px-5 py-5 sm:px-6">
+                        <p className="theme-text-muted mb-1.5 text-xs font-medium">
                           Kapasitas Kelas
                         </p>
 
-                        <p className="text-sm font-semibold text-[#0F172A]">
-                          {kelas.kapasitas ??
-                            0}{" "}
-                          siswa
+                        <p className="theme-text text-sm font-semibold">
+                          {kelas.kapasitas ?? 0} siswa
                         </p>
                       </div>
 
                       {/* RUANGAN */}
 
-                      <div className="border-b border-slate-100 px-5 py-5 sm:px-6">
-                        <p className="mb-1.5 text-xs font-medium text-slate-400">
+                      <div className="theme-border-soft border-b px-5 py-5 sm:px-6">
+                        <p className="theme-text-muted mb-1.5 text-xs font-medium">
                           Ruangan
                         </p>
 
-                        <p className="text-sm font-semibold text-[#0F172A]">
-                          {kelas
-                            .lantai
-                            ?.gedung
-                            ?.nama ||
-                            kelas
-                              .lantai
-                              ?.nama ||
-                            kelas
-                              .ruangan
-                              ?.nama ||
+                        <p className="theme-text text-sm font-semibold">
+                          {kelas.lantai?.gedung?.nama ||
+                            kelas.lantai?.nama ||
+                            kelas.ruangan?.nama ||
                             kelas.ruangan ||
                             "-"}
                         </p>
@@ -1225,30 +1108,21 @@ export default function DetailKelasPage() {
 
                       {/* STATUS */}
 
-                      <div className="border-b border-slate-100 px-5 py-5 sm:px-6">
-                        <p className="mb-2 text-xs font-medium text-slate-400">
+                      <div className="theme-border-soft border-b px-5 py-5 sm:px-6">
+                        <p className="theme-text-muted mb-2 text-xs font-medium">
                           Status Kelas
                         </p>
 
                         <span
-                          className={`inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-semibold ${
-                            kelas.status ===
-                            "aktif"
-                              ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-                              : "border-rose-200 bg-rose-50 text-rose-700"
-                          }`}
+                          className={
+                            kelas.status === "aktif"
+                              ? "theme-success inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-semibold"
+                              : "theme-danger inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-semibold"
+                          }
                         >
-                          <span
-                            className={`h-1.5 w-1.5 rounded-full ${
-                              kelas.status ===
-                              "aktif"
-                                ? "bg-emerald-500"
-                                : "bg-rose-500"
-                            }`}
-                          />
+                          <span className="h-1.5 w-1.5 rounded-full bg-current" />
 
-                          {kelas.status ===
-                          "aktif"
+                          {kelas.status === "aktif"
                             ? "Kelas Aktif"
                             : "Kelas Nonaktif"}
                         </span>
@@ -1261,70 +1135,59 @@ export default function DetailKelasPage() {
                     TAB SISWA
                 ================================================= */}
 
-                {activeTab ===
-                  "siswa" && (
+                {activeTab === "siswa" && (
                   <div>
-                    <div className="flex flex-col gap-3 border-b border-slate-100 px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                    <div className="theme-border-soft flex flex-col gap-3 border-b px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                       <div>
-                        <h2 className="text-base font-bold text-[#0F172A]">
+                        <h2 className="theme-text text-base font-bold">
                           Daftar Siswa
                         </h2>
 
-                        <p className="mt-1 text-sm text-slate-500">
-                          Daftar siswa yang
-                          terdaftar di
-                          kelas{" "}
-                          <span className="font-medium text-slate-700">
-                            {kelas.nama ||
-                              "-"}
+                        <p className="theme-text-muted mt-1 text-sm">
+                          Daftar siswa yang terdaftar di kelas{" "}
+                          <span className="theme-text-secondary font-medium">
+                            {kelas.nama || "-"}
                           </span>
                           .
                         </p>
                       </div>
 
-                      <div className="inline-flex w-fit shrink-0 items-center gap-2 rounded-lg bg-blue-50 px-3 py-2 text-sm font-semibold text-[#1E3A8A]">
-                        <Users
-                          size={16}
-                        />
-                        {jumlahSiswa}{" "}
-                        Siswa
+                      <div className="theme-info inline-flex w-fit shrink-0 items-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold">
+                        <Users size={16} />
+                        {jumlahSiswa} Siswa
                       </div>
                     </div>
 
                     <div className="w-full overflow-x-auto">
                       <table className="w-full min-w-[700px] text-sm">
                         <thead>
-                          <tr className="border-b border-slate-200 bg-slate-50/80">
-                            <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                          <tr className="theme-table-header theme-border border-b">
+                            <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider">
                               No
                             </th>
 
-                            <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                            <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider">
                               Nama Siswa
                             </th>
 
-                            <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                            <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider">
                               NIS
                             </th>
 
-                            <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                            <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider">
                               NISN
                             </th>
 
-                            <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                            <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider">
                               Status
                             </th>
                           </tr>
                         </thead>
 
                         <tbody>
-                          {daftarSiswa.length >
-                          0 ? (
+                          {daftarSiswa.length > 0 ? (
                             daftarSiswa.map(
-                              (
-                                anggota,
-                                index
-                              ) => {
+                              (anggota, index) => {
                                 const siswa =
                                   getSiswaData(
                                     anggota
@@ -1336,12 +1199,9 @@ export default function DetailKelasPage() {
                                   );
 
                                 const initial =
-                                  nama !==
-                                  "-"
+                                  nama !== "-"
                                     ? nama
-                                        .charAt(
-                                          0
-                                        )
+                                        .charAt(0)
                                         .toUpperCase()
                                     : "?";
 
@@ -1353,46 +1213,41 @@ export default function DetailKelasPage() {
                                       anggota?.siswaId ||
                                       index
                                     }
-                                    className="border-b border-slate-100 transition hover:bg-blue-50/30"
+                                    className="theme-border-soft theme-table-hover border-b transition"
                                   >
-                                    <td className="px-5 py-4 text-slate-500">
-                                      {index +
-                                        1}
+                                    <td className="theme-text-muted px-5 py-4">
+                                      {index + 1}
                                     </td>
 
                                     <td className="px-5 py-4">
                                       <div className="flex items-center gap-3">
-                                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-xs font-bold text-[#1E3A8A]">
-                                          {
-                                            initial
-                                          }
+                                        <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-xs font-bold">
+                                          {initial}
                                         </div>
 
                                         <div className="min-w-0">
-                                          <p className="truncate font-semibold text-[#0F172A]">
-                                            {
-                                              nama
-                                            }
+                                          <p className="theme-text truncate font-semibold">
+                                            {nama}
                                           </p>
                                         </div>
                                       </div>
                                     </td>
 
-                                    <td className="px-5 py-4 text-slate-600">
+                                    <td className="theme-text-secondary px-5 py-4">
                                       {getNisSiswa(
                                         anggota
                                       )}
                                     </td>
 
-                                    <td className="px-5 py-4 text-slate-600">
+                                    <td className="theme-text-secondary px-5 py-4">
                                       {getNisnSiswa(
                                         anggota
                                       )}
                                     </td>
 
                                     <td className="px-5 py-4">
-                                      <span className="inline-flex items-center gap-1.5 rounded-lg border border-emerald-200 bg-emerald-50 px-2.5 py-1 text-xs font-semibold text-emerald-700">
-                                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                                      <span className="theme-success inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold">
+                                        <span className="h-1.5 w-1.5 rounded-full bg-current" />
                                         Aktif
                                       </span>
                                     </td>
@@ -1403,29 +1258,19 @@ export default function DetailKelasPage() {
                           ) : (
                             <tr>
                               <td
-                                colSpan={
-                                  5
-                                }
+                                colSpan={5}
                                 className="px-5 py-14 text-center"
                               >
-                                <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
-                                  <Users
-                                    size={
-                                      23
-                                    }
-                                  />
+                                <div className="theme-card-soft theme-text-muted mx-auto flex h-12 w-12 items-center justify-center rounded-xl">
+                                  <Users size={23} />
                                 </div>
 
-                                <p className="mt-4 text-sm font-semibold text-slate-600">
-                                  Belum ada
-                                  siswa
+                                <p className="theme-text-secondary mt-4 text-sm font-semibold">
+                                  Belum ada siswa
                                 </p>
 
-                                <p className="mt-1 text-xs text-slate-400">
-                                  Belum ada
-                                  siswa yang
-                                  terdaftar di
-                                  kelas ini.
+                                <p className="theme-text-muted mt-1 text-xs">
+                                  Belum ada siswa yang terdaftar di kelas ini.
                                 </p>
                               </td>
                             </tr>
@@ -1434,24 +1279,20 @@ export default function DetailKelasPage() {
                       </table>
                     </div>
 
-                    {daftarSiswa.length >
-                      0 && (
-                      <div className="border-t border-slate-100 bg-slate-50/50 px-5 py-3.5 sm:px-6">
-                        <div className="flex flex-col gap-1 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+                    {daftarSiswa.length > 0 && (
+                      <div className="theme-card-soft theme-border-soft border-t px-5 py-3.5 sm:px-6">
+                        <div className="theme-text-muted flex flex-col gap-1 text-xs sm:flex-row sm:items-center sm:justify-between">
                           <span>
                             Total{" "}
-                            <strong className="font-semibold text-slate-700">
-                              {
-                                daftarSiswa.length
-                              }
+                            <strong className="theme-text-secondary font-semibold">
+                              {daftarSiswa.length}
                             </strong>{" "}
-                            siswa
-                            terdaftar
+                            siswa terdaftar
                           </span>
 
                           <span>
                             Kelas{" "}
-                            <strong className="font-semibold text-[#1E3A8A]">
+                            <strong className="theme-sidebar-text-active font-semibold">
                               {kelas.nama}
                             </strong>
                           </span>
@@ -1465,45 +1306,39 @@ export default function DetailKelasPage() {
                     TAB GURU
                 ================================================= */}
 
-                {activeTab ===
-                  "guru" && (
+                {activeTab === "guru" && (
                   <div>
-                    <div className="border-b border-slate-100 px-5 py-5 sm:px-6">
-                      <h2 className="text-base font-bold text-[#0F172A]">
-                        Guru dan Wali
-                        Kelas
+                    <div className="theme-border-soft border-b px-5 py-5 sm:px-6">
+                      <h2 className="theme-text text-base font-bold">
+                        Guru dan Wali Kelas
                       </h2>
 
-                      <p className="mt-1 text-sm text-slate-500">
-                        Daftar guru yang
-                        terkait dengan
-                        kegiatan
-                        pembelajaran
-                        kelas.
+                      <p className="theme-text-muted mt-1 text-sm">
+                        Daftar guru yang terkait dengan kegiatan pembelajaran kelas.
                       </p>
                     </div>
 
                     <div className="w-full overflow-x-auto">
                       <table className="w-full min-w-[760px] text-sm">
                         <thead>
-                          <tr className="border-b border-slate-200 bg-slate-50/80">
-                            <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                          <tr className="theme-table-header theme-border border-b">
+                            <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider">
                               No
                             </th>
 
-                            <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                            <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider">
                               Nama Guru
                             </th>
 
-                            <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                            <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider">
                               Mata Pelajaran
                             </th>
 
-                            <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                            <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider">
                               Peran
                             </th>
 
-                            <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                            <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider">
                               Jam Mengajar
                             </th>
                           </tr>
@@ -1514,31 +1349,22 @@ export default function DetailKelasPage() {
                             (guru) =>
                               guru?.mapel ||
                               guru?.mataPelajaran
-                          ).length >
-                          0 ? (
+                          ).length > 0 ? (
                             guruList
                               .filter(
-                                (
-                                  guru
-                                ) =>
+                                (guru) =>
                                   guru?.mapel ||
                                   guru?.mataPelajaran
                               )
                               .map(
-                                (
-                                  guru,
-                                  index
-                                ) => {
+                                (guru, index) => {
                                   const namaGuru =
-                                    getNama(
-                                      guru
-                                    );
+                                    getNama(guru);
 
                                   const jam =
                                     jamPerGuru[
                                       namaGuru
-                                    ] ||
-                                    0;
+                                    ] || 0;
 
                                   const waliNama =
                                     getNama(
@@ -1555,16 +1381,15 @@ export default function DetailKelasPage() {
                                         guru?.id ??
                                         index
                                       }
-                                      className="border-b border-slate-100 transition hover:bg-blue-50/30"
+                                      className="theme-border-soft theme-table-hover border-b transition"
                                     >
-                                      <td className="px-5 py-4 text-slate-500">
-                                        {index +
-                                          1}
+                                      <td className="theme-text-muted px-5 py-4">
+                                        {index + 1}
                                       </td>
 
                                       <td className="px-5 py-4">
                                         <div className="flex items-center gap-3">
-                                          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-xs font-bold text-[#1E3A8A]">
+                                          <div className="theme-info flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-xs font-bold">
                                             {namaGuru
                                               ?.charAt(
                                                 0
@@ -1573,42 +1398,35 @@ export default function DetailKelasPage() {
                                               "G"}
                                           </div>
 
-                                          <span className="font-semibold text-[#0F172A]">
+                                          <span className="theme-text font-semibold">
                                             {namaGuru ||
                                               "-"}
                                           </span>
                                         </div>
                                       </td>
 
-                                      <td className="px-5 py-4 text-slate-600">
+                                      <td className="theme-text-secondary px-5 py-4">
                                         {guru?.mapel ||
-                                          guru
-                                            ?.mataPelajaran
-                                            ?.nama ||
+                                          guru?.mataPelajaran?.nama ||
                                           "-"}
                                       </td>
 
                                       <td className="px-5 py-4">
                                         {isWali ? (
-                                          <span className="inline-flex items-center gap-1.5 rounded-lg border border-blue-200 bg-blue-50 px-2.5 py-1 text-xs font-semibold text-[#1E3A8A]">
-                                            <UserCheck
-                                              size={
-                                                13
-                                              }
-                                            />
+                                          <span className="theme-info inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1 text-xs font-semibold">
+                                            <UserCheck size={13} />
                                             Wali Kelas
                                           </span>
                                         ) : (
-                                          <span className="text-slate-500">
+                                          <span className="theme-text-muted">
                                             Guru
                                           </span>
                                         )}
                                       </td>
 
                                       <td className="px-5 py-4">
-                                        <span className="font-semibold text-[#1E3A8A]">
-                                          {jam}{" "}
-                                          jam
+                                        <span className="theme-sidebar-text-active font-semibold">
+                                          {jam} jam
                                         </span>
                                       </td>
                                     </tr>
@@ -1618,29 +1436,20 @@ export default function DetailKelasPage() {
                           ) : (
                             <tr>
                               <td
-                                colSpan={
-                                  5
-                                }
+                                colSpan={5}
                                 className="px-5 py-12 text-center"
                               >
                                 <UserCheck
-                                  size={
-                                    30
-                                  }
-                                  className="mx-auto mb-3 text-slate-300"
+                                  size={30}
+                                  className="theme-text-placeholder mx-auto mb-3"
                                 />
 
-                                <p className="text-sm font-semibold text-slate-600">
-                                  Belum ada
-                                  guru
+                                <p className="theme-text-secondary text-sm font-semibold">
+                                  Belum ada guru
                                 </p>
 
-                                <p className="mt-1 text-xs text-slate-400">
-                                  Data guru
-                                  belum
-                                  tersedia
-                                  untuk
-                                  kelas ini.
+                                <p className="theme-text-muted mt-1 text-xs">
+                                  Data guru belum tersedia untuk kelas ini.
                                 </p>
                               </td>
                             </tr>
@@ -1655,35 +1464,28 @@ export default function DetailKelasPage() {
                     TAB JADWAL
                 ================================================= */}
 
-                {activeTab ===
-                  "jadwal" && (
+                {activeTab === "jadwal" && (
                   <div>
+
                     {/* HEADER */}
 
-                    <div className="flex flex-col gap-4 border-b border-slate-100 px-5 py-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="theme-border-soft flex flex-col gap-4 border-b px-5 py-5 sm:px-6 lg:flex-row lg:items-center lg:justify-between">
                       <div>
-                        <h2 className="text-base font-bold text-[#0F172A]">
+                        <h2 className="theme-text text-base font-bold">
                           Jadwal Pelajaran
                         </h2>
 
-                        <p className="mt-1 text-sm text-slate-500">
-                          Jadwal mata
-                          pelajaran dan
-                          guru pengajar
-                          untuk kelas ini.
+                        <p className="theme-text-muted mt-1 text-sm">
+                          Jadwal mata pelajaran dan guru pengajar untuk kelas ini.
                         </p>
                       </div>
 
                       <div className="flex flex-wrap gap-2">
                         <button
                           type="button"
-                          onClick={
-                            loadJadwal
-                          }
-                          disabled={
-                            loadingJadwal
-                          }
-                          className="inline-flex items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                          onClick={loadJadwal}
+                          disabled={loadingJadwal}
+                          className="theme-card theme-border theme-text-secondary inline-flex items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition hover:bg-[var(--color-header-hover)] disabled:cursor-not-allowed disabled:opacity-60"
                         >
                           <RefreshCw
                             size={16}
@@ -1700,24 +1502,15 @@ export default function DetailKelasPage() {
                           type="button"
                           onClick={() =>
                             setShowAddJadwal(
-                              (prev) =>
-                                !prev
+                              (prev) => !prev
                             )
                           }
-                          className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#2563EB] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1E3A8A]"
+                          className="theme-primary inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm transition"
                         >
                           {showAddJadwal ? (
-                            <X
-                              size={
-                                16
-                              }
-                            />
+                            <X size={16} />
                           ) : (
-                            <Plus
-                              size={
-                                16
-                              }
-                            />
+                            <Plus size={16} />
                           )}
 
                           {showAddJadwal
@@ -1730,25 +1523,20 @@ export default function DetailKelasPage() {
                     {/* ERROR JADWAL */}
 
                     {jadwalError && (
-                      <div className="border-b border-amber-200 bg-amber-50 px-5 py-3.5 sm:px-6">
+                      <div className="theme-warning theme-border border-b px-5 py-3.5 sm:px-6">
                         <div className="flex items-start gap-3">
                           <AlertCircle
-                            size={
-                              18
-                            }
-                            className="mt-0.5 shrink-0 text-amber-600"
+                            size={18}
+                            className="mt-0.5 shrink-0"
                           />
 
                           <div>
-                            <p className="text-sm font-semibold text-amber-800">
-                              Gagal memuat
-                              jadwal
+                            <p className="text-sm font-semibold">
+                              Gagal memuat jadwal
                             </p>
 
-                            <p className="mt-0.5 text-xs text-amber-700">
-                              {
-                                jadwalError
-                              }
+                            <p className="mt-0.5 text-xs">
+                              {jadwalError}
                             </p>
                           </div>
                         </div>
@@ -1758,50 +1546,35 @@ export default function DetailKelasPage() {
                     {/* FORM TAMBAH */}
 
                     {showAddJadwal && (
-                      <div className="border-b border-slate-200 bg-slate-50/80 p-5 sm:p-6">
+                      <div className="theme-card-soft theme-border border-b p-5 sm:p-6">
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+
                           {/* HARI */}
 
                           <div>
-                            <label className="mb-1.5 block text-xs font-semibold text-slate-600">
+                            <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
                               Hari
                             </label>
 
                             <select
-                              value={
-                                newJadwal.hari
-                              }
-                              onChange={(
-                                e
-                              ) =>
+                              value={newJadwal.hari}
+                              onChange={(e) =>
                                 setNewJadwal(
-                                  (
-                                    prev
-                                  ) => ({
+                                  (prev) => ({
                                     ...prev,
-                                    hari: e
-                                      .target
-                                      .value,
+                                    hari: e.target.value,
                                   })
                                 )
                               }
-                              className="h-10 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-blue-100"
+                              className="theme-input h-10 w-full rounded-xl border px-3 text-sm outline-none transition focus:border-[var(--color-primary)]"
                             >
                               {HARI_LIST.map(
-                                (
-                                  hari
-                                ) => (
+                                (hari) => (
                                   <option
-                                    key={
-                                      hari
-                                    }
-                                    value={
-                                      hari
-                                    }
+                                    key={hari}
+                                    value={hari}
                                   >
-                                    {
-                                      hari
-                                    }
+                                    {hari}
                                   </option>
                                 )
                               )}
@@ -1811,7 +1584,7 @@ export default function DetailKelasPage() {
                           {/* JAM MULAI */}
 
                           <div>
-                            <label className="mb-1.5 block text-xs font-semibold text-slate-600">
+                            <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
                               Jam Mulai
                             </label>
 
@@ -1820,29 +1593,23 @@ export default function DetailKelasPage() {
                               value={
                                 newJadwal.jamMulai
                               }
-                              onChange={(
-                                e
-                              ) =>
+                              onChange={(e) =>
                                 setNewJadwal(
-                                  (
-                                    prev
-                                  ) => ({
+                                  (prev) => ({
                                     ...prev,
                                     jamMulai:
-                                      e
-                                        .target
-                                        .value,
+                                      e.target.value,
                                   })
                                 )
                               }
-                              className="h-10 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-blue-100"
+                              className="theme-input h-10 w-full rounded-xl border px-3 text-sm outline-none transition focus:border-[var(--color-primary)]"
                             />
                           </div>
 
                           {/* JAM SELESAI */}
 
                           <div>
-                            <label className="mb-1.5 block text-xs font-semibold text-slate-600">
+                            <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
                               Jam Selesai
                             </label>
 
@@ -1851,29 +1618,23 @@ export default function DetailKelasPage() {
                               value={
                                 newJadwal.jamSelesai
                               }
-                              onChange={(
-                                e
-                              ) =>
+                              onChange={(e) =>
                                 setNewJadwal(
-                                  (
-                                    prev
-                                  ) => ({
+                                  (prev) => ({
                                     ...prev,
                                     jamSelesai:
-                                      e
-                                        .target
-                                        .value,
+                                      e.target.value,
                                   })
                                 )
                               }
-                              className="h-10 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-blue-100"
+                              className="theme-input h-10 w-full rounded-xl border px-3 text-sm outline-none transition focus:border-[var(--color-primary)]"
                             />
                           </div>
 
                           {/* MAPEL */}
 
                           <div>
-                            <label className="mb-1.5 block text-xs font-semibold text-slate-600">
+                            <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
                               Mata Pelajaran
                             </label>
 
@@ -1881,43 +1642,28 @@ export default function DetailKelasPage() {
                               value={
                                 newJadwal.mapel
                               }
-                              onChange={(
-                                e
-                              ) =>
+                              onChange={(e) =>
                                 setNewJadwal(
-                                  (
-                                    prev
-                                  ) => ({
+                                  (prev) => ({
                                     ...prev,
                                     mapel:
-                                      e
-                                        .target
-                                        .value,
+                                      e.target.value,
                                   })
                                 )
                               }
-                              className="h-10 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-blue-100"
+                              className="theme-input h-10 w-full rounded-xl border px-3 text-sm outline-none transition focus:border-[var(--color-primary)]"
                             >
                               <option value="">
-                                Pilih
-                                Mapel
+                                Pilih Mapel
                               </option>
 
                               {mapelList.map(
-                                (
-                                  mapel
-                                ) => (
+                                (mapel) => (
                                   <option
-                                    key={
-                                      mapel.id
-                                    }
-                                    value={
-                                      mapel.nama
-                                    }
+                                    key={mapel.id}
+                                    value={mapel.nama}
                                   >
-                                    {
-                                      mapel.nama
-                                    }
+                                    {mapel.nama}
                                   </option>
                                 )
                               )}
@@ -1927,7 +1673,7 @@ export default function DetailKelasPage() {
                           {/* GURU */}
 
                           <div>
-                            <label className="mb-1.5 block text-xs font-semibold text-slate-600">
+                            <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
                               Guru
                             </label>
 
@@ -1935,45 +1681,28 @@ export default function DetailKelasPage() {
                               value={
                                 newJadwal.guru
                               }
-                              onChange={(
-                                e
-                              ) =>
+                              onChange={(e) =>
                                 setNewJadwal(
-                                  (
-                                    prev
-                                  ) => ({
+                                  (prev) => ({
                                     ...prev,
                                     guru:
-                                      e
-                                        .target
-                                        .value,
+                                      e.target.value,
                                   })
                                 )
                               }
-                              className="h-10 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-blue-100"
+                              className="theme-input h-10 w-full rounded-xl border px-3 text-sm outline-none transition focus:border-[var(--color-primary)]"
                             >
                               <option value="">
-                                Pilih
-                                Guru
+                                Pilih Guru
                               </option>
 
                               {guruList.map(
-                                (
-                                  guru
-                                ) => (
+                                (guru) => (
                                   <option
-                                    key={
-                                      guru.id
-                                    }
-                                    value={
-                                      getNama(
-                                        guru
-                                      )
-                                    }
+                                    key={guru.id}
+                                    value={getNama(guru)}
                                   >
-                                    {getNama(
-                                      guru
-                                    )}
+                                    {getNama(guru)}
                                   </option>
                                 )
                               )}
@@ -1983,7 +1712,7 @@ export default function DetailKelasPage() {
                           {/* RUANGAN */}
 
                           <div>
-                            <label className="mb-1.5 block text-xs font-semibold text-slate-600">
+                            <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
                               Ruangan
                             </label>
 
@@ -1992,23 +1721,17 @@ export default function DetailKelasPage() {
                               value={
                                 newJadwal.ruangan
                               }
-                              onChange={(
-                                e
-                              ) =>
+                              onChange={(e) =>
                                 setNewJadwal(
-                                  (
-                                    prev
-                                  ) => ({
+                                  (prev) => ({
                                     ...prev,
                                     ruangan:
-                                      e
-                                        .target
-                                        .value,
+                                      e.target.value,
                                   })
                                 )
                               }
                               placeholder="A-01"
-                              className="h-10 w-full rounded-xl border border-slate-300 bg-white px-3 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:border-[#2563EB] focus:ring-2 focus:ring-blue-100"
+                              className="theme-input h-10 w-full rounded-xl border px-3 text-sm outline-none transition focus:border-[var(--color-primary)]"
                             />
                           </div>
                         </div>
@@ -2021,13 +1744,9 @@ export default function DetailKelasPage() {
                                 false
                               )
                             }
-                            className="inline-flex h-10 items-center justify-center gap-2 rounded-xl border border-slate-300 bg-white px-4 text-sm font-semibold text-slate-600 transition hover:bg-slate-100"
+                            className="theme-card theme-border theme-text-secondary inline-flex h-10 items-center justify-center gap-2 rounded-xl border px-4 text-sm font-semibold transition hover:bg-[var(--color-header-hover)]"
                           >
-                            <X
-                              size={
-                                15
-                              }
-                            />
+                            <X size={15} />
                             Batal
                           </button>
 
@@ -2036,13 +1755,9 @@ export default function DetailKelasPage() {
                             onClick={
                               handleAddJadwal
                             }
-                            className="inline-flex h-10 items-center justify-center gap-2 rounded-xl bg-[#2563EB] px-5 text-sm font-semibold text-white transition hover:bg-[#1E3A8A]"
+                            className="theme-primary inline-flex h-10 items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold transition"
                           >
-                            <Check
-                              size={
-                                16
-                              }
-                            />
+                            <Check size={16} />
                             Simpan Jadwal
                           </button>
                         </div>
@@ -2054,15 +1769,12 @@ export default function DetailKelasPage() {
                     {loadingJadwal ? (
                       <div className="flex min-h-[280px] flex-col items-center justify-center">
                         <Loader2
-                          size={
-                            28
-                          }
-                          className="animate-spin text-[#2563EB]"
+                          size={28}
+                          className="animate-spin text-[var(--color-primary)]"
                         />
 
-                        <p className="mt-3 text-sm font-medium text-slate-500">
-                          Memuat jadwal
-                          pelajaran...
+                        <p className="theme-text-muted mt-3 text-sm font-medium">
+                          Memuat jadwal pelajaran...
                         </p>
                       </div>
                     ) : (
@@ -2072,85 +1784,65 @@ export default function DetailKelasPage() {
                         <div className="w-full overflow-x-auto">
                           <table className="w-full min-w-[1000px] text-sm">
                             <thead>
-                              <tr className="border-b border-slate-200 bg-slate-50/80">
-                                <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                              <tr className="theme-table-header theme-border border-b">
+                                <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider">
                                   No
                                 </th>
 
-                                <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                                <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider">
                                   Hari
                                 </th>
 
-                                <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                                <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider">
                                   Waktu
                                 </th>
 
-                                <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">
-                                  Mata
-                                  Pelajaran
+                                <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider">
+                                  Mata Pelajaran
                                 </th>
 
-                                <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                                <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider">
                                   Guru
                                 </th>
 
-                                <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                                <th className="px-5 py-3.5 text-left text-[11px] font-bold uppercase tracking-wider">
                                   Ruangan
                                 </th>
 
-                                <th className="px-5 py-3.5 text-right text-[11px] font-bold uppercase tracking-wider text-slate-500">
+                                <th className="px-5 py-3.5 text-right text-[11px] font-bold uppercase tracking-wider">
                                   Aksi
                                 </th>
                               </tr>
                             </thead>
 
                             <tbody>
-                              {jadwal.length ===
-                              0 ? (
+                              {jadwal.length === 0 ? (
                                 <tr>
                                   <td
-                                    colSpan={
-                                      7
-                                    }
+                                    colSpan={7}
                                     className="px-5 py-14 text-center"
                                   >
-                                    <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-slate-400">
-                                      <Calendar
-                                        size={
-                                          23
-                                        }
-                                      />
+                                    <div className="theme-card-soft theme-text-muted mx-auto flex h-12 w-12 items-center justify-center rounded-xl">
+                                      <Calendar size={23} />
                                     </div>
 
-                                    <p className="mt-4 text-sm font-semibold text-slate-600">
-                                      Belum ada
-                                      jadwal
+                                    <p className="theme-text-secondary mt-4 text-sm font-semibold">
+                                      Belum ada jadwal
                                     </p>
 
-                                    <p className="mt-1 text-xs text-slate-400">
-                                      Belum ada
-                                      jadwal
-                                      pelajaran
-                                      untuk kelas
-                                      ini.
+                                    <p className="theme-text-muted mt-1 text-xs">
+                                      Belum ada jadwal pelajaran untuk kelas ini.
                                     </p>
                                   </td>
                                 </tr>
                               ) : (
                                 jadwal.map(
-                                  (
-                                    item,
-                                    index
-                                  ) => {
+                                  (item, index) => {
                                     const guru =
-                                      getGuruName(
-                                        item
-                                      );
+                                      getGuruName(item);
 
                                     const mapel =
-                                      getMapelName(
-                                        item
-                                      );
+                                      getMapelName(item);
 
                                     return (
                                       <tr
@@ -2158,33 +1850,30 @@ export default function DetailKelasPage() {
                                           item.id ??
                                           index
                                         }
-                                        className="border-b border-slate-100 transition hover:bg-blue-50/30"
+                                        className="theme-border-soft theme-table-hover border-b transition"
                                       >
-                                        <td className="px-5 py-4 text-slate-500">
-                                          {index +
-                                            1}
+                                        <td className="theme-text-muted px-5 py-4">
+                                          {index + 1}
                                         </td>
 
                                         <td className="px-5 py-4">
-                                          <span className="font-semibold text-[#0F172A]">
+                                          <span className="theme-text font-semibold">
                                             {item.hari ||
                                               "-"}
                                           </span>
                                         </td>
 
                                         <td className="px-5 py-4">
-                                          <div className="flex items-center gap-2 text-slate-600">
+                                          <div className="theme-text-secondary flex items-center gap-2">
                                             <Clock3
-                                              size={
-                                                15
-                                              }
-                                              className="text-slate-400"
+                                              size={15}
+                                              className="theme-text-placeholder"
                                             />
 
                                             <span className="whitespace-nowrap">
                                               {item.jamMulai ||
                                                 "-"}{" "}
-                                              –
+                                              –{" "}
                                               {item.jamSelesai ||
                                                 "-"}
                                             </span>
@@ -2192,24 +1881,22 @@ export default function DetailKelasPage() {
                                         </td>
 
                                         <td className="px-5 py-4">
-                                          <span className="font-semibold text-[#0F172A]">
+                                          <span className="theme-text font-semibold">
                                             {mapel}
                                           </span>
                                         </td>
 
-                                        <td className="px-5 py-4 text-slate-600">
+                                        <td className="theme-text-secondary px-5 py-4">
                                           {getGuruLabel(
                                             guru
                                           )}
                                         </td>
 
                                         <td className="px-5 py-4">
-                                          <div className="flex items-center gap-2 text-slate-600">
+                                          <div className="theme-text-secondary flex items-center gap-2">
                                             <MapPin
-                                              size={
-                                                14
-                                              }
-                                              className="text-slate-400"
+                                              size={14}
+                                              className="theme-text-placeholder"
                                             />
 
                                             <span>
@@ -2228,13 +1915,9 @@ export default function DetailKelasPage() {
                                               )
                                             }
                                             title="Hapus jadwal"
-                                            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-rose-50 hover:text-rose-600"
+                                            className="theme-text-muted inline-flex h-8 w-8 items-center justify-center rounded-lg transition hover:bg-[var(--color-danger-background)] hover:text-[var(--color-danger)]"
                                           >
-                                            <Trash2
-                                              size={
-                                                16
-                                              }
-                                            />
+                                            <Trash2 size={16} />
                                           </button>
                                         </td>
                                       </tr>
@@ -2248,27 +1931,21 @@ export default function DetailKelasPage() {
 
                         {/* TOTAL */}
 
-                        {jadwal.length >
-                          0 && (
-                          <div className="border-t border-slate-100 bg-slate-50/50 px-5 py-3.5 sm:px-6">
-                            <div className="flex flex-col gap-1 text-xs text-slate-500 sm:flex-row sm:items-center sm:justify-between">
+                        {jadwal.length > 0 && (
+                          <div className="theme-card-soft theme-border-soft border-t px-5 py-3.5 sm:px-6">
+                            <div className="theme-text-muted flex flex-col gap-1 text-xs sm:flex-row sm:items-center sm:justify-between">
                               <span>
                                 Total{" "}
-                                <strong className="font-semibold text-slate-700">
-                                  {
-                                    jadwal.length
-                                  }
+                                <strong className="theme-text-secondary font-semibold">
+                                  {jadwal.length}
                                 </strong>{" "}
-                                jadwal
-                                pelajaran
+                                jadwal pelajaran
                               </span>
 
                               <span>
                                 Kelas{" "}
-                                <strong className="font-semibold text-[#1E3A8A]">
-                                  {
-                                    kelas.nama
-                                  }
+                                <strong className="theme-sidebar-text-active font-semibold">
+                                  {kelas.nama}
                                 </strong>
                               </span>
                             </div>

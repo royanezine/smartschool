@@ -36,6 +36,74 @@ import {
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
+// ============================================================
+// THEME HELPERS
+// ============================================================
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+
+// ============================================================
+// PAGE
+// ============================================================
+
 export default function ProfilGuruPage() {
   const router = useRouter();
 
@@ -104,23 +172,6 @@ export default function ProfilGuruPage() {
         );
       }
 
-      /*
-       * Response backend bisa berbentuk:
-       *
-       * {
-       *   success: true,
-       *   data: {...}
-       * }
-       *
-       * atau:
-       *
-       * {
-       *   data: {
-       *      data: {...}
-       *   }
-       * }
-       */
-
       const rawData =
         result?.data?.data ||
         result?.data ||
@@ -166,16 +217,20 @@ export default function ProfilGuruPage() {
     }
   };
 
+  // ============================================================
+  // LOADING
+  // ============================================================
+
   if (loading) {
     return (
-      <div className="flex h-screen w-full items-center justify-center bg-slate-100">
+      <div className="theme-page flex h-screen w-full items-center justify-center">
         <div className="flex flex-col items-center gap-3">
           <Loader2
             size={32}
-            className="animate-spin text-blue-600"
+            className={`animate-spin ${themePrimaryText}`}
           />
 
-          <p className="text-sm font-medium text-slate-500">
+          <p className="theme-text-secondary text-sm font-medium">
             Memuat profil guru...
           </p>
         </div>
@@ -183,9 +238,13 @@ export default function ProfilGuruPage() {
     );
   }
 
+  // ============================================================
+  // ERROR
+  // ============================================================
+
   if (error || !profile) {
     return (
-      <div className="flex h-screen w-full min-w-0 overflow-hidden bg-slate-100">
+      <div className="theme-page flex h-screen w-full min-w-0 overflow-hidden">
         <Sidebar
           active="profil"
           setActive={() => {}}
@@ -206,23 +265,27 @@ export default function ProfilGuruPage() {
           />
 
           <main className="flex flex-1 items-center justify-center overflow-y-auto p-6">
-            <div className="w-full max-w-md rounded-2xl border border-red-100 bg-white p-6 text-center shadow-sm">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 text-red-600">
+            <div
+              className={`theme-card w-full max-w-md rounded-2xl border p-6 text-center ${themeDangerBorder} ${themeCardShadow}`}
+            >
+              <div
+                className={`mx-auto flex h-12 w-12 items-center justify-center rounded-xl ${themeDangerSurface} theme-danger`}
+              >
                 <AlertCircle size={24} />
               </div>
 
-              <h2 className="mt-4 text-base font-bold text-slate-800">
+              <h2 className="theme-text mt-4 text-base font-bold">
                 Gagal Memuat Profil
               </h2>
 
-              <p className="mt-2 text-sm leading-relaxed text-slate-500">
+              <p className="theme-text-secondary mt-2 text-sm leading-relaxed">
                 {error || "Data profil tidak ditemukan."}
               </p>
 
               <button
                 type="button"
                 onClick={loadProfile}
-                className="mt-5 inline-flex items-center justify-center rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-700"
+                className={`mt-5 inline-flex items-center justify-center rounded-xl px-5 py-2.5 text-sm font-semibold text-[var(--color-card)] transition ${themePrimaryGradient} ${themePrimaryShadow}`}
               >
                 Coba Lagi
               </button>
@@ -233,8 +296,12 @@ export default function ProfilGuruPage() {
     );
   }
 
+  // ============================================================
+  // MAIN
+  // ============================================================
+
   return (
-    <div className="flex h-screen w-full min-w-0 overflow-hidden bg-slate-100">
+    <div className="theme-page flex h-screen w-full min-w-0 overflow-hidden">
       {/* SIDEBAR */}
       <Sidebar
         active="profil"
@@ -260,25 +327,32 @@ export default function ProfilGuruPage() {
           <div className="w-full min-w-0 p-3 sm:p-4 md:p-6 lg:p-7 xl:p-8">
             <div className="mx-auto w-full max-w-[1500px] space-y-6">
 
+              {/* ================================================= */}
               {/* PAGE HEADER */}
-              <section className="rounded-2xl border border-slate-200 bg-white shadow-sm">
+              {/* ================================================= */}
+
+              <section
+                className={`theme-card rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+              >
                 <div className="flex flex-col gap-4 p-5 sm:p-6 lg:flex-row lg:items-center lg:justify-between">
                   <div>
                     <div className="mb-2 flex items-center gap-2">
-                      <span className="rounded-full bg-blue-50 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-blue-700">
+                      <span
+                        className={`rounded-full px-3 py-1 text-[10px] font-bold uppercase tracking-wider ${themePrimarySoft} ${themePrimaryText}`}
+                      >
                         Guru
                       </span>
 
-                      <span className="text-xs text-slate-400">
+                      <span className="theme-text-muted text-xs">
                         / Profil
                       </span>
                     </div>
 
-                    <h1 className="text-xl font-bold tracking-tight text-slate-800 sm:text-2xl">
+                    <h1 className="theme-text text-xl font-bold tracking-tight sm:text-2xl">
                       Profil Guru
                     </h1>
 
-                    <p className="mt-1 text-xs leading-relaxed text-slate-500 sm:text-sm">
+                    <p className="theme-text-secondary mt-1 text-xs leading-relaxed sm:text-sm">
                       Kelola dan lihat informasi profil, data kepegawaian,
                       serta informasi akun Anda.
                     </p>
@@ -287,7 +361,7 @@ export default function ProfilGuruPage() {
                   <button
                     type="button"
                     onClick={handleEditProfile}
-                    className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 sm:w-auto"
+                    className={`inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold text-[var(--color-card)] transition sm:w-auto ${themePrimaryGradient} ${themePrimaryShadow}`}
                   >
                     <Edit3 size={17} />
                     Edit Profil
@@ -295,14 +369,26 @@ export default function ProfilGuruPage() {
                 </div>
               </section>
 
+              {/* ================================================= */}
               {/* PROFILE HERO */}
-              <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <div className="relative h-32 overflow-hidden bg-slate-800 sm:h-40">
-                  <div className="absolute -right-10 -top-20 h-56 w-56 rounded-full bg-blue-500/20 blur-3xl" />
-                  <div className="absolute -bottom-24 left-1/3 h-52 w-52 rounded-full bg-indigo-500/20 blur-3xl" />
+              {/* ================================================= */}
+
+              <section
+                className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+              >
+                <div
+                  className={`relative h-32 overflow-hidden sm:h-40 ${themePrimaryGradient}`}
+                >
+                  <div
+                    className="absolute -right-10 -top-20 h-56 w-56 rounded-full bg-[color-mix(in_srgb,var(--color-card)_18%,transparent)] blur-3xl"
+                  />
+
+                  <div
+                    className="absolute -bottom-24 left-1/3 h-52 w-52 rounded-full bg-[color-mix(in_srgb,var(--color-info)_18%,transparent)] blur-3xl"
+                  />
 
                   <div className="absolute inset-0 opacity-10">
-                    <div className="h-full w-full bg-[radial-gradient(circle_at_20%_20%,white_1px,transparent_1px)] [background-size:24px_24px]" />
+                    <div className="h-full w-full bg-[radial-gradient(circle_at_20%_20%,var(--color-card)_1px,transparent_1px)] [background-size:24px_24px]" />
                   </div>
                 </div>
 
@@ -312,7 +398,9 @@ export default function ProfilGuruPage() {
 
                       {/* AVATAR */}
                       <div className="relative w-fit">
-                        <div className="flex h-24 w-24 items-center justify-center rounded-2xl border-4 border-white bg-slate-700 text-2xl font-bold text-white shadow-lg sm:h-28 sm:w-28 sm:text-3xl">
+                        <div
+                          className={`theme-card flex h-24 w-24 items-center justify-center rounded-2xl border-4 text-2xl font-bold sm:h-28 sm:w-28 sm:text-3xl ${themeNeutralBorder} ${themePrimaryText} ${themeCardShadow}`}
+                        >
                           {profile.initials}
                         </div>
 
@@ -320,7 +408,7 @@ export default function ProfilGuruPage() {
                           type="button"
                           aria-label="Ubah foto profil"
                           onClick={handleEditProfile}
-                          className="absolute bottom-1 right-1 flex h-8 w-8 items-center justify-center rounded-lg border-2 border-white bg-blue-600 text-white shadow-sm transition hover:bg-blue-700"
+                          className={`absolute bottom-1 right-1 flex h-8 w-8 items-center justify-center rounded-lg border-2 border-[var(--color-card)] text-[var(--color-card)] transition ${themePrimaryGradient} ${themePrimaryShadow}`}
                         >
                           <Camera size={14} />
                         </button>
@@ -329,21 +417,23 @@ export default function ProfilGuruPage() {
                       {/* NAME */}
                       <div className="min-w-0 pb-1">
                         <div className="flex flex-wrap items-center gap-2">
-                          <h2 className="text-xl font-bold text-slate-800 sm:text-2xl">
+                          <h2 className="theme-text text-xl font-bold sm:text-2xl">
                             {profile.nama}
                           </h2>
 
-                          <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-semibold text-emerald-700">
+                          <span
+                            className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-semibold ${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder}`}
+                          >
                             <CheckCircle2 size={12} />
                             {profile.statusAkun}
                           </span>
                         </div>
 
-                        <p className="mt-1 text-sm font-medium text-slate-500">
+                        <p className="theme-text-secondary mt-1 text-sm font-medium">
                           {profile.gelar}
                         </p>
 
-                        <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-400">
+                        <div className="theme-text-muted mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs">
                           <span className="inline-flex items-center gap-1.5">
                             <BriefcaseBusiness size={13} />
                             {profile.jabatan}
@@ -358,17 +448,21 @@ export default function ProfilGuruPage() {
                     </div>
 
                     {/* CODE */}
-                    <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 px-4 py-3">
-                      <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-slate-600 shadow-sm">
+                    <div
+                      className={`flex items-center gap-3 rounded-xl border px-4 py-3 ${themeNeutralSurface} ${themeNeutralBorder}`}
+                    >
+                      <div
+                        className={`theme-card flex h-9 w-9 items-center justify-center rounded-lg ${themePrimaryText} ${themeSmallShadow}`}
+                      >
                         <Hash size={17} />
                       </div>
 
                       <div>
-                        <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+                        <p className="theme-text-muted text-[10px] font-medium uppercase tracking-wide">
                           Kode Guru
                         </p>
 
-                        <p className="mt-0.5 text-sm font-bold text-slate-700">
+                        <p className="theme-text mt-0.5 text-sm font-bold">
                           {profile.kodeGuru}
                         </p>
                       </div>
@@ -377,8 +471,13 @@ export default function ProfilGuruPage() {
                 </div>
               </section>
 
+              {/* ================================================= */}
               {/* TABS */}
-              <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+              {/* ================================================= */}
+
+              <div
+                className={`theme-card overflow-x-auto rounded-xl border ${themeNeutralBorder} ${themeCardShadow}`}
+              >
                 <div className="flex min-w-max">
                   <TabButton
                     active={activeTab === "profil"}
@@ -403,20 +502,19 @@ export default function ProfilGuruPage() {
                 </div>
               </div>
 
-              {/* ===================================================== */}
+              {/* ================================================= */}
               {/* PROFIL */}
-              {/* ===================================================== */}
+              {/* ================================================= */}
 
               {activeTab === "profil" && (
                 <div className="grid min-w-0 grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
-
                   <div className="min-w-0 space-y-6">
 
                     <ProfileSection
                       icon={User}
                       title="Informasi Pribadi"
                       description="Informasi dasar mengenai identitas guru."
-                      iconClass="bg-blue-50 text-blue-600"
+                      iconType="primary"
                     >
                       <div className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
                         <DetailItem
@@ -461,7 +559,7 @@ export default function ProfilGuruPage() {
                       icon={Phone}
                       title="Informasi Kontak"
                       description="Informasi kontak yang dapat digunakan untuk komunikasi."
-                      iconClass="bg-indigo-50 text-indigo-600"
+                      iconType="info"
                     >
                       <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                         <DetailItem
@@ -490,7 +588,7 @@ export default function ProfilGuruPage() {
                       icon={BookOpen}
                       title="Bidang Mengajar"
                       description="Informasi bidang studi dan aktivitas pembelajaran."
-                      iconClass="bg-violet-50 text-violet-600"
+                      iconType="primary"
                     >
                       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                         <InfoBox
@@ -523,23 +621,30 @@ export default function ProfilGuruPage() {
                   {/* RIGHT */}
                   <aside className="min-w-0 space-y-6">
 
-                    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                      <div className="border-b border-slate-100 bg-slate-50/80 p-5">
+                    {/* STATUS */}
+                    <div
+                      className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+                    >
+                      <div
+                        className={`border-b p-5 ${themeDivider} ${themeNeutralSurface}`}
+                      >
                         <div className="flex items-center justify-between">
                           <div>
-                            <h3 className="text-sm font-bold text-slate-800">
+                            <h3 className="theme-text text-sm font-bold">
                               Status Guru
                             </h3>
 
-                            <p className="mt-1 text-xs text-slate-400">
+                            <p className="theme-text-muted mt-1 text-xs">
                               Ringkasan status akun dan kepegawaian
                             </p>
                           </div>
 
-                          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-50">
+                          <div
+                            className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeSuccessSurface}`}
+                          >
                             <CheckCircle2
                               size={18}
-                              className="text-emerald-600"
+                              className="text-[var(--color-success)]"
                             />
                           </div>
                         </div>
@@ -572,14 +677,17 @@ export default function ProfilGuruPage() {
                       </div>
                     </div>
 
-                    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                    {/* ACTIVITY */}
+                    <div
+                      className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+                    >
                       <div className="p-5">
                         <div className="mb-4">
-                          <h3 className="text-sm font-bold text-slate-800">
+                          <h3 className="theme-text text-sm font-bold">
                             Ringkasan Aktivitas
                           </h3>
 
-                          <p className="mt-1 text-xs text-slate-400">
+                          <p className="theme-text-muted mt-1 text-xs">
                             Data aktivitas guru.
                           </p>
                         </div>
@@ -612,13 +720,16 @@ export default function ProfilGuruPage() {
                       </div>
                     </div>
 
-                    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                    {/* QUICK ACTION */}
+                    <div
+                      className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+                    >
                       <div className="p-5">
-                        <h3 className="text-sm font-bold text-slate-800">
+                        <h3 className="theme-text text-sm font-bold">
                           Akses Cepat
                         </h3>
 
-                        <p className="mt-1 text-xs text-slate-400">
+                        <p className="theme-text-muted mt-1 text-xs">
                           Menu yang berkaitan dengan profil Anda.
                         </p>
 
@@ -656,9 +767,9 @@ export default function ProfilGuruPage() {
                 </div>
               )}
 
-              {/* ===================================================== */}
+              {/* ================================================= */}
               {/* KEPEGAWAIAN */}
-              {/* ===================================================== */}
+              {/* ================================================= */}
 
               {activeTab === "kepegawaian" && (
                 <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
@@ -666,7 +777,7 @@ export default function ProfilGuruPage() {
                     icon={BriefcaseBusiness}
                     title="Data Kepegawaian"
                     description="Informasi status dan identitas kepegawaian."
-                    iconClass="bg-blue-50 text-blue-600"
+                    iconType="primary"
                   >
                     <div className="space-y-5">
                       <DetailItem
@@ -705,7 +816,7 @@ export default function ProfilGuruPage() {
                     icon={GraduationCap}
                     title="Pendidikan & Kompetensi"
                     description="Informasi pendidikan terakhir dan bidang kompetensi."
-                    iconClass="bg-violet-50 text-violet-600"
+                    iconType="info"
                   >
                     <div className="space-y-4">
                       <InfoBox
@@ -736,9 +847,9 @@ export default function ProfilGuruPage() {
                 </div>
               )}
 
-              {/* ===================================================== */}
+              {/* ================================================= */}
               {/* AKUN */}
-              {/* ===================================================== */}
+              {/* ================================================= */}
 
               {activeTab === "akun" && (
                 <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_340px]">
@@ -746,7 +857,7 @@ export default function ProfilGuruPage() {
                     icon={ShieldCheck}
                     title="Akun & Keamanan"
                     description="Kelola informasi akun dan keamanan akses."
-                    iconClass="bg-slate-100 text-slate-700"
+                    iconType="neutral"
                   >
                     <div className="space-y-5">
                       <DetailItem
@@ -761,18 +872,22 @@ export default function ProfilGuruPage() {
                         value={profile.email}
                       />
 
-                      <div className="flex flex-col gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div
+                        className={`flex flex-col gap-4 rounded-xl border p-4 sm:flex-row sm:items-center sm:justify-between ${themeNeutralSurface} ${themeNeutralBorder}`}
+                      >
                         <div className="flex items-start gap-3">
-                          <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-white text-slate-600 shadow-sm">
+                          <div
+                            className={`theme-card flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg ${themePrimaryText} ${themeSmallShadow}`}
+                          >
                             <Lock size={18} />
                           </div>
 
                           <div>
-                            <p className="text-sm font-semibold text-slate-700">
+                            <p className="theme-text-secondary text-sm font-semibold">
                               Kata Sandi
                             </p>
 
-                            <p className="mt-1 text-xs text-slate-400">
+                            <p className="theme-text-muted mt-1 text-xs">
                               Gunakan menu keamanan untuk memperbarui
                               kata sandi.
                             </p>
@@ -782,7 +897,7 @@ export default function ProfilGuruPage() {
                         <button
                           type="button"
                           onClick={handleChangePassword}
-                          className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 sm:w-auto"
+                          className={`inline-flex w-full items-center justify-center gap-2 rounded-lg border px-4 py-2.5 text-xs font-semibold transition sm:w-auto ${themeNeutralBorder} theme-card theme-text-secondary ${themeNeutralHover}`}
                         >
                           <KeyRound size={14} />
                           Ubah Kata Sandi
@@ -792,32 +907,43 @@ export default function ProfilGuruPage() {
                   </ProfileSection>
 
                   <div className="space-y-6">
-                    <div className="rounded-2xl border border-emerald-100 bg-emerald-50 p-5">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-600 text-white">
+
+                    {/* PROTECTED */}
+                    <div
+                      className={`rounded-2xl border p-5 ${themeSuccessSurface} ${themeSuccessBorder}`}
+                    >
+                      <div
+                        className={`flex h-10 w-10 items-center justify-center rounded-xl text-[var(--color-card)] ${themePrimaryGradient}`}
+                      >
                         <ShieldCheck size={19} />
                       </div>
 
-                      <h3 className="mt-4 text-sm font-bold text-slate-800">
+                      <h3 className="theme-text mt-4 text-sm font-bold">
                         Akun Terlindungi
                       </h3>
 
-                      <p className="mt-1.5 text-xs leading-relaxed text-slate-500">
+                      <p className="theme-text-secondary mt-1.5 text-xs leading-relaxed">
                         Akun Anda aktif dan telah terverifikasi.
                         Pastikan informasi login tetap aman dan tidak
                         dibagikan kepada orang lain.
                       </p>
                     </div>
 
-                    <div className="rounded-2xl border border-blue-100 bg-blue-50 p-5">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 text-white">
+                    {/* INFORMATION */}
+                    <div
+                      className={`rounded-2xl border p-5 ${themeInfoSurface} ${themeInfoBorder}`}
+                    >
+                      <div
+                        className={`flex h-10 w-10 items-center justify-center rounded-xl text-[var(--color-card)] ${themePrimaryGradient}`}
+                      >
                         <InfoIcon />
                       </div>
 
-                      <h3 className="mt-4 text-sm font-bold text-slate-800">
+                      <h3 className="theme-text mt-4 text-sm font-bold">
                         Informasi
                       </h3>
 
-                      <p className="mt-1.5 text-xs leading-relaxed text-slate-500">
+                      <p className="theme-text-secondary mt-1.5 text-xs leading-relaxed">
                         Jika terdapat kesalahan pada data kepegawaian,
                         hubungi administrator sekolah untuk melakukan
                         pembaruan data.
@@ -827,8 +953,10 @@ export default function ProfilGuruPage() {
                 </div>
               )}
 
-              <footer className="border-t border-slate-200 pt-5 text-center">
-                <p className="text-[11px] text-slate-400">
+              {/* FOOTER */}
+
+              <footer className={`border-t pt-5 text-center ${themeDivider}`}>
+                <p className="theme-text-muted text-[11px]">
                   © 2026 SmartSchool • Profil Guru
                 </p>
               </footer>
@@ -1085,8 +1213,8 @@ function TabButton({
       onClick={onClick}
       className={`relative inline-flex items-center gap-2 px-5 py-3.5 text-xs font-semibold transition sm:px-6 ${
         active
-          ? "text-blue-600"
-          : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
+          ? themePrimaryText
+          : `theme-text-secondary ${themeNeutralHover} hover:text-[var(--color-primary)]`
       }`}
     >
       <Icon size={16} />
@@ -1094,7 +1222,9 @@ function TabButton({
       <span>{label}</span>
 
       {active && (
-        <span className="absolute bottom-0 left-4 right-4 h-0.5 rounded-full bg-blue-600 sm:left-5 sm:right-5" />
+        <span
+          className={`absolute bottom-0 left-4 right-4 h-0.5 rounded-full sm:left-5 sm:right-5 ${themePrimaryGradient}`}
+        />
       )}
     </button>
   );
@@ -1108,25 +1238,37 @@ function ProfileSection({
   icon: Icon,
   title,
   description,
-  iconClass,
+  iconType = "primary",
   children,
 }) {
+  const iconStyles = {
+    primary: `${themePrimarySoft} ${themePrimaryText}`,
+    info: `${themeInfoSurface} text-[var(--color-info)]`,
+    neutral: `${themeNeutralSurface} theme-text-secondary`,
+  };
+
   return (
-    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-      <div className="border-b border-slate-100 bg-gradient-to-r from-slate-50 to-white px-5 py-5 sm:px-6">
+    <section
+      className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+    >
+      <div
+        className={`border-b px-5 py-5 sm:px-6 ${themeDivider} ${themeNeutralSurface}`}
+      >
         <div className="flex items-start gap-3">
           <div
-            className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl ${iconClass}`}
+            className={`flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl ${
+              iconStyles[iconType] || iconStyles.primary
+            }`}
           >
             <Icon size={19} />
           </div>
 
           <div className="min-w-0">
-            <h2 className="text-sm font-bold text-slate-800 sm:text-base">
+            <h2 className="theme-text text-sm font-bold sm:text-base">
               {title}
             </h2>
 
-            <p className="mt-1 text-xs leading-relaxed text-slate-400 sm:text-sm">
+            <p className="theme-text-muted mt-1 text-xs leading-relaxed sm:text-sm">
               {description}
             </p>
           </div>
@@ -1152,16 +1294,18 @@ function DetailItem({
   return (
     <div className="min-w-0">
       <div className="flex items-start gap-3">
-        <div className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-slate-50 text-slate-400">
+        <div
+          className={`mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText}`}
+        >
           <Icon size={15} />
         </div>
 
         <div className="min-w-0">
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+          <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wide">
             {label}
           </p>
 
-          <p className="mt-1 break-words text-sm font-semibold leading-relaxed text-slate-700">
+          <p className="theme-text mt-1 break-words text-sm font-semibold leading-relaxed">
             {value || "-"}
           </p>
         </div>
@@ -1180,17 +1324,21 @@ function InfoBox({
   value,
 }) {
   return (
-    <div className="flex min-w-0 items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
-      <div className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg bg-white text-blue-600 shadow-sm">
+    <div
+      className={`flex min-w-0 items-center gap-3 rounded-xl border p-4 ${themeNeutralSurface} ${themeNeutralBorder}`}
+    >
+      <div
+        className={`theme-card flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-lg ${themePrimaryText} ${themeSmallShadow}`}
+      >
         <Icon size={17} />
       </div>
 
       <div className="min-w-0">
-        <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+        <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wide">
           {label}
         </p>
 
-        <p className="mt-1 truncate text-sm font-semibold text-slate-700">
+        <p className="theme-text mt-1 truncate text-sm font-semibold">
           {value || "-"}
         </p>
       </div>
@@ -1208,8 +1356,10 @@ function StatusRow({
   active = false,
 }) {
   return (
-    <div className="flex items-center justify-between gap-3 rounded-lg px-3 py-2.5 transition hover:bg-slate-50">
-      <span className="text-xs text-slate-500">
+    <div
+      className={`flex items-center justify-between gap-3 rounded-lg px-3 py-2.5 transition ${themeNeutralHover}`}
+    >
+      <span className="theme-text-secondary text-xs">
         {label}
       </span>
 
@@ -1217,16 +1367,16 @@ function StatusRow({
         <span
           className={`h-1.5 w-1.5 rounded-full ${
             active
-              ? "bg-emerald-500"
-              : "bg-slate-300"
+              ? "bg-[var(--color-success)]"
+              : "bg-[color-mix(in_srgb,var(--color-text)_22%,transparent)]"
           }`}
         />
 
         <span
           className={`text-xs font-semibold ${
             active
-              ? "text-emerald-600"
-              : "text-slate-500"
+              ? "text-[var(--color-success)]"
+              : "theme-text-secondary"
           }`}
         >
           {value || "-"}
@@ -1246,18 +1396,22 @@ function MiniStat({
   label,
 }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+    <div
+      className={`rounded-xl border p-3 ${themeNeutralSurface} ${themeNeutralBorder}`}
+    >
       <div className="flex items-center gap-2">
-        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-white text-blue-600 shadow-sm">
+        <div
+          className={`theme-card flex h-8 w-8 items-center justify-center rounded-lg ${themePrimaryText} ${themeSmallShadow}`}
+        >
           <Icon size={15} />
         </div>
 
         <div className="min-w-0">
-          <p className="text-sm font-bold text-slate-800">
+          <p className="theme-text text-sm font-bold">
             {value}
           </p>
 
-          <p className="truncate text-[10px] text-slate-400">
+          <p className="theme-text-muted truncate text-[10px]">
             {label}
           </p>
         </div>
@@ -1280,25 +1434,27 @@ function QuickAction({
     <button
       type="button"
       onClick={onClick}
-      className="group flex w-full items-center gap-3 rounded-xl border border-transparent p-3 text-left transition hover:border-slate-200 hover:bg-slate-50"
+      className={`group flex w-full items-center gap-3 rounded-xl border border-transparent p-3 text-left transition ${themeNeutralHover} hover:border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]`}
     >
-      <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600 transition group-hover:bg-blue-600 group-hover:text-white">
+      <div
+        className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText} transition group-hover:text-[var(--color-card)] group-hover:${themePrimaryGradient}`}
+      >
         <Icon size={16} />
       </div>
 
       <div className="min-w-0 flex-1">
-        <p className="truncate text-xs font-semibold text-slate-700">
+        <p className="theme-text truncate text-xs font-semibold">
           {title}
         </p>
 
-        <p className="mt-0.5 truncate text-[11px] text-slate-400">
+        <p className="theme-text-muted mt-0.5 truncate text-[11px]">
           {description}
         </p>
       </div>
 
       <ChevronRight
         size={15}
-        className="flex-shrink-0 text-slate-300 transition group-hover:translate-x-0.5 group-hover:text-blue-500"
+        className="theme-text-muted flex-shrink-0 transition group-hover:translate-x-0.5 group-hover:text-[var(--color-primary)]"
       />
     </button>
   );

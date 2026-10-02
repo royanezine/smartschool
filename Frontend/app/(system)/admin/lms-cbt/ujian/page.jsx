@@ -8,19 +8,36 @@ import {
   Users,
   Clock3,
   CalendarDays,
-  MoreVertical,
   Eye,
   Pencil,
   Trash2,
   X,
   ClipboardList,
   CheckCircle2,
-  CircleAlert,
-  Timer,
 } from "lucide-react";
 
 import Sidebar from "../../../../components/Sidebar";
 import Header from "../../../../components/Header";
+
+/* ============================================================
+   THEME HELPERS
+============================================================ */
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]";
+
+const themePrimaryHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-primary)_5%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+/* ============================================================
+   DATA
+============================================================ */
 
 const initialUjian = [
   {
@@ -90,24 +107,39 @@ const initialUjian = [
   },
 ];
 
+/* ============================================================
+   STATUS CONFIG
+============================================================ */
+
 const statusConfig = {
   Aktif: {
-    className: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    className:
+      "bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] text-[var(--color-success)] border-[color-mix(in_srgb,var(--color-success)_20%,transparent)]",
     icon: CheckCircle2,
   },
+
   Terjadwal: {
-    className: "bg-blue-50 text-blue-700 border-blue-200",
+    className:
+      "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] text-[var(--color-primary)] border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]",
     icon: CalendarDays,
   },
+
   Draft: {
-    className: "bg-slate-100 text-slate-600 border-slate-200",
+    className:
+      "bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] theme-text-secondary border-[color-mix(in_srgb,var(--color-text)_12%,transparent)]",
     icon: ClipboardList,
   },
+
   Selesai: {
-    className: "bg-violet-50 text-violet-700 border-violet-200",
+    className:
+      "bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)] text-[var(--color-info)] border-[color-mix(in_srgb,var(--color-info)_20%,transparent)]",
     icon: CheckCircle2,
   },
 };
+
+/* ============================================================
+   PAGE
+============================================================ */
 
 export default function UjianCbtPage() {
   const [ujian, setUjian] = useState(initialUjian);
@@ -115,6 +147,10 @@ export default function UjianCbtPage() {
   const [filterStatus, setFilterStatus] = useState("Semua");
   const [selectedUjian, setSelectedUjian] = useState(null);
   const [modal, setModal] = useState(null);
+
+  /* ============================================================
+     FILTER
+  ============================================================ */
 
   const filteredUjian = useMemo(() => {
     return ujian.filter((item) => {
@@ -127,18 +163,34 @@ export default function UjianCbtPage() {
         item.guru.toLowerCase().includes(keyword);
 
       const matchesStatus =
-        filterStatus === "Semua" || item.status === filterStatus;
+        filterStatus === "Semua" ||
+        item.status === filterStatus;
 
       return matchesSearch && matchesStatus;
     });
   }, [ujian, search, filterStatus]);
 
+  /* ============================================================
+     STATISTICS
+  ============================================================ */
+
   const totalUjian = ujian.length;
-  const aktif = ujian.filter((item) => item.status === "Aktif").length;
+
+  const aktif = ujian.filter(
+    (item) => item.status === "Aktif"
+  ).length;
+
   const terjadwal = ujian.filter(
     (item) => item.status === "Terjadwal"
   ).length;
-  const selesai = ujian.filter((item) => item.status === "Selesai").length;
+
+  const selesai = ujian.filter(
+    (item) => item.status === "Selesai"
+  ).length;
+
+  /* ============================================================
+     MODAL HANDLERS
+  ============================================================ */
 
   const openDetail = (item) => {
     setSelectedUjian(item);
@@ -157,7 +209,9 @@ export default function UjianCbtPage() {
 
   const deleteUjian = () => {
     setUjian((prev) =>
-      prev.filter((item) => item.id !== selectedUjian.id)
+      prev.filter(
+        (item) => item.id !== selectedUjian.id
+      )
     );
 
     setSelectedUjian(null);
@@ -165,27 +219,44 @@ export default function UjianCbtPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div className="min-h-screen theme-page flex">
+      {/* ======================================================
+          SIDEBAR
+      ====================================================== */}
+
       <Sidebar />
 
       <div className="flex-1 min-w-0 flex flex-col">
         <Header />
 
         <main className="flex-1 px-4 md:px-6 lg:px-8 py-6">
-          {/* Breadcrumb */}
-          <div className="flex items-center gap-2 text-sm text-slate-500 mb-5">
+          {/* ==================================================
+              BREADCRUMB
+          ================================================== */}
+
+          <div className="flex items-center gap-2 text-sm theme-text-secondary mb-5">
             <span>CBT</span>
-            <span>/</span>
-            <span className="text-slate-800 font-medium">Ujian</span>
+
+            <span className="theme-text-muted">
+              /
+            </span>
+
+            <span className="theme-text font-medium">
+              Ujian
+            </span>
           </div>
 
-          {/* Header */}
+          {/* ==================================================
+              HEADER
+          ================================================== */}
+
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
             <div>
-              <h1 className="text-2xl font-bold text-slate-800">
+              <h1 className="text-2xl font-bold theme-text">
                 Ujian CBT
               </h1>
-              <p className="text-sm text-slate-500 mt-1">
+
+              <p className="text-sm theme-text-secondary mt-1">
                 Kelola ujian berbasis komputer untuk siswa
               </p>
             </div>
@@ -195,20 +266,35 @@ export default function UjianCbtPage() {
                 setSelectedUjian(null);
                 setModal("add");
               }}
-              className="inline-flex items-center justify-center gap-2 px-4 py-2.5 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-sm font-medium transition"
+              className="
+                inline-flex items-center justify-center gap-2
+                px-4 py-2.5
+                bg-[var(--color-primary)]
+                hover:opacity-90
+                text-white
+                rounded-lg
+                text-sm
+                font-medium
+                transition
+                shadow-[0_6px_18px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]
+              "
             >
               <Plus size={18} />
               Buat Ujian
             </button>
           </div>
 
-          {/* Statistics */}
+          {/* ==================================================
+              STATISTICS
+          ================================================== */}
+
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
             <StatCard
               title="Total Ujian"
               value={totalUjian}
               icon={FileCheck2}
               description="Semua ujian"
+              variant="primary"
             />
 
             <StatCard
@@ -216,6 +302,7 @@ export default function UjianCbtPage() {
               value={aktif}
               icon={CheckCircle2}
               description="Sedang berlangsung"
+              variant="success"
             />
 
             <StatCard
@@ -223,6 +310,7 @@ export default function UjianCbtPage() {
               value={terjadwal}
               icon={CalendarDays}
               description="Akan datang"
+              variant="info"
             />
 
             <StatCard
@@ -230,115 +318,212 @@ export default function UjianCbtPage() {
               value={selesai}
               icon={ClipboardList}
               description="Sudah selesai"
+              variant="warning"
             />
           </div>
 
-          {/* Main Card */}
-          <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
-            {/* Toolbar */}
-            <div className="p-4 border-b border-slate-200">
+          {/* ==================================================
+              MAIN CARD
+          ================================================== */}
+
+          <div
+            className={`
+              theme-card
+              border
+              theme-border
+              rounded-xl
+              overflow-hidden
+              ${themeCardShadow}
+            `}
+          >
+            {/* ==================================================
+                TOOLBAR
+            ================================================== */}
+
+            <div className="p-4 border-b theme-border">
               <div className="flex flex-col lg:flex-row gap-3 lg:items-center lg:justify-between">
-                {/* Search */}
+                {/* SEARCH */}
+
                 <div className="relative w-full lg:max-w-md">
                   <Search
                     size={18}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                    className="
+                      absolute left-3 top-1/2
+                      -translate-y-1/2
+                      theme-text-muted
+                    "
                   />
 
                   <input
                     type="text"
                     placeholder="Cari ujian, mata pelajaran, kelas..."
                     value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2.5 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-slate-200 focus:border-slate-400"
+                    onChange={(e) =>
+                      setSearch(e.target.value)
+                    }
+                    className="
+                      theme-input
+                      w-full
+                      pl-10 pr-4 py-2.5
+                      border
+                      theme-border
+                      rounded-lg
+                      text-sm
+                      theme-text
+                      theme-text-placeholder
+                      outline-none
+                      focus:ring-2
+                      focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]
+                      focus:border-[var(--color-primary)]
+                    "
                   />
                 </div>
 
-                {/* Filter */}
+                {/* FILTER */}
+
                 <div className="flex items-center gap-2">
                   <select
                     value={filterStatus}
-                    onChange={(e) => setFilterStatus(e.target.value)}
-                    className="px-3 py-2.5 border border-slate-200 rounded-lg text-sm text-slate-600 bg-white outline-none focus:ring-2 focus:ring-slate-200"
+                    onChange={(e) =>
+                      setFilterStatus(e.target.value)
+                    }
+                    className="
+                      theme-input
+                      px-3 py-2.5
+                      border
+                      theme-border
+                      rounded-lg
+                      text-sm
+                      theme-text-secondary
+                      outline-none
+                      focus:ring-2
+                      focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]
+                      focus:border-[var(--color-primary)]
+                    "
                   >
-                    <option value="Semua">Semua Status</option>
-                    <option value="Aktif">Aktif</option>
-                    <option value="Terjadwal">Terjadwal</option>
-                    <option value="Draft">Draft</option>
-                    <option value="Selesai">Selesai</option>
+                    <option value="Semua">
+                      Semua Status
+                    </option>
+
+                    <option value="Aktif">
+                      Aktif
+                    </option>
+
+                    <option value="Terjadwal">
+                      Terjadwal
+                    </option>
+
+                    <option value="Draft">
+                      Draft
+                    </option>
+
+                    <option value="Selesai">
+                      Selesai
+                    </option>
                   </select>
                 </div>
               </div>
             </div>
 
-            {/* Desktop Table */}
+            {/* ==================================================
+                DESKTOP TABLE
+            ================================================== */}
+
             <div className="hidden lg:block overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="bg-slate-50 border-b border-slate-200">
-                    <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500">
+                  <tr className="theme-card-soft border-b theme-border">
+                    <th className="px-5 py-3 text-left text-xs font-semibold theme-text-secondary">
                       No
                     </th>
-                    <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500">
+
+                    <th className="px-5 py-3 text-left text-xs font-semibold theme-text-secondary">
                       Ujian
                     </th>
-                    <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500">
+
+                    <th className="px-5 py-3 text-left text-xs font-semibold theme-text-secondary">
                       Kelas
                     </th>
-                    <th className="px-5 py-3 text-left text-xs font-semibold text-slate-500">
+
+                    <th className="px-5 py-3 text-left text-xs font-semibold theme-text-secondary">
                       Jadwal
                     </th>
-                    <th className="px-5 py-3 text-center text-xs font-semibold text-slate-500">
+
+                    <th className="px-5 py-3 text-center text-xs font-semibold theme-text-secondary">
                       Soal
                     </th>
-                    <th className="px-5 py-3 text-center text-xs font-semibold text-slate-500">
+
+                    <th className="px-5 py-3 text-center text-xs font-semibold theme-text-secondary">
                       Peserta
                     </th>
-                    <th className="px-5 py-3 text-center text-xs font-semibold text-slate-500">
+
+                    <th className="px-5 py-3 text-center text-xs font-semibold theme-text-secondary">
                       Status
                     </th>
-                    <th className="px-5 py-3 text-center text-xs font-semibold text-slate-500">
+
+                    <th className="px-5 py-3 text-center text-xs font-semibold theme-text-secondary">
                       Aksi
                     </th>
                   </tr>
                 </thead>
 
-                <tbody className="divide-y divide-slate-100">
-                  {filteredUjian.map((item, index) => (
-                    <UjianRow
-                      key={item.id}
-                      item={item}
-                      index={index}
-                      onDetail={openDetail}
-                      onEdit={openEdit}
-                      onDelete={openDelete}
-                    />
-                  ))}
+                <tbody className="divide-y theme-border-soft">
+                  {filteredUjian.map(
+                    (item, index) => (
+                      <UjianRow
+                        key={item.id}
+                        item={item}
+                        index={index}
+                        onDetail={openDetail}
+                        onEdit={openEdit}
+                        onDelete={openDelete}
+                      />
+                    )
+                  )}
                 </tbody>
               </table>
             </div>
 
-            {/* Mobile */}
-            <div className="lg:hidden divide-y divide-slate-100">
+            {/* ==================================================
+                MOBILE
+            ================================================== */}
+
+            <div className="lg:hidden divide-y theme-border-soft">
               {filteredUjian.map((item) => {
-                const status = statusConfig[item.status] || statusConfig.Draft;
+                const status =
+                  statusConfig[item.status] ||
+                  statusConfig.Draft;
+
                 const StatusIcon = status.icon;
 
                 return (
-                  <div key={item.id} className="p-4">
+                  <div
+                    key={item.id}
+                    className="p-4"
+                  >
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0">
-                        <h3 className="font-semibold text-slate-800">
+                        <h3 className="font-semibold theme-text">
                           {item.nama}
                         </h3>
 
-                        <p className="text-sm text-slate-500 mt-1">
-                          {item.mapel} • {item.kelas}
+                        <p className="text-sm theme-text-secondary mt-1">
+                          {item.mapel} •{" "}
+                          {item.kelas}
                         </p>
                       </div>
 
                       <span
-                        className={`shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-full border text-xs font-medium ${status.className}`}
+                        className={`
+                          shrink-0
+                          inline-flex items-center gap-1
+                          px-2.5 py-1
+                          rounded-full
+                          border
+                          text-xs
+                          font-medium
+                          ${status.className}
+                        `}
                       >
                         <StatusIcon size={13} />
                         {item.status}
@@ -373,22 +558,52 @@ export default function UjianCbtPage() {
 
                     <div className="flex items-center gap-2 mt-4">
                       <button
-                        onClick={() => openDetail(item)}
-                        className="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50"
+                        onClick={() =>
+                          openDetail(item)
+                        }
+                        className="
+                          flex-1
+                          px-3 py-2
+                          border
+                          theme-border
+                          rounded-lg
+                          text-sm
+                          font-medium
+                          theme-text-secondary
+                          hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
+                        "
                       >
                         Detail
                       </button>
 
                       <button
-                        onClick={() => openEdit(item)}
-                        className="p-2 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50"
+                        onClick={() =>
+                          openEdit(item)
+                        }
+                        className="
+                          p-2
+                          border
+                          theme-border
+                          rounded-lg
+                          theme-text-secondary
+                          hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
+                        "
                       >
                         <Pencil size={17} />
                       </button>
 
                       <button
-                        onClick={() => openDelete(item)}
-                        className="p-2 border border-red-200 rounded-lg text-red-500 hover:bg-red-50"
+                        onClick={() =>
+                          openDelete(item)
+                        }
+                        className="
+                          p-2
+                          border
+                          border-[color-mix(in_srgb,var(--color-danger)_25%,transparent)]
+                          rounded-lg
+                          text-[var(--color-danger)]
+                          hover:bg-[color-mix(in_srgb,var(--color-danger)_8%,transparent)]
+                        "
                       >
                         <Trash2 size={17} />
                       </button>
@@ -398,40 +613,46 @@ export default function UjianCbtPage() {
               })}
             </div>
 
-            {/* Empty */}
+            {/* ==================================================
+                EMPTY
+            ================================================== */}
+
             {filteredUjian.length === 0 && (
               <div className="py-16 text-center">
                 <FileCheck2
                   size={42}
-                  className="mx-auto text-slate-300"
+                  className="mx-auto theme-text-muted"
                 />
 
-                <h3 className="mt-3 font-semibold text-slate-700">
+                <h3 className="mt-3 font-semibold theme-text">
                   Ujian tidak ditemukan
                 </h3>
 
-                <p className="text-sm text-slate-400 mt-1">
+                <p className="text-sm theme-text-muted mt-1">
                   Coba ubah kata pencarian atau filter.
                 </p>
               </div>
             )}
 
-            {/* Footer */}
+            {/* ==================================================
+                FOOTER
+            ================================================== */}
+
             {filteredUjian.length > 0 && (
-              <div className="px-5 py-4 border-t border-slate-200 flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
-                <p className="text-sm text-slate-500">
+              <div className="px-5 py-4 border-t theme-border flex flex-col sm:flex-row gap-2 sm:items-center sm:justify-between">
+                <p className="text-sm theme-text-secondary">
                   Menampilkan{" "}
-                  <span className="font-medium text-slate-700">
+                  <span className="font-medium theme-text">
                     {filteredUjian.length}
                   </span>{" "}
                   dari{" "}
-                  <span className="font-medium text-slate-700">
+                  <span className="font-medium theme-text">
                     {ujian.length}
                   </span>{" "}
                   ujian
                 </p>
 
-                <p className="text-xs text-slate-400">
+                <p className="text-xs theme-text-muted">
                   Data ujian CBT
                 </p>
               </div>
@@ -440,78 +661,96 @@ export default function UjianCbtPage() {
         </main>
       </div>
 
-      {/* Detail Modal */}
-      {modal === "detail" && selectedUjian && (
-        <Modal
-          title="Detail Ujian"
-          onClose={() => {
-            setModal(null);
-            setSelectedUjian(null);
-          }}
-        >
-          <div className="space-y-4">
-            <div>
-              <p className="text-xs text-slate-400">Nama Ujian</p>
-              <p className="font-semibold text-slate-800 mt-1">
-                {selectedUjian.nama}
-              </p>
+      {/* ========================================================
+          DETAIL MODAL
+      ======================================================== */}
+
+      {modal === "detail" &&
+        selectedUjian && (
+          <Modal
+            title="Detail Ujian"
+            onClose={() => {
+              setModal(null);
+              setSelectedUjian(null);
+            }}
+          >
+            <div className="space-y-4">
+              <div>
+                <p className="text-xs theme-text-muted">
+                  Nama Ujian
+                </p>
+
+                <p className="font-semibold theme-text mt-1">
+                  {selectedUjian.nama}
+                </p>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <DetailItem
+                  label="Mata Pelajaran"
+                  value={selectedUjian.mapel}
+                />
+
+                <DetailItem
+                  label="Kelas"
+                  value={selectedUjian.kelas}
+                />
+
+                <DetailItem
+                  label="Guru"
+                  value={selectedUjian.guru}
+                />
+
+                <DetailItem
+                  label="Jumlah Soal"
+                  value={`${selectedUjian.jumlahSoal} soal`}
+                />
+
+                <DetailItem
+                  label="Durasi"
+                  value={`${selectedUjian.durasi} menit`}
+                />
+
+                <DetailItem
+                  label="Peserta"
+                  value={`${selectedUjian.peserta} siswa`}
+                />
+
+                <DetailItem
+                  label="Tanggal"
+                  value={selectedUjian.tanggal}
+                />
+
+                <DetailItem
+                  label="Waktu"
+                  value={selectedUjian.waktu}
+                />
+              </div>
+
+              <div className="pt-3 border-t theme-border-soft flex justify-end">
+                <button
+                  onClick={() => setModal(null)}
+                  className="
+                    px-4 py-2
+                    bg-[var(--color-primary)]
+                    hover:opacity-90
+                    text-white
+                    rounded-lg
+                    text-sm
+                    font-medium
+                  "
+                >
+                  Tutup
+                </button>
+              </div>
             </div>
+          </Modal>
+        )}
 
-            <div className="grid grid-cols-2 gap-4">
-              <DetailItem
-                label="Mata Pelajaran"
-                value={selectedUjian.mapel}
-              />
+      {/* ========================================================
+          ADD MODAL
+      ======================================================== */}
 
-              <DetailItem
-                label="Kelas"
-                value={selectedUjian.kelas}
-              />
-
-              <DetailItem
-                label="Guru"
-                value={selectedUjian.guru}
-              />
-
-              <DetailItem
-                label="Jumlah Soal"
-                value={`${selectedUjian.jumlahSoal} soal`}
-              />
-
-              <DetailItem
-                label="Durasi"
-                value={`${selectedUjian.durasi} menit`}
-              />
-
-              <DetailItem
-                label="Peserta"
-                value={`${selectedUjian.peserta} siswa`}
-              />
-
-              <DetailItem
-                label="Tanggal"
-                value={selectedUjian.tanggal}
-              />
-
-              <DetailItem
-                label="Waktu"
-                value={selectedUjian.waktu}
-              />
-            </div>
-
-            <div className="pt-3 border-t border-slate-100 flex justify-end">
-              <button
-                onClick={() => setModal(null)}
-                className="px-4 py-2 bg-slate-800 text-white rounded-lg text-sm font-medium hover:bg-slate-900"
-              >
-                Tutup
-              </button>
-            </div>
-          </div>
-        </Modal>
-      )}
-
-      {/* Add Modal */}
       {modal === "add" && (
         <Modal
           title="Buat Ujian CBT"
@@ -536,111 +775,197 @@ export default function UjianCbtPage() {
         </Modal>
       )}
 
-      {/* Edit Modal */}
-      {modal === "edit" && selectedUjian && (
-        <Modal
-          title="Edit Ujian CBT"
-          onClose={() => setModal(null)}
-        >
-          <UjianForm
-            initialData={selectedUjian}
-            onCancel={() => setModal(null)}
-            onSave={(data) => {
-              setUjian((prev) =>
-                prev.map((item) =>
-                  item.id === selectedUjian.id
-                    ? {
-                        ...item,
-                        ...data,
-                      }
-                    : item
-                )
-              );
+      {/* ========================================================
+          EDIT MODAL
+      ======================================================== */}
 
-              setModal(null);
-              setSelectedUjian(null);
-            }}
-          />
-        </Modal>
-      )}
+      {modal === "edit" &&
+        selectedUjian && (
+          <Modal
+            title="Edit Ujian CBT"
+            onClose={() => setModal(null)}
+          >
+            <UjianForm
+              initialData={selectedUjian}
+              onCancel={() => setModal(null)}
+              onSave={(data) => {
+                setUjian((prev) =>
+                  prev.map((item) =>
+                    item.id === selectedUjian.id
+                      ? {
+                          ...item,
+                          ...data,
+                        }
+                      : item
+                  )
+                );
 
-      {/* Delete Modal */}
-      {modal === "delete" && selectedUjian && (
-        <Modal
-          title="Hapus Ujian"
-          onClose={() => setModal(null)}
-        >
-          <div className="text-center">
-            <div className="w-12 h-12 mx-auto rounded-full bg-red-50 flex items-center justify-center">
-              <Trash2 size={22} className="text-red-500" />
-            </div>
+                setModal(null);
+                setSelectedUjian(null);
+              }}
+            />
+          </Modal>
+        )}
 
-            <h3 className="font-semibold text-slate-800 mt-4">
-              Hapus ujian ini?
-            </h3>
+      {/* ========================================================
+          DELETE MODAL
+      ======================================================== */}
 
-            <p className="text-sm text-slate-500 mt-2">
-              Ujian{" "}
-              <span className="font-medium text-slate-700">
-                {selectedUjian.nama}
-              </span>{" "}
-              akan dihapus dari daftar.
-            </p>
-
-            <div className="flex justify-center gap-3 mt-6">
-              <button
-                onClick={() => setModal(null)}
-                className="px-4 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50"
+      {modal === "delete" &&
+        selectedUjian && (
+          <Modal
+            title="Hapus Ujian"
+            onClose={() => setModal(null)}
+          >
+            <div className="text-center">
+              <div
+                className="
+                  w-12 h-12
+                  mx-auto
+                  rounded-full
+                  bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)]
+                  flex items-center justify-center
+                "
               >
-                Batal
-              </button>
+                <Trash2
+                  size={22}
+                  className="text-[var(--color-danger)]"
+                />
+              </div>
 
-              <button
-                onClick={deleteUjian}
-                className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm font-medium"
-              >
-                Hapus
-              </button>
+              <h3 className="font-semibold theme-text mt-4">
+                Hapus ujian ini?
+              </h3>
+
+              <p className="text-sm theme-text-secondary mt-2">
+                Ujian{" "}
+                <span className="font-medium theme-text">
+                  {selectedUjian.nama}
+                </span>{" "}
+                akan dihapus dari daftar.
+              </p>
+
+              <div className="flex justify-center gap-3 mt-6">
+                <button
+                  onClick={() => setModal(null)}
+                  className="
+                    px-4 py-2
+                    border
+                    theme-border
+                    rounded-lg
+                    text-sm
+                    font-medium
+                    theme-text-secondary
+                    hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
+                  "
+                >
+                  Batal
+                </button>
+
+                <button
+                  onClick={deleteUjian}
+                  className="
+                    px-4 py-2
+                    bg-[var(--color-danger)]
+                    hover:opacity-90
+                    text-white
+                    rounded-lg
+                    text-sm
+                    font-medium
+                  "
+                >
+                  Hapus
+                </button>
+              </div>
             </div>
-          </div>
-        </Modal>
-      )}
+          </Modal>
+        )}
     </div>
   );
 }
 
-/* =========================
-   COMPONENTS
-========================= */
+/* ============================================================
+   STAT CARD
+============================================================ */
 
 function StatCard({
   title,
   value,
   icon: Icon,
   description,
+  variant = "primary",
 }) {
+  const variantConfig = {
+    primary: {
+      bg: "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
+      text: "text-[var(--color-primary)]",
+    },
+
+    success: {
+      bg: "bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)]",
+      text: "text-[var(--color-success)]",
+    },
+
+    warning: {
+      bg: "bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)]",
+      text: "text-[var(--color-warning)]",
+    },
+
+    info: {
+      bg: "bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)]",
+      text: "text-[var(--color-info)]",
+    },
+  };
+
+  const current =
+    variantConfig[variant] ||
+    variantConfig.primary;
+
   return (
-    <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
+    <div
+      className="
+        theme-card
+        border
+        theme-border
+        rounded-xl
+        p-5
+        shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]
+      "
+    >
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-sm text-slate-500">{title}</p>
+          <p className="text-sm theme-text-secondary">
+            {title}
+          </p>
 
-          <p className="text-2xl font-bold text-slate-800 mt-2">
+          <p className="text-2xl font-bold theme-text mt-2">
             {value}
           </p>
 
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs theme-text-muted mt-1">
             {description}
           </p>
         </div>
 
-        <div className="w-10 h-10 rounded-lg bg-slate-100 flex items-center justify-center">
-          <Icon size={20} className="text-slate-600" />
+        <div
+          className={`
+            w-10 h-10
+            rounded-lg
+            ${current.bg}
+            flex items-center justify-center
+            ${current.text}
+          `}
+        >
+          <Icon size={20} />
         </div>
       </div>
     </div>
   );
 }
+
+/* ============================================================
+   UJIAN ROW
+============================================================ */
 
 function UjianRow({
   item,
@@ -649,61 +974,69 @@ function UjianRow({
   onEdit,
   onDelete,
 }) {
-  const status = statusConfig[item.status] || statusConfig.Draft;
+  const status =
+    statusConfig[item.status] ||
+    statusConfig.Draft;
+
   const StatusIcon = status.icon;
 
   return (
-    <tr className="hover:bg-slate-50/70 transition">
-      <td className="px-5 py-4 text-sm text-slate-500">
+    <tr
+      className="
+        hover:bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)]
+        transition
+      "
+    >
+      <td className="px-5 py-4 text-sm theme-text-secondary">
         {index + 1}
       </td>
 
       <td className="px-5 py-4">
         <div>
-          <p className="font-semibold text-sm text-slate-800">
+          <p className="font-semibold text-sm theme-text">
             {item.nama}
           </p>
 
-          <p className="text-xs text-slate-500 mt-1">
+          <p className="text-xs theme-text-secondary mt-1">
             {item.mapel}
           </p>
 
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs theme-text-muted mt-1">
             {item.guru}
           </p>
         </div>
       </td>
 
       <td className="px-5 py-4">
-        <span className="text-sm text-slate-700">
+        <span className="text-sm theme-text">
           {item.kelas}
         </span>
       </td>
 
       <td className="px-5 py-4">
-        <p className="text-sm text-slate-700">
+        <p className="text-sm theme-text">
           {item.tanggal}
         </p>
 
-        <p className="text-xs text-slate-400 mt-1 flex items-center gap-1">
+        <p className="text-xs theme-text-muted mt-1 flex items-center gap-1">
           <Clock3 size={13} />
           {item.waktu}
         </p>
       </td>
 
       <td className="px-5 py-4 text-center">
-        <div className="inline-flex items-center gap-1 text-sm text-slate-700">
+        <div className="inline-flex items-center gap-1 text-sm theme-text">
           <ClipboardList size={15} />
           {item.jumlahSoal}
         </div>
 
-        <p className="text-xs text-slate-400 mt-1">
+        <p className="text-xs theme-text-muted mt-1">
           {item.durasi} menit
         </p>
       </td>
 
       <td className="px-5 py-4 text-center">
-        <div className="inline-flex items-center gap-1 text-sm text-slate-700">
+        <div className="inline-flex items-center gap-1 text-sm theme-text">
           <Users size={15} />
           {item.peserta}
         </div>
@@ -711,7 +1044,15 @@ function UjianRow({
 
       <td className="px-5 py-4 text-center">
         <span
-          className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full border text-xs font-medium ${status.className}`}
+          className={`
+            inline-flex items-center gap-1
+            px-2.5 py-1
+            rounded-full
+            border
+            text-xs
+            font-medium
+            ${status.className}
+          `}
         >
           <StatusIcon size={13} />
           {item.status}
@@ -723,7 +1064,14 @@ function UjianRow({
           <button
             onClick={() => onDetail(item)}
             title="Detail"
-            className="p-2 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+            className="
+              p-2
+              rounded-lg
+              theme-text-secondary
+              hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
+              hover:text-[var(--color-primary)]
+              transition
+            "
           >
             <Eye size={17} />
           </button>
@@ -731,7 +1079,14 @@ function UjianRow({
           <button
             onClick={() => onEdit(item)}
             title="Edit"
-            className="p-2 rounded-lg text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+            className="
+              p-2
+              rounded-lg
+              theme-text-secondary
+              hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
+              hover:text-[var(--color-warning)]
+              transition
+            "
           >
             <Pencil size={17} />
           </button>
@@ -739,7 +1094,13 @@ function UjianRow({
           <button
             onClick={() => onDelete(item)}
             title="Hapus"
-            className="p-2 rounded-lg text-red-400 hover:bg-red-50 hover:text-red-600"
+            className="
+              p-2
+              rounded-lg
+              text-[var(--color-danger)]
+              hover:bg-[color-mix(in_srgb,var(--color-danger)_8%,transparent)]
+              transition
+            "
           >
             <Trash2 size={17} />
           </button>
@@ -749,59 +1110,119 @@ function UjianRow({
   );
 }
 
-function InfoItem({ icon: Icon, label, value }) {
+/* ============================================================
+   INFO ITEM
+============================================================ */
+
+function InfoItem({
+  icon: Icon,
+  label,
+  value,
+}) {
   return (
     <div>
-      <p className="text-xs text-slate-400 flex items-center gap-1">
+      <p className="text-xs theme-text-muted flex items-center gap-1">
         <Icon size={13} />
         {label}
       </p>
 
-      <p className="text-sm font-medium text-slate-700 mt-1">
+      <p className="text-sm font-medium theme-text mt-1">
         {value}
       </p>
     </div>
   );
 }
 
-function DetailItem({ label, value }) {
+/* ============================================================
+   DETAIL ITEM
+============================================================ */
+
+function DetailItem({
+  label,
+  value,
+}) {
   return (
     <div>
-      <p className="text-xs text-slate-400">{label}</p>
-      <p className="text-sm font-medium text-slate-700 mt-1">
+      <p className="text-xs theme-text-muted">
+        {label}
+      </p>
+
+      <p className="text-sm font-medium theme-text mt-1">
         {value}
       </p>
     </div>
   );
 }
 
-function Modal({ title, children, onClose }) {
+/* ============================================================
+   MODAL
+============================================================ */
+
+function Modal({
+  title,
+  children,
+  onClose,
+}) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      {/* BACKDROP */}
+
       <div
-        className="absolute inset-0 bg-slate-900/40 backdrop-blur-sm"
+        className="
+          absolute inset-0
+          bg-[color-mix(in_srgb,var(--color-text)_40%,transparent)]
+          backdrop-blur-sm
+        "
         onClick={onClose}
       />
 
-      <div className="relative w-full max-w-lg bg-white rounded-xl shadow-xl max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
-          <h2 className="font-semibold text-slate-800">
+      {/* MODAL */}
+
+      <div
+        className="
+          relative
+          w-full
+          max-w-lg
+          theme-card
+          border
+          theme-border
+          rounded-xl
+          shadow-[0_20px_60px_color-mix(in_srgb,var(--color-text)_18%,transparent)]
+          max-h-[90vh]
+          overflow-y-auto
+        "
+      >
+        <div className="flex items-center justify-between px-5 py-4 border-b theme-border">
+          <h2 className="font-semibold theme-text">
             {title}
           </h2>
 
           <button
             onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:bg-slate-100 hover:text-slate-700"
+            className="
+              p-1.5
+              rounded-lg
+              theme-text-muted
+              hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
+              hover:text-[var(--color-primary)]
+              transition
+            "
           >
             <X size={18} />
           </button>
         </div>
 
-        <div className="p-5">{children}</div>
+        <div className="p-5">
+          {children}
+        </div>
       </div>
     </div>
   );
 }
+
+/* ============================================================
+   UJIAN FORM
+============================================================ */
 
 function UjianForm({
   initialData,
@@ -813,7 +1234,8 @@ function UjianForm({
     mapel: initialData?.mapel || "",
     kelas: initialData?.kelas || "",
     guru: initialData?.guru || "",
-    jumlahSoal: initialData?.jumlahSoal || 20,
+    jumlahSoal:
+      initialData?.jumlahSoal || 20,
     durasi: initialData?.durasi || 60,
     tanggal: initialData?.tanggal || "",
     waktu: initialData?.waktu || "",
@@ -841,7 +1263,9 @@ function UjianForm({
       <FormInput
         label="Nama Ujian"
         value={form.nama}
-        onChange={(value) => update("nama", value)}
+        onChange={(value) =>
+          update("nama", value)
+        }
         placeholder="Contoh: Ujian Tengah Semester"
         required
       />
@@ -850,7 +1274,9 @@ function UjianForm({
         <FormInput
           label="Mata Pelajaran"
           value={form.mapel}
-          onChange={(value) => update("mapel", value)}
+          onChange={(value) =>
+            update("mapel", value)
+          }
           placeholder="Contoh: Pemrograman Web"
           required
         />
@@ -858,7 +1284,9 @@ function UjianForm({
         <FormInput
           label="Kelas"
           value={form.kelas}
-          onChange={(value) => update("kelas", value)}
+          onChange={(value) =>
+            update("kelas", value)
+          }
           placeholder="Contoh: XII PPLG 1"
           required
         />
@@ -867,7 +1295,9 @@ function UjianForm({
       <FormInput
         label="Guru"
         value={form.guru}
-        onChange={(value) => update("guru", value)}
+        onChange={(value) =>
+          update("guru", value)
+        }
         placeholder="Nama guru"
         required
       />
@@ -877,7 +1307,9 @@ function UjianForm({
           label="Jumlah Soal"
           type="number"
           value={form.jumlahSoal}
-          onChange={(value) => update("jumlahSoal", value)}
+          onChange={(value) =>
+            update("jumlahSoal", value)
+          }
           required
         />
 
@@ -885,7 +1317,9 @@ function UjianForm({
           label="Durasi (menit)"
           type="number"
           value={form.durasi}
-          onChange={(value) => update("durasi", value)}
+          onChange={(value) =>
+            update("durasi", value)
+          }
           required
         />
       </div>
@@ -894,7 +1328,9 @@ function UjianForm({
         <FormInput
           label="Tanggal"
           value={form.tanggal}
-          onChange={(value) => update("tanggal", value)}
+          onChange={(value) =>
+            update("tanggal", value)
+          }
           placeholder="10 September 2026"
           required
         />
@@ -902,31 +1338,58 @@ function UjianForm({
         <FormInput
           label="Waktu"
           value={form.waktu}
-          onChange={(value) => update("waktu", value)}
+          onChange={(value) =>
+            update("waktu", value)
+          }
           placeholder="08:00 - 09:30"
           required
         />
       </div>
 
-      <div className="flex justify-end gap-3 pt-3 border-t border-slate-100">
+      <div className="flex justify-end gap-3 pt-3 border-t theme-border-soft">
         <button
           type="button"
           onClick={onCancel}
-          className="px-4 py-2 border border-slate-200 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-50"
+          className="
+            px-4 py-2
+            border
+            theme-border
+            rounded-lg
+            text-sm
+            font-medium
+            theme-text-secondary
+            hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
+            transition
+          "
         >
           Batal
         </button>
 
         <button
           type="submit"
-          className="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-lg text-sm font-medium"
+          className="
+            px-4 py-2
+            bg-[var(--color-primary)]
+            hover:opacity-90
+            text-white
+            rounded-lg
+            text-sm
+            font-medium
+            transition
+          "
         >
-          {initialData ? "Simpan Perubahan" : "Buat Ujian"}
+          {initialData
+            ? "Simpan Perubahan"
+            : "Buat Ujian"}
         </button>
       </div>
     </form>
   );
 }
+
+/* ============================================================
+   FORM INPUT
+============================================================ */
 
 function FormInput({
   label,
@@ -938,17 +1401,33 @@ function FormInput({
 }) {
   return (
     <div>
-      <label className="block text-sm font-medium text-slate-700 mb-1.5">
+      <label className="block text-sm font-medium theme-text-secondary mb-1.5">
         {label}
       </label>
 
       <input
         type={type}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) =>
+          onChange(e.target.value)
+        }
         placeholder={placeholder}
         required={required}
-        className="w-full px-3 py-2.5 border border-slate-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-slate-200 focus:border-slate-400"
+        className="
+          theme-input
+          w-full
+          px-3 py-2.5
+          border
+          theme-border
+          rounded-lg
+          text-sm
+          theme-text
+          theme-text-placeholder
+          outline-none
+          focus:ring-2
+          focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]
+          focus:border-[var(--color-primary)]
+        "
       />
     </div>
   );

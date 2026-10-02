@@ -17,13 +17,9 @@ import {
   Plus,
   X,
   Calendar,
-  Filter,
   Download,
   Printer,
   FileText,
-  TrendingUp,
-  TrendingDown,
-  CreditCard,
 } from "lucide-react";
 
 import Header from "../../../../components/Header";
@@ -36,7 +32,6 @@ export default function TrackingTunggakanPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [entriesPerPage] = useState(5);
 
-  // Modal states
   const [showDetailModal, setShowDetailModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -45,7 +40,6 @@ export default function TrackingTunggakanPage() {
 
   const toggleSidebar = () => setIsCollapsed((prev) => !prev);
 
-  // Data dummy lengkap
   const [tunggakan, setTunggakan] = useState([
     {
       id: 1,
@@ -156,32 +150,46 @@ export default function TrackingTunggakanPage() {
     },
   ]);
 
-  // Statistik
-  const totalTunggakan = tunggakan.filter((t) => t.status === "Menunggak").length;
-  const totalLunas = tunggakan.filter((t) => t.status === "Lunas").length;
+  const totalTunggakan = tunggakan.filter(
+    (t) => t.status === "Menunggak"
+  ).length;
+
+  const totalLunas = tunggakan.filter(
+    (t) => t.status === "Lunas"
+  ).length;
+
   const totalNominalTunggak = tunggakan
     .filter((t) => t.status === "Menunggak")
     .reduce((a, b) => a + b.totalTagihan, 0);
+
   const totalSiswaTunggak = new Set(
-    tunggakan.filter((t) => t.status === "Menunggak").map((t) => t.siswa)
+    tunggakan
+      .filter((t) => t.status === "Menunggak")
+      .map((t) => t.siswa)
   ).size;
 
-  // Filter & Pagination
   const filtered = tunggakan.filter((t) => {
     const matchSearch =
       t.siswa.toLowerCase().includes(search.toLowerCase()) ||
       t.kelas.toLowerCase().includes(search.toLowerCase()) ||
       t.nisn.includes(search);
-    const matchFilter = filter === "semua" || t.status === filter;
+
+    const matchFilter =
+      filter === "semua" || t.status === filter;
+
     return matchSearch && matchFilter;
   });
 
   const indexOfLast = currentPage * entriesPerPage;
   const indexOfFirst = indexOfLast - entriesPerPage;
-  const currentEntries = filtered.slice(indexOfFirst, indexOfLast);
-  const totalPages = Math.ceil(filtered.length / entriesPerPage);
+  const currentEntries = filtered.slice(
+    indexOfFirst,
+    indexOfLast
+  );
+  const totalPages = Math.ceil(
+    filtered.length / entriesPerPage
+  );
 
-  // Modal handlers
   const handleViewDetail = (item) => {
     setSelectedTunggakan(item);
     setShowDetailModal(true);
@@ -199,7 +207,12 @@ export default function TrackingTunggakanPage() {
 
   const confirmDelete = () => {
     if (selectedTunggakan) {
-      setTunggakan(tunggakan.filter((t) => t.id !== selectedTunggakan.id));
+      setTunggakan(
+        tunggakan.filter(
+          (t) => t.id !== selectedTunggakan.id
+        )
+      );
+
       setShowDeleteModal(false);
       setSelectedTunggakan(null);
     }
@@ -210,18 +223,16 @@ export default function TrackingTunggakanPage() {
   };
 
   const saveEdit = () => {
-    // Simulasi save
     setShowEditModal(false);
     setSelectedTunggakan(null);
   };
 
   const saveAdd = () => {
-    // Simulasi add
     setShowAddModal(false);
   };
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-slate-50">
+    <div className="flex h-screen w-full overflow-hidden theme-page">
       <Sidebar
         active="trackingTunggakan"
         setActive={() => {}}
@@ -240,59 +251,121 @@ export default function TrackingTunggakanPage() {
           }}
         />
 
-        <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden bg-gradient-to-br from-slate-50 via-white to-slate-50/50">
+        <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden theme-page">
           <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 xl:px-10">
-            {/* =========================================================
-                BREADCRUMB
-            ========================================================= */}
-            <div className="flex items-center gap-2 text-sm mb-6">
+
+            {/* BREADCRUMB */}
+            <div className="mb-6 flex items-center gap-2 text-sm">
               <button
                 onClick={() => window.history.back()}
-                className="inline-flex items-center gap-1.5 text-slate-500 transition hover:text-[#155DFC]"
+                className="
+                  inline-flex items-center gap-1.5
+                  theme-text-secondary
+                  transition
+                  hover:text-[var(--color-primary)]
+                "
               >
                 <ArrowLeft size={16} />
-                <span className="font-medium">Kembali</span>
+                <span className="font-medium">
+                  Kembali
+                </span>
               </button>
-              <span className="text-slate-300">/</span>
-              <span className="text-slate-400">Keuangan</span>
-              <span className="text-slate-300">/</span>
-              <span className="font-medium text-[#155DFC]">Tracking Tunggakan</span>
+
+              <span className="theme-text-placeholder">
+                /
+              </span>
+
+              <span className="theme-text-muted">
+                Keuangan
+              </span>
+
+              <span className="theme-text-placeholder">
+                /
+              </span>
+
+              <span className="font-medium theme-primary">
+                Tracking Tunggakan
+              </span>
             </div>
 
-            {/* =========================================================
-                HEADER
-            ========================================================= */}
-            <div className="mb-6 flex flex-col gap-4 rounded-2xl bg-gradient-to-r from-[#0F172A] to-[#1E293B] p-6 sm:p-8">
+            {/* HEADER */}
+            <div className="mb-6 rounded-2xl theme-header p-6 sm:p-8">
               <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-4">
-                  <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-xl bg-white/10 border border-white/5 text-white">
+                  <div
+                    className="
+                      flex h-14 w-14 shrink-0
+                      items-center justify-center
+                      rounded-xl
+                      border
+                      border-[color-mix(in_srgb,var(--color-danger)_12%,transparent)]
+                      bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)]
+                      theme-danger
+                    "
+                  >
                     <AlertCircle size={28} />
                   </div>
+
                   <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider text-blue-300">
+                    <p className="text-xs font-semibold uppercase tracking-wider theme-primary">
                       Keuangan & Kas
                     </p>
-                    <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
+
+                    <h1 className="text-2xl font-bold tracking-tight theme-text sm:text-3xl">
                       Tracking Tunggakan
                     </h1>
-                    <p className="mt-1 text-sm text-slate-300">
+
+                    <p className="mt-1 text-sm theme-text-secondary">
                       Pantau dan kelola tagihan siswa yang menunggak
                     </p>
                   </div>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  <button className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/20">
+                  <button
+                    className="
+                      inline-flex items-center gap-2
+                      rounded-lg
+                      theme-card-soft
+                      px-4 py-2.5
+                      text-sm font-medium
+                      theme-text-secondary
+                      transition
+                      hover:bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)]
+                    "
+                  >
                     <Printer size={16} />
                     Cetak
                   </button>
-                  <button className="inline-flex items-center gap-2 rounded-lg bg-white/10 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-white/20">
+
+                  <button
+                    className="
+                      inline-flex items-center gap-2
+                      rounded-lg
+                      theme-card-soft
+                      px-4 py-2.5
+                      text-sm font-medium
+                      theme-text-secondary
+                      transition
+                      hover:bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)]
+                    "
+                  >
                     <Download size={16} />
                     Ekspor
                   </button>
+
                   <button
                     onClick={handleAddPayment}
-                    className="inline-flex items-center gap-2 rounded-lg bg-[#155DFC] px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-blue-500/25 transition hover:bg-[#0d47c9]"
+                    className="
+                      inline-flex items-center gap-2
+                      rounded-lg
+                      theme-primary
+                      px-4 py-2.5
+                      text-sm font-medium
+                      transition
+                      shadow-[0_10px_30px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]
+                      hover:brightness-95
+                    "
                   >
                     <Plus size={16} />
                     Tambah Pembayaran
@@ -301,9 +374,7 @@ export default function TrackingTunggakanPage() {
               </div>
             </div>
 
-            {/* =========================================================
-                STATISTIK
-            ========================================================= */}
+            {/* STATISTIK */}
             <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <StatCard
                 icon={<AlertCircle size={22} />}
@@ -312,6 +383,7 @@ export default function TrackingTunggakanPage() {
                 color="red"
                 subtext="Tagihan yang belum dibayar"
               />
+
               <StatCard
                 icon={<DollarSign size={22} />}
                 label="Total Nominal Tunggak"
@@ -319,6 +391,7 @@ export default function TrackingTunggakanPage() {
                 color="blue"
                 subtext="Total tagihan + denda"
               />
+
               <StatCard
                 icon={<Users size={22} />}
                 label="Siswa Tunggak"
@@ -326,6 +399,7 @@ export default function TrackingTunggakanPage() {
                 color="purple"
                 subtext="Jumlah siswa menunggak"
               />
+
               <StatCard
                 icon={<CheckCircle2 size={22} />}
                 label="Lunas"
@@ -335,15 +409,18 @@ export default function TrackingTunggakanPage() {
               />
             </div>
 
-            {/* =========================================================
-                FILTER & SEARCH
-            ========================================================= */}
+            {/* FILTER & SEARCH */}
             <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center">
               <div className="relative flex-1">
                 <Search
                   size={18}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                  className="
+                    absolute left-3.5 top-1/2
+                    -translate-y-1/2
+                    theme-text-muted
+                  "
                 />
+
                 <input
                   value={search}
                   onChange={(e) => {
@@ -351,7 +428,16 @@ export default function TrackingTunggakanPage() {
                     setCurrentPage(1);
                   }}
                   placeholder="Cari siswa, kelas, atau NISN..."
-                  className="w-full rounded-xl border border-slate-200 bg-white py-2.5 pl-10 pr-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#155DFC] focus:ring-4 focus:ring-[#155DFC]/10"
+                  className="
+                    w-full rounded-xl
+                    theme-input
+                    py-2.5 pl-10 pr-4
+                    text-sm outline-none transition
+                    placeholder:theme-text-placeholder
+                    focus:border-[var(--color-primary)]
+                    focus:ring-4
+                    focus:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
+                  "
                 />
               </div>
 
@@ -362,68 +448,89 @@ export default function TrackingTunggakanPage() {
                     setFilter(e.target.value);
                     setCurrentPage(1);
                   }}
-                  className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm text-slate-700 outline-none focus:border-[#155DFC] focus:ring-4 focus:ring-[#155DFC]/10"
+                  className="
+                    rounded-xl
+                    theme-input
+                    px-4 py-2.5
+                    text-sm
+                    outline-none
+                    focus:border-[var(--color-primary)]
+                    focus:ring-4
+                    focus:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
+                  "
                 >
-                  <option value="semua">Semua Status</option>
-                  <option value="Menunggak">Menunggak</option>
-                  <option value="Lunas">Lunas</option>
+                  <option value="semua">
+                    Semua Status
+                  </option>
+                  <option value="Menunggak">
+                    Menunggak
+                  </option>
+                  <option value="Lunas">
+                    Lunas
+                  </option>
                 </select>
-                <button className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50">
+
+                <button
+                  className="
+                    inline-flex items-center gap-2
+                    rounded-xl
+                    border theme-border
+                    theme-card
+                    px-4 py-2.5
+                    text-sm font-medium
+                    theme-text-secondary
+                    transition
+                    hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
+                  "
+                >
                   <Calendar size={16} />
                   Periode
                 </button>
               </div>
             </div>
 
-            {/* =========================================================
-                TABEL
-            ========================================================= */}
-            <div className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
+            {/* TABEL */}
+            <div
+              className="
+                overflow-hidden rounded-2xl
+                border theme-border
+                theme-card
+                shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)]
+              "
+            >
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-slate-200 bg-gradient-to-r from-slate-50 to-white">
-                      <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                        Siswa
-                      </th>
-                      <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                        Kelas
-                      </th>
-                      <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                        Tagihan
-                      </th>
-                      <th className="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
-                        Nominal
-                      </th>
-                      <th className="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
-                        Denda
-                      </th>
-                      <th className="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-wider text-slate-500">
-                        Total
-                      </th>
-                      <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider text-slate-500">
-                        Jatuh Tempo
-                      </th>
-                      <th className="px-4 py-3.5 text-center text-xs font-semibold uppercase tracking-wider text-slate-500">
-                        Status
-                      </th>
-                      <th className="px-4 py-3.5 text-center text-xs font-semibold uppercase tracking-wider text-slate-500">
-                        Aksi
-                      </th>
+                    <tr className="border-b theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)]">
+                      <TableHead>Siswa</TableHead>
+                      <TableHead>Kelas</TableHead>
+                      <TableHead>Tagihan</TableHead>
+                      <TableHead align="right">Nominal</TableHead>
+                      <TableHead align="right">Denda</TableHead>
+                      <TableHead align="right">Total</TableHead>
+                      <TableHead>Jatuh Tempo</TableHead>
+                      <TableHead align="center">Status</TableHead>
+                      <TableHead align="center">Aksi</TableHead>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+
+                  <tbody className="divide-y theme-border-soft">
                     {currentEntries.length === 0 ? (
                       <tr>
                         <td
                           colSpan={9}
-                          className="px-4 py-12 text-center text-slate-400"
+                          className="px-4 py-12 text-center theme-text-muted"
                         >
                           <div className="flex flex-col items-center gap-2">
-                            <FileText size={32} className="text-slate-300" />
+                            <FileText
+                              size={32}
+                              className="theme-text-placeholder"
+                            />
+
                             <p className="text-sm font-medium">
                               Tidak ada data tunggakan
                             </p>
+
                             <p className="text-xs">
                               Coba ubah kata kunci pencarian
                             </p>
@@ -434,87 +541,115 @@ export default function TrackingTunggakanPage() {
                       currentEntries.map((item) => (
                         <tr
                           key={item.id}
-                          className="group transition hover:bg-slate-50/80"
+                          className="
+                            group transition
+                            hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]
+                          "
                         >
                           <td className="px-4 py-3.5">
                             <div>
-                              <p className="font-medium text-slate-800">
+                              <p className="font-medium theme-text">
                                 {item.siswa}
                               </p>
-                              <p className="text-xs text-slate-400">
+
+                              <p className="text-xs theme-text-muted">
                                 NISN: {item.nisn}
                               </p>
                             </div>
                           </td>
-                          <td className="px-4 py-3.5 text-slate-600">
+
+                          <td className="px-4 py-3.5 theme-text-secondary">
                             {item.kelas}
                           </td>
+
                           <td className="px-4 py-3.5">
                             <div>
-                              <p className="text-slate-700">{item.tagihan}</p>
-                              <p className="text-xs text-slate-400">
+                              <p className="theme-text-secondary">
+                                {item.tagihan}
+                              </p>
+
+                              <p className="text-xs theme-text-muted">
                                 {item.kategori}
                               </p>
                             </div>
                           </td>
-                          <td className="px-4 py-3.5 text-right font-medium text-slate-700">
+
+                          <td className="px-4 py-3.5 text-right font-medium theme-text-secondary">
                             Rp {item.nominal.toLocaleString()}
                           </td>
-                          <td className="px-4 py-3.5 text-right font-medium text-red-500">
+
+                          <td className="px-4 py-3.5 text-right font-medium theme-danger">
                             {item.denda > 0
                               ? `Rp ${item.denda.toLocaleString()}`
                               : "-"}
                           </td>
-                          <td className="px-4 py-3.5 text-right font-bold text-slate-800">
+
+                          <td className="px-4 py-3.5 text-right font-bold theme-text">
                             Rp {item.totalTagihan.toLocaleString()}
                           </td>
-                          <td className="px-4 py-3.5 text-slate-600">
+
+                          <td className="px-4 py-3.5 theme-text-secondary">
                             <div className="flex items-center gap-1.5">
-                              <Calendar size={14} className="text-slate-400" />
+                              <Calendar
+                                size={14}
+                                className="theme-text-muted"
+                              />
+
                               {item.jatuhTempo}
+
                               {item.hari > 0 && (
-                                <span className="ml-1 rounded-full bg-red-100 px-2 py-0.5 text-xs font-medium text-red-600">
+                                <span
+                                  className="
+                                    ml-1 rounded-full
+                                    theme-danger
+                                    bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)]
+                                    px-2 py-0.5
+                                    text-xs font-medium
+                                  "
+                                >
                                   +{item.hari} hari
                                 </span>
                               )}
                             </div>
                           </td>
+
                           <td className="px-4 py-3.5 text-center">
-                            <span
-                              className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${
-                                item.status === "Lunas"
-                                  ? "bg-emerald-100 text-emerald-700"
-                                  : "bg-red-100 text-red-700"
-                              }`}
-                            >
-                              {item.status === "Lunas" ? (
-                                <CheckCircle2 size={12} />
-                              ) : (
-                                <Clock size={12} />
-                              )}
-                              {item.status}
-                            </span>
+                            <StatusBadge
+                              status={item.status}
+                            />
                           </td>
+
                           <td className="px-4 py-3.5 text-center">
                             <div className="flex items-center justify-center gap-1">
-                              <button
-                                onClick={() => handleViewDetail(item)}
-                                className="rounded-lg p-1.5 text-slate-400 transition hover:bg-blue-50 hover:text-[#155DFC]"
+                              <ActionButton
+                                onClick={() =>
+                                  handleViewDetail(item)
+                                }
+                                type="primary"
+                                title="Lihat detail"
                               >
                                 <Eye size={16} />
-                              </button>
-                              <button
-                                onClick={() => handleEdit(item)}
-                                className="rounded-lg p-1.5 text-slate-400 transition hover:bg-blue-50 hover:text-[#155DFC]"
+                              </ActionButton>
+
+                              <ActionButton
+                                onClick={() =>
+                                  handleEdit(item)
+                                }
+                                type="primary"
+                                title="Edit"
                               >
                                 <Edit size={16} />
-                              </button>
-                              <button
-                                onClick={() => handleDelete(item)}
-                                className="rounded-lg p-1.5 text-slate-400 transition hover:bg-red-50 hover:text-red-600"
+                              </ActionButton>
+
+                              <ActionButton
+                                onClick={() =>
+                                  handleDelete(item)
+                                }
+                                type="danger"
+                                title="Hapus"
                               >
                                 <Trash2 size={16} />
-                              </button>
+                              </ActionButton>
                             </div>
                           </td>
                         </tr>
@@ -524,43 +659,82 @@ export default function TrackingTunggakanPage() {
                 </table>
               </div>
 
-              {/* Pagination */}
+              {/* PAGINATION */}
               {filtered.length > 0 && (
-                <div className="flex items-center justify-between border-t border-slate-200 bg-slate-50/50 px-4 py-3">
-                  <p className="text-sm text-slate-500">
+                <div
+                  className="
+                    flex items-center justify-between
+                    border-t theme-border
+                    bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)]
+                    px-4 py-3
+                  "
+                >
+                  <p className="text-sm theme-text-muted">
                     Menampilkan {indexOfFirst + 1}-
                     {Math.min(indexOfLast, filtered.length)} dari{" "}
                     {filtered.length} data
                   </p>
+
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() =>
-                        setCurrentPage((p) => Math.max(1, p - 1))
+                        setCurrentPage((p) =>
+                          Math.max(1, p - 1)
+                        )
                       }
                       disabled={currentPage === 1}
-                      className="rounded-lg border border-slate-200 bg-white p-2 text-slate-500 transition hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white"
+                      className="
+                        rounded-lg border theme-border
+                        theme-card
+                        p-2 theme-text-muted
+                        transition
+                        hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
+                        disabled:opacity-40
+                      "
                     >
                       <ChevronLeft size={16} />
                     </button>
-                    {Array.from({ length: totalPages }, (_, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setCurrentPage(i + 1)}
-                        className={`rounded-lg px-3.5 py-1.5 text-sm font-medium transition ${
-                          currentPage === i + 1
-                            ? "bg-[#155DFC] text-white shadow-sm shadow-blue-500/25"
-                            : "text-slate-600 hover:bg-slate-100"
-                        }`}
-                      >
-                        {i + 1}
-                      </button>
-                    ))}
+
+                    {Array.from(
+                      { length: totalPages },
+                      (_, i) => (
+                        <button
+                          key={i}
+                          onClick={() =>
+                            setCurrentPage(i + 1)
+                          }
+                          className={`
+                            rounded-lg px-3.5 py-1.5
+                            text-sm font-medium transition
+                            ${
+                              currentPage === i + 1
+                                ? "theme-primary shadow-[0_4px_12px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]"
+                                : "theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]"
+                            }
+                          `}
+                        >
+                          {i + 1}
+                        </button>
+                      )
+                    )}
+
                     <button
                       onClick={() =>
-                        setCurrentPage((p) => Math.min(totalPages, p + 1))
+                        setCurrentPage((p) =>
+                          Math.min(totalPages, p + 1)
+                        )
                       }
-                      disabled={currentPage === totalPages}
-                      className="rounded-lg border border-slate-200 bg-white p-2 text-slate-500 transition hover:bg-slate-50 disabled:opacity-40 disabled:hover:bg-white"
+                      disabled={
+                        currentPage === totalPages
+                      }
+                      className="
+                        rounded-lg border theme-border
+                        theme-card
+                        p-2 theme-text-muted
+                        transition
+                        hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
+                        disabled:opacity-40
+                      "
                     >
                       <ChevronRight size={16} />
                     </button>
@@ -569,10 +743,8 @@ export default function TrackingTunggakanPage() {
               )}
             </div>
 
-            {/* =========================================================
-                FOOTER
-            ========================================================= */}
-            <footer className="mt-8 border-t border-slate-200/50 pt-6 text-center text-xs text-slate-400">
+            {/* FOOTER */}
+            <footer className="mt-8 border-t theme-border-soft pt-6 text-center text-xs theme-text-muted">
               © 2026 SmartSchool • Tracking Tunggakan
             </footer>
           </div>
@@ -589,96 +761,100 @@ export default function TrackingTunggakanPage() {
         >
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
+              <DetailItem
+                label="Siswa"
+                value={selectedTunggakan.siswa}
+              />
+
+              <DetailItem
+                label="NISN"
+                value={selectedTunggakan.nisn}
+              />
+
+              <DetailItem
+                label="Kelas"
+                value={selectedTunggakan.kelas}
+              />
+
+              <DetailItem
+                label="Kategori"
+                value={selectedTunggakan.kategori}
+              />
+
+              <DetailItem
+                label="Tagihan"
+                value={selectedTunggakan.tagihan}
+              />
+
               <div>
-                <p className="text-xs font-medium text-slate-400">Siswa</p>
-                <p className="font-semibold text-slate-800">
-                  {selectedTunggakan.siswa}
+                <p className="text-xs font-medium theme-text-muted">
+                  Status
                 </p>
+                <StatusBadge
+                  status={selectedTunggakan.status}
+                />
               </div>
-              <div>
-                <p className="text-xs font-medium text-slate-400">NISN</p>
-                <p className="font-semibold text-slate-800">
-                  {selectedTunggakan.nisn}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs font-medium text-slate-400">Kelas</p>
-                <p className="font-semibold text-slate-800">
-                  {selectedTunggakan.kelas}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs font-medium text-slate-400">Kategori</p>
-                <p className="font-semibold text-slate-800">
-                  {selectedTunggakan.kategori}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs font-medium text-slate-400">Tagihan</p>
-                <p className="font-semibold text-slate-800">
-                  {selectedTunggakan.tagihan}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs font-medium text-slate-400">Status</p>
-                <span
-                  className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${
-                    selectedTunggakan.status === "Lunas"
-                      ? "bg-emerald-100 text-emerald-700"
-                      : "bg-red-100 text-red-700"
-                  }`}
-                >
-                  {selectedTunggakan.status === "Lunas" ? (
-                    <CheckCircle2 size={12} />
-                  ) : (
-                    <Clock size={12} />
-                  )}
-                  {selectedTunggakan.status}
-                </span>
-              </div>
-              <div>
-                <p className="text-xs font-medium text-slate-400">Nominal</p>
-                <p className="font-semibold text-slate-800">
-                  Rp {selectedTunggakan.nominal.toLocaleString()}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs font-medium text-slate-400">Denda</p>
-                <p className="font-semibold text-red-500">
-                  Rp {selectedTunggakan.denda.toLocaleString()}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs font-medium text-slate-400">Total</p>
-                <p className="font-bold text-slate-800">
-                  Rp {selectedTunggakan.totalTagihan.toLocaleString()}
-                </p>
-              </div>
-              <div>
-                <p className="text-xs font-medium text-slate-400">Jatuh Tempo</p>
-                <p className="font-semibold text-slate-800">
-                  {selectedTunggakan.jatuhTempo}
-                </p>
-              </div>
+
+              <DetailItem
+                label="Nominal"
+                value={`Rp ${selectedTunggakan.nominal.toLocaleString()}`}
+              />
+
+              <DetailItem
+                label="Denda"
+                value={`Rp ${selectedTunggakan.denda.toLocaleString()}`}
+                valueClass="theme-danger"
+              />
+
+              <DetailItem
+                label="Total"
+                value={`Rp ${selectedTunggakan.totalTagihan.toLocaleString()}`}
+                valueClass="theme-text"
+                bold
+              />
+
+              <DetailItem
+                label="Jatuh Tempo"
+                value={selectedTunggakan.jatuhTempo}
+              />
+
               {selectedTunggakan.tanggalBayar && (
-                <div>
-                  <p className="text-xs font-medium text-slate-400">
-                    Tanggal Bayar
-                  </p>
-                  <p className="font-semibold text-emerald-600">
-                    {selectedTunggakan.tanggalBayar}
-                  </p>
-                </div>
+                <DetailItem
+                  label="Tanggal Bayar"
+                  value={selectedTunggakan.tanggalBayar}
+                  valueClass="theme-success"
+                />
               )}
             </div>
-            <div className="flex justify-end gap-2 pt-4 border-t border-slate-100">
+
+            <div className="flex justify-end gap-2 border-t theme-border-soft pt-4">
               <button
-                onClick={() => setShowDetailModal(false)}
-                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50"
+                onClick={() =>
+                  setShowDetailModal(false)
+                }
+                className="
+                  rounded-xl border theme-border
+                  theme-card-soft
+                  px-4 py-2
+                  text-sm font-medium
+                  theme-text-secondary
+                  transition
+                  hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
+                "
               >
                 Tutup
               </button>
-              <button className="rounded-xl bg-[#155DFC] px-4 py-2 text-sm font-medium text-white hover:bg-[#0d47c9]">
+
+              <button
+                className="
+                  rounded-xl
+                  theme-primary
+                  px-4 py-2
+                  text-sm font-medium
+                  transition
+                  hover:brightness-95
+                "
+              >
                 Bayar Sekarang
               </button>
             </div>
@@ -690,44 +866,40 @@ export default function TrackingTunggakanPage() {
           MODAL EDIT
       ========================================================= */}
       {showEditModal && selectedTunggakan && (
-        <Modal title="Edit Tunggakan" onClose={() => setShowEditModal(false)}>
+        <Modal
+          title="Edit Tunggakan"
+          onClose={() => setShowEditModal(false)}
+        >
           <div className="space-y-4">
+            <FormField
+              label="Nama Siswa"
+              type="text"
+              value={selectedTunggakan.siswa}
+              onChange={(e) =>
+                setSelectedTunggakan({
+                  ...selectedTunggakan,
+                  siswa: e.target.value,
+                })
+              }
+            />
+
+            <FormField
+              label="Kelas"
+              type="text"
+              value={selectedTunggakan.kelas}
+              onChange={(e) =>
+                setSelectedTunggakan({
+                  ...selectedTunggakan,
+                  kelas: e.target.value,
+                })
+              }
+            />
+
             <div>
-              <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                Nama Siswa
-              </label>
-              <input
-                type="text"
-                value={selectedTunggakan.siswa}
-                onChange={(e) =>
-                  setSelectedTunggakan({
-                    ...selectedTunggakan,
-                    siswa: e.target.value,
-                  })
-                }
-                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-[#155DFC] focus:ring-4 focus:ring-[#155DFC]/10"
-              />
-            </div>
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                Kelas
-              </label>
-              <input
-                type="text"
-                value={selectedTunggakan.kelas}
-                onChange={(e) =>
-                  setSelectedTunggakan({
-                    ...selectedTunggakan,
-                    kelas: e.target.value,
-                  })
-                }
-                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-[#155DFC] focus:ring-4 focus:ring-[#155DFC]/10"
-              />
-            </div>
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-slate-700">
+              <label className="mb-1.5 block text-sm font-medium theme-text-secondary">
                 Status
               </label>
+
               <select
                 value={selectedTunggakan.status}
                 onChange={(e) =>
@@ -736,26 +908,29 @@ export default function TrackingTunggakanPage() {
                     status: e.target.value,
                   })
                 }
-                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-[#155DFC] focus:ring-4 focus:ring-[#155DFC]/10"
+                className="
+                  w-full rounded-xl
+                  theme-input
+                  px-4 py-2.5
+                  text-sm outline-none
+                  focus:border-[var(--color-primary)]
+                  focus:ring-4
+                  focus:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
+                "
               >
-                <option value="Menunggak">Menunggak</option>
-                <option value="Lunas">Lunas</option>
+                <option value="Menunggak">
+                  Menunggak
+                </option>
+                <option value="Lunas">
+                  Lunas
+                </option>
               </select>
             </div>
-            <div className="flex justify-end gap-2 pt-4 border-t border-slate-100">
-              <button
-                onClick={() => setShowEditModal(false)}
-                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50"
-              >
-                Batal
-              </button>
-              <button
-                onClick={saveEdit}
-                className="rounded-xl bg-[#155DFC] px-4 py-2 text-sm font-medium text-white hover:bg-[#0d47c9]"
-              >
-                Simpan
-              </button>
-            </div>
+
+            <ModalActions
+              onCancel={() => setShowEditModal(false)}
+              onSave={saveEdit}
+            />
           </div>
         </Modal>
       )}
@@ -764,33 +939,69 @@ export default function TrackingTunggakanPage() {
           MODAL DELETE
       ========================================================= */}
       {showDeleteModal && selectedTunggakan && (
-        <Modal title="Konfirmasi Hapus" onClose={() => setShowDeleteModal(false)}>
+        <Modal
+          title="Konfirmasi Hapus"
+          onClose={() => setShowDeleteModal(false)}
+        >
           <div className="space-y-4">
-            <div className="flex items-start gap-4 rounded-xl border border-red-200 bg-red-50 p-4">
-              <AlertCircle size={24} className="shrink-0 text-red-500" />
+            <div
+              className="
+                flex items-start gap-4 rounded-xl
+                border
+                border-[color-mix(in_srgb,var(--color-danger)_20%,transparent)]
+                bg-[color-mix(in_srgb,var(--color-danger)_8%,transparent)]
+                p-4
+              "
+            >
+              <AlertCircle
+                size={24}
+                className="shrink-0 theme-danger"
+              />
+
               <div>
-                <p className="text-sm font-semibold text-red-800">
+                <p className="text-sm font-semibold theme-danger">
                   Hapus Data Tunggakan?
                 </p>
-                <p className="text-sm text-red-600">
-                  Apakah Anda yakin ingin menghapus data tunggakan untuk{" "}
-                  <span className="font-bold">
+
+                <p className="text-sm theme-text-secondary">
+                  Apakah Anda yakin ingin menghapus data
+                  tunggakan untuk{" "}
+                  <span className="font-bold theme-text">
                     {selectedTunggakan.siswa}
-                  </span>?
-                  Tindakan ini tidak dapat dibatalkan.
+                  </span>
+                  ? Tindakan ini tidak dapat dibatalkan.
                 </p>
               </div>
             </div>
+
             <div className="flex justify-end gap-2">
               <button
-                onClick={() => setShowDeleteModal(false)}
-                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50"
+                onClick={() =>
+                  setShowDeleteModal(false)
+                }
+                className="
+                  rounded-xl border theme-border
+                  theme-card-soft
+                  px-4 py-2
+                  text-sm font-medium
+                  theme-text-secondary
+                  transition
+                  hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
+                "
               >
                 Batal
               </button>
+
               <button
                 onClick={confirmDelete}
-                className="rounded-xl bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700"
+                className="
+                  rounded-xl
+                  theme-danger
+                  px-4 py-2
+                  text-sm font-medium
+                  transition
+                  hover:brightness-95
+                "
               >
                 Hapus
               </button>
@@ -803,66 +1014,53 @@ export default function TrackingTunggakanPage() {
           MODAL ADD PAYMENT
       ========================================================= */}
       {showAddModal && (
-        <Modal title="Tambah Pembayaran" onClose={() => setShowAddModal(false)}>
+        <Modal
+          title="Tambah Pembayaran"
+          onClose={() => setShowAddModal(false)}
+        >
           <div className="space-y-4">
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                Nama Siswa <span className="text-red-500">*</span>
-              </label>
-              <select className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-[#155DFC] focus:ring-4 focus:ring-[#155DFC]/10">
-                <option value="">Pilih Siswa</option>
-                <option value="1">Ahmad Fauzi</option>
-                <option value="2">Siti Rahma</option>
-                <option value="3">Budi Santoso</option>
-                <option value="4">Dewi Lestari</option>
-                <option value="5">Eko Prasetyo</option>
-              </select>
-            </div>
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                Jenis Tagihan <span className="text-red-500">*</span>
-              </label>
-              <select className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-[#155DFC] focus:ring-4 focus:ring-[#155DFC]/10">
-                <option value="">Pilih Tagihan</option>
-                <option value="SPP">SPP</option>
-                <option value="Pangkal">Uang Pangkal</option>
-                <option value="Ekstra">Ekstrakurikuler</option>
-                <option value="Ujian">Ujian Nasional</option>
-              </select>
-            </div>
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                Nominal <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="number"
-                placeholder="Masukkan nominal"
-                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-[#155DFC] focus:ring-4 focus:ring-[#155DFC]/10"
-              />
-            </div>
-            <div>
-              <label className="mb-1.5 block text-sm font-medium text-slate-700">
-                Tanggal Bayar <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="date"
-                className="w-full rounded-xl border border-slate-200 px-4 py-2.5 text-sm outline-none focus:border-[#155DFC] focus:ring-4 focus:ring-[#155DFC]/10"
-              />
-            </div>
-            <div className="flex justify-end gap-2 pt-4 border-t border-slate-100">
-              <button
-                onClick={() => setShowAddModal(false)}
-                className="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50"
-              >
-                Batal
-              </button>
-              <button
-                onClick={saveAdd}
-                className="rounded-xl bg-[#155DFC] px-4 py-2 text-sm font-medium text-white hover:bg-[#0d47c9]"
-              >
-                Simpan
-              </button>
-            </div>
+            <FormSelect
+              label="Nama Siswa"
+              required
+              options={[
+                ["", "Pilih Siswa"],
+                ["1", "Ahmad Fauzi"],
+                ["2", "Siti Rahma"],
+                ["3", "Budi Santoso"],
+                ["4", "Dewi Lestari"],
+                ["5", "Eko Prasetyo"],
+              ]}
+            />
+
+            <FormSelect
+              label="Jenis Tagihan"
+              required
+              options={[
+                ["", "Pilih Tagihan"],
+                ["SPP", "SPP"],
+                ["Pangkal", "Uang Pangkal"],
+                ["Ekstra", "Ekstrakurikuler"],
+                ["Ujian", "Ujian Nasional"],
+              ]}
+            />
+
+            <FormField
+              label="Nominal"
+              required
+              type="number"
+              placeholder="Masukkan nominal"
+            />
+
+            <FormField
+              label="Tanggal Bayar"
+              required
+              type="date"
+            />
+
+            <ModalActions
+              onCancel={() => setShowAddModal(false)}
+              onSave={saveAdd}
+            />
           </div>
         </Modal>
       )}
@@ -870,30 +1068,329 @@ export default function TrackingTunggakanPage() {
   );
 }
 
-// =========================================================
-// STAT CARD COMPONENT
-// =========================================================
-function StatCard({ icon, label, value, color, subtext }) {
-  const colors = {
-    emerald: "bg-emerald-50 text-emerald-600",
-    red: "bg-red-50 text-red-600",
-    blue: "bg-blue-50 text-[#155DFC]",
-    purple: "bg-purple-50 text-purple-600",
+/* =========================================================
+   TABLE HEAD
+========================================================= */
+
+function TableHead({ children, align = "left" }) {
+  const alignment = {
+    left: "text-left",
+    right: "text-right",
+    center: "text-center",
   };
 
   return (
-    <div className="group rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm transition hover:shadow-md">
+    <th
+      className={`
+        px-4 py-3.5
+        ${alignment[align]}
+        text-xs font-semibold
+        uppercase tracking-wider
+        theme-text-muted
+      `}
+    >
+      {children}
+    </th>
+  );
+}
+
+/* =========================================================
+   STATUS BADGE
+========================================================= */
+
+function StatusBadge({ status }) {
+  const isLunas = status === "Lunas";
+
+  return (
+    <span
+      className={`
+        inline-flex items-center gap-1
+        rounded-full
+        px-2.5 py-1
+        text-xs font-semibold
+        ${
+          isLunas
+            ? "theme-success bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)]"
+            : "theme-danger bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)]"
+        }
+      `}
+    >
+      {isLunas ? (
+        <CheckCircle2 size={12} />
+      ) : (
+        <Clock size={12} />
+      )}
+
+      {status}
+    </span>
+  );
+}
+
+/* =========================================================
+   ACTION BUTTON
+========================================================= */
+
+function ActionButton({
+  children,
+  onClick,
+  type = "primary",
+  title,
+}) {
+  const styles =
+    type === "danger"
+      ? `
+        hover:bg-[color-mix(in_srgb,var(--color-danger)_8%,transparent)]
+        hover:text-[var(--color-danger)]
+      `
+      : `
+        hover:bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]
+        hover:text-[var(--color-primary)]
+      `;
+
+  return (
+    <button
+      onClick={onClick}
+      title={title}
+      className={`
+        rounded-lg
+        p-1.5
+        theme-text-muted
+        transition
+        ${styles}
+      `}
+    >
+      {children}
+    </button>
+  );
+}
+
+/* =========================================================
+   DETAIL ITEM
+========================================================= */
+
+function DetailItem({
+  label,
+  value,
+  valueClass = "theme-text",
+  bold = false,
+}) {
+  return (
+    <div>
+      <p className="text-xs font-medium theme-text-muted">
+        {label}
+      </p>
+
+      <p
+        className={`${
+          bold ? "font-bold" : "font-semibold"
+        } ${valueClass}`}
+      >
+        {value}
+      </p>
+    </div>
+  );
+}
+
+/* =========================================================
+   FORM FIELD
+========================================================= */
+
+function FormField({
+  label,
+  required = false,
+  type = "text",
+  value,
+  onChange,
+  placeholder,
+}) {
+  return (
+    <div>
+      <label className="mb-1.5 block text-sm font-medium theme-text-secondary">
+        {label}
+
+        {required && (
+          <span className="ml-1 theme-danger">
+            *
+          </span>
+        )}
+      </label>
+
+      <input
+        type={type}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        className="
+          w-full rounded-xl
+          theme-input
+          px-4 py-2.5
+          text-sm outline-none
+          placeholder:theme-text-placeholder
+          focus:border-[var(--color-primary)]
+          focus:ring-4
+          focus:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
+        "
+      />
+    </div>
+  );
+}
+
+/* =========================================================
+   FORM SELECT
+========================================================= */
+
+function FormSelect({
+  label,
+  required = false,
+  options,
+}) {
+  return (
+    <div>
+      <label className="mb-1.5 block text-sm font-medium theme-text-secondary">
+        {label}
+
+        {required && (
+          <span className="ml-1 theme-danger">
+            *
+          </span>
+        )}
+      </label>
+
+      <select
+        className="
+          w-full rounded-xl
+          theme-input
+          px-4 py-2.5
+          text-sm outline-none
+          focus:border-[var(--color-primary)]
+          focus:ring-4
+          focus:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
+        "
+      >
+        {options.map(([value, text]) => (
+          <option key={value} value={value}>
+            {text}
+          </option>
+        ))}
+      </select>
+    </div>
+  );
+}
+
+/* =========================================================
+   MODAL ACTIONS
+========================================================= */
+
+function ModalActions({
+  onCancel,
+  onSave,
+}) {
+  return (
+    <div className="flex justify-end gap-2 border-t theme-border-soft pt-4">
+      <button
+        onClick={onCancel}
+        className="
+          rounded-xl border theme-border
+          theme-card-soft
+          px-4 py-2
+          text-sm font-medium
+          theme-text-secondary
+          transition
+          hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
+        "
+      >
+        Batal
+      </button>
+
+      <button
+        onClick={onSave}
+        className="
+          rounded-xl
+          theme-primary
+          px-4 py-2
+          text-sm font-medium
+          transition
+          hover:brightness-95
+        "
+      >
+        Simpan
+      </button>
+    </div>
+  );
+}
+
+/* =========================================================
+   STAT CARD
+========================================================= */
+
+function StatCard({
+  icon,
+  label,
+  value,
+  color,
+  subtext,
+}) {
+  const colors = {
+    emerald: `
+      bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)]
+      text-[var(--color-success)]
+    `,
+
+    red: `
+      bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)]
+      text-[var(--color-danger)]
+    `,
+
+    blue: `
+      bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
+      text-[var(--color-primary)]
+    `,
+
+    purple: `
+      bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)]
+      text-[var(--color-info)]
+    `,
+  };
+
+  return (
+    <div
+      className="
+        group rounded-2xl
+        border theme-border
+        theme-card
+        p-5
+        shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)]
+        transition
+        hover:shadow-[0_8px_24px_color-mix(in_srgb,var(--color-text)_10%,transparent)]
+      "
+    >
       <div className="flex items-start gap-4">
         <div
-          className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl ${colors[color]} transition group-hover:scale-105`}
+          className={`
+            flex h-12 w-12 shrink-0
+            items-center justify-center
+            rounded-xl
+            transition
+            group-hover:scale-105
+            ${colors[color]}
+          `}
         >
           {icon}
         </div>
+
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-medium text-slate-400">{label}</p>
-          <p className="mt-1 text-xl font-bold text-slate-800">{value}</p>
+          <p className="text-xs font-medium theme-text-muted">
+            {label}
+          </p>
+
+          <p className="mt-1 text-xl font-bold theme-text">
+            {value}
+          </p>
+
           {subtext && (
-            <p className="mt-0.5 text-xs text-slate-400">{subtext}</p>
+            <p className="mt-0.5 text-xs theme-text-muted">
+              {subtext}
+            </p>
           )}
         </div>
       </div>
@@ -901,29 +1398,60 @@ function StatCard({ icon, label, value, color, subtext }) {
   );
 }
 
-// =========================================================
-// MODAL COMPONENT
-// =========================================================
-function Modal({ title, children, onClose }) {
+/* =========================================================
+   MODAL
+========================================================= */
+
+function Modal({
+  title,
+  children,
+  onClose,
+}) {
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm"
+      className="
+        fixed inset-0 z-50
+        flex items-center justify-center
+        bg-[color-mix(in_srgb,var(--color-text)_55%,transparent)]
+        p-4
+        backdrop-blur-sm
+      "
       onClick={onClose}
     >
       <div
-        className="w-full max-w-2xl max-h-[90vh] overflow-y-auto rounded-2xl bg-white p-6 shadow-2xl"
+        className="
+          max-h-[90vh]
+          w-full max-w-2xl
+          overflow-y-auto
+          rounded-2xl
+          theme-card
+          p-6
+          shadow-[0_20px_60px_color-mix(in_srgb,var(--color-text)_20%,transparent)]
+        "
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-bold text-slate-800">{title}</h2>
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="text-xl font-bold theme-text">
+            {title}
+          </h2>
+
           <button
             onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
+            className="
+              rounded-lg p-1.5
+              theme-text-muted
+              transition
+              hover:bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)]
+              hover:text-[var(--color-text)]
+            "
           >
             <X size={20} />
           </button>
         </div>
-        <div className="divide-y divide-slate-100">{children}</div>
+
+        <div className="divide-y theme-border-soft">
+          {children}
+        </div>
       </div>
     </div>
   );

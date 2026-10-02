@@ -75,10 +75,9 @@ export default function UploadMediaPage() {
   };
 
   return (
-    <div className="flex min-h-screen w-full bg-slate-50">
+    <div className="theme-page flex min-h-screen w-full">
       {/* =====================================================
           SIDEBAR
-          Jangan diberi overflow-hidden / shrink
       ===================================================== */}
       <div className="shrink-0">
         <Sidebar
@@ -96,6 +95,7 @@ export default function UploadMediaPage() {
         <div className="w-full min-w-0">
           <div className="w-full px-3 py-4 sm:px-5 sm:py-6 md:px-7 lg:px-8 xl:px-10">
             <div className="mx-auto w-full max-w-[1500px]">
+
               {/* =================================================
                   TOP BAR
               ================================================= */}
@@ -109,19 +109,17 @@ export default function UploadMediaPage() {
                     gap-2
                     rounded-xl
                     border
-                    border-slate-200
-                    bg-white
+                    theme-border
+                    theme-card
                     px-3.5
                     py-2.5
                     text-sm
                     font-semibold
-                    text-slate-600
+                    theme-text-secondary
                     shadow-sm
                     transition-all
                     hover:-translate-x-0.5
-                    hover:border-indigo-200
-                    hover:bg-indigo-50
-                    hover:text-indigo-600
+                    theme-table-hover
                     hover:shadow-md
                   "
                 >
@@ -140,22 +138,45 @@ export default function UploadMediaPage() {
                   overflow-hidden
                   rounded-2xl
                   border
-                  border-indigo-100
-                  bg-gradient-to-br
-                  from-slate-950
-                  via-indigo-950
-                  to-indigo-800
-                  shadow-xl
-                  shadow-indigo-900/10
+                  theme-border
+                  theme-card
+                  shadow-sm
                 "
               >
                 {/* Decorative */}
-                <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-indigo-400/15 blur-3xl" />
+                <div
+                  className="
+                    pointer-events-none
+                    absolute
+                    -right-20
+                    -top-24
+                    h-64
+                    w-64
+                    rounded-full
+                    bg-[var(--color-primary)]
+                    opacity-[0.08]
+                    blur-3xl
+                  "
+                />
 
-                <div className="pointer-events-none absolute -bottom-28 left-1/3 h-64 w-64 rounded-full bg-blue-400/10 blur-3xl" />
+                <div
+                  className="
+                    pointer-events-none
+                    absolute
+                    -bottom-28
+                    left-1/3
+                    h-64
+                    w-64
+                    rounded-full
+                    bg-[var(--color-info)]
+                    opacity-[0.06]
+                    blur-3xl
+                  "
+                />
 
                 <div className="relative p-5 sm:p-6 md:p-8">
                   <div className="flex items-start gap-4">
+
                     {/* ICON */}
                     <div
                       className="
@@ -166,29 +187,53 @@ export default function UploadMediaPage() {
                         items-center
                         justify-center
                         rounded-2xl
-                        border
-                        border-white/10
-                        bg-white/10
-                        shadow-inner
-                        backdrop-blur-md
+                        theme-info
                         sm:h-14
                         sm:w-14
                       "
                     >
-                      <Upload className="h-6 w-6 text-white sm:h-7 sm:w-7" />
+                      <Upload className="h-6 w-6 sm:h-7 sm:w-7" />
                     </div>
 
                     {/* TEXT */}
                     <div className="min-w-0">
-                      <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-indigo-200 sm:text-xs">
+                      <p
+                        className="
+                          mb-1
+                          text-[10px]
+                          font-semibold
+                          uppercase
+                          tracking-[0.18em]
+                          theme-text-muted
+                          sm:text-xs
+                        "
+                      >
                         CMS Management
                       </p>
 
-                      <h1 className="text-2xl font-bold tracking-tight text-white sm:text-3xl lg:text-4xl">
+                      <h1
+                        className="
+                          text-2xl
+                          font-bold
+                          tracking-tight
+                          theme-text
+                          sm:text-3xl
+                          lg:text-4xl
+                        "
+                      >
                         Upload Media
                       </h1>
 
-                      <p className="mt-1.5 max-w-2xl text-xs leading-relaxed text-indigo-100 sm:text-sm">
+                      <p
+                        className="
+                          mt-1.5
+                          max-w-2xl
+                          text-xs
+                          leading-relaxed
+                          theme-text-secondary
+                          sm:text-sm
+                        "
+                      >
                         Tambahkan gambar, video, PDF, dan file lainnya ke
                         media library website sekolah.
                       </p>
@@ -201,6 +246,7 @@ export default function UploadMediaPage() {
                   CONTENT
               ================================================= */}
               <div className="grid w-full gap-6 lg:grid-cols-[minmax(0,1fr)_280px]">
+
                 {/* =================================================
                     FORM
                 ================================================= */}
@@ -211,24 +257,50 @@ export default function UploadMediaPage() {
                     overflow-hidden
                     rounded-2xl
                     border
-                    border-slate-200
-                    bg-white
+                    theme-border
+                    theme-card
                     shadow-sm
                   "
                 >
                   {/* FORM HEADER */}
-                  <div className="border-b border-slate-100 px-5 py-4 sm:px-6">
+                  <div
+                    className="
+                      border-b
+                      theme-border-soft
+                      px-5
+                      py-4
+                      sm:px-6
+                    "
+                  >
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
+                      <div
+                        className="
+                          flex
+                          h-10
+                          w-10
+                          shrink-0
+                          items-center
+                          justify-center
+                          rounded-xl
+                          theme-info
+                        "
+                      >
                         <FileUp className="h-5 w-5" />
                       </div>
 
                       <div className="min-w-0">
-                        <h2 className="text-sm font-bold text-slate-800 sm:text-base">
+                        <h2
+                          className="
+                            text-sm
+                            font-bold
+                            theme-text
+                            sm:text-base
+                          "
+                        >
                           Pilih File
                         </h2>
 
-                        <p className="mt-0.5 text-xs text-slate-400">
+                        <p className="mt-0.5 text-xs theme-text-muted">
                           Pilih file yang ingin ditambahkan
                         </p>
                       </div>
@@ -237,6 +309,7 @@ export default function UploadMediaPage() {
 
                   {/* FORM BODY */}
                   <div className="p-5 sm:p-6">
+
                     {/* UPLOAD AREA */}
                     <div
                       className="
@@ -244,12 +317,11 @@ export default function UploadMediaPage() {
                         rounded-2xl
                         border-2
                         border-dashed
-                        border-slate-200
-                        bg-slate-50/60
+                        theme-border
+                        theme-card-soft
                         p-6
                         transition-all
-                        hover:border-indigo-300
-                        hover:bg-indigo-50/30
+                        hover:border-[var(--color-primary)]
                         sm:p-10
                       "
                     >
@@ -262,7 +334,14 @@ export default function UploadMediaPage() {
 
                       <label
                         htmlFor="file-upload"
-                        className="flex cursor-pointer flex-col items-center justify-center text-center"
+                        className="
+                          flex
+                          cursor-pointer
+                          flex-col
+                          items-center
+                          justify-center
+                          text-center
+                        "
                       >
                         <div
                           className="
@@ -273,23 +352,37 @@ export default function UploadMediaPage() {
                             items-center
                             justify-center
                             rounded-2xl
-                            bg-white
-                            text-indigo-600
+                            theme-card
+                            theme-primary-outline
                             shadow-sm
                             ring-1
-                            ring-slate-200
+                            ring-[var(--color-border)]
                             transition-all
-                            group-hover:shadow-md
+                            hover:shadow-md
                           "
                         >
                           <Upload className="h-7 w-7" />
                         </div>
 
-                        <h3 className="text-sm font-bold text-slate-700 sm:text-base">
+                        <h3
+                          className="
+                            text-sm
+                            font-bold
+                            theme-text
+                            sm:text-base
+                          "
+                        >
                           Klik untuk memilih file
                         </h3>
 
-                        <p className="mt-1 text-xs text-slate-400 sm:text-sm">
+                        <p
+                          className="
+                            mt-1
+                            text-xs
+                            theme-text-muted
+                            sm:text-sm
+                          "
+                        >
                           atau pilih file dari perangkat Anda
                         </p>
 
@@ -299,15 +392,15 @@ export default function UploadMediaPage() {
                             inline-flex
                             items-center
                             rounded-full
-                            bg-white
+                            theme-card
                             px-3
                             py-1.5
                             text-[10px]
                             font-semibold
-                            text-slate-500
+                            theme-text-muted
                             shadow-sm
                             ring-1
-                            ring-slate-200
+                            ring-[var(--color-border)]
                           "
                         >
                           Maksimal ukuran 5 MB
@@ -327,8 +420,8 @@ export default function UploadMediaPage() {
                           gap-3
                           rounded-2xl
                           border
-                          border-indigo-100
-                          bg-indigo-50/50
+                          theme-border
+                          theme-info
                           p-3
                           sm:p-4
                         "
@@ -343,8 +436,7 @@ export default function UploadMediaPage() {
                               items-center
                               justify-center
                               rounded-xl
-                              bg-white
-                              text-indigo-600
+                              theme-card
                               shadow-sm
                             "
                           >
@@ -354,19 +446,43 @@ export default function UploadMediaPage() {
                           <div className="min-w-0">
                             <p
                               title={file.name}
-                              className="truncate text-sm font-semibold text-slate-700"
+                              className="
+                                truncate
+                                text-sm
+                                font-semibold
+                                theme-text
+                              "
                             >
                               {file.name}
                             </p>
 
                             <div className="mt-1 flex items-center gap-2">
-                              <span className="text-[10px] font-medium text-slate-400">
+                              <span
+                                className="
+                                  text-[10px]
+                                  font-medium
+                                  theme-text-muted
+                                "
+                              >
                                 {formatSize(file.size)}
                               </span>
 
-                              <span className="h-1 w-1 rounded-full bg-slate-300" />
+                              <span
+                                className="
+                                  h-1
+                                  w-1
+                                  rounded-full
+                                  bg-[var(--color-border)]
+                                "
+                              />
 
-                              <span className="text-[10px] font-medium text-emerald-600">
+                              <span
+                                className="
+                                  text-[10px]
+                                  font-medium
+                                  theme-text
+                                "
+                              >
                                 File dipilih
                               </span>
                             </div>
@@ -384,10 +500,10 @@ export default function UploadMediaPage() {
                             items-center
                             justify-center
                             rounded-lg
-                            text-slate-400
+                            theme-text-muted
                             transition
-                            hover:bg-rose-50
-                            hover:text-rose-600
+                            hover:bg-[var(--color-danger-background)]
+                            hover:text-[var(--color-danger)]
                           "
                           title="Hapus file"
                         >
@@ -407,6 +523,7 @@ export default function UploadMediaPage() {
                         sm:justify-end
                       "
                     >
+                      {/* CANCEL */}
                       <button
                         type="button"
                         onClick={() => router.back()}
@@ -418,16 +535,15 @@ export default function UploadMediaPage() {
                           gap-2
                           rounded-xl
                           border
-                          border-slate-200
-                          bg-white
+                          theme-border
+                          theme-card
                           px-5
                           py-3
                           text-sm
                           font-semibold
-                          text-slate-600
+                          theme-text-secondary
                           transition-all
-                          hover:border-slate-300
-                          hover:bg-slate-50
+                          theme-table-hover
                           sm:w-auto
                         "
                       >
@@ -435,6 +551,7 @@ export default function UploadMediaPage() {
                         Batal
                       </button>
 
+                      {/* SUBMIT */}
                       <button
                         type="submit"
                         disabled={!file || loading}
@@ -445,17 +562,14 @@ export default function UploadMediaPage() {
                           justify-center
                           gap-2
                           rounded-xl
-                          bg-indigo-600
+                          theme-primary
                           px-5
                           py-3
                           text-sm
                           font-semibold
-                          text-white
                           shadow-lg
-                          shadow-indigo-600/20
                           transition-all
                           hover:-translate-y-0.5
-                          hover:bg-indigo-700
                           hover:shadow-xl
                           disabled:cursor-not-allowed
                           disabled:opacity-50
@@ -493,30 +607,68 @@ export default function UploadMediaPage() {
                     INFO PANEL
                 ================================================= */}
                 <aside className="min-w-0">
-                  <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+
+                  {/* PANDUAN */}
+                  <div
+                    className="
+                      rounded-2xl
+                      border
+                      theme-border
+                      theme-card
+                      p-5
+                      shadow-sm
+                    "
+                  >
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
+                      <div
+                        className="
+                          flex
+                          h-10
+                          w-10
+                          shrink-0
+                          items-center
+                          justify-center
+                          rounded-xl
+                          theme-success
+                        "
+                      >
                         <CheckCircle2 className="h-5 w-5" />
                       </div>
 
                       <div>
-                        <h3 className="text-sm font-bold text-slate-800">
+                        <h3 className="text-sm font-bold theme-text">
                           Panduan Upload
                         </h3>
 
-                        <p className="text-[10px] text-slate-400">
+                        <p className="text-[10px] theme-text-muted">
                           Informasi file
                         </p>
                       </div>
                     </div>
 
                     <div className="mt-5 space-y-4">
-                      <div className="flex gap-3">
-                        <div className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-500" />
 
-                        <p className="text-xs leading-relaxed text-slate-500">
+                      <div className="flex gap-3">
+                        <div
+                          className="
+                            mt-0.5
+                            h-1.5
+                            w-1.5
+                            shrink-0
+                            rounded-full
+                            bg-[var(--color-primary)]
+                          "
+                        />
+
+                        <p
+                          className="
+                            text-xs
+                            leading-relaxed
+                            theme-text-secondary
+                          "
+                        >
                           Ukuran file maksimal{" "}
-                          <span className="font-semibold text-slate-700">
+                          <span className="font-semibold theme-text">
                             5 MB
                           </span>
                           .
@@ -524,17 +676,47 @@ export default function UploadMediaPage() {
                       </div>
 
                       <div className="flex gap-3">
-                        <div className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-500" />
+                        <div
+                          className="
+                            mt-0.5
+                            h-1.5
+                            w-1.5
+                            shrink-0
+                            rounded-full
+                            bg-[var(--color-primary)]
+                          "
+                        />
 
-                        <p className="text-xs leading-relaxed text-slate-500">
+                        <p
+                          className="
+                            text-xs
+                            leading-relaxed
+                            theme-text-secondary
+                          "
+                        >
                           Gunakan nama file yang singkat dan mudah dikenali.
                         </p>
                       </div>
 
                       <div className="flex gap-3">
-                        <div className="mt-0.5 h-1.5 w-1.5 shrink-0 rounded-full bg-indigo-500" />
+                        <div
+                          className="
+                            mt-0.5
+                            h-1.5
+                            w-1.5
+                            shrink-0
+                            rounded-full
+                            bg-[var(--color-primary)]
+                          "
+                        />
 
-                        <p className="text-xs leading-relaxed text-slate-500">
+                        <p
+                          className="
+                            text-xs
+                            leading-relaxed
+                            theme-text-secondary
+                          "
+                        >
                           Pastikan file yang dipilih sesuai dengan kebutuhan
                           website.
                         </p>
@@ -543,29 +725,68 @@ export default function UploadMediaPage() {
                   </div>
 
                   {/* SUPPORTED FILE */}
-                  <div className="mt-4 rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
-                    <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">
+                  <div
+                    className="
+                      mt-4
+                      rounded-2xl
+                      border
+                      theme-border
+                      theme-card
+                      p-5
+                      shadow-sm
+                    "
+                  >
+                    <p
+                      className="
+                        text-[10px]
+                        font-bold
+                        uppercase
+                        tracking-wider
+                        theme-text-muted
+                      "
+                    >
                       File yang didukung
                     </p>
 
                     <div className="mt-4 grid grid-cols-3 gap-2">
-                      <div className="rounded-xl bg-indigo-50 p-3 text-center">
-                        <ImageIcon className="mx-auto h-5 w-5 text-indigo-600" />
-                        <p className="mt-1 text-[9px] font-semibold text-indigo-600">
+
+                      {/* IMAGE */}
+                      <div className="rounded-xl theme-info p-3 text-center">
+                        <ImageIcon className="mx-auto h-5 w-5" />
+
+                        <p className="mt-1 text-[9px] font-semibold">
                           Gambar
                         </p>
                       </div>
 
-                      <div className="rounded-xl bg-violet-50 p-3 text-center">
-                        <Video className="mx-auto h-5 w-5 text-violet-600" />
-                        <p className="mt-1 text-[9px] font-semibold text-violet-600">
+                      {/* VIDEO */}
+                      <div className="rounded-xl theme-card-soft p-3 text-center">
+                        <Video
+                          className="
+                            mx-auto
+                            h-5
+                            w-5
+                            text-[var(--color-primary)]
+                          "
+                        />
+
+                        <p
+                          className="
+                            mt-1
+                            text-[9px]
+                            font-semibold
+                            theme-text
+                          "
+                        >
                           Video
                         </p>
                       </div>
 
-                      <div className="rounded-xl bg-rose-50 p-3 text-center">
-                        <FileText className="mx-auto h-5 w-5 text-rose-600" />
-                        <p className="mt-1 text-[9px] font-semibold text-rose-600">
+                      {/* PDF */}
+                      <div className="rounded-xl theme-danger p-3 text-center">
+                        <FileText className="mx-auto h-5 w-5" />
+
+                        <p className="mt-1 text-[9px] font-semibold">
                           PDF
                         </p>
                       </div>
@@ -578,7 +799,13 @@ export default function UploadMediaPage() {
                   FOOTER
               ================================================= */}
               <footer className="py-8 text-center">
-                <p className="text-[11px] font-medium text-slate-400">
+                <p
+                  className="
+                    text-[11px]
+                    font-medium
+                    theme-text-muted
+                  "
+                >
                   © 2026 SmartSchool • CMS Media Management
                 </p>
               </footer>

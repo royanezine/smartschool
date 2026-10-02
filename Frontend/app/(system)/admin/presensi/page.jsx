@@ -329,16 +329,6 @@ function normalizeAbsensiItem(
     item?.siswa ||
     {};
 
-  /*
-   * PRIORITAS ROLE:
-   * 1. /api/users/:id
-   * 2. item.pengguna.peran
-   * 3. item.role
-   * 4. jabatan
-   *
-   * TIDAK berdasarkan kelas.
-   */
-
   const role =
     getRoleFromUser(authoritativeUser) ||
     getRoleFromUser(item?.pengguna) ||
@@ -371,13 +361,9 @@ function normalizeAbsensiItem(
     fallbackKelas?.nama ||
     "-";
 
-  const status = normalizeStatus(
-    item?.status,
-  );
+  const status = normalizeStatus(item?.status);
 
-  const metode = normalizeMetode(
-    item?.metode,
-  );
+  const metode = normalizeMetode(item?.metode);
 
   const initials =
     nama
@@ -409,11 +395,8 @@ function normalizeAbsensiItem(
       null,
 
     nama,
-
     nomorInduk,
-
     kelas,
-
     role,
 
     tanggal:
@@ -429,7 +412,6 @@ function normalizeAbsensiItem(
     jamPulang: "-",
 
     status,
-
     metode,
 
     lokasi:
@@ -443,55 +425,44 @@ function normalizeAbsensiItem(
 
     avatar: initials,
 
-    /*
-     * Data user asli disimpan untuk halaman detail.
-     */
-    penggunaDetail: authoritativeUser || pengguna,
+    penggunaDetail:
+      authoritativeUser || pengguna,
   };
 }
 
 /* =========================================================
    STATUS CONFIG
+   SEMUA MENGIKUTI GLOBAL THEME
 ========================================================= */
 
 const STATUS_CONFIG = {
   Hadir: {
-    bg: "bg-emerald-50",
-    text: "text-emerald-700",
-    border: "border-emerald-200",
-    dot: "bg-emerald-500",
+    className: "theme-success",
+    dot: "bg-[var(--color-success)]",
     icon: UserCheck,
   },
 
   Terlambat: {
-    bg: "bg-amber-50",
-    text: "text-amber-700",
-    border: "border-amber-200",
-    dot: "bg-amber-500",
+    className: "theme-warning",
+    dot: "bg-[var(--color-warning)]",
     icon: Clock3,
   },
 
   Izin: {
-    bg: "bg-blue-50",
-    text: "text-blue-700",
-    border: "border-blue-200",
-    dot: "bg-blue-500",
+    className: "theme-info",
+    dot: "bg-[var(--color-info)]",
     icon: AlertCircle,
   },
 
   Sakit: {
-    bg: "bg-violet-50",
-    text: "text-violet-700",
-    border: "border-violet-200",
-    dot: "bg-violet-500",
+    className: "theme-card-soft theme-text-secondary",
+    dot: "bg-[var(--color-text-muted)]",
     icon: AlertCircle,
   },
 
   "Tidak Hadir": {
-    bg: "bg-red-50",
-    text: "text-red-700",
-    border: "border-red-200",
-    dot: "bg-red-500",
+    className: "theme-danger",
+    dot: "bg-[var(--color-danger)]",
     icon: UserX,
   },
 };
@@ -509,7 +480,7 @@ function StatusBadge({ status }) {
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold whitespace-nowrap ${config.bg} ${config.text} ${config.border}`}
+      className={`inline-flex items-center gap-1.5 rounded-full border theme-border px-2.5 py-1 text-[11px] font-semibold whitespace-nowrap ${config.className}`}
     >
       <Icon size={12} />
       {status}
@@ -522,22 +493,22 @@ function StatusBadge({ status }) {
 ========================================================= */
 
 function RoleBadge({ role }) {
-  const config = {
-    Guru:
-      "border-blue-200 bg-blue-50 text-blue-700",
+  let className =
+    "theme-card-soft theme-text-secondary theme-border";
 
-    Siswa:
-      "border-indigo-200 bg-indigo-50 text-indigo-700",
+  if (role === "Guru") {
+    className =
+      "theme-info";
+  }
 
-    Staff:
-      "border-slate-200 bg-slate-100 text-slate-700",
-  };
+  if (role === "Siswa") {
+    className =
+      "theme-primary";
+  }
 
   return (
     <span
-      className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-semibold ${
-        config[role] || config.Staff
-      }`}
+      className={`inline-flex rounded-full border px-2 py-0.5 text-[10px] font-semibold ${className}`}
     >
       {role}
     </span>
@@ -557,27 +528,27 @@ function StatCard({
   loading,
 }) {
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/80 p-4 sm:p-5 shadow-sm hover:shadow-md transition-all duration-200">
+    <div className="theme-card rounded-2xl border p-4 sm:p-5 shadow-sm transition-all duration-200 hover:shadow-md">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[11px] sm:text-xs font-medium text-slate-500">
+          <p className="theme-text-muted text-[11px] sm:text-xs font-medium">
             {title}
           </p>
 
           {loading ? (
-            <div className="mt-2 h-8 w-16 animate-pulse rounded-lg bg-slate-100" />
+            <div className="theme-card-soft mt-2 h-8 w-16 animate-pulse rounded-lg" />
           ) : (
-            <p className="mt-1.5 text-2xl sm:text-3xl font-bold text-slate-900">
+            <p className="theme-text mt-1.5 text-2xl sm:text-3xl font-bold">
               {value}
             </p>
           )}
 
-          <p className="mt-1 text-[10px] sm:text-xs text-slate-400 truncate">
+          <p className="theme-text-placeholder mt-1 text-[10px] sm:text-xs truncate">
             {description}
           </p>
         </div>
 
-        <div className="w-10 h-10 rounded-xl bg-slate-50 border border-slate-100 flex items-center justify-center shrink-0">
+        <div className="theme-card-soft theme-border flex h-10 w-10 items-center justify-center rounded-xl border shrink-0">
           <Icon
             size={18}
             className={iconClass}
@@ -598,21 +569,21 @@ function InfoItem({
   value,
 }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+    <div className="theme-card-soft theme-border rounded-xl border p-3">
       <div className="flex items-start gap-2.5">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white">
+        <div className="theme-card theme-border flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border">
           <Icon
             size={14}
-            className="text-slate-400"
+            className="theme-text-muted"
           />
         </div>
 
         <div className="min-w-0">
-          <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+          <p className="theme-text-placeholder text-[10px] font-medium uppercase tracking-wide">
             {label}
           </p>
 
-          <p className="mt-0.5 break-words text-xs font-semibold text-slate-700">
+          <p className="theme-text-secondary mt-0.5 break-words text-xs font-semibold">
             {value || "-"}
           </p>
         </div>
@@ -631,11 +602,11 @@ function MiniSummary({
 }) {
   return (
     <div>
-      <p className="text-[10px] text-slate-400">
+      <p className="theme-text-placeholder text-[10px]">
         {label}
       </p>
 
-      <p className="text-sm font-bold text-slate-700">
+      <p className="theme-text-secondary text-sm font-bold">
         {value}
       </p>
     </div>
@@ -783,11 +754,6 @@ export default function PresensiPage() {
                       response,
                     );
 
-                  /*
-                   * Ambil user ID dari setiap
-                   * record lalu ambil data user
-                   * sebenarnya.
-                   */
                   const normalized =
                     await Promise.all(
                       records.map(
@@ -835,10 +801,6 @@ export default function PresensiPage() {
         const finalData =
           responses.flat();
 
-        /*
-         * Debug supaya mudah mengecek
-         * Siti Rahayu.
-         */
         console.log(
           "=== DATA PRESENSI ADMIN ===",
           finalData,
@@ -1041,9 +1003,6 @@ export default function PresensiPage() {
   ======================================================= */
 
   const handleOpenDetail = (item) => {
-    /*
-     * Kalau Guru → halaman detail Guru.
-     */
     if (
       item.role === "Guru" &&
       item.penggunaId
@@ -1055,10 +1014,6 @@ export default function PresensiPage() {
       return;
     }
 
-    /*
-     * Untuk role lain tetap menggunakan
-     * modal detail.
-     */
     setSelectedPresensi(item);
   };
 
@@ -1174,9 +1129,7 @@ export default function PresensiPage() {
       URL.createObjectURL(blob);
 
     const link =
-      document.createElement(
-        "a",
-      );
+      document.createElement("a");
 
     link.href = url;
 
@@ -1199,7 +1152,7 @@ export default function PresensiPage() {
   ======================================================= */
 
   return (
-    <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar
         role="admin"
         activeMenu="presensi"
@@ -1211,7 +1164,7 @@ export default function PresensiPage() {
         }
       />
 
-      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+      <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
         <Header
           title="Presensi & Kehadiran"
           onMenuClick={() =>
@@ -1222,22 +1175,22 @@ export default function PresensiPage() {
         />
 
         <main className="flex-1 overflow-y-auto">
-          <div className="p-4 sm:p-6 lg:p-8 space-y-5 sm:space-y-6">
+          <div className="space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8">
 
             {/* HEADER */}
 
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-[#155DFC] to-[#0d47c9] text-white flex items-center justify-center shadow-lg shadow-[#155DFC]/20 shrink-0">
+                <div className="theme-primary flex h-11 w-11 shrink-0 items-center justify-center rounded-xl shadow-sm">
                   <ClipboardCheck size={20} />
                 </div>
 
                 <div className="min-w-0">
-                  <h1 className="text-xl sm:text-2xl font-bold text-slate-800 truncate">
+                  <h1 className="theme-text truncate text-xl font-bold sm:text-2xl">
                     Presensi & Kehadiran
                   </h1>
 
-                  <p className="text-xs sm:text-sm text-slate-500 mt-1">
+                  <p className="theme-text-secondary mt-1 text-xs sm:text-sm">
                     Kelola dan pantau kehadiran siswa, guru, dan staff sekolah.
                   </p>
                 </div>
@@ -1249,7 +1202,7 @@ export default function PresensiPage() {
                 disabled={
                   filteredData.length === 0
                 }
-                className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-gradient-to-r from-[#155DFC] to-[#0d47c9] text-white text-sm font-semibold shadow-sm hover:brightness-110 transition disabled:cursor-not-allowed disabled:opacity-60"
+                className="theme-primary inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 <Download size={15} />
                 Export Data
@@ -1260,18 +1213,18 @@ export default function PresensiPage() {
 
             {(errorKelas ||
               errorAbsensi) && (
-              <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4">
+              <div className="theme-danger flex items-start gap-3 rounded-xl border p-4">
                 <AlertCircle
                   size={19}
-                  className="mt-0.5 shrink-0 text-red-600"
+                  className="mt-0.5 shrink-0"
                 />
 
                 <div className="flex-1">
-                  <p className="text-sm font-semibold text-red-800">
+                  <p className="text-sm font-semibold">
                     Terjadi kesalahan
                   </p>
 
-                  <p className="mt-0.5 text-sm text-red-700">
+                  <p className="mt-0.5 text-sm">
                     {errorKelas ||
                       errorAbsensi}
                   </p>
@@ -1283,7 +1236,7 @@ export default function PresensiPage() {
                     setErrorKelas("");
                     setErrorAbsensi("");
                   }}
-                  className="text-red-500 hover:text-red-700"
+                  className="transition hover:opacity-70"
                 >
                   <X size={18} />
                 </button>
@@ -1292,23 +1245,20 @@ export default function PresensiPage() {
 
             {/* DATE */}
 
-            <section className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+            <section className="theme-card overflow-hidden rounded-2xl border shadow-sm">
               <div className="p-4 sm:p-5">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                   <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#eaf1ff] border border-[#c7dbff]">
-                      <CalendarDays
-                        size={17}
-                        className="text-[#155DFC]"
-                      />
+                    <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border">
+                      <CalendarDays size={17} />
                     </div>
 
                     <div>
-                      <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                      <p className="theme-text-placeholder text-[10px] font-semibold uppercase tracking-wide">
                         Rekap Tanggal
                       </p>
 
-                      <p className="text-sm font-bold text-slate-800">
+                      <p className="theme-text text-sm font-bold">
                         {formatTanggal(
                           dateFilter,
                         )}
@@ -1345,13 +1295,13 @@ export default function PresensiPage() {
 
             {/* STAT */}
 
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
               <StatCard
                 title="Total Presensi"
                 value={totalPresensi}
                 description="Data presensi hari ini"
                 icon={Users}
-                iconClass="text-[#155DFC]"
+                iconClass="theme-text"
                 loading={loadingAbsensi}
               />
 
@@ -1360,7 +1310,7 @@ export default function PresensiPage() {
                 value={totalHadir}
                 description="Kehadiran tercatat"
                 icon={UserCheck}
-                iconClass="text-emerald-500"
+                iconClass="text-[var(--color-success)]"
                 loading={loadingAbsensi}
               />
 
@@ -1369,7 +1319,7 @@ export default function PresensiPage() {
                 value={totalTerlambat}
                 description="Masuk setelah jam"
                 icon={Clock3}
-                iconClass="text-amber-500"
+                iconClass="text-[var(--color-warning)]"
                 loading={loadingAbsensi}
               />
 
@@ -1378,19 +1328,19 @@ export default function PresensiPage() {
                 value={totalTidakHadir}
                 description="Izin, sakit, atau alpa"
                 icon={UserX}
-                iconClass="text-red-500"
+                iconClass="text-[var(--color-danger)]"
                 loading={loadingAbsensi}
               />
             </div>
 
             {/* FILTER */}
 
-            <section className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-4">
-              <div className="flex flex-col lg:flex-row gap-3">
-                <div className="relative flex-1 min-w-0">
+            <section className="theme-card rounded-2xl border p-4 shadow-sm">
+              <div className="flex flex-col gap-3 lg:flex-row">
+                <div className="relative min-w-0 flex-1">
                   <Search
                     size={16}
-                    className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                    className="theme-text-placeholder absolute left-3 top-1/2 -translate-y-1/2"
                   />
 
                   <input
@@ -1403,7 +1353,7 @@ export default function PresensiPage() {
                       setCurrentPage(1);
                     }}
                     placeholder="Cari nama, NIS/NIP, atau kelas..."
-                    className="w-full pl-9 pr-3 py-2.5 text-sm rounded-xl border border-slate-200 bg-white text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#155DFC]/20 focus:border-[#155DFC]/50 transition"
+                    className="theme-input w-full rounded-xl border py-2.5 pl-9 pr-3 text-sm outline-none transition focus:ring-2 focus:ring-[var(--color-primary)]/20"
                   />
                 </div>
 
@@ -1416,7 +1366,7 @@ export default function PresensiPage() {
                       );
                       setCurrentPage(1);
                     }}
-                    className="h-11 min-w-[130px] rounded-xl border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 outline-none focus:border-[#155DFC]/50 focus:ring-2 focus:ring-[#155DFC]/20"
+                    className="theme-input h-11 min-w-[130px] rounded-xl border px-3 text-xs font-medium outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20"
                   >
                     <option value="Semua">
                       Semua Pengguna
@@ -1443,7 +1393,7 @@ export default function PresensiPage() {
                       );
                       setCurrentPage(1);
                     }}
-                    className="h-11 min-w-[140px] rounded-xl border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 outline-none focus:border-[#155DFC]/50 focus:ring-2 focus:ring-[#155DFC]/20"
+                    className="theme-input h-11 min-w-[140px] rounded-xl border px-3 text-xs font-medium outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20"
                   >
                     <option value="Semua">
                       Semua Kelas
@@ -1473,7 +1423,7 @@ export default function PresensiPage() {
                       );
                       setCurrentPage(1);
                     }}
-                    className="h-11 min-w-[140px] rounded-xl border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 outline-none focus:border-[#155DFC]/50 focus:ring-2 focus:ring-[#155DFC]/20"
+                    className="theme-input h-11 min-w-[140px] rounded-xl border px-3 text-xs font-medium outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20"
                   >
                     <option value="Semua">
                       Semua Status
@@ -1509,14 +1459,15 @@ export default function PresensiPage() {
                       );
                       setCurrentPage(1);
                     }}
-                    className="h-11 min-w-[150px] rounded-xl border border-slate-200 bg-white px-3 text-xs font-medium text-slate-700 outline-none focus:border-[#155DFC]/50 focus:ring-2 focus:ring-[#155DFC]/20"
+                    className="theme-input h-11 min-w-[150px] rounded-xl border px-3 text-xs font-medium outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20"
                   />
 
                   <button
+                    type="button"
                     onClick={
                       resetFilters
                     }
-                    className="inline-flex h-11 items-center justify-center gap-1.5 rounded-xl border border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 transition hover:bg-slate-50"
+                    className="theme-card-soft theme-text-secondary theme-border inline-flex h-11 items-center justify-center gap-1.5 rounded-xl border px-3 text-xs font-medium transition hover:opacity-80"
                   >
                     <RotateCcw size={14} />
                     Reset
@@ -1527,32 +1478,29 @@ export default function PresensiPage() {
 
             {/* TABLE */}
 
-            <section className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-              <div className="px-4 sm:px-5 lg:px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <section className="theme-card overflow-hidden rounded-2xl border shadow-sm">
+              <div className="theme-border flex flex-col gap-3 border-b px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5 lg:px-6">
                 <div>
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-lg bg-[#eaf1ff] border border-[#c7dbff] flex items-center justify-center">
-                      <Database
-                        size={15}
-                        className="text-[#155DFC]"
-                      />
+                    <div className="theme-info flex h-8 w-8 items-center justify-center rounded-lg border">
+                      <Database size={15} />
                     </div>
 
-                    <h2 className="text-sm font-bold text-slate-800">
+                    <h2 className="theme-text text-sm font-bold">
                       Data Presensi
                     </h2>
                   </div>
 
-                  <p className="text-xs text-slate-400 mt-1">
+                  <p className="theme-text-muted mt-1 text-xs">
                     Daftar kehadiran siswa, guru, dan staff.
                   </p>
                 </div>
 
                 {loadingAbsensi && (
-                  <div className="flex items-center gap-2 text-xs text-slate-500">
+                  <div className="theme-text-secondary flex items-center gap-2 text-xs">
                     <Loader2
                       size={14}
-                      className="animate-spin text-[#155DFC]"
+                      className="animate-spin text-[var(--color-primary)]"
                     />
                     Memuat data...
                   </div>
@@ -1560,9 +1508,9 @@ export default function PresensiPage() {
               </div>
 
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[1050px] text-sm border-collapse">
+                <table className="w-full min-w-[1050px] border-collapse text-sm">
                   <thead>
-                    <tr className="bg-gradient-to-r from-[#155DFC] to-[#0d47c9] text-white">
+                    <tr className="theme-primary">
                       <th className="px-4 py-3 text-left text-xs font-semibold">
                         Pengguna
                       </th>
@@ -1602,48 +1550,48 @@ export default function PresensiPage() {
                         (_, index) => (
                           <tr
                             key={index}
-                            className="border-b border-slate-100"
+                            className="theme-border border-b"
                           >
                             <td className="px-4 py-3">
                               <div className="flex items-center gap-3">
-                                <div className="h-9 w-9 animate-pulse rounded-lg bg-slate-100" />
+                                <div className="theme-card-soft h-9 w-9 animate-pulse rounded-lg" />
 
                                 <div className="space-y-2">
-                                  <div className="h-4 w-32 animate-pulse rounded bg-slate-100" />
+                                  <div className="theme-card-soft h-4 w-32 animate-pulse rounded" />
 
-                                  <div className="h-3 w-20 animate-pulse rounded bg-slate-100" />
+                                  <div className="theme-card-soft h-3 w-20 animate-pulse rounded" />
                                 </div>
                               </div>
                             </td>
 
                             <td className="px-4 py-3">
                               <div className="space-y-2">
-                                <div className="h-3 w-24 animate-pulse rounded bg-slate-100" />
+                                <div className="theme-card-soft h-3 w-24 animate-pulse rounded" />
 
-                                <div className="h-3 w-20 animate-pulse rounded bg-slate-100" />
+                                <div className="theme-card-soft h-3 w-20 animate-pulse rounded" />
                               </div>
                             </td>
 
                             <td className="px-4 py-3">
-                              <div className="h-4 w-16 animate-pulse rounded bg-slate-100" />
+                              <div className="theme-card-soft h-4 w-16 animate-pulse rounded" />
                             </td>
 
                             <td className="px-4 py-3">
-                              <div className="h-4 w-16 animate-pulse rounded bg-slate-100" />
+                              <div className="theme-card-soft h-4 w-16 animate-pulse rounded" />
                             </td>
 
                             <td className="px-4 py-3">
-                              <div className="h-6 w-20 animate-pulse rounded-full bg-slate-100" />
+                              <div className="theme-card-soft h-6 w-20 animate-pulse rounded-full" />
                             </td>
 
                             <td className="px-4 py-3">
-                              <div className="h-4 w-20 animate-pulse rounded bg-slate-100" />
+                              <div className="theme-card-soft h-4 w-20 animate-pulse rounded" />
                             </td>
 
                             <td className="px-4 py-3">
                               <div className="flex justify-center gap-1">
-                                <div className="h-8 w-8 animate-pulse rounded-lg bg-slate-100" />
-                                <div className="h-8 w-8 animate-pulse rounded-lg bg-slate-100" />
+                                <div className="theme-card-soft h-8 w-8 animate-pulse rounded-lg" />
+                                <div className="theme-card-soft h-8 w-8 animate-pulse rounded-lg" />
                               </div>
                             </td>
                           </tr>
@@ -1655,21 +1603,21 @@ export default function PresensiPage() {
                         (item) => (
                           <tr
                             key={item.id}
-                            className="border-b border-slate-100 last:border-0 hover:bg-[#eaf1ff] transition-colors"
+                            className="theme-border theme-table-hover border-b transition-colors"
                           >
                             <td className="px-4 py-3">
                               <div className="flex items-center gap-3">
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#155DFC] to-[#0d47c9] text-white text-xs font-bold">
+                                <div className="theme-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-xs font-bold">
                                   {item.avatar}
                                 </div>
 
                                 <div className="min-w-0">
-                                  <p className="truncate max-w-[180px] text-sm font-semibold text-slate-800">
+                                  <p className="theme-text max-w-[180px] truncate text-sm font-semibold">
                                     {item.nama}
                                   </p>
 
                                   <div className="mt-1 flex items-center gap-2">
-                                    <span className="text-[11px] text-slate-400">
+                                    <span className="theme-text-muted text-[11px]">
                                       {
                                         item.nomorInduk
                                       }
@@ -1686,16 +1634,17 @@ export default function PresensiPage() {
                             </td>
 
                             <td className="px-4 py-3">
-                              <p className="text-xs font-medium text-slate-700">
+                              <p className="theme-text-secondary text-xs font-medium">
                                 {item.role ===
                                 "Guru"
-                                  ? item.penggunaDetail
+                                  ? item
+                                      .penggunaDetail
                                       ?.jabatan ||
                                     "Guru"
                                   : item.kelas}
                               </p>
 
-                              <p className="mt-0.5 text-[11px] text-slate-400">
+                              <p className="theme-text-muted mt-0.5 text-[11px]">
                                 {item.role ===
                                 "Guru"
                                   ? "Tenaga Pendidik"
@@ -1713,18 +1662,18 @@ export default function PresensiPage() {
                                   className={
                                     item.jamMasuk ===
                                     "-"
-                                      ? "text-slate-300"
-                                      : "text-[#155DFC]"
+                                      ? "theme-text-placeholder"
+                                      : "text-[var(--color-primary)]"
                                   }
                                 />
 
                                 <span
-                                  className={`text-xs font-semibold ${
+                                  className={
                                     item.jamMasuk ===
                                     "-"
-                                      ? "text-slate-300"
-                                      : "text-slate-700"
-                                  }`}
+                                      ? "theme-text-placeholder text-xs font-semibold"
+                                      : "theme-text-secondary text-xs font-semibold"
+                                  }
                                 >
                                   {
                                     item.jamMasuk
@@ -1737,10 +1686,10 @@ export default function PresensiPage() {
                               <div className="flex items-center gap-2">
                                 <Clock3
                                   size={13}
-                                  className="text-slate-300"
+                                  className="theme-text-placeholder"
                                 />
 
-                                <span className="text-xs font-semibold text-slate-300">
+                                <span className="theme-text-placeholder text-xs font-semibold">
                                   -
                                 </span>
                               </div>
@@ -1755,7 +1704,7 @@ export default function PresensiPage() {
 
                               {item.keterangan !==
                                 "-" && (
-                                <p className="mt-1 max-w-[160px] truncate text-[10px] text-slate-400">
+                                <p className="theme-text-muted mt-1 max-w-[160px] truncate text-[10px]">
                                   {
                                     item.keterangan
                                   }
@@ -1764,7 +1713,7 @@ export default function PresensiPage() {
                             </td>
 
                             <td className="px-4 py-3">
-                              <span className="text-xs font-medium text-slate-600">
+                              <span className="theme-text-secondary text-xs font-medium">
                                 {
                                   item.metode
                                 }
@@ -1772,11 +1721,9 @@ export default function PresensiPage() {
 
                               {item.lokasi !==
                                 "-" && (
-                                <p className="mt-0.5 flex items-center gap-1 text-[10px] text-slate-400">
+                                <p className="theme-text-muted mt-0.5 flex items-center gap-1 text-[10px]">
                                   <MapPin
-                                    size={
-                                      10
-                                    }
+                                    size={10}
                                   />
                                   {
                                     item.lokasi
@@ -1788,34 +1735,32 @@ export default function PresensiPage() {
                             <td className="px-4 py-3">
                               <div className="flex items-center justify-center gap-1">
                                 <button
+                                  type="button"
                                   onClick={() =>
                                     handleOpenDetail(
                                       item,
                                     )
                                   }
                                   title="Lihat detail"
-                                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-[#c7dbff] hover:bg-[#eaf1ff] hover:text-[#155DFC]"
+                                  className="theme-card-soft theme-text-secondary theme-border flex h-8 w-8 items-center justify-center rounded-lg border transition hover:text-[var(--color-primary)]"
                                 >
                                   <Eye
-                                    size={
-                                      14
-                                    }
+                                    size={14}
                                   />
                                 </button>
 
                                 <button
+                                  type="button"
                                   onClick={() =>
                                     handleOpenEdit(
                                       item,
                                     )
                                   }
                                   title="Ubah presensi"
-                                  className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:border-[#c7dbff] hover:bg-[#eaf1ff] hover:text-[#155DFC]"
+                                  className="theme-card-soft theme-text-secondary theme-border flex h-8 w-8 items-center justify-center rounded-lg border transition hover:text-[var(--color-primary)]"
                                 >
                                   <Edit3
-                                    size={
-                                      14
-                                    }
+                                    size={14}
                                   />
                                 </button>
                               </div>
@@ -1830,26 +1775,26 @@ export default function PresensiPage() {
                           className="px-4 py-16"
                         >
                           <div className="flex flex-col items-center justify-center text-center">
-                            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-[#eaf1ff] border border-[#c7dbff]">
+                            <div className="theme-info flex h-14 w-14 items-center justify-center rounded-full border">
                               <Search
                                 size={24}
-                                className="text-[#155DFC]"
                               />
                             </div>
 
-                            <p className="mt-4 text-base font-bold text-slate-800">
+                            <p className="theme-text mt-4 text-base font-bold">
                               Data presensi tidak ditemukan
                             </p>
 
-                            <p className="mt-1 text-xs text-slate-500">
+                            <p className="theme-text-secondary mt-1 text-xs">
                               Coba ubah pencarian atau filter yang digunakan.
                             </p>
 
                             <button
+                              type="button"
                               onClick={
                                 resetFilters
                               }
-                              className="mt-4 text-xs font-semibold text-[#155DFC] hover:underline"
+                              className="mt-4 text-xs font-semibold text-[var(--color-primary)] hover:underline"
                             >
                               Reset Filter
                             </button>
@@ -1866,17 +1811,16 @@ export default function PresensiPage() {
               {!loadingAbsensi &&
                 filteredData.length >
                   0 && (
-                  <div className="px-4 sm:px-5 py-3 border-t border-slate-100 bg-slate-50/60 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                    <p className="text-xs text-slate-500">
+                  <div className="theme-card-soft theme-border flex flex-col gap-3 border-t px-4 py-3 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+                    <p className="theme-text-secondary text-xs">
                       Menampilkan{" "}
-                      <span className="font-semibold text-slate-700">
-                        {(safeCurrentPage -
-                          1) *
+                      <span className="theme-text font-semibold">
+                        {(safeCurrentPage - 1) *
                           itemsPerPage +
                           1}
                       </span>{" "}
                       -{" "}
-                      <span className="font-semibold text-slate-700">
+                      <span className="theme-text font-semibold">
                         {Math.min(
                           safeCurrentPage *
                             itemsPerPage,
@@ -1884,7 +1828,7 @@ export default function PresensiPage() {
                         )}
                       </span>{" "}
                       dari{" "}
-                      <span className="font-semibold text-slate-700">
+                      <span className="theme-text font-semibold">
                         {
                           filteredData.length
                         }
@@ -1894,6 +1838,7 @@ export default function PresensiPage() {
 
                     <div className="flex items-center gap-1">
                       <button
+                        type="button"
                         disabled={
                           safeCurrentPage ===
                           1
@@ -1907,7 +1852,7 @@ export default function PresensiPage() {
                               ),
                           )
                         }
-                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="theme-card theme-text-secondary theme-border flex h-8 w-8 items-center justify-center rounded-lg border transition hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         <ChevronLeft
                           size={15}
@@ -1924,18 +1869,19 @@ export default function PresensiPage() {
                       ).map(
                         (page) => (
                           <button
+                            type="button"
                             key={page}
                             onClick={() =>
                               setCurrentPage(
                                 page,
                               )
                             }
-                            className={`flex h-8 min-w-8 items-center justify-center rounded-lg px-2 text-xs font-semibold transition ${
+                            className={
                               safeCurrentPage ===
                               page
-                                ? "bg-[#155DFC] text-white shadow-sm"
-                                : "border border-slate-200 bg-white text-slate-500 hover:bg-slate-50"
-                            }`}
+                                ? "theme-primary flex h-8 min-w-8 items-center justify-center rounded-lg px-2 text-xs font-semibold shadow-sm"
+                                : "theme-card theme-text-secondary theme-border flex h-8 min-w-8 items-center justify-center rounded-lg border px-2 text-xs font-semibold transition hover:opacity-80"
+                            }
                           >
                             {page}
                           </button>
@@ -1943,6 +1889,7 @@ export default function PresensiPage() {
                       )}
 
                       <button
+                        type="button"
                         disabled={
                           safeCurrentPage ===
                           totalPages
@@ -1956,7 +1903,7 @@ export default function PresensiPage() {
                               ),
                           )
                         }
-                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 bg-white text-slate-500 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                        className="theme-card theme-text-secondary theme-border flex h-8 w-8 items-center justify-center rounded-lg border transition hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-40"
                       >
                         <ChevronRight
                           size={15}
@@ -1971,61 +1918,57 @@ export default function PresensiPage() {
       </div>
 
       {/* =====================================================
-          DETAIL MODAL NON-GURU
+          DETAIL MODAL
       ===================================================== */}
 
       {selectedPresensi && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm">
+          <div className="theme-card w-full max-w-2xl overflow-hidden rounded-2xl border shadow-2xl">
+            <div className="theme-border flex items-center justify-between border-b px-5 py-4">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-[#eaf1ff] border border-[#c7dbff] flex items-center justify-center">
-                  <Eye
-                    size={17}
-                    className="text-[#155DFC]"
-                  />
+                <div className="theme-info flex h-9 w-9 items-center justify-center rounded-lg border">
+                  <Eye size={17} />
                 </div>
 
                 <div>
-                  <h2 className="text-sm font-bold text-slate-800">
+                  <h2 className="theme-text text-sm font-bold">
                     Detail Presensi
                   </h2>
 
-                  <p className="text-[11px] text-slate-400 mt-0.5">
+                  <p className="theme-text-muted mt-0.5 text-[11px]">
                     Informasi kehadiran pengguna
                   </p>
                 </div>
               </div>
 
               <button
+                type="button"
                 onClick={() =>
-                  setSelectedPresensi(
-                    null,
-                  )
+                  setSelectedPresensi(null)
                 }
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                className="theme-text-muted flex h-9 w-9 items-center justify-center rounded-lg transition hover:opacity-70"
               >
                 <X size={18} />
               </button>
             </div>
 
             <div className="max-h-[75vh] overflow-y-auto p-5">
-              <div className="mb-5 flex flex-col gap-4 rounded-xl border border-[#c7dbff] bg-[#f5f8ff] p-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="theme-info mb-5 flex flex-col gap-4 rounded-xl border p-4 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#155DFC] to-[#0d47c9] text-white text-sm font-bold shadow-sm">
+                  <div className="theme-primary flex h-12 w-12 shrink-0 items-center justify-center rounded-full text-sm font-bold shadow-sm">
                     {
                       selectedPresensi.avatar
                     }
                   </div>
 
                   <div className="min-w-0">
-                    <h3 className="truncate text-base font-bold text-slate-800">
+                    <h3 className="theme-text truncate text-base font-bold">
                       {
                         selectedPresensi.nama
                       }
                     </h3>
 
-                    <p className="mt-0.5 text-xs text-slate-500">
+                    <p className="theme-text-secondary mt-0.5 text-xs">
                       {
                         selectedPresensi.nomorInduk
                       }
@@ -2113,14 +2056,13 @@ export default function PresensiPage() {
               </div>
             </div>
 
-            <div className="flex flex-col-reverse gap-2 border-t border-slate-100 bg-slate-50/70 px-5 py-4 sm:flex-row sm:justify-end">
+            <div className="theme-card-soft theme-border flex flex-col-reverse gap-2 border-t px-5 py-4 sm:flex-row sm:justify-end">
               <button
+                type="button"
                 onClick={() =>
-                  setSelectedPresensi(
-                    null,
-                  )
+                  setSelectedPresensi(null)
                 }
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+                className="theme-card theme-text-secondary theme-border rounded-xl border px-4 py-2.5 text-sm font-semibold transition hover:opacity-80"
               >
                 Tutup
               </button>
@@ -2134,54 +2076,52 @@ export default function PresensiPage() {
       ===================================================== */}
 
       {editPresensi && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/50 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/50 p-4 backdrop-blur-sm">
+          <div className="theme-card w-full max-w-lg overflow-hidden rounded-2xl border shadow-2xl">
+            <div className="theme-border flex items-center justify-between border-b px-5 py-4">
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg bg-[#eaf1ff] border border-[#c7dbff] flex items-center justify-center">
-                  <Edit3
-                    size={17}
-                    className="text-[#155DFC]"
-                  />
+                <div className="theme-info flex h-9 w-9 items-center justify-center rounded-lg border">
+                  <Edit3 size={17} />
                 </div>
 
                 <div>
-                  <h2 className="text-sm font-bold text-slate-800">
+                  <h2 className="theme-text text-sm font-bold">
                     Ubah Status Presensi
                   </h2>
 
-                  <p className="text-[11px] text-slate-400 mt-0.5">
+                  <p className="theme-text-muted mt-0.5 text-[11px]">
                     Perbarui data kehadiran pengguna
                   </p>
                 </div>
               </div>
 
               <button
+                type="button"
                 onClick={() =>
                   setEditPresensi(null)
                 }
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                className="theme-text-muted flex h-9 w-9 items-center justify-center rounded-lg transition hover:opacity-70"
               >
                 <X size={18} />
               </button>
             </div>
 
             <div className="max-h-[75vh] overflow-y-auto p-5">
-              <div className="mb-5 flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-[#155DFC] to-[#0d47c9] text-white text-xs font-bold">
+              <div className="theme-card-soft theme-border mb-5 flex items-center gap-3 rounded-xl border p-4">
+                <div className="theme-primary flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-xs font-bold">
                   {
                     editPresensi.avatar
                   }
                 </div>
 
                 <div className="min-w-0">
-                  <p className="truncate text-sm font-bold text-slate-800">
+                  <p className="theme-text truncate text-sm font-bold">
                     {
                       editPresensi.nama
                     }
                   </p>
 
-                  <p className="mt-0.5 text-xs text-slate-500">
+                  <p className="theme-text-secondary mt-0.5 text-xs">
                     {
                       editPresensi.nomorInduk
                     }{" "}
@@ -2198,7 +2138,7 @@ export default function PresensiPage() {
               </div>
 
               <div>
-                <label className="mb-2 block text-xs font-semibold text-slate-600">
+                <label className="theme-text-secondary mb-2 block text-xs font-semibold">
                   Status Kehadiran
                 </label>
 
@@ -2229,24 +2169,22 @@ export default function PresensiPage() {
                               status,
                             )
                           }
-                          className={`rounded-xl border px-3 py-2.5 text-left text-xs font-medium transition ${
+                          className={
                             active
-                              ? `${config.bg} ${config.text} ${config.border} ring-2 ring-[#155DFC]/10`
-                              : "border-slate-200 bg-white text-slate-500 hover:bg-slate-50"
-                          }`}
+                              ? `rounded-xl border px-3 py-2.5 text-left text-xs font-medium transition ${config.className}`
+                              : "theme-card-soft theme-text-secondary theme-border rounded-xl border px-3 py-2.5 text-left text-xs font-medium transition hover:opacity-80"
+                          }
                         >
                           <span className="flex items-center gap-2">
                             <span
                               className={`h-2 w-2 rounded-full ${
                                 active
                                   ? config.dot
-                                  : "bg-slate-300"
+                                  : "bg-[var(--color-text-placeholder)]"
                               }`}
                             />
 
-                            {
-                              status
-                            }
+                            {status}
                           </span>
                         </button>
                       );
@@ -2257,7 +2195,7 @@ export default function PresensiPage() {
 
               <div className="mt-5 grid gap-3 sm:grid-cols-2">
                 <div>
-                  <label className="mb-2 block text-xs font-semibold text-slate-600">
+                  <label className="theme-text-secondary mb-2 block text-xs font-semibold">
                     Jam Masuk
                   </label>
 
@@ -2269,25 +2207,25 @@ export default function PresensiPage() {
                         ? editPresensi.jamMasuk
                         : ""
                     }
-                    className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none"
+                    className="theme-input h-11 w-full rounded-xl border px-3 text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20"
                   />
                 </div>
 
                 <div>
-                  <label className="mb-2 block text-xs font-semibold text-slate-600">
+                  <label className="theme-text-secondary mb-2 block text-xs font-semibold">
                     Jam Pulang
                   </label>
 
                   <input
                     type="time"
                     defaultValue=""
-                    className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none"
+                    className="theme-input h-11 w-full rounded-xl border px-3 text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20"
                   />
                 </div>
               </div>
 
               <div className="mt-5">
-                <label className="mb-2 block text-xs font-semibold text-slate-600">
+                <label className="theme-text-secondary mb-2 block text-xs font-semibold">
                   Keterangan
                 </label>
 
@@ -2302,38 +2240,40 @@ export default function PresensiPage() {
                   }
                   rows={3}
                   placeholder="Tambahkan keterangan jika diperlukan..."
-                  className="w-full resize-none rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-700 outline-none"
+                  className="theme-input w-full resize-none rounded-xl border px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20"
                 />
               </div>
 
-              <div className="mt-4 flex gap-2 rounded-xl border border-blue-200 bg-[#f5f8ff] p-3">
+              <div className="theme-info mt-4 flex gap-2 rounded-xl border p-3">
                 <AlertCircle
                   size={15}
-                  className="mt-0.5 shrink-0 text-[#155DFC]"
+                  className="mt-0.5 shrink-0"
                 />
 
-                <p className="text-[11px] leading-relaxed text-slate-600">
+                <p className="theme-text-secondary text-[11px] leading-relaxed">
                   Backend saat ini belum menyediakan endpoint update presensi dari halaman admin.
                 </p>
               </div>
             </div>
 
-            <div className="flex flex-col-reverse gap-2 border-t border-slate-100 bg-slate-50/70 px-5 py-4 sm:flex-row sm:justify-end">
+            <div className="theme-card-soft theme-border flex flex-col-reverse gap-2 border-t px-5 py-4 sm:flex-row sm:justify-end">
               <button
+                type="button"
                 onClick={() =>
                   setEditPresensi(null)
                 }
-                className="rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
+                className="theme-card theme-text-secondary theme-border rounded-xl border px-4 py-2.5 text-sm font-semibold transition hover:opacity-80"
               >
                 Batal
               </button>
 
               <button
+                type="button"
                 onClick={
                   handleSaveEdit
                 }
                 disabled={isSaving}
-                className="inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#155DFC] to-[#0d47c9] px-4 py-2.5 text-sm font-semibold text-white transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60"
+                className="theme-primary inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 {isSaving ? (
                   <>
@@ -2345,9 +2285,7 @@ export default function PresensiPage() {
                   </>
                 ) : (
                   <>
-                    <Check
-                      size={15}
-                    />
+                    <Check size={15} />
                     Simpan Perubahan
                   </>
                 )}

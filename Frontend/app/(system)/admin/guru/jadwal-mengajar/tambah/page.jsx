@@ -168,15 +168,15 @@ function SearchableSelect({
 
   return (
     <div className="relative">
-      <label className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-slate-700">
+      <label className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold theme-text-secondary">
         <Icon
           size={14}
-          className="text-slate-400"
+          className="theme-text-muted"
         />
 
         {label}
 
-        <span className="text-red-500">
+        <span className="text-[var(--color-danger)]">
           *
         </span>
       </label>
@@ -189,14 +189,14 @@ function SearchableSelect({
             (prev) => !prev
           )
         }
-        className={`flex h-11 w-full items-center justify-between gap-3 rounded-lg border bg-white px-3.5 text-left text-sm transition ${
+        className={`flex h-11 w-full items-center justify-between gap-3 rounded-lg border px-3.5 text-left text-sm transition theme-input ${
           open
-            ? "border-[#155DFC] ring-4 ring-[#155DFC]/10"
-            : "border-slate-200 hover:border-slate-300"
+            ? "border-[var(--color-primary)] ring-4 ring-[var(--color-primary)]/10"
+            : "hover:border-[var(--color-primary)]"
         } ${
           disabled
-            ? "cursor-not-allowed bg-slate-50 text-slate-400"
-            : "text-slate-700"
+            ? "cursor-not-allowed opacity-70"
+            : ""
         }`}
       >
         <span className="min-w-0 truncate">
@@ -207,7 +207,7 @@ function SearchableSelect({
 
         <ChevronDown
           size={16}
-          className={`shrink-0 text-slate-400 transition-transform ${
+          className={`shrink-0 theme-text-muted transition-transform ${
             open
               ? "rotate-180"
               : ""
@@ -224,15 +224,15 @@ function SearchableSelect({
             className="fixed inset-0 z-30 cursor-default"
           />
 
-          <div className="absolute left-0 right-0 top-full z-40 mt-2 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-xl shadow-slate-900/10">
+          <div className="absolute left-0 right-0 top-full z-40 mt-2 overflow-hidden rounded-xl border theme-card theme-border shadow-xl">
 
             {/* SEARCH */}
 
-            <div className="border-b border-slate-100 p-3">
+            <div className="border-b theme-border-soft p-3">
               <div className="relative">
                 <Search
                   size={15}
-                  className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                  className="absolute left-3 top-1/2 -translate-y-1/2 theme-text-muted"
                 />
 
                 <input
@@ -248,7 +248,7 @@ function SearchableSelect({
                     e.stopPropagation()
                   }
                   placeholder={`Cari ${label.toLowerCase()}...`}
-                  className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50 pl-9 pr-3 text-xs text-slate-700 outline-none placeholder:text-slate-400 focus:border-[#155DFC] focus:bg-white focus:ring-4 focus:ring-[#155DFC]/10"
+                  className="h-10 w-full rounded-lg border px-9 pr-3 text-xs outline-none transition theme-input focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-primary)]/10"
                 />
               </div>
             </div>
@@ -277,8 +277,8 @@ function SearchableSelect({
                         }
                         className={`flex w-full items-center gap-3 rounded-lg px-3 py-3 text-left transition ${
                           selected
-                            ? "bg-[#eaf1ff] text-[#155DFC]"
-                            : "text-slate-700 hover:bg-slate-50"
+                            ? "theme-sidebar-active"
+                            : "theme-text-secondary theme-table-hover"
                         }`}
                       >
                         {renderOption
@@ -299,7 +299,7 @@ function SearchableSelect({
                         {selected && (
                           <CircleCheck
                             size={15}
-                            className="ml-auto shrink-0 text-[#155DFC]"
+                            className="ml-auto shrink-0 text-[var(--color-primary)]"
                           />
                         )}
                       </button>
@@ -310,14 +310,14 @@ function SearchableSelect({
                 <div className="px-4 py-8 text-center">
                   <Search
                     size={20}
-                    className="mx-auto text-slate-300"
+                    className="mx-auto theme-text-placeholder"
                   />
 
-                  <p className="mt-2 text-xs font-semibold text-slate-500">
+                  <p className="mt-2 text-xs font-semibold theme-text-muted">
                     Data tidak ditemukan
                   </p>
 
-                  <p className="mt-1 text-[10px] text-slate-400">
+                  <p className="mt-1 text-[10px] theme-text-placeholder">
                     Coba kata pencarian lain.
                   </p>
                 </div>
@@ -328,9 +328,9 @@ function SearchableSelect({
       )}
 
       {selectedOption && (
-        <p className="mt-1 text-[10px] text-slate-400">
+        <p className="mt-1 text-[10px] theme-text-placeholder">
           Pilihan saat ini:{" "}
-          <span className="font-medium text-slate-500">
+          <span className="font-medium theme-text-muted">
             {
               selectedOption.label
             }
@@ -815,7 +815,7 @@ export default function TambahJadwalMengajarPage() {
   ======================================================= */
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-slate-50">
+    <div className="flex h-screen w-full overflow-hidden theme-page">
 
       {/* ===================================================
           SIDEBAR
@@ -875,7 +875,7 @@ export default function TambahJadwalMengajarPage() {
                       "/admin/guru/jadwal-mengajar"
                     )
                   }
-                  className="mb-4 inline-flex items-center gap-2 text-xs font-semibold text-slate-500 transition hover:text-[#155DFC]"
+                  className="mb-4 inline-flex items-center gap-2 text-xs font-semibold theme-text-muted transition hover:text-[var(--color-primary)]"
                 >
                   <ArrowLeft
                     size={15}
@@ -888,7 +888,7 @@ export default function TambahJadwalMengajarPage() {
 
                   <div className="flex min-w-0 items-start gap-3">
 
-                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#155DFC] text-white shadow-sm">
+                    <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl theme-primary shadow-sm">
                       <CalendarClock
                         size={22}
                       />
@@ -898,17 +898,17 @@ export default function TambahJadwalMengajarPage() {
 
                       <div className="flex flex-wrap items-center gap-2">
 
-                        <h1 className="text-xl font-bold tracking-tight text-slate-800 sm:text-2xl">
+                        <h1 className="text-xl font-bold tracking-tight theme-text sm:text-2xl">
                           Tambah Jadwal Mengajar
                         </h1>
 
-                        <span className="rounded-full border border-[#c7dbff] bg-[#eaf1ff] px-2.5 py-1 text-[10px] font-semibold text-[#155DFC]">
+                        <span className="rounded-full border px-2.5 py-1 text-[10px] font-semibold theme-sidebar-active theme-border">
                           Akademik
                         </span>
 
                       </div>
 
-                      <p className="mt-1 max-w-2xl text-xs leading-5 text-slate-500 sm:text-sm">
+                      <p className="mt-1 max-w-2xl text-xs leading-5 theme-text-muted sm:text-sm">
                         Tentukan guru, mata pelajaran, kelas, ruangan, dan waktu mengajar.
                       </p>
 
@@ -920,29 +920,29 @@ export default function TambahJadwalMengajarPage() {
 
                   <div className="grid grid-cols-2 gap-2 sm:flex sm:items-center">
 
-                    <div className="rounded-lg border border-slate-200 bg-white px-4 py-2.5 shadow-sm">
+                    <div className="rounded-lg border px-4 py-2.5 shadow-sm theme-card theme-border">
 
-                      <p className="text-[10px] uppercase tracking-wide text-slate-400">
+                      <p className="text-[10px] uppercase tracking-wide theme-text-placeholder">
                         Hari Terisi
                       </p>
 
-                      <p className="mt-0.5 text-sm font-bold text-slate-800">
+                      <p className="mt-0.5 text-sm font-bold theme-text">
                         {jumlahHariDiisi}
 
-                        <span className="ml-1 text-xs font-normal text-slate-400">
+                        <span className="ml-1 text-xs font-normal theme-text-placeholder">
                           / {HARI.length}
                         </span>
                       </p>
 
                     </div>
 
-                    <div className="rounded-lg border border-slate-200 bg-white px-4 py-2.5 shadow-sm">
+                    <div className="rounded-lg border px-4 py-2.5 shadow-sm theme-card theme-border">
 
-                      <p className="text-[10px] uppercase tracking-wide text-slate-400">
+                      <p className="text-[10px] uppercase tracking-wide theme-text-placeholder">
                         Kelas
                       </p>
 
-                      <p className="mt-0.5 max-w-[150px] truncate text-sm font-bold text-slate-800">
+                      <p className="mt-0.5 max-w-[150px] truncate text-sm font-bold theme-text">
                         {kelasMapelTerpilih?.kelasNama ||
                           "Belum dipilih"}
                       </p>
@@ -960,19 +960,19 @@ export default function TambahJadwalMengajarPage() {
               ================================================== */}
 
               {loadingData && (
-                <div className="flex items-center gap-3 rounded-xl border border-blue-200 bg-blue-50 p-4">
+                <div className="flex items-center gap-3 rounded-xl border p-4 theme-info theme-border">
 
                   <Loader2
                     size={18}
-                    className="animate-spin text-[#155DFC]"
+                    className="animate-spin text-[var(--color-info)]"
                   />
 
                   <div>
-                    <p className="text-sm font-semibold text-blue-800">
+                    <p className="text-sm font-semibold text-[var(--color-info)]">
                       Mengambil data kelas mapel...
                     </p>
 
-                    <p className="mt-1 text-xs text-blue-700">
+                    <p className="mt-1 text-xs text-[var(--color-info)]">
                       Data guru, mata pelajaran, dan kelas sedang dimuat dari backend.
                     </p>
                   </div>
@@ -985,21 +985,21 @@ export default function TambahJadwalMengajarPage() {
               ================================================== */}
 
               {success && (
-                <div className="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4">
+                <div className="flex items-start gap-3 rounded-xl border p-4 theme-success theme-border">
 
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg theme-card">
                     <CheckCircle2
                       size={18}
-                      className="text-emerald-600"
+                      className="text-[var(--color-success)]"
                     />
                   </div>
 
                   <div>
-                    <p className="text-sm font-semibold text-emerald-800">
+                    <p className="text-sm font-semibold text-[var(--color-success)]">
                       Jadwal berhasil ditambahkan
                     </p>
 
-                    <p className="mt-1 text-xs text-emerald-700">
+                    <p className="mt-1 text-xs text-[var(--color-success)]">
                       Mengalihkan ke daftar jadwal mengajar...
                     </p>
                   </div>
@@ -1012,22 +1012,22 @@ export default function TambahJadwalMengajarPage() {
               ================================================== */}
 
               {error && (
-                <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4">
+                <div className="flex items-start gap-3 rounded-xl border p-4 theme-danger theme-border">
 
-                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg theme-card">
                     <AlertCircle
                       size={18}
-                      className="text-red-600"
+                      className="text-[var(--color-danger)]"
                     />
                   </div>
 
                   <div className="min-w-0 flex-1">
 
-                    <p className="text-sm font-semibold text-red-800">
+                    <p className="text-sm font-semibold text-[var(--color-danger)]">
                       Data belum dapat diproses
                     </p>
 
-                    <p className="mt-1 text-xs leading-5 text-red-700">
+                    <p className="mt-1 text-xs leading-5 text-[var(--color-danger)]">
                       {error}
                     </p>
 
@@ -1038,7 +1038,7 @@ export default function TambahJadwalMengajarPage() {
                     onClick={() =>
                       setError("")
                     }
-                    className="rounded-lg p-1 text-red-400 transition hover:bg-red-100 hover:text-red-600"
+                    className="rounded-lg p-1 text-[var(--color-danger)] transition hover:bg-[var(--color-danger-background)]"
                   >
                     <X
                       size={16}
@@ -1062,28 +1062,29 @@ export default function TambahJadwalMengajarPage() {
                   onSubmit={
                     handleSubmit
                   }
-                  className="min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm"
+                  className="min-w-0 overflow-hidden rounded-xl border shadow-sm theme-card theme-border"
                 >
 
                   {/* FORM HEADER */}
 
-                  <div className="border-b border-slate-200 px-5 py-5 sm:px-6">
+                  <div className="border-b px-5 py-5 sm:px-6 theme-border-soft">
 
                     <div className="flex items-start gap-3">
 
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#eaf1ff] text-[#155DFC]">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg theme-info">
                         <School
                           size={17}
+                          className="text-[var(--color-primary)]"
                         />
                       </div>
 
                       <div>
 
-                        <h2 className="text-sm font-bold text-slate-800">
+                        <h2 className="text-sm font-bold theme-text">
                           Informasi Jadwal
                         </h2>
 
-                        <p className="mt-1 text-xs text-slate-400">
+                        <p className="mt-1 text-xs theme-text-muted">
                           Pilih relasi kelas, mata pelajaran, dan guru yang sudah terdaftar.
                         </p>
 
@@ -1125,15 +1126,16 @@ export default function TambahJadwalMengajarPage() {
                       ) => (
                         <div className="flex min-w-0 flex-1 items-center gap-3">
 
-                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#eaf1ff] text-[#155DFC]">
+                          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg theme-info">
                             <BookMarked
                               size={15}
+                              className="text-[var(--color-primary)]"
                             />
                           </div>
 
                           <div className="min-w-0 flex-1">
 
-                            <p className="truncate text-xs font-bold text-slate-700">
+                            <p className="truncate text-xs font-bold theme-text">
                               {
                                 item.mapelNama
                               }
@@ -1141,18 +1143,18 @@ export default function TambahJadwalMengajarPage() {
 
                             <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1">
 
-                              <span className="text-[10px] font-medium text-slate-500">
+                              <span className="text-[10px] font-medium theme-text-muted">
                                 Kelas:{" "}
                                 {
                                   item.kelasNama
                                 }
                               </span>
 
-                              <span className="text-slate-300">
+                              <span className="theme-text-placeholder">
                                 •
                               </span>
 
-                              <span className="text-[10px] text-slate-500">
+                              <span className="text-[10px] theme-text-muted">
                                 Guru:{" "}
                                 {
                                   item.guruNama
@@ -1162,7 +1164,7 @@ export default function TambahJadwalMengajarPage() {
                             </div>
 
                             {item.mapelKode && (
-                              <p className="mt-1 text-[9px] text-slate-400">
+                              <p className="mt-1 text-[9px] theme-text-placeholder">
                                 Kode Mapel:{" "}
                                 {
                                   item.mapelKode
@@ -1181,29 +1183,29 @@ export default function TambahJadwalMengajarPage() {
                     {kelasMapelTerpilih && (
                       <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
 
-                        <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                        <div className="rounded-lg border p-3 theme-card-soft theme-border">
 
                           <div className="flex items-center gap-2">
 
                             <User
                               size={14}
-                              className="text-[#155DFC]"
+                              className="text-[var(--color-primary)]"
                             />
 
-                            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                            <p className="text-[10px] font-semibold uppercase tracking-wide theme-text-placeholder">
                               Guru
                             </p>
 
                           </div>
 
-                          <p className="mt-1.5 truncate text-xs font-bold text-slate-700">
+                          <p className="mt-1.5 truncate text-xs font-bold theme-text">
                             {
                               kelasMapelTerpilih.guruNama
                             }
                           </p>
 
                           {kelasMapelTerpilih.guruNip && (
-                            <p className="mt-0.5 text-[9px] text-slate-400">
+                            <p className="mt-0.5 text-[9px] theme-text-placeholder">
                               NIP:{" "}
                               {
                                 kelasMapelTerpilih.guruNip
@@ -1213,29 +1215,29 @@ export default function TambahJadwalMengajarPage() {
 
                         </div>
 
-                        <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                        <div className="rounded-lg border p-3 theme-card-soft theme-border">
 
                           <div className="flex items-center gap-2">
 
                             <BookMarked
                               size={14}
-                              className="text-[#155DFC]"
+                              className="text-[var(--color-primary)]"
                             />
 
-                            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                            <p className="text-[10px] font-semibold uppercase tracking-wide theme-text-placeholder">
                               Mata Pelajaran
                             </p>
 
                           </div>
 
-                          <p className="mt-1.5 truncate text-xs font-bold text-slate-700">
+                          <p className="mt-1.5 truncate text-xs font-bold theme-text">
                             {
                               kelasMapelTerpilih.mapelNama
                             }
                           </p>
 
                           {kelasMapelTerpilih.mapelKode && (
-                            <p className="mt-0.5 text-[9px] text-slate-400">
+                            <p className="mt-0.5 text-[9px] theme-text-placeholder">
                               Kode:{" "}
                               {
                                 kelasMapelTerpilih.mapelKode
@@ -1245,22 +1247,22 @@ export default function TambahJadwalMengajarPage() {
 
                         </div>
 
-                        <div className="rounded-lg border border-slate-200 bg-slate-50 p-3">
+                        <div className="rounded-lg border p-3 theme-card-soft theme-border">
 
                           <div className="flex items-center gap-2">
 
                             <School
                               size={14}
-                              className="text-[#155DFC]"
+                              className="text-[var(--color-primary)]"
                             />
 
-                            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                            <p className="text-[10px] font-semibold uppercase tracking-wide theme-text-placeholder">
                               Kelas
                             </p>
 
                           </div>
 
-                          <p className="mt-1.5 truncate text-xs font-bold text-slate-700">
+                          <p className="mt-1.5 truncate text-xs font-bold theme-text">
                             {
                               kelasMapelTerpilih.kelasNama
                             }
@@ -1277,20 +1279,20 @@ export default function TambahJadwalMengajarPage() {
                       RUANGAN
                   ================================================== */}
 
-                  <div className="border-y border-slate-200 bg-slate-50/70 px-5 py-4 sm:px-6">
+                  <div className="border-y px-5 py-4 sm:px-6 theme-card-soft theme-border">
 
                     <div className="max-w-xl">
 
-                      <label className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-slate-700">
+                      <label className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold theme-text-secondary">
 
                         <DoorOpen
                           size={14}
-                          className="text-slate-400"
+                          className="theme-text-muted"
                         />
 
                         Ruangan
 
-                        <span className="text-[10px] font-normal text-slate-400">
+                        <span className="text-[10px] font-normal theme-text-placeholder">
                           (opsional)
                         </span>
 
@@ -1308,10 +1310,10 @@ export default function TambahJadwalMengajarPage() {
                           saving
                         }
                         placeholder="Contoh: Lab Komputer 1 / Ruang 201"
-                        className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3.5 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#155DFC] focus:ring-4 focus:ring-[#155DFC]/10 disabled:bg-slate-50"
+                        className="h-11 w-full rounded-lg border px-3.5 text-sm outline-none transition theme-input focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-primary)]/10 disabled:opacity-70"
                       />
 
-                      <p className="mt-1.5 text-[10px] text-slate-400">
+                      <p className="mt-1.5 text-[10px] theme-text-placeholder">
                         Ruangan ini akan digunakan untuk semua hari yang kamu isi.
                       </p>
 
@@ -1323,27 +1325,27 @@ export default function TambahJadwalMengajarPage() {
                       JADWAL HEADER
                   ================================================== */}
 
-                  <div className="border-b border-slate-200 bg-white px-5 py-4 sm:px-6">
+                  <div className="border-b px-5 py-4 sm:px-6 theme-border-soft theme-card">
 
                     <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 
                       <div>
 
-                        <h2 className="text-sm font-bold text-slate-800">
+                        <h2 className="text-sm font-bold theme-text">
                           Jadwal Mingguan
                         </h2>
 
-                        <p className="mt-1 text-xs text-slate-400">
+                        <p className="mt-1 text-xs theme-text-muted">
                           Isi waktu pada hari yang memiliki jadwal.
                         </p>
 
                       </div>
 
-                      <div className="inline-flex w-fit items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-[10px] font-semibold text-slate-500">
+                      <div className="inline-flex w-fit items-center gap-2 rounded-lg border px-3 py-2 text-[10px] font-semibold theme-card-soft theme-border theme-text-secondary">
 
                         <Clock3
                           size={13}
-                          className="text-[#155DFC]"
+                          className="text-[var(--color-primary)]"
                         />
 
                         {jumlahHariDiisi} hari terisi
@@ -1388,10 +1390,10 @@ export default function TambahJadwalMengajarPage() {
                               }
                               className={`rounded-xl border p-3.5 transition sm:p-4 ${
                                 terisi
-                                  ? "border-[#c7dbff] bg-[#f7f9ff]"
+                                  ? "theme-sidebar-active theme-border"
                                   : sebagianDiisi
-                                  ? "border-amber-200 bg-amber-50/40"
-                                  : "border-slate-200 bg-white"
+                                  ? "theme-warning theme-border"
+                                  : "theme-card theme-border"
                               }`}
                             >
 
@@ -1404,8 +1406,8 @@ export default function TambahJadwalMengajarPage() {
                                   <div
                                     className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${
                                       terisi
-                                        ? "bg-[#155DFC] text-white"
-                                        : "bg-slate-100 text-slate-500"
+                                        ? "theme-primary"
+                                        : "theme-card-soft theme-text-muted"
                                     }`}
                                   >
                                     <CalendarDays
@@ -1415,7 +1417,7 @@ export default function TambahJadwalMengajarPage() {
 
                                   <div>
 
-                                    <p className="text-xs font-bold text-slate-700">
+                                    <p className="text-xs font-bold theme-text">
                                       {
                                         hari.label
                                       }
@@ -1424,10 +1426,10 @@ export default function TambahJadwalMengajarPage() {
                                     <p
                                       className={`mt-0.5 text-[10px] ${
                                         terisi
-                                          ? "text-[#155DFC]"
+                                          ? "text-[var(--color-primary)]"
                                           : sebagianDiisi
-                                          ? "text-amber-600"
-                                          : "text-slate-400"
+                                          ? "text-[var(--color-warning)]"
+                                          : "theme-text-placeholder"
                                       }`}
                                     >
                                       {terisi
@@ -1445,7 +1447,7 @@ export default function TambahJadwalMengajarPage() {
 
                                 <div>
 
-                                  <label className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                                  <label className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wide theme-text-placeholder">
                                     Jam Mulai
                                   </label>
 
@@ -1461,7 +1463,7 @@ export default function TambahJadwalMengajarPage() {
                                     disabled={
                                       saving
                                     }
-                                    className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-700 outline-none transition focus:border-[#155DFC] focus:ring-4 focus:ring-[#155DFC]/10 disabled:bg-slate-50"
+                                    className="h-10 w-full rounded-lg border px-3 text-xs outline-none transition theme-input focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-primary)]/10 disabled:opacity-70"
                                   />
 
                                 </div>
@@ -1470,7 +1472,7 @@ export default function TambahJadwalMengajarPage() {
 
                                 <div>
 
-                                  <label className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                                  <label className="mb-1.5 block text-[10px] font-semibold uppercase tracking-wide theme-text-placeholder">
                                     Jam Selesai
                                   </label>
 
@@ -1486,7 +1488,7 @@ export default function TambahJadwalMengajarPage() {
                                     disabled={
                                       saving
                                     }
-                                    className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-xs text-slate-700 outline-none transition focus:border-[#155DFC] focus:ring-4 focus:ring-[#155DFC]/10 disabled:bg-slate-50"
+                                    className="h-10 w-full rounded-lg border px-3 text-xs outline-none transition theme-input focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[var(--color-primary)]/10 disabled:opacity-70"
                                   />
 
                                 </div>
@@ -1506,7 +1508,7 @@ export default function TambahJadwalMengajarPage() {
                       FORM FOOTER
                   ================================================== */}
 
-                  <div className="border-t border-slate-200 bg-slate-50/60 px-5 py-4 sm:px-6">
+                  <div className="border-t px-5 py-4 sm:px-6 theme-border theme-card-soft">
 
                     <div className="flex flex-col gap-2 sm:flex-row sm:justify-between">
 
@@ -1518,7 +1520,7 @@ export default function TambahJadwalMengajarPage() {
                         disabled={
                           saving
                         }
-                        className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+                        className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg border px-4 py-2 text-xs font-semibold transition theme-card theme-border theme-text-secondary theme-sidebar-hover disabled:cursor-not-allowed disabled:opacity-50"
                       >
                         Reset Form
                       </button>
@@ -1535,7 +1537,7 @@ export default function TambahJadwalMengajarPage() {
                           disabled={
                             saving
                           }
-                          className="inline-flex min-h-10 items-center justify-center rounded-lg border border-slate-200 bg-white px-5 py-2 text-xs font-semibold text-slate-600 transition hover:bg-slate-50 disabled:opacity-50"
+                          className="inline-flex min-h-10 items-center justify-center rounded-lg border px-5 py-2 text-xs font-semibold transition theme-card theme-border theme-text-secondary theme-sidebar-hover disabled:cursor-not-allowed disabled:opacity-50"
                         >
                           Batal
                         </button>
@@ -1548,7 +1550,7 @@ export default function TambahJadwalMengajarPage() {
                             loadingData ||
                             !selectedKelasMapelId
                           }
-                          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg bg-[#155DFC] px-5 py-2 text-xs font-semibold text-white shadow-sm transition hover:bg-[#0d47c9] disabled:cursor-not-allowed disabled:opacity-60"
+                          className="inline-flex min-h-10 items-center justify-center gap-2 rounded-lg px-5 py-2 text-xs font-semibold shadow-sm transition theme-primary disabled:cursor-not-allowed disabled:opacity-60"
                         >
 
                           {saving ? (
@@ -1590,27 +1592,28 @@ export default function TambahJadwalMengajarPage() {
                       PREVIEW
                   ================================================== */}
 
-                  <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+                  <section className="overflow-hidden rounded-xl border shadow-sm theme-card theme-border">
 
-                    <div className="border-b border-slate-200 px-5 py-4">
+                    <div className="border-b px-5 py-4 theme-border-soft">
 
                       <div className="flex items-center justify-between gap-3">
 
                         <div>
 
-                          <h2 className="text-sm font-bold text-slate-800">
+                          <h2 className="text-sm font-bold theme-text">
                             Pratinjau Jadwal
                           </h2>
 
-                          <p className="mt-1 text-[11px] text-slate-400">
+                          <p className="mt-1 text-[11px] theme-text-muted">
                             Ringkasan data yang akan disimpan.
                           </p>
 
                         </div>
 
-                        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#eaf1ff] text-[#155DFC]">
+                        <div className="flex h-9 w-9 items-center justify-center rounded-lg theme-info">
                           <CalendarClock
                             size={17}
+                            className="text-[var(--color-primary)]"
                           />
                         </div>
 
@@ -1624,7 +1627,7 @@ export default function TambahJadwalMengajarPage() {
 
                       <div className="flex items-center gap-3 pb-4">
 
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-[#155DFC] text-xs font-bold text-white">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full theme-primary text-xs font-bold">
                           {kelasMapelTerpilih
                             ? getInitials(
                                 kelasMapelTerpilih.guruNama
@@ -1634,18 +1637,18 @@ export default function TambahJadwalMengajarPage() {
 
                         <div className="min-w-0">
 
-                          <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                          <p className="text-[10px] font-bold uppercase tracking-wide theme-text-placeholder">
                             Guru
                           </p>
 
-                          <p className="mt-0.5 truncate text-sm font-bold text-slate-800">
+                          <p className="mt-0.5 truncate text-sm font-bold theme-text">
                             {kelasMapelTerpilih
                               ?.guruNama ||
                               "Belum dipilih"}
                           </p>
 
                           {kelasMapelTerpilih?.guruNip && (
-                            <p className="mt-0.5 text-[10px] text-slate-400">
+                            <p className="mt-0.5 text-[10px] theme-text-placeholder">
                               NIP:{" "}
                               {
                                 kelasMapelTerpilih.guruNip
@@ -1659,29 +1662,29 @@ export default function TambahJadwalMengajarPage() {
 
                       {/* MAPEL */}
 
-                      <div className="rounded-lg border border-slate-200 bg-slate-50 p-3.5">
+                      <div className="rounded-lg border p-3.5 theme-card-soft theme-border">
 
                         <div className="flex items-start gap-2.5">
 
                           <BookMarked
                             size={15}
-                            className="mt-0.5 shrink-0 text-[#155DFC]"
+                            className="mt-0.5 shrink-0 text-[var(--color-primary)]"
                           />
 
                           <div className="min-w-0">
 
-                            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                            <p className="text-[10px] font-semibold uppercase tracking-wide theme-text-placeholder">
                               Mata Pelajaran
                             </p>
 
-                            <p className="mt-1 text-xs font-bold text-slate-700">
+                            <p className="mt-1 text-xs font-bold theme-text">
                               {kelasMapelTerpilih
                                 ?.mapelNama ||
                                 "Belum dipilih"}
                             </p>
 
                             {kelasMapelTerpilih?.mapelKode && (
-                              <p className="mt-0.5 text-[10px] text-slate-400">
+                              <p className="mt-0.5 text-[10px] theme-text-placeholder">
                                 Kode:{" "}
                                 {
                                   kelasMapelTerpilih.mapelKode
@@ -1697,22 +1700,22 @@ export default function TambahJadwalMengajarPage() {
 
                       {/* KELAS */}
 
-                      <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3.5">
+                      <div className="mt-3 rounded-lg border p-3.5 theme-card-soft theme-border">
 
                         <div className="flex items-start gap-2.5">
 
                           <School
                             size={15}
-                            className="mt-0.5 shrink-0 text-[#155DFC]"
+                            className="mt-0.5 shrink-0 text-[var(--color-primary)]"
                           />
 
                           <div className="min-w-0">
 
-                            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                            <p className="text-[10px] font-semibold uppercase tracking-wide theme-text-placeholder">
                               Kelas
                             </p>
 
-                            <p className="mt-1 text-xs font-bold text-slate-700">
+                            <p className="mt-1 text-xs font-bold theme-text">
                               {kelasMapelTerpilih
                                 ?.kelasNama ||
                                 "Belum dipilih"}
@@ -1726,22 +1729,22 @@ export default function TambahJadwalMengajarPage() {
 
                       {/* RUANGAN */}
 
-                      <div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3.5">
+                      <div className="mt-3 rounded-lg border p-3.5 theme-card-soft theme-border">
 
                         <div className="flex items-start gap-2.5">
 
                           <DoorOpen
                             size={15}
-                            className="mt-0.5 shrink-0 text-[#155DFC]"
+                            className="mt-0.5 shrink-0 text-[var(--color-primary)]"
                           />
 
                           <div className="min-w-0">
 
-                            <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                            <p className="text-[10px] font-semibold uppercase tracking-wide theme-text-placeholder">
                               Ruangan
                             </p>
 
-                            <p className="mt-1 truncate text-xs font-bold text-slate-700">
+                            <p className="mt-1 truncate text-xs font-bold theme-text">
                               {ruangan.trim() ||
                                 "Belum diisi"}
                             </p>
@@ -1776,8 +1779,8 @@ export default function TambahJadwalMengajarPage() {
                                 }
                                 className={`flex items-center justify-between gap-3 rounded-lg border px-3 py-2.5 ${
                                   terisi
-                                    ? "border-[#c7dbff] bg-[#f7f9ff]"
-                                    : "border-slate-100 bg-white"
+                                    ? "theme-sidebar-active theme-border"
+                                    : "theme-card theme-border-soft"
                                 }`}
                               >
 
@@ -1786,12 +1789,12 @@ export default function TambahJadwalMengajarPage() {
                                   <div
                                     className={`h-1.5 w-1.5 rounded-full ${
                                       terisi
-                                        ? "bg-[#155DFC]"
-                                        : "bg-slate-300"
+                                        ? "bg-[var(--color-primary)]"
+                                        : "bg-[var(--color-text-placeholder)]"
                                     }`}
                                   />
 
-                                  <span className="text-[11px] font-semibold text-slate-600">
+                                  <span className="text-[11px] font-semibold theme-text-secondary">
                                     {
                                       hari.label
                                     }
@@ -1800,7 +1803,7 @@ export default function TambahJadwalMengajarPage() {
                                 </div>
 
                                 {terisi ? (
-                                  <span className="max-w-[190px] truncate text-right text-[10px] font-semibold text-slate-700">
+                                  <span className="max-w-[190px] truncate text-right text-[10px] font-semibold theme-text">
 
                                     {
                                       slot.jamMulai
@@ -1821,7 +1824,7 @@ export default function TambahJadwalMengajarPage() {
 
                                   </span>
                                 ) : (
-                                  <span className="text-[10px] text-slate-300">
+                                  <span className="text-[10px] theme-text-placeholder">
                                     —
                                   </span>
                                 )}
@@ -1841,19 +1844,20 @@ export default function TambahJadwalMengajarPage() {
                       INFORMATION
                   ================================================== */}
 
-                  <section className="rounded-xl border border-[#c7dbff] bg-[#f7f9ff] p-5">
+                  <section className="rounded-xl border p-5 theme-info theme-border">
 
                     <div className="flex items-start gap-3">
 
-                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-[#155DFC] shadow-sm">
+                      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg theme-card shadow-sm">
                         <Info
                           size={17}
+                          className="text-[var(--color-primary)]"
                         />
                       </div>
 
                       <div className="min-w-0">
 
-                        <h2 className="text-xs font-bold text-slate-700">
+                        <h2 className="text-xs font-bold theme-text">
                           Informasi Pengisian
                         </h2>
 
@@ -1861,9 +1865,9 @@ export default function TambahJadwalMengajarPage() {
 
                           <div className="flex items-start gap-2">
 
-                            <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#155DFC]" />
+                            <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-primary)]" />
 
-                            <p className="text-[11px] leading-5 text-slate-500">
+                            <p className="text-[11px] leading-5 theme-text-secondary">
                               Data guru, mata pelajaran, dan kelas diambil dari relasi Kelas Mapel.
                             </p>
 
@@ -1871,9 +1875,9 @@ export default function TambahJadwalMengajarPage() {
 
                           <div className="flex items-start gap-2">
 
-                            <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#155DFC]" />
+                            <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-primary)]" />
 
-                            <p className="text-[11px] leading-5 text-slate-500">
+                            <p className="text-[11px] leading-5 theme-text-secondary">
                               Satu hari yang diisi akan membuat satu record jadwal di backend.
                             </p>
 
@@ -1881,9 +1885,9 @@ export default function TambahJadwalMengajarPage() {
 
                           <div className="flex items-start gap-2">
 
-                            <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#155DFC]" />
+                            <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-primary)]" />
 
-                            <p className="text-[11px] leading-5 text-slate-500">
+                            <p className="text-[11px] leading-5 theme-text-secondary">
                               Jam selesai harus lebih besar dari jam mulai.
                             </p>
 
@@ -1891,9 +1895,9 @@ export default function TambahJadwalMengajarPage() {
 
                           <div className="flex items-start gap-2">
 
-                            <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[#155DFC]" />
+                            <span className="mt-1 h-1.5 w-1.5 shrink-0 rounded-full bg-[var(--color-primary)]" />
 
-                            <p className="text-[11px] leading-5 text-slate-500">
+                            <p className="text-[11px] leading-5 theme-text-secondary">
                               Backend otomatis menolak jadwal guru yang bentrok.
                             </p>
 
@@ -1911,17 +1915,17 @@ export default function TambahJadwalMengajarPage() {
                       COMPLETION
                   ================================================== */}
 
-                  <section className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+                  <section className="rounded-xl border p-5 shadow-sm theme-card theme-border">
 
                     <div className="flex items-center justify-between gap-3">
 
                       <div>
 
-                        <p className="text-[10px] font-bold uppercase tracking-wide text-slate-400">
+                        <p className="text-[10px] font-bold uppercase tracking-wide theme-text-placeholder">
                           Kelengkapan
                         </p>
 
-                        <p className="mt-1 text-sm font-bold text-slate-800">
+                        <p className="mt-1 text-sm font-bold theme-text">
                           {jumlahHariDiisi} /{" "}
                           {HARI.length} hari
                         </p>
@@ -1933,17 +1937,17 @@ export default function TambahJadwalMengajarPage() {
                         className={
                           jumlahHariDiisi >
                           0
-                            ? "text-[#155DFC]"
-                            : "text-slate-300"
+                            ? "text-[var(--color-primary)]"
+                            : "theme-text-placeholder"
                         }
                       />
 
                     </div>
 
-                    <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-100">
+                    <div className="mt-3 h-2 overflow-hidden rounded-full bg-[var(--color-border)]">
 
                       <div
-                        className="h-full rounded-full bg-[#155DFC] transition-all"
+                        className="h-full rounded-full bg-[var(--color-primary)] transition-all"
                         style={{
                           width: `${
                             (jumlahHariDiisi /
@@ -1955,7 +1959,7 @@ export default function TambahJadwalMengajarPage() {
 
                     </div>
 
-                    <p className="mt-2 text-[10px] text-slate-400">
+                    <p className="mt-2 text-[10px] theme-text-placeholder">
 
                       {jumlahHariDiisi ===
                       0
@@ -1979,7 +1983,7 @@ export default function TambahJadwalMengajarPage() {
 
               <footer className="pb-3 pt-1 text-center">
 
-                <p className="text-[10px] text-slate-400">
+                <p className="text-[10px] theme-text-placeholder">
                   © 2026 SmartSchool • Tambah Jadwal Mengajar
                 </p>
 

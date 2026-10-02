@@ -2,16 +2,12 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import Sidebar from "../../../components/Sidebar";
-import Header from "../../../components/Header";
 import {
   Bell,
   Megaphone,
   CheckCircle,
   XCircle,
-  Clock,
   Eye,
-  EyeOff,
   Trash2,
   Check,
   X,
@@ -20,27 +16,81 @@ import {
   Sparkles,
   Calendar,
   User,
-  Mail,
   Send,
-  Filter,
-  ChevronDown,
-  ChevronUp,
-  MoreHorizontal,
-  Edit,
-  Copy,
   Archive,
-  Pin,
-  PinOff,
-  AlertCircle,
-  Info,
   AlertTriangle,
-  Award,
-  FileText,
-  RefreshCw,
+  Info,
   Save,
 } from "lucide-react";
 
-// ===== DATA DUMMY =====
+// ============================================================
+// THEME HELPERS
+// ============================================================
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+
+// ============================================================
+// DATA DUMMY
+// ============================================================
+
 const dummyNotifications = [
   {
     id: 1,
@@ -146,9 +196,13 @@ const dummyAnnouncements = [
   },
 ];
 
-// ===== UTILITY =====
+// ============================================================
+// UTILITY
+// ============================================================
+
 const formatTanggal = (dateString) => {
   if (!dateString) return "-";
+
   return new Date(dateString).toLocaleDateString("id-ID", {
     day: "numeric",
     month: "long",
@@ -158,22 +212,14 @@ const formatTanggal = (dateString) => {
   });
 };
 
-const formatTanggalShort = (dateString) => {
-  if (!dateString) return "-";
-  return new Date(dateString).toLocaleDateString("id-ID", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  });
-};
-
 const getTipeColor = (tipe) => {
   const map = {
-    info: "bg-blue-50 text-blue-600 border-blue-200",
-    success: "bg-emerald-50 text-emerald-600 border-emerald-200",
-    warning: "bg-amber-50 text-amber-600 border-amber-200",
-    error: "bg-rose-50 text-rose-600 border-rose-200",
+    info: `${themeInfoSurface} text-[var(--color-info)] ${themeInfoBorder}`,
+    success: `${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder}`,
+    warning: `${themeWarningSurface} text-[var(--color-warning)] ${themeWarningBorder}`,
+    error: `${themeDangerSurface} text-[var(--color-warning)] ${themeDangerBorder}`,
   };
+
   return map[tipe] || map.info;
 };
 
@@ -184,15 +230,17 @@ const getTipeIcon = (tipe) => {
     warning: AlertTriangle,
     error: XCircle,
   };
+
   return map[tipe] || Info;
 };
 
 const getPrioritasColor = (prioritas) => {
   const map = {
-    high: "bg-rose-50 text-rose-600 border-rose-200",
-    medium: "bg-amber-50 text-amber-600 border-amber-200",
-    low: "bg-blue-50 text-blue-600 border-blue-200",
+    high: `${themeWarningSurface} text-[var(--color-warning)] ${themeWarningBorder}`,
+    medium: `${themeWarningSurface} text-[var(--color-warning)] ${themeWarningBorder}`,
+    low: `${themeInfoSurface} text-[var(--color-info)] ${themeInfoBorder}`,
   };
+
   return map[prioritas] || map.low;
 };
 
@@ -202,33 +250,36 @@ const getPrioritasLabel = (prioritas) => {
     medium: "Sedang",
     low: "Rendah",
   };
+
   return map[prioritas] || prioritas;
 };
 
 const getStatusBadge = (status) => {
   const map = {
-    published: { bg: "bg-emerald-50 text-emerald-600 border-emerald-200", label: "Dipublikasikan" },
-    draft: { bg: "bg-slate-50 text-slate-500 border-slate-200", label: "Draf" },
-    archived: { bg: "bg-rose-50 text-rose-500 border-rose-200", label: "Diarsipkan" },
+    published: {
+      bg: `${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder}`,
+      label: "Dipublikasikan",
+    },
+    draft: {
+      bg: `${themeNeutralSurface} theme-text-secondary ${themeNeutralBorder}`,
+      label: "Draf",
+    },
+    archived: {
+      bg: `${themeDangerSurface} text-[var(--color-warning)] ${themeDangerBorder}`,
+      label: "Diarsipkan",
+    },
   };
+
   return map[status] || map.draft;
 };
 
-const getStatusLabel = (status) => {
-  const map = {
-    published: "Dipublikasikan",
-    draft: "Draf",
-    archived: "Diarsipkan",
-  };
-  return map[status] || status;
-};
-
-// ===== MAIN COMPONENT =====
+// ============================================================
+// MAIN COMPONENT
+// ============================================================
 
 export default function NotifikasiPengumumanPage() {
   const router = useRouter();
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeMenu] = useState("notifikasi");
+
   const [activeTab, setActiveTab] = useState("notifikasi");
   const [searchQuery, setSearchQuery] = useState("");
   const [filterKategori, setFilterKategori] = useState("Semua");
@@ -237,15 +288,28 @@ export default function NotifikasiPengumumanPage() {
   const [showNewAnnouncement, setShowNewAnnouncement] = useState(false);
 
   const notificationsData = [
-    { id: 1, title: "Pembaruan Sistem v2.0", desc: "Dikirim 2 jam lalu", read: false },
-    { id: 2, title: "Pengingat: Backup Data", desc: "Dikirim 1 hari lalu", read: false },
+    {
+      id: 1,
+      title: "Pembaruan Sistem v2.0",
+      desc: "Dikirim 2 jam lalu",
+      read: false,
+    },
+    {
+      id: 2,
+      title: "Pengingat: Backup Data",
+      desc: "Dikirim 1 hari lalu",
+      read: false,
+    },
   ];
 
-  // State untuk data
-  const [notifications, setNotifications] = useState(dummyNotifications);
-  const [announcements, setAnnouncements] = useState(dummyAnnouncements);
+  const [notifications, setNotifications] = useState(
+    dummyNotifications
+  );
 
-  // State untuk form pengumuman baru
+  const [announcements, setAnnouncements] = useState(
+    dummyAnnouncements
+  );
+
   const [newAnnouncement, setNewAnnouncement] = useState({
     judul: "",
     isi: "",
@@ -253,46 +317,80 @@ export default function NotifikasiPengumumanPage() {
     prioritas: "medium",
   });
 
-  // Filter Notifikasi
+  // ============================================================
+  // FILTER NOTIFIKASI
+  // ============================================================
+
   const filteredNotifs = notifications.filter((n) => {
     const matchSearch =
       n.judul.toLowerCase().includes(searchQuery.toLowerCase()) ||
       n.isi.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchKategori = filterKategori === "Semua" || n.kategori === filterKategori;
+
+    const matchKategori =
+      filterKategori === "Semua" ||
+      n.kategori === filterKategori;
+
     const matchDibaca =
       filterDibaca === "Semua" ||
       (filterDibaca === "Belum Dibaca" && !n.dibaca) ||
       (filterDibaca === "Sudah Dibaca" && n.dibaca);
+
     return matchSearch && matchKategori && matchDibaca;
   });
 
-  // Filter Pengumuman
+  // ============================================================
+  // FILTER PENGUMUMAN
+  // ============================================================
+
   const filteredAnnounces = announcements.filter((a) => {
     const matchSearch =
       a.judul.toLowerCase().includes(searchQuery.toLowerCase()) ||
       a.isi.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchKategori = filterKategori === "Semua" || a.kategori === filterKategori;
+
+    const matchKategori =
+      filterKategori === "Semua" ||
+      a.kategori === filterKategori;
+
     return matchSearch && matchKategori;
   });
 
-  const unreadCount = notifications.filter((n) => !n.dibaca).length;
+  const unreadCount = notifications.filter(
+    (n) => !n.dibaca
+  ).length;
+
+  // ============================================================
+  // HANDLERS
+  // ============================================================
 
   const handleMarkRead = (id) => {
     setNotifications((prev) =>
-      prev.map((n) => (n.id === id ? { ...n, dibaca: true } : n))
+      prev.map((n) =>
+        n.id === id
+          ? { ...n, dibaca: true }
+          : n
+      )
     );
   };
 
   const handleMarkAllRead = () => {
-    setNotifications((prev) => prev.map((n) => ({ ...n, dibaca: true })));
+    setNotifications((prev) =>
+      prev.map((n) => ({
+        ...n,
+        dibaca: true,
+      }))
+    );
   };
 
   const handleDeleteNotif = (id) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
+    setNotifications((prev) =>
+      prev.filter((n) => n.id !== id)
+    );
   };
 
   const handleDeleteAnnounce = (id) => {
-    setAnnouncements((prev) => prev.filter((a) => a.id !== id));
+    setAnnouncements((prev) =>
+      prev.filter((a) => a.id !== id)
+    );
   };
 
   const handleToggleStatus = (id) => {
@@ -301,8 +399,14 @@ export default function NotifikasiPengumumanPage() {
         a.id === id
           ? {
               ...a,
-              status: a.status === "published" ? "draft" : "published",
-              dipublikasikanPada: a.status === "draft" ? new Date().toISOString() : null,
+              status:
+                a.status === "published"
+                  ? "draft"
+                  : "published",
+              dipublikasikanPada:
+                a.status === "draft"
+                  ? new Date().toISOString()
+                  : null,
             }
           : a
       )
@@ -310,7 +414,13 @@ export default function NotifikasiPengumumanPage() {
   };
 
   const handleCreateAnnouncement = () => {
-    if (!newAnnouncement.judul.trim() || !newAnnouncement.isi.trim()) return;
+    if (
+      !newAnnouncement.judul.trim() ||
+      !newAnnouncement.isi.trim()
+    ) {
+      return;
+    }
+
     const newItem = {
       id: announcements.length + 1,
       ...newAnnouncement,
@@ -319,377 +429,700 @@ export default function NotifikasiPengumumanPage() {
       dipublikasikanPada: null,
       penulis: "Super Admin",
     };
-    setAnnouncements([newItem, ...announcements]);
+
+    setAnnouncements([
+      newItem,
+      ...announcements,
+    ]);
+
     setShowNewAnnouncement(false);
-    setNewAnnouncement({ judul: "", isi: "", kategori: "Pengumuman", prioritas: "medium" });
+
+    setNewAnnouncement({
+      judul: "",
+      isi: "",
+      kategori: "Pengumuman",
+      prioritas: "medium",
+    });
   };
 
-  const totalPagesNotif = Math.ceil(filteredNotifs.length / 5);
+  // ============================================================
+  // PAGINATION
+  // ============================================================
+
+  const totalPagesNotif = Math.ceil(
+    filteredNotifs.length / 5
+  );
+
   const paginatedNotifs = filteredNotifs.slice(
     (currentPage - 1) * 5,
     currentPage * 5
   );
 
-  const categories = ["Semua", "Sistem", "Keamanan", "Yayasan", "Sekolah", "Langganan", "Pengumuman", "Acara", "Kebijakan"];
+  const categories = [
+    "Semua",
+    "Sistem",
+    "Keamanan",
+    "Yayasan",
+    "Sekolah",
+    "Langganan",
+    "Pengumuman",
+    "Acara",
+    "Kebijakan",
+  ];
+
+  // ============================================================
+  // RENDER
+  // ============================================================
 
   return (
-  <div className="flex min-h-screen bg-slate-50">
-    <Sidebar
-      active={activeMenu}
-      setActive={() => {}}
-      collapsed={!sidebarOpen}
-      setCollapsed={() => setSidebarOpen(!sidebarOpen)}
-    />
+    <div className="theme-page theme-text min-h-full">
+      <div className="mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 sm:py-7 lg:px-8 lg:py-8">
+        <div className="space-y-5 lg:space-y-6">
 
-    <div className="flex-1 flex flex-col min-w-0">
-      <Header
-        toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-        notifications={notificationsData}
-        user={{
-          name: "Super Admin",
-          email: "admin@smartschool.com",
-          avatar: "SA",
-        }}
-      />
+          {/* ==================================================
+              HEADER
+          ================================================== */}
 
-      <main className="flex-1 p-4 sm:p-6 lg:p-8">
-        <div className="w-full space-y-6">
-
-
-            {/* HEADER */}
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-              <div>
-                <div className="flex items-center gap-2.5">
-                  <div className="p-2 rounded-lg bg-blue-600 text-white shadow-sm">
-                    <Bell size={18} />
-                  </div>
-                  <h1 className="text-xl sm:text-2xl font-semibold text-slate-800">
-                    Notifikasi & Pengumuman
-                  </h1>
-                 
-                  {unreadCount > 0 && (
-                    <span className="ml-2 px-2.5 py-0.5 rounded-full text-xs font-medium bg-rose-50 text-rose-600 border border-rose-200">
-                      {unreadCount} belum dibaca
-                    </span>
-                  )}
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <div className="flex items-center gap-2.5">
+                <div
+                  className={`p-2 rounded-lg ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
+                >
+                  <Bell size={18} />
                 </div>
-                <p className="text-sm text-slate-500 ml-[52px] flex items-center gap-1.5">
-                  <Sparkles size={14} className="text-slate-400" />
-                  Kelola notifikasi dan kirim pengumuman ke seluruh pengguna.
-                </p>
+
+                <h1 className="text-xl sm:text-2xl font-semibold theme-text">
+                  Notifikasi & Pengumuman
+                </h1>
+
+                {unreadCount > 0 && (
+                  <span
+                    className={`ml-2 px-2.5 py-0.5 rounded-full text-xs font-medium ${themeWarningSurface} text-[var(--color-warning)] border ${themeWarningBorder}`}
+                  >
+                    {unreadCount} belum dibaca
+                  </span>
+                )}
               </div>
-              <div className="flex items-center gap-2.5 ml-[52px] sm:ml-0">
-                {activeTab === "notifikasi" && unreadCount > 0 && (
+
+              <p className="theme-text-muted text-sm ml-[52px] mt-1 flex items-center gap-1.5">
+                <Sparkles
+                  size={14}
+                  className="theme-text-muted"
+                />
+                Kelola notifikasi dan kirim pengumuman ke
+                seluruh pengguna.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2.5">
+              {activeTab === "notifikasi" &&
+                unreadCount > 0 && (
                   <button
                     onClick={handleMarkAllRead}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 border border-blue-200 rounded-lg hover:bg-blue-100 transition-colors"
+                    className={`flex items-center gap-2 px-4 py-2 text-sm font-medium ${themePrimaryText} ${themePrimarySoft} border ${themePrimarySoftBorder} rounded-lg hover:bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)] transition-colors`}
                   >
                     <CheckCircle size={16} />
                     Tandai Semua Dibaca
                   </button>
                 )}
-                {activeTab === "pengumuman" && (
-                  <button
-                    onClick={() => setShowNewAnnouncement(true)}
-                    className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors shadow-sm hover:shadow"
+
+              {activeTab === "pengumuman" && (
+                <button
+                  onClick={() =>
+                    setShowNewAnnouncement(true)
+                  }
+                  className={`flex items-center gap-2 px-4 py-2 text-sm font-medium text-[var(--color-card)] ${themePrimaryGradient} rounded-lg transition-all ${themePrimaryShadow}`}
+                >
+                  <Plus size={16} />
+                  Buat Pengumuman
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* ==================================================
+              TABS
+          ================================================== */}
+
+          <div
+            className={`border-b ${themeDivider} overflow-x-auto`}
+          >
+            <nav className="flex gap-1 min-w-max">
+
+              <button
+                onClick={() => {
+                  setActiveTab("notifikasi");
+                  setCurrentPage(1);
+                }}
+                className={`
+                  flex items-center gap-2 px-4 py-2.5 text-sm font-medium
+                  rounded-t-lg border-b-2 transition-colors
+                  ${
+                    activeTab === "notifikasi"
+                      ? `border-[var(--color-primary)] ${themePrimaryText} ${themePrimarySoft}`
+                      : `border-transparent theme-text-secondary ${themeNeutralHover}`
+                  }
+                `}
+              >
+                <Bell size={16} />
+
+                Notifikasi
+
+                {unreadCount > 0 && (
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${themeWarningSurface} text-[var(--color-warning)] border ${themeWarningBorder}`}
                   >
-                    <Plus size={16} />
-                    Buat Pengumuman
-                  </button>
+                    {unreadCount}
+                  </span>
                 )}
-              </div>
-            </div>
+              </button>
 
-            {/* TABS */}
-            <div className="border-b border-slate-200/80 overflow-x-auto">
-              <nav className="flex gap-1 min-w-max">
-                <button
-                  onClick={() => setActiveTab("notifikasi")}
-                  className={`
-                    flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-t-lg border-b-2 transition-colors
-                    ${activeTab === "notifikasi"
-                      ? "border-blue-600 text-blue-600 bg-blue-50/50"
-                      : "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50"
-                    }
-                  `}
-                >
-                  <Bell size={16} />
-                  Notifikasi
-                  {unreadCount > 0 && (
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-rose-50 text-rose-600 border border-rose-200">
-                      {unreadCount}
-                    </span>
-                  )}
-                </button>
-                <button
-                  onClick={() => setActiveTab("pengumuman")}
-                  className={`
-                    flex items-center gap-2 px-4 py-2.5 text-sm font-medium rounded-t-lg border-b-2 transition-colors
-                    ${activeTab === "pengumuman"
-                      ? "border-blue-600 text-blue-600 bg-blue-50/50"
-                      : "border-transparent text-slate-500 hover:text-slate-700 hover:bg-slate-50"
-                    }
-                  `}
-                >
-                  <Megaphone size={16} />
-                  Pengumuman
-                  {announcements.filter((a) => a.status === "published").length > 0 && (
-                    <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-emerald-50 text-emerald-600 border border-emerald-200">
-                      {announcements.filter((a) => a.status === "published").length}
-                    </span>
-                  )}
-                </button>
-              </nav>
-            </div>
+              <button
+                onClick={() => {
+                  setActiveTab("pengumuman");
+                  setCurrentPage(1);
+                }}
+                className={`
+                  flex items-center gap-2 px-4 py-2.5 text-sm font-medium
+                  rounded-t-lg border-b-2 transition-colors
+                  ${
+                    activeTab === "pengumuman"
+                      ? `border-[var(--color-primary)] ${themePrimaryText} ${themePrimarySoft}`
+                      : `border-transparent theme-text-secondary ${themeNeutralHover}`
+                  }
+                `}
+              >
+                <Megaphone size={16} />
 
-            {/* SEARCH & FILTER */}
-            <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm">
-              <div className="flex flex-col sm:flex-row gap-3">
-                <div className="relative flex-1">
-                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
-                  <input
-                    type="text"
-                    placeholder={activeTab === "notifikasi" ? "Cari notifikasi..." : "Cari pengumuman..."}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition-all placeholder:text-slate-400"
-                  />
-                </div>
-                <div className="flex flex-wrap items-center gap-2">
-                  <select
-                    value={filterKategori}
-                    onChange={(e) => setFilterKategori(e.target.value)}
-                    className="px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-slate-600 min-w-[120px]"
+                Pengumuman
+
+                {announcements.filter(
+                  (a) => a.status === "published"
+                ).length > 0 && (
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[10px] font-medium ${themeSuccessSurface} text-[var(--color-success)] border ${themeSuccessBorder}`}
                   >
-                    {categories.map((cat) => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                  </select>
-                  {activeTab === "notifikasi" && (
-                    <select
-                      value={filterDibaca}
-                      onChange={(e) => setFilterDibaca(e.target.value)}
-                      className="px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 text-slate-600 min-w-[120px]"
+                    {
+                      announcements.filter(
+                        (a) => a.status === "published"
+                      ).length
+                    }
+                  </span>
+                )}
+              </button>
+            </nav>
+          </div>
+
+          {/* ==================================================
+              SEARCH & FILTER
+          ================================================== */}
+
+          <div
+            className={`theme-card rounded-xl border theme-border p-4 ${themeCardShadow}`}
+          >
+            <div className="flex flex-col sm:flex-row gap-3">
+
+              <div className="relative flex-1">
+                <Search
+                  size={16}
+                  className="absolute left-3 top-1/2 -translate-y-1/2 theme-text-muted"
+                />
+
+                <input
+                  type="text"
+                  placeholder={
+                    activeTab === "notifikasi"
+                      ? "Cari notifikasi..."
+                      : "Cari pengumuman..."
+                  }
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className={`theme-input theme-text w-full pl-9 pr-3 py-2 text-sm rounded-lg ${themeFocus} transition-all placeholder:text-[var(--color-text-placeholder)]`}
+                />
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+
+                <select
+                  value={filterKategori}
+                  onChange={(e) => {
+                    setFilterKategori(e.target.value);
+                    setCurrentPage(1);
+                  }}
+                  className={`theme-input theme-text w-full sm:w-auto px-3 py-2 text-sm rounded-lg ${themeFocus} min-w-[120px]`}
+                >
+                  {categories.map((cat) => (
+                    <option
+                      key={cat}
+                      value={cat}
                     >
-                      <option value="Semua">Semua Status</option>
-                      <option value="Belum Dibaca">Belum Dibaca</option>
-                      <option value="Sudah Dibaca">Sudah Dibaca</option>
-                    </select>
-                  )}
-                  <button
-                    onClick={() => {
-                      setSearchQuery("");
-                      setFilterKategori("Semua");
-                      setFilterDibaca("Semua");
+                      {cat}
+                    </option>
+                  ))}
+                </select>
+
+                {activeTab === "notifikasi" && (
+                  <select
+                    value={filterDibaca}
+                    onChange={(e) => {
+                      setFilterDibaca(e.target.value);
+                      setCurrentPage(1);
                     }}
-                    className="px-3 py-2 text-sm text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                    className={`theme-input theme-text w-full sm:w-auto px-3 py-2 text-sm rounded-lg ${themeFocus} min-w-[120px]`}
                   >
-                    Reset
-                  </button>
-                </div>
+                    <option value="Semua">
+                      Semua Status
+                    </option>
+                    <option value="Belum Dibaca">
+                      Belum Dibaca
+                    </option>
+                    <option value="Sudah Dibaca">
+                      Sudah Dibaca
+                    </option>
+                  </select>
+                )}
+
+                <button
+                  onClick={() => {
+                    setSearchQuery("");
+                    setFilterKategori("Semua");
+                    setFilterDibaca("Semua");
+                    setCurrentPage(1);
+                  }}
+                  className={`px-3 py-2 text-sm theme-text-secondary ${themeNeutralHover} rounded-lg transition-colors`}
+                >
+                  Reset
+                </button>
               </div>
             </div>
+          </div>
 
-            {/* CONTENT */}
-            <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden">
-              {activeTab === "notifikasi" ? (
-                <>
-                  {paginatedNotifs.length === 0 ? (
-                    <div className="p-8 text-center">
-                      <Bell size={48} className="text-slate-300 mx-auto mb-3" />
-                      <p className="text-sm font-medium text-slate-600">Tidak ada notifikasi</p>
-                      <p className="text-xs text-slate-400 mt-1">Belum ada notifikasi yang masuk</p>
-                    </div>
-                  ) : (
-                    <div className="divide-y divide-slate-100">
-                      {paginatedNotifs.map((notif) => {
-                        const Icon = getTipeIcon(notif.tipe);
-                        const tipeColor = getTipeColor(notif.tipe);
-                        return (
-                          <div
-                            key={notif.id}
-                            className={`p-4 sm:p-5 hover:bg-slate-50/60 transition-colors cursor-pointer ${
-                              !notif.dibaca ? "bg-blue-50/30 border-l-4 border-l-blue-500" : ""
-                            }`}
-                            onClick={() => {
-                              if (!notif.dibaca) handleMarkRead(notif.id);
-                              if (notif.targetUrl) router.push(notif.targetUrl);
-                            }}
-                          >
-                            <div className="flex items-start gap-3">
-                              <div className={`p-2 rounded-lg ${tipeColor} flex-shrink-0 mt-0.5`}>
-                                <Icon size={16} />
-                              </div>
-                              <div className="flex-1 min-w-0">
-                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
-                                  <h4 className={`text-sm font-medium ${!notif.dibaca ? "text-slate-800" : "text-slate-600"}`}>
-                                    {notif.judul}
-                                    {!notif.dibaca && (
-                                      <span className="ml-2 inline-block w-2 h-2 rounded-full bg-blue-500" />
-                                    )}
-                                  </h4>
-                                  <div className="flex items-center gap-1.5 flex-shrink-0 flex-wrap">
-                                    <span className="text-xs text-slate-400">{formatTanggal(notif.dibuatPada)}</span>
-                                    <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 border border-slate-200">
-                                      {notif.kategori}
-                                    </span>
-                                  </div>
-                                </div>
-                                <p className="text-sm text-slate-500 mt-1">{notif.isi}</p>
-                                <div className="flex flex-wrap items-center gap-2 mt-2">
-                                  <span className="text-xs text-slate-400 flex items-center gap-1">
-                                    <User size={12} />
-                                    {notif.pengirim}
-                                  </span>
-                                  {notif.targetUrl && (
-                                    <span className="text-xs text-blue-600 hover:text-blue-700 font-medium">
-                                      Lihat Detail →
-                                    </span>
+          {/* ==================================================
+              CONTENT
+          ================================================== */}
+
+          <div
+            className={`theme-card rounded-xl border theme-border ${themeCardShadow} overflow-hidden`}
+          >
+            {activeTab === "notifikasi" ? (
+              <>
+                {paginatedNotifs.length === 0 ? (
+                  <div className="p-8 text-center">
+                    <Bell
+                      size={48}
+                      className="theme-text-muted mx-auto mb-3"
+                    />
+
+                    <p className="text-sm font-medium theme-text-secondary">
+                      Tidak ada notifikasi
+                    </p>
+
+                    <p className="text-xs theme-text-muted mt-1">
+                      Belum ada notifikasi yang masuk
+                    </p>
+                  </div>
+                ) : (
+                  <div>
+                    {paginatedNotifs.map((notif, index) => {
+                      const Icon = getTipeIcon(notif.tipe);
+                      const tipeColor = getTipeColor(
+                        notif.tipe
+                      );
+
+                      return (
+                        <div
+                          key={notif.id}
+                          className={`
+                            p-4 sm:p-5
+                            transition-colors cursor-pointer
+                            hover:bg-[color-mix(in_srgb,var(--color-primary)_4%,transparent)]
+                            ${
+                              index <
+                              paginatedNotifs.length - 1
+                                ? `border-b ${themeDivider}`
+                                : ""
+                            }
+                            ${
+                              !notif.dibaca
+                                ? "border-l-4 border-l-[var(--color-primary)]"
+                                : ""
+                            }
+                          `}
+                          onClick={() => {
+                            if (!notif.dibaca) {
+                              handleMarkRead(notif.id);
+                            }
+
+                            if (notif.targetUrl) {
+                              router.push(notif.targetUrl);
+                            }
+                          }}
+                        >
+                          <div className="flex items-start gap-3">
+
+                            <div
+                              className={`p-2 rounded-lg ${tipeColor} flex-shrink-0 mt-0.5 border`}
+                            >
+                              <Icon size={16} />
+                            </div>
+
+                            <div className="flex-1 min-w-0">
+
+                              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
+
+                                <h4
+                                  className={`text-sm font-medium ${
+                                    !notif.dibaca
+                                      ? "theme-text"
+                                      : "theme-text-secondary"
+                                  }`}
+                                >
+                                  {notif.judul}
+
+                                  {!notif.dibaca && (
+                                    <span className="ml-2 inline-block w-2 h-2 rounded-full bg-[var(--color-primary)]" />
                                   )}
-                                  <div className="flex items-center gap-0.5 ml-auto">
-                                    {!notif.dibaca && (
-                                      <button
-                                        onClick={(e) => { e.stopPropagation(); handleMarkRead(notif.id); }}
-                                        className="p-1.5 rounded-lg hover:bg-blue-50 text-slate-400 hover:text-blue-600 transition-colors"
-                                        title="Tandai Dibaca"
-                                      >
-                                        <Check size={14} />
-                                      </button>
+                                </h4>
+
+                                <div className="flex items-center gap-1.5 flex-shrink-0 flex-wrap">
+
+                                  <span className="text-xs theme-text-muted">
+                                    {formatTanggal(
+                                      notif.dibuatPada
                                     )}
+                                  </span>
+
+                                  <span
+                                    className={`text-xs px-2 py-0.5 rounded-full ${themeNeutralSurface} theme-text-secondary border ${themeNeutralBorder}`}
+                                  >
+                                    {notif.kategori}
+                                  </span>
+                                </div>
+                              </div>
+
+                              <p className="text-sm theme-text-secondary mt-1">
+                                {notif.isi}
+                              </p>
+
+                              <div className="flex flex-wrap items-center gap-2 mt-2">
+
+                                <span className="text-xs theme-text-muted flex items-center gap-1">
+                                  <User size={12} />
+                                  {notif.pengirim}
+                                </span>
+
+                                {notif.targetUrl && (
+                                  <span
+                                    className={`text-xs ${themePrimaryText} hover:underline font-medium`}
+                                  >
+                                    Lihat Detail →
+                                  </span>
+                                )}
+
+                                <div className="flex items-center gap-0.5 ml-auto">
+
+                                  {!notif.dibaca && (
                                     <button
-                                      onClick={(e) => { e.stopPropagation(); handleDeleteNotif(notif.id); }}
-                                      className="p-1.5 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors"
-                                      title="Hapus"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handleMarkRead(
+                                          notif.id
+                                        );
+                                      }}
+                                      className={`p-1.5 rounded-lg theme-text-muted hover:${themePrimaryText} ${themePrimarySoft} transition-colors`}
+                                      title="Tandai Dibaca"
                                     >
-                                      <Trash2 size={14} />
+                                      <Check size={14} />
                                     </button>
-                                  </div>
+                                  )}
+
+                                  <button
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeleteNotif(
+                                        notif.id
+                                      );
+                                    }}
+                                    className={`p-1.5 rounded-lg theme-text-muted hover:text-[var(--color-warning)] ${themeWarningSurface} transition-colors`}
+                                    title="Hapus"
+                                  >
+                                    <Trash2 size={14} />
+                                  </button>
+
                                 </div>
                               </div>
                             </div>
                           </div>
-                        );
-                      })}
-                    </div>
-                  )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
 
-                  {/* Pagination */}
-                  {totalPagesNotif > 1 && (
-                    <div className="px-4 py-3 border-t border-slate-200/80 flex flex-col xs:flex-row items-center justify-between gap-2">
-                      <p className="text-xs text-slate-500 text-center xs:text-left">
-                        Menampilkan {paginatedNotifs.length} dari {filteredNotifs.length} notifikasi
-                      </p>
-                      <div className="flex items-center gap-0.5">
-                        <button
-                          onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                          disabled={currentPage === 1}
-                          className="px-3 py-1 text-sm text-slate-500 hover:bg-slate-100 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                        >
-                          Previous
-                        </button>
-                        {[...Array(Math.min(totalPagesNotif, 5))].map((_, i) => (
-                          <button
-                            key={i + 1}
-                            onClick={() => setCurrentPage(i + 1)}
-                            className={`w-8 h-8 text-sm rounded-lg transition-colors ${
-                              currentPage === i + 1
-                                ? "bg-blue-600 text-white shadow-sm"
-                                : "text-slate-500 hover:bg-slate-100"
-                            }`}
-                          >
-                            {i + 1}
-                          </button>
-                        ))}
-                        {totalPagesNotif > 5 && (
-                          <>
-                            <span className="text-slate-400 px-0.5">…</span>
-                            <button
-                              onClick={() => setCurrentPage(totalPagesNotif)}
-                              className={`w-8 h-8 text-sm rounded-lg transition-colors ${
-                                currentPage === totalPagesNotif
-                                  ? "bg-blue-600 text-white shadow-sm"
-                                  : "text-slate-500 hover:bg-slate-100"
-                              }`}
-                            >
-                              {totalPagesNotif}
-                            </button>
-                          </>
-                        )}
-                        <button
-                          onClick={() => setCurrentPage(Math.min(totalPagesNotif, currentPage + 1))}
-                          disabled={currentPage === totalPagesNotif}
-                          className="px-3 py-1 text-sm text-slate-500 hover:bg-slate-100 rounded-lg disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                        >
-                          Next
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <>
-                  {filteredAnnounces.length === 0 ? (
-                    <div className="p-8 text-center">
-                      <Megaphone size={48} className="text-slate-300 mx-auto mb-3" />
-                      <p className="text-sm font-medium text-slate-600">Tidak ada pengumuman</p>
-                      <p className="text-xs text-slate-400 mt-1">Buat pengumuman pertama Anda</p>
+                {/* PAGINATION */}
+
+                {totalPagesNotif > 1 && (
+                  <div
+                    className={`px-4 py-3 border-t ${themeDivider} flex flex-col sm:flex-row items-center justify-between gap-2`}
+                  >
+                    <p className="text-xs theme-text-muted text-center sm:text-left">
+                      Menampilkan{" "}
+                      {paginatedNotifs.length} dari{" "}
+                      {filteredNotifs.length} notifikasi
+                    </p>
+
+                    <div className="flex items-center gap-0.5">
+
                       <button
-                        onClick={() => setShowNewAnnouncement(true)}
-                        className="mt-3 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors"
+                        onClick={() =>
+                          setCurrentPage(
+                            Math.max(
+                              1,
+                              currentPage - 1
+                            )
+                          )
+                        }
+                        disabled={currentPage === 1}
+                        className={`px-3 py-1 text-sm theme-text-secondary ${themeNeutralHover} rounded-lg disabled:opacity-40 disabled:cursor-not-allowed transition-colors`}
                       >
-                        <Plus size={16} className="inline mr-1" />
-                        Buat Pengumuman
+                        Previous
+                      </button>
+
+                      {[
+                        ...Array(
+                          Math.min(
+                            totalPagesNotif,
+                            5
+                          )
+                        ),
+                      ].map((_, i) => (
+                        <button
+                          key={i + 1}
+                          onClick={() =>
+                            setCurrentPage(i + 1)
+                          }
+                          className={`
+                            w-8 h-8 text-sm rounded-lg transition-colors
+                            ${
+                              currentPage === i + 1
+                                ? `${themePrimaryGradient} text-[var(--color-card)] ${themeSmallShadow}`
+                                : `theme-text-secondary ${themeNeutralHover}`
+                            }
+                          `}
+                        >
+                          {i + 1}
+                        </button>
+                      ))}
+
+                      {totalPagesNotif > 5 && (
+                        <>
+                          <span className="theme-text-muted px-0.5">
+                            …
+                          </span>
+
+                          <button
+                            onClick={() =>
+                              setCurrentPage(
+                                totalPagesNotif
+                              )
+                            }
+                            className={`
+                              w-8 h-8 text-sm rounded-lg transition-colors
+                              ${
+                                currentPage ===
+                                totalPagesNotif
+                                  ? `${themePrimaryGradient} text-[var(--color-card)] ${themeSmallShadow}`
+                                  : `theme-text-secondary ${themeNeutralHover}`
+                              }
+                            `}
+                          >
+                            {totalPagesNotif}
+                          </button>
+                        </>
+                      )}
+
+                      <button
+                        onClick={() =>
+                          setCurrentPage(
+                            Math.min(
+                              totalPagesNotif,
+                              currentPage + 1
+                            )
+                          )
+                        }
+                        disabled={
+                          currentPage === totalPagesNotif
+                        }
+                        className={`px-3 py-1 text-sm theme-text-secondary ${themeNeutralHover} rounded-lg disabled:opacity-40 disabled:cursor-not-allowed transition-colors`}
+                      >
+                        Next
                       </button>
                     </div>
-                  ) : (
-                    <div className="divide-y divide-slate-100">
-                      {filteredAnnounces.map((announce) => {
-                        const statusBadge = getStatusBadge(announce.status);
+                  </div>
+                )}
+              </>
+            ) : (
+              <>
+                {filteredAnnounces.length === 0 ? (
+                  <div className="p-8 text-center">
+
+                    <Megaphone
+                      size={48}
+                      className="theme-text-muted mx-auto mb-3"
+                    />
+
+                    <p className="text-sm font-medium theme-text-secondary">
+                      Tidak ada pengumuman
+                    </p>
+
+                    <p className="text-xs theme-text-muted mt-1">
+                      Buat pengumuman pertama Anda
+                    </p>
+
+                    <button
+                      onClick={() =>
+                        setShowNewAnnouncement(true)
+                      }
+                      className={`mt-3 px-4 py-2 text-sm font-medium text-[var(--color-card)] ${themePrimaryGradient} rounded-lg ${themePrimaryShadow} transition-all`}
+                    >
+                      <Plus
+                        size={16}
+                        className="inline mr-1"
+                      />
+                      Buat Pengumuman
+                    </button>
+                  </div>
+                ) : (
+                  <div>
+                    {filteredAnnounces.map(
+                      (announce, index) => {
+                        const statusBadge =
+                          getStatusBadge(
+                            announce.status
+                          );
+
                         return (
-                          <div key={announce.id} className="p-4 sm:p-5 hover:bg-slate-50/60 transition-colors">
+                          <div
+                            key={announce.id}
+                            className={`
+                              p-4 sm:p-5
+                              hover:bg-[color-mix(in_srgb,var(--color-primary)_4%,transparent)]
+                              transition-colors
+                              ${
+                                index <
+                                filteredAnnounces.length - 1
+                                  ? `border-b ${themeDivider}`
+                                  : ""
+                              }
+                            `}
+                          >
                             <div className="flex items-start gap-3">
-                              <div className="p-2 rounded-lg bg-purple-50 text-purple-600 flex-shrink-0 mt-0.5">
+
+                              <div
+                                className={`p-2 rounded-lg ${themePrimarySoft} ${themePrimaryText} border ${themePrimarySoftBorder} flex-shrink-0 mt-0.5`}
+                              >
                                 <Megaphone size={16} />
                               </div>
+
                               <div className="flex-1 min-w-0">
+
                                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-2">
-                                  <h4 className="text-sm font-medium text-slate-800">{announce.judul}</h4>
+
+                                  <h4 className="text-sm font-medium theme-text">
+                                    {announce.judul}
+                                  </h4>
+
                                   <div className="flex items-center gap-1.5 flex-shrink-0 flex-wrap">
-                                    <span className={`text-xs px-2 py-0.5 rounded-full border ${statusBadge.bg}`}>
-                                      {statusBadge.label}
+
+                                    <span
+                                      className={`text-xs px-2 py-0.5 rounded-full border ${statusBadge.bg}`}
+                                    >
+                                      {
+                                        statusBadge.label
+                                      }
                                     </span>
-                                    <span className={`text-xs px-2 py-0.5 rounded-full border ${getPrioritasColor(announce.prioritas)}`}>
-                                      {getPrioritasLabel(announce.prioritas)}
+
+                                    <span
+                                      className={`text-xs px-2 py-0.5 rounded-full border ${getPrioritasColor(
+                                        announce.prioritas
+                                      )}`}
+                                    >
+                                      {getPrioritasLabel(
+                                        announce.prioritas
+                                      )}
                                     </span>
-                                    <span className="text-xs text-slate-400">{formatTanggal(announce.dibuatPada)}</span>
+
+                                    <span className="text-xs theme-text-muted">
+                                      {formatTanggal(
+                                        announce.dibuatPada
+                                      )}
+                                    </span>
                                   </div>
                                 </div>
-                                <p className="text-sm text-slate-500 mt-1">{announce.isi}</p>
+
+                                <p className="text-sm theme-text-secondary mt-1">
+                                  {announce.isi}
+                                </p>
+
                                 <div className="flex flex-wrap items-center gap-2 mt-2">
-                                  <span className="text-xs text-slate-400 flex items-center gap-1">
+
+                                  <span className="text-xs theme-text-muted flex items-center gap-1">
                                     <User size={12} />
                                     {announce.penulis}
                                   </span>
-                                  <span className="text-xs text-slate-400 flex items-center gap-1">
+
+                                  <span className="text-xs theme-text-muted flex items-center gap-1">
                                     <Calendar size={12} />
                                     {announce.dipublikasikanPada
-                                      ? formatTanggal(announce.dipublikasikanPada)
+                                      ? formatTanggal(
+                                          announce.dipublikasikanPada
+                                        )
                                       : "Belum dipublikasikan"}
                                   </span>
-                                  <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-500 border border-slate-200">
+
+                                  <span
+                                    className={`text-xs px-2 py-0.5 rounded-full ${themeNeutralSurface} theme-text-secondary border ${themeNeutralBorder}`}
+                                  >
                                     {announce.kategori}
                                   </span>
+
                                   <div className="flex items-center gap-0.5 ml-auto">
+
                                     <button
-                                      onClick={() => handleToggleStatus(announce.id)}
-                                      className="p-1.5 rounded-lg hover:bg-amber-50 text-slate-400 hover:text-amber-600 transition-colors"
-                                      title={announce.status === "published" ? "Arsipkan" : "Publikasikan"}
+                                      onClick={() =>
+                                        handleToggleStatus(
+                                          announce.id
+                                        )
+                                      }
+                                      className={`p-1.5 rounded-lg theme-text-muted hover:text-[var(--color-warning)] ${themeWarningSurface} transition-colors`}
+                                      title={
+                                        announce.status ===
+                                        "published"
+                                          ? "Arsipkan"
+                                          : "Publikasikan"
+                                      }
                                     >
-                                      {announce.status === "published" ? <Archive size={14} /> : <Send size={14} />}
+                                      {announce.status ===
+                                      "published" ? (
+                                        <Archive
+                                          size={14}
+                                        />
+                                      ) : (
+                                        <Send size={14} />
+                                      )}
                                     </button>
+
                                     <button
-                                      onClick={() => handleDeleteAnnounce(announce.id)}
-                                      className="p-1.5 rounded-lg hover:bg-rose-50 text-slate-400 hover:text-rose-600 transition-colors"
+                                      onClick={() =>
+                                        handleDeleteAnnounce(
+                                          announce.id
+                                        )
+                                      }
+                                      className={`p-1.5 rounded-lg theme-text-muted hover:text-[var(--color-warning)] ${themeWarningSurface} transition-colors`}
                                       title="Hapus"
                                     >
                                       <Trash2 size={14} />
@@ -700,105 +1133,202 @@ export default function NotifikasiPengumumanPage() {
                             </div>
                           </div>
                         );
-                      })}
-                    </div>
-                  )}
-                </>
-              )}
-            </div>
-
-            {/* FOOTER */}
-            <div className="text-center text-xs text-slate-400/80 py-2 border-t border-slate-200/40">
-              © 2026 SmartSchool • {activeTab === "notifikasi" ? "Notifikasi" : "Pengumuman"} terakhir diperbarui hari ini
-            </div>
+                      }
+                    )}
+                  </div>
+                )}
+              </>
+            )}
           </div>
-        </main>
+
+          {/* ==================================================
+              FOOTER
+          ================================================== */}
+
+          <div
+            className={`text-center text-xs theme-text-muted py-2 border-t ${themeDivider}`}
+          >
+            © 2026 SmartSchool •{" "}
+            {activeTab === "notifikasi"
+              ? "Notifikasi"
+              : "Pengumuman"}{" "}
+            terakhir diperbarui hari ini
+          </div>
+        </div>
       </div>
 
-      {/* MODAL BUAT PENGUMUMAN */}
+      {/* ======================================================
+          MODAL BUAT PENGUMUMAN
+      ====================================================== */}
+
       {showNewAnnouncement && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/40 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 sticky top-0 bg-white">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[color-mix(in_srgb,var(--color-text)_42%,transparent)] backdrop-blur-sm p-4">
+
+          <div
+            className={`theme-card rounded-xl ${themeCardShadow} w-full max-w-lg max-h-[90vh] overflow-y-auto border theme-border`}
+          >
+
+            {/* MODAL HEADER */}
+
+            <div
+              className={`flex items-center justify-between px-5 py-4 border-b ${themeDivider} sticky top-0 theme-card z-10`}
+            >
               <div className="flex items-center gap-2.5">
-                <div className="p-1.5 rounded-lg bg-blue-50 text-blue-600">
+
+                <div
+                  className={`p-1.5 rounded-lg ${themePrimarySoft} ${themePrimaryText} border ${themePrimarySoftBorder}`}
+                >
                   <Megaphone size={18} />
                 </div>
-                <h3 className="text-sm font-semibold text-slate-800">Buat Pengumuman Baru</h3>
+
+                <h3 className="text-sm font-semibold theme-text">
+                  Buat Pengumuman Baru
+                </h3>
               </div>
+
               <button
-                onClick={() => setShowNewAnnouncement(false)}
-                className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+                onClick={() =>
+                  setShowNewAnnouncement(false)
+                }
+                className={`p-1.5 rounded-lg theme-text-muted ${themeNeutralHover} hover:theme-text transition-colors`}
               >
                 <X size={18} />
               </button>
             </div>
 
+            {/* MODAL BODY */}
+
             <div className="p-5 space-y-4">
+
+              {/* JUDUL */}
+
               <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1.5">
-                  Judul Pengumuman <span className="text-rose-500">*</span>
+                <label className="block text-xs font-medium theme-text-secondary mb-1.5">
+                  Judul Pengumuman{" "}
+                  <span className="text-[var(--color-warning)]">
+                    *
+                  </span>
                 </label>
+
                 <input
                   type="text"
                   value={newAnnouncement.judul}
-                  onChange={(e) => setNewAnnouncement({ ...newAnnouncement, judul: e.target.value })}
+                  onChange={(e) =>
+                    setNewAnnouncement({
+                      ...newAnnouncement,
+                      judul: e.target.value,
+                    })
+                  }
                   placeholder="Masukkan judul pengumuman"
-                  className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition placeholder:text-slate-400"
+                  className={`theme-input theme-text w-full px-3 py-2 text-sm rounded-lg ${themeFocus} transition placeholder:text-[var(--color-text-placeholder)]`}
                 />
               </div>
+
+              {/* ISI */}
+
               <div>
-                <label className="block text-xs font-medium text-slate-500 mb-1.5">
-                  Isi Pengumuman <span className="text-rose-500">*</span>
+                <label className="block text-xs font-medium theme-text-secondary mb-1.5">
+                  Isi Pengumuman{" "}
+                  <span className="text-[var(--color-warning)]">
+                    *
+                  </span>
                 </label>
+
                 <textarea
                   value={newAnnouncement.isi}
-                  onChange={(e) => setNewAnnouncement({ ...newAnnouncement, isi: e.target.value })}
+                  onChange={(e) =>
+                    setNewAnnouncement({
+                      ...newAnnouncement,
+                      isi: e.target.value,
+                    })
+                  }
                   rows={4}
                   placeholder="Tulis isi pengumuman di sini..."
-                  className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition resize-none placeholder:text-slate-400"
+                  className={`theme-input theme-text w-full px-3 py-2 text-sm rounded-lg ${themeFocus} transition resize-none placeholder:text-[var(--color-text-placeholder)]`}
                 />
               </div>
+
+              {/* KATEGORI + PRIORITAS */}
+
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+
                 <div>
-                  <label className="block text-xs font-medium text-slate-500 mb-1.5">Kategori</label>
+                  <label className="block text-xs font-medium theme-text-secondary mb-1.5">
+                    Kategori
+                  </label>
+
                   <select
                     value={newAnnouncement.kategori}
-                    onChange={(e) => setNewAnnouncement({ ...newAnnouncement, kategori: e.target.value })}
-                    className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition cursor-pointer text-slate-600"
+                    onChange={(e) =>
+                      setNewAnnouncement({
+                        ...newAnnouncement,
+                        kategori: e.target.value,
+                      })
+                    }
+                    className={`theme-input theme-text w-full px-3 py-2 text-sm rounded-lg ${themeFocus} transition cursor-pointer`}
                   >
-                    <option value="Pengumuman">Pengumuman</option>
-                    <option value="Acara">Acara</option>
-                    <option value="Kebijakan">Kebijakan</option>
-                    <option value="Peringatan">Peringatan</option>
+                    <option value="Pengumuman">
+                      Pengumuman
+                    </option>
+                    <option value="Acara">
+                      Acara
+                    </option>
+                    <option value="Kebijakan">
+                      Kebijakan
+                    </option>
+                    <option value="Peringatan">
+                      Peringatan
+                    </option>
                   </select>
                 </div>
+
                 <div>
-                  <label className="block text-xs font-medium text-slate-500 mb-1.5">Prioritas</label>
+                  <label className="block text-xs font-medium theme-text-secondary mb-1.5">
+                    Prioritas
+                  </label>
+
                   <select
                     value={newAnnouncement.prioritas}
-                    onChange={(e) => setNewAnnouncement({ ...newAnnouncement, prioritas: e.target.value })}
-                    className="w-full px-3 py-2 text-sm bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400 transition cursor-pointer text-slate-600"
+                    onChange={(e) =>
+                      setNewAnnouncement({
+                        ...newAnnouncement,
+                        prioritas: e.target.value,
+                      })
+                    }
+                    className={`theme-input theme-text w-full px-3 py-2 text-sm rounded-lg ${themeFocus} transition cursor-pointer`}
                   >
-                    <option value="low">Rendah</option>
-                    <option value="medium">Sedang</option>
-                    <option value="high">Penting</option>
+                    <option value="low">
+                      Rendah
+                    </option>
+                    <option value="medium">
+                      Sedang
+                    </option>
+                    <option value="high">
+                      Penting
+                    </option>
                   </select>
                 </div>
               </div>
 
-              <div className="flex items-center gap-3 pt-2 border-t border-slate-200/60">
+              {/* MODAL ACTION */}
+
+              <div
+                className={`flex flex-col-reverse sm:flex-row items-center gap-3 pt-2 border-t ${themeDivider}`}
+              >
                 <button
                   type="button"
-                  onClick={() => setShowNewAnnouncement(false)}
-                  className="flex-1 py-2 rounded-lg text-sm font-medium text-slate-600 border border-slate-200 hover:bg-slate-50 transition-colors"
+                  onClick={() =>
+                    setShowNewAnnouncement(false)
+                  }
+                  className={`w-full sm:flex-1 py-2 rounded-lg text-sm font-medium theme-text-secondary border ${themeNeutralBorder} ${themeNeutralHover} transition-colors`}
                 >
                   Batal
                 </button>
+
                 <button
                   type="button"
                   onClick={handleCreateAnnouncement}
-                  className="flex-1 py-2 rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm hover:shadow flex items-center justify-center gap-2"
+                  className={`w-full sm:flex-1 py-2 rounded-lg text-sm font-medium text-[var(--color-card)] ${themePrimaryGradient} transition-all ${themePrimaryShadow} flex items-center justify-center gap-2`}
                 >
                   <Save size={16} />
                   Simpan Sebagai Draf

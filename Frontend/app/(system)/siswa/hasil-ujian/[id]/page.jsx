@@ -3,9 +3,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
-import Sidebar from "../../../../components/Sidebar";
-import Header from "../../../../components/Header";
-
 import {
   AlertCircle,
   ArrowLeft,
@@ -20,6 +17,67 @@ import {
   Trophy,
   XCircle,
 } from "lucide-react";
+
+/* =========================================================
+   THEME HELPERS
+========================================================= */
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimaryShadow =
+  "shadow-[0_10px_30px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
 
 /* =========================================================
    API
@@ -204,7 +262,7 @@ function normalizeHasilUjian(value) {
 }
 
 /* =========================================================
-   CEK APAKAH OBJECT MERUPAKAN HASIL UJIAN
+   CEK HASIL UJIAN
 ========================================================= */
 
 function isValidHasilUjian(value) {
@@ -230,7 +288,7 @@ function isValidHasilUjian(value) {
 }
 
 /* =========================================================
-   CARI HASIL UJIAN DARI BERBAGAI STRUKTUR RESPONSE
+   CARI HASIL UJIAN
 ========================================================= */
 
 function getResultData(ujian, percobaan) {
@@ -285,7 +343,7 @@ function getResultData(ujian, percobaan) {
 }
 
 /* =========================================================
-   AMBIL HASIL DARI LOCAL STORAGE
+   LOCAL STORAGE
 ========================================================= */
 
 function getSavedHasilUjian(id) {
@@ -394,7 +452,7 @@ function getSavedHasilUjian(id) {
 }
 
 /* =========================================================
-   GET VALUE HELPER
+   NUMBER
 ========================================================= */
 
 function firstValidNumber(...values) {
@@ -419,7 +477,7 @@ function firstValidNumber(...values) {
 }
 
 /* =========================================================
-   GET SCORE
+   SCORE
 ========================================================= */
 
 function getScore(ujian, percobaan) {
@@ -540,9 +598,7 @@ function formatNumber(value) {
    FORMAT DATE
 ========================================================= */
 
-function formatDateTime(
-  dateString
-) {
+function formatDateTime(dateString) {
   if (!dateString) {
     return "-";
   }
@@ -574,9 +630,7 @@ function formatDateTime(
    STATUS
 ========================================================= */
 
-function getStatusLabel(
-  status
-) {
+function getStatusLabel(status) {
   const normalized =
     String(status || "")
       .toLowerCase()
@@ -593,8 +647,7 @@ function getStatusLabel(
 
   if (
     normalized === "berlangsung" ||
-    normalized ===
-      "sedang_mengerjakan" ||
+    normalized === "sedang_mengerjakan" ||
     normalized === "in_progress" ||
     normalized === "ongoing"
   ) {
@@ -605,12 +658,10 @@ function getStatusLabel(
 }
 
 /* =========================================================
-   CARI PERCOBAAN DARI DETAIL UJIAN
+   PERCOBAAN
 ========================================================= */
 
-function getPercobaanFromUjian(
-  ujian
-) {
+function getPercobaanFromUjian(ujian) {
   if (!ujian) {
     return null;
   }
@@ -644,8 +695,7 @@ function getPercobaanFromUjian(
 
         return (
           status === "selesai" ||
-          status ===
-            "dikumpulkan" ||
+          status === "dikumpulkan" ||
           status === "completed" ||
           status === "finished"
         );
@@ -672,10 +722,6 @@ export default function HasilUjianPage() {
     ? params.id[0]
     : params?.id;
 
-  /* =======================================================
-     STATE
-  ======================================================= */
-
   const [ujian, setUjian] =
     useState(null);
 
@@ -687,11 +733,6 @@ export default function HasilUjianPage() {
 
   const [error, setError] =
     useState("");
-
-  const [
-    isSidebarCollapsed,
-    setIsSidebarCollapsed,
-  ] = useState(false);
 
   /* =======================================================
      LOAD DATA
@@ -1042,7 +1083,7 @@ export default function HasilUjianPage() {
     );
 
   /* =======================================================
-     TANGGAL SELESAI
+     TANGGAL
   ======================================================= */
 
   const tanggalSelesai =
@@ -1055,7 +1096,7 @@ export default function HasilUjianPage() {
     null;
 
   /* =======================================================
-     PERSENTASE NILAI
+     PROGRESS
   ======================================================= */
 
   const progressNilai =
@@ -1073,53 +1114,27 @@ export default function HasilUjianPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen bg-slate-50">
-        <Sidebar
-          role="siswa"
-          active="ujian"
-          collapsed={
-            isSidebarCollapsed
-          }
-          setCollapsed={
-            setIsSidebarCollapsed
-          }
-        />
+      <div className="theme-page flex min-h-full min-w-0 flex-1 items-center justify-center p-6">
+        <div
+          className={`w-full max-w-sm rounded-3xl border theme-border theme-card p-8 text-center ${themeCardShadow}`}
+        >
+          <div
+            className={`mx-auto flex h-16 w-16 items-center justify-center rounded-2xl ${themePrimarySoft}`}
+          >
+            <Loader2
+              size={28}
+              className={`${themePrimaryText} animate-spin`}
+            />
+          </div>
 
-        <div className="flex min-w-0 flex-1 flex-col">
-          <Header
-            toggleSidebar={() =>
-              setIsSidebarCollapsed(
-                (prev) => !prev
-              )
-            }
-            notifications={[]}
-            user={{
-              name: "Siswa",
-              email:
-                "siswa@smartschool.com",
-              avatar: "S",
-            }}
-          />
+          <h2 className="mt-5 text-base font-bold theme-text">
+            Memuat hasil ujian
+          </h2>
 
-          <main className="flex flex-1 items-center justify-center p-6">
-            <div className="w-full max-w-sm rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-blue-50">
-                <Loader2
-                  size={28}
-                  className="animate-spin text-[#155DFC]"
-                />
-              </div>
-
-              <h2 className="mt-5 text-base font-bold text-slate-800">
-                Memuat hasil ujian
-              </h2>
-
-              <p className="mt-2 text-sm leading-6 text-slate-400">
-                Sedang mengambil data hasil
-                pengerjaan kamu.
-              </p>
-            </div>
-          </main>
+          <p className="mt-2 text-sm leading-6 theme-text-muted">
+            Sedang mengambil data hasil
+            pengerjaan kamu.
+          </p>
         </div>
       </div>
     );
@@ -1131,75 +1146,45 @@ export default function HasilUjianPage() {
 
   if (error) {
     return (
-      <div className="flex min-h-screen bg-slate-50">
-        <Sidebar
-          role="siswa"
-          active="ujian"
-          collapsed={
-            isSidebarCollapsed
-          }
-          setCollapsed={
-            setIsSidebarCollapsed
-          }
-        />
+      <div className="theme-page flex min-h-full min-w-0 flex-1 items-center justify-center p-6">
+        <div
+          className={`w-full max-w-md rounded-3xl border theme-border theme-card p-7 text-center ${themeCardShadow}`}
+        >
+          <div
+            className={`mx-auto flex h-16 w-16 items-center justify-center rounded-2xl ${themeDangerSurface} theme-danger`}
+          >
+            <AlertCircle size={28} />
+          </div>
 
-        <div className="flex min-w-0 flex-1 flex-col">
-          <Header
-            toggleSidebar={() =>
-              setIsSidebarCollapsed(
-                (prev) => !prev
-              )
-            }
-            notifications={[]}
-            user={{
-              name: "Siswa",
-              email:
-                "siswa@smartschool.com",
-              avatar: "S",
-            }}
-          />
+          <h2 className="mt-5 text-lg font-bold theme-text">
+            Hasil belum dapat dimuat
+          </h2>
 
-          <main className="flex flex-1 items-center justify-center p-6">
-            <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-7 text-center shadow-sm">
-              <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-rose-50 text-rose-500">
-                <AlertCircle
-                  size={28}
-                />
-              </div>
+          <p className="mt-2 text-sm leading-6 theme-text-secondary">
+            {error}
+          </p>
 
-              <h2 className="mt-5 text-lg font-bold text-slate-800">
-                Hasil belum dapat dimuat
-              </h2>
+          <div className="mt-6 grid grid-cols-2 gap-3">
+            <button
+              type="button"
+              onClick={() =>
+                router.push(
+                  "/siswa/ujian"
+                )
+              }
+              className={`rounded-xl border theme-border theme-card px-4 py-3 text-sm font-semibold theme-text-secondary transition ${themeNeutralHover}`}
+            >
+              Kembali
+            </button>
 
-              <p className="mt-2 text-sm leading-6 text-slate-500">
-                {error}
-              </p>
-
-              <div className="mt-6 grid grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={() =>
-                    router.push(
-                      "/siswa/ujian"
-                    )
-                  }
-                  className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50"
-                >
-                  Kembali
-                </button>
-
-                <button
-                  type="button"
-                  onClick={
-                    loadHasil
-                  }
-                  className="rounded-xl bg-[#155DFC] px-4 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#0D47C9]"
-                >
-                  Coba Lagi
-                </button>
-              </div>
-            </div>
-          </main>
+            <button
+              type="button"
+              onClick={loadHasil}
+              className={`rounded-xl ${themePrimaryGradient} px-4 py-3 text-sm font-semibold text-[var(--color-card)] ${themePrimaryShadow} transition hover:brightness-95`}
+            >
+              Coba Lagi
+            </button>
+          </div>
         </div>
       </div>
     );
@@ -1210,608 +1195,524 @@ export default function HasilUjianPage() {
   ======================================================= */
 
   return (
-    <div className="flex min-h-screen bg-slate-50">
-      <Sidebar
-        role="siswa"
-        active="ujian"
-        collapsed={
-          isSidebarCollapsed
-        }
-        setCollapsed={
-          setIsSidebarCollapsed
-        }
-      />
+    <div className="theme-page min-h-full min-w-0 flex-1 overflow-y-auto">
+      <div className="mx-auto w-full max-w-6xl px-4 py-5 sm:px-6 sm:py-7 lg:px-8 lg:py-8">
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <Header
-          toggleSidebar={() =>
-            setIsSidebarCollapsed(
-              (prev) => !prev
+        {/* BACK */}
+
+        <button
+          type="button"
+          onClick={() =>
+            router.push(
+              "/siswa/ujian"
             )
           }
-          notifications={[]}
-          user={{
-            name: "Siswa",
-            email:
-              "siswa@smartschool.com",
-            avatar: "S",
-          }}
-        />
+          className="mb-5 inline-flex items-center gap-2 text-sm font-semibold theme-text-muted transition hover:text-[var(--color-primary)]"
+        >
+          <ArrowLeft size={17} />
+          Kembali ke Daftar Ujian
+        </button>
 
-        <main className="min-w-0 flex-1 overflow-y-auto">
-          <div className="mx-auto w-full max-w-6xl px-4 py-5 sm:px-6 sm:py-7 lg:px-8 lg:py-8">
+        {/* HERO RESULT */}
 
-            {/* =================================================
-                BACK
-            ================================================= */}
+        <section
+          className={`relative overflow-hidden rounded-3xl border theme-border theme-card ${themeCardShadow}`}
+        >
+          <div
+            className={`h-1.5 ${themePrimaryGradient}`}
+          />
 
-            <button
-              type="button"
-              onClick={() =>
-                router.push(
-                  "/siswa/ujian"
-                )
-              }
-              className="mb-5 inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-[#155DFC]"
-            >
-              <ArrowLeft size={17} />
-              Kembali ke Daftar Ujian
-            </button>
+          <div className="relative overflow-hidden px-5 py-8 sm:px-8 sm:py-10 lg:px-10">
 
-            {/* =================================================
-                HERO RESULT
-            ================================================= */}
+            <div
+              className={`pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full ${themePrimarySoft} blur-2xl`}
+            />
 
-            <section className="relative overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm">
+            <div
+              className={`pointer-events-none absolute -bottom-28 -left-20 h-56 w-56 rounded-full ${themeInfoSurface} blur-2xl`}
+            />
 
-              {/* top accent */}
-              <div className="h-1.5 bg-gradient-to-r from-[#155DFC] via-[#3B82F6] to-[#60A5FA]" />
+            <div className="relative">
+              <div className="flex flex-col gap-7 lg:flex-row lg:items-center lg:justify-between">
 
-              <div className="relative overflow-hidden px-5 py-8 sm:px-8 sm:py-10 lg:px-10">
+                {/* TITLE */}
 
-                {/* decorative background */}
-                <div className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full bg-blue-50/80 blur-2xl" />
-
-                <div className="pointer-events-none absolute -bottom-28 -left-20 h-56 w-56 rounded-full bg-indigo-50/70 blur-2xl" />
-
-                <div className="relative">
-
-                  <div className="flex flex-col gap-7 lg:flex-row lg:items-center lg:justify-between">
-
-                    {/* title */}
-                    <div className="min-w-0">
-
-                      <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-blue-100 bg-blue-50 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] text-[#155DFC]">
-                        <CheckCircle2
-                          size={14}
-                        />
-                        Ujian Selesai
-                      </div>
-
-                      <h1 className="max-w-2xl text-2xl font-black tracking-tight text-slate-900 sm:text-3xl lg:text-[34px]">
-                        {ujian?.judul ||
-                          "Hasil Ujian"}
-                      </h1>
-
-                      <p className="mt-2 max-w-xl text-sm leading-6 text-slate-500">
-                        Pengerjaan ujian kamu
-                        telah selesai. Berikut
-                        adalah ringkasan hasil yang
-                        berhasil diperoleh.
-                      </p>
-
-                      <div className="mt-5 flex flex-wrap items-center gap-2">
-                        <span className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600">
-                          <BookOpen
-                            size={14}
-                            className="text-[#155DFC]"
-                          />
-                          {ujian
-                            ?.kelasMapel
-                            ?.mataPelajaran
-                            ?.nama ||
-                            "Mata Pelajaran"}
-                        </span>
-
-                        <span className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600">
-                          <FileText
-                            size={14}
-                            className="text-slate-400"
-                          />
-                          {ujian
-                            ?.kelasMapel
-                            ?.kelas
-                            ?.nama ||
-                            "Kelas"}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* score */}
-                    <div className="shrink-0 lg:w-[250px]">
-
-                      <div className="rounded-3xl border border-blue-100 bg-blue-50/70 p-5 text-center">
-
-                        <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-[#155DFC] shadow-sm">
-                          {lulus ? (
-                            <Trophy
-                              size={23}
-                            />
-                          ) : (
-                            <Award
-                              size={23}
-                            />
-                          )}
-                        </div>
-
-                        <p className="mt-4 text-[11px] font-bold uppercase tracking-[0.16em] text-slate-400">
-                          Nilai Akhir
-                        </p>
-
-                        <div className="mt-1 flex items-baseline justify-center gap-1">
-                          <span className="text-5xl font-black tracking-tight text-[#155DFC]">
-                            {formatNumber(
-                              nilaiNumber
-                            )}
-                          </span>
-
-                          <span className="text-sm font-bold text-slate-400">
-                            /100
-                          </span>
-                        </div>
-
-                        <div className="mx-auto mt-4 h-2 max-w-[180px] overflow-hidden rounded-full bg-white">
-                          <div
-                            className="h-full rounded-full bg-[#155DFC] transition-all duration-700"
-                            style={{
-                              width: `${progressNilai}%`,
-                            }}
-                          />
-                        </div>
-
-                        <div className="mt-4">
-                          {lulus ? (
-                            <span className="inline-flex items-center gap-2 rounded-full bg-emerald-100 px-3.5 py-1.5 text-xs font-bold text-emerald-700">
-                              <CheckCircle2
-                                size={14}
-                              />
-                              Lulus
-                            </span>
-                          ) : (
-                            <span className="inline-flex items-center gap-2 rounded-full bg-rose-100 px-3.5 py-1.5 text-xs font-bold text-rose-700">
-                              <XCircle
-                                size={14}
-                              />
-                              Belum Lulus
-                            </span>
-                          )}
-                        </div>
-
-                        {nilaiKelulusan > 0 && (
-                          <p className="mt-3 text-[11px] text-slate-400">
-                            Minimal kelulusan{" "}
-                            <span className="font-bold text-slate-600">
-                              {formatNumber(
-                                nilaiKelulusan
-                              )}
-                            </span>
-                          </p>
-                        )}
-                      </div>
-                    </div>
-
+                <div className="min-w-0">
+                  <div
+                    className={`mb-4 inline-flex items-center gap-2 rounded-full border ${themePrimarySoftBorder} ${themePrimarySoft} px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.14em] ${themePrimaryText}`}
+                  >
+                    <CheckCircle2 size={14} />
+                    Ujian Selesai
                   </div>
-                </div>
-              </div>
-            </section>
 
-            {/* =================================================
-                STATISTICS
-            ================================================= */}
+                  <h1 className="max-w-2xl text-2xl font-black tracking-tight theme-text sm:text-3xl lg:text-[34px]">
+                    {ujian?.judul ||
+                      "Hasil Ujian"}
+                  </h1>
 
-            <section className="mt-5 grid gap-4 sm:grid-cols-3">
+                  <p className="mt-2 max-w-xl text-sm leading-6 theme-text-secondary">
+                    Pengerjaan ujian kamu
+                    telah selesai. Berikut
+                    adalah ringkasan hasil yang
+                    berhasil diperoleh.
+                  </p>
 
-              <ResultStat
-                icon={
-                  <CheckCircle2
-                    size={19}
-                  />
-                }
-                label="Jawaban Benar"
-                value={jumlahBenar}
-                description={
-                  totalSoal > 0
-                    ? `${Math.round(
-                        (jumlahBenar /
-                          totalSoal) *
-                          100
-                      )}% dari total soal`
-                    : "Tidak tersedia"
-                }
-                tone="emerald"
-              />
-
-              <ResultStat
-                icon={
-                  <XCircle
-                    size={19}
-                  />
-                }
-                label="Jawaban Salah"
-                value={jumlahSalah}
-                description={
-                  totalSoal > 0
-                    ? `${Math.round(
-                        (jumlahSalah /
-                          totalSoal) *
-                          100
-                      )}% dari total soal`
-                    : "Tidak tersedia"
-                }
-                tone="rose"
-              />
-
-              <ResultStat
-                icon={
-                  <MinusCircle
-                    size={19}
-                  />
-                }
-                label="Tidak Dijawab"
-                value={jumlahLewati}
-                description={
-                  totalSoal > 0
-                    ? `${Math.round(
-                        (jumlahLewati /
-                          totalSoal) *
-                          100
-                      )}% dari total soal`
-                    : "Tidak tersedia"
-                }
-                tone="amber"
-              />
-
-            </section>
-
-            {/* =================================================
-                CONTENT GRID
-            ================================================= */}
-
-            <div className="mt-5 grid gap-5 lg:grid-cols-[1.35fr_0.65fr]">
-
-              {/* =================================================
-                  DETAIL UJIAN
-              ================================================= */}
-
-              <section className="rounded-3xl border border-slate-200 bg-white shadow-sm">
-
-                <SectionHeader
-                  icon={
-                    <BookOpen
-                      size={19}
-                    />
-                  }
-                  title="Detail Ujian"
-                  description="Informasi mengenai ujian yang kamu kerjakan"
-                />
-
-                <div className="grid gap-3 p-5 sm:grid-cols-2 sm:p-6">
-
-                  <InfoCard
-                    icon={
+                  <div className="mt-5 flex flex-wrap items-center gap-2">
+                    <span
+                      className="inline-flex items-center gap-2 rounded-xl border theme-border theme-card px-3 py-2 text-xs font-semibold theme-text-secondary"
+                    >
                       <BookOpen
-                        size={17}
+                        size={14}
+                        className={themePrimaryText}
                       />
-                    }
-                    label="Mata Pelajaran"
-                    value={
-                      ujian
+
+                      {ujian
                         ?.kelasMapel
                         ?.mataPelajaran
-                        ?.nama || "-"
-                    }
-                    tone="blue"
-                  />
+                        ?.nama ||
+                        "Mata Pelajaran"}
+                    </span>
 
-                  <InfoCard
-                    icon={
+                    <span
+                      className="inline-flex items-center gap-2 rounded-xl border theme-border theme-card px-3 py-2 text-xs font-semibold theme-text-secondary"
+                    >
                       <FileText
-                        size={17}
+                        size={14}
+                        className="theme-text-muted"
                       />
-                    }
-                    label="Kelas"
-                    value={
-                      ujian
+
+                      {ujian
                         ?.kelasMapel
                         ?.kelas
-                        ?.nama || "-"
-                    }
-                    tone="indigo"
-                  />
-
-                  <InfoCard
-                    icon={
-                      <FileText
-                        size={17}
-                      />
-                    }
-                    label="Jumlah Soal"
-                    value={`${totalSoal} soal`}
-                    tone="emerald"
-                  />
-
-                  <InfoCard
-                    icon={
-                      <Clock3
-                        size={17}
-                      />
-                    }
-                    label="Durasi"
-                    value={`${ujian?.durasi || 0} menit`}
-                    tone="amber"
-                  />
-
+                        ?.nama ||
+                        "Kelas"}
+                    </span>
+                  </div>
                 </div>
-              </section>
 
-              {/* =================================================
-                  RINGKASAN
-              ================================================= */}
+                {/* SCORE */}
 
-              <section className="rounded-3xl border border-slate-200 bg-white shadow-sm">
+                <div className="shrink-0 lg:w-[250px]">
+                  <div
+                    className={`rounded-3xl border ${themePrimarySoftBorder} ${themePrimarySoft} p-5 text-center`}
+                  >
+                    <div
+                      className={`mx-auto flex h-12 w-12 items-center justify-center rounded-2xl theme-card ${themePrimaryText} ${themeSmallShadow}`}
+                    >
+                      {lulus ? (
+                        <Trophy size={23} />
+                      ) : (
+                        <Award size={23} />
+                      )}
+                    </div>
 
-                <SectionHeader
-                  icon={
-                    <Award
-                      size={19}
-                    />
-                  }
-                  title="Ringkasan Nilai"
-                  description="Performa pengerjaan kamu"
-                />
+                    <p className="mt-4 text-[11px] font-bold uppercase tracking-[0.16em] theme-text-muted">
+                      Nilai Akhir
+                    </p>
 
-                <div className="p-5 sm:p-6">
-
-                  <div className="rounded-2xl bg-slate-50 p-4">
-
-                    <div className="flex items-center justify-between">
-                      <span className="text-xs font-medium text-slate-500">
-                        Nilai diperoleh
-                      </span>
-
-                      <span className="text-sm font-black text-[#155DFC]">
+                    <div className="mt-1 flex items-baseline justify-center gap-1">
+                      <span
+                        className={`text-5xl font-black tracking-tight ${themePrimaryText}`}
+                      >
                         {formatNumber(
                           nilaiNumber
                         )}
                       </span>
+
+                      <span className="text-sm font-bold theme-text-muted">
+                        /100
+                      </span>
                     </div>
 
-                    <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200">
+                    <div
+                      className={`mx-auto mt-4 h-2 max-w-[180px] overflow-hidden rounded-full ${themeNeutralSurface}`}
+                    >
                       <div
-                        className="h-full rounded-full bg-[#155DFC]"
+                        className={`h-full rounded-full ${themePrimaryGradient} transition-all duration-700`}
                         style={{
                           width: `${progressNilai}%`,
                         }}
                       />
                     </div>
 
-                    {nilaiKelulusan > 0 && (
-                      <div className="mt-3 flex items-center justify-between text-[11px]">
-                        <span className="text-slate-400">
-                          Nilai kelulusan
+                    <div className="mt-4">
+                      {lulus ? (
+                        <span
+                          className={`inline-flex items-center gap-2 rounded-full ${themeSuccessSurface} px-3.5 py-1.5 text-xs font-bold text-[var(--color-success)]`}
+                        >
+                          <CheckCircle2 size={14} />
+                          Lulus
                         </span>
+                      ) : (
+                        <span
+                          className={`inline-flex items-center gap-2 rounded-full ${themeDangerSurface} px-3.5 py-1.5 text-xs font-bold theme-danger`}
+                        >
+                          <XCircle size={14} />
+                          Belum Lulus
+                        </span>
+                      )}
+                    </div>
 
-                        <span className="font-bold text-slate-600">
+                    {nilaiKelulusan > 0 && (
+                      <p className="mt-3 text-[11px] theme-text-muted">
+                        Minimal kelulusan{" "}
+                        <span className="font-bold theme-text-secondary">
                           {formatNumber(
                             nilaiKelulusan
                           )}
                         </span>
-                      </div>
+                      </p>
                     )}
-                  </div>
-
-                  <div className="mt-4 space-y-3">
-
-                    <MiniResultRow
-                      icon={
-                        <CheckCircle2
-                          size={15}
-                        />
-                      }
-                      label="Benar"
-                      value={jumlahBenar}
-                      tone="emerald"
-                    />
-
-                    <MiniResultRow
-                      icon={
-                        <XCircle
-                          size={15}
-                        />
-                      }
-                      label="Salah"
-                      value={jumlahSalah}
-                      tone="rose"
-                    />
-
-                    <MiniResultRow
-                      icon={
-                        <MinusCircle
-                          size={15}
-                        />
-                      }
-                      label="Tidak dijawab"
-                      value={jumlahLewati}
-                      tone="amber"
-                    />
-
                   </div>
                 </div>
-              </section>
+              </div>
             </div>
+          </div>
+        </section>
 
-            {/* =================================================
-                WAKTU PENGERJAAN
-            ================================================= */}
+        {/* STATISTICS */}
 
-            {percobaanSaya && (
-              <section className="mt-5 rounded-3xl border border-slate-200 bg-white shadow-sm">
+        <section className="mt-5 grid gap-4 sm:grid-cols-3">
+          <ResultStat
+            icon={
+              <CheckCircle2 size={19} />
+            }
+            label="Jawaban Benar"
+            value={jumlahBenar}
+            description={
+              totalSoal > 0
+                ? `${Math.round(
+                    (jumlahBenar /
+                      totalSoal) *
+                      100
+                  )}% dari total soal`
+                : "Tidak tersedia"
+            }
+            tone="success"
+          />
 
-                <SectionHeader
-                  icon={
-                    <CalendarDays
-                      size={19}
-                    />
-                  }
-                  title="Waktu Pengerjaan"
-                  description="Informasi sesi pengerjaan ujian"
-                />
+          <ResultStat
+            icon={
+              <XCircle size={19} />
+            }
+            label="Jawaban Salah"
+            value={jumlahSalah}
+            description={
+              totalSoal > 0
+                ? `${Math.round(
+                    (jumlahSalah /
+                      totalSoal) *
+                      100
+                  )}% dari total soal`
+                : "Tidak tersedia"
+            }
+            tone="danger"
+          />
 
-                <div className="grid gap-0 divide-y divide-slate-100 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+          <ResultStat
+            icon={
+              <MinusCircle size={19} />
+            }
+            label="Tidak Dijawab"
+            value={jumlahLewati}
+            description={
+              totalSoal > 0
+                ? `${Math.round(
+                    (jumlahLewati /
+                      totalSoal) *
+                      100
+                  )}% dari total soal`
+                : "Tidak tersedia"
+            }
+            tone="warning"
+          />
+        </section>
 
-                  <TimeInfo
-                    label="Mulai"
-                    value={formatDateTime(
-                      percobaanSaya?.dimulaiPada
+        {/* CONTENT GRID */}
+
+        <div className="mt-5 grid gap-5 lg:grid-cols-[1.35fr_0.65fr]">
+
+          {/* DETAIL UJIAN */}
+
+          <section
+            className={`rounded-3xl border theme-border theme-card ${themeCardShadow}`}
+          >
+            <SectionHeader
+              icon={<BookOpen size={19} />}
+              title="Detail Ujian"
+              description="Informasi mengenai ujian yang kamu kerjakan"
+            />
+
+            <div className="grid gap-3 p-5 sm:grid-cols-2 sm:p-6">
+              <InfoCard
+                icon={<BookOpen size={17} />}
+                label="Mata Pelajaran"
+                value={
+                  ujian
+                    ?.kelasMapel
+                    ?.mataPelajaran
+                    ?.nama || "-"
+                }
+                tone="primary"
+              />
+
+              <InfoCard
+                icon={<FileText size={17} />}
+                label="Kelas"
+                value={
+                  ujian
+                    ?.kelasMapel
+                    ?.kelas
+                    ?.nama || "-"
+                }
+                tone="info"
+              />
+
+              <InfoCard
+                icon={<FileText size={17} />}
+                label="Jumlah Soal"
+                value={`${totalSoal} soal`}
+                tone="success"
+              />
+
+              <InfoCard
+                icon={<Clock3 size={17} />}
+                label="Durasi"
+                value={`${ujian?.durasi || 0} menit`}
+                tone="warning"
+              />
+            </div>
+          </section>
+
+          {/* RINGKASAN */}
+
+          <section
+            className={`rounded-3xl border theme-border theme-card ${themeCardShadow}`}
+          >
+            <SectionHeader
+              icon={<Award size={19} />}
+              title="Ringkasan Nilai"
+              description="Performa pengerjaan kamu"
+            />
+
+            <div className="p-5 sm:p-6">
+              <div
+                className={`rounded-2xl ${themeNeutralSurface} p-4`}
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-medium theme-text-secondary">
+                    Nilai diperoleh
+                  </span>
+
+                  <span
+                    className={`text-sm font-black ${themePrimaryText}`}
+                  >
+                    {formatNumber(
+                      nilaiNumber
                     )}
+                  </span>
+                </div>
+
+                <div
+                  className={`mt-3 h-2 overflow-hidden rounded-full ${themeNeutralSurface}`}
+                >
+                  <div
+                    className={`h-full rounded-full ${themePrimaryGradient}`}
+                    style={{
+                      width: `${progressNilai}%`,
+                    }}
                   />
+                </div>
 
-                  <TimeInfo
-                    label="Selesai"
-                    value={formatDateTime(
-                      percobaanSaya?.selesaiPada ||
-                        tanggalSelesai
-                    )}
-                  />
+                {nilaiKelulusan > 0 && (
+                  <div className="mt-3 flex items-center justify-between text-[11px]">
+                    <span className="theme-text-muted">
+                      Nilai kelulusan
+                    </span>
 
-                  <div className="p-5 sm:p-6">
-                    <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
-                      Status
-                    </p>
-
-                    <span className="mt-2 inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-bold text-emerald-700">
-                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
-                      {status}
+                    <span className="font-bold theme-text-secondary">
+                      {formatNumber(
+                        nilaiKelulusan
+                      )}
                     </span>
                   </div>
+                )}
+              </div>
 
-                </div>
-              </section>
-            )}
-
-            {/* =================================================
-                RESULT NOT FOUND
-            ================================================= */}
-
-            {!percobaanSaya &&
-              !hasilUjian && (
-                <section className="mt-5 rounded-3xl border border-amber-200 bg-amber-50/70 p-5">
-
-                  <div className="flex gap-3">
-
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-amber-600 shadow-sm">
-                      <AlertCircle
-                        size={18}
-                      />
-                    </div>
-
-                    <div>
-                      <h3 className="text-sm font-bold text-amber-800">
-                        Data hasil belum ditemukan
-                      </h3>
-
-                      <p className="mt-1 text-xs leading-5 text-amber-700">
-                        Backend belum mengirim data
-                        percobaan atau hasil ujian
-                        untuk sesi ini.
-                      </p>
-                    </div>
-
-                  </div>
-                </section>
-              )}
-
-            {/* =================================================
-                DATA STATUS
-            ================================================= */}
-
-            {percobaanSaya && (
-              <section className="mt-5 rounded-3xl border border-blue-100 bg-blue-50/60 p-4 sm:p-5">
-
-                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-
-                  <div className="flex items-center gap-3">
-
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-white text-[#155DFC] shadow-sm">
-                      <CheckCircle2
-                        size={17}
-                      />
-                    </div>
-
-                    <div>
-                      <p className="text-xs font-bold text-[#155DFC]">
-                        Hasil berhasil ditemukan
-                      </p>
-
-                      <p className="mt-0.5 text-[11px] text-slate-500">
-                        Data hasil pengerjaan tersedia
-                        untuk sesi ujian ini.
-                      </p>
-                    </div>
-
-                  </div>
-
-                  <div className="rounded-xl bg-white px-3 py-2 sm:text-right">
-
-                    <p className="text-[9px] font-bold uppercase tracking-wider text-slate-400">
-                      Percobaan ID
-                    </p>
-
-                    <p className="mt-0.5 max-w-[230px] truncate text-[11px] font-bold text-slate-600">
-                      {percobaanSaya?.id ||
-                        percobaanSaya?.percobaanUjianId ||
-                        "-"}
-                    </p>
-
-                  </div>
-
-                </div>
-              </section>
-            )}
-
-            {/* =================================================
-                ACTION
-            ================================================= */}
-
-            <div className="mt-6 flex justify-center">
-
-              <button
-                type="button"
-                onClick={() =>
-                  router.push(
-                    "/siswa/ujian"
-                  )
-                }
-                className="inline-flex w-full items-center justify-center gap-2 rounded-2xl bg-[#155DFC] px-6 py-3.5 text-sm font-bold text-white shadow-sm transition hover:bg-[#0D47C9] hover:shadow-md sm:w-auto"
-              >
-                <ArrowLeft
-                  size={17}
+              <div className="mt-4 space-y-3">
+                <MiniResultRow
+                  icon={
+                    <CheckCircle2 size={15} />
+                  }
+                  label="Benar"
+                  value={jumlahBenar}
+                  tone="success"
                 />
-                Kembali ke Daftar Ujian
-              </button>
 
+                <MiniResultRow
+                  icon={
+                    <XCircle size={15} />
+                  }
+                  label="Salah"
+                  value={jumlahSalah}
+                  tone="danger"
+                />
+
+                <MiniResultRow
+                  icon={
+                    <MinusCircle size={15} />
+                  }
+                  label="Tidak dijawab"
+                  value={jumlahLewati}
+                  tone="warning"
+                />
+              </div>
             </div>
+          </section>
+        </div>
 
-            <footer className="py-7 text-center text-[11px] text-slate-400">
-              © 2026 SmartSchool
-              <span className="mx-1.5">
-                •
-              </span>
-              Hasil Ujian
-            </footer>
+        {/* WAKTU PENGERJAAN */}
 
-          </div>
-        </main>
+        {percobaanSaya && (
+          <section
+            className={`mt-5 rounded-3xl border theme-border theme-card ${themeCardShadow}`}
+          >
+            <SectionHeader
+              icon={<CalendarDays size={19} />}
+              title="Waktu Pengerjaan"
+              description="Informasi sesi pengerjaan ujian"
+            />
+
+            <div
+              className={`grid gap-0 divide-y ${themeDivider} sm:grid-cols-3 sm:divide-x sm:divide-y-0`}
+            >
+              <TimeInfo
+                label="Mulai"
+                value={formatDateTime(
+                  percobaanSaya?.dimulaiPada
+                )}
+              />
+
+              <TimeInfo
+                label="Selesai"
+                value={formatDateTime(
+                  percobaanSaya?.selesaiPada ||
+                    tanggalSelesai
+                )}
+              />
+
+              <div className="p-5 sm:p-6">
+                <p className="text-[11px] font-semibold uppercase tracking-wider theme-text-muted">
+                  Status
+                </p>
+
+                <span
+                  className={`mt-2 inline-flex items-center gap-2 rounded-full ${themeSuccessSurface} px-3 py-1.5 text-xs font-bold text-[var(--color-success)]`}
+                >
+                  <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-success)]" />
+                  {status}
+                </span>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* RESULT NOT FOUND */}
+
+        {!percobaanSaya &&
+          !hasilUjian && (
+            <section
+              className={`mt-5 rounded-3xl border ${themeWarningBorder} ${themeWarningSurface} p-5`}
+            >
+              <div className="flex gap-3">
+                <div
+                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl theme-card text-[var(--color-warning)] ${themeSmallShadow}`}
+                >
+                  <AlertCircle size={18} />
+                </div>
+
+                <div>
+                  <h3 className="text-sm font-bold text-[var(--color-warning)]">
+                    Data hasil belum ditemukan
+                  </h3>
+
+                  <p className="mt-1 text-xs leading-5 theme-text-secondary">
+                    Backend belum mengirim data
+                    percobaan atau hasil ujian
+                    untuk sesi ini.
+                  </p>
+                </div>
+              </div>
+            </section>
+          )}
+
+        {/* DATA STATUS */}
+
+        {percobaanSaya && (
+          <section
+            className={`mt-5 rounded-3xl border ${themeInfoBorder} ${themeInfoSurface} p-4 sm:p-5`}
+          >
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3">
+                <div
+                  className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl theme-card ${themePrimaryText} ${themeSmallShadow}`}
+                >
+                  <CheckCircle2 size={17} />
+                </div>
+
+                <div>
+                  <p
+                    className={`text-xs font-bold ${themePrimaryText}`}
+                  >
+                    Hasil berhasil ditemukan
+                  </p>
+
+                  <p className="mt-0.5 text-[11px] theme-text-secondary">
+                    Data hasil pengerjaan tersedia
+                    untuk sesi ujian ini.
+                  </p>
+                </div>
+              </div>
+
+              <div
+                className={`rounded-xl theme-card px-3 py-2 sm:text-right ${themeSmallShadow}`}
+              >
+                <p className="text-[9px] font-bold uppercase tracking-wider theme-text-muted">
+                  Percobaan ID
+                </p>
+
+                <p className="mt-0.5 max-w-[230px] truncate text-[11px] font-bold theme-text-secondary">
+                  {percobaanSaya?.id ||
+                    percobaanSaya?.percobaanUjianId ||
+                    "-"}
+                </p>
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* ACTION */}
+
+        <div className="mt-6 flex justify-center">
+          <button
+            type="button"
+            onClick={() =>
+              router.push(
+                "/siswa/ujian"
+              )
+            }
+            className={`inline-flex w-full items-center justify-center gap-2 rounded-2xl ${themePrimaryGradient} px-6 py-3.5 text-sm font-bold text-[var(--color-card)] ${themePrimaryShadow} transition hover:brightness-95 sm:w-auto`}
+          >
+            <ArrowLeft size={17} />
+            Kembali ke Daftar Ujian
+          </button>
+        </div>
+
+        <footer className="py-7 text-center text-[11px] theme-text-muted">
+          © 2026 SmartSchool
+          <span className="mx-1.5">•</span>
+          Hasil Ujian
+        </footer>
       </div>
     </div>
   );
@@ -1829,31 +1730,33 @@ function ResultStat({
   tone,
 }) {
   const styles = {
-    emerald: {
-      icon: "bg-emerald-50 text-emerald-600",
-      value: "text-emerald-700",
+    success: {
+      icon: `${themeSuccessSurface} text-[var(--color-success)]`,
+      value: "text-[var(--color-success)]",
     },
-    rose: {
-      icon: "bg-rose-50 text-rose-600",
-      value: "text-rose-700",
+
+    danger: {
+      icon: `${themeDangerSurface} theme-danger`,
+      value: "theme-danger",
     },
-    amber: {
-      icon: "bg-amber-50 text-amber-600",
-      value: "text-amber-700",
+
+    warning: {
+      icon: `${themeWarningSurface} text-[var(--color-warning)]`,
+      value: "text-[var(--color-warning)]",
     },
   };
 
   const current =
     styles[tone] ||
-    styles.emerald;
+    styles.success;
 
   return (
-    <div className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-
+    <div
+      className={`rounded-3xl border theme-border theme-card p-5 ${themeCardShadow} transition hover:-translate-y-0.5 hover:shadow-[0_10px_28px_color-mix(in_srgb,var(--color-text)_9%,transparent)]`}
+    >
       <div className="flex items-start justify-between gap-4">
-
         <div>
-          <p className="text-xs font-semibold text-slate-400">
+          <p className="text-xs font-semibold theme-text-muted">
             {label}
           </p>
 
@@ -1863,7 +1766,7 @@ function ResultStat({
             {formatNumber(value)}
           </p>
 
-          <p className="mt-1 text-[11px] text-slate-400">
+          <p className="mt-1 text-[11px] theme-text-muted">
             {description}
           </p>
         </div>
@@ -1873,7 +1776,6 @@ function ResultStat({
         >
           {icon}
         </div>
-
       </div>
     </div>
   );
@@ -1889,22 +1791,24 @@ function SectionHeader({
   description,
 }) {
   return (
-    <div className="flex items-center gap-3 border-b border-slate-100 px-5 py-4 sm:px-6">
-
-      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-[#155DFC]">
+    <div
+      className={`flex items-center gap-3 border-b ${themeDivider} px-5 py-4 sm:px-6`}
+    >
+      <div
+        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
+      >
         {icon}
       </div>
 
       <div className="min-w-0">
-        <h2 className="text-sm font-bold text-slate-800">
+        <h2 className="text-sm font-bold theme-text">
           {title}
         </h2>
 
-        <p className="mt-0.5 text-[11px] text-slate-400">
+        <p className="mt-0.5 text-[11px] theme-text-muted">
           {description}
         </p>
       </div>
-
     </div>
   );
 }
@@ -1917,32 +1821,43 @@ function InfoCard({
   icon,
   label,
   value,
-  tone = "blue",
+  tone = "primary",
 }) {
   const tones = {
-    blue: {
-      icon: "bg-blue-50 text-[#155DFC]",
+    primary: {
+      icon: `${themePrimarySoft} ${themePrimaryText}`,
+      hover:
+        "hover:border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]",
     },
-    indigo: {
-      icon: "bg-indigo-50 text-indigo-600",
+
+    info: {
+      icon: `${themeInfoSurface} text-[var(--color-info)]`,
+      hover:
+        "hover:border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]",
     },
-    emerald: {
-      icon: "bg-emerald-50 text-emerald-600",
+
+    success: {
+      icon: `${themeSuccessSurface} text-[var(--color-success)]`,
+      hover:
+        "hover:border-[color-mix(in_srgb,var(--color-success)_22%,transparent)]",
     },
-    amber: {
-      icon: "bg-amber-50 text-amber-600",
+
+    warning: {
+      icon: `${themeWarningSurface} text-[var(--color-warning)]`,
+      hover:
+        "hover:border-[color-mix(in_srgb,var(--color-warning)_22%,transparent)]",
     },
   };
 
   const current =
     tones[tone] ||
-    tones.blue;
+    tones.primary;
 
   return (
-    <div className="rounded-2xl border border-slate-100 bg-slate-50/80 p-4 transition hover:border-blue-100 hover:bg-blue-50/30">
-
+    <div
+      className={`rounded-2xl border theme-border ${themeNeutralSurface} p-4 transition ${current.hover}`}
+    >
       <div className="flex items-center gap-2.5">
-
         <div
           className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${current.icon}`}
         >
@@ -1950,15 +1865,14 @@ function InfoCard({
         </div>
 
         <div className="min-w-0">
-          <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+          <p className="text-[10px] font-semibold uppercase tracking-wider theme-text-muted">
             {label}
           </p>
 
-          <p className="mt-1 truncate text-sm font-bold text-slate-700">
+          <p className="mt-1 truncate text-sm font-bold theme-text-secondary">
             {value}
           </p>
         </div>
-
       </div>
     </div>
   );
@@ -1975,38 +1889,33 @@ function MiniResultRow({
   tone,
 }) {
   const styles = {
-    emerald:
-      "bg-emerald-50 text-emerald-600",
-    rose:
-      "bg-rose-50 text-rose-600",
-    amber:
-      "bg-amber-50 text-amber-600",
+    success: `${themeSuccessSurface} text-[var(--color-success)]`,
+    danger: `${themeDangerSurface} theme-danger`,
+    warning: `${themeWarningSurface} text-[var(--color-warning)]`,
   };
 
   return (
-    <div className="flex items-center justify-between rounded-xl border border-slate-100 bg-white px-3 py-2.5">
-
+    <div
+      className={`flex items-center justify-between rounded-xl border ${themeNeutralBorder} theme-card px-3 py-2.5`}
+    >
       <div className="flex items-center gap-2">
-
         <div
           className={`flex h-7 w-7 items-center justify-center rounded-lg ${
             styles[tone] ||
-            styles.emerald
+            styles.success
           }`}
         >
           {icon}
         </div>
 
-        <span className="text-xs font-semibold text-slate-600">
+        <span className="text-xs font-semibold theme-text-secondary">
           {label}
         </span>
-
       </div>
 
-      <span className="text-sm font-black text-slate-800">
+      <span className="text-sm font-black theme-text">
         {formatNumber(value)}
       </span>
-
     </div>
   );
 }
@@ -2021,15 +1930,13 @@ function TimeInfo({
 }) {
   return (
     <div className="p-5 sm:p-6">
-
-      <p className="text-[11px] font-semibold uppercase tracking-wider text-slate-400">
+      <p className="text-[11px] font-semibold uppercase tracking-wider theme-text-muted">
         {label}
       </p>
 
-      <p className="mt-2 text-sm font-bold leading-6 text-slate-700">
+      <p className="mt-2 text-sm font-bold leading-6 theme-text-secondary">
         {value}
       </p>
-
     </div>
   );
 }

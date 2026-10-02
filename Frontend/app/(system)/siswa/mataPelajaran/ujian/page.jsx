@@ -1,9 +1,7 @@
 ﻿"use client";
 
-import { Suspense, useState, useMemo } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Sidebar from "../../../../components/Sidebar";
-import Header from "../../../../components/Header";
 import {
   ArrowLeft,
   GraduationCap,
@@ -22,23 +20,177 @@ import {
   Award,
 } from "lucide-react";
 
+/* =========================================================
+   DATA MATA PELAJARAN
+========================================================= */
+
 const mataPelajaranList = [
-  { id: "matematika", nama: "Matematika", guru: "Bu Sari", icon: Calculator, color: "blue" },
-  { id: "bindo", nama: "Bahasa Indonesia", guru: "Pak Budi", icon: Languages, color: "rose" },
-  { id: "ipa", nama: "IPA", guru: "Bu Dewi", icon: FlaskConical, color: "emerald" },
-  { id: "ips", nama: "IPS", guru: "Pak Anwar", icon: Globe2, color: "amber" },
-  { id: "binggris", nama: "Bahasa Inggris", guru: "Bu Rina", icon: BookOpen, color: "indigo" },
-  { id: "seni", nama: "Seni Budaya", guru: "Bu Wulan", icon: Palette, color: "fuchsia" },
-  { id: "musik", nama: "Seni Musik", guru: "Pak Doni", icon: Music, color: "cyan" },
-  { id: "penjas", nama: "Penjaskes", guru: "Pak Rudi", icon: Dumbbell, color: "orange" },
+  {
+    id: "matematika",
+    nama: "Matematika",
+    guru: "Bu Sari",
+    icon: Calculator,
+  },
+  {
+    id: "bindo",
+    nama: "Bahasa Indonesia",
+    guru: "Pak Budi",
+    icon: Languages,
+  },
+  {
+    id: "ipa",
+    nama: "IPA",
+    guru: "Bu Dewi",
+    icon: FlaskConical,
+  },
+  {
+    id: "ips",
+    nama: "IPS",
+    guru: "Pak Anwar",
+    icon: Globe2,
+  },
+  {
+    id: "binggris",
+    nama: "Bahasa Inggris",
+    guru: "Bu Rina",
+    icon: BookOpen,
+  },
+  {
+    id: "seni",
+    nama: "Seni Budaya",
+    guru: "Bu Wulan",
+    icon: Palette,
+  },
+  {
+    id: "musik",
+    nama: "Seni Musik",
+    guru: "Pak Doni",
+    icon: Music,
+  },
+  {
+    id: "penjas",
+    nama: "Penjaskes",
+    guru: "Pak Rudi",
+    icon: Dumbbell,
+  },
 ];
 
-// status: "mendatang" | "berlangsung" | "selesai"
+/* =========================================================
+   THEME HELPERS
+   Mengikuti token global theme
+========================================================= */
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySurface =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySurfaceStrong =
+  "bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+
+const themePrimaryBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_24%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_16%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_6%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralSurfaceStrong =
+  "bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_9%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeInfoText =
+  "text-[var(--color-info)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeSuccessText =
+  "text-[var(--color-success)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeWarningText =
+  "text-[var(--color-warning)]";
+
+const themeTextOnPrimary =
+  "text-[var(--color-card)]";
+
+const themeCard =
+  "theme-card";
+
+const themeText =
+  "theme-text";
+
+const themeTextSecondary =
+  "theme-text-secondary";
+
+const themeTextMuted =
+  "theme-text-muted";
+
+/* =========================================================
+   STATUS UJIAN
+========================================================= */
+
 const STATUS_STYLE = {
-  mendatang: { label: "Mendatang", bg: "bg-blue-50", text: "text-blue-600", icon: CalendarClock },
-  berlangsung: { label: "Bisa Dikerjakan", bg: "bg-amber-50", text: "text-amber-600", icon: PlayCircle },
-  selesai: { label: "Selesai", bg: "bg-emerald-50", text: "text-emerald-600", icon: CheckCircle2 },
+  mendatang: {
+    label: "Mendatang",
+    surface: themeInfoSurface,
+    border: themeInfoBorder,
+    text: themeInfoText,
+    icon: CalendarClock,
+  },
+
+  berlangsung: {
+    label: "Bisa Dikerjakan",
+    surface: themeWarningSurface,
+    border: themeWarningBorder,
+    text: themeWarningText,
+    icon: PlayCircle,
+  },
+
+  selesai: {
+    label: "Selesai",
+    surface: themeSuccessSurface,
+    border: themeSuccessBorder,
+    text: themeSuccessText,
+    icon: CheckCircle2,
+  },
 };
+
+/* =========================================================
+   DATA UJIAN
+========================================================= */
 
 const ujianList = [
   {
@@ -109,201 +261,445 @@ const ujianList = [
   },
 ];
 
-function UjianPageContent() {
-  return (
-    <Suspense fallback={null}>
-      <UjianPageInner />
-    </Suspense>
-  );
-}
+/* =========================================================
+   HALAMAN UJIAN
+========================================================= */
 
 function UjianPageInner() {
   const router = useRouter();
   const searchParams = useSearchParams();
+
   const mapelParam = searchParams.get("mapel");
 
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [activeMapel, setActiveMapel] = useState(mapelParam || "semua");
-  const [activeFilter, setActiveFilter] = useState("semua");
+  const [activeMapel, setActiveMapel] = useState(
+    mapelParam || "semua"
+  );
 
-  const selectedMapel = mataPelajaranList.find((m) => m.id === activeMapel);
+  const [activeFilter, setActiveFilter] =
+    useState("semua");
+
+  /* =======================================================
+     MAPEL TERPILIH
+  ======================================================= */
+
+  const selectedMapel = mataPelajaranList.find(
+    (m) => m.id === activeMapel
+  );
+
+  /* =======================================================
+     FILTER UJIAN
+  ======================================================= */
 
   const filteredUjian = useMemo(() => {
     return ujianList
-      .filter((u) => (activeMapel === "semua" ? true : u.mapelId === activeMapel))
-      .filter((u) => (activeFilter === "semua" ? true : u.status === activeFilter));
+      .filter((u) =>
+        activeMapel === "semua"
+          ? true
+          : u.mapelId === activeMapel
+      )
+      .filter((u) =>
+        activeFilter === "semua"
+          ? true
+          : u.status === activeFilter
+      );
   }, [activeMapel, activeFilter]);
 
-  const ujianSelesai = ujianList.filter((u) => u.status === "selesai" && u.nilai !== null);
-  const rataRata = ujianSelesai.length > 0
-    ? Math.round(ujianSelesai.reduce((sum, u) => sum + u.nilai, 0) / ujianSelesai.length)
-    : null;
-  const jumlahMendatang = ujianList.filter((u) => u.status === "mendatang" || u.status === "berlangsung").length;
+  /* =======================================================
+     STATISTIK
+  ======================================================= */
 
-  const notifications = [
-    { id: 1, title: "Quiz Grammar bisa dikerjakan sekarang", desc: "Bahasa Inggris - Bu Rina", read: false },
-  ];
+  const ujianSelesai = ujianList.filter(
+    (u) =>
+      u.status === "selesai" &&
+      u.nilai !== null
+  );
+
+  const rataRata =
+    ujianSelesai.length > 0
+      ? Math.round(
+          ujianSelesai.reduce(
+            (sum, u) => sum + u.nilai,
+            0
+          ) / ujianSelesai.length
+        )
+      : null;
+
+  const jumlahMendatang = ujianList.filter(
+    (u) =>
+      u.status === "mendatang" ||
+      u.status === "berlangsung"
+  ).length;
+
+  /* =======================================================
+     RENDER
+  ======================================================= */
 
   return (
-    <div className="flex h-screen bg-slate-50 overflow-hidden">
-      <Sidebar
-        role="siswa"
-        active="mataPelajaran"
-        setActive={() => {}}
-        collapsed={!sidebarOpen}
-        setCollapsed={() => setSidebarOpen(!sidebarOpen)}
-      />
-      <div className="flex-1 flex flex-col min-w-0">
-        <Header
-          toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-          notifications={notifications}
-          user={{ name: "Andi Saputra", email: "siswa@smartschool.com", avatar: "AS" }}
-        />
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-          <div className="w-full max-w-5xl mx-auto space-y-6">
+    <div className={`${themeText} theme-page min-h-full`}>
+      <div className="mx-auto w-full max-w-5xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
 
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => router.push("/siswa/mataPelajaran")}
-                className="p-2 rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-100 transition-colors flex-shrink-0"
-              >
-                <ArrowLeft size={16} />
-              </button>
-              <div className="min-w-0">
-                <p className="text-xs font-medium text-blue-600 uppercase tracking-wide">
-                  {selectedMapel ? selectedMapel.nama : "Semua Mata Pelajaran"}
-                </p>
-                <h1 className="text-2xl sm:text-[28px] font-bold text-slate-900 mt-1 tracking-tight">
-                  Ujian
-                </h1>
-                <p className="text-sm text-slate-500 mt-1">
-                  Jadwal ujian, kuis, dan hasil yang sudah dinilai.
-                </p>
-              </div>
-            </div>
+        {/* =================================================
+            HEADER
+        ================================================= */}
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="bg-white rounded-2xl border border-slate-200/70 shadow-sm p-4 flex items-center gap-3.5">
-                <div className="w-11 h-11 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center flex-shrink-0">
-                  <CalendarClock size={20} />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xl font-bold text-slate-900 leading-none">{jumlahMendatang}</p>
-                  <p className="text-xs text-slate-500 mt-1">Ujian mendatang</p>
-                </div>
-              </div>
-              <div className="bg-white rounded-2xl border border-slate-200/70 shadow-sm p-4 flex items-center gap-3.5">
-                <div className="w-11 h-11 rounded-xl bg-violet-50 text-violet-600 flex items-center justify-center flex-shrink-0">
-                  <Award size={20} />
-                </div>
-                <div className="min-w-0">
-                  <p className="text-xl font-bold text-slate-900 leading-none">{rataRata !== null ? rataRata : "-"}</p>
-                  <p className="text-xs text-slate-500 mt-1">Rata-rata nilai</p>
-                </div>
-              </div>
-            </div>
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() =>
+              router.push("/siswa/mataPelajaran")
+            }
+            className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${themeNeutralBorder} ${themeCard} ${themeTextSecondary} ${themeSmallShadow} transition hover:${themePrimaryText} hover:${themePrimarySurface}`}
+            aria-label="Kembali ke mata pelajaran"
+          >
+            <ArrowLeft size={17} />
+          </button>
 
-            <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1">
-              <button
-                onClick={() => setActiveMapel("semua")}
-                className={activeMapel === "semua" ? "flex-shrink-0 text-xs font-medium px-3.5 py-1.5 rounded-full border bg-slate-800 border-slate-800 text-white" : "flex-shrink-0 text-xs font-medium px-3.5 py-1.5 rounded-full border bg-white border-slate-200 text-slate-500 hover:border-slate-300"}
-              >
-                Semua Mapel
-              </button>
-              {mataPelajaranList.map((m) => (
-                <button
-                  key={m.id}
-                  onClick={() => setActiveMapel(m.id)}
-                  className={activeMapel === m.id ? "flex-shrink-0 text-xs font-medium px-3.5 py-1.5 rounded-full border bg-slate-800 border-slate-800 text-white" : "flex-shrink-0 text-xs font-medium px-3.5 py-1.5 rounded-full border bg-white border-slate-200 text-slate-500 hover:border-slate-300"}
-                >
-                  {m.nama}
-                </button>
-              ))}
-            </div>
+          <div className="min-w-0">
+            <p
+              className={`text-xs font-semibold uppercase tracking-wide ${themePrimaryText}`}
+            >
+              {selectedMapel
+                ? selectedMapel.nama
+                : "Semua Mata Pelajaran"}
+            </p>
 
-            <div className="flex gap-2">
-              {["semua", "mendatang", "berlangsung", "selesai"].map((f) => (
-                <button
-                  key={f}
-                  onClick={() => setActiveFilter(f)}
-                  className={activeFilter === f ? "text-xs font-medium px-3 py-1.5 rounded-lg bg-blue-50 text-blue-600" : "text-xs font-medium px-3 py-1.5 rounded-lg text-slate-500 hover:bg-slate-100"}
-                >
-                  {f === "semua" ? "Semua Status" : STATUS_STYLE[f].label}
-                </button>
-              ))}
-            </div>
+            <h1
+              className={`mt-1 text-2xl font-bold tracking-tight ${themeText} sm:text-[28px]`}
+            >
+              Ujian
+            </h1>
 
-            <div className="space-y-3">
-              {filteredUjian.length > 0 ? (
-                filteredUjian.map((ujian) => {
-                  const mapel = mataPelajaranList.find((m) => m.id === ujian.mapelId);
-                  const s = STATUS_STYLE[ujian.status];
-                  const StatusIcon = s.icon;
-                  return (
-                    <div key={ujian.id} className="bg-white rounded-2xl border border-slate-200/70 shadow-sm p-4 sm:p-5">
-                      <div className="flex items-start gap-3.5">
-                        <div className={"w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 " + s.bg + " " + s.text}>
-                          <GraduationCap size={19} />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className={"text-[10px] font-semibold px-1.5 py-0.5 rounded inline-flex items-center gap-1 " + s.bg + " " + s.text}>
-                              <StatusIcon size={10} />
-                              {s.label}
-                            </span>
-                            <span className="text-[10px] font-medium text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded">
-                              {ujian.tipe}
-                            </span>
-                            {activeMapel === "semua" && mapel ? (
-                              <span className="text-[11px] font-medium text-slate-400">{mapel.nama}</span>
-                            ) : null}
-                          </div>
-                          <p className="text-sm font-medium text-slate-800 mt-1.5">{ujian.judul}</p>
-                          <p className="text-xs text-slate-400 mt-0.5">
-                            {ujian.guru} - {ujian.tanggal} - {ujian.durasi}
-                          </p>
-                        </div>
-
-                        {ujian.status === "selesai" ? (
-                          <div className="flex-shrink-0 text-right">
-                            <p className="text-2xl font-bold text-slate-900">{ujian.nilai}</p>
-                            <p className="text-[11px] text-slate-400">Nilai</p>
-                          </div>
-                        ) : ujian.status === "berlangsung" ? (
-                          <button className="flex-shrink-0 inline-flex items-center gap-1 text-xs font-medium text-white bg-amber-500 hover:bg-amber-600 transition-colors rounded-lg px-3 py-2">
-                            Kerjakan
-                            <ChevronRight size={13} />
-                          </button>
-                        ) : (
-                          <div className="flex-shrink-0 mt-1 text-slate-300">
-                            <ChevronRight size={16} />
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })
-              ) : (
-                <div className="bg-white rounded-2xl border border-slate-200/70 shadow-sm text-center py-14 px-5">
-                  <div className="w-12 h-12 rounded-xl bg-slate-50 text-slate-300 flex items-center justify-center mx-auto mb-3">
-                    <GraduationCap size={22} />
-                  </div>
-                  <p className="text-sm font-medium text-slate-600">Tidak ada ujian</p>
-                  <p className="text-xs text-slate-400 mt-1">Tidak ada ujian yang cocok dengan filter ini.</p>
-                </div>
-              )}
-            </div>
-
+            <p
+              className={`mt-1 text-sm ${themeTextSecondary}`}
+            >
+              Jadwal ujian, kuis, dan hasil yang
+              sudah dinilai.
+            </p>
           </div>
-        </main>
+        </div>
+
+        {/* =================================================
+            STATISTIK
+        ================================================= */}
+
+        <div className="grid grid-cols-2 gap-4">
+          {/* UJIAN MENDATANG */}
+
+          <div
+            className={`flex items-center gap-3.5 rounded-2xl border ${themeNeutralBorder} ${themeCard} ${themeCardShadow} p-4`}
+          >
+            <div
+              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themeInfoSurface} ${themeInfoText}`}
+            >
+              <CalendarClock size={20} />
+            </div>
+
+            <div className="min-w-0">
+              <p
+                className={`text-xl font-bold leading-none ${themeText}`}
+              >
+                {jumlahMendatang}
+              </p>
+
+              <p
+                className={`mt-1 text-xs ${themeTextMuted}`}
+              >
+                Ujian mendatang
+              </p>
+            </div>
+          </div>
+
+          {/* RATA-RATA */}
+
+          <div
+            className={`flex items-center gap-3.5 rounded-2xl border ${themeNeutralBorder} ${themeCard} ${themeCardShadow} p-4`}
+          >
+            <div
+              className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themePrimarySurface} ${themePrimaryText}`}
+            >
+              <Award size={20} />
+            </div>
+
+            <div className="min-w-0">
+              <p
+                className={`text-xl font-bold leading-none ${themeText}`}
+              >
+                {rataRata !== null
+                  ? rataRata
+                  : "-"}
+              </p>
+
+              <p
+                className={`mt-1 text-xs ${themeTextMuted}`}
+              >
+                Rata-rata nilai
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* =================================================
+            FILTER MAPEL
+        ================================================= */}
+
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {/* SEMUA MAPEL */}
+
+          <button
+            type="button"
+            onClick={() =>
+              setActiveMapel("semua")
+            }
+            className={`flex-shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-medium transition ${
+              activeMapel === "semua"
+                ? `${themePrimaryGradient} ${themeTextOnPrimary} ${themePrimaryBorder} ${themePrimaryShadow}`
+                : `${themeCard} ${themeNeutralBorder} ${themeTextSecondary} hover:${themePrimaryText} hover:${themePrimarySurface}`
+            }`}
+          >
+            Semua Mapel
+          </button>
+
+          {mataPelajaranList.map((mapel) => {
+            const isActive =
+              activeMapel === mapel.id;
+
+            return (
+              <button
+                key={mapel.id}
+                type="button"
+                onClick={() =>
+                  setActiveMapel(mapel.id)
+                }
+                className={`flex-shrink-0 rounded-full border px-3.5 py-1.5 text-xs font-medium transition ${
+                  isActive
+                    ? `${themePrimaryGradient} ${themeTextOnPrimary} ${themePrimaryBorder} ${themePrimaryShadow}`
+                    : `${themeCard} ${themeNeutralBorder} ${themeTextSecondary} hover:${themePrimaryText} hover:${themePrimarySurface}`
+                }`}
+              >
+                {mapel.nama}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* =================================================
+            FILTER STATUS
+        ================================================= */}
+
+        <div className="flex gap-2 overflow-x-auto pb-1">
+          {[
+            "semua",
+            "mendatang",
+            "berlangsung",
+            "selesai",
+          ].map((filter) => {
+            const isActive =
+              activeFilter === filter;
+
+            const status =
+              filter !== "semua"
+                ? STATUS_STYLE[filter]
+                : null;
+
+            return (
+              <button
+                key={filter}
+                type="button"
+                onClick={() =>
+                  setActiveFilter(filter)
+                }
+                className={`flex-shrink-0 rounded-lg border px-3 py-1.5 text-xs font-medium transition ${
+                  isActive
+                    ? status
+                      ? `${status.surface} ${status.border} ${status.text}`
+                      : `${themePrimarySurface} ${themePrimaryBorder} ${themePrimaryText}`
+                    : `border-transparent ${themeTextSecondary} hover:${themeNeutralSurface}`
+                }`}
+              >
+                {filter === "semua"
+                  ? "Semua Status"
+                  : STATUS_STYLE[filter].label}
+              </button>
+            );
+          })}
+        </div>
+
+        {/* =================================================
+            LIST UJIAN
+        ================================================= */}
+
+        <div className="space-y-3">
+          {filteredUjian.length > 0 ? (
+            filteredUjian.map((ujian) => {
+              const mapel =
+                mataPelajaranList.find(
+                  (m) =>
+                    m.id === ujian.mapelId
+                );
+
+              const status =
+                STATUS_STYLE[ujian.status];
+
+              const StatusIcon =
+                status.icon;
+
+              return (
+                <div
+                  key={ujian.id}
+                  className={`rounded-2xl border ${themeNeutralBorder} ${themeCard} ${themeCardShadow} p-4 transition hover:${themePrimaryBorder} sm:p-5`}
+                >
+                  <div className="flex items-start gap-3.5">
+
+                    {/* ICON */}
+
+                    <div
+                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${status.surface} ${status.text}`}
+                    >
+                      <GraduationCap
+                        size={19}
+                      />
+                    </div>
+
+                    {/* INFORMASI */}
+
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-1.5">
+
+                        {/* STATUS */}
+
+                        <span
+                          className={`inline-flex items-center gap-1 rounded border px-1.5 py-0.5 text-[10px] font-semibold ${status.surface} ${status.border} ${status.text}`}
+                        >
+                          <StatusIcon size={10} />
+                          {status.label}
+                        </span>
+
+                        {/* TIPE */}
+
+                        <span
+                          className={`rounded border ${themeNeutralBorder} ${themeNeutralSurface} px-1.5 py-0.5 text-[10px] font-medium ${themeTextMuted}`}
+                        >
+                          {ujian.tipe}
+                        </span>
+
+                        {/* MAPEL */}
+
+                        {activeMapel === "semua" &&
+                        mapel ? (
+                          <span
+                            className={`text-[11px] font-medium ${themeTextMuted}`}
+                          >
+                            {mapel.nama}
+                          </span>
+                        ) : null}
+                      </div>
+
+                      <p
+                        className={`mt-1.5 text-sm font-semibold ${themeText}`}
+                      >
+                        {ujian.judul}
+                      </p>
+
+                      <p
+                        className={`mt-0.5 text-xs ${themeTextMuted}`}
+                      >
+                        {ujian.guru}
+                        {" • "}
+                        {ujian.tanggal}
+                        {" • "}
+                        {ujian.durasi}
+                      </p>
+                    </div>
+
+                    {/* AKSI / NILAI */}
+
+                    {ujian.status ===
+                    "selesai" ? (
+                      <div className="shrink-0 text-right">
+                        <p
+                          className={`text-2xl font-bold ${themeSuccessText}`}
+                        >
+                          {ujian.nilai}
+                        </p>
+
+                        <p
+                          className={`text-[11px] ${themeTextMuted}`}
+                        >
+                          Nilai
+                        </p>
+                      </div>
+                    ) : ujian.status ===
+                      "berlangsung" ? (
+                      <button
+                        type="button"
+                        className={`flex shrink-0 items-center gap-1 rounded-lg border ${themeWarningBorder} ${themeWarningSurface} ${themeWarningText} px-3 py-2 text-xs font-semibold transition hover:brightness-95`}
+                      >
+                        Kerjakan
+
+                        <ChevronRight
+                          size={13}
+                        />
+                      </button>
+                    ) : (
+                      <div className="mt-1 flex shrink-0 items-center justify-center">
+                        <ChevronRight
+                          size={16}
+                          className={themeTextMuted}
+                        />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            /* =================================================
+               EMPTY STATE
+            ================================================= */
+
+            <div
+              className={`rounded-2xl border ${themeNeutralBorder} ${themeCard} ${themeCardShadow} px-5 py-14 text-center`}
+            >
+              <div
+                className={`mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl ${themeNeutralSurfaceStrong} ${themeTextMuted}`}
+              >
+                <GraduationCap
+                  size={22}
+                />
+              </div>
+
+              <p
+                className={`text-sm font-semibold ${themeText}`}
+              >
+                Tidak ada ujian
+              </p>
+
+              <p
+                className={`mt-1 text-xs ${themeTextMuted}`}
+              >
+                Tidak ada ujian yang cocok
+                dengan filter ini.
+              </p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
 }
+
+/* =========================================================
+   EXPORT
+========================================================= */
+
 export default function UjianPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-slate-50" />}>
-      <UjianPageContent />
+    <Suspense
+      fallback={
+        <div className="theme-page min-h-full" />
+      }
+    >
+      <UjianPageInner />
     </Suspense>
   );
 }

@@ -3,21 +3,23 @@
 import { useState, useMemo } from "react";
 import Header from "../../../../components/Header";
 import Sidebar from "../../../../components/Sidebar";
-import { Search, Filter, ClipboardList, Plus, X } from "lucide-react";
+import {
+  Search,
+  Filter,
+  ClipboardList,
+  Plus,
+  X,
+} from "lucide-react";
 
 /**
  * app/admin/akademik/sikapPerilaku/page.jsx
  *
  * Halaman Sikap & Perilaku — mencatat catatan sikap/perilaku siswa
- * (positif maupun negatif) dalam satu tabel, mengikuti gaya tampilan yang
- * sama dengan halaman Nilai/Prestasi/Rapor: header gradasi biru-indigo,
- * baris selang-seling, teks gelap, dan TANPA card/badge warna terpisah
- * untuk membedakan jenis positif/negatif — jenis cukup ditulis sebagai teks.
+ * (positif maupun negatif) dalam satu tabel.
  *
  * CATATAN DATA:
  * MOCK_CATATAN masih dummy. Kalau nanti nyambung ke API, tinggal ganti
- * `useState(MOCK_CATATAN)` dengan hasil fetch — bentuk data per entri
- * dipertahankan sama supaya UI di bawah tidak perlu diubah.
+ * useState(MOCK_CATATAN) dengan hasil fetch.
  */
 
 const JENIS_OPTIONS = ["Positif", "Negatif"];
@@ -133,7 +135,12 @@ const MOCK_CATATAN = [
   },
 ];
 
-const KELAS_OPTIONS = ["Semua Kelas", ...Array.from(new Set(MOCK_CATATAN.map((c) => c.kelas))).sort()];
+const KELAS_OPTIONS = [
+  "Semua Kelas",
+  ...Array.from(
+    new Set(MOCK_CATATAN.map((c) => c.kelas))
+  ).sort(),
+];
 
 const emptyForm = {
   nama: "",
@@ -146,15 +153,22 @@ const emptyForm = {
 
 function formatTanggal(iso) {
   const d = new Date(iso);
-  return d.toLocaleDateString("id-ID", { day: "2-digit", month: "long", year: "numeric" });
+
+  return d.toLocaleDateString("id-ID", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
 }
 
 export default function SikapPerilakuPage() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [data, setData] = useState(MOCK_CATATAN);
+
   const [search, setSearch] = useState("");
   const [kelasFilter, setKelasFilter] = useState("Semua Kelas");
   const [jenisFilter, setJenisFilter] = useState("Semua Jenis");
+
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState(emptyForm);
 
@@ -164,24 +178,48 @@ export default function SikapPerilakuPage() {
     return data
       .filter((c) => {
         const matchSearch =
-          c.nama.toLowerCase().includes(search.toLowerCase()) ||
-          c.catatan.toLowerCase().includes(search.toLowerCase());
-        const matchKelas = kelasFilter === "Semua Kelas" || c.kelas === kelasFilter;
-        const matchJenis = jenisFilter === "Semua Jenis" || c.jenis === jenisFilter;
+          c.nama
+            .toLowerCase()
+            .includes(search.toLowerCase()) ||
+          c.catatan
+            .toLowerCase()
+            .includes(search.toLowerCase());
+
+        const matchKelas =
+          kelasFilter === "Semua Kelas" ||
+          c.kelas === kelasFilter;
+
+        const matchJenis =
+          jenisFilter === "Semua Jenis" ||
+          c.jenis === jenisFilter;
+
         return matchSearch && matchKelas && matchJenis;
       })
-      .sort((a, b) => new Date(b.tanggal) - new Date(a.tanggal));
+      .sort(
+        (a, b) =>
+          new Date(b.tanggal) - new Date(a.tanggal)
+      );
   }, [data, search, kelasFilter, jenisFilter]);
 
   const handleSimpan = () => {
     if (!form.nama || !form.catatan) return;
-    setData((prev) => [{ id: Date.now(), ...form, poin: Number(form.poin) }, ...prev]);
+
+    setData((prev) => [
+      {
+        id: Date.now(),
+        ...form,
+        poin: Number(form.poin),
+      },
+      ...prev,
+    ]);
+
     setForm(emptyForm);
     setShowForm(false);
   };
 
   return (
-    <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
+    <div className="flex h-screen w-full theme-page overflow-hidden">
+      {/* SIDEBAR */}
       <Sidebar
         active="akademikSikapPerilaku"
         setActive={() => {}}
@@ -189,52 +227,120 @@ export default function SikapPerilakuPage() {
         setCollapsed={setIsCollapsed}
         role="admin"
       />
+
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+        {/* HEADER */}
         <Header
           toggleSidebar={toggleSidebar}
           notifications={[]}
-          user={{ name: "Admin Sekolah", email: "admin@smartschool.com", avatar: "AD" }}
+          user={{
+            name: "Admin Sekolah",
+            email: "admin@smartschool.com",
+            avatar: "AD",
+          }}
         />
-        <main className="flex-1 overflow-y-auto">
+
+        <main className="flex-1 overflow-y-auto theme-page">
           <div className="p-4 sm:p-6 lg:p-8 space-y-6">
-            {/* HEADER */}
+
+            {/* ======================================================
+                HEADER
+                ====================================================== */}
+
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 text-white shadow-lg shadow-blue-200">
+                <div className="p-2.5 rounded-xl theme-primary shadow-lg">
                   <ClipboardList size={20} />
                 </div>
+
                 <div>
-                  <h1 className="text-2xl font-bold text-slate-900">Sikap & Perilaku</h1>
-                  <p className="text-sm text-slate-600">Catatan sikap dan perilaku siswa sehari-hari.</p>
+                  <h1 className="text-2xl font-bold theme-text">
+                    Sikap & Perilaku
+                  </h1>
+
+                  <p className="text-sm theme-text-secondary">
+                    Catatan sikap dan perilaku siswa sehari-hari.
+                  </p>
                 </div>
               </div>
+
               <button
                 onClick={() => setShowForm(true)}
-                className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold shadow-sm shadow-blue-200 transition-colors self-start sm:self-auto"
+                className="
+                  flex items-center justify-center gap-2
+                  px-4 py-2.5 rounded-xl
+                  theme-primary
+                  text-sm font-semibold
+                  shadow-sm
+                  transition-colors
+                  self-start sm:self-auto
+                "
               >
                 <Plus size={16} />
                 Tambah Catatan
               </button>
             </div>
 
-            {/* FILTER BAR */}
-            <div className="bg-white rounded-xl border border-slate-200/80 p-4 shadow-sm flex flex-col lg:flex-row gap-3">
+            {/* ======================================================
+                FILTER BAR
+                ====================================================== */}
+
+            <div
+              className="
+                theme-card rounded-xl
+                border theme-border
+                p-4 shadow-sm
+                flex flex-col lg:flex-row gap-3
+              "
+            >
               <div className="relative flex-1">
-                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+                <Search
+                  size={16}
+                  className="
+                    absolute left-3 top-1/2
+                    -translate-y-1/2
+                    theme-text-muted
+                  "
+                />
+
                 <input
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Cari nama siswa atau catatan..."
-                  className="w-full pl-9 pr-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 text-slate-800"
+                  className="
+                    w-full pl-9 pr-3 py-2
+                    text-sm rounded-lg
+                    border theme-border
+                    theme-input
+                    focus:outline-none
+                  "
                 />
               </div>
+
               <div className="flex flex-wrap items-center gap-2">
-                <Filter size={15} className="text-slate-400 hidden lg:block" />
+                <Filter
+                  size={15}
+                  className="
+                    theme-text-muted
+                    hidden lg:block
+                  "
+                />
+
+                {/* FILTER KELAS */}
                 <select
                   value={kelasFilter}
-                  onChange={(e) => setKelasFilter(e.target.value)}
-                  className="text-sm rounded-lg border border-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 bg-white text-slate-800 font-medium"
+                  onChange={(e) =>
+                    setKelasFilter(e.target.value)
+                  }
+                  className="
+                    text-sm rounded-lg
+                    border theme-border
+                    theme-input
+                    px-3 py-2
+                    focus:outline-none
+                    font-medium
+                  "
                 >
                   {KELAS_OPTIONS.map((k) => (
                     <option key={k} value={k}>
@@ -242,12 +348,26 @@ export default function SikapPerilakuPage() {
                     </option>
                   ))}
                 </select>
+
+                {/* FILTER JENIS */}
                 <select
                   value={jenisFilter}
-                  onChange={(e) => setJenisFilter(e.target.value)}
-                  className="text-sm rounded-lg border border-slate-200 px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 bg-white text-slate-800 font-medium"
+                  onChange={(e) =>
+                    setJenisFilter(e.target.value)
+                  }
+                  className="
+                    text-sm rounded-lg
+                    border theme-border
+                    theme-input
+                    px-3 py-2
+                    focus:outline-none
+                    font-medium
+                  "
                 >
-                  {["Semua Jenis", ...JENIS_OPTIONS].map((j) => (
+                  {[
+                    "Semua Jenis",
+                    ...JENIS_OPTIONS,
+                  ].map((j) => (
                     <option key={j} value={j}>
                       {j}
                     </option>
@@ -256,46 +376,147 @@ export default function SikapPerilakuPage() {
               </div>
             </div>
 
-            {/* TABEL SIKAP & PERILAKU */}
-            <div className="bg-white rounded-xl border border-slate-200/80 shadow-sm overflow-hidden">
+            {/* ======================================================
+                TABEL SIKAP & PERILAKU
+                ====================================================== */}
+
+            <div
+              className="
+                theme-card rounded-xl
+                border theme-border
+                shadow-sm overflow-hidden
+              "
+            >
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white">
-                      <th className="text-left font-semibold px-4 py-3 whitespace-nowrap">No.</th>
-                      <th className="text-left font-semibold px-4 py-3 min-w-[180px]">Nama Siswa</th>
-                      <th className="text-left font-semibold px-4 py-3 whitespace-nowrap">Kelas</th>
-                      <th className="text-left font-semibold px-4 py-3 whitespace-nowrap">Jenis</th>
-                      <th className="text-left font-semibold px-4 py-3 min-w-[260px]">Catatan</th>
-                      <th className="text-center font-semibold px-4 py-3 whitespace-nowrap">Poin</th>
-                      <th className="text-left font-semibold px-4 py-3 whitespace-nowrap">Tanggal</th>
+                    <tr
+                      className="
+                        bg-gradient-to-r
+                        from-blue-600 to-indigo-600
+                        text-white
+                      "
+                    >
+                      <th className="text-left font-semibold px-4 py-3 whitespace-nowrap">
+                        No.
+                      </th>
+
+                      <th className="text-left font-semibold px-4 py-3 min-w-[180px]">
+                        Nama Siswa
+                      </th>
+
+                      <th className="text-left font-semibold px-4 py-3 whitespace-nowrap">
+                        Kelas
+                      </th>
+
+                      <th className="text-left font-semibold px-4 py-3 whitespace-nowrap">
+                        Jenis
+                      </th>
+
+                      <th className="text-left font-semibold px-4 py-3 min-w-[260px]">
+                        Catatan
+                      </th>
+
+                      <th className="text-center font-semibold px-4 py-3 whitespace-nowrap">
+                        Poin
+                      </th>
+
+                      <th className="text-left font-semibold px-4 py-3 whitespace-nowrap">
+                        Tanggal
+                      </th>
                     </tr>
                   </thead>
+
                   <tbody>
                     {filteredData.map((c, idx) => (
                       <tr
                         key={c.id}
-                        className={`border-b border-slate-100 last:border-0 transition-colors hover:bg-blue-100/60 ${
-                          idx % 2 === 0 ? "bg-blue-50/60" : "bg-white"
-                        }`}
+                        className="
+                          border-b theme-border-soft
+                          last:border-0
+                          theme-table-hover
+                          transition-colors
+                        "
                       >
-                        <td className="px-4 py-2.5 text-slate-700 font-medium">{idx + 1}</td>
+                        <td
+                          className="
+                            px-4 py-2.5
+                            theme-text-secondary
+                            font-medium
+                          "
+                        >
+                          {idx + 1}
+                        </td>
+
                         <td className="px-4 py-2.5">
-                          <p className="font-semibold text-slate-900">{c.nama}</p>
+                          <p className="font-semibold theme-text">
+                            {c.nama}
+                          </p>
                         </td>
-                        <td className="px-4 py-2.5 text-slate-700 whitespace-nowrap">{c.kelas}</td>
-                        <td className="px-4 py-2.5 text-slate-800 font-medium whitespace-nowrap">{c.jenis}</td>
-                        <td className="px-4 py-2.5 text-slate-700">{c.catatan}</td>
-                        <td className="px-4 py-2.5 text-center text-slate-900 font-semibold">
-                          {c.poin > 0 ? `+${c.poin}` : c.poin}
+
+                        <td
+                          className="
+                            px-4 py-2.5
+                            theme-text-secondary
+                            whitespace-nowrap
+                          "
+                        >
+                          {c.kelas}
                         </td>
-                        <td className="px-4 py-2.5 text-slate-700 whitespace-nowrap">{formatTanggal(c.tanggal)}</td>
+
+                        <td
+                          className="
+                            px-4 py-2.5
+                            theme-text
+                            font-medium
+                            whitespace-nowrap
+                          "
+                        >
+                          {c.jenis}
+                        </td>
+
+                        <td className="px-4 py-2.5 theme-text-secondary">
+                          {c.catatan}
+                        </td>
+
+                        <td
+                          className="
+                            px-4 py-2.5
+                            text-center
+                            theme-text
+                            font-semibold
+                          "
+                        >
+                          {c.poin > 0
+                            ? `+${c.poin}`
+                            : c.poin}
+                        </td>
+
+                        <td
+                          className="
+                            px-4 py-2.5
+                            theme-text-secondary
+                            whitespace-nowrap
+                          "
+                        >
+                          {formatTanggal(c.tanggal)}
+                        </td>
                       </tr>
                     ))}
+
                     {filteredData.length === 0 && (
                       <tr>
-                        <td colSpan={7} className="px-4 py-10 text-center text-sm text-slate-400">
-                          Tidak ada catatan yang cocok dengan filter ini.
+                        <td
+                          colSpan={7}
+                          className="
+                            px-4 py-10
+                            text-center
+                            text-sm
+                            theme-text-muted
+                          "
+                        >
+                          Tidak ada catatan yang cocok
+                          dengan filter ini.
                         </td>
                       </tr>
                     )}
@@ -307,51 +528,158 @@ export default function SikapPerilakuPage() {
         </main>
       </div>
 
-      {/* MODAL TAMBAH CATATAN */}
+      {/* ============================================================
+          MODAL TAMBAH CATATAN
+          ============================================================ */}
+
       {showForm && (
         <>
-          <div onClick={() => setShowForm(false)} className="fixed inset-0 z-40 bg-slate-900/40 backdrop-blur-sm" />
+          {/* OVERLAY */}
+          <div
+            onClick={() => setShowForm(false)}
+            className="
+              fixed inset-0 z-40
+              bg-slate-900/40
+              backdrop-blur-sm
+            "
+          />
+
+          {/* MODAL CONTAINER */}
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
-              <div className="flex items-center justify-between px-5 h-16 border-b border-slate-100 sticky top-0 bg-white">
-                <h2 className="text-sm font-semibold text-slate-900">Tambah Catatan Sikap & Perilaku</h2>
+            <div
+              className="
+                theme-card
+                rounded-2xl
+                shadow-2xl
+                w-full max-w-lg
+                max-h-[90vh]
+                overflow-y-auto
+              "
+            >
+              {/* MODAL HEADER */}
+              <div
+                className="
+                  flex items-center justify-between
+                  px-5 h-16
+                  border-b theme-border-soft
+                  sticky top-0
+                  theme-card
+                  z-10
+                "
+              >
+                <h2 className="text-sm font-semibold theme-text">
+                  Tambah Catatan Sikap & Perilaku
+                </h2>
+
                 <button
                   onClick={() => setShowForm(false)}
-                  className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-500 hover:text-slate-900 transition-colors"
+                  className="
+                    p-1.5 rounded-lg
+                    theme-text-muted
+                    theme-header-hover
+                    transition-colors
+                  "
                 >
                   <X size={18} />
                 </button>
               </div>
 
+              {/* MODAL FORM */}
               <div className="p-5 space-y-4">
+
+                {/* NAMA SISWA */}
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 mb-1.5 block">Nama Siswa</label>
+                  <label
+                    className="
+                      text-xs font-semibold
+                      theme-text-secondary
+                      mb-1.5 block
+                    "
+                  >
+                    Nama Siswa
+                  </label>
+
                   <input
                     type="text"
                     value={form.nama}
-                    onChange={(e) => setForm({ ...form, nama: e.target.value })}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        nama: e.target.value,
+                      })
+                    }
                     placeholder="Contoh: Alya Ramadhani"
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 text-slate-800"
-                  />
-                </div>
-                <div>
-                  <label className="text-xs font-semibold text-slate-700 mb-1.5 block">Kelas</label>
-                  <input
-                    type="text"
-                    value={form.kelas}
-                    onChange={(e) => setForm({ ...form, kelas: e.target.value })}
-                    placeholder="Contoh: X RPL 1 / XI TKJ 2"
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 text-slate-800"
+                    className="
+                      w-full px-3 py-2
+                      text-sm rounded-lg
+                      border theme-border
+                      theme-input
+                      focus:outline-none
+                    "
                   />
                 </div>
 
+                {/* KELAS */}
+                <div>
+                  <label
+                    className="
+                      text-xs font-semibold
+                      theme-text-secondary
+                      mb-1.5 block
+                    "
+                  >
+                    Kelas
+                  </label>
+
+                  <input
+                    type="text"
+                    value={form.kelas}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        kelas: e.target.value,
+                      })
+                    }
+                    placeholder="Contoh: X RPL 1 / XI TKJ 2"
+                    className="
+                      w-full px-3 py-2
+                      text-sm rounded-lg
+                      border theme-border
+                      theme-input
+                      focus:outline-none
+                    "
+                  />
+                </div>
+
+                {/* JENIS + POIN */}
                 <div className="grid grid-cols-2 gap-3">
+                  {/* JENIS */}
                   <div>
-                    <label className="text-xs font-semibold text-slate-700 mb-1.5 block">Jenis</label>
+                    <label
+                      className="
+                        text-xs font-semibold
+                        theme-text-secondary
+                        mb-1.5 block
+                      "
+                    >
+                      Jenis
+                    </label>
+
                     <select
                       value={form.jenis}
-                      onChange={(e) => setForm({ ...form, jenis: e.target.value })}
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 bg-white text-slate-800"
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          jenis: e.target.value,
+                        })
+                      }
+                      className="
+                        w-full px-3 py-2
+                        text-sm rounded-lg
+                        border theme-border
+                        theme-input
+                        focus:outline-none
+                      "
                     >
                       {JENIS_OPTIONS.map((j) => (
                         <option key={j} value={j}>
@@ -360,50 +688,137 @@ export default function SikapPerilakuPage() {
                       ))}
                     </select>
                   </div>
+
+                  {/* POIN */}
                   <div>
-                    <label className="text-xs font-semibold text-slate-700 mb-1.5 block">Poin</label>
+                    <label
+                      className="
+                        text-xs font-semibold
+                        theme-text-secondary
+                        mb-1.5 block
+                      "
+                    >
+                      Poin
+                    </label>
+
                     <input
                       type="number"
                       value={form.poin}
-                      onChange={(e) => setForm({ ...form, poin: e.target.value })}
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          poin: e.target.value,
+                        })
+                      }
                       placeholder="Contoh: 5 atau -3"
-                      className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 text-slate-800"
+                      className="
+                        w-full px-3 py-2
+                        text-sm rounded-lg
+                        border theme-border
+                        theme-input
+                        focus:outline-none
+                      "
                     />
                   </div>
                 </div>
 
+                {/* CATATAN */}
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 mb-1.5 block">Catatan</label>
+                  <label
+                    className="
+                      text-xs font-semibold
+                      theme-text-secondary
+                      mb-1.5 block
+                    "
+                  >
+                    Catatan
+                  </label>
+
                   <textarea
                     value={form.catatan}
-                    onChange={(e) => setForm({ ...form, catatan: e.target.value })}
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        catatan: e.target.value,
+                      })
+                    }
                     placeholder="Contoh: Aktif membantu teman sekelas"
                     rows={3}
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 text-slate-800 resize-none"
+                    className="
+                      w-full px-3 py-2
+                      text-sm rounded-lg
+                      border theme-border
+                      theme-input
+                      focus:outline-none
+                      resize-none
+                    "
                   />
                 </div>
 
+                {/* TANGGAL */}
                 <div>
-                  <label className="text-xs font-semibold text-slate-700 mb-1.5 block">Tanggal</label>
+                  <label
+                    className="
+                      text-xs font-semibold
+                      theme-text-secondary
+                      mb-1.5 block
+                    "
+                  >
+                    Tanggal
+                  </label>
+
                   <input
                     type="date"
                     value={form.tanggal}
-                    onChange={(e) => setForm({ ...form, tanggal: e.target.value })}
-                    className="w-full px-3 py-2 text-sm rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-400 text-slate-800"
+                    onChange={(e) =>
+                      setForm({
+                        ...form,
+                        tanggal: e.target.value,
+                      })
+                    }
+                    className="
+                      w-full px-3 py-2
+                      text-sm rounded-lg
+                      border theme-border
+                      theme-input
+                      focus:outline-none
+                    "
                   />
                 </div>
               </div>
 
-              <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-slate-100">
+              {/* MODAL FOOTER */}
+              <div
+                className="
+                  flex items-center justify-end gap-2
+                  px-5 py-4
+                  border-t theme-border-soft
+                "
+              >
                 <button
                   onClick={() => setShowForm(false)}
-                  className="px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 rounded-lg transition-colors"
+                  className="
+                    px-4 py-2
+                    text-sm font-semibold
+                    theme-text-secondary
+                    theme-header-hover
+                    rounded-lg
+                    transition-colors
+                  "
                 >
                   Batal
                 </button>
+
                 <button
                   onClick={handleSimpan}
-                  className="px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors shadow-sm shadow-blue-200"
+                  className="
+                    px-4 py-2
+                    text-sm font-semibold
+                    theme-primary
+                    rounded-lg
+                    transition-colors
+                    shadow-sm
+                  "
                 >
                   Simpan
                 </button>

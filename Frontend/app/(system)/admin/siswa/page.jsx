@@ -27,6 +27,73 @@ import {
 import { apiFetch } from "../../../../lib/api";
 
 // =========================================================
+// THEME HELPERS
+// =========================================================
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themePrimaryHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+
+// =========================================================
 // HELPER RESPONSE
 // =========================================================
 
@@ -73,19 +140,6 @@ function normalizeSiswa(item) {
 
   let kelas = "-";
 
-  /*
-   * Bentuk data yang mungkin:
-   *
-   * anggotaKelas: [
-   *   {
-   *     kelas: {
-   *       id,
-   *       nama
-   *     }
-   *   }
-   * ]
-   */
-
   const anggotaKelas =
     item?.anggotaKelas ||
     item?.kelasSiswa ||
@@ -109,14 +163,6 @@ function normalizeSiswa(item) {
       anggotaKelas?.nama ||
       "-";
   }
-
-  /*
-   * Beberapa response mungkin langsung punya:
-   *
-   * kelas: {
-   *   nama: "VII A"
-   * }
-   */
 
   if (item?.kelas) {
     if (typeof item.kelas === "string") {
@@ -295,7 +341,8 @@ export default function AdminSiswaPage() {
   // SIDEBAR
   // =======================================================
 
-  const [isCollapsed, setIsCollapsed] = useState(false);
+  const [isCollapsed, setIsCollapsed] =
+    useState(false);
 
   // =======================================================
   // DATA
@@ -303,17 +350,21 @@ export default function AdminSiswaPage() {
 
   const [siswa, setSiswa] = useState([]);
 
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] =
+    useState(true);
 
-  const [refreshing, setRefreshing] = useState(false);
+  const [refreshing, setRefreshing] =
+    useState(false);
 
-  const [error, setError] = useState("");
+  const [error, setError] =
+    useState("");
 
   // =======================================================
   // SEARCH
   // =======================================================
 
-  const [search, setSearch] = useState("");
+  const [search, setSearch] =
+    useState("");
 
   // =======================================================
   // FILTER
@@ -378,16 +429,6 @@ export default function AdminSiswaPage() {
 
       setError("");
 
-      /*
-       * Sesuai BE:
-       *
-       * GET /api/users
-       * GET /api/users?role=siswa
-       *
-       * Ditambah limit besar supaya data siswa
-       * yang dikembalikan tidak hanya sedikit.
-       */
-
       const response = await apiFetch(
         "/api/users?role=siswa&page=1&limit=1000",
         {
@@ -412,7 +453,8 @@ export default function AdminSiswaPage() {
         rawData
           .map(normalizeSiswa)
           .filter(
-            (item) => item && item.id
+            (item) =>
+              item && item.id
           );
 
       console.log(
@@ -421,7 +463,6 @@ export default function AdminSiswaPage() {
       );
 
       setSiswa(normalized);
-
       setCurrentPage(1);
     } catch (err) {
       console.error(
@@ -582,9 +623,7 @@ export default function AdminSiswaPage() {
   // =======================================================
 
   const filteredByStatus = useMemo(() => {
-    if (
-      filterStatus === "semua"
-    ) {
+    if (filterStatus === "semua") {
       return filteredBySearch;
     }
 
@@ -603,9 +642,7 @@ export default function AdminSiswaPage() {
   // =======================================================
 
   const filteredByKelas = useMemo(() => {
-    if (
-      filterKelas === "semua"
-    ) {
+    if (filterKelas === "semua") {
       return filteredByStatus;
     }
 
@@ -907,9 +944,7 @@ export default function AdminSiswaPage() {
       "Bergabung",
     ];
 
-    const escapeCSV = (
-      value
-    ) => {
+    const escapeCSV = (value) => {
       const text = String(
         value ?? "-"
       );
@@ -1067,9 +1102,7 @@ export default function AdminSiswaPage() {
         </head>
 
         <body>
-
           <table>
-
             <tr>
               ${headers
                 .map(
@@ -1120,7 +1153,6 @@ export default function AdminSiswaPage() {
 
     tableHtml += `
           </table>
-
         </body>
       </html>
     `;
@@ -1198,15 +1230,12 @@ export default function AdminSiswaPage() {
 
     let tableHtml = `
       <html>
-
         <head>
-
           <title>
             Data Siswa SmartSchool
           </title>
 
           <style>
-
             body {
               font-family: Arial, sans-serif;
               padding: 24px;
@@ -1245,13 +1274,10 @@ export default function AdminSiswaPage() {
             tr:nth-child(even) {
               background: #f8fafc;
             }
-
           </style>
-
         </head>
 
         <body>
-
           <h1>
             Data Siswa SmartSchool
           </h1>
@@ -1264,7 +1290,6 @@ export default function AdminSiswaPage() {
           </p>
 
           <table>
-
             <tr>
               ${headers
                 .map(
@@ -1294,9 +1319,7 @@ export default function AdminSiswaPage() {
 
     tableHtml += `
           </table>
-
         </body>
-
       </html>
     `;
 
@@ -1340,9 +1363,7 @@ export default function AdminSiswaPage() {
   // AVATAR
   // =======================================================
 
-  const getInitials = (
-    nama
-  ) => {
+  const getInitials = (nama) => {
     if (!nama) {
       return "??";
     }
@@ -1352,9 +1373,7 @@ export default function AdminSiswaPage() {
         .trim()
         .split(/\s+/);
 
-    if (
-      parts.length >= 2
-    ) {
+    if (parts.length >= 2) {
       return (
         parts[0][0] +
         parts[1][0]
@@ -1366,26 +1385,22 @@ export default function AdminSiswaPage() {
       .toUpperCase();
   };
 
-  const getAvatarColor = (
-    nama
-  ) => {
-    const colors = [
-      "bg-blue-500",
-      "bg-emerald-500",
-      "bg-amber-500",
-      "bg-rose-500",
-      "bg-indigo-500",
-      "bg-purple-500",
-      "bg-cyan-500",
-      "bg-orange-500",
-      "bg-pink-500",
-      "bg-teal-500",
+  /*
+   * Avatar sekarang menggunakan warna primary/theme
+   * berdasarkan panjang nama, bukan warna hardcoded.
+   */
+  const getAvatarClass = (nama) => {
+    const variants = [
+      "bg-[var(--color-primary)]",
+      "bg-[var(--color-info)]",
+      "bg-[var(--color-success)]",
+      "bg-[var(--color-warning)]",
+      "bg-[color-mix(in_srgb,var(--color-primary)_72%,var(--color-info))]",
     ];
 
-    return colors[
-      String(nama || "")
-        .length %
-        colors.length
+    return variants[
+      String(nama || "").length %
+        variants.length
     ];
   };
 
@@ -1394,7 +1409,7 @@ export default function AdminSiswaPage() {
   // =======================================================
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-slate-100">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
 
       {/* SIDEBAR */}
 
@@ -1440,17 +1455,19 @@ export default function AdminSiswaPage() {
 
                 <div className="flex min-w-0 items-center gap-3">
 
-                  <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-blue-600 to-cyan-600 text-white shadow-lg shadow-blue-200">
+                  <div
+                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themePrimaryGradient} ${themePrimaryShadow} text-[var(--color-card)]`}
+                  >
                     <Users size={21} />
                   </div>
 
                   <div className="min-w-0">
 
-                    <h1 className="truncate text-xl font-semibold text-slate-800 sm:text-2xl">
+                    <h1 className="theme-text truncate text-xl font-semibold sm:text-2xl">
                       Data Siswa
                     </h1>
 
-                    <p className="text-xs text-slate-600 sm:text-sm">
+                    <p className="theme-text-secondary text-xs sm:text-sm">
                       Data induk peserta didik
                     </p>
 
@@ -1466,57 +1483,43 @@ export default function AdminSiswaPage() {
 
                     <button
                       type="button"
-                      className="flex items-center gap-1.5 rounded-xl border border-slate-300 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700"
+                      className={`theme-input flex items-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-medium transition ${themePrimaryText} ${themePrimarySoftBorder} hover:bg-[color-mix(in_srgb,var(--color-primary)_7%,transparent)]`}
                     >
-                      <Download
-                        size={17}
-                      />
+                      <Download size={17} />
 
                       Export
 
-                      <ChevronDown
-                        size={14}
-                      />
+                      <ChevronDown size={14} />
                     </button>
 
-                    <div className="invisible absolute right-0 top-full z-30 mt-1 w-44 rounded-xl border border-slate-200 bg-white p-1 shadow-xl opacity-0 transition-all group-hover:visible group-hover:opacity-100">
+                    <div
+                      className={`theme-card invisible absolute right-0 top-full z-30 mt-1 w-44 rounded-xl border ${themeNeutralBorder} p-1 opacity-0 ${themeCardShadow} transition-all group-hover:visible group-hover:opacity-100`}
+                    >
 
                       <button
                         type="button"
-                        onClick={
-                          exportPDF
-                        }
-                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+                        onClick={exportPDF}
+                        className={`theme-text-secondary flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm transition ${themePrimaryHover} hover:text-[var(--color-primary)]`}
                       >
-                        <Printer
-                          size={16}
-                        />
+                        <Printer size={16} />
                         PDF
                       </button>
 
                       <button
                         type="button"
-                        onClick={
-                          exportExcel
-                        }
-                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+                        onClick={exportExcel}
+                        className={`theme-text-secondary flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm transition ${themePrimaryHover} hover:text-[var(--color-primary)]`}
                       >
-                        <FileSpreadsheet
-                          size={16}
-                        />
+                        <FileSpreadsheet size={16} />
                         Excel
                       </button>
 
                       <button
                         type="button"
-                        onClick={
-                          exportCSV
-                        }
-                        className="flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+                        onClick={exportCSV}
+                        className={`theme-text-secondary flex w-full items-center gap-2 rounded-lg px-3 py-2.5 text-sm transition ${themePrimaryHover} hover:text-[var(--color-primary)]`}
                       >
-                        <FileSpreadsheet
-                          size={16}
-                        />
+                        <FileSpreadsheet size={16} />
                         CSV
                       </button>
 
@@ -1528,13 +1531,9 @@ export default function AdminSiswaPage() {
 
                   <button
                     type="button"
-                    onClick={
-                      handleRefresh
-                    }
-                    disabled={
-                      refreshing
-                    }
-                    className="flex h-10 items-center gap-2 rounded-xl border border-slate-300 bg-white px-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    onClick={handleRefresh}
+                    disabled={refreshing}
+                    className={`theme-input flex h-10 items-center gap-2 rounded-xl border ${themeNeutralBorder} px-3 text-sm font-medium theme-text-secondary transition ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-60`}
                     title="Refresh data"
                   >
                     <RefreshCw
@@ -1556,11 +1555,9 @@ export default function AdminSiswaPage() {
                         "/admin/siswa/tambah"
                       )
                     }
-                    className="flex h-10 flex-1 items-center justify-center gap-2 rounded-xl bg-blue-600 px-4 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700 sm:flex-none"
+                    className={`flex h-10 flex-1 items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-4 text-sm font-medium text-[var(--color-card)] ${themePrimaryShadow} transition hover:brightness-95 sm:flex-none`}
                   >
-                    <Plus
-                      size={18}
-                    />
+                    <Plus size={18} />
                     Tambah Siswa
                   </button>
 
@@ -1571,20 +1568,22 @@ export default function AdminSiswaPage() {
               {/* ERROR */}
 
               {error && (
-                <div className="flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 px-4 py-3">
+                <div
+                  className={`flex items-start gap-3 rounded-xl border ${themeDangerBorder} ${themeDangerSurface} px-4 py-3`}
+                >
 
                   <AlertTriangle
                     size={19}
-                    className="mt-0.5 shrink-0 text-rose-600"
+                    className="theme-text mt-0.5 shrink-0"
                   />
 
                   <div className="min-w-0 flex-1">
 
-                    <p className="text-sm font-semibold text-rose-700">
+                    <p className="theme-text text-sm font-semibold">
                       Gagal memuat data siswa
                     </p>
 
-                    <p className="mt-1 break-words text-sm text-rose-600">
+                    <p className="theme-text-secondary mt-1 break-words text-sm">
                       {error}
                     </p>
 
@@ -1595,7 +1594,7 @@ export default function AdminSiswaPage() {
                     onClick={() =>
                       setError("")
                     }
-                    className="text-xl leading-none text-rose-500 hover:text-rose-700"
+                    className={`theme-text-muted text-xl leading-none transition hover:text-[var(--color-primary)]`}
                   >
                     ×
                   </button>
@@ -1607,85 +1606,105 @@ export default function AdminSiswaPage() {
 
               <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
 
-                <div className="rounded-xl border border-slate-300 bg-white p-4 shadow-sm transition hover:shadow-md">
+                {/* TOTAL */}
+
+                <div
+                  className={`theme-card rounded-xl border ${themeNeutralBorder} p-4 ${themeCardShadow} transition hover:-translate-y-0.5`}
+                >
 
                   <div className="flex items-center gap-2">
 
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100 text-blue-700">
+                    <div
+                      className={`flex h-8 w-8 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText}`}
+                    >
                       <Users size={16} />
                     </div>
 
-                    <p className="text-[10px] font-medium uppercase tracking-wider text-slate-500">
+                    <p className="theme-text-muted text-[10px] font-medium uppercase tracking-wider">
                       Total Siswa
                     </p>
 
                   </div>
 
-                  <p className="mt-1 text-2xl font-bold text-slate-800">
+                  <p className="theme-text mt-1 text-2xl font-bold">
                     {totalSiswa}
                   </p>
 
                 </div>
 
-                <div className="rounded-xl border border-slate-300 bg-white p-4 shadow-sm transition hover:shadow-md">
+                {/* AKTIF */}
+
+                <div
+                  className={`theme-card rounded-xl border ${themeSuccessBorder} p-4 ${themeCardShadow} transition hover:-translate-y-0.5`}
+                >
 
                   <div className="flex items-center gap-2">
 
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-100 text-emerald-700">
-                      <CheckCircle
-                        size={16}
-                      />
+                    <div
+                      className={`flex h-8 w-8 items-center justify-center rounded-lg ${themeSuccessSurface} text-[var(--color-success)]`}
+                    >
+                      <CheckCircle size={16} />
                     </div>
 
-                    <p className="text-[10px] font-medium uppercase tracking-wider text-slate-500">
+                    <p className="theme-text-muted text-[10px] font-medium uppercase tracking-wider">
                       Aktif
                     </p>
 
                   </div>
 
-                  <p className="mt-1 text-2xl font-bold text-emerald-700">
+                  <p className="mt-1 text-2xl font-bold text-[var(--color-success)]">
                     {totalAktif}
                   </p>
 
                 </div>
 
-                <div className="rounded-xl border border-slate-300 bg-white p-4 shadow-sm transition hover:shadow-md">
+                {/* NONAKTIF */}
+
+                <div
+                  className={`theme-card rounded-xl border ${themeDangerBorder} p-4 ${themeCardShadow} transition hover:-translate-y-0.5`}
+                >
 
                   <div className="flex items-center gap-2">
 
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-100 text-rose-700">
-                      <XCircle
-                        size={16}
-                      />
+                    <div
+                      className={`flex h-8 w-8 items-center justify-center rounded-lg ${themeDangerSurface} theme-text-secondary`}
+                    >
+                      <XCircle size={16} />
                     </div>
 
-                    <p className="text-[10px] font-medium uppercase tracking-wider text-slate-500">
+                    <p className="theme-text-muted text-[10px] font-medium uppercase tracking-wider">
                       Nonaktif
                     </p>
 
                   </div>
 
-                  <p className="mt-1 text-2xl font-bold text-rose-700">
+                  <p className="theme-text mt-1 text-2xl font-bold">
                     {totalNonaktif}
                   </p>
 
                 </div>
 
-                <div className="rounded-xl border border-slate-300 bg-white p-4 shadow-sm transition hover:shadow-md">
+                {/* KELAS */}
+
+                <div
+                  className={`theme-card rounded-xl border ${themeInfoBorder} p-4 ${themeCardShadow} transition hover:-translate-y-0.5`}
+                >
 
                   <div className="flex items-center gap-2">
 
-                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-100 text-indigo-700">
+                    <div
+                      className={`flex h-8 w-8 items-center justify-center rounded-lg ${themeInfoSurface} text-[var(--color-info)]`}
+                    >
                       <Users size={16} />
                     </div>
 
-                    <p className="text-[10px] font-medium uppercase tracking-wider text-slate-500">
+                    <p className="theme-text-muted text-[10px] font-medium uppercase tracking-wider">
                       Kelas
                     </p>
 
                   </div>
 
-                  <p className="mt-1 text-2xl font-bold text-indigo-700">
+                  <p className="mt-1 text-2xl font-bold text-[var(--color-info)]">
                     {totalKelas}
                   </p>
 
@@ -1695,7 +1714,9 @@ export default function AdminSiswaPage() {
 
               {/* SEARCH FILTER */}
 
-              <div className="rounded-xl border border-slate-300 bg-white p-4 shadow-sm">
+              <div
+                className={`theme-card rounded-xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}
+              >
 
                 <div className="flex flex-col gap-3">
 
@@ -1705,7 +1726,7 @@ export default function AdminSiswaPage() {
 
                     <Search
                       size={17}
-                      className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"
+                      className="theme-text-muted absolute left-3.5 top-1/2 -translate-y-1/2"
                     />
 
                     <input
@@ -1713,12 +1734,11 @@ export default function AdminSiswaPage() {
                       value={search}
                       onChange={(event) =>
                         setSearch(
-                          event.target
-                            .value
+                          event.target.value
                         )
                       }
                       placeholder="Cari nama, NIS, NISN, kelas, email, telepon..."
-                      className="w-full rounded-xl border border-slate-300 bg-slate-50 py-2.5 pl-10 pr-4 text-sm text-slate-800 outline-none transition placeholder:text-slate-500 focus:border-blue-500 focus:bg-white focus:ring-2 focus:ring-blue-500/30"
+                      className={`theme-input theme-text w-full rounded-xl border ${themeNeutralBorder} py-2.5 pl-10 pr-4 text-sm outline-none transition ${themeFocus}`}
                     />
 
                   </div>
@@ -1728,16 +1748,13 @@ export default function AdminSiswaPage() {
                     {/* STATUS */}
 
                     <select
-                      value={
-                        filterStatus
-                      }
+                      value={filterStatus}
                       onChange={(event) =>
                         setFilterStatus(
-                          event.target
-                            .value
+                          event.target.value
                         )
                       }
-                      className="min-w-[130px] rounded-lg border border-slate-300 bg-slate-50 px-3 py-1.5 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
+                      className={`theme-input theme-text min-w-[130px] rounded-lg border ${themeNeutralBorder} px-3 py-1.5 text-sm outline-none ${themeFocus}`}
                     >
                       <option value="semua">
                         Semua Status
@@ -1759,30 +1776,24 @@ export default function AdminSiswaPage() {
                       className="relative min-w-[160px]"
                     >
 
-                      <div className="rounded-lg border border-slate-300 bg-slate-50 px-3 py-1.5">
+                      <div
+                        className={`theme-input rounded-lg border ${themeNeutralBorder} px-3 py-1.5`}
+                      >
 
                         <div className="flex items-center gap-1">
 
                           <input
                             type="text"
-                            value={
-                              kelasSearch
-                            }
+                            value={kelasSearch}
                             onChange={(event) => {
                               setKelasSearch(
-                                event
-                                  .target
-                                  .value
+                                event.target.value
                               );
 
-                              setIsKelasOpen(
-                                true
-                              );
+                              setIsKelasOpen(true);
                             }}
                             onFocus={() =>
-                              setIsKelasOpen(
-                                true
-                              )
+                              setIsKelasOpen(true)
                             }
                             placeholder={
                               filterKelas ===
@@ -1790,13 +1801,13 @@ export default function AdminSiswaPage() {
                                 ? "Semua Kelas"
                                 : filterKelas
                             }
-                            className="min-w-0 flex-1 bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-500"
+                            className="theme-text min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-[var(--color-text-placeholder)]"
                             autoComplete="off"
                           />
 
                           <ChevronDown
                             size={16}
-                            className={`shrink-0 text-slate-500 transition-transform ${
+                            className={`theme-text-muted shrink-0 transition-transform ${
                               isKelasOpen
                                 ? "rotate-180"
                                 : ""
@@ -1808,28 +1819,21 @@ export default function AdminSiswaPage() {
                       </div>
 
                       {isKelasOpen && (
-                        <div className="absolute left-0 right-0 top-full z-30 mt-1 max-h-60 overflow-y-auto rounded-lg border border-slate-300 bg-white shadow-xl">
+                        <div
+                          className={`theme-card absolute left-0 right-0 top-full z-30 mt-1 max-h-60 overflow-y-auto rounded-lg border ${themeNeutralBorder} ${themeCardShadow}`}
+                        >
 
                           <button
                             type="button"
                             onClick={() => {
-                              setFilterKelas(
-                                "semua"
-                              );
-
-                              setKelasSearch(
-                                ""
-                              );
-
-                              setIsKelasOpen(
-                                false
-                              );
+                              setFilterKelas("semua");
+                              setKelasSearch("");
+                              setIsKelasOpen(false);
                             }}
-                            className={`block w-full px-3 py-2 text-left text-sm hover:bg-blue-50 ${
-                              filterKelas ===
-                              "semua"
-                                ? "bg-blue-100 font-semibold text-blue-700"
-                                : "text-slate-700"
+                            className={`theme-text flex w-full px-3 py-2 text-left text-sm transition ${themePrimaryHover} ${
+                              filterKelas === "semua"
+                                ? `${themePrimarySoft} font-semibold ${themePrimaryText}`
+                                : ""
                             }`}
                           >
                             Semua Kelas
@@ -1837,7 +1841,7 @@ export default function AdminSiswaPage() {
 
                           {filteredKelasOptions.length ===
                           0 ? (
-                            <div className="px-3 py-3 text-sm text-slate-500">
+                            <div className="theme-text-muted px-3 py-3 text-sm">
                               Belum ada kelas
                             </div>
                           ) : (
@@ -1845,32 +1849,23 @@ export default function AdminSiswaPage() {
                               (kelas) => (
                                 <button
                                   type="button"
-                                  key={
-                                    kelas
-                                  }
+                                  key={kelas}
                                   onClick={() => {
                                     setFilterKelas(
                                       kelas
                                     );
 
-                                    setKelasSearch(
-                                      ""
-                                    );
-
-                                    setIsKelasOpen(
-                                      false
-                                    );
+                                    setKelasSearch("");
+                                    setIsKelasOpen(false);
                                   }}
-                                  className={`block w-full px-3 py-2 text-left text-sm hover:bg-blue-50 ${
+                                  className={`theme-text flex w-full px-3 py-2 text-left text-sm transition ${themePrimaryHover} ${
                                     filterKelas ===
                                     kelas
-                                      ? "bg-blue-100 font-semibold text-blue-700"
-                                      : "text-slate-700"
+                                      ? `${themePrimarySoft} font-semibold ${themePrimaryText}`
+                                      : ""
                                   }`}
                                 >
-                                  {
-                                    kelas
-                                  }
+                                  {kelas}
                                 </button>
                               )
                             )
@@ -1887,11 +1882,10 @@ export default function AdminSiswaPage() {
                       value={sortBy}
                       onChange={(event) =>
                         setSortBy(
-                          event.target
-                            .value
+                          event.target.value
                         )
                       }
-                      className="min-w-[140px] rounded-lg border border-slate-300 bg-slate-50 px-3 py-1.5 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-500/30"
+                      className={`theme-input theme-text min-w-[140px] rounded-lg border ${themeNeutralBorder} px-3 py-1.5 text-sm outline-none ${themeFocus}`}
                     >
                       <option value="nama_asc">
                         Nama A-Z
@@ -1922,18 +1916,14 @@ export default function AdminSiswaPage() {
 
                     <button
                       type="button"
-                      onClick={
-                        resetFilter
-                      }
-                      className="rounded-lg px-3 py-1.5 text-sm text-slate-600 transition hover:bg-slate-100 hover:text-slate-800"
+                      onClick={resetFilter}
+                      className={`theme-text-secondary rounded-lg px-3 py-1.5 text-sm transition ${themeNeutralHover} hover:text-[var(--color-primary)]`}
                     >
                       Reset
                     </button>
 
-                    <span className="ml-auto hidden text-sm text-slate-600 sm:inline">
-                      {
-                        filteredByKelas.length
-                      }{" "}
+                    <span className="theme-text-secondary ml-auto hidden text-sm sm:inline">
+                      {filteredByKelas.length}{" "}
                       siswa ditemukan
                     </span>
 
@@ -1945,59 +1935,62 @@ export default function AdminSiswaPage() {
 
               {/* TABLE */}
 
-              <div className="w-full overflow-hidden rounded-xl border border-slate-300 bg-white shadow-sm">
+              <div
+                className={`theme-card w-full overflow-hidden rounded-xl border ${themeNeutralBorder} ${themeCardShadow}`}
+              >
 
                 <div className="w-full overflow-x-auto">
 
                   <table className="w-full min-w-[900px]">
 
                     <thead>
+                      <tr
+                        className={themePrimaryGradient}
+                      >
 
-                      <tr className="bg-blue-600">
-
-                        <th className="w-[5%] px-3 py-3 text-center text-xs font-semibold uppercase tracking-wider text-white">
+                        <th className="w-[5%] px-3 py-3 text-center text-xs font-semibold uppercase tracking-wider text-[var(--color-card)]">
                           No
                         </th>
 
-                        <th className="w-[25%] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white">
+                        <th className="w-[25%] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--color-card)]">
                           Profil
                         </th>
 
-                        <th className="w-[11%] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white">
+                        <th className="w-[11%] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--color-card)]">
                           NIS
                         </th>
 
-                        <th className="w-[13%] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white">
+                        <th className="w-[13%] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--color-card)]">
                           NISN
                         </th>
 
-                        <th className="w-[13%] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white">
+                        <th className="w-[13%] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--color-card)]">
                           Kelas
                         </th>
 
-                        <th className="hidden w-[18%] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white md:table-cell">
+                        <th className="hidden w-[18%] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--color-card)] md:table-cell">
                           Email
                         </th>
 
-                        <th className="w-[10%] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-white">
+                        <th className="w-[10%] px-3 py-3 text-left text-xs font-semibold uppercase tracking-wider text-[var(--color-card)]">
                           Status
                         </th>
 
-                        <th className="w-[13%] px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider text-white">
+                        <th className="w-[13%] px-3 py-3 text-right text-xs font-semibold uppercase tracking-wider text-[var(--color-card)]">
                           Aksi
                         </th>
 
                       </tr>
-
                     </thead>
 
-                    <tbody className="divide-y divide-slate-200">
+                    <tbody
+                      className={`divide-y ${themeDivider}`}
+                    >
 
                       {/* LOADING */}
 
                       {loading && (
                         <tr>
-
                           <td
                             colSpan={8}
                             className="px-4 py-16 text-center"
@@ -2007,21 +2000,20 @@ export default function AdminSiswaPage() {
 
                               <Loader2
                                 size={30}
-                                className="animate-spin text-blue-600"
+                                className="animate-spin text-[var(--color-primary)]"
                               />
 
-                              <p className="mt-3 text-sm font-medium text-slate-700">
+                              <p className="theme-text mt-3 text-sm font-medium">
                                 Mengambil data siswa...
                               </p>
 
-                              <p className="mt-1 text-xs text-slate-500">
+                              <p className="theme-text-muted mt-1 text-xs">
                                 Menghubungkan ke database SmartSchool
                               </p>
 
                             </div>
 
                           </td>
-
                         </tr>
                       )}
 
@@ -2029,10 +2021,7 @@ export default function AdminSiswaPage() {
 
                       {!loading &&
                         currentItems.map(
-                          (
-                            item,
-                            index
-                          ) => {
+                          (item, index) => {
                             const rowNumber =
                               startIndex +
                               index +
@@ -2040,18 +2029,14 @@ export default function AdminSiswaPage() {
 
                             return (
                               <tr
-                                key={
-                                  item.id
-                                }
-                                className="group transition-colors hover:bg-blue-50/50"
+                                key={item.id}
+                                className={`group transition-colors hover:bg-[color-mix(in_srgb,var(--color-primary)_5%,transparent)]`}
                               >
 
                                 {/* NO */}
 
-                                <td className="px-3 py-4 text-center text-sm font-medium text-slate-700">
-                                  {
-                                    rowNumber
-                                  }
+                                <td className="theme-text-secondary px-3 py-4 text-center text-sm font-medium">
+                                  {rowNumber}
                                 </td>
 
                                 {/* PROFIL */}
@@ -2061,9 +2046,9 @@ export default function AdminSiswaPage() {
                                   <div className="flex min-w-0 items-center gap-3">
 
                                     <div
-                                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${getAvatarColor(
+                                      className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${getAvatarClass(
                                         item.nama
-                                      )} text-sm font-bold text-white shadow-sm`}
+                                      )} text-sm font-bold text-[var(--color-card)] ${themeSmallShadow}`}
                                     >
                                       {getInitials(
                                         item.nama
@@ -2072,18 +2057,14 @@ export default function AdminSiswaPage() {
 
                                     <div className="min-w-0">
 
-                                      <p className="truncate text-sm font-semibold text-slate-800">
-                                        {
-                                          item.nama
-                                        }
+                                      <p className="theme-text truncate text-sm font-semibold">
+                                        {item.nama}
                                       </p>
 
-                                      <p className="truncate text-xs text-slate-500">
-                                        {
-                                          formatGender(
-                                            item.gender
-                                          )
-                                        }
+                                      <p className="theme-text-muted truncate text-xs">
+                                        {formatGender(
+                                          item.gender
+                                        )}
                                       </p>
 
                                     </div>
@@ -2094,18 +2075,14 @@ export default function AdminSiswaPage() {
 
                                 {/* NIS */}
 
-                                <td className="px-3 py-4 text-sm text-slate-700">
-                                  {
-                                    item.nis
-                                  }
+                                <td className="theme-text-secondary px-3 py-4 text-sm">
+                                  {item.nis}
                                 </td>
 
                                 {/* NISN */}
 
-                                <td className="px-3 py-4 text-sm text-slate-700">
-                                  {
-                                    item.nisn
-                                  }
+                                <td className="theme-text-secondary px-3 py-4 text-sm">
+                                  {item.nisn}
                                 </td>
 
                                 {/* KELAS */}
@@ -2114,13 +2091,13 @@ export default function AdminSiswaPage() {
 
                                   {item.kelas !==
                                   "-" ? (
-                                    <span className="inline-flex whitespace-nowrap rounded-lg bg-indigo-100 px-2.5 py-1 text-xs font-medium text-indigo-700">
-                                      {
-                                        item.kelas
-                                      }
+                                    <span
+                                      className={`inline-flex whitespace-nowrap rounded-lg ${themeInfoSurface} px-2.5 py-1 text-xs font-medium text-[var(--color-info)]`}
+                                    >
+                                      {item.kelas}
                                     </span>
                                   ) : (
-                                    <span className="text-sm text-slate-400">
+                                    <span className="theme-text-muted text-sm">
                                       Belum masuk kelas
                                     </span>
                                   )}
@@ -2131,10 +2108,8 @@ export default function AdminSiswaPage() {
 
                                 <td className="hidden px-3 py-4 md:table-cell">
 
-                                  <span className="block max-w-[220px] truncate text-sm text-slate-600">
-                                    {
-                                      item.email
-                                    }
+                                  <span className="theme-text-secondary block max-w-[220px] truncate text-sm">
+                                    {item.email}
                                   </span>
 
                                 </td>
@@ -2147,16 +2122,14 @@ export default function AdminSiswaPage() {
                                     className={`inline-flex items-center gap-1.5 whitespace-nowrap rounded-full border px-2.5 py-1 text-xs font-medium ${
                                       item.status ===
                                       "Aktif"
-                                        ? "border-emerald-300 bg-emerald-100 text-emerald-700"
-                                        : "border-rose-300 bg-rose-100 text-rose-700"
+                                        ? `${themeSuccessSurface} ${themeSuccessBorder} text-[var(--color-success)]`
+                                        : `${themeDangerSurface} ${themeDangerBorder} theme-text-secondary`
                                     }`}
                                   >
 
                                     <span className="h-1.5 w-1.5 rounded-full bg-current" />
 
-                                    {
-                                      item.status
-                                    }
+                                    {item.status}
 
                                   </span>
 
@@ -2177,12 +2150,10 @@ export default function AdminSiswaPage() {
                                           `/admin/siswa/${item.id}`
                                         )
                                       }
-                                      className="rounded-lg p-2 text-slate-500 transition hover:bg-blue-100 hover:text-blue-700"
+                                      className={`theme-text-muted rounded-lg p-2 transition ${themePrimaryHover} hover:text-[var(--color-primary)]`}
                                       title="Lihat detail"
                                     >
-                                      <Eye
-                                        size={17}
-                                      />
+                                      <Eye size={17} />
                                     </button>
 
                                     {/* EDIT */}
@@ -2194,12 +2165,10 @@ export default function AdminSiswaPage() {
                                           `/admin/siswa/edit/${item.id}`
                                         )
                                       }
-                                      className="rounded-lg p-2 text-slate-500 transition hover:bg-amber-100 hover:text-amber-700"
+                                      className="theme-text-muted rounded-lg p-2 transition hover:bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)] hover:text-[var(--color-warning)]"
                                       title="Edit siswa"
                                     >
-                                      <Edit
-                                        size={17}
-                                      />
+                                      <Edit size={17} />
                                     </button>
 
                                     {/* DELETE */}
@@ -2212,12 +2181,10 @@ export default function AdminSiswaPage() {
                                           item.nama
                                         )
                                       }
-                                      className="rounded-lg p-2 text-slate-500 transition hover:bg-rose-100 hover:text-rose-700"
+                                      className="theme-text-muted rounded-lg p-2 transition hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)] hover:text-[var(--color-text)]"
                                       title="Hapus siswa"
                                     >
-                                      <Trash2
-                                        size={17}
-                                      />
+                                      <Trash2 size={17} />
                                     </button>
 
                                   </div>
@@ -2242,18 +2209,20 @@ export default function AdminSiswaPage() {
                     0 && (
                     <div className="p-12 text-center">
 
-                      <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-slate-100">
+                      <div
+                        className={`mx-auto flex h-14 w-14 items-center justify-center rounded-full ${themeNeutralSurface}`}
+                      >
                         <Users
                           size={28}
-                          className="text-slate-400"
+                          className="theme-text-muted"
                         />
                       </div>
 
-                      <p className="mt-4 text-sm font-semibold text-slate-700">
+                      <p className="theme-text mt-4 text-sm font-semibold">
                         Tidak ada data siswa
                       </p>
 
-                      <p className="mt-1 text-xs text-slate-500">
+                      <p className="theme-text-muted mt-1 text-xs">
                         {search ||
                         filterStatus !==
                           "semua" ||
@@ -2275,11 +2244,9 @@ export default function AdminSiswaPage() {
                                 "/admin/siswa/tambah"
                               )
                             }
-                            className="mt-4 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
+                            className={`mt-4 inline-flex items-center gap-2 rounded-xl ${themePrimaryGradient} px-4 py-2.5 text-sm font-medium text-[var(--color-card)] ${themePrimaryShadow}`}
                           >
-                            <Plus
-                              size={17}
-                            />
+                            <Plus size={17} />
                             Tambah Siswa
                           </button>
                         )}
@@ -2291,20 +2258,19 @@ export default function AdminSiswaPage() {
 
                 {!loading &&
                   totalItems > 0 && (
-                    <div className="flex flex-col items-center justify-between gap-3 border-t border-slate-300 bg-slate-50 px-4 py-3 sm:flex-row">
+                    <div
+                      className={`flex flex-col items-center justify-between gap-3 border-t ${themeDivider} ${themeNeutralSurface} px-4 py-3 sm:flex-row`}
+                    >
 
-                      <div className="flex items-center gap-3 text-sm text-slate-600">
+                      <div className="flex items-center gap-3 theme-text-secondary text-sm">
 
                         <span>
                           Menampilkan{" "}
-                          {startIndex +
-                            1}{" "}
+                          {startIndex + 1}{" "}
                           -{" "}
                           {endIndex}{" "}
                           dari{" "}
-                          {
-                            totalItems
-                          }{" "}
+                          {totalItems}{" "}
                           data
                         </span>
 
@@ -2315,9 +2281,7 @@ export default function AdminSiswaPage() {
                           </span>
 
                           <select
-                            value={
-                              itemsPerPage
-                            }
+                            value={itemsPerPage}
                             onChange={(
                               event
                             ) => {
@@ -2329,11 +2293,9 @@ export default function AdminSiswaPage() {
                                 )
                               );
 
-                              setCurrentPage(
-                                1
-                              );
+                              setCurrentPage(1);
                             }}
-                            className="rounded-lg border border-slate-300 bg-white px-2 py-1 text-sm text-slate-700"
+                            className={`theme-input theme-text rounded-lg border ${themeNeutralBorder} px-2 py-1 text-sm outline-none ${themeFocus}`}
                           >
                             <option value={10}>
                               10
@@ -2356,8 +2318,7 @@ export default function AdminSiswaPage() {
 
                       </div>
 
-                      {totalPages >
-                        1 && (
+                      {totalPages > 1 && (
                         <div className="flex items-center gap-1">
 
                           <button
@@ -2367,11 +2328,9 @@ export default function AdminSiswaPage() {
                               1
                             }
                             onClick={() =>
-                              goToPage(
-                                1
-                              )
+                              goToPage(1)
                             }
-                            className="rounded-lg px-2 py-1.5 text-sm text-slate-600 hover:bg-slate-200 disabled:opacity-30"
+                            className={`theme-text-secondary rounded-lg px-2 py-1.5 text-sm ${themeNeutralHover} disabled:opacity-30`}
                           >
                             «
                           </button>
@@ -2388,7 +2347,7 @@ export default function AdminSiswaPage() {
                                   1
                               )
                             }
-                            className="rounded-lg px-2 py-1.5 text-sm text-slate-600 hover:bg-slate-200 disabled:opacity-30"
+                            className={`theme-text-secondary rounded-lg px-2 py-1.5 text-sm ${themeNeutralHover} disabled:opacity-30`}
                           >
                             ‹
                           </button>
@@ -2401,10 +2360,7 @@ export default function AdminSiswaPage() {
                                   totalPages
                                 ),
                             },
-                            (
-                              _,
-                              index
-                            ) => {
+                            (_, index) => {
                               let pageNumber;
 
                               if (
@@ -2412,19 +2368,16 @@ export default function AdminSiswaPage() {
                                 5
                               ) {
                                 pageNumber =
-                                  index +
-                                  1;
+                                  index + 1;
                               } else if (
                                 currentPage <=
                                 3
                               ) {
                                 pageNumber =
-                                  index +
-                                  1;
+                                  index + 1;
                               } else if (
                                 currentPage >=
-                                totalPages -
-                                  2
+                                totalPages - 2
                               ) {
                                 pageNumber =
                                   totalPages -
@@ -2440,24 +2393,20 @@ export default function AdminSiswaPage() {
                               return (
                                 <button
                                   type="button"
-                                  key={
-                                    pageNumber
-                                  }
+                                  key={pageNumber}
                                   onClick={() =>
                                     goToPage(
                                       pageNumber
                                     )
                                   }
-                                  className={`h-8 w-8 rounded-lg text-sm font-medium ${
+                                  className={`h-8 w-8 rounded-lg text-sm font-medium transition ${
                                     currentPage ===
                                     pageNumber
-                                      ? "bg-blue-600 text-white"
-                                      : "text-slate-700 hover:bg-slate-200"
+                                      ? `${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`
+                                      : `theme-text-secondary ${themeNeutralHover}`
                                   }`}
                                 >
-                                  {
-                                    pageNumber
-                                  }
+                                  {pageNumber}
                                 </button>
                               );
                             }
@@ -2471,11 +2420,10 @@ export default function AdminSiswaPage() {
                             }
                             onClick={() =>
                               goToPage(
-                                currentPage +
-                                  1
+                                currentPage + 1
                               )
                             }
-                            className="rounded-lg px-2 py-1.5 text-sm text-slate-600 hover:bg-slate-200 disabled:opacity-30"
+                            className={`theme-text-secondary rounded-lg px-2 py-1.5 text-sm ${themeNeutralHover} disabled:opacity-30`}
                           >
                             ›
                           </button>
@@ -2491,7 +2439,7 @@ export default function AdminSiswaPage() {
                                 totalPages
                               )
                             }
-                            className="rounded-lg px-2 py-1.5 text-sm text-slate-600 hover:bg-slate-200 disabled:opacity-30"
+                            className={`theme-text-secondary rounded-lg px-2 py-1.5 text-sm ${themeNeutralHover} disabled:opacity-30`}
                           >
                             »
                           </button>
@@ -2506,7 +2454,9 @@ export default function AdminSiswaPage() {
 
               {/* FOOTER */}
 
-              <footer className="border-t border-slate-300 py-4 text-center text-sm text-slate-500">
+              <footer
+                className={`border-t ${themeDivider} py-4 text-center theme-text-muted text-sm`}
+              >
                 © 2026 SmartSchool • Data Siswa
               </footer>
 
@@ -2523,13 +2473,11 @@ export default function AdminSiswaPage() {
       {deleteModal.open && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4 backdrop-blur-sm"
-          onClick={
-            closeDeleteModal
-          }
+          onClick={closeDeleteModal}
         >
 
           <div
-            className="w-full max-w-md overflow-hidden rounded-2xl bg-white shadow-2xl"
+            className={`theme-card w-full max-w-md overflow-hidden rounded-2xl ${themeCardShadow}`}
             onClick={(event) =>
               event.stopPropagation()
             }
@@ -2537,58 +2485,58 @@ export default function AdminSiswaPage() {
 
             <div className="p-6 text-center">
 
-              <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-rose-100">
+              <div
+                className={`mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full ${themeDangerSurface}`}
+              >
                 <AlertTriangle
                   size={30}
-                  className="text-rose-600"
+                  className="theme-text"
                 />
               </div>
 
-              <h3 className="text-xl font-bold text-slate-800">
+              <h3 className="theme-text text-xl font-bold">
                 Hapus Data Siswa?
               </h3>
 
-              <p className="mt-2 text-sm leading-relaxed text-slate-500">
+              <p className="theme-text-secondary mt-2 text-sm leading-relaxed">
 
                 Apakah kamu yakin ingin
                 menghapus data siswa
 
                 <br />
 
-                <span className="font-semibold text-slate-800">
+                <span className="theme-text font-semibold">
                   "{deleteModal.nama}"
                 </span>
                 ?
 
               </p>
 
-              <p className="mt-3 text-xs text-rose-500">
+              <p className="theme-text-muted mt-3 text-xs">
                 Data akan dihapus melalui
                 backend SmartSchool.
               </p>
 
             </div>
 
-            <div className="flex gap-3 border-t border-slate-200 bg-slate-50 p-4">
+            <div
+              className={`flex gap-3 border-t ${themeDivider} ${themeNeutralSurface} p-4`}
+            >
 
               <button
                 type="button"
-                onClick={
-                  closeDeleteModal
-                }
+                onClick={closeDeleteModal}
                 disabled={deleting}
-                className="flex-1 rounded-xl border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-50"
+                className={`theme-input theme-text-secondary flex-1 rounded-xl border ${themeNeutralBorder} px-4 py-2.5 text-sm font-medium transition ${themeNeutralHover} disabled:opacity-50`}
               >
                 Batal
               </button>
 
               <button
                 type="button"
-                onClick={
-                  confirmDelete
-                }
+                onClick={confirmDelete}
                 disabled={deleting}
-                className="flex-1 rounded-xl bg-rose-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-rose-700 disabled:opacity-60"
+                className={`flex-1 rounded-xl bg-[var(--color-text)] px-4 py-2.5 text-sm font-medium text-[var(--color-card)] transition hover:opacity-90 disabled:opacity-60`}
               >
 
                 <span className="flex items-center justify-center gap-2">
@@ -2603,9 +2551,7 @@ export default function AdminSiswaPage() {
                     </>
                   ) : (
                     <>
-                      <Trash2
-                        size={16}
-                      />
+                      <Trash2 size={16} />
                       Hapus
                     </>
                   )}

@@ -12,7 +12,6 @@ import {
   Eye,
   Edit3,
   CalendarDays,
-  Users,
   UserRound,
   HeartHandshake,
   Award,
@@ -23,10 +22,8 @@ import {
   TrendingDown,
   Clock3,
   CheckCircle2,
-  XCircle,
   ChevronRight,
   ChevronLeft,
-  Filter,
   RotateCcw,
   X,
   BookOpen,
@@ -232,30 +229,24 @@ const PRESTASI_DATA = [
 
 const KONSELING_STATUS = {
   Selesai: {
-    bg: "bg-emerald-50",
-    text: "text-emerald-700",
-    border: "border-emerald-100",
-    dot: "bg-emerald-500",
+    className: "theme-success",
+    dot: "bg-[var(--color-success)]",
   },
   Terjadwal: {
-    bg: "bg-blue-50",
-    text: "text-blue-700",
-    border: "border-blue-100",
-    dot: "bg-blue-500",
+    className: "theme-info",
+    dot: "bg-[var(--color-info)]",
   },
   Dibatalkan: {
-    bg: "bg-slate-100",
-    text: "text-slate-500",
-    border: "border-slate-200",
-    dot: "bg-slate-400",
+    className: "theme-card-soft theme-text-muted",
+    dot: "bg-[var(--color-text-muted)]",
   },
 };
 
 const PRIORITY_CONFIG = {
-  Tinggi: "border-red-100 bg-red-50 text-red-700",
-  Sedang: "border-amber-100 bg-amber-50 text-amber-700",
-  Normal: "border-slate-200 bg-slate-50 text-slate-600",
-  Rendah: "border-slate-200 bg-slate-50 text-slate-500",
+  Tinggi: "theme-danger",
+  Sedang: "theme-warning",
+  Normal: "theme-card-soft theme-text-secondary",
+  Rendah: "theme-card-soft theme-text-muted",
 };
 
 /* =========================================================
@@ -268,7 +259,7 @@ function KonselingStatus({ status }) {
 
   return (
     <span
-      className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium ${config.bg} ${config.text} ${config.border}`}
+      className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium theme-border ${config.className}`}
     >
       <span
         className={`h-1.5 w-1.5 rounded-full ${config.dot}`}
@@ -281,9 +272,8 @@ function KonselingStatus({ status }) {
 function PriorityBadge({ priority }) {
   return (
     <span
-      className={`inline-flex rounded-md border px-2 py-1 text-[10px] font-medium ${
-        PRIORITY_CONFIG[priority] ||
-        PRIORITY_CONFIG.Normal
+      className={`inline-flex rounded-md border px-2 py-1 text-[10px] font-medium theme-border ${
+        PRIORITY_CONFIG[priority] || PRIORITY_CONFIG.Normal
       }`}
     >
       {priority}
@@ -305,15 +295,15 @@ function StatCard({
   trend,
 }) {
   return (
-    <div className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-sm">
+    <div className="theme-card theme-border rounded-xl border p-4 shadow-sm">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-xs font-medium text-slate-500">
+          <p className="theme-text-muted text-xs font-medium">
             {title}
           </p>
 
           <div className="mt-1 flex items-center gap-2">
-            <p className="text-2xl font-bold tracking-tight text-slate-800">
+            <p className="theme-text text-2xl font-bold tracking-tight">
               {value}
             </p>
 
@@ -321,8 +311,8 @@ function StatCard({
               <span
                 className={`inline-flex items-center text-[10px] font-semibold ${
                   trend.type === "up"
-                    ? "text-emerald-600"
-                    : "text-red-500"
+                    ? "text-[var(--color-success)]"
+                    : "text-[var(--color-danger)]"
                 }`}
               >
                 {trend.type === "up" ? (
@@ -335,7 +325,7 @@ function StatCard({
             )}
           </div>
 
-          <p className="mt-1 truncate text-xs text-slate-400">
+          <p className="theme-text-placeholder mt-1 truncate text-xs">
             {description}
           </p>
         </div>
@@ -363,19 +353,19 @@ function SectionCard({
   onAction,
 }) {
   return (
-    <div className="flex min-h-0 flex-col rounded-xl border border-slate-200/80 bg-white shadow-sm">
-      <div className="flex shrink-0 items-center justify-between border-b border-slate-100 px-4 py-3">
+    <div className="theme-card theme-border flex min-h-0 flex-col rounded-xl border shadow-sm">
+      <div className="theme-border-soft flex shrink-0 items-center justify-between border-b px-4 py-3">
         <div className="flex min-w-0 items-center gap-2.5">
-          <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-[#eaf1ff]">
-            <Icon size={16} className="text-[#155DFC]" />
+          <div className="theme-info flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
+            <Icon size={16} />
           </div>
 
           <div className="min-w-0">
-            <h3 className="truncate text-sm font-bold text-slate-800">
+            <h3 className="theme-text truncate text-sm font-bold">
               {title}
             </h3>
 
-            <p className="truncate text-[10px] text-slate-400">
+            <p className="theme-text-placeholder truncate text-[10px]">
               {description}
             </p>
           </div>
@@ -384,7 +374,7 @@ function SectionCard({
         {action && (
           <button
             onClick={onAction}
-            className="shrink-0 text-xs font-semibold text-[#155DFC] hover:text-[#0d47c9]"
+            className="theme-sidebar-text-active shrink-0 text-xs font-semibold transition hover:opacity-80"
           >
             {action}
           </button>
@@ -527,7 +517,7 @@ export default function BKPage() {
   };
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-slate-50">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
       {/* =====================================================
           SIDEBAR
       ===================================================== */}
@@ -563,7 +553,7 @@ export default function BKPage() {
             CONTENT
         =================================================== */}
 
-        <main className="min-h-0 flex-1 overflow-hidden">
+        <main className="theme-page min-h-0 flex-1 overflow-hidden">
           <div className="flex h-full min-h-0 flex-col px-4 py-4 sm:px-5 lg:px-6">
             {/* =================================================
                 PAGE HEADER
@@ -572,19 +562,16 @@ export default function BKPage() {
             <div className="mb-4 shrink-0">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <div className="flex min-w-0 items-center gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[#eaf1ff]">
-                    <HeartHandshake
-                      size={20}
-                      className="text-[#155DFC]"
-                    />
+                  <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+                    <HeartHandshake size={20} />
                   </div>
 
                   <div className="min-w-0">
-                    <h1 className="truncate text-lg font-bold tracking-tight text-slate-800 sm:text-xl">
+                    <h1 className="theme-text truncate text-lg font-bold tracking-tight sm:text-xl">
                       Bimbingan Konseling
                     </h1>
 
-                    <p className="truncate text-xs text-slate-500">
+                    <p className="theme-text-secondary truncate text-xs">
                       Kelola layanan konseling, perkembangan,
                       prestasi, dan pembinaan siswa
                     </p>
@@ -593,9 +580,11 @@ export default function BKPage() {
 
                 <button
                   onClick={() =>
-                    router.push("/admin/bk/sesi-konseling/tambah")
+                    router.push(
+                      "/admin/bk/sesi-konseling/tambah"
+                    )
                   }
-                  className="inline-flex shrink-0 items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-[#155DFC] to-[#0d47c9] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:shadow-md"
+                  className="theme-primary inline-flex shrink-0 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold shadow-sm transition"
                 >
                   <Plus size={17} />
                   Tambah Sesi
@@ -613,8 +602,8 @@ export default function BKPage() {
                 value="24"
                 description="Sesi bulan ini"
                 icon={MessageSquare}
-                iconBg="bg-[#eaf1ff]"
-                iconColor="text-[#155DFC]"
+                iconBg="theme-info"
+                iconColor=""
                 trend={{
                   type: "up",
                   value: "12%",
@@ -626,8 +615,8 @@ export default function BKPage() {
                 value="18"
                 description="Prestasi tercatat"
                 icon={Award}
-                iconBg="bg-emerald-50"
-                iconColor="text-emerald-600"
+                iconBg="theme-success"
+                iconColor=""
                 trend={{
                   type: "up",
                   value: "8%",
@@ -639,8 +628,8 @@ export default function BKPage() {
                 value="12"
                 description="Kasus bulan ini"
                 icon={AlertTriangle}
-                iconBg="bg-amber-50"
-                iconColor="text-amber-600"
+                iconBg="theme-warning"
+                iconColor=""
                 trend={{
                   type: "down",
                   value: "6%",
@@ -652,8 +641,8 @@ export default function BKPage() {
                 value="86%"
                 description="Siswa sudah mengikuti"
                 icon={Brain}
-                iconBg="bg-violet-50"
-                iconColor="text-violet-600"
+                iconBg="theme-info"
+                iconColor=""
               />
             </div>
 
@@ -695,13 +684,11 @@ export default function BKPage() {
                 TABS
             ================================================= */}
 
-            <div className="mb-4 shrink-0 overflow-x-auto rounded-xl border border-slate-200/80 bg-white shadow-sm">
+            <div className="theme-card theme-border mb-4 shrink-0 overflow-x-auto rounded-xl border shadow-sm">
               <div className="flex min-w-max">
                 {tabs.map((tab) => {
                   const Icon = tab.icon;
-
-                  const active =
-                    activeTab === tab.id;
+                  const active = activeTab === tab.id;
 
                   return (
                     <button
@@ -712,8 +699,8 @@ export default function BKPage() {
                       }}
                       className={`relative flex items-center gap-2 px-4 py-3 text-xs font-semibold transition ${
                         active
-                          ? "text-[#155DFC]"
-                          : "text-slate-500 hover:text-slate-700"
+                          ? "theme-sidebar-text-active"
+                          : "theme-text-muted"
                       }`}
                     >
                       <Icon size={15} />
@@ -721,7 +708,7 @@ export default function BKPage() {
                       {tab.label}
 
                       {active && (
-                        <span className="absolute bottom-0 left-3 right-3 h-0.5 rounded-full bg-[#155DFC]" />
+                        <span className="absolute bottom-0 left-3 right-3 h-0.5 rounded-full bg-[var(--color-primary)]" />
                       )}
                     </button>
                   );
@@ -735,15 +722,15 @@ export default function BKPage() {
 
             <div className="min-h-0 flex-1">
               {activeTab === "konseling" && (
-                <div className="flex h-full min-h-0 flex-col rounded-xl border border-slate-200/80 bg-white shadow-sm">
+                <div className="theme-card theme-border flex h-full min-h-0 flex-col rounded-xl border shadow-sm">
                   {/* FILTER */}
 
-                  <div className="shrink-0 border-b border-slate-100 p-3 sm:p-4">
+                  <div className="theme-border-soft shrink-0 border-b p-3 sm:p-4">
                     <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
                       <div className="relative min-w-0 flex-1">
                         <Search
                           size={17}
-                          className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                          className="theme-text-muted pointer-events-none absolute left-3 top-1/2 -translate-y-1/2"
                         />
 
                         <input
@@ -756,7 +743,7 @@ export default function BKPage() {
                             setCurrentPage(1);
                           }}
                           placeholder="Cari nama siswa, NIS, kelas, atau konselor..."
-                          className="h-10 w-full rounded-lg border border-slate-200 bg-slate-50/50 pl-9 pr-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-[#8bb4ff] focus:bg-white focus:ring-2 focus:ring-[#155DFC]/10"
+                          className="theme-input h-10 w-full rounded-lg border pl-9 pr-3 text-sm outline-none transition focus:border-[var(--color-primary)]"
                         />
                       </div>
 
@@ -769,7 +756,7 @@ export default function BKPage() {
                             );
                             setCurrentPage(1);
                           }}
-                          className="h-10 min-w-[135px] rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 outline-none focus:border-[#8bb4ff] focus:ring-2 focus:ring-[#155DFC]/10"
+                          className="theme-input h-10 min-w-[135px] rounded-lg border px-3 text-xs font-medium outline-none focus:border-[var(--color-primary)]"
                         >
                           <option value="Semua">
                             Semua Status
@@ -793,7 +780,7 @@ export default function BKPage() {
                             );
                             setCurrentPage(1);
                           }}
-                          className="h-10 min-w-[135px] rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-600 outline-none focus:border-[#8bb4ff] focus:ring-2 focus:ring-[#155DFC]/10"
+                          className="theme-input h-10 min-w-[135px] rounded-lg border px-3 text-xs font-medium outline-none focus:border-[var(--color-primary)]"
                         >
                           <option value="Semua">
                             Semua Kelas
@@ -820,7 +807,7 @@ export default function BKPage() {
 
                         <button
                           onClick={resetFilters}
-                          className="inline-flex h-10 items-center justify-center gap-1.5 rounded-lg border border-slate-200 bg-white px-3 text-xs font-medium text-slate-500 transition hover:bg-slate-50"
+                          className="theme-card theme-border theme-text-secondary theme-header-hover inline-flex h-10 items-center justify-center gap-1.5 rounded-lg border px-3 text-xs font-medium transition"
                         >
                           <RotateCcw size={14} />
                           Reset
@@ -833,57 +820,57 @@ export default function BKPage() {
 
                   <div className="min-h-0 flex-1 overflow-auto">
                     <table className="w-full min-w-[950px] border-collapse">
-                      <thead className="sticky top-0 z-10 bg-slate-50">
-                        <tr className="border-b border-slate-200">
-                          <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                      <thead className="theme-table-header sticky top-0 z-10">
+                        <tr className="theme-border border-b">
+                          <th className="theme-text-secondary px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">
                             Siswa
                           </th>
 
-                          <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                          <th className="theme-text-secondary px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">
                             Jadwal
                           </th>
 
-                          <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                          <th className="theme-text-secondary px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">
                             Konselor
                           </th>
 
-                          <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                          <th className="theme-text-secondary px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">
                             Kategori
                           </th>
 
-                          <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                          <th className="theme-text-secondary px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">
                             Prioritas
                           </th>
 
-                          <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                          <th className="theme-text-secondary px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">
                             Status
                           </th>
 
-                          <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                          <th className="theme-text-secondary px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wider">
                             Aksi
                           </th>
                         </tr>
                       </thead>
 
-                      <tbody className="divide-y divide-slate-100">
+                      <tbody className="divide-y divide-[var(--color-border-soft)]">
                         {paginatedKonseling.map(
                           (item) => (
                             <tr
                               key={item.id}
-                              className="transition hover:bg-slate-50/70"
+                              className="theme-table-hover transition"
                             >
                               <td className="px-4 py-3">
                                 <div className="flex items-center gap-3">
-                                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#eaf1ff] text-xs font-bold text-[#155DFC]">
+                                  <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-xs font-bold">
                                     {item.avatar}
                                   </div>
 
                                   <div className="min-w-0">
-                                    <p className="truncate text-sm font-semibold text-slate-700">
+                                    <p className="theme-text truncate text-sm font-semibold">
                                       {item.siswa}
                                     </p>
 
-                                    <p className="mt-0.5 text-[11px] text-slate-400">
+                                    <p className="theme-text-placeholder mt-0.5 text-[11px]">
                                       {item.nis} ·{" "}
                                       {item.kelas}
                                     </p>
@@ -892,28 +879,28 @@ export default function BKPage() {
                               </td>
 
                               <td className="px-4 py-3">
-                                <p className="text-xs font-medium text-slate-700">
+                                <p className="theme-text text-xs font-medium">
                                   {item.tanggal}
                                 </p>
 
-                                <p className="mt-0.5 flex items-center gap-1 text-[11px] text-slate-400">
+                                <p className="theme-text-placeholder mt-0.5 flex items-center gap-1 text-[11px]">
                                   <Clock3 size={11} />
                                   {item.waktu}
                                 </p>
                               </td>
 
                               <td className="px-4 py-3">
-                                <p className="text-xs font-medium text-slate-700">
+                                <p className="theme-text text-xs font-medium">
                                   {item.konselor}
                                 </p>
 
-                                <p className="mt-0.5 text-[10px] text-slate-400">
+                                <p className="theme-text-placeholder mt-0.5 text-[10px]">
                                   Guru BK
                                 </p>
                               </td>
 
                               <td className="px-4 py-3">
-                                <span className="rounded-md border border-blue-100 bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700">
+                                <span className="theme-info rounded-md border px-2.5 py-1 text-xs font-medium">
                                   {item.kategori}
                                 </span>
                               </td>
@@ -940,7 +927,7 @@ export default function BKPage() {
                                         item
                                       )
                                     }
-                                    className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-[#eaf1ff] hover:text-[#155DFC]"
+                                    className="theme-text-muted theme-header-hover flex h-8 w-8 items-center justify-center rounded-lg transition"
                                     title="Lihat detail"
                                   >
                                     <Eye size={16} />
@@ -952,7 +939,7 @@ export default function BKPage() {
                                         item
                                       )
                                     }
-                                    className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 transition hover:bg-[#eaf1ff] hover:text-[#155DFC]"
+                                    className="theme-text-muted theme-header-hover flex h-8 w-8 items-center justify-center rounded-lg transition"
                                     title="Edit"
                                   >
                                     <Edit3 size={16} />
@@ -968,19 +955,18 @@ export default function BKPage() {
 
                   {/* PAGINATION */}
 
-                  <div className="flex shrink-0 flex-col gap-2 border-t border-slate-100 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
-                    <p className="text-xs text-slate-400">
+                  <div className="theme-border-soft flex shrink-0 flex-col gap-2 border-t px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="theme-text-muted text-xs">
                       Menampilkan{" "}
-                      <span className="font-medium text-slate-600">
-                        {filteredKonseling.length ===
-                        0
+                      <span className="theme-text-secondary font-medium">
+                        {filteredKonseling.length === 0
                           ? 0
                           : (safeCurrentPage - 1) *
                               itemsPerPage +
                             1}
                       </span>{" "}
                       -{" "}
-                      <span className="font-medium text-slate-600">
+                      <span className="theme-text-secondary font-medium">
                         {Math.min(
                           safeCurrentPage *
                             itemsPerPage,
@@ -988,7 +974,7 @@ export default function BKPage() {
                         )}
                       </span>{" "}
                       dari{" "}
-                      <span className="font-medium text-slate-600">
+                      <span className="theme-text-secondary font-medium">
                         {filteredKonseling.length}
                       </span>{" "}
                       sesi
@@ -1002,7 +988,7 @@ export default function BKPage() {
                             Math.max(1, prev - 1)
                           )
                         }
-                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-50 disabled:opacity-40"
+                        className="theme-card theme-border theme-text-secondary theme-header-hover flex h-8 w-8 items-center justify-center rounded-lg border transition disabled:opacity-40"
                       >
                         <ChevronLeft size={15} />
                       </button>
@@ -1020,8 +1006,8 @@ export default function BKPage() {
                           }
                           className={`flex h-8 min-w-8 items-center justify-center rounded-lg px-2 text-xs font-medium ${
                             safeCurrentPage === page
-                              ? "bg-[#155DFC] text-white"
-                              : "text-slate-500 hover:bg-slate-100"
+                              ? "theme-primary"
+                              : "theme-text-muted theme-header-hover"
                           }`}
                         >
                           {page}
@@ -1040,7 +1026,7 @@ export default function BKPage() {
                             )
                           )
                         }
-                        className="flex h-8 w-8 items-center justify-center rounded-lg border border-slate-200 text-slate-500 transition hover:bg-slate-50 disabled:opacity-40"
+                        className="theme-card theme-border theme-text-secondary theme-header-hover flex h-8 w-8 items-center justify-center rounded-lg border transition disabled:opacity-40"
                       >
                         <ChevronRight size={15} />
                       </button>
@@ -1066,53 +1052,53 @@ export default function BKPage() {
                   }
                 >
                   <table className="w-full min-w-[850px] border-collapse">
-                    <thead className="sticky top-0 z-10 bg-slate-50">
-                      <tr className="border-b border-slate-200">
-                        <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                    <thead className="theme-table-header sticky top-0 z-10">
+                      <tr className="theme-border border-b">
+                        <th className="theme-text-secondary px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">
                           Siswa
                         </th>
 
-                        <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                        <th className="theme-text-secondary px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">
                           Pelanggaran
                         </th>
 
-                        <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                        <th className="theme-text-secondary px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">
                           Kategori
                         </th>
 
-                        <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                        <th className="theme-text-secondary px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">
                           Point
                         </th>
 
-                        <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                        <th className="theme-text-secondary px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">
                           Tanggal
                         </th>
 
-                        <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                        <th className="theme-text-secondary px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wider">
                           Aksi
                         </th>
                       </tr>
                     </thead>
 
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-[var(--color-border-soft)]">
                       {PELANGGARAN_DATA.map(
                         (item) => (
                           <tr
                             key={item.id}
-                            className="transition hover:bg-slate-50/70"
+                            className="theme-table-hover transition"
                           >
                             <td className="px-4 py-3">
                               <div className="flex items-center gap-3">
-                                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#eaf1ff] text-xs font-bold text-[#155DFC]">
+                                <div className="theme-info flex h-9 w-9 items-center justify-center rounded-lg text-xs font-bold">
                                   {item.avatar}
                                 </div>
 
                                 <div>
-                                  <p className="text-sm font-semibold text-slate-700">
+                                  <p className="theme-text text-sm font-semibold">
                                     {item.siswa}
                                   </p>
 
-                                  <p className="text-[11px] text-slate-400">
+                                  <p className="theme-text-placeholder text-[11px]">
                                     {item.nis} ·{" "}
                                     {item.kelas}
                                   </p>
@@ -1121,28 +1107,28 @@ export default function BKPage() {
                             </td>
 
                             <td className="px-4 py-3">
-                              <p className="max-w-[240px] truncate text-xs font-medium text-slate-700">
+                              <p className="theme-text max-w-[240px] truncate text-xs font-medium">
                                 {item.pelanggaran}
                               </p>
                             </td>
 
                             <td className="px-4 py-3">
-                              <span className="rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs text-slate-600">
+                              <span className="theme-card-soft theme-text-secondary theme-border rounded-md border px-2.5 py-1 text-xs">
                                 {item.kategori}
                               </span>
                             </td>
 
                             <td className="px-4 py-3">
-                              <span className="font-bold text-red-600">
+                              <span className="font-bold text-[var(--color-danger)]">
                                 {item.point}
                               </span>
 
-                              <span className="ml-1 text-[10px] text-slate-400">
+                              <span className="theme-text-placeholder ml-1 text-[10px]">
                                 point
                               </span>
                             </td>
 
-                            <td className="px-4 py-3 text-xs text-slate-500">
+                            <td className="theme-text-secondary px-4 py-3 text-xs">
                               {item.tanggal}
                             </td>
 
@@ -1154,7 +1140,7 @@ export default function BKPage() {
                                       item
                                     )
                                   }
-                                  className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-[#eaf1ff] hover:text-[#155DFC]"
+                                  className="theme-text-muted theme-header-hover flex h-8 w-8 items-center justify-center rounded-lg transition"
                                 >
                                   <Eye size={16} />
                                 </button>
@@ -1185,52 +1171,52 @@ export default function BKPage() {
                   }
                 >
                   <table className="w-full min-w-[800px] border-collapse">
-                    <thead className="sticky top-0 z-10 bg-slate-50">
-                      <tr className="border-b border-slate-200">
-                        <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                    <thead className="theme-table-header sticky top-0 z-10">
+                      <tr className="theme-border border-b">
+                        <th className="theme-text-secondary px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">
                           Siswa
                         </th>
 
-                        <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                        <th className="theme-text-secondary px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">
                           Prestasi
                         </th>
 
-                        <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                        <th className="theme-text-secondary px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">
                           Tingkat
                         </th>
 
-                        <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                        <th className="theme-text-secondary px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">
                           Kategori
                         </th>
 
-                        <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                        <th className="theme-text-secondary px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider">
                           Tanggal
                         </th>
 
-                        <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                        <th className="theme-text-secondary px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wider">
                           Aksi
                         </th>
                       </tr>
                     </thead>
 
-                    <tbody className="divide-y divide-slate-100">
+                    <tbody className="divide-y divide-[var(--color-border-soft)]">
                       {PRESTASI_DATA.map((item) => (
                         <tr
                           key={item.id}
-                          className="transition hover:bg-slate-50/70"
+                          className="theme-table-hover transition"
                         >
                           <td className="px-4 py-3">
                             <div className="flex items-center gap-3">
-                              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#eaf1ff] text-xs font-bold text-[#155DFC]">
+                              <div className="theme-info flex h-9 w-9 items-center justify-center rounded-lg text-xs font-bold">
                                 {item.avatar}
                               </div>
 
                               <div>
-                                <p className="text-sm font-semibold text-slate-700">
+                                <p className="theme-text text-sm font-semibold">
                                   {item.siswa}
                                 </p>
 
-                                <p className="text-[11px] text-slate-400">
+                                <p className="theme-text-placeholder text-[11px]">
                                   {item.kelas}
                                 </p>
                               </div>
@@ -1238,22 +1224,22 @@ export default function BKPage() {
                           </td>
 
                           <td className="px-4 py-3">
-                            <p className="max-w-[270px] truncate text-xs font-semibold text-slate-700">
+                            <p className="theme-text max-w-[270px] truncate text-xs font-semibold">
                               {item.prestasi}
                             </p>
                           </td>
 
                           <td className="px-4 py-3">
-                            <span className="rounded-md border border-emerald-100 bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
+                            <span className="theme-success rounded-md border px-2.5 py-1 text-xs font-medium">
                               {item.tingkat}
                             </span>
                           </td>
 
-                          <td className="px-4 py-3 text-xs text-slate-600">
+                          <td className="theme-text-secondary px-4 py-3 text-xs">
                             {item.kategori}
                           </td>
 
-                          <td className="px-4 py-3 text-xs text-slate-500">
+                          <td className="theme-text-muted px-4 py-3 text-xs">
                             {item.tanggal}
                           </td>
 
@@ -1265,7 +1251,7 @@ export default function BKPage() {
                                     item
                                   )
                                 }
-                                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-[#eaf1ff] hover:text-[#155DFC]"
+                                className="theme-text-muted theme-header-hover flex h-8 w-8 items-center justify-center rounded-lg transition"
                               >
                                 <Eye size={16} />
                               </button>
@@ -1286,21 +1272,18 @@ export default function BKPage() {
                 <div className="grid h-full min-h-0 gap-4 lg:grid-cols-3">
                   {/* OVERVIEW */}
 
-                  <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-sm">
+                  <div className="theme-card theme-border rounded-xl border p-5 shadow-sm">
                     <div className="flex items-center gap-3">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-violet-50">
-                        <Brain
-                          size={20}
-                          className="text-violet-600"
-                        />
+                      <div className="theme-info flex h-10 w-10 items-center justify-center rounded-xl">
+                        <Brain size={20} />
                       </div>
 
                       <div>
-                        <h3 className="text-sm font-bold text-slate-800">
+                        <h3 className="theme-text text-sm font-bold">
                           Asesmen Siswa
                         </h3>
 
-                        <p className="text-[10px] text-slate-400">
+                        <p className="theme-text-placeholder text-[10px]">
                           Ringkasan pengisian asesmen
                         </p>
                       </div>
@@ -1309,24 +1292,24 @@ export default function BKPage() {
                     <div className="mt-6">
                       <div className="flex items-end justify-between">
                         <div>
-                          <p className="text-3xl font-bold text-slate-800">
+                          <p className="theme-text text-3xl font-bold">
                             92%
                           </p>
 
-                          <p className="mt-1 text-xs text-slate-400">
+                          <p className="theme-text-placeholder mt-1 text-xs">
                             Kelengkapan data
                           </p>
                         </div>
 
                         <ClipboardCheck
                           size={28}
-                          className="text-violet-400"
+                          className="text-[var(--color-info)]"
                         />
                       </div>
 
-                      <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
+                      <div className="theme-card-soft mt-4 h-2 overflow-hidden rounded-full">
                         <div
-                          className="h-full rounded-full bg-violet-500"
+                          className="h-full rounded-full bg-[var(--color-info)]"
                           style={{
                             width: "92%",
                           }}
@@ -1359,21 +1342,21 @@ export default function BKPage() {
 
                   {/* MINAT BAKAT */}
 
-                  <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-sm">
+                  <div className="theme-card theme-border rounded-xl border p-5 shadow-sm">
                     <div className="flex items-center justify-between">
                       <div>
-                        <h3 className="text-sm font-bold text-slate-800">
+                        <h3 className="theme-text text-sm font-bold">
                           Minat Dominan
                         </h3>
 
-                        <p className="mt-0.5 text-[10px] text-slate-400">
+                        <p className="theme-text-placeholder mt-0.5 text-[10px]">
                           Hasil asesmen siswa
                         </p>
                       </div>
 
                       <Star
                         size={18}
-                        className="text-amber-500"
+                        className="text-[var(--color-warning)]"
                       />
                     </div>
 
@@ -1407,13 +1390,13 @@ export default function BKPage() {
 
                   {/* QUICK ACTION */}
 
-                  <div className="rounded-xl border border-slate-200/80 bg-white p-5 shadow-sm">
+                  <div className="theme-card theme-border rounded-xl border p-5 shadow-sm">
                     <div>
-                      <h3 className="text-sm font-bold text-slate-800">
+                      <h3 className="theme-text text-sm font-bold">
                         Menu Bimbingan Konseling
                       </h3>
 
-                      <p className="mt-0.5 text-[10px] text-slate-400">
+                      <p className="theme-text-placeholder mt-0.5 text-[10px]">
                         Akses pengelolaan data BK
                       </p>
                     </div>
@@ -1488,14 +1471,14 @@ export default function BKPage() {
 
       {selectedKonseling && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-[2px]">
-          <div className="w-full max-w-2xl overflow-hidden rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+          <div className="theme-card w-full max-w-2xl overflow-hidden rounded-2xl shadow-2xl">
+            <div className="theme-border-soft flex items-center justify-between border-b px-5 py-4">
               <div>
-                <h2 className="text-base font-bold text-slate-800">
+                <h2 className="theme-text text-base font-bold">
                   Detail Sesi Konseling
                 </h2>
 
-                <p className="mt-0.5 text-xs text-slate-400">
+                <p className="theme-text-placeholder mt-0.5 text-xs">
                   Informasi lengkap sesi konseling siswa
                 </p>
               </div>
@@ -1504,24 +1487,24 @@ export default function BKPage() {
                 onClick={() =>
                   setSelectedKonseling(null)
                 }
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100"
+                className="theme-text-muted theme-header-hover flex h-8 w-8 items-center justify-center rounded-lg"
               >
                 <X size={18} />
               </button>
             </div>
 
             <div className="max-h-[75vh] overflow-y-auto p-5">
-              <div className="flex items-center gap-3 rounded-xl border border-[#c7dbff] bg-[#f5f8ff] p-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white text-sm font-bold text-[#155DFC]">
+              <div className="theme-info theme-border flex items-center gap-3 rounded-xl border p-4">
+                <div className="theme-card flex h-12 w-12 items-center justify-center rounded-xl text-sm font-bold">
                   {selectedKonseling.avatar}
                 </div>
 
                 <div className="min-w-0 flex-1">
-                  <h3 className="text-base font-bold text-slate-800">
+                  <h3 className="theme-text text-base font-bold">
                     {selectedKonseling.siswa}
                   </h3>
 
-                  <p className="text-xs text-slate-400">
+                  <p className="theme-text-muted text-xs">
                     {selectedKonseling.nis} ·{" "}
                     {selectedKonseling.kelas}
                   </p>
@@ -1570,28 +1553,28 @@ export default function BKPage() {
                 />
               </div>
 
-              <div className="mt-4 rounded-xl border border-slate-200 p-4">
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+              <div className="theme-card-soft theme-border mt-4 rounded-xl border p-4">
+                <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wide">
                   Catatan Konseling
                 </p>
 
-                <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                <p className="theme-text-secondary mt-2 text-sm leading-relaxed">
                   {selectedKonseling.catatan}
                 </p>
               </div>
             </div>
 
-            <div className="flex justify-end gap-2 border-t border-slate-100 px-5 py-4">
+            <div className="theme-border-soft flex justify-end gap-2 border-t px-5 py-4">
               <button
                 onClick={() =>
                   setSelectedKonseling(null)
                 }
-                className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50"
+                className="theme-card theme-border theme-text-secondary theme-header-hover rounded-lg border px-4 py-2 text-sm font-medium"
               >
                 Tutup
               </button>
 
-              <button className="inline-flex items-center gap-2 rounded-lg bg-[#155DFC] px-4 py-2 text-sm font-semibold text-white hover:bg-[#0d47c9]">
+              <button className="theme-primary inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold">
                 <Edit3 size={15} />
                 Edit Sesi
               </button>
@@ -1606,14 +1589,14 @@ export default function BKPage() {
 
       {selectedPelanggaran && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-[2px]">
-          <div className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+          <div className="theme-card w-full max-w-lg overflow-hidden rounded-2xl shadow-2xl">
+            <div className="theme-border-soft flex items-center justify-between border-b px-5 py-4">
               <div>
-                <h2 className="text-base font-bold text-slate-800">
+                <h2 className="theme-text text-base font-bold">
                   Detail Pelanggaran
                 </h2>
 
-                <p className="mt-0.5 text-xs text-slate-400">
+                <p className="theme-text-placeholder mt-0.5 text-xs">
                   Informasi pelanggaran siswa
                 </p>
               </div>
@@ -1622,24 +1605,24 @@ export default function BKPage() {
                 onClick={() =>
                   setSelectedPelanggaran(null)
                 }
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100"
+                className="theme-text-muted theme-header-hover flex h-8 w-8 items-center justify-center rounded-lg"
               >
                 <X size={18} />
               </button>
             </div>
 
             <div className="p-5">
-              <div className="flex items-center gap-3 rounded-xl border border-red-100 bg-red-50 p-4">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-xs font-bold text-[#155DFC]">
+              <div className="theme-danger theme-border flex items-center gap-3 rounded-xl border p-4">
+                <div className="theme-card flex h-11 w-11 items-center justify-center rounded-xl text-xs font-bold">
                   {selectedPelanggaran.avatar}
                 </div>
 
                 <div>
-                  <p className="text-sm font-bold text-slate-800">
+                  <p className="theme-text text-sm font-bold">
                     {selectedPelanggaran.siswa}
                   </p>
 
-                  <p className="text-xs text-slate-400">
+                  <p className="theme-text-muted text-xs">
                     {selectedPelanggaran.nis} ·{" "}
                     {selectedPelanggaran.kelas}
                   </p>
@@ -1677,12 +1660,12 @@ export default function BKPage() {
               </div>
             </div>
 
-            <div className="flex justify-end border-t border-slate-100 px-5 py-4">
+            <div className="theme-border-soft flex justify-end border-t px-5 py-4">
               <button
                 onClick={() =>
                   setSelectedPelanggaran(null)
                 }
-                className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50"
+                className="theme-card theme-border theme-text-secondary theme-header-hover rounded-lg border px-4 py-2 text-sm font-medium"
               >
                 Tutup
               </button>
@@ -1697,14 +1680,14 @@ export default function BKPage() {
 
       {selectedPrestasi && (
         <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-[2px]">
-          <div className="w-full max-w-lg overflow-hidden rounded-2xl bg-white shadow-2xl">
-            <div className="flex items-center justify-between border-b border-slate-100 px-5 py-4">
+          <div className="theme-card w-full max-w-lg overflow-hidden rounded-2xl shadow-2xl">
+            <div className="theme-border-soft flex items-center justify-between border-b px-5 py-4">
               <div>
-                <h2 className="text-base font-bold text-slate-800">
+                <h2 className="theme-text text-base font-bold">
                   Detail Prestasi
                 </h2>
 
-                <p className="mt-0.5 text-xs text-slate-400">
+                <p className="theme-text-placeholder mt-0.5 text-xs">
                   Informasi prestasi siswa
                 </p>
               </div>
@@ -1713,35 +1696,35 @@ export default function BKPage() {
                 onClick={() =>
                   setSelectedPrestasi(null)
                 }
-                className="flex h-8 w-8 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-100"
+                className="theme-text-muted theme-header-hover flex h-8 w-8 items-center justify-center rounded-lg"
               >
                 <X size={18} />
               </button>
             </div>
 
             <div className="p-5">
-              <div className="flex items-center gap-3 rounded-xl border border-emerald-100 bg-emerald-50 p-4">
-                <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white text-xs font-bold text-[#155DFC]">
+              <div className="theme-success theme-border flex items-center gap-3 rounded-xl border p-4">
+                <div className="theme-card flex h-11 w-11 items-center justify-center rounded-xl text-xs font-bold">
                   {selectedPrestasi.avatar}
                 </div>
 
                 <div>
-                  <p className="text-sm font-bold text-slate-800">
+                  <p className="theme-text text-sm font-bold">
                     {selectedPrestasi.siswa}
                   </p>
 
-                  <p className="text-xs text-slate-400">
+                  <p className="theme-text-muted text-xs">
                     {selectedPrestasi.kelas}
                   </p>
                 </div>
               </div>
 
               <div className="mt-4">
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-400">
+                <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wide">
                   Prestasi
                 </p>
 
-                <p className="mt-1 text-sm font-bold text-slate-800">
+                <p className="theme-text mt-1 text-sm font-bold">
                   {selectedPrestasi.prestasi}
                 </p>
               </div>
@@ -1767,12 +1750,12 @@ export default function BKPage() {
               </div>
             </div>
 
-            <div className="flex justify-end border-t border-slate-100 px-5 py-4">
+            <div className="theme-border-soft flex justify-end border-t px-5 py-4">
               <button
                 onClick={() =>
                   setSelectedPrestasi(null)
                 }
-                className="rounded-lg border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:bg-slate-50"
+                className="theme-card theme-border theme-text-secondary theme-header-hover rounded-lg border px-4 py-2 text-sm font-medium"
               >
                 Tutup
               </button>
@@ -1795,23 +1778,26 @@ function QuickSummary({
   description,
 }) {
   return (
-    <div className="rounded-xl border border-slate-200/80 bg-white p-3 shadow-sm">
+    <div className="theme-card theme-border rounded-xl border p-3 shadow-sm">
       <div className="flex items-center gap-3">
-        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-50">
-          <Icon size={17} className="text-slate-500" />
+        <div className="theme-card-soft flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
+          <Icon
+            size={17}
+            className="theme-text-muted"
+          />
         </div>
 
         <div className="min-w-0">
-          <p className="truncate text-[10px] font-medium text-slate-400">
+          <p className="theme-text-placeholder truncate text-[10px] font-medium">
             {title}
           </p>
 
           <div className="flex items-baseline gap-1.5">
-            <p className="text-lg font-bold text-slate-800">
+            <p className="theme-text text-lg font-bold">
               {value}
             </p>
 
-            <p className="truncate text-[10px] text-slate-400">
+            <p className="theme-text-placeholder truncate text-[10px]">
               {description}
             </p>
           </div>
@@ -1831,18 +1817,21 @@ function DetailItem({
   value,
 }) {
   return (
-    <div className="rounded-xl border border-slate-200 bg-slate-50 p-3">
+    <div className="theme-card-soft theme-border rounded-xl border p-3">
       <div className="flex items-start gap-2.5">
-        <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white">
-          <Icon size={14} className="text-slate-400" />
+        <div className="theme-card flex h-8 w-8 shrink-0 items-center justify-center rounded-lg">
+          <Icon
+            size={14}
+            className="theme-text-muted"
+          />
         </div>
 
         <div className="min-w-0">
-          <p className="text-[10px] font-medium uppercase tracking-wide text-slate-400">
+          <p className="theme-text-muted text-[10px] font-medium uppercase tracking-wide">
             {label}
           </p>
 
-          <p className="mt-0.5 break-words text-xs font-semibold text-slate-700">
+          <p className="theme-text mt-0.5 break-words text-xs font-semibold">
             {value}
           </p>
         </div>
@@ -1859,18 +1848,18 @@ function ProgressRow({ label, value }) {
   return (
     <div>
       <div className="mb-1.5 flex items-center justify-between">
-        <span className="text-xs font-medium text-slate-600">
+        <span className="theme-text-secondary text-xs font-medium">
           {label}
         </span>
 
-        <span className="text-xs font-semibold text-slate-700">
+        <span className="theme-text text-xs font-semibold">
           {value}
         </span>
       </div>
 
-      <div className="h-1.5 overflow-hidden rounded-full bg-slate-100">
+      <div className="theme-card-soft h-1.5 overflow-hidden rounded-full">
         <div
-          className="h-full rounded-full bg-[#155DFC]"
+          className="h-full rounded-full bg-[var(--color-primary)]"
           style={{
             width: value,
           }}
@@ -1888,18 +1877,18 @@ function InterestRow({ label, value }) {
   return (
     <div>
       <div className="mb-1.5 flex items-center justify-between">
-        <span className="text-xs font-medium text-slate-600">
+        <span className="theme-text-secondary text-xs font-medium">
           {label}
         </span>
 
-        <span className="text-xs font-bold text-slate-700">
+        <span className="theme-text text-xs font-bold">
           {value}%
         </span>
       </div>
 
-      <div className="h-1.5 overflow-hidden rounded-full bg-slate-100">
+      <div className="theme-card-soft h-1.5 overflow-hidden rounded-full">
         <div
-          className="h-full rounded-full bg-violet-500"
+          className="h-full rounded-full bg-[var(--color-info)]"
           style={{
             width: `${value}%`,
           }}
@@ -1922,25 +1911,25 @@ function QuickAction({
   return (
     <button
       onClick={onClick}
-      className="group flex w-full items-center gap-3 rounded-xl border border-slate-200 bg-white p-3 text-left transition hover:border-[#c7dbff] hover:bg-[#f8faff]"
+      className="theme-card theme-border theme-header-hover group flex w-full items-center gap-3 rounded-xl border p-3 text-left transition"
     >
-      <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[#eaf1ff]">
-        <Icon size={16} className="text-[#155DFC]" />
+      <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
+        <Icon size={16} />
       </div>
 
       <div className="min-w-0 flex-1">
-        <p className="truncate text-xs font-semibold text-slate-700">
+        <p className="theme-text truncate text-xs font-semibold">
           {title}
         </p>
 
-        <p className="mt-0.5 truncate text-[10px] text-slate-400">
+        <p className="theme-text-placeholder mt-0.5 truncate text-[10px]">
           {description}
         </p>
       </div>
 
       <ChevronRight
         size={15}
-        className="shrink-0 text-slate-300 transition group-hover:text-[#155DFC]"
+        className="theme-text-muted shrink-0 transition group-hover:text-[var(--color-primary)]"
       />
     </button>
   );

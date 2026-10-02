@@ -3,10 +3,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-
 import Header from "../../../components/Header";
 import Sidebar from "../../../components/Sidebar";
-
 
 import {
   Users,
@@ -36,7 +34,6 @@ import {
   Clock3,
 } from "lucide-react";
 
-
 import {
   getUsers,
   deleteUser,
@@ -45,7 +42,6 @@ import {
 import {
   getMataPelajaran,
 } from "../../../../services/mataPelajaran.service";
-
 
 export default function AdminGuruPage() {
   const router = useRouter();
@@ -60,7 +56,7 @@ export default function AdminGuruPage() {
   // =======================================================
   const [guru, setGuru] = useState([]);
   const [totalMapel, setTotalMapel] = useState(0);
-const [loadingMapel, setLoadingMapel] = useState(true);
+  const [loadingMapel, setLoadingMapel] = useState(true);
 
   // =======================================================
   // LOADING
@@ -109,13 +105,6 @@ const [loadingMapel, setLoadingMapel] = useState(true);
   // =======================================================
   // DUMMY MASTER SHIFT
   // =======================================================
-  // Catatan:
-  // Ini hanya dummy untuk kebutuhan tampilan/revisi FE.
-  // Tidak mengubah data guru dari backend.
-  //
-  // Nanti ketika BE sudah memiliki shiftId pada data guru,
-  // dummy ini bisa diganti dengan data API.
-  // =======================================================
   const dummyShifts = useMemo(
     () => [
       {
@@ -136,9 +125,6 @@ const [loadingMapel, setLoadingMapel] = useState(true);
 
   // =======================================================
   // ASSIGN DUMMY SHIFT
-  // =======================================================
-  // Guru dari API tetap tidak diubah.
-  // Kita hanya membuat informasi tampilan berdasarkan index.
   // =======================================================
   const getDummyShift = (index) => {
     return dummyShifts[index % dummyShifts.length];
@@ -218,42 +204,42 @@ const [loadingMapel, setLoadingMapel] = useState(true);
   );
 
   const fetchMapel = useCallback(async () => {
-  try {
-    setLoadingMapel(true);
+    try {
+      setLoadingMapel(true);
 
-    const response = await getMataPelajaran();
+      const response = await getMataPelajaran();
 
-    if (!response?.success) {
-      throw new Error(
-        response?.message ||
-          "Gagal mengambil data mata pelajaran."
+      if (!response?.success) {
+        throw new Error(
+          response?.message ||
+            "Gagal mengambil data mata pelajaran."
+        );
+      }
+
+      const data = Array.isArray(response.data)
+        ? response.data
+        : [];
+
+      setTotalMapel(data.length);
+    } catch (err) {
+      console.error(
+        "[browser] Error fetch mata pelajaran:",
+        err
       );
+
+      setTotalMapel(0);
+    } finally {
+      setLoadingMapel(false);
     }
-
-    const data = Array.isArray(response.data)
-      ? response.data
-      : [];
-
-    setTotalMapel(data.length);
-  } catch (err) {
-    console.error(
-      "[browser] Error fetch mata pelajaran:",
-      err
-    );
-
-    setTotalMapel(0);
-  } finally {
-    setLoadingMapel(false);
-  }
-}, []);
+  }, []);
 
   // =======================================================
   // LOAD DATA
   // =======================================================
   useEffect(() => {
-  fetchGuru();
-  fetchMapel();
-}, [fetchGuru, fetchMapel]);
+    fetchGuru();
+    fetchMapel();
+  }, [fetchGuru, fetchMapel]);
 
   // =======================================================
   // REFRESH
@@ -391,9 +377,7 @@ const [loadingMapel, setLoadingMapel] = useState(true);
         guru.length === 1 &&
         currentPage > 1
       ) {
-        setCurrentPage(
-          currentPage - 1
-        );
+        setCurrentPage(currentPage - 1);
       } else {
         await fetchGuru(false);
       }
@@ -512,7 +496,6 @@ const [loadingMapel, setLoadingMapel] = useState(true);
         ).toLowerCase() !== "aktif"
     ).length;
 
-
   // =======================================================
   // INITIALS
   // =======================================================
@@ -542,22 +525,8 @@ const [loadingMapel, setLoadingMapel] = useState(true);
   // =======================================================
   // AVATAR
   // =======================================================
-  const getAvatarColor = (nama = "") => {
-    const colors = [
-      "bg-blue-600",
-      "bg-indigo-600",
-      "bg-sky-600",
-      "bg-violet-600",
-      "bg-cyan-600",
-      "bg-blue-500",
-      "bg-indigo-500",
-      "bg-slate-600",
-    ];
-
-    return colors[
-      nama.length %
-        colors.length
-    ];
+  const getAvatarColor = () => {
+    return "bg-[image:var(--color-brand-logo-bg)]";
   };
 
   // =======================================================
@@ -968,11 +937,9 @@ const [loadingMapel, setLoadingMapel] = useState(true);
   // RENDER
   // =======================================================
   return (
-    <div className="flex h-screen w-full bg-slate-100 overflow-hidden">
+    <div className="flex h-screen w-full theme-page overflow-hidden">
 
-      {/* =================================================
-          SIDEBAR
-      ================================================= */}
+      {/* SIDEBAR */}
 
       <Sidebar
         active="guru"
@@ -981,9 +948,7 @@ const [loadingMapel, setLoadingMapel] = useState(true);
         setCollapsed={setIsCollapsed}
       />
 
-      {/* =================================================
-          CONTENT
-      ================================================= */}
+      {/* CONTENT */}
 
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
 
@@ -1008,24 +973,22 @@ const [loadingMapel, setLoadingMapel] = useState(true);
 
             <div className="w-full space-y-5">
 
-              {/* =================================================
-                  HEADER
-              ================================================= */}
+              {/* HEADER */}
 
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
 
                 <div className="flex items-center gap-3">
 
-                  <div className="w-11 h-11 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md shadow-blue-200">
+                  <div className="w-11 h-11 rounded-xl bg-[image:var(--color-brand-logo-bg)] text-white flex items-center justify-center shadow-md">
                     <Users size={21} />
                   </div>
 
                   <div>
-                    <h1 className="text-xl font-semibold text-slate-800">
+                    <h1 className="text-xl font-semibold theme-text">
                       Data Guru
                     </h1>
 
-                    <p className="text-sm text-slate-600">
+                    <p className="text-sm theme-text-secondary">
                       Data induk tenaga pendidik dan shift kerja
                     </p>
                   </div>
@@ -1034,15 +997,13 @@ const [loadingMapel, setLoadingMapel] = useState(true);
 
                 <div className="flex flex-wrap items-center gap-2">
 
-                  {/* =================================================
-                      EXPORT
-                  ================================================= */}
+                  {/* EXPORT */}
 
                   <div className="relative group">
 
                     <button
                       type="button"
-                      className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl border border-slate-300 bg-white text-slate-700 hover:border-blue-400 hover:bg-blue-50 hover:text-blue-700 transition-all text-sm font-medium"
+                      className="flex items-center gap-1.5 px-3 py-2.5 rounded-xl border theme-border theme-card theme-text-secondary theme-header-hover transition-all text-sm font-medium"
                     >
                       <Download size={17} />
 
@@ -1051,12 +1012,12 @@ const [loadingMapel, setLoadingMapel] = useState(true);
                       </span>
                     </button>
 
-                    <div className="absolute right-0 top-full mt-1 w-44 bg-white rounded-xl border border-slate-300 shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-30">
+                    <div className="absolute right-0 top-full mt-1 w-44 theme-card rounded-xl border theme-border shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-30">
 
                       <button
                         type="button"
                         onClick={exportPDF}
-                        className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 rounded-t-xl"
+                        className="flex items-center gap-2 w-full px-4 py-2.5 text-sm theme-text-secondary hover:bg-[var(--color-info-background)] hover:text-[var(--color-info)] rounded-t-xl"
                       >
                         <Printer size={16} />
                         PDF / Print
@@ -1065,7 +1026,7 @@ const [loadingMapel, setLoadingMapel] = useState(true);
                       <button
                         type="button"
                         onClick={exportExcel}
-                        className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700"
+                        className="flex items-center gap-2 w-full px-4 py-2.5 text-sm theme-text-secondary hover:bg-[var(--color-info-background)] hover:text-[var(--color-info)]"
                       >
                         <FileSpreadsheet size={16} />
                         Excel
@@ -1074,7 +1035,7 @@ const [loadingMapel, setLoadingMapel] = useState(true);
                       <button
                         type="button"
                         onClick={exportCSV}
-                        className="flex items-center gap-2 w-full px-4 py-2.5 text-sm text-slate-700 hover:bg-blue-50 hover:text-blue-700 rounded-b-xl"
+                        className="flex items-center gap-2 w-full px-4 py-2.5 text-sm theme-text-secondary hover:bg-[var(--color-info-background)] hover:text-[var(--color-info)] rounded-b-xl"
                       >
                         <FileText size={16} />
                         CSV
@@ -1083,15 +1044,13 @@ const [loadingMapel, setLoadingMapel] = useState(true);
                     </div>
                   </div>
 
-                  {/* =================================================
-                      REFRESH
-                  ================================================= */}
+                  {/* REFRESH */}
 
                   <button
                     type="button"
                     onClick={handleRefresh}
                     disabled={loading}
-                    className="p-2.5 rounded-xl border border-slate-300 bg-white text-slate-600 hover:text-blue-700 hover:bg-blue-50 hover:border-blue-300 disabled:opacity-50 transition-all"
+                    className="p-2.5 rounded-xl border theme-border theme-card theme-text-secondary hover:text-[var(--color-primary)] hover:bg-[var(--color-info-background)] disabled:opacity-50 transition-all"
                     title="Refresh data"
                   >
                     <RefreshCw
@@ -1104,16 +1063,14 @@ const [loadingMapel, setLoadingMapel] = useState(true);
                     />
                   </button>
 
-                  {/* =================================================
-                      ADD
-                  ================================================= */}
+                  {/* ADD */}
 
                   <button
                     type="button"
                     onClick={() =>
                       setShowModal(true)
                     }
-                    className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all shadow-sm hover:shadow-md hover:shadow-blue-200 font-medium"
+                    className="flex items-center gap-2 px-5 py-2.5 theme-primary rounded-xl transition-all shadow-sm hover:shadow-md font-medium"
                   >
                     <Plus size={18} />
                     Tambah Guru
@@ -1122,26 +1079,24 @@ const [loadingMapel, setLoadingMapel] = useState(true);
                 </div>
               </div>
 
-              {/* =================================================
-                  INFO SHIFT DUMMY
-              ================================================= */}
+              {/* INFO SHIFT */}
 
-              <div className="bg-white rounded-xl border border-slate-300 shadow-sm p-4">
+              <div className="theme-card rounded-xl border theme-border shadow-sm p-4">
 
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
 
                   <div className="flex items-start gap-3">
 
-                    <div className="p-2 rounded-lg bg-blue-100 text-blue-700">
+                    <div className="p-2 rounded-lg theme-info">
                       <Clock3 size={18} />
                     </div>
 
                     <div>
-                      <p className="text-sm font-semibold text-slate-800">
+                      <p className="text-sm font-semibold theme-text">
                         Shift Kerja Guru
                       </p>
 
-                      <p className="text-xs text-slate-500 mt-0.5">
+                      <p className="text-xs theme-text-muted mt-0.5">
                         Data shift sementara untuk kebutuhan tampilan revisi absensi.
                       </p>
                     </div>
@@ -1154,15 +1109,15 @@ const [loadingMapel, setLoadingMapel] = useState(true);
                       (shift) => (
                         <div
                           key={shift.id}
-                          className="flex items-center gap-2 px-3 py-2 bg-slate-50 border border-slate-200 rounded-lg"
+                          className="flex items-center gap-2 px-3 py-2 theme-card-soft border theme-border rounded-lg"
                         >
-                          <span className="w-2 h-2 rounded-full bg-blue-600" />
+                          <span className="w-2 h-2 rounded-full bg-[var(--color-primary)]" />
 
-                          <span className="text-xs font-medium text-slate-700">
+                          <span className="text-xs font-medium theme-text-secondary">
                             {shift.nama}
                           </span>
 
-                          <span className="text-xs text-slate-500">
+                          <span className="text-xs theme-text-muted">
                             {shift.jamMasuk} - {shift.jamPulang}
                           </span>
                         </div>
@@ -1175,25 +1130,23 @@ const [loadingMapel, setLoadingMapel] = useState(true);
 
               </div>
 
-              {/* =================================================
-                  ERROR
-              ================================================= */}
+              {/* ERROR */}
 
               {error && (
-                <div className="flex items-start gap-3 p-4 rounded-xl border border-rose-200 bg-rose-50">
+                <div className="flex items-start gap-3 p-4 rounded-xl border theme-danger">
 
                   <AlertCircle
                     size={20}
-                    className="text-rose-600 mt-0.5 shrink-0"
+                    className="mt-0.5 shrink-0"
                   />
 
                   <div className="flex-1">
 
-                    <p className="text-sm font-semibold text-rose-800">
+                    <p className="text-sm font-semibold">
                       Gagal mengambil data guru
                     </p>
 
-                    <p className="text-sm text-rose-700 mt-1">
+                    <p className="text-sm mt-1">
                       {error}
                     </p>
 
@@ -1202,7 +1155,7 @@ const [loadingMapel, setLoadingMapel] = useState(true);
                   <button
                     type="button"
                     onClick={handleRefresh}
-                    className="text-sm font-medium text-rose-700 hover:text-rose-900"
+                    className="text-sm font-medium hover:opacity-80"
                   >
                     Coba lagi
                   </button>
@@ -1210,29 +1163,27 @@ const [loadingMapel, setLoadingMapel] = useState(true);
                 </div>
               )}
 
-              {/* =================================================
-                  STATISTICS
-              ================================================= */}
+              {/* STATISTICS */}
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
 
                 {/* TOTAL */}
 
-                <div className="bg-white rounded-xl border border-slate-300 p-4 shadow-sm">
+                <div className="theme-card rounded-xl border theme-border p-4 shadow-sm">
 
                   <div className="flex items-center gap-2">
 
-                    <div className="p-1.5 rounded-lg bg-blue-100 text-blue-700">
+                    <div className="p-1.5 rounded-lg theme-info">
                       <Users size={16} />
                     </div>
 
-                    <p className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">
+                    <p className="text-[10px] font-medium theme-text-muted uppercase tracking-wider">
                       Total Guru
                     </p>
 
                   </div>
 
-                  <p className="text-2xl font-bold text-slate-800 mt-1">
+                  <p className="text-2xl font-bold theme-text mt-1">
                     {loading
                       ? "—"
                       : totalGuru}
@@ -1242,21 +1193,21 @@ const [loadingMapel, setLoadingMapel] = useState(true);
 
                 {/* AKTIF */}
 
-                <div className="bg-white rounded-xl border border-slate-300 p-4 shadow-sm">
+                <div className="theme-card rounded-xl border theme-border p-4 shadow-sm">
 
                   <div className="flex items-center gap-2">
 
-                    <div className="p-1.5 rounded-lg bg-emerald-100 text-emerald-700">
+                    <div className="p-1.5 rounded-lg theme-success">
                       <CheckCircle size={16} />
                     </div>
 
-                    <p className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">
+                    <p className="text-[10px] font-medium theme-text-muted uppercase tracking-wider">
                       Aktif
                     </p>
 
                   </div>
 
-                  <p className="text-2xl font-bold text-slate-800 mt-1">
+                  <p className="text-2xl font-bold theme-text mt-1">
                     {loading
                       ? "—"
                       : totalAktif}
@@ -1266,21 +1217,21 @@ const [loadingMapel, setLoadingMapel] = useState(true);
 
                 {/* NONAKTIF */}
 
-                <div className="bg-white rounded-xl border border-slate-300 p-4 shadow-sm">
+                <div className="theme-card rounded-xl border theme-border p-4 shadow-sm">
 
                   <div className="flex items-center gap-2">
 
-                    <div className="p-1.5 rounded-lg bg-rose-100 text-rose-700">
+                    <div className="p-1.5 rounded-lg theme-danger">
                       <XCircle size={16} />
                     </div>
 
-                    <p className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">
+                    <p className="text-[10px] font-medium theme-text-muted uppercase tracking-wider">
                       Nonaktif
                     </p>
 
                   </div>
 
-                  <p className="text-2xl font-bold text-slate-800 mt-1">
+                  <p className="text-2xl font-bold theme-text mt-1">
                     {loading
                       ? "—"
                       : totalNonaktif}
@@ -1289,7 +1240,7 @@ const [loadingMapel, setLoadingMapel] = useState(true);
                   {!loading &&
                     totalGuru >
                       guru.length && (
-                      <p className="text-[10px] text-slate-400 mt-1">
+                      <p className="text-[10px] theme-text-muted mt-1">
                         dari halaman aktif
                       </p>
                     )}
@@ -1298,37 +1249,35 @@ const [loadingMapel, setLoadingMapel] = useState(true);
 
                 {/* MAPEL */}
 
-                <div className="bg-white rounded-xl border border-slate-300 p-4 shadow-sm">
+                <div className="theme-card rounded-xl border theme-border p-4 shadow-sm">
 
                   <div className="flex items-center gap-2">
 
-                    <div className="p-1.5 rounded-lg bg-indigo-100 text-indigo-700">
+                    <div className="p-1.5 rounded-lg theme-info">
                       <Users size={16} />
                     </div>
 
-                    <p className="text-[10px] font-medium text-slate-500 uppercase tracking-wider">
+                    <p className="text-[10px] font-medium theme-text-muted uppercase tracking-wider">
                       Mapel
                     </p>
 
                   </div>
 
-                 <p className="text-2xl font-bold text-indigo-700 mt-1">
-  {loadingMapel ? "—" : totalMapel}
-</p>
+                  <p className="text-2xl font-bold text-[var(--color-info)] mt-1">
+                    {loadingMapel ? "—" : totalMapel}
+                  </p>
 
-<p className="text-[10px] text-slate-400 mt-1">
-  Mata pelajaran tersedia
-</p>
+                  <p className="text-[10px] theme-text-muted mt-1">
+                    Mata pelajaran tersedia
+                  </p>
 
                 </div>
 
               </div>
 
-              {/* =================================================
-                  FILTER
-              ================================================= */}
+              {/* FILTER */}
 
-              <div className="bg-white rounded-xl border border-slate-300 p-4 shadow-sm">
+              <div className="theme-card rounded-xl border theme-border p-4 shadow-sm">
 
                 <div className="flex flex-col sm:flex-row gap-3">
 
@@ -1338,7 +1287,7 @@ const [loadingMapel, setLoadingMapel] = useState(true);
 
                     <Search
                       size={17}
-                      className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-500"
+                      className="absolute left-3.5 top-1/2 -translate-y-1/2 theme-text-muted"
                     />
 
                     <input
@@ -1350,7 +1299,7 @@ const [loadingMapel, setLoadingMapel] = useState(true);
                           e.target.value
                         )
                       }
-                      className="w-full pl-10 pr-4 py-2.5 text-sm text-slate-800 bg-slate-50 border border-slate-300 rounded-xl placeholder:text-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition"
+                      className="w-full pl-10 pr-4 py-2.5 text-sm theme-input rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/30 focus:border-[var(--color-primary)] transition"
                     />
 
                   </div>
@@ -1361,7 +1310,7 @@ const [loadingMapel, setLoadingMapel] = useState(true);
 
                     <Filter
                       size={17}
-                      className="text-slate-500 shrink-0"
+                      className="theme-text-muted shrink-0"
                     />
 
                     <select
@@ -1371,7 +1320,7 @@ const [loadingMapel, setLoadingMapel] = useState(true);
                           e.target.value
                         )
                       }
-                      className="py-2.5 px-3 pr-8 text-sm text-slate-700 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition appearance-none cursor-pointer"
+                      className="py-2.5 px-3 pr-8 text-sm theme-input rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/30 focus:border-[var(--color-primary)] transition appearance-none cursor-pointer"
                     >
                       <option value="semua">
                         Semua Status
@@ -1394,7 +1343,7 @@ const [loadingMapel, setLoadingMapel] = useState(true);
 
                     <ArrowUpDown
                       size={17}
-                      className="text-slate-500 shrink-0"
+                      className="theme-text-muted shrink-0"
                     />
 
                     <select
@@ -1404,7 +1353,7 @@ const [loadingMapel, setLoadingMapel] = useState(true);
                           e.target.value
                         )
                       }
-                      className="py-2.5 px-3 pr-8 text-sm text-slate-700 bg-slate-50 border border-slate-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 transition appearance-none cursor-pointer"
+                      className="py-2.5 px-3 pr-8 text-sm theme-input rounded-xl focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/30 focus:border-[var(--color-primary)] transition appearance-none cursor-pointer"
                     >
                       <option value="nama_asc">
                         Nama A-Z
@@ -1437,11 +1386,9 @@ const [loadingMapel, setLoadingMapel] = useState(true);
 
               </div>
 
-              {/* =================================================
-                  TABLE
-              ================================================= */}
+              {/* TABLE */}
 
-              <div className="bg-white rounded-xl border border-slate-300 shadow-sm overflow-hidden">
+              <div className="theme-card rounded-xl border theme-border shadow-sm overflow-hidden">
 
                 <div className="overflow-x-auto">
 
@@ -1461,7 +1408,7 @@ const [loadingMapel, setLoadingMapel] = useState(true);
 
                     <thead>
 
-                      <tr className="border-b border-blue-700 bg-gradient-to-r from-blue-600 to-blue-700">
+                      <tr className="theme-primary">
 
                         <th className="px-4 py-3 text-center text-xs font-semibold uppercase tracking-wider text-white">
                           No
@@ -1503,7 +1450,7 @@ const [loadingMapel, setLoadingMapel] = useState(true);
 
                     </thead>
 
-                    <tbody className="divide-y divide-slate-200">
+                    <tbody>
 
                       {/* LOADING */}
 
@@ -1519,14 +1466,14 @@ const [loadingMapel, setLoadingMapel] = useState(true);
 
                               <Loader2
                                 size={28}
-                                className="animate-spin text-blue-600"
+                                className="animate-spin text-[var(--color-primary)]"
                               />
 
-                              <p className="text-sm font-medium text-slate-700 mt-3">
+                              <p className="text-sm font-medium theme-text-secondary mt-3">
                                 Mengambil data guru...
                               </p>
 
-                              <p className="text-xs text-slate-500 mt-1">
+                              <p className="text-xs theme-text-muted mt-1">
                                 Menghubungkan ke server
                               </p>
 
@@ -1565,12 +1512,12 @@ const [loadingMapel, setLoadingMapel] = useState(true);
                                 key={
                                   item.id
                                 }
-                                className="transition-colors hover:bg-blue-50"
+                                className="transition-colors theme-table-hover"
                               >
 
                                 {/* NO */}
 
-                                <td className="px-4 py-4 text-center align-middle text-sm font-medium text-slate-700">
+                                <td className="px-4 py-4 text-center align-middle text-sm font-medium theme-text-secondary">
                                   {rowNumber}
                                 </td>
 
@@ -1605,12 +1552,12 @@ const [loadingMapel, setLoadingMapel] = useState(true);
 
                                     <div className="min-w-0">
 
-                                      <p className="font-semibold text-slate-800 text-sm truncate">
+                                      <p className="font-semibold theme-text text-sm truncate">
                                         {item.namaLengkap ||
                                           "-"}
                                       </p>
 
-                                      <p className="text-xs text-slate-500 truncate">
+                                      <p className="text-xs theme-text-muted truncate">
                                         {item.namaPengguna ||
                                           "-"}
                                       </p>
@@ -1625,7 +1572,7 @@ const [loadingMapel, setLoadingMapel] = useState(true);
 
                                 <td className="px-4 py-4 align-middle">
 
-                                  <span className="text-sm text-slate-700 whitespace-nowrap">
+                                  <span className="text-sm theme-text-secondary whitespace-nowrap">
                                     {item.nip ||
                                       "-"}
                                   </span>
@@ -1636,7 +1583,7 @@ const [loadingMapel, setLoadingMapel] = useState(true);
 
                                 <td className="px-4 py-4 align-middle">
 
-                                  <span className="text-sm text-slate-600 break-all">
+                                  <span className="text-sm theme-text-secondary break-all">
                                     {item.email ||
                                       "-"}
                                   </span>
@@ -1647,7 +1594,7 @@ const [loadingMapel, setLoadingMapel] = useState(true);
 
                                 <td className="px-4 py-4 align-middle">
 
-                                  <span className="text-sm text-slate-700">
+                                  <span className="text-sm theme-text-secondary">
                                     {item.jabatan ||
                                       item.peran
                                         ?.namaTampilan ||
@@ -1662,15 +1609,13 @@ const [loadingMapel, setLoadingMapel] = useState(true);
 
                                   <div className="flex flex-col gap-1">
 
-                                    <span className="inline-flex w-fit items-center gap-1.5 px-2.5 py-1 rounded-lg bg-blue-50 border border-blue-200 text-blue-700 text-xs font-semibold whitespace-nowrap">
+                                    <span className="inline-flex w-fit items-center gap-1.5 px-2.5 py-1 rounded-lg theme-info text-xs font-semibold whitespace-nowrap">
                                       <Clock3
                                         size={13}
                                       />
 
                                       {shift.nama}
                                     </span>
-
-                                   
 
                                   </div>
 
@@ -1682,11 +1627,11 @@ const [loadingMapel, setLoadingMapel] = useState(true);
 
                                   <div className="flex flex-col">
 
-                                    <span className="text-sm font-medium text-slate-700 whitespace-nowrap">
+                                    <span className="text-sm font-medium theme-text-secondary whitespace-nowrap">
                                       {shift.jamMasuk} - {shift.jamPulang}
                                     </span>
 
-                                    <span className="text-[11px] text-slate-400">
+                                    <span className="text-[11px] theme-text-muted">
                                       Jam kerja
                                     </span>
 
@@ -1699,12 +1644,12 @@ const [loadingMapel, setLoadingMapel] = useState(true);
                                 <td className="px-4 py-4 align-middle">
 
                                   <span
-                                    className={`inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border whitespace-nowrap ${
+                                    className={
                                       status ===
                                       "Aktif"
-                                        ? "bg-emerald-100 text-emerald-700 border-emerald-300"
-                                        : "bg-rose-100 text-rose-700 border-rose-300"
-                                    }`}
+                                        ? "inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full theme-success whitespace-nowrap"
+                                        : "inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full theme-danger whitespace-nowrap"
+                                    }
                                   >
 
                                     <span className="w-1.5 h-1.5 rounded-full bg-current" />
@@ -1730,7 +1675,7 @@ const [loadingMapel, setLoadingMapel] = useState(true);
                                           `/admin/guru/${item.id}`
                                         )
                                       }
-                                      className="p-2 rounded-lg text-slate-500 hover:bg-blue-100 hover:text-blue-700 transition-all"
+                                      className="p-2 rounded-lg theme-text-muted hover:bg-[var(--color-info-background)] hover:text-[var(--color-info)] transition-all"
                                       title="Lihat Profil"
                                     >
                                       <Eye
@@ -1749,7 +1694,7 @@ const [loadingMapel, setLoadingMapel] = useState(true);
                                           `/admin/guru/edit/${item.id}`
                                         )
                                       }
-                                      className="p-2 rounded-lg text-slate-500 hover:bg-amber-100 hover:text-amber-700 transition-all"
+                                      className="p-2 rounded-lg theme-text-muted hover:bg-[var(--color-warning-background)] hover:text-[var(--color-warning)] transition-all"
                                       title="Edit Guru"
                                     >
                                       <Edit
@@ -1773,7 +1718,7 @@ const [loadingMapel, setLoadingMapel] = useState(true);
                                           item.namaLengkap
                                         )
                                       }
-                                      className="p-2 rounded-lg text-slate-500 hover:bg-rose-100 hover:text-rose-700 disabled:opacity-40 disabled:cursor-not-allowed transition-all"
+                                      className="p-2 rounded-lg theme-text-muted hover:bg-[var(--color-danger-background)] hover:text-[var(--color-danger)] disabled:opacity-40 disabled:cursor-not-allowed transition-all"
                                       title="Nonaktifkan Guru"
                                     >
                                       {deletingId ===
@@ -1815,17 +1760,17 @@ const [loadingMapel, setLoadingMapel] = useState(true);
                     0 && (
                     <div className="p-12 text-center">
 
-                      <div className="w-12 h-12 rounded-full bg-blue-100 text-blue-500 flex items-center justify-center mx-auto mb-3">
+                      <div className="w-12 h-12 rounded-full theme-info flex items-center justify-center mx-auto mb-3">
                         <Users size={24} />
                       </div>
 
-                      <p className="text-sm font-medium text-slate-700">
+                      <p className="text-sm font-medium theme-text-secondary">
                         {error
                           ? "Data guru tidak dapat dimuat"
                           : "Tidak ada data guru"}
                       </p>
 
-                      <p className="text-xs text-slate-500 mt-1">
+                      <p className="text-xs theme-text-muted mt-1">
                         {error
                           ? "Periksa koneksi API dan sesi login."
                           : search
@@ -1839,7 +1784,7 @@ const [loadingMapel, setLoadingMapel] = useState(true);
                           onClick={
                             handleRefresh
                           }
-                          className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-medium hover:bg-blue-700"
+                          className="mt-4 inline-flex items-center gap-2 px-4 py-2 rounded-lg theme-primary text-sm font-medium"
                         >
                           <RefreshCw
                             size={15}
@@ -1851,30 +1796,28 @@ const [loadingMapel, setLoadingMapel] = useState(true);
                     </div>
                   )}
 
-                {/* =================================================
-                    PAGINATION
-                ================================================= */}
+                {/* PAGINATION */}
 
                 {!loading &&
                   totalData >
                     0 && (
-                    <div className="flex flex-col lg:flex-row items-center justify-between px-4 py-3 border-t border-slate-300 bg-slate-50 gap-3">
+                    <div className="flex flex-col lg:flex-row items-center justify-between px-4 py-3 border-t theme-border theme-card-soft gap-3">
 
                       {/* INFO */}
 
-                      <div className="flex flex-wrap items-center justify-center gap-3 text-sm text-slate-600">
+                      <div className="flex flex-wrap items-center justify-center gap-3 text-sm theme-text-secondary">
 
                         <span>
                           Menampilkan{" "}
-                          <strong className="font-semibold text-slate-700">
+                          <strong className="font-semibold theme-text">
                             {startIndex}
                           </strong>{" "}
                           -{" "}
-                          <strong className="font-semibold text-slate-700">
+                          <strong className="font-semibold theme-text">
                             {endIndex}
                           </strong>{" "}
                           dari{" "}
-                          <strong className="font-semibold text-slate-700">
+                          <strong className="font-semibold theme-text">
                             {totalData}
                           </strong>{" "}
                           data
@@ -1904,7 +1847,7 @@ const [loadingMapel, setLoadingMapel] = useState(true);
                                 1
                               );
                             }}
-                            className="py-1 px-2 text-sm border border-slate-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/30 text-slate-700 cursor-pointer"
+                            className="py-1 px-2 text-sm theme-input rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)]/30 cursor-pointer"
                           >
                             <option value={10}>
                               10
@@ -1942,7 +1885,7 @@ const [loadingMapel, setLoadingMapel] = useState(true);
                               currentPage ===
                               1
                             }
-                            className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-200 disabled:opacity-30 disabled:cursor-not-allowed transition"
+                            className="w-8 h-8 flex items-center justify-center rounded-lg theme-text-muted hover:bg-[var(--color-table-hover)] disabled:opacity-30 disabled:cursor-not-allowed transition"
                           >
                             <ChevronsLeft
                               size={16}
@@ -1963,7 +1906,7 @@ const [loadingMapel, setLoadingMapel] = useState(true);
                               currentPage ===
                               1
                             }
-                            className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-200 disabled:opacity-30 disabled:cursor-not-allowed transition"
+                            className="w-8 h-8 flex items-center justify-center rounded-lg theme-text-muted hover:bg-[var(--color-table-hover)] disabled:opacity-30 disabled:cursor-not-allowed transition"
                           >
                             <ChevronLeft
                               size={16}
@@ -1986,12 +1929,12 @@ const [loadingMapel, setLoadingMapel] = useState(true);
                                     page
                                   )
                                 }
-                                className={`w-8 h-8 flex items-center justify-center rounded-lg text-sm font-medium transition ${
+                                className={
                                   currentPage ===
                                   page
-                                    ? "bg-blue-600 text-white shadow-sm"
-                                    : "text-slate-700 hover:bg-slate-200"
-                                }`}
+                                    ? "w-8 h-8 flex items-center justify-center rounded-lg text-sm font-medium theme-primary shadow-sm"
+                                    : "w-8 h-8 flex items-center justify-center rounded-lg text-sm font-medium theme-text-secondary hover:bg-[var(--color-table-hover)] transition"
+                                }
                               >
                                 {
                                   page
@@ -2014,7 +1957,7 @@ const [loadingMapel, setLoadingMapel] = useState(true);
                               currentPage ===
                               totalPages
                             }
-                            className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-200 disabled:opacity-30 disabled:cursor-not-allowed transition"
+                            className="w-8 h-8 flex items-center justify-center rounded-lg theme-text-muted hover:bg-[var(--color-table-hover)] disabled:opacity-30 disabled:cursor-not-allowed transition"
                           >
                             <ChevronRight
                               size={16}
@@ -2034,7 +1977,7 @@ const [loadingMapel, setLoadingMapel] = useState(true);
                               currentPage ===
                               totalPages
                             }
-                            className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-500 hover:bg-slate-200 disabled:opacity-30 disabled:cursor-not-allowed transition"
+                            className="w-8 h-8 flex items-center justify-center rounded-lg theme-text-muted hover:bg-[var(--color-table-hover)] disabled:opacity-30 disabled:cursor-not-allowed transition"
                           >
                             <ChevronsRight
                               size={16}
@@ -2049,11 +1992,9 @@ const [loadingMapel, setLoadingMapel] = useState(true);
 
               </div>
 
-              {/* =================================================
-                  FOOTER
-              ================================================= */}
+              {/* FOOTER */}
 
-              <footer className="text-center text-sm text-slate-500 py-3 border-t border-slate-300">
+              <footer className="text-center text-sm theme-text-muted py-3 border-t theme-border">
                 © 2026 SmartSchool •
                 Data Guru
               </footer>
@@ -2066,20 +2007,18 @@ const [loadingMapel, setLoadingMapel] = useState(true);
 
       </div>
 
-      {/* =====================================================
-          MODAL TAMBAH GURU
-      ===================================================== */}
+      {/* MODAL TAMBAH GURU */}
 
       {showModal && (
         <div
-          className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm flex items-center justify-center z-50 p-4"
+          className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4"
           onClick={() =>
             setShowModal(false)
           }
         >
 
           <div
-            className="bg-white rounded-2xl shadow-2xl max-w-md w-full p-6"
+            className="theme-card rounded-2xl shadow-2xl max-w-md w-full p-6"
             onClick={(e) =>
               e.stopPropagation()
             }
@@ -2087,15 +2026,15 @@ const [loadingMapel, setLoadingMapel] = useState(true);
 
             <div className="text-center mb-6">
 
-              <div className="w-16 h-16 rounded-full bg-blue-100 text-blue-700 flex items-center justify-center mx-auto mb-3">
+              <div className="w-16 h-16 rounded-full theme-info flex items-center justify-center mx-auto mb-3">
                 <UserPlus size={28} />
               </div>
 
-              <h3 className="text-xl font-bold text-slate-800">
+              <h3 className="text-xl font-bold theme-text">
                 Tambah Guru
               </h3>
 
-              <p className="text-sm text-slate-500 mt-1">
+              <p className="text-sm theme-text-muted mt-1">
                 Pilih metode penambahan guru
               </p>
 
@@ -2116,20 +2055,20 @@ const [loadingMapel, setLoadingMapel] = useState(true);
                     "/admin/guru/tambah?mode=form"
                   );
                 }}
-                className="w-full flex items-center gap-4 p-4 border border-slate-300 rounded-xl hover:border-blue-400 hover:bg-blue-50/50 transition-all group"
+                className="w-full flex items-center gap-4 p-4 border theme-border rounded-xl hover:border-[var(--color-primary)] hover:bg-[var(--color-info-background)] transition-all group"
               >
 
-                <div className="p-2.5 rounded-xl bg-blue-100 text-blue-700 group-hover:bg-blue-200">
+                <div className="p-2.5 rounded-xl theme-info">
                   <User size={20} />
                 </div>
 
                 <div className="flex-1 text-left">
 
-                  <p className="font-semibold text-slate-700">
+                  <p className="font-semibold theme-text-secondary">
                     Form Biasa
                   </p>
 
-                  <p className="text-xs text-slate-500 mt-0.5">
+                  <p className="text-xs theme-text-muted mt-0.5">
                     Isi data guru secara manual
                   </p>
 
@@ -2137,7 +2076,7 @@ const [loadingMapel, setLoadingMapel] = useState(true);
 
                 <ChevronRight
                   size={18}
-                  className="text-slate-400 group-hover:text-blue-600"
+                  className="theme-text-muted group-hover:text-[var(--color-primary)]"
                 />
 
               </button>
@@ -2155,20 +2094,20 @@ const [loadingMapel, setLoadingMapel] = useState(true);
                     "/admin/guru/tambah?mode=import"
                   );
                 }}
-                className="w-full flex items-center gap-4 p-4 border border-slate-300 rounded-xl hover:border-indigo-400 hover:bg-indigo-50/50 transition-all group"
+                className="w-full flex items-center gap-4 p-4 border theme-border rounded-xl hover:border-[var(--color-info)] hover:bg-[var(--color-info-background)] transition-all group"
               >
 
-                <div className="p-2.5 rounded-xl bg-indigo-100 text-indigo-700 group-hover:bg-indigo-200">
+                <div className="p-2.5 rounded-xl theme-info">
                   <Upload size={20} />
                 </div>
 
                 <div className="flex-1 text-left">
 
-                  <p className="font-semibold text-slate-700">
+                  <p className="font-semibold theme-text-secondary">
                     Import Data
                   </p>
 
-                  <p className="text-xs text-slate-500 mt-0.5">
+                  <p className="text-xs theme-text-muted mt-0.5">
                     Upload file Excel atau CSV
                   </p>
 
@@ -2176,7 +2115,7 @@ const [loadingMapel, setLoadingMapel] = useState(true);
 
                 <ChevronRight
                   size={18}
-                  className="text-slate-400 group-hover:text-indigo-600"
+                  className="theme-text-muted group-hover:text-[var(--color-info)]"
                 />
 
               </button>
@@ -2188,7 +2127,7 @@ const [loadingMapel, setLoadingMapel] = useState(true);
               onClick={() =>
                 setShowModal(false)
               }
-              className="mt-4 w-full py-2.5 text-sm text-slate-600 hover:text-slate-800"
+              className="mt-4 w-full py-2.5 text-sm theme-text-muted hover:text-[var(--color-primary)]"
             >
               Batal
             </button>
@@ -2201,3 +2140,4 @@ const [loadingMapel, setLoadingMapel] = useState(true);
     </div>
   );
 }
+

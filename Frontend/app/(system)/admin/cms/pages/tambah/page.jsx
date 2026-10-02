@@ -166,7 +166,7 @@ export default function CreatePagePage() {
     if (!message) return null;
 
     return (
-      <p className="mt-2 flex items-start gap-2 text-xs leading-relaxed text-red-600">
+      <p className="mt-2 flex items-start gap-2 text-xs leading-relaxed text-[var(--color-danger)]">
         <AlertCircle className="mt-0.5 h-4 w-4 shrink-0" />
         <span>{message}</span>
       </p>
@@ -178,7 +178,7 @@ export default function CreatePagePage() {
   ========================================================== */
 
   return (
-    <div className="flex min-h-screen w-full bg-[#F8FAFC]">
+    <div className="theme-page flex min-h-screen w-full">
       {/* ======================================================
           SIDEBAR
       ====================================================== */}
@@ -204,7 +204,7 @@ export default function CreatePagePage() {
           }}
         />
 
-        <main className="min-h-screen w-full">
+        <main className="theme-page min-h-screen w-full">
           <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
             <div className="mx-auto w-full max-w-[1450px]">
 
@@ -216,30 +216,38 @@ export default function CreatePagePage() {
                 <div className="flex min-w-0 flex-wrap items-center gap-2 text-sm">
                   <Link
                     href="/cmsAdmin"
-                    className="font-medium text-slate-400 transition hover:text-[#2563EB]"
+                    className="theme-text-muted transition hover:text-[var(--color-primary)]"
                   >
                     Dashboard
                   </Link>
 
-                  <span className="text-slate-300">/</span>
+                  <span className="theme-text-placeholder">/</span>
 
                   <Link
                     href="/cmsAdmin/pages"
-                    className="font-medium text-slate-400 transition hover:text-[#2563EB]"
+                    className="theme-text-muted transition hover:text-[var(--color-primary)]"
                   >
                     Halaman Statis
                   </Link>
 
-                  <span className="text-slate-300">/</span>
+                  <span className="theme-text-placeholder">/</span>
 
-                  <span className="font-semibold text-slate-700">
+                  <span className="theme-text font-semibold">
                     Tambah Halaman
                   </span>
                 </div>
 
                 <Link
                   href="/cmsAdmin/pages"
-                  className="inline-flex w-fit items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 shadow-sm transition hover:border-blue-200 hover:bg-blue-50 hover:text-[#2563EB]"
+                  className="
+                    theme-card theme-border theme-text-secondary
+                    inline-flex w-fit items-center gap-2 rounded-xl
+                    border px-4 py-2.5 text-sm font-semibold shadow-sm
+                    transition
+                    hover:border-[var(--color-primary)]
+                    hover:bg-[var(--color-sidebar-active)]
+                    hover:text-[var(--color-primary)]
+                  "
                 >
                   <ArrowLeft className="h-4 w-4" />
                   Kembali
@@ -251,15 +259,15 @@ export default function CreatePagePage() {
               ================================================== */}
 
               {successMessage && (
-                <div className="mb-5 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3.5">
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
+                <div className="theme-success mb-5 flex items-start gap-3 rounded-xl border px-4 py-3.5">
+                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0" />
 
                   <div>
-                    <p className="text-sm font-semibold text-emerald-800">
+                    <p className="text-sm font-semibold">
                       Berhasil
                     </p>
 
-                    <p className="mt-0.5 text-xs text-emerald-700">
+                    <p className="mt-0.5 text-xs opacity-90">
                       {successMessage}
                     </p>
                   </div>
@@ -271,15 +279,15 @@ export default function CreatePagePage() {
               ================================================== */}
 
               {submitError && (
-                <div className="mb-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 px-4 py-3.5">
-                  <AlertCircle className="mt-0.5 h-5 w-5 shrink-0 text-red-600" />
+                <div className="theme-danger mb-5 flex items-start gap-3 rounded-xl border px-4 py-3.5">
+                  <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
 
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-semibold text-red-800">
+                    <p className="text-sm font-semibold">
                       Gagal menyimpan halaman
                     </p>
 
-                    <p className="mt-1 text-xs leading-5 text-red-700">
+                    <p className="mt-1 text-xs leading-5 opacity-90">
                       {submitError}
                     </p>
                   </div>
@@ -287,7 +295,7 @@ export default function CreatePagePage() {
                   <button
                     type="button"
                     onClick={() => setSubmitError("")}
-                    className="text-red-400 transition hover:text-red-600"
+                    className="opacity-70 transition hover:opacity-100"
                     aria-label="Tutup pesan error"
                   >
                     <X className="h-4 w-4" />
@@ -299,25 +307,25 @@ export default function CreatePagePage() {
                   HEADER CARD
               ================================================== */}
 
-              <section className="mb-6 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-                <div className="border-b border-slate-100 px-5 py-5 sm:px-6">
+              <section className="theme-card theme-border mb-6 overflow-hidden rounded-2xl border shadow-sm">
+                <div className="theme-border border-b px-5 py-5 sm:px-6">
                   <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
 
                     <div className="flex min-w-0 items-center gap-4">
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-[#2563EB]">
+                      <div className="theme-info flex h-12 w-12 shrink-0 items-center justify-center rounded-xl">
                         <FileText className="h-6 w-6" />
                       </div>
 
                       <div className="min-w-0">
-                        <p className="mb-1 text-xs font-semibold uppercase tracking-[0.12em] text-[#2563EB]">
+                        <p className="mb-1 text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-primary)]">
                           CMS
                         </p>
 
-                        <h1 className="text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
+                        <h1 className="theme-text text-xl font-bold tracking-tight sm:text-2xl">
                           Tambah Halaman Statis
                         </h1>
 
-                        <p className="mt-1 text-sm text-slate-500">
+                        <p className="theme-text-secondary mt-1 text-sm">
                           Buat halaman informasi baru untuk website sekolah.
                         </p>
                       </div>
@@ -326,30 +334,24 @@ export default function CreatePagePage() {
                     <div
                       className={`inline-flex w-fit items-center gap-2 rounded-xl border px-4 py-2.5 ${
                         isPublished
-                          ? "border-emerald-200 bg-emerald-50"
-                          : "border-amber-200 bg-amber-50"
+                          ? "theme-success"
+                          : "theme-warning"
                       }`}
                     >
                       <span
                         className={`h-2.5 w-2.5 rounded-full ${
                           isPublished
-                            ? "bg-emerald-500"
-                            : "bg-amber-500"
+                            ? "bg-[var(--color-success)]"
+                            : "bg-[var(--color-warning)]"
                         }`}
                       />
 
                       <div>
-                        <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                        <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wider">
                           Status
                         </p>
 
-                        <p
-                          className={`text-xs font-bold ${
-                            isPublished
-                              ? "text-emerald-700"
-                              : "text-amber-700"
-                          }`}
-                        >
+                        <p className="text-xs font-bold">
                           {isPublished
                             ? "Dipublikasikan"
                             : "Draft"}
@@ -377,21 +379,21 @@ export default function CreatePagePage() {
                         INFORMASI DASAR
                     ================================================= */}
 
-                    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                    <section className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
 
-                      <div className="border-b border-slate-100 bg-slate-50/70 px-5 py-4 sm:px-6">
+                      <div className="theme-card-soft theme-border border-b px-5 py-4 sm:px-6">
                         <div className="flex items-center gap-3">
 
-                          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-[#2563EB]">
+                          <div className="theme-info flex h-10 w-10 items-center justify-center rounded-xl">
                             <Type className="h-5 w-5" />
                           </div>
 
                           <div>
-                            <h2 className="text-sm font-bold text-slate-900 sm:text-base">
+                            <h2 className="theme-text text-sm font-bold sm:text-base">
                               Informasi Halaman
                             </h2>
 
-                            <p className="mt-0.5 text-xs text-slate-500">
+                            <p className="theme-text-secondary mt-0.5 text-xs">
                               Tentukan judul dan status halaman.
                             </p>
                           </div>
@@ -406,10 +408,12 @@ export default function CreatePagePage() {
                         <div>
                           <label
                             htmlFor="judul"
-                            className="mb-2 block text-sm font-semibold text-slate-700"
+                            className="theme-text-secondary mb-2 block text-sm font-semibold"
                           >
                             Judul Halaman
-                            <span className="ml-1 text-red-500">*</span>
+                            <span className="ml-1 text-[var(--color-danger)]">
+                              *
+                            </span>
                           </label>
 
                           <input
@@ -418,10 +422,10 @@ export default function CreatePagePage() {
                             autoComplete="off"
                             placeholder="Contoh: Akademik"
                             {...register("judul")}
-                            className={`w-full rounded-xl border bg-white px-4 py-3 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 ${
+                            className={`theme-input w-full rounded-xl border px-4 py-3 text-sm outline-none transition ${
                               errors.judul
-                                ? "border-red-300 focus:border-red-500 focus:ring-4 focus:ring-red-500/10"
-                                : "border-slate-200 focus:border-[#2563EB] focus:ring-4 focus:ring-blue-500/10"
+                                ? "border-[var(--color-danger)] focus:border-[var(--color-danger)]"
+                                : "focus:border-[var(--color-primary)]"
                             }`}
                           />
 
@@ -432,13 +436,13 @@ export default function CreatePagePage() {
                               />
 
                               {!errors.judul && (
-                                <p className="text-xs text-slate-400">
+                                <p className="theme-text-muted text-xs">
                                   Gunakan judul yang singkat dan mudah dipahami.
                                 </p>
                               )}
                             </div>
 
-                            <span className="shrink-0 text-xs text-slate-400">
+                            <span className="theme-text-muted shrink-0 text-xs">
                               {(judulValue || "").length}/150
                             </span>
                           </div>
@@ -449,16 +453,18 @@ export default function CreatePagePage() {
                         <div>
                           <label
                             htmlFor="status"
-                            className="mb-2 block text-sm font-semibold text-slate-700"
+                            className="theme-text-secondary mb-2 block text-sm font-semibold"
                           >
                             Status Halaman
-                            <span className="ml-1 text-red-500">*</span>
+                            <span className="ml-1 text-[var(--color-danger)]">
+                              *
+                            </span>
                           </label>
 
                           <select
                             id="status"
                             {...register("status")}
-                            className="w-full rounded-xl border border-slate-200 bg-white px-4 py-3 text-sm font-medium text-slate-700 outline-none transition focus:border-[#2563EB] focus:ring-4 focus:ring-blue-500/10"
+                            className="theme-input w-full rounded-xl border px-4 py-3 text-sm font-medium outline-none transition focus:border-[var(--color-primary)]"
                           >
                             <option value="draft">
                               Draft
@@ -469,7 +475,7 @@ export default function CreatePagePage() {
                             </option>
                           </select>
 
-                          <p className="mt-2 text-xs leading-5 text-slate-400">
+                          <p className="theme-text-muted mt-2 text-xs leading-5">
                             Pilih draft jika halaman belum siap ditampilkan.
                           </p>
 
@@ -484,33 +490,33 @@ export default function CreatePagePage() {
                         KONTEN
                     ================================================= */}
 
-                    <section className="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                    <section className="theme-card theme-border min-w-0 overflow-hidden rounded-2xl border shadow-sm">
 
-                      <div className="border-b border-slate-100 bg-slate-50/70 px-5 py-4 sm:px-6">
+                      <div className="theme-card-soft theme-border border-b px-5 py-4 sm:px-6">
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 
                           <div className="flex items-center gap-3">
 
-                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-[#2563EB]">
+                            <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
                               <FileText className="h-5 w-5" />
                             </div>
 
                             <div>
-                              <h2 className="text-sm font-bold text-slate-900 sm:text-base">
+                              <h2 className="theme-text text-sm font-bold sm:text-base">
                                 Konten Halaman
                               </h2>
 
-                              <p className="mt-0.5 text-xs text-slate-500">
+                              <p className="theme-text-secondary mt-0.5 text-xs">
                                 Isi informasi yang akan ditampilkan pada website.
                               </p>
                             </div>
 
                           </div>
 
-                          <div className="flex w-fit items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 py-2">
-                            <FileText className="h-3.5 w-3.5 text-slate-400" />
+                          <div className="theme-card theme-border theme-text-secondary flex w-fit items-center gap-2 rounded-lg border px-3 py-2">
+                            <FileText className="theme-text-muted h-3.5 w-3.5" />
 
-                            <span className="text-xs font-medium text-slate-500">
+                            <span className="text-xs font-medium">
                               {contentLength.toLocaleString("id-ID")} karakter
                             </span>
                           </div>
@@ -520,11 +526,11 @@ export default function CreatePagePage() {
 
                       <div className="min-w-0 p-5 sm:p-6">
 
-                        <label className="mb-2 block text-sm font-semibold text-slate-700">
+                        <label className="theme-text-secondary mb-2 block text-sm font-semibold">
                           Isi Konten
                         </label>
 
-                        <div className="min-w-0 overflow-hidden rounded-xl border border-slate-200 bg-white transition focus-within:border-[#2563EB] focus-within:ring-4 focus-within:ring-blue-500/10">
+                        <div className="theme-card theme-border min-w-0 overflow-hidden rounded-xl border transition focus-within:border-[var(--color-primary)]">
                           <RichTextEditor
                             value={content}
                             onChange={handleContentChange}
@@ -535,12 +541,12 @@ export default function CreatePagePage() {
                           message={errors.konten?.message}
                         />
 
-                        <div className="mt-3 flex flex-col gap-1 text-xs text-slate-400 sm:flex-row sm:items-center sm:justify-between">
+                        <div className="theme-text-muted mt-3 flex flex-col gap-1 text-xs sm:flex-row sm:items-center sm:justify-between">
                           <span>
                             Gunakan editor untuk mengatur format konten.
                           </span>
 
-                          <span className="font-medium text-slate-500">
+                          <span className="theme-text-secondary font-medium">
                             {contentLength.toLocaleString("id-ID")} karakter
                           </span>
                         </div>
@@ -559,21 +565,21 @@ export default function CreatePagePage() {
                         PUBLIKASI
                     ================================================= */}
 
-                    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                    <section className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
 
-                      <div className="border-b border-slate-100 bg-slate-50/70 px-5 py-4">
+                      <div className="theme-card-soft theme-border border-b px-5 py-4">
                         <div className="flex items-center gap-3">
 
-                          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-[#0F172A] text-white">
+                          <div className="theme-primary flex h-9 w-9 items-center justify-center rounded-lg">
                             <Globe className="h-4 w-4" />
                           </div>
 
                           <div>
-                            <h2 className="text-sm font-bold text-slate-900">
+                            <h2 className="theme-text text-sm font-bold">
                               Publikasi
                             </h2>
 
-                            <p className="text-xs text-slate-500">
+                            <p className="theme-text-secondary text-xs">
                               Pengaturan halaman
                             </p>
                           </div>
@@ -586,8 +592,8 @@ export default function CreatePagePage() {
                         <div
                           className={`rounded-xl border p-4 ${
                             isPublished
-                              ? "border-emerald-200 bg-emerald-50/60"
-                              : "border-amber-200 bg-amber-50/60"
+                              ? "theme-success"
+                              : "theme-warning"
                           }`}
                         >
                           <div className="flex items-start gap-3">
@@ -595,19 +601,19 @@ export default function CreatePagePage() {
                             <div
                               className={`mt-1 h-2.5 w-2.5 shrink-0 rounded-full ${
                                 isPublished
-                                  ? "bg-emerald-500"
-                                  : "bg-amber-500"
+                                  ? "bg-[var(--color-success)]"
+                                  : "bg-[var(--color-warning)]"
                               }`}
                             />
 
                             <div>
-                              <p className="text-sm font-semibold text-slate-800">
+                              <p className="theme-text text-sm font-semibold">
                                 {isPublished
                                   ? "Siap dipublikasikan"
                                   : "Masih dalam draft"}
                               </p>
 
-                              <p className="mt-1 text-xs leading-5 text-slate-500">
+                              <p className="theme-text-secondary mt-1 text-xs leading-5">
                                 {isPublished
                                   ? "Halaman akan tersedia pada website sekolah."
                                   : "Halaman belum ditampilkan sebagai halaman publik."}
@@ -622,7 +628,7 @@ export default function CreatePagePage() {
                           <button
                             type="submit"
                             disabled={loading}
-                            className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#2563EB] px-5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1D4ED8] disabled:cursor-not-allowed disabled:opacity-60"
+                            className="theme-primary inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl px-5 text-sm font-semibold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-60"
                           >
                             {loading ? (
                               <>
@@ -650,7 +656,7 @@ export default function CreatePagePage() {
                               router.push("/cmsAdmin/pages")
                             }
                             disabled={loading}
-                            className="mt-2 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-slate-900 disabled:opacity-50"
+                            className="theme-card theme-border theme-text-secondary mt-2 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border px-5 text-sm font-semibold transition hover:bg-[var(--color-header-hover)] disabled:opacity-50"
                           >
                             <ArrowLeft className="h-4 w-4" />
                             Batal
@@ -664,21 +670,21 @@ export default function CreatePagePage() {
                         PREVIEW
                     ================================================= */}
 
-                    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                    <section className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
 
-                      <div className="border-b border-slate-100 bg-slate-50/70 px-5 py-4">
+                      <div className="theme-card-soft theme-border border-b px-5 py-4">
                         <div className="flex items-center gap-3">
 
-                          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-blue-50 text-[#2563EB]">
+                          <div className="theme-info flex h-9 w-9 items-center justify-center rounded-lg">
                             <Eye className="h-4 w-4" />
                           </div>
 
                           <div>
-                            <h2 className="text-sm font-bold text-slate-900">
+                            <h2 className="theme-text text-sm font-bold">
                               Ringkasan
                             </h2>
 
-                            <p className="text-xs text-slate-500">
+                            <p className="theme-text-secondary text-xs">
                               Informasi halaman
                             </p>
                           </div>
@@ -691,19 +697,19 @@ export default function CreatePagePage() {
                         <div className="space-y-4">
 
                           <div>
-                            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                            <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wider">
                               Judul
                             </p>
 
-                            <p className="mt-1.5 break-words text-sm font-semibold text-slate-700">
+                            <p className="theme-text mt-1.5 break-words text-sm font-semibold">
                               {judulValue || "Belum ada judul"}
                             </p>
                           </div>
 
-                          <div className="h-px bg-slate-100" />
+                          <div className="theme-border-soft h-px" />
 
                           <div>
-                            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                            <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wider">
                               Status
                             </p>
 
@@ -712,12 +718,12 @@ export default function CreatePagePage() {
                               <span
                                 className={`h-2 w-2 rounded-full ${
                                   isPublished
-                                    ? "bg-emerald-500"
-                                    : "bg-amber-500"
+                                    ? "bg-[var(--color-success)]"
+                                    : "bg-[var(--color-warning)]"
                                 }`}
                               />
 
-                              <span className="text-sm font-semibold text-slate-700">
+                              <span className="theme-text text-sm font-semibold">
                                 {isPublished
                                   ? "Dipublikasikan"
                                   : "Draft"}
@@ -726,14 +732,14 @@ export default function CreatePagePage() {
                             </div>
                           </div>
 
-                          <div className="h-px bg-slate-100" />
+                          <div className="theme-border-soft h-px" />
 
                           <div>
-                            <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                            <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wider">
                               Isi Konten
                             </p>
 
-                            <p className="mt-1.5 text-sm font-semibold text-slate-700">
+                            <p className="theme-text mt-1.5 text-sm font-semibold">
                               {contentLength.toLocaleString("id-ID")} karakter
                             </p>
                           </div>
@@ -746,21 +752,21 @@ export default function CreatePagePage() {
                         URL
                     ================================================= */}
 
-                    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+                    <section className="theme-card theme-border overflow-hidden rounded-2xl border shadow-sm">
 
-                      <div className="border-b border-slate-100 bg-slate-50/70 px-5 py-4">
+                      <div className="theme-card-soft theme-border border-b px-5 py-4">
                         <div className="flex items-center gap-3">
 
-                          <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
+                          <div className="theme-card-soft theme-text-secondary flex h-9 w-9 items-center justify-center rounded-lg">
                             <Globe className="h-4 w-4" />
                           </div>
 
                           <div>
-                            <h2 className="text-sm font-bold text-slate-900">
+                            <h2 className="theme-text text-sm font-bold">
                               URL Halaman
                             </h2>
 
-                            <p className="text-xs text-slate-500">
+                            <p className="theme-text-secondary text-xs">
                               Dibuat otomatis
                             </p>
                           </div>
@@ -770,26 +776,26 @@ export default function CreatePagePage() {
 
                       <div className="p-5">
 
-                        <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                        <div className="theme-card-soft theme-border rounded-xl border p-4">
 
-                          <p className="text-[10px] font-semibold uppercase tracking-wider text-slate-400">
+                          <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wider">
                             Slug
                           </p>
 
-                          <p className="mt-1.5 text-sm font-semibold text-slate-700">
+                          <p className="theme-text mt-1.5 text-sm font-semibold">
                             Otomatis
                           </p>
 
-                          <p className="mt-1 text-xs leading-5 text-slate-500">
+                          <p className="theme-text-secondary mt-1 text-xs leading-5">
                             Backend membuat slug berdasarkan judul halaman.
                           </p>
 
                         </div>
 
-                        <div className="mt-3 flex items-start gap-2 rounded-xl border border-blue-100 bg-blue-50/60 p-3">
-                          <Info className="mt-0.5 h-4 w-4 shrink-0 text-[#2563EB]" />
+                        <div className="theme-info mt-3 flex items-start gap-2 rounded-xl border p-3">
+                          <Info className="mt-0.5 h-4 w-4 shrink-0" />
 
-                          <p className="text-xs leading-5 text-blue-700">
+                          <p className="text-xs leading-5">
                             Kamu tidak perlu memasukkan slug secara manual.
                           </p>
                         </div>
@@ -801,20 +807,20 @@ export default function CreatePagePage() {
                         INFORMASI
                     ================================================= */}
 
-                    <section className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <section className="theme-card theme-border rounded-2xl border p-5 shadow-sm">
 
                       <div className="flex items-start gap-3">
 
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
+                        <div className="theme-card-soft theme-text-secondary flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
                           <Info className="h-4 w-4" />
                         </div>
 
                         <div>
-                          <h3 className="text-sm font-bold text-slate-900">
+                          <h3 className="theme-text text-sm font-bold">
                             Informasi
                           </h3>
 
-                          <div className="mt-2 space-y-2 text-xs leading-5 text-slate-500">
+                          <div className="theme-text-secondary mt-2 space-y-2 text-xs leading-5">
                             <p>
                               Judul minimal 3 karakter.
                             </p>
@@ -843,11 +849,11 @@ export default function CreatePagePage() {
                 ================================================== */}
 
                 <div className="mt-6">
-                  <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-5">
+                  <div className="theme-card theme-border rounded-2xl border p-4 shadow-sm sm:p-5">
 
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 
-                      <div className="hidden items-center gap-2 text-xs text-slate-400 md:flex">
+                      <div className="theme-text-muted hidden items-center gap-2 text-xs md:flex">
                         <Layout className="h-4 w-4" />
 
                         <span>
@@ -863,7 +869,7 @@ export default function CreatePagePage() {
                             router.push("/cmsAdmin/pages")
                           }
                           disabled={loading}
-                          className="inline-flex w-full items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 py-3 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 hover:text-slate-900 disabled:opacity-50 sm:w-auto"
+                          className="theme-card theme-border theme-text-secondary inline-flex w-full items-center justify-center gap-2 rounded-xl border px-5 py-3 text-sm font-semibold transition hover:bg-[var(--color-header-hover)] disabled:opacity-50 sm:w-auto"
                         >
                           <X className="h-4 w-4" />
                           Batal
@@ -872,7 +878,7 @@ export default function CreatePagePage() {
                         <button
                           type="submit"
                           disabled={loading}
-                          className="inline-flex w-full items-center justify-center gap-2 rounded-xl bg-[#2563EB] px-6 py-3 text-sm font-semibold text-white shadow-sm transition hover:bg-[#1D4ED8] disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
+                          className="theme-primary inline-flex w-full items-center justify-center gap-2 rounded-xl px-6 py-3 text-sm font-semibold shadow-sm transition disabled:cursor-not-allowed disabled:opacity-60 sm:w-auto"
                         >
                           {loading ? (
                             <>
@@ -905,7 +911,7 @@ export default function CreatePagePage() {
               ================================================== */}
 
               <footer className="py-8 text-center">
-                <p className="text-xs text-slate-400">
+                <p className="theme-text-muted text-xs">
                   © 2026 SmartSchool · CMS Management
                 </p>
               </footer>

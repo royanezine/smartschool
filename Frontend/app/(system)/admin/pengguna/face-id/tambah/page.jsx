@@ -27,6 +27,25 @@ import {
 } from "lucide-react";
 
 /* =========================================================
+   THEME HELPERS
+========================================================= */
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]";
+
+const themePrimaryHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
+
+const themeTextHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_6px_24px_color-mix(in_srgb,var(--color-text)_6%,transparent)]";
+
+/* =========================================================
    API CONFIG
 ========================================================= */
 
@@ -45,22 +64,24 @@ const API_URL = API_BASE.endsWith("/api")
 const roleConfig = {
   Guru: {
     icon: GraduationCap,
-    className: "bg-blue-50 text-blue-600 border-blue-200",
+    className: `${themePrimarySoft} text-[var(--color-primary)] ${themePrimarySoftBorder}`,
   },
 
   Siswa: {
     icon: GraduationCap,
-    className: "bg-indigo-50 text-indigo-600 border-indigo-200",
+    className: `${themePrimarySoft} text-[var(--color-primary)] ${themePrimarySoftBorder}`,
   },
 
   Staff: {
     icon: UserCheck,
-    className: "bg-amber-50 text-amber-600 border-amber-200",
+    className:
+      "bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)] text-[var(--color-warning)] border-[color-mix(in_srgb,var(--color-warning)_25%,transparent)]",
   },
 
   Admin: {
     icon: ShieldCheck,
-    className: "bg-purple-50 text-purple-600 border-purple-200",
+    className:
+      "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] text-[var(--color-primary)] border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]",
   },
 };
 
@@ -71,7 +92,8 @@ const roleConfig = {
 function RoleBadge({ role }) {
   const config = roleConfig[role] || {
     icon: Users,
-    className: "bg-slate-100 text-slate-600 border-slate-200",
+    className:
+      "theme-card-soft theme-text-secondary theme-border",
   };
 
   const Icon = config.icon;
@@ -93,16 +115,21 @@ function RoleBadge({ role }) {
 function InfoItem({ icon: Icon, label, value }) {
   return (
     <div className="flex items-start gap-3">
-      <div className="w-8 h-8 rounded-lg bg-[#eaf1ff] border border-[#c7dbff] flex items-center justify-center shrink-0">
-        <Icon size={14} className="text-[#155DFC]" />
+      <div
+        className={`w-8 h-8 rounded-lg ${themePrimarySoft} ${themePrimarySoftBorder} border flex items-center justify-center shrink-0`}
+      >
+        <Icon
+          size={14}
+          className="text-[var(--color-primary)]"
+        />
       </div>
 
       <div className="min-w-0">
-        <p className="text-[10px] uppercase tracking-wide font-semibold text-slate-400">
+        <p className="text-[10px] uppercase tracking-wide font-semibold theme-text-muted">
           {label}
         </p>
 
-        <p className="text-sm font-medium text-slate-700 mt-0.5 truncate">
+        <p className="text-sm font-medium theme-text mt-0.5 truncate">
           {value || "-"}
         </p>
       </div>
@@ -129,10 +156,7 @@ function normalizeRole(user) {
     return "Siswa";
   }
 
-  if (
-    role.includes("admin") &&
-    !role.includes("super")
-  ) {
+  if (role.includes("admin") && !role.includes("super")) {
     return "Admin";
   }
 
@@ -191,22 +215,17 @@ export default function TambahFaceIdPage() {
     useState(false);
 
   /* USER */
-
   const [users, setUsers] = useState([]);
   const [loadingUsers, setLoadingUsers] =
     useState(true);
-
   const [searchUser, setSearchUser] =
     useState("");
-
   const [selectedUser, setSelectedUser] =
     useState(null);
-
   const [showUserList, setShowUserList] =
     useState(false);
 
   /* CAMERA */
-
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
@@ -224,17 +243,18 @@ export default function TambahFaceIdPage() {
     useState("");
 
   /* REGISTRATION */
-
   const [
     registrationComplete,
     setRegistrationComplete,
   ] = useState(false);
 
-  const [saving, setSaving] = useState(false);
+  const [saving, setSaving] =
+    useState(false);
 
   /* MESSAGE */
+  const [error, setError] =
+    useState("");
 
-  const [error, setError] = useState("");
   const [successMessage, setSuccessMessage] =
     useState("");
 
@@ -252,7 +272,7 @@ export default function TambahFaceIdPage() {
 
       if (!token) {
         throw new Error(
-          "Token login tidak ditemukan. Silakan login kembali.",
+          "Token login tidak ditemukan. Silakan login kembali."
         );
       }
 
@@ -263,7 +283,7 @@ export default function TambahFaceIdPage() {
           headers: {
             Authorization: `Bearer ${token}`,
           },
-        },
+        }
       );
 
       const result = await response.json();
@@ -271,14 +291,9 @@ export default function TambahFaceIdPage() {
       if (!response.ok) {
         throw new Error(
           result?.message ||
-            "Gagal mengambil data pengguna.",
+            "Gagal mengambil data pengguna."
         );
       }
-
-      /*
-       * Menyesuaikan beberapa kemungkinan
-       * bentuk response paginatedResponse.
-       */
 
       let list = [];
 
@@ -298,18 +313,19 @@ export default function TambahFaceIdPage() {
         list = result.items;
       }
 
-      const normalized = list.map(normalizeUser);
+      const normalized =
+        list.map(normalizeUser);
 
       setUsers(normalized);
     } catch (err) {
       console.error(
         "Error load users:",
-        err,
+        err
       );
 
       setError(
         err?.message ||
-          "Gagal mengambil data pengguna.",
+          "Gagal mengambil data pengguna."
       );
     } finally {
       setLoadingUsers(false);
@@ -399,12 +415,10 @@ export default function TambahFaceIdPage() {
     setSelectedUser(user);
     setSearchUser(user.nama);
     setShowUserList(false);
-
     setFaceDetected(false);
     setCapturedFile(null);
     setPreviewUrl("");
     setRegistrationComplete(false);
-
     setError("");
     setSuccessMessage("");
   };
@@ -416,7 +430,7 @@ export default function TambahFaceIdPage() {
   const handleStartCamera = async () => {
     if (!selectedUser) {
       setError(
-        "Pilih pengguna terlebih dahulu.",
+        "Pilih pengguna terlebih dahulu."
       );
       return;
     }
@@ -430,14 +444,9 @@ export default function TambahFaceIdPage() {
         !navigator.mediaDevices.getUserMedia
       ) {
         throw new Error(
-          "Browser tidak mendukung akses kamera.",
+          "Browser tidak mendukung akses kamera."
         );
       }
-
-      /*
-       * Kalau sebelumnya ada preview,
-       * bersihkan terlebih dahulu.
-       */
 
       if (previewUrl) {
         URL.revokeObjectURL(previewUrl);
@@ -447,10 +456,6 @@ export default function TambahFaceIdPage() {
       setCapturedFile(null);
       setFaceDetected(false);
       setRegistrationComplete(false);
-
-      /*
-       * Minta izin kamera.
-       */
 
       const stream =
         await navigator.mediaDevices.getUserMedia(
@@ -465,16 +470,15 @@ export default function TambahFaceIdPage() {
               },
             },
             audio: false,
-          },
+          }
         );
 
       streamRef.current = stream;
-
       setCameraActive(true);
     } catch (err) {
       console.error(
         "Camera error:",
-        err,
+        err
       );
 
       if (
@@ -482,19 +486,19 @@ export default function TambahFaceIdPage() {
         "NotAllowedError"
       ) {
         setError(
-          "Akses kamera ditolak. Izinkan kamera pada browser terlebih dahulu.",
+          "Akses kamera ditolak. Izinkan kamera pada browser terlebih dahulu."
         );
       } else if (
         err?.name ===
         "NotFoundError"
       ) {
         setError(
-          "Kamera tidak ditemukan pada perangkat.",
+          "Kamera tidak ditemukan pada perangkat."
         );
       } else {
         setError(
           err?.message ||
-            "Kamera tidak dapat diaktifkan.",
+            "Kamera tidak dapat diaktifkan."
         );
       }
 
@@ -528,7 +532,7 @@ export default function TambahFaceIdPage() {
   const handleCapture = () => {
     if (!videoRef.current) {
       setError(
-        "Kamera belum siap.",
+        "Kamera belum siap."
       );
       return;
     }
@@ -538,7 +542,7 @@ export default function TambahFaceIdPage() {
 
     if (!canvas) {
       setError(
-        "Canvas kamera belum siap.",
+        "Canvas kamera belum siap."
       );
       return;
     }
@@ -548,7 +552,7 @@ export default function TambahFaceIdPage() {
       !video.videoHeight
     ) {
       setError(
-        "Video kamera belum siap. Tunggu sebentar lalu coba lagi.",
+        "Video kamera belum siap. Tunggu sebentar lalu coba lagi."
       );
       return;
     }
@@ -561,21 +565,16 @@ export default function TambahFaceIdPage() {
 
     if (!context) {
       setError(
-        "Gagal memproses gambar kamera.",
+        "Gagal memproses gambar kamera."
       );
       return;
     }
-
-    /*
-     * Mirror kembali agar hasil foto
-     * terlihat natural.
-     */
 
     context.save();
 
     context.translate(
       canvas.width,
-      0,
+      0
     );
 
     context.scale(-1, 1);
@@ -585,7 +584,7 @@ export default function TambahFaceIdPage() {
       0,
       0,
       canvas.width,
-      canvas.height,
+      canvas.height
     );
 
     context.restore();
@@ -594,7 +593,7 @@ export default function TambahFaceIdPage() {
       (blob) => {
         if (!blob) {
           setError(
-            "Gagal mengambil foto.",
+            "Gagal mengambil foto."
           );
           return;
         }
@@ -604,30 +603,26 @@ export default function TambahFaceIdPage() {
           `face-${selectedUser.id}-${Date.now()}.jpg`,
           {
             type: "image/jpeg",
-          },
+          }
         );
 
         const url =
           URL.createObjectURL(blob);
 
         if (previewUrl) {
-          URL.revokeObjectURL(previewUrl);
+          URL.revokeObjectURL(
+            previewUrl
+          );
         }
 
         setCapturedFile(file);
         setPreviewUrl(url);
-
-        /*
-         * Untuk tahap enrollment,
-         * foto berhasil diambil = siap disimpan.
-         */
-
         setFaceDetected(true);
 
         stopCamera();
       },
       "image/jpeg",
-      0.92,
+      0.92
     );
   };
 
@@ -657,14 +652,14 @@ export default function TambahFaceIdPage() {
   const handleRegisterFace = async () => {
     if (!selectedUser) {
       setError(
-        "Pilih pengguna terlebih dahulu.",
+        "Pilih pengguna terlebih dahulu."
       );
       return;
     }
 
     if (!capturedFile) {
       setError(
-        "Ambil foto wajah terlebih dahulu.",
+        "Ambil foto wajah terlebih dahulu."
       );
       return;
     }
@@ -679,20 +674,15 @@ export default function TambahFaceIdPage() {
 
       if (!token) {
         throw new Error(
-          "Token login tidak ditemukan. Silakan login kembali.",
+          "Token login tidak ditemukan. Silakan login kembali."
         );
       }
 
       const formData = new FormData();
 
-      /*
-       * Nama field harus sama dengan
-       * upload.single("foto") di backend.
-       */
-
       formData.append(
         "foto",
-        capturedFile,
+        capturedFile
       );
 
       const response = await fetch(
@@ -703,7 +693,7 @@ export default function TambahFaceIdPage() {
             Authorization: `Bearer ${token}`,
           },
           body: formData,
-        },
+        }
       );
 
       const result =
@@ -712,7 +702,7 @@ export default function TambahFaceIdPage() {
       if (!response.ok) {
         throw new Error(
           result?.message ||
-            "Gagal mendaftarkan Face ID.",
+            "Gagal mendaftarkan Face ID."
         );
       }
 
@@ -720,19 +710,10 @@ export default function TambahFaceIdPage() {
 
       setSuccessMessage(
         result?.message ||
-          "Face ID berhasil didaftarkan.",
+          "Face ID berhasil didaftarkan."
       );
 
-      /*
-       * Update data user setelah berhasil.
-       */
-
       await loadUsers();
-
-      /*
-       * User yang baru didaftarkan tidak lagi
-       * masuk ke daftar pengguna yang tersedia.
-       */
 
       setSelectedUser((prev) =>
         prev
@@ -740,17 +721,17 @@ export default function TambahFaceIdPage() {
               ...prev,
               faceId: true,
             }
-          : prev,
+          : prev
       );
     } catch (err) {
       console.error(
         "Register Face ID error:",
-        err,
+        err
       );
 
       setError(
         err?.message ||
-          "Gagal mendaftarkan Face ID.",
+          "Gagal mendaftarkan Face ID."
       );
     } finally {
       setSaving(false);
@@ -771,12 +752,10 @@ export default function TambahFaceIdPage() {
     setSelectedUser(null);
     setSearchUser("");
     setShowUserList(false);
-
     setFaceDetected(false);
     setCapturedFile(null);
     setPreviewUrl("");
     setRegistrationComplete(false);
-
     setError("");
     setSuccessMessage("");
   };
@@ -797,14 +776,14 @@ export default function TambahFaceIdPage() {
 
       if (previewUrl) {
         URL.revokeObjectURL(
-          previewUrl,
+          previewUrl
         );
       }
     };
   }, [previewUrl]);
 
   return (
-    <div className="flex h-screen w-full bg-slate-50 overflow-hidden">
+    <div className="flex h-screen w-full theme-page overflow-hidden">
       {/* =====================================================
           SIDEBAR
       ====================================================== */}
@@ -836,61 +815,67 @@ export default function TambahFaceIdPage() {
           <div className="p-4 sm:p-6 lg:p-8">
             <div className="max-w-[1400px] mx-auto space-y-6">
 
-              {/* =================================================
-                  BACK
-              ================================================== */}
+              {/* BACK */}
 
               <div className="flex items-center justify-between gap-3">
                 <button
                   type="button"
                   onClick={() =>
                     router.push(
-                      "/admin/pengguna/face-id",
+                      "/admin/pengguna/face-id"
                     )
                   }
-                  className="inline-flex items-center gap-2 text-sm font-medium text-slate-500 hover:text-[#155DFC] transition"
+                  className="inline-flex items-center gap-2 text-sm font-medium theme-text-secondary hover:text-[var(--color-primary)] transition"
                 >
                   <ArrowLeft size={16} />
                   Kembali ke Daftar Face ID
                 </button>
 
-                <div className="hidden sm:flex items-center gap-2 text-xs text-slate-400">
+                <div className="hidden sm:flex items-center gap-2 text-xs theme-text-muted">
                   <span>Pengguna</span>
                   <span>/</span>
                   <span>Face ID</span>
                   <span>/</span>
-                  <span className="text-[#155DFC] font-medium">
+
+                  <span className="text-[var(--color-primary)] font-medium">
                     Daftar Face ID
                   </span>
                 </div>
               </div>
 
-              {/* =================================================
-                  PAGE HEADER
-              ================================================== */}
+              {/* PAGE HEADER */}
 
-              <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
+              <div
+                className={`theme-card rounded-2xl border theme-border ${themeCardShadow} overflow-hidden`}
+              >
                 <div className="p-5 sm:p-6 lg:p-7">
                   <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
-
                     <div className="flex items-start gap-4">
-                      <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-gradient-to-br from-[#155DFC] to-[#0d47c9] text-white flex items-center justify-center shadow-lg shadow-[#155DFC]/20 shrink-0">
-                        <ScanFace size={25} />
+
+                      <div
+                        className={`w-12 h-12 sm:w-14 sm:h-14 rounded-2xl ${themePrimarySoft} ${themePrimarySoftBorder} border flex items-center justify-center shrink-0`}
+                      >
+                        <ScanFace
+                          size={25}
+                          className="text-[var(--color-primary)]"
+                        />
                       </div>
 
                       <div>
                         <div className="flex flex-wrap items-center gap-2">
-                          <h1 className="text-xl sm:text-2xl font-bold text-slate-800">
+                          <h1 className="text-xl sm:text-2xl font-bold theme-text">
                             Daftar Face ID
                           </h1>
 
-                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-[#eaf1ff] text-[#155DFC] border border-[#c7dbff] text-[10px] font-bold">
+                          <span
+                            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full ${themePrimarySoft} text-[var(--color-primary)] ${themePrimarySoftBorder} border text-[10px] font-bold`}
+                          >
                             <ShieldCheck size={12} />
                             Secure
                           </span>
                         </div>
 
-                        <p className="text-sm text-slate-500 mt-1.5 max-w-2xl">
+                        <p className="text-sm theme-text-secondary mt-1.5 max-w-2xl">
                           Daftarkan data wajah pengguna
                           untuk digunakan sebagai
                           identifikasi pada sistem
@@ -900,75 +885,68 @@ export default function TambahFaceIdPage() {
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <div className="px-3 py-2 rounded-xl bg-slate-50 border border-slate-200">
-                        <p className="text-[10px] text-slate-400">
+                      <div className="px-3 py-2 rounded-xl theme-card-soft theme-border border">
+                        <p className="text-[10px] theme-text-muted">
                           Status Sistem
                         </p>
 
                         <div className="flex items-center gap-1.5 mt-0.5">
-                          <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                          <span className="w-2 h-2 rounded-full bg-[var(--color-success)]" />
 
-                          <span className="text-xs font-semibold text-emerald-600">
+                          <span className="text-xs font-semibold theme-success">
                             Siap Digunakan
                           </span>
                         </div>
                       </div>
                     </div>
-
                   </div>
                 </div>
               </div>
 
-              {/* =================================================
-                  ERROR
-              ================================================== */}
+              {/* ERROR */}
 
               {error && (
-                <div className="flex items-start gap-3 p-4 rounded-xl bg-red-50 border border-red-200">
+                <div className="flex items-start gap-3 p-4 rounded-xl theme-danger border">
                   <CircleAlert
                     size={17}
-                    className="text-red-500 shrink-0 mt-0.5"
+                    className="shrink-0 mt-0.5"
                   />
 
                   <div className="flex-1">
-                    <p className="text-sm font-semibold text-red-700">
+                    <p className="text-sm font-semibold">
                       Terjadi kesalahan
                     </p>
 
-                    <p className="text-xs text-red-600 mt-1 leading-5">
+                    <p className="text-xs mt-1 leading-5">
                       {error}
                     </p>
                   </div>
 
                   <button
                     type="button"
-                    onClick={() =>
-                      setError("")
-                    }
-                    className="text-red-400 hover:text-red-600"
+                    onClick={() => setError("")}
+                    className="opacity-60 hover:opacity-100 transition"
                   >
                     <X size={15} />
                   </button>
                 </div>
               )}
 
-              {/* =================================================
-                  SUCCESS
-              ================================================== */}
+              {/* SUCCESS */}
 
               {successMessage && (
-                <div className="flex items-start gap-3 p-4 rounded-xl bg-emerald-50 border border-emerald-200">
+                <div className="flex items-start gap-3 p-4 rounded-xl theme-success border">
                   <CheckCircle2
                     size={17}
-                    className="text-emerald-600 shrink-0 mt-0.5"
+                    className="shrink-0 mt-0.5"
                   />
 
                   <div className="flex-1">
-                    <p className="text-sm font-semibold text-emerald-700">
+                    <p className="text-sm font-semibold">
                       Berhasil
                     </p>
 
-                    <p className="text-xs text-emerald-600 mt-1">
+                    <p className="text-xs mt-1">
                       {successMessage}
                     </p>
                   </div>
@@ -978,18 +956,18 @@ export default function TambahFaceIdPage() {
                     onClick={() =>
                       setSuccessMessage("")
                     }
-                    className="text-emerald-400 hover:text-emerald-600"
+                    className="opacity-60 hover:opacity-100 transition"
                   >
                     <X size={15} />
                   </button>
                 </div>
               )}
 
-              {/* =================================================
-                  STEP INDICATOR
-              ================================================== */}
+              {/* STEP INDICATOR */}
 
-              <div className="bg-white rounded-2xl border border-slate-200/80 shadow-sm p-5 sm:p-6">
+              <div
+                className={`theme-card rounded-2xl border theme-border ${themeCardShadow} p-5 sm:p-6`}
+              >
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
 
                   {/* STEP 1 */}
@@ -998,8 +976,8 @@ export default function TambahFaceIdPage() {
                     <div
                       className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${
                         selectedUser
-                          ? "bg-emerald-500 text-white"
-                          : "bg-[#155DFC] text-white"
+                          ? "bg-[var(--color-success)] text-white"
+                          : "bg-[var(--color-primary)] text-white"
                       }`}
                     >
                       {selectedUser ? (
@@ -1012,11 +990,11 @@ export default function TambahFaceIdPage() {
                     </div>
 
                     <div>
-                      <p className="text-xs text-slate-400">
+                      <p className="text-xs theme-text-muted">
                         Langkah 1
                       </p>
 
-                      <p className="text-sm font-semibold text-slate-700">
+                      <p className="text-sm font-semibold theme-text">
                         Pilih Pengguna
                       </p>
                     </div>
@@ -1028,10 +1006,10 @@ export default function TambahFaceIdPage() {
                     <div
                       className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${
                         faceDetected
-                          ? "bg-emerald-500 text-white"
+                          ? "bg-[var(--color-success)] text-white"
                           : cameraActive
-                            ? "bg-[#155DFC] text-white"
-                            : "bg-slate-100 text-slate-400"
+                            ? "bg-[var(--color-primary)] text-white"
+                            : "theme-card-soft theme-text-muted"
                       }`}
                     >
                       {faceDetected ? (
@@ -1044,11 +1022,11 @@ export default function TambahFaceIdPage() {
                     </div>
 
                     <div>
-                      <p className="text-xs text-slate-400">
+                      <p className="text-xs theme-text-muted">
                         Langkah 2
                       </p>
 
-                      <p className="text-sm font-semibold text-slate-700">
+                      <p className="text-sm font-semibold theme-text">
                         Scan Wajah
                       </p>
                     </div>
@@ -1060,8 +1038,8 @@ export default function TambahFaceIdPage() {
                     <div
                       className={`w-9 h-9 rounded-full flex items-center justify-center shrink-0 ${
                         registrationComplete
-                          ? "bg-emerald-500 text-white"
-                          : "bg-slate-100 text-slate-400"
+                          ? "bg-[var(--color-success)] text-white"
+                          : "theme-card-soft theme-text-muted"
                       }`}
                     >
                       {registrationComplete ? (
@@ -1074,22 +1052,19 @@ export default function TambahFaceIdPage() {
                     </div>
 
                     <div>
-                      <p className="text-xs text-slate-400">
+                      <p className="text-xs theme-text-muted">
                         Langkah 3
                       </p>
 
-                      <p className="text-sm font-semibold text-slate-700">
+                      <p className="text-sm font-semibold theme-text">
                         Simpan Face ID
                       </p>
                     </div>
                   </div>
-
                 </div>
               </div>
 
-              {/* =================================================
-                  MAIN GRID
-              ================================================== */}
+              {/* MAIN GRID */}
 
               <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1.25fr)_minmax(340px,0.75fr)] gap-6">
 
@@ -1097,17 +1072,18 @@ export default function TambahFaceIdPage() {
                     LEFT - CAMERA
                 ================================================== */}
 
-                <section className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-
-                  <div className="px-5 sm:px-6 py-4 border-b border-slate-100">
+                <section
+                  className={`theme-card rounded-2xl border theme-border ${themeCardShadow} overflow-hidden`}
+                >
+                  <div className="px-5 sm:px-6 py-4 border-b theme-border">
                     <div className="flex items-center justify-between gap-3">
 
                       <div>
-                        <h2 className="text-sm font-bold text-slate-800">
+                        <h2 className="text-sm font-bold theme-text">
                           Pendaftaran Wajah
                         </h2>
 
-                        <p className="text-xs text-slate-400 mt-1">
+                        <p className="text-xs theme-text-muted mt-1">
                           Pastikan wajah terlihat jelas
                           pada area kamera.
                         </p>
@@ -1116,15 +1092,15 @@ export default function TambahFaceIdPage() {
                       <div
                         className={`inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-[10px] font-semibold border ${
                           cameraActive
-                            ? "bg-emerald-50 text-emerald-600 border-emerald-200"
-                            : "bg-slate-50 text-slate-500 border-slate-200"
+                            ? "theme-success"
+                            : "theme-card-soft theme-text-secondary theme-border"
                         }`}
                       >
                         <span
                           className={`w-1.5 h-1.5 rounded-full ${
                             cameraActive
-                              ? "bg-emerald-500"
-                              : "bg-slate-400"
+                              ? "bg-[var(--color-success)]"
+                              : "bg-[var(--color-text-muted)]"
                           }`}
                         />
 
@@ -1132,7 +1108,6 @@ export default function TambahFaceIdPage() {
                           ? "Kamera Aktif"
                           : "Kamera Belum Aktif"}
                       </div>
-
                     </div>
                   </div>
 
@@ -1210,7 +1185,6 @@ export default function TambahFaceIdPage() {
                                 aktifkan kamera untuk
                                 melakukan scan wajah.
                               </p>
-
                             </div>
                           </div>
                         )}
@@ -1219,7 +1193,6 @@ export default function TambahFaceIdPage() {
 
                       {cameraActive && (
                         <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-
                           <div
                             className={`relative w-[48%] max-w-[230px] aspect-[3/4] rounded-[45%] border-2 transition-all duration-500 ${
                               faceDetected
@@ -1227,25 +1200,22 @@ export default function TambahFaceIdPage() {
                                 : "border-white/70"
                             }`}
                           >
-
                             {/* CORNERS */}
 
-                            <span className="absolute -top-1 -left-1 w-7 h-7 border-l-2 border-t-2 border-[#155DFC] rounded-tl-xl" />
+                            <span className="absolute -top-1 -left-1 w-7 h-7 border-l-2 border-t-2 border-[var(--color-primary)] rounded-tl-xl" />
 
-                            <span className="absolute -top-1 -right-1 w-7 h-7 border-r-2 border-t-2 border-[#155DFC] rounded-tr-xl" />
+                            <span className="absolute -top-1 -right-1 w-7 h-7 border-r-2 border-t-2 border-[var(--color-primary)] rounded-tr-xl" />
 
-                            <span className="absolute -bottom-1 -left-1 w-7 h-7 border-l-2 border-b-2 border-[#155DFC] rounded-bl-xl" />
+                            <span className="absolute -bottom-1 -left-1 w-7 h-7 border-l-2 border-b-2 border-[var(--color-primary)] rounded-bl-xl" />
 
-                            <span className="absolute -bottom-1 -right-1 w-7 h-7 border-r-2 border-b-2 border-[#155DFC] rounded-br-xl" />
+                            <span className="absolute -bottom-1 -right-1 w-7 h-7 border-r-2 border-b-2 border-[var(--color-primary)] rounded-br-xl" />
 
                             {/* SCAN LINE */}
 
                             {!faceDetected && (
-                              <div className="absolute left-3 right-3 top-1/2 h-px bg-[#60a5fa] shadow-[0_0_12px_rgba(96,165,250,0.8)] animate-pulse" />
+                              <div className="absolute left-3 right-3 top-1/2 h-px bg-[var(--color-primary)] shadow-[0_0_12px_color-mix(in_srgb,var(--color-primary)_70%,transparent)] animate-pulse" />
                             )}
-
                           </div>
-
                         </div>
                       )}
 
@@ -1261,7 +1231,6 @@ export default function TambahFaceIdPage() {
                           </div>
 
                           <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between gap-3">
-
                             <div className="flex items-center gap-2">
                               <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
 
@@ -1274,7 +1243,6 @@ export default function TambahFaceIdPage() {
                               Pastikan hanya satu
                               wajah
                             </span>
-
                           </div>
                         </>
                       )}
@@ -1296,7 +1264,6 @@ export default function TambahFaceIdPage() {
                         ref={canvasRef}
                         className="hidden"
                       />
-
                     </div>
 
                     {/* CAMERA CONTROLS */}
@@ -1314,7 +1281,7 @@ export default function TambahFaceIdPage() {
                           onClick={
                             handleStartCamera
                           }
-                          className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-[#155DFC] to-[#0d47c9] text-white text-sm font-semibold shadow-sm hover:brightness-110 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                          className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[var(--color-primary)] text-white text-sm font-semibold shadow-sm hover:brightness-110 transition disabled:opacity-40 disabled:cursor-not-allowed"
                         >
                           <Camera size={17} />
 
@@ -1329,11 +1296,12 @@ export default function TambahFaceIdPage() {
                             onClick={
                               handleReset
                             }
-                            className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-600 text-sm font-semibold hover:bg-slate-50 transition"
+                            className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl theme-card border theme-border theme-text-secondary text-sm font-semibold themeTextHover transition"
                           >
                             <RefreshCw
                               size={16}
                             />
+
                             Batal Scan
                           </button>
 
@@ -1342,7 +1310,7 @@ export default function TambahFaceIdPage() {
                             onClick={
                               handleCapture
                             }
-                            className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-[#155DFC] to-[#0d47c9] text-white text-sm font-semibold shadow-sm hover:brightness-110 transition"
+                            className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[var(--color-primary)] text-white text-sm font-semibold shadow-sm hover:brightness-110 transition"
                           >
                             <Camera size={17} />
                             Ambil Foto
@@ -1356,7 +1324,7 @@ export default function TambahFaceIdPage() {
                               handleReset
                             }
                             disabled={saving}
-                            className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-600 text-sm font-semibold hover:bg-slate-50 transition disabled:opacity-40"
+                            className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl theme-card border theme-border theme-text-secondary text-sm font-semibold themeTextHover transition disabled:opacity-40"
                           >
                             <RefreshCw
                               size={16}
@@ -1373,7 +1341,7 @@ export default function TambahFaceIdPage() {
                             onClick={
                               handleRegisterFace
                             }
-                            className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-gradient-to-r from-[#155DFC] to-[#0d47c9] text-white text-sm font-semibold shadow-sm hover:brightness-110 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                            className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-[var(--color-primary)] text-white text-sm font-semibold shadow-sm hover:brightness-110 transition disabled:opacity-40 disabled:cursor-not-allowed"
                           >
                             <Fingerprint
                               size={17}
@@ -1385,76 +1353,77 @@ export default function TambahFaceIdPage() {
                           </button>
                         </>
                       )}
-
                     </div>
 
+                    {/* NO USER */}
+
                     {!selectedUser && (
-                      <div className="flex items-start gap-2 mt-3 p-3 rounded-xl bg-amber-50 border border-amber-100">
+                      <div className="flex items-start gap-2 mt-3 p-3 rounded-xl theme-warning border">
                         <CircleAlert
                           size={15}
-                          className="text-amber-500 shrink-0 mt-0.5"
+                          className="shrink-0 mt-0.5"
                         />
 
-                        <p className="text-[11px] leading-5 text-amber-700">
+                        <p className="text-[11px] leading-5">
                           Pilih pengguna terlebih dahulu
                           sebelum mengaktifkan kamera.
                         </p>
                       </div>
                     )}
 
+                    {/* CAPTURED */}
+
                     {capturedFile &&
                       !registrationComplete && (
-                        <div className="flex items-start gap-3 mt-4 p-4 rounded-xl bg-blue-50 border border-blue-200">
-
-                          <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center shrink-0">
+                        <div className="flex items-start gap-3 mt-4 p-4 rounded-xl theme-primary border">
+                          <div
+                            className={`w-8 h-8 rounded-lg ${themePrimarySoft} flex items-center justify-center shrink-0`}
+                          >
                             <CheckCircle2
                               size={17}
-                              className="text-blue-600"
+                              className="text-[var(--color-primary)]"
                             />
                           </div>
 
                           <div>
-                            <p className="text-sm font-bold text-blue-700">
+                            <p className="text-sm font-bold">
                               Foto wajah berhasil
                               diambil
                             </p>
 
-                            <p className="text-xs text-blue-600 mt-1 leading-5">
+                            <p className="text-xs mt-1 leading-5">
                               Periksa kembali foto wajah,
                               lalu klik "Simpan Face ID".
                             </p>
                           </div>
-
                         </div>
                       )}
 
-                    {registrationComplete && (
-                      <div className="flex items-start gap-3 mt-4 p-4 rounded-xl bg-emerald-50 border border-emerald-200">
+                    {/* REGISTRATION COMPLETE */}
 
-                        <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center shrink-0">
+                    {registrationComplete && (
+                      <div className="flex items-start gap-3 mt-4 p-4 rounded-xl theme-success border">
+                        <div className="w-8 h-8 rounded-lg bg-[color-mix(in_srgb,var(--color-success)_12%,transparent)] flex items-center justify-center shrink-0">
                           <CheckCircle2
                             size={17}
-                            className="text-emerald-600"
                           />
                         </div>
 
                         <div>
-                          <p className="text-sm font-bold text-emerald-700">
+                          <p className="text-sm font-bold">
                             Face ID berhasil
                             didaftarkan
                           </p>
 
-                          <p className="text-xs text-emerald-600 mt-1 leading-5">
+                          <p className="text-xs mt-1 leading-5">
                             Data wajah pengguna telah
                             tersimpan dan siap digunakan
                             untuk sistem identifikasi
                             SmartSchool.
                           </p>
                         </div>
-
                       </div>
                     )}
-
                   </div>
                 </section>
 
@@ -1466,27 +1435,26 @@ export default function TambahFaceIdPage() {
 
                   {/* USER SELECT */}
 
-                  <section className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-visible">
-
-                    <div className="px-5 sm:px-6 py-4 border-b border-slate-100">
-                      <h2 className="text-sm font-bold text-slate-800">
+                  <section
+                    className={`theme-card rounded-2xl border theme-border ${themeCardShadow} overflow-visible`}
+                  >
+                    <div className="px-5 sm:px-6 py-4 border-b theme-border">
+                      <h2 className="text-sm font-bold theme-text">
                         Pilih Pengguna
                       </h2>
 
-                      <p className="text-xs text-slate-400 mt-1">
+                      <p className="text-xs theme-text-muted mt-1">
                         Pilih akun yang akan
                         didaftarkan Face ID.
                       </p>
                     </div>
 
                     <div className="p-5 sm:p-6">
-
                       <div className="relative">
-
                         <div className="relative">
                           <Users
                             size={16}
-                            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                            className="absolute left-3 top-1/2 -translate-y-1/2 theme-text-muted"
                           />
 
                           <input
@@ -1494,32 +1462,31 @@ export default function TambahFaceIdPage() {
                             value={searchUser}
                             onFocus={() =>
                               setShowUserList(
-                                true,
+                                true
                               )
                             }
                             onChange={(event) => {
                               setSearchUser(
-                                event.target
-                                  .value,
+                                event.target.value
                               );
 
                               setSelectedUser(
-                                null,
+                                null
                               );
 
                               setShowUserList(
-                                true,
+                                true
                               );
 
                               handleReset();
                             }}
                             placeholder="Cari nama, username, atau ID..."
-                            className="w-full pl-9 pr-10 py-3 rounded-xl border border-slate-200 text-sm text-slate-700 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-[#155DFC]/20 focus:border-[#155DFC]/50"
+                            className="w-full pl-9 pr-10 py-3 rounded-xl theme-input border theme-border text-sm theme-text placeholder:theme-text-placeholder focus:outline-none focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] focus:border-[color-mix(in_srgb,var(--color-primary)_50%,transparent)]"
                           />
 
                           <ChevronDown
                             size={16}
-                            className={`absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 transition ${
+                            className={`absolute right-3 top-1/2 -translate-y-1/2 theme-text-muted transition ${
                               showUserList
                                 ? "rotate-180"
                                 : ""
@@ -1528,18 +1495,19 @@ export default function TambahFaceIdPage() {
                         </div>
 
                         {showUserList && (
-                          <div className="absolute z-30 top-full left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-xl overflow-hidden">
-
+                          <div
+                            className={`absolute z-30 top-full left-0 right-0 mt-2 theme-card border theme-border rounded-xl ${themeCardShadow} overflow-hidden`}
+                          >
                             <div className="max-h-64 overflow-y-auto">
 
                               {loadingUsers ? (
                                 <div className="px-5 py-8 text-center">
                                   <RefreshCw
                                     size={20}
-                                    className="mx-auto text-slate-300 animate-spin"
+                                    className="mx-auto theme-text-muted animate-spin"
                                   />
 
-                                  <p className="text-xs font-semibold text-slate-600 mt-2">
+                                  <p className="text-xs font-semibold theme-text-secondary mt-2">
                                     Memuat pengguna...
                                   </p>
                                 </div>
@@ -1549,122 +1517,97 @@ export default function TambahFaceIdPage() {
                                   (user) => (
                                     <button
                                       type="button"
-                                      key={
-                                        user.id
-                                      }
+                                      key={user.id}
                                       onClick={() =>
                                         handleSelectUser(
-                                          user,
+                                          user
                                         )
                                       }
-                                      className="w-full flex items-center gap-3 px-4 py-3 text-left hover:bg-[#eaf1ff] transition border-b border-slate-100 last:border-0"
+                                      className={`w-full flex items-center gap-3 px-4 py-3 text-left transition border-b theme-border last:border-0 ${themeTextHover}`}
                                     >
-                                      <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#155DFC] to-[#0d47c9] text-white flex items-center justify-center text-[10px] font-bold shrink-0">
+                                      <div
+                                        className={`w-9 h-9 rounded-full ${themePrimarySoft} text-[var(--color-primary)] ${themePrimarySoftBorder} border flex items-center justify-center text-[10px] font-bold shrink-0`}
+                                      >
                                         {user.nama
-                                          .split(
-                                            " ",
-                                          )
+                                          .split(" ")
                                           .map(
-                                            (
-                                              item,
-                                            ) =>
-                                              item[0],
+                                            (item) =>
+                                              item[0]
                                           )
-                                          .slice(
-                                            0,
-                                            2,
-                                          )
-                                          .join(
-                                            "",
-                                          )}
+                                          .slice(0, 2)
+                                          .join("")}
                                       </div>
 
                                       <div className="min-w-0 flex-1">
-                                        <p className="text-xs font-semibold text-slate-700 truncate">
-                                          {
-                                            user.nama
-                                          }
+                                        <p className="text-xs font-semibold theme-text truncate">
+                                          {user.nama}
                                         </p>
 
-                                        <p className="text-[10px] text-slate-400 truncate mt-0.5">
-                                          {
-                                            user.id
-                                          }{" "}
+                                        <p className="text-[10px] theme-text-muted truncate mt-0.5">
+                                          {user.id}{" "}
                                           •{" "}
-                                          {
-                                            user.jabatan
-                                          }
+                                          {user.jabatan}
                                         </p>
                                       </div>
 
                                       <RoleBadge
-                                        role={
-                                          user.role
-                                        }
+                                        role={user.role}
                                       />
                                     </button>
-                                  ),
+                                  )
                                 )
                               ) : (
                                 <div className="px-5 py-8 text-center">
                                   <Users
                                     size={20}
-                                    className="mx-auto text-slate-300"
+                                    className="mx-auto theme-text-muted"
                                   />
 
-                                  <p className="text-xs font-semibold text-slate-600 mt-2">
+                                  <p className="text-xs font-semibold theme-text-secondary mt-2">
                                     Pengguna tidak
                                     ditemukan
                                   </p>
 
-                                  <p className="text-[10px] text-slate-400 mt-1">
+                                  <p className="text-[10px] theme-text-muted mt-1">
                                     Pengguna aktif yang
                                     belum memiliki Face
                                     ID tidak ditemukan.
                                   </p>
                                 </div>
                               )}
-
                             </div>
                           </div>
                         )}
-
                       </div>
 
                       {/* SELECTED USER */}
 
                       {selectedUser && (
-                        <div className="mt-4 p-4 rounded-xl bg-[#f7f9ff] border border-[#dbe7ff]">
-
+                        <div
+                          className={`mt-4 p-4 rounded-xl ${themePrimarySoft} ${themePrimarySoftBorder} border`}
+                        >
                           <div className="flex items-center gap-3">
 
-                            <div className="w-11 h-11 rounded-full bg-gradient-to-br from-[#155DFC] to-[#0d47c9] text-white flex items-center justify-center text-xs font-bold shrink-0">
+                            <div
+                              className={`w-11 h-11 rounded-full ${themePrimarySoft} text-[var(--color-primary)] ${themePrimarySoftBorder} border flex items-center justify-center text-xs font-bold shrink-0`}
+                            >
                               {selectedUser.nama
-                                .split(
-                                  " ",
-                                )
+                                .split(" ")
                                 .map(
                                   (item) =>
-                                    item[0],
+                                    item[0]
                                 )
-                                .slice(
-                                  0,
-                                  2,
-                                )
+                                .slice(0, 2)
                                 .join("")}
                             </div>
 
                             <div className="min-w-0 flex-1">
-                              <p className="text-sm font-bold text-slate-800 truncate">
-                                {
-                                  selectedUser.nama
-                                }
+                              <p className="text-sm font-bold theme-text truncate">
+                                {selectedUser.nama}
                               </p>
 
-                              <p className="text-[11px] text-slate-400 truncate mt-0.5">
-                                {
-                                  selectedUser.email
-                                }
+                              <p className="text-[11px] theme-text-muted truncate mt-0.5">
+                                {selectedUser.email}
                               </p>
                             </div>
 
@@ -1673,11 +1616,10 @@ export default function TambahFaceIdPage() {
                               onClick={
                                 handleClearUser
                               }
-                              className="w-7 h-7 rounded-lg hover:bg-white text-slate-400 hover:text-red-500 flex items-center justify-center transition"
+                              className={`w-7 h-7 rounded-lg themeTextHover theme-text-muted hover:text-[var(--color-danger)] flex items-center justify-center transition`}
                             >
                               <X size={14} />
                             </button>
-
                           </div>
 
                           <div className="flex items-center gap-2 mt-3">
@@ -1687,36 +1629,33 @@ export default function TambahFaceIdPage() {
                               }
                             />
 
-                            <span className="text-[10px] text-slate-400">
+                            <span className="text-[10px] theme-text-muted">
                               {selectedUser.id}
                             </span>
                           </div>
-
                         </div>
                       )}
-
                     </div>
                   </section>
 
                   {/* DETAIL USER */}
 
-                  <section className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-
-                    <div className="px-5 sm:px-6 py-4 border-b border-slate-100">
-                      <h2 className="text-sm font-bold text-slate-800">
+                  <section
+                    className={`theme-card rounded-2xl border theme-border ${themeCardShadow} overflow-hidden`}
+                  >
+                    <div className="px-5 sm:px-6 py-4 border-b theme-border">
+                      <h2 className="text-sm font-bold theme-text">
                         Informasi Pengguna
                       </h2>
 
-                      <p className="text-xs text-slate-400 mt-1">
+                      <p className="text-xs theme-text-muted mt-1">
                         Detail akun yang dipilih.
                       </p>
                     </div>
 
                     <div className="p-5 sm:p-6">
-
                       {selectedUser ? (
                         <div className="space-y-4">
-
                           <InfoItem
                             icon={User}
                             label="Nama Lengkap"
@@ -1748,64 +1687,59 @@ export default function TambahFaceIdPage() {
                           />
 
                           <InfoItem
-                            icon={
-                              GraduationCap
-                            }
+                            icon={GraduationCap}
                             label="Jabatan / Keterangan"
                             value={
                               selectedUser.jabatan
                             }
                           />
-
                         </div>
                       ) : (
                         <div className="py-8 text-center">
-
-                          <div className="w-12 h-12 mx-auto rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-center">
+                          <div
+                            className={`w-12 h-12 mx-auto rounded-xl theme-card-soft border theme-border flex items-center justify-center`}
+                          >
                             <User
                               size={20}
-                              className="text-slate-300"
+                              className="theme-text-muted"
                             />
                           </div>
 
-                          <p className="text-xs font-semibold text-slate-600 mt-3">
+                          <p className="text-xs font-semibold theme-text-secondary mt-3">
                             Belum ada pengguna
                             dipilih
                           </p>
 
-                          <p className="text-[10px] text-slate-400 mt-1 max-w-xs mx-auto">
+                          <p className="text-[10px] theme-text-muted mt-1 max-w-xs mx-auto">
                             Informasi pengguna akan
                             tampil setelah kamu
                             memilih akun.
                           </p>
-
                         </div>
                       )}
-
                     </div>
                   </section>
 
                   {/* INSTRUCTION */}
 
-                  <section className="bg-white rounded-2xl border border-slate-200/80 shadow-sm overflow-hidden">
-
-                    <div className="px-5 sm:px-6 py-4 border-b border-slate-100">
+                  <section
+                    className={`theme-card rounded-2xl border theme-border ${themeCardShadow} overflow-hidden`}
+                  >
+                    <div className="px-5 sm:px-6 py-4 border-b theme-border">
                       <div className="flex items-center gap-2">
                         <Info
                           size={15}
-                          className="text-[#155DFC]"
+                          className="text-[var(--color-primary)]"
                         />
 
-                        <h2 className="text-sm font-bold text-slate-800">
+                        <h2 className="text-sm font-bold theme-text">
                           Panduan Pendaftaran
                         </h2>
                       </div>
                     </div>
 
                     <div className="p-5 sm:p-6">
-
                       <div className="space-y-3">
-
                         {[
                           "Pastikan pencahayaan wajah cukup dan merata.",
                           "Posisikan wajah tepat di tengah area kamera.",
@@ -1818,46 +1752,46 @@ export default function TambahFaceIdPage() {
                               key={index}
                               className="flex items-start gap-3"
                             >
-                              <div className="w-6 h-6 rounded-full bg-[#eaf1ff] text-[#155DFC] border border-[#c7dbff] flex items-center justify-center text-[10px] font-bold shrink-0">
+                              <div
+                                className={`w-6 h-6 rounded-full ${themePrimarySoft} text-[var(--color-primary)] ${themePrimarySoftBorder} border flex items-center justify-center text-[10px] font-bold shrink-0`}
+                              >
                                 {index + 1}
                               </div>
 
-                              <p className="text-xs leading-5 text-slate-500">
+                              <p className="text-xs leading-5 theme-text-secondary">
                                 {text}
                               </p>
                             </div>
-                          ),
+                          )
                         )}
-
                       </div>
-
                     </div>
                   </section>
-
                 </div>
               </div>
 
-              {/* =================================================
-                  SECURITY NOTICE
-              ================================================== */}
+              {/* SECURITY NOTICE */}
 
-              <section className="bg-[#f7f9ff] rounded-2xl border border-[#dbe7ff] p-4 sm:p-5">
-
+              <section
+                className={`rounded-2xl ${themePrimarySoft} ${themePrimarySoftBorder} border p-4 sm:p-5`}
+              >
                 <div className="flex items-start gap-3">
 
-                  <div className="w-9 h-9 rounded-xl bg-white border border-[#c7dbff] flex items-center justify-center shrink-0">
+                  <div
+                    className={`w-9 h-9 rounded-xl theme-card ${themePrimarySoftBorder} border flex items-center justify-center shrink-0`}
+                  >
                     <ShieldCheck
                       size={17}
-                      className="text-[#155DFC]"
+                      className="text-[var(--color-primary)]"
                     />
                   </div>
 
                   <div>
-                    <p className="text-sm font-semibold text-slate-700">
+                    <p className="text-sm font-semibold theme-text">
                       Keamanan Data Face ID
                     </p>
 
-                    <p className="text-xs text-slate-500 leading-5 mt-1">
+                    <p className="text-xs theme-text-secondary leading-5 mt-1">
                       Data biometrik digunakan hanya
                       untuk kebutuhan identifikasi dan
                       presensi pengguna dalam sistem
@@ -1866,14 +1800,10 @@ export default function TambahFaceIdPage() {
                       benar.
                     </p>
                   </div>
-
                 </div>
-
               </section>
 
-              {/* =================================================
-                  BOTTOM ACTION
-              ================================================== */}
+              {/* BOTTOM ACTION */}
 
               <div className="flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-3 pb-4">
 
@@ -1881,10 +1811,10 @@ export default function TambahFaceIdPage() {
                   type="button"
                   onClick={() =>
                     router.push(
-                      "/admin/pengguna/face-id",
+                      "/admin/pengguna/face-id"
                     )
                   }
-                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-600 text-sm font-semibold hover:bg-slate-50 transition"
+                  className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl theme-card border theme-border theme-text-secondary text-sm font-semibold themeTextHover transition"
                 >
                   <ArrowLeft size={15} />
                   Batal
@@ -1899,7 +1829,7 @@ export default function TambahFaceIdPage() {
                       !cameraActive &&
                       !capturedFile
                     }
-                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-slate-600 text-sm font-semibold hover:bg-slate-50 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl theme-card border theme-border theme-text-secondary text-sm font-semibold themeTextHover transition disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     <RefreshCw size={15} />
                     Reset
@@ -1916,7 +1846,7 @@ export default function TambahFaceIdPage() {
                     onClick={
                       handleRegisterFace
                     }
-                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#155DFC] to-[#0d47c9] text-white text-sm font-semibold shadow-sm hover:brightness-110 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                    className="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl bg-[var(--color-primary)] text-white text-sm font-semibold shadow-sm hover:brightness-110 transition disabled:opacity-40 disabled:cursor-not-allowed"
                   >
                     {registrationComplete ? (
                       <>
@@ -1930,13 +1860,13 @@ export default function TambahFaceIdPage() {
                         <Fingerprint
                           size={16}
                         />
+
                         {saving
                           ? "Menyimpan..."
                           : "Daftarkan Face ID"}
                       </>
                     )}
                   </button>
-
                 </div>
               </div>
 

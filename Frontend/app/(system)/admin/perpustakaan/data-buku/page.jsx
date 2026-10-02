@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Sidebar from "../../../../components/Sidebar";
 import Header from "../../../../components/Header";
 
@@ -16,208 +16,135 @@ import {
   ChevronDown,
   Library,
   CheckCircle2,
-  AlertTriangle,
   Archive,
-  MapPin,
+  FileText,
+  ExternalLink,
+  AlertCircle,
+  Loader2,
 } from "lucide-react";
 
+import {
+  getBuku,
+  getBukuById,
+  createBuku,
+  updateBuku,
+  deleteBuku,
+} from "../../../../../services/perpustakaan.service";
+
 /* =========================================================
-   DATA DUMMY
+   THEME HELPERS
 ========================================================= */
 
-const initialBooks = [
-  {
-    id: 1,
-    kode: "BK-0001",
-    isbn: "978-602-1234-01-1",
-    judul: "Matematika untuk SMA Kelas X",
-    penulis: "Budi Santoso",
-    penerbit: "Edukasi Nasional",
-    tahun: "2025",
-    kategori: "Matematika",
-    jenjang: "SMA",
-    lokasi: "Rak A-01",
-    stok: 8,
-    tersedia: 6,
-    dipinjam: 2,
-    kondisi: "Baik",
-    status: "Aktif",
-  },
-  {
-    id: 2,
-    kode: "BK-0002",
-    isbn: "978-602-1234-02-8",
-    judul: "Bahasa Indonesia untuk Pelajar",
-    penulis: "Siti Rahmawati",
-    penerbit: "Media Pendidikan",
-    tahun: "2024",
-    kategori: "Bahasa Indonesia",
-    jenjang: "SMA",
-    lokasi: "Rak A-02",
-    stok: 10,
-    tersedia: 8,
-    dipinjam: 2,
-    kondisi: "Baik",
-    status: "Aktif",
-  },
-  {
-    id: 3,
-    kode: "BK-0003",
-    isbn: "978-602-1234-03-5",
-    judul: "Fisika Dasar",
-    penulis: "Andi Pratama",
-    penerbit: "Sains Indonesia",
-    tahun: "2025",
-    kategori: "IPA",
-    jenjang: "SMA",
-    lokasi: "Rak B-01",
-    stok: 7,
-    tersedia: 5,
-    dipinjam: 2,
-    kondisi: "Baik",
-    status: "Aktif",
-  },
-  {
-    id: 4,
-    kode: "BK-0004",
-    isbn: "978-602-1234-04-2",
-    judul: "Pemrograman Dasar",
-    penulis: "Ahmad Fauzi",
-    penerbit: "Tekno Edu",
-    tahun: "2025",
-    kategori: "Informatika",
-    jenjang: "SMK",
-    lokasi: "Rak C-01",
-    stok: 12,
-    tersedia: 9,
-    dipinjam: 3,
-    kondisi: "Baik",
-    status: "Aktif",
-  },
-  {
-    id: 5,
-    kode: "BK-0005",
-    isbn: "978-602-1234-05-9",
-    judul: "Sejarah Indonesia",
-    penulis: "Rina Kusuma",
-    penerbit: "Nusantara Press",
-    tahun: "2023",
-    kategori: "Sejarah",
-    jenjang: "SMA",
-    lokasi: "Rak B-03",
-    stok: 6,
-    tersedia: 4,
-    dipinjam: 2,
-    kondisi: "Rusak Ringan",
-    status: "Aktif",
-  },
-  {
-    id: 6,
-    kode: "BK-0006",
-    isbn: "978-602-1234-06-6",
-    judul: "Dasar-Dasar Akuntansi",
-    penulis: "Hendra Wijaya",
-    penerbit: "Bisnis Edukasi",
-    tahun: "2024",
-    kategori: "Ekonomi",
-    jenjang: "SMK",
-    lokasi: "Rak C-03",
-    stok: 9,
-    tersedia: 9,
-    dipinjam: 0,
-    kondisi: "Baik",
-    status: "Aktif",
-  },
-  {
-    id: 7,
-    kode: "BK-0007",
-    isbn: "978-602-1234-07-3",
-    judul: "English for Students",
-    penulis: "Dewi Anggraini",
-    penerbit: "Global Education",
-    tahun: "2024",
-    kategori: "Bahasa Inggris",
-    jenjang: "SMA",
-    lokasi: "Rak A-04",
-    stok: 8,
-    tersedia: 5,
-    dipinjam: 3,
-    kondisi: "Baik",
-    status: "Aktif",
-  },
-  {
-    id: 8,
-    kode: "BK-0008",
-    isbn: "978-602-1234-08-0",
-    judul: "Teknik Komputer dan Jaringan",
-    penulis: "Yusuf Prasetyo",
-    penerbit: "Teknologi Sekolah",
-    tahun: "2023",
-    kategori: "Teknologi",
-    jenjang: "SMK",
-    lokasi: "Rak C-04",
-    stok: 5,
-    tersedia: 2,
-    dipinjam: 3,
-    kondisi: "Rusak Ringan",
-    status: "Aktif",
-  },
-  {
-    id: 9,
-    kode: "BK-0009",
-    isbn: "978-602-1234-09-7",
-    judul: "Pendidikan Jasmani dan Kesehatan",
-    penulis: "Slamet Riyadi",
-    penerbit: "Sehat Bersama",
-    tahun: "2024",
-    kategori: "PJOK",
-    jenjang: "SMA",
-    lokasi: "Rak D-01",
-    stok: 6,
-    tersedia: 6,
-    dipinjam: 0,
-    kondisi: "Baik",
-    status: "Aktif",
-  },
-  {
-    id: 10,
-    kode: "BK-0010",
-    isbn: "978-602-1234-10-3",
-    judul: "Modul Biologi Kelas XI",
-    penulis: "Dewi Lestari",
-    penerbit: "Sains Edu",
-    tahun: "2022",
-    kategori: "Biologi",
-    jenjang: "SMA",
-    lokasi: "Rak B-05",
-    stok: 4,
-    tersedia: 0,
-    dipinjam: 4,
-    kondisi: "Baik",
-    status: "Aktif",
-  },
-];
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]";
+
+const themePrimaryHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
+
+const themeTextHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_6px_24px_color-mix(in_srgb,var(--color-text)_6%,transparent)]";
+
+const themePrimaryShadow =
+  "shadow-[0_10px_25px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]";
 
 /* =========================================================
    FORM DEFAULT
 ========================================================= */
 
 const emptyForm = {
-  kode: "",
-  isbn: "",
+  kodeBuku: "",
   judul: "",
   penulis: "",
   penerbit: "",
-  tahun: "",
-  kategori: "Matematika",
-  jenjang: "SMA",
-  lokasi: "",
-  stok: "",
-  tersedia: "",
-  dipinjam: "0",
-  kondisi: "Baik",
-  status: "Aktif",
+  tahunTerbit: "",
+  isbn: "",
+  tipe: "FISIK",
+  kategori: "",
+  deskripsi: "",
+  coverUrl: "",
+  urlEbook: "",
+  jumlah: "0",
+  status: "aktif",
 };
+
+/* =========================================================
+   HELPERS
+========================================================= */
+
+function normalizeBook(book) {
+  if (!book) return null;
+
+  const jumlah = Number(book.jumlah ?? 0);
+  const jumlahTersedia = Number(
+    book.jumlahTersedia ?? 0,
+  );
+
+  return {
+    ...book,
+
+    id: book.id ?? book.bukuId,
+
+    kodeBuku: book.kodeBuku ?? "",
+    judul: book.judul ?? "",
+    penulis: book.penulis ?? "",
+    penerbit: book.penerbit ?? "",
+    tahunTerbit: book.tahunTerbit ?? "",
+    isbn: book.isbn ?? "",
+
+    tipe: book.tipe ?? "FISIK",
+    kategori: book.kategori ?? "",
+
+    deskripsi: book.deskripsi ?? "",
+    coverUrl: book.coverUrl ?? "",
+    urlEbook: book.urlEbook ?? "",
+
+    jumlah,
+    jumlahTersedia,
+
+    dipinjam: Math.max(
+      0,
+      jumlah - jumlahTersedia,
+    ),
+
+    status: String(
+      book.status ?? "aktif",
+    ).toLowerCase(),
+  };
+}
+
+function getErrorMessage(error) {
+  if (!error) {
+    return "Terjadi kesalahan.";
+  }
+
+  if (typeof error === "string") {
+    return error;
+  }
+
+  return (
+    error?.message ||
+    error?.response?.data?.message ||
+    "Terjadi kesalahan pada server."
+  );
+}
+
+function statusLabel(status) {
+  return status === "aktif"
+    ? "Aktif"
+    : "Nonaktif";
+}
+
+function typeLabel(tipe) {
+  return tipe === "EBOOK"
+    ? "E-Book"
+    : "Buku Fisik";
+}
 
 /* =========================================================
    STAT CARD
@@ -231,40 +158,48 @@ function StatCard({
 }) {
   const styles = {
     blue: {
-      bg: "bg-blue-50",
-      text: "text-blue-600",
-      value: "text-slate-900",
+      iconBg: themePrimarySoft,
+      iconText: "text-[var(--color-primary)]",
+      value: "theme-text",
     },
+
     green: {
-      bg: "bg-emerald-50",
-      text: "text-emerald-600",
-      value: "text-emerald-700",
+      iconBg:
+        "bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)]",
+      iconText: "text-[var(--color-success)]",
+      value: "text-[var(--color-success)]",
     },
+
     orange: {
-      bg: "bg-orange-50",
-      text: "text-orange-600",
-      value: "text-orange-700",
+      iconBg:
+        "bg-[color-mix(in_srgb,var(--color-warning)_12%,transparent)]",
+      iconText: "text-[var(--color-warning)]",
+      value: "text-[var(--color-warning)]",
     },
+
     purple: {
-      bg: "bg-violet-50",
-      text: "text-violet-600",
-      value: "text-violet-700",
+      iconBg:
+        "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
+      iconText: "text-[var(--color-primary)]",
+      value: "text-[var(--color-primary)]",
     },
   };
 
   const style = styles[type];
 
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-4 shadow-[0_1px_3px_rgba(15,23,42,0.08)] sm:p-5">
+    <div
+      className={`theme-card theme-border rounded-xl border p-4 ${themeCardShadow} sm:p-5`}
+    >
       <div className="flex items-center gap-3">
         <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${style.bg} ${style.text}`}
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${style.iconBg} ${style.iconText}`}
         >
           <Icon size={19} />
         </div>
 
         <div>
-          <p className="text-[11px] font-medium uppercase tracking-wide text-slate-500">
+          <p className="theme-text-muted text-[11px] font-medium uppercase tracking-wide">
             {label}
           </p>
 
@@ -280,18 +215,18 @@ function StatCard({
 }
 
 /* =========================================================
-   STATUS
+   STATUS BADGE
 ========================================================= */
 
 function StatusBadge({ status }) {
-  const active = status === "Aktif";
+  const active = status === "aktif";
 
   return (
     <span
       className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${
         active
-          ? "border-emerald-200 bg-emerald-50 text-emerald-700"
-          : "border-slate-200 bg-slate-100 text-slate-500"
+          ? "border-[color-mix(in_srgb,var(--color-success)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] text-[var(--color-success)]"
+          : "theme-border theme-card-soft theme-text-muted"
       }`}
     >
       {active ? (
@@ -300,43 +235,34 @@ function StatusBadge({ status }) {
         <Archive size={13} />
       )}
 
-      {status}
+      {statusLabel(status)}
     </span>
   );
 }
 
 /* =========================================================
-   CONDITION
+   TYPE BADGE
 ========================================================= */
 
-function ConditionBadge({ condition }) {
-  if (condition === "Baik") {
-    return (
-      <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-1 text-xs font-medium text-emerald-700">
-        Baik
-      </span>
-    );
-  }
-
-  if (condition === "Rusak Ringan") {
-    return (
-      <span className="inline-flex items-center gap-1 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700">
-        <AlertTriangle size={12} />
-        Rusak Ringan
-      </span>
-    );
-  }
+function TypeBadge({ tipe }) {
+  const ebook = tipe === "EBOOK";
 
   return (
-    <span className="inline-flex items-center gap-1 rounded-full bg-rose-50 px-2.5 py-1 text-xs font-medium text-rose-700">
-      <AlertTriangle size={12} />
-      Rusak
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${
+        ebook
+          ? "border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] text-[var(--color-primary)]"
+          : "border-[color-mix(in_srgb,var(--color-success)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] text-[var(--color-success)]"
+      }`}
+    >
+      <BookOpen size={12} />
+      {typeLabel(tipe)}
     </span>
   );
 }
 
 /* =========================================================
-   FORM MODAL
+   BOOK FORM
 ========================================================= */
 
 function BookForm({
@@ -344,8 +270,20 @@ function BookForm({
   onCancel,
   onSave,
   editMode,
+  saving,
+  error,
 }) {
-  const [form, setForm] = useState(initial);
+  const [form, setForm] = useState({
+    ...emptyForm,
+    ...initial,
+  });
+
+  useEffect(() => {
+    setForm({
+      ...emptyForm,
+      ...initial,
+    });
+  }, [initial]);
 
   const update = (key) => (event) => {
     setForm((current) => ({
@@ -354,39 +292,81 @@ function BookForm({
     }));
   };
 
-  const submit = (event) => {
+  const submit = async (event) => {
     event.preventDefault();
 
-    if (!form.judul.trim()) return;
-    if (!form.penulis.trim()) return;
+    if (!form.kodeBuku.trim()) {
+      return;
+    }
 
-    onSave({
-      ...form,
-      stok: Number(form.stok) || 0,
-      tersedia: Number(form.tersedia) || 0,
-      dipinjam: Number(form.dipinjam) || 0,
-    });
+    if (!form.judul.trim()) {
+      return;
+    }
+
+    if (!form.penulis.trim()) {
+      return;
+    }
+
+    if (!form.kategori.trim()) {
+      return;
+    }
+
+    if (
+      form.tipe === "EBOOK" &&
+      !form.urlEbook.trim()
+    ) {
+      return;
+    }
+
+    await onSave(form);
   };
 
+  const inputClass =
+    "theme-input theme-border theme-text h-11 w-full rounded-lg border px-3.5 text-sm outline-none transition placeholder:text-[var(--color-text-placeholder)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
+
+  const selectClass =
+    "theme-input theme-border theme-text h-11 w-full appearance-none rounded-lg border px-3.5 pr-9 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
+
+  const labelClass =
+    "theme-text-secondary mb-2 block text-xs font-semibold";
+
   return (
-    <form onSubmit={submit} className="space-y-5">
+    <form
+      onSubmit={submit}
+      className="space-y-5"
+    >
+      {error && (
+        <div className="theme-border flex items-start gap-2 rounded-lg border p-3 text-sm">
+          <AlertCircle
+            size={17}
+            className="mt-0.5 shrink-0 theme-danger"
+          />
+
+          <p className="theme-text-secondary">
+            {error}
+          </p>
+        </div>
+      )}
+
       {/* KODE + ISBN */}
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-2 block text-xs font-semibold text-slate-600">
+          <label className={labelClass}>
             Kode Buku
           </label>
 
           <input
-            value={form.kode}
-            onChange={update("kode")}
+            required
+            value={form.kodeBuku}
+            onChange={update("kodeBuku")}
             placeholder="Contoh: BK-0011"
-            className="h-11 w-full rounded-lg border border-slate-300 px-3.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            className={inputClass}
           />
         </div>
 
         <div>
-          <label className="mb-2 block text-xs font-semibold text-slate-600">
+          <label className={labelClass}>
             ISBN
           </label>
 
@@ -394,14 +374,15 @@ function BookForm({
             value={form.isbn}
             onChange={update("isbn")}
             placeholder="978-602-xxxx-xx-x"
-            className="h-11 w-full rounded-lg border border-slate-300 px-3.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            className={inputClass}
           />
         </div>
       </div>
 
       {/* JUDUL */}
+
       <div>
-        <label className="mb-2 block text-xs font-semibold text-slate-600">
+        <label className={labelClass}>
           Judul Buku
         </label>
 
@@ -410,14 +391,15 @@ function BookForm({
           value={form.judul}
           onChange={update("judul")}
           placeholder="Masukkan judul buku"
-          className="h-11 w-full rounded-lg border border-slate-300 px-3.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+          className={inputClass}
         />
       </div>
 
       {/* PENULIS + PENERBIT */}
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-2 block text-xs font-semibold text-slate-600">
+          <label className={labelClass}>
             Penulis
           </label>
 
@@ -426,12 +408,12 @@ function BookForm({
             value={form.penulis}
             onChange={update("penulis")}
             placeholder="Nama penulis"
-            className="h-11 w-full rounded-lg border border-slate-300 px-3.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            className={inputClass}
           />
         </div>
 
         <div>
-          <label className="mb-2 block text-xs font-semibold text-slate-600">
+          <label className={labelClass}>
             Penerbit
           </label>
 
@@ -439,173 +421,105 @@ function BookForm({
             value={form.penerbit}
             onChange={update("penerbit")}
             placeholder="Nama penerbit"
-            className="h-11 w-full rounded-lg border border-slate-300 px-3.5 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            className={inputClass}
           />
         </div>
       </div>
 
-      {/* TAHUN + KATEGORI + JENJANG */}
+      {/* TAHUN + TIPE + KATEGORI */}
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <div>
-          <label className="mb-2 block text-xs font-semibold text-slate-600">
+          <label className={labelClass}>
             Tahun Terbit
           </label>
 
           <input
             type="number"
-            value={form.tahun}
-            onChange={update("tahun")}
+            min="0"
+            value={form.tahunTerbit}
+            onChange={update("tahunTerbit")}
             placeholder="2025"
-            className="h-11 w-full rounded-lg border border-slate-300 px-3.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            className={inputClass}
           />
         </div>
 
         <div>
-          <label className="mb-2 block text-xs font-semibold text-slate-600">
+          <label className={labelClass}>
+            Tipe Buku
+          </label>
+
+          <div className="relative">
+            <select
+              value={form.tipe}
+              onChange={update("tipe")}
+              className={selectClass}
+            >
+              <option value="FISIK">
+                Buku Fisik
+              </option>
+
+              <option value="EBOOK">
+                E-Book
+              </option>
+            </select>
+
+            <ChevronDown
+              size={15}
+              className="theme-text-muted pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
+            />
+          </div>
+        </div>
+
+        <div>
+          <label className={labelClass}>
             Kategori
           </label>
 
-          <div className="relative">
-            <select
-              value={form.kategori}
-              onChange={update("kategori")}
-              className="h-11 w-full appearance-none rounded-lg border border-slate-300 bg-white px-3.5 pr-9 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-            >
-              <option>Matematika</option>
-              <option>Bahasa Indonesia</option>
-              <option>Bahasa Inggris</option>
-              <option>IPA</option>
-              <option>Biologi</option>
-              <option>Sejarah</option>
-              <option>Ekonomi</option>
-              <option>Informatika</option>
-              <option>Teknologi</option>
-              <option>PJOK</option>
-              <option>Lainnya</option>
-            </select>
-
-            <ChevronDown
-              size={15}
-              className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className="mb-2 block text-xs font-semibold text-slate-600">
-            Jenjang
-          </label>
-
-          <div className="relative">
-            <select
-              value={form.jenjang}
-              onChange={update("jenjang")}
-              className="h-11 w-full appearance-none rounded-lg border border-slate-300 bg-white px-3.5 pr-9 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-            >
-              <option>SD</option>
-              <option>SMP</option>
-              <option>SMA</option>
-              <option>SMK</option>
-              <option>Umum</option>
-            </select>
-
-            <ChevronDown
-              size={15}
-              className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* LOKASI */}
-      <div>
-        <label className="mb-2 block text-xs font-semibold text-slate-600">
-          Lokasi Rak
-        </label>
-
-        <input
-          value={form.lokasi}
-          onChange={update("lokasi")}
-          placeholder="Contoh: Rak A-01"
-          className="h-11 w-full rounded-lg border border-slate-300 px-3.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-        />
-      </div>
-
-      {/* STOK */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div>
-          <label className="mb-2 block text-xs font-semibold text-slate-600">
-            Total Stok
-          </label>
-
           <input
-            type="number"
-            min="0"
-            value={form.stok}
-            onChange={update("stok")}
-            placeholder="10"
-            className="h-11 w-full rounded-lg border border-slate-300 px-3.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-          />
-        </div>
-
-        <div>
-          <label className="mb-2 block text-xs font-semibold text-slate-600">
-            Tersedia
-          </label>
-
-          <input
-            type="number"
-            min="0"
-            value={form.tersedia}
-            onChange={update("tersedia")}
-            placeholder="8"
-            className="h-11 w-full rounded-lg border border-slate-300 px-3.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-          />
-        </div>
-
-        <div>
-          <label className="mb-2 block text-xs font-semibold text-slate-600">
-            Dipinjam
-          </label>
-
-          <input
-            type="number"
-            min="0"
-            value={form.dipinjam}
-            onChange={update("dipinjam")}
-            placeholder="2"
-            className="h-11 w-full rounded-lg border border-slate-300 px-3.5 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+            required
+            value={form.kategori}
+            onChange={update("kategori")}
+            placeholder="Contoh: Matematika"
+            className={inputClass}
           />
         </div>
       </div>
 
-      {/* KONDISI + STATUS */}
+      {/* STOK + STATUS */}
+
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <div>
-          <label className="mb-2 block text-xs font-semibold text-slate-600">
-            Kondisi Buku
+          <label className={labelClass}>
+            Jumlah
           </label>
 
-          <div className="relative">
-            <select
-              value={form.kondisi}
-              onChange={update("kondisi")}
-              className="h-11 w-full appearance-none rounded-lg border border-slate-300 bg-white px-3.5 pr-9 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-            >
-              <option>Baik</option>
-              <option>Rusak Ringan</option>
-              <option>Rusak</option>
-            </select>
+          <input
+            type="number"
+            min="0"
+            value={
+              form.tipe === "EBOOK"
+                ? 0
+                : form.jumlah
+            }
+            disabled={form.tipe === "EBOOK"}
+            onChange={update("jumlah")}
+            className={`${inputClass} ${
+              form.tipe === "EBOOK"
+                ? "cursor-not-allowed opacity-60"
+                : ""
+            }`}
+          />
 
-            <ChevronDown
-              size={15}
-              className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
-            />
-          </div>
+          <p className="theme-text-muted mt-1 text-[11px]">
+            {form.tipe === "EBOOK"
+              ? "E-Book otomatis memiliki jumlah 0."
+              : "Jumlah adalah total eksemplar buku fisik."}
+          </p>
         </div>
 
         <div>
-          <label className="mb-2 block text-xs font-semibold text-slate-600">
+          <label className={labelClass}>
             Status
           </label>
 
@@ -613,35 +527,110 @@ function BookForm({
             <select
               value={form.status}
               onChange={update("status")}
-              className="h-11 w-full appearance-none rounded-lg border border-slate-300 bg-white px-3.5 pr-9 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+              className={selectClass}
             >
-              <option>Aktif</option>
-              <option>Nonaktif</option>
+              <option value="aktif">
+                Aktif
+              </option>
+
+              <option value="nonaktif">
+                Nonaktif
+              </option>
             </select>
 
             <ChevronDown
               size={15}
-              className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+              className="theme-text-muted pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
             />
           </div>
         </div>
       </div>
 
+      {/* URL EBOOK */}
+
+      <div>
+        <label className={labelClass}>
+          URL E-Book
+          {form.tipe === "EBOOK" && (
+            <span className="theme-danger ml-1">
+              *
+            </span>
+          )}
+        </label>
+
+        <input
+          type="url"
+          required={form.tipe === "EBOOK"}
+          value={form.urlEbook}
+          onChange={update("urlEbook")}
+          placeholder="https://..."
+          className={inputClass}
+        />
+
+        <p className="theme-text-muted mt-1 text-[11px]">
+          Wajib diisi jika tipe buku adalah E-Book.
+        </p>
+      </div>
+
+      {/* COVER */}
+
+      <div>
+        <label className={labelClass}>
+          URL Cover
+        </label>
+
+        <input
+          type="url"
+          value={form.coverUrl}
+          onChange={update("coverUrl")}
+          placeholder="https://..."
+          className={inputClass}
+        />
+      </div>
+
+      {/* DESKRIPSI */}
+
+      <div>
+        <label className={labelClass}>
+          Deskripsi
+        </label>
+
+        <textarea
+          value={form.deskripsi}
+          onChange={update("deskripsi")}
+          placeholder="Deskripsi buku..."
+          rows={4}
+          className="theme-input theme-border theme-text w-full resize-none rounded-lg border px-3.5 py-3 text-sm outline-none transition placeholder:text-[var(--color-text-placeholder)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]"
+        />
+      </div>
+
       {/* FOOTER */}
-      <div className="flex flex-col-reverse gap-2 border-t border-slate-200 pt-5 sm:flex-row sm:justify-end">
+
+      <div className="flex flex-col-reverse gap-2 border-t border-[var(--color-border-soft)] pt-5 sm:flex-row sm:justify-end">
         <button
           type="button"
+          disabled={saving}
           onClick={onCancel}
-          className="h-10 rounded-lg border border-slate-300 px-5 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+          className={`theme-card theme-border theme-text-secondary h-10 rounded-lg border px-5 text-sm font-medium transition ${themeTextHover}`}
         >
           Batal
         </button>
 
         <button
           type="submit"
-          className="h-10 rounded-lg bg-blue-600 px-5 text-sm font-semibold text-white transition hover:bg-blue-700"
+          disabled={saving}
+          className={`flex h-10 items-center justify-center gap-2 rounded-lg bg-[var(--color-primary)] px-5 text-sm font-semibold text-[var(--color-card)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60 ${themePrimaryShadow}`}
         >
-          {editMode ? "Simpan Perubahan" : "Simpan Buku"}
+          {saving && (
+            <Loader2
+              size={16}
+              className="animate-spin"
+            />
+          )}
+
+          {editMode
+            ? "Simpan Perubahan"
+            : "Simpan Buku"}
         </button>
       </div>
     </form>
@@ -652,19 +641,25 @@ function BookForm({
    DETAIL MODAL
 ========================================================= */
 
-function DetailModal({ book, onClose }) {
-  if (!book) return null;
+function DetailModal({
+  book,
+  onClose,
+  loading,
+}) {
+  if (!book && !loading) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-[2px]">
-      <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
-        <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white px-5 py-4">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4 backdrop-blur-[2px]">
+      <div
+        className={`theme-card theme-border max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl border ${themeCardShadow}`}
+      >
+        <div className="theme-card sticky top-0 z-10 flex items-center justify-between border-b border-[var(--color-border-soft)] px-5 py-4">
           <div>
-            <h2 className="text-lg font-bold text-slate-900">
+            <h2 className="theme-text text-lg font-bold">
               Detail Data Buku
             </h2>
 
-            <p className="mt-0.5 text-xs text-slate-500">
+            <p className="theme-text-muted mt-0.5 text-xs">
               Informasi lengkap koleksi perpustakaan
             </p>
           </div>
@@ -672,160 +667,237 @@ function DetailModal({ book, onClose }) {
           <button
             type="button"
             onClick={onClose}
-            className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+            className={`theme-text-muted flex h-9 w-9 items-center justify-center rounded-lg transition ${themeTextHover}`}
           >
             <X size={18} />
           </button>
         </div>
 
-        <div className="p-5 sm:p-6">
-          {/* HEADER BOOK */}
-          <div className="flex flex-col gap-4 sm:flex-row">
-            <div className="flex h-36 w-full shrink-0 items-center justify-center rounded-xl bg-blue-600 sm:w-28">
-              <BookOpen
-                size={45}
-                strokeWidth={1.5}
-                className="text-white"
+        {loading ? (
+          <div className="flex min-h-[300px] items-center justify-center">
+            <div className="flex items-center gap-2 theme-text-muted text-sm">
+              <Loader2
+                size={18}
+                className="animate-spin"
               />
-            </div>
-
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap gap-2">
-                <span className="rounded-md bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-600">
-                  {book.kode}
-                </span>
-
-                <StatusBadge status={book.status} />
-              </div>
-
-              <h3 className="mt-3 text-xl font-bold leading-7 text-slate-900">
-                {book.judul}
-              </h3>
-
-              <p className="mt-1 text-sm text-slate-500">
-                {book.penulis}
-              </p>
+              Memuat detail buku...
             </div>
           </div>
+        ) : book ? (
+          <div className="p-5 sm:p-6">
+            {/* HEADER */}
 
-          {/* INFORMATION */}
-          <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-4 border-t border-slate-200 pt-5 sm:grid-cols-2">
-            <div>
-              <p className="text-xs text-slate-400">
-                ISBN
-              </p>
-              <p className="mt-1 text-sm font-medium text-slate-700">
-                {book.isbn || "-"}
-              </p>
+            <div className="flex flex-col gap-4 sm:flex-row">
+              <div className="flex h-36 w-full shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[var(--color-primary)] text-[var(--color-card)] sm:w-28">
+                {book.coverUrl ? (
+                  <img
+                    src={book.coverUrl}
+                    alt={book.judul}
+                    className="h-full w-full object-cover"
+                  />
+                ) : (
+                  <BookOpen
+                    size={45}
+                    strokeWidth={1.5}
+                  />
+                )}
+              </div>
+
+              <div className="min-w-0 flex-1">
+                <div className="flex flex-wrap gap-2">
+                  <span
+                    className={`${themePrimarySoft} border ${themePrimarySoftBorder} rounded-md px-2.5 py-1 text-xs font-semibold text-[var(--color-primary)]`}
+                  >
+                    {book.kodeBuku}
+                  </span>
+
+                  <TypeBadge
+                    tipe={book.tipe}
+                  />
+
+                  <StatusBadge
+                    status={book.status}
+                  />
+                </div>
+
+                <h3 className="theme-text mt-3 text-xl font-bold leading-7">
+                  {book.judul}
+                </h3>
+
+                <p className="theme-text-secondary mt-1 text-sm">
+                  {book.penulis}
+                </p>
+              </div>
             </div>
 
-            <div>
-              <p className="text-xs text-slate-400">
-                Penerbit
-              </p>
-              <p className="mt-1 text-sm font-medium text-slate-700">
-                {book.penerbit || "-"}
-              </p>
+            {/* INFORMATION */}
+
+            <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-4 border-t border-[var(--color-border-soft)] pt-5 sm:grid-cols-2">
+              <div>
+                <p className="theme-text-muted text-xs">
+                  ISBN
+                </p>
+
+                <p className="theme-text-secondary mt-1 text-sm font-medium">
+                  {book.isbn || "-"}
+                </p>
+              </div>
+
+              <div>
+                <p className="theme-text-muted text-xs">
+                  Penerbit
+                </p>
+
+                <p className="theme-text-secondary mt-1 text-sm font-medium">
+                  {book.penerbit || "-"}
+                </p>
+              </div>
+
+              <div>
+                <p className="theme-text-muted text-xs">
+                  Tahun Terbit
+                </p>
+
+                <p className="theme-text-secondary mt-1 text-sm font-medium">
+                  {book.tahunTerbit || "-"}
+                </p>
+              </div>
+
+              <div>
+                <p className="theme-text-muted text-xs">
+                  Kategori
+                </p>
+
+                <p className="theme-text-secondary mt-1 text-sm font-medium">
+                  {book.kategori || "-"}
+                </p>
+              </div>
+
+              <div>
+                <p className="theme-text-muted text-xs">
+                  Tipe
+                </p>
+
+                <div className="mt-1">
+                  <TypeBadge
+                    tipe={book.tipe}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <p className="theme-text-muted text-xs">
+                  Status
+                </p>
+
+                <div className="mt-1">
+                  <StatusBadge
+                    status={book.status}
+                  />
+                </div>
+              </div>
             </div>
 
-            <div>
-              <p className="text-xs text-slate-400">
-                Tahun Terbit
+            {/* STOCK */}
+
+            <div className="mt-6">
+              <p className="theme-text-muted mb-3 text-xs font-semibold uppercase tracking-wide">
+                Informasi Stok
               </p>
-              <p className="mt-1 text-sm font-medium text-slate-700">
-                {book.tahun || "-"}
-              </p>
+
+              <div className="grid grid-cols-3 gap-2">
+                <div className="theme-card-soft theme-border rounded-xl border p-4 text-center">
+                  <p className="theme-text-muted text-xs">
+                    Total
+                  </p>
+
+                  <p className="theme-text mt-1 text-xl font-bold">
+                    {book.jumlah}
+                  </p>
+                </div>
+
+                <div className="rounded-xl border border-[color-mix(in_srgb,var(--color-success)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_8%,transparent)] p-4 text-center">
+                  <p className="text-xs text-[var(--color-success)]">
+                    Tersedia
+                  </p>
+
+                  <p className="mt-1 text-xl font-bold text-[var(--color-success)]">
+                    {book.jumlahTersedia}
+                  </p>
+                </div>
+
+                <div className="rounded-xl border border-[color-mix(in_srgb,var(--color-warning)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)] p-4 text-center">
+                  <p className="text-xs text-[var(--color-warning)]">
+                    Dipinjam
+                  </p>
+
+                  <p className="mt-1 text-xl font-bold text-[var(--color-warning)]">
+                    {book.dipinjam}
+                  </p>
+                </div>
+              </div>
             </div>
 
-            <div>
-              <p className="text-xs text-slate-400">
-                Kategori
-              </p>
-              <p className="mt-1 text-sm font-medium text-slate-700">
-                {book.kategori}
-              </p>
-            </div>
+            {/* DESCRIPTION */}
 
-            <div>
-              <p className="text-xs text-slate-400">
-                Jenjang
-              </p>
-              <p className="mt-1 text-sm font-medium text-slate-700">
-                {book.jenjang}
-              </p>
-            </div>
+            {book.deskripsi && (
+              <div className="theme-border mt-5 rounded-xl border p-4">
+                <div className="flex items-center gap-2">
+                  <FileText
+                    size={16}
+                    className="text-[var(--color-primary)]"
+                  />
 
-            <div>
-              <p className="text-xs text-slate-400">
-                Lokasi Rak
-              </p>
-              <p className="mt-1 flex items-center gap-1.5 text-sm font-medium text-slate-700">
-                <MapPin size={14} className="text-blue-500" />
-                {book.lokasi || "-"}
-              </p>
+                  <p className="theme-text text-sm font-semibold">
+                    Deskripsi
+                  </p>
+                </div>
+
+                <p className="theme-text-secondary mt-2 whitespace-pre-line text-sm leading-6">
+                  {book.deskripsi}
+                </p>
+              </div>
+            )}
+
+            {/* EBOOK URL */}
+
+            {book.urlEbook && (
+              <div className="theme-border mt-5 flex flex-col gap-3 rounded-xl border p-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <p className="theme-text-muted text-xs">
+                    URL E-Book
+                  </p>
+
+                  <p className="theme-text-secondary mt-1 max-w-[450px] truncate text-sm">
+                    {book.urlEbook}
+                  </p>
+                </div>
+
+                <a
+                  href={book.urlEbook}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="flex h-9 shrink-0 items-center justify-center gap-2 rounded-lg bg-[var(--color-primary)] px-4 text-sm font-semibold text-[var(--color-card)]"
+                >
+                  Buka E-Book
+                  <ExternalLink size={14} />
+                </a>
+              </div>
+            )}
+
+            {/* FOOTER */}
+
+            <div className="mt-5 flex justify-end border-t border-[var(--color-border-soft)] pt-5">
+              <button
+                type="button"
+                onClick={onClose}
+                className={`theme-card theme-border theme-text-secondary h-10 rounded-lg border px-5 text-sm font-medium transition ${themeTextHover}`}
+              >
+                Tutup
+              </button>
             </div>
           </div>
-
-          {/* STOCK */}
-          <div className="mt-6">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-wide text-slate-500">
-              Informasi Stok
-            </p>
-
-            <div className="grid grid-cols-3 gap-2">
-              <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-center">
-                <p className="text-xs text-slate-400">
-                  Total
-                </p>
-
-                <p className="mt-1 text-xl font-bold text-slate-900">
-                  {book.stok}
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-emerald-100 bg-emerald-50 p-4 text-center">
-                <p className="text-xs text-emerald-600">
-                  Tersedia
-                </p>
-
-                <p className="mt-1 text-xl font-bold text-emerald-700">
-                  {book.tersedia}
-                </p>
-              </div>
-
-              <div className="rounded-xl border border-orange-100 bg-orange-50 p-4 text-center">
-                <p className="text-xs text-orange-600">
-                  Dipinjam
-                </p>
-
-                <p className="mt-1 text-xl font-bold text-orange-700">
-                  {book.dipinjam}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* CONDITION */}
-          <div className="mt-5 flex items-center justify-between rounded-xl border border-slate-200 p-4">
-            <div>
-              <p className="text-xs text-slate-400">
-                Kondisi Buku
-              </p>
-
-              <div className="mt-1.5">
-                <ConditionBadge condition={book.kondisi} />
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={onClose}
-              className="h-10 rounded-lg border border-slate-300 px-5 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
-            >
-              Tutup
-            </button>
-          </div>
-        </div>
+        ) : null}
       </div>
     </div>
   );
@@ -836,46 +908,120 @@ function DetailModal({ book, onClose }) {
 ========================================================= */
 
 export default function DataBukuPage() {
-  const [books, setBooks] = useState(initialBooks);
+  const [books, setBooks] = useState([]);
 
   const [search, setSearch] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("Semua");
-  const [jenjangFilter, setJenjangFilter] = useState("Semua");
-  const [conditionFilter, setConditionFilter] = useState("Semua");
-  const [statusFilter, setStatusFilter] = useState("Semua");
+  const [categoryFilter, setCategoryFilter] =
+    useState("Semua");
+  const [typeFilter, setTypeFilter] =
+    useState("Semua");
+  const [statusFilter, setStatusFilter] =
+    useState("Semua");
 
   const [modal, setModal] = useState(null);
-  const [activeBook, setActiveBook] = useState(null);
-  const [detailBook, setDetailBook] = useState(null);
-  const [deleteBook, setDeleteBook] = useState(null);
+  const [activeBook, setActiveBook] =
+    useState(null);
+
+  const [detailBook, setDetailBook] =
+    useState(null);
+
+  const [detailLoading, setDetailLoading] =
+    useState(false);
+
+  const [deleteBook, setDeleteBook] =
+    useState(null);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [saving, setSaving] =
+    useState(false);
+
+  const [deleting, setDeleting] =
+    useState(false);
+
+  const [error, setError] =
+    useState("");
+
+  const [formError, setFormError] =
+    useState("");
+
+  /* =========================================================
+     LOAD BUKU DARI BE
+  ========================================================= */
+
+  const loadBooks = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const result = await getBuku();
+
+      const normalized = Array.isArray(result)
+        ? result.map(normalizeBook)
+        : [];
+
+      setBooks(normalized);
+    } catch (err) {
+      console.error(
+        "Gagal mengambil data buku:",
+        err,
+      );
+
+      setError(getErrorMessage(err));
+      setBooks([]);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadBooks();
+  }, []);
+
+  /* =========================================================
+     CATEGORY OPTIONS DARI DATA BE
+  ========================================================= */
+
+  const categories = useMemo(() => {
+    const values = books
+      .map((book) => book.kategori)
+      .filter(Boolean);
+
+    return [...new Set(values)].sort(
+      (a, b) => a.localeCompare(b),
+    );
+  }, [books]);
 
   /* =========================================================
      FILTER
   ========================================================= */
 
   const filteredBooks = useMemo(() => {
-    const query = search.trim().toLowerCase();
+    const query = search
+      .trim()
+      .toLowerCase();
 
     return books.filter((book) => {
       const matchSearch =
         !query ||
-        book.judul.toLowerCase().includes(query) ||
-        book.penulis.toLowerCase().includes(query) ||
-        book.kode.toLowerCase().includes(query) ||
-        book.isbn.toLowerCase().includes(query) ||
-        book.penerbit.toLowerCase().includes(query);
+        book.judul
+          .toLowerCase()
+          .includes(query) ||
+        book.penulis
+          .toLowerCase()
+          .includes(query) ||
+        book.kodeBuku
+          .toLowerCase()
+          .includes(query);
 
       const matchCategory =
         categoryFilter === "Semua" ||
         book.kategori === categoryFilter;
 
-      const matchJenjang =
-        jenjangFilter === "Semua" ||
-        book.jenjang === jenjangFilter;
-
-      const matchCondition =
-        conditionFilter === "Semua" ||
-        book.kondisi === conditionFilter;
+      const matchType =
+        typeFilter === "Semua" ||
+        book.tipe === typeFilter;
 
       const matchStatus =
         statusFilter === "Semua" ||
@@ -884,8 +1030,7 @@ export default function DataBukuPage() {
       return (
         matchSearch &&
         matchCategory &&
-        matchJenjang &&
-        matchCondition &&
+        matchType &&
         matchStatus
       );
     });
@@ -893,8 +1038,7 @@ export default function DataBukuPage() {
     books,
     search,
     categoryFilter,
-    jenjangFilter,
-    conditionFilter,
+    typeFilter,
     statusFilter,
   ]);
 
@@ -905,18 +1049,22 @@ export default function DataBukuPage() {
   const totalJudul = books.length;
 
   const totalStok = books.reduce(
-    (sum, book) => sum + book.stok,
-    0
+    (sum, book) =>
+      sum + Number(book.jumlah || 0),
+    0,
   );
 
   const totalTersedia = books.reduce(
-    (sum, book) => sum + book.tersedia,
-    0
+    (sum, book) =>
+      sum +
+      Number(book.jumlahTersedia || 0),
+    0,
   );
 
   const totalDipinjam = books.reduce(
-    (sum, book) => sum + book.dipinjam,
-    0
+    (sum, book) =>
+      sum + Number(book.dipinjam || 0),
+    0,
   );
 
   /* =========================================================
@@ -924,11 +1072,10 @@ export default function DataBukuPage() {
   ========================================================= */
 
   const openAdd = () => {
-    const nextNumber = books.length + 1;
+    setFormError("");
 
     setActiveBook({
       ...emptyForm,
-      kode: `BK-${String(nextNumber).padStart(4, "0")}`,
     });
 
     setModal("add");
@@ -939,8 +1086,28 @@ export default function DataBukuPage() {
   ========================================================= */
 
   const openEdit = (book) => {
+    setFormError("");
+
     setActiveBook({
-      ...book,
+      kodeBuku: book.kodeBuku ?? "",
+      judul: book.judul ?? "",
+      penulis: book.penulis ?? "",
+      penerbit: book.penerbit ?? "",
+      tahunTerbit:
+        book.tahunTerbit ?? "",
+      isbn: book.isbn ?? "",
+      tipe: book.tipe ?? "FISIK",
+      kategori: book.kategori ?? "",
+      deskripsi: book.deskripsi ?? "",
+      coverUrl: book.coverUrl ?? "",
+      urlEbook: book.urlEbook ?? "",
+      jumlah: String(
+        book.jumlah ?? 0,
+      ),
+      status:
+        book.status ?? "aktif",
+
+      id: book.id,
     });
 
     setModal("edit");
@@ -951,53 +1118,199 @@ export default function DataBukuPage() {
   ========================================================= */
 
   const closeModal = () => {
+    if (saving) return;
+
     setModal(null);
     setActiveBook(null);
+    setFormError("");
   };
 
   /* =========================================================
-     SAVE
+     BUILD PAYLOAD
   ========================================================= */
 
-  const saveBook = (form) => {
-    if (modal === "add") {
-      setBooks((current) => [
-        {
-          ...form,
-          id: Date.now(),
-        },
-        ...current,
-      ]);
-    } else {
-      setBooks((current) =>
-        current.map((book) =>
-          book.id === form.id
-            ? {
-                ...book,
-                ...form,
-              }
-            : book
-        )
-      );
+  const buildPayload = (form) => {
+    const payload = {
+      kodeBuku:
+        form.kodeBuku.trim(),
+
+      judul:
+        form.judul.trim(),
+
+      penulis:
+        form.penulis.trim(),
+
+      penerbit:
+        form.penerbit.trim(),
+
+      isbn:
+        form.isbn.trim(),
+
+      tipe:
+        form.tipe,
+
+      kategori:
+        form.kategori.trim(),
+
+      deskripsi:
+        form.deskripsi.trim(),
+
+      coverUrl:
+        form.coverUrl.trim(),
+
+      urlEbook:
+        form.urlEbook.trim(),
+
+      jumlah:
+        form.tipe === "EBOOK"
+          ? 0
+          : Number(form.jumlah) || 0,
+
+      status:
+        form.status,
+    };
+
+    if (
+      form.tahunTerbit !== "" &&
+      form.tahunTerbit != null
+    ) {
+      payload.tahunTerbit =
+        Number(form.tahunTerbit);
     }
 
-    closeModal();
+    return payload;
   };
 
   /* =========================================================
-     DELETE
+     SAVE -> BE
   ========================================================= */
 
-  const confirmDelete = () => {
+  const saveBook = async (form) => {
+    try {
+      setSaving(true);
+      setFormError("");
+
+      if (!form.kodeBuku.trim()) {
+        setFormError(
+          "Kode buku wajib diisi.",
+        );
+        return;
+      }
+
+      if (!form.judul.trim()) {
+        setFormError(
+          "Judul buku wajib diisi.",
+        );
+        return;
+      }
+
+      if (!form.penulis.trim()) {
+        setFormError(
+          "Penulis wajib diisi.",
+        );
+        return;
+      }
+
+      if (!form.kategori.trim()) {
+        setFormError(
+          "Kategori wajib diisi.",
+        );
+        return;
+      }
+
+      if (
+        form.tipe === "EBOOK" &&
+        !form.urlEbook.trim()
+      ) {
+        setFormError(
+          "URL E-Book wajib diisi untuk tipe EBOOK.",
+        );
+        return;
+      }
+
+      const payload =
+        buildPayload(form);
+
+      if (modal === "add") {
+        await createBuku(payload);
+      } else {
+        await updateBuku(
+          activeBook.id,
+          payload,
+        );
+      }
+
+      await loadBooks();
+
+      closeModal();
+    } catch (err) {
+      console.error(
+        "Gagal menyimpan buku:",
+        err,
+      );
+
+      setFormError(
+        getErrorMessage(err),
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  /* =========================================================
+     DETAIL -> BE
+  ========================================================= */
+
+  const openDetail = async (book) => {
+    setDetailBook(null);
+    setDetailLoading(true);
+
+    try {
+      const result =
+        await getBukuById(book.id);
+
+      setDetailBook(
+        normalizeBook(result),
+      );
+    } catch (err) {
+      setError(
+        getErrorMessage(err),
+      );
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  /* =========================================================
+     DELETE -> BE
+  ========================================================= */
+
+  const confirmDelete = async () => {
     if (!deleteBook) return;
 
-    setBooks((current) =>
-      current.filter(
-        (book) => book.id !== deleteBook.id
-      )
-    );
+    try {
+      setDeleting(true);
+      setError("");
 
-    setDeleteBook(null);
+      await deleteBuku(
+        deleteBook.id,
+      );
+
+      setDeleteBook(null);
+
+      await loadBooks();
+    } catch (err) {
+      console.error(
+        "Gagal menghapus buku:",
+        err,
+      );
+
+      setError(
+        getErrorMessage(err),
+      );
+    } finally {
+      setDeleting(false);
+    }
   };
 
   /* =========================================================
@@ -1007,8 +1320,7 @@ export default function DataBukuPage() {
   const resetFilter = () => {
     setSearch("");
     setCategoryFilter("Semua");
-    setJenjangFilter("Semua");
-    setConditionFilter("Semua");
+    setTypeFilter("Semua");
     setStatusFilter("Semua");
   };
 
@@ -1017,7 +1329,7 @@ export default function DataBukuPage() {
   ========================================================= */
 
   return (
-    <div className="flex min-h-screen bg-[#F5F8FC]">
+    <div className="theme-page flex min-h-screen">
       <Sidebar />
 
       <div className="flex min-w-0 flex-1 flex-col">
@@ -1026,23 +1338,23 @@ export default function DataBukuPage() {
         <main className="min-w-0 flex-1 px-4 py-5 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-[1400px]">
 
-            {/* =================================================
-                HEADER
-            ================================================= */}
+            {/* HEADER */}
 
             <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex items-center gap-3">
-                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-600 text-white shadow-sm">
+                <div
+                  className={`flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--color-primary)] text-[var(--color-card)] ${themePrimaryShadow}`}
+                >
                   <Library size={23} />
                 </div>
 
                 <div>
-                  <h1 className="text-[25px] font-bold tracking-tight text-slate-900">
+                  <h1 className="theme-text text-[25px] font-bold tracking-tight">
                     Data Buku Perpustakaan
                   </h1>
 
-                  <p className="mt-0.5 text-sm text-slate-500">
-                    Kelola koleksi dan ketersediaan buku perpustakaan sekolah
+                  <p className="theme-text-secondary mt-0.5 text-sm">
+                    Kelola koleksi buku berdasarkan data perpustakaan sekolah
                   </p>
                 </div>
               </div>
@@ -1050,8 +1362,28 @@ export default function DataBukuPage() {
               <div className="flex items-center gap-2">
                 <button
                   type="button"
+                  onClick={loadBooks}
+                  disabled={loading}
+                  className={`theme-card theme-border theme-text-secondary flex h-10 items-center gap-2 rounded-lg border px-3.5 text-sm font-medium transition ${themeTextHover}`}
+                >
+                  <RefreshCw
+                    size={16}
+                    className={
+                      loading
+                        ? "animate-spin"
+                        : ""
+                    }
+                  />
+
+                  <span className="hidden sm:inline">
+                    Refresh
+                  </span>
+                </button>
+
+                <button
+                  type="button"
                   onClick={resetFilter}
-                  className="flex h-10 items-center gap-2 rounded-lg border border-slate-300 bg-white px-3.5 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+                  className={`theme-card theme-border theme-text-secondary flex h-10 items-center gap-2 rounded-lg border px-3.5 text-sm font-medium transition ${themeTextHover}`}
                 >
                   <RefreshCw size={16} />
 
@@ -1063,7 +1395,7 @@ export default function DataBukuPage() {
                 <button
                   type="button"
                   onClick={openAdd}
-                  className="flex h-10 items-center gap-2 rounded-lg bg-blue-600 px-4 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
+                  className={`flex h-10 items-center gap-2 rounded-lg bg-[var(--color-primary)] px-4 text-sm font-semibold text-[var(--color-card)] transition hover:brightness-110 ${themePrimaryShadow}`}
                 >
                   <Plus size={17} />
                   Tambah Buku
@@ -1071,9 +1403,38 @@ export default function DataBukuPage() {
               </div>
             </div>
 
-            {/* =================================================
-                STATISTIC
-            ================================================= */}
+            {/* ERROR */}
+
+            {error && (
+              <div className="theme-border mb-5 flex items-start gap-3 rounded-xl border p-4">
+                <AlertCircle
+                  size={19}
+                  className="theme-danger mt-0.5 shrink-0"
+                />
+
+                <div className="min-w-0 flex-1">
+                  <p className="theme-text text-sm font-semibold">
+                    Gagal memuat data
+                  </p>
+
+                  <p className="theme-text-secondary mt-1 text-sm">
+                    {error}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setError("")
+                  }
+                  className="theme-text-muted"
+                >
+                  <X size={17} />
+                </button>
+              </div>
+            )}
+
+            {/* STATISTIC */}
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
               <StatCard
@@ -1105,110 +1466,93 @@ export default function DataBukuPage() {
               />
             </div>
 
-            {/* =================================================
-                FILTER
-            ================================================= */}
+            {/* FILTER */}
 
-            <div className="mt-5 rounded-xl border border-slate-200 bg-white p-4 shadow-[0_1px_3px_rgba(15,23,42,0.08)]">
-              {/* SEARCH */}
-
+            <div
+              className={`theme-card theme-border mt-5 rounded-xl border p-4 ${themeCardShadow}`}
+            >
               <div className="relative">
                 <Search
                   size={18}
-                  className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                  className="theme-text-muted pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2"
                 />
 
                 <input
                   value={search}
                   onChange={(event) =>
-                    setSearch(event.target.value)
+                    setSearch(
+                      event.target.value,
+                    )
                   }
-                  placeholder="Cari kode, judul buku, penulis, ISBN, atau penerbit..."
-                  className="h-11 w-full rounded-lg border border-slate-300 bg-white pl-10 pr-4 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                  placeholder="Cari kode, judul buku, atau penulis..."
+                  className="theme-input theme-border theme-text h-11 w-full rounded-lg border pl-10 pr-4 text-sm outline-none transition placeholder:text-[var(--color-text-placeholder)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]"
                 />
               </div>
 
-              {/* FILTER ROW */}
+              <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3 xl:flex xl:items-center">
 
-              <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-4 xl:flex xl:items-center">
                 {/* CATEGORY */}
 
-                <div className="relative xl:w-48">
+                <div className="relative xl:w-52">
                   <select
                     value={categoryFilter}
                     onChange={(event) =>
-                      setCategoryFilter(event.target.value)
+                      setCategoryFilter(
+                        event.target.value,
+                      )
                     }
-                    className="h-10 w-full appearance-none rounded-lg border border-slate-300 bg-white px-3.5 pr-9 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="theme-input theme-border theme-text h-10 w-full appearance-none rounded-lg border px-3.5 pr-9 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]"
                   >
                     <option value="Semua">
                       Semua Kategori
                     </option>
-                    <option>Matematika</option>
-                    <option>Bahasa Indonesia</option>
-                    <option>Bahasa Inggris</option>
-                    <option>IPA</option>
-                    <option>Biologi</option>
-                    <option>Sejarah</option>
-                    <option>Ekonomi</option>
-                    <option>Informatika</option>
-                    <option>Teknologi</option>
-                    <option>PJOK</option>
+
+                    {categories.map(
+                      (category) => (
+                        <option
+                          key={category}
+                          value={category}
+                        >
+                          {category}
+                        </option>
+                      ),
+                    )}
                   </select>
 
                   <ChevronDown
                     size={15}
-                    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+                    className="theme-text-muted pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
                   />
                 </div>
 
-                {/* JENJANG */}
-
-                <div className="relative xl:w-40">
-                  <select
-                    value={jenjangFilter}
-                    onChange={(event) =>
-                      setJenjangFilter(event.target.value)
-                    }
-                    className="h-10 w-full appearance-none rounded-lg border border-slate-300 bg-white px-3.5 pr-9 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
-                  >
-                    <option value="Semua">
-                      Semua Jenjang
-                    </option>
-                    <option>SD</option>
-                    <option>SMP</option>
-                    <option>SMA</option>
-                    <option>SMK</option>
-                    <option>Umum</option>
-                  </select>
-
-                  <ChevronDown
-                    size={15}
-                    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
-                  />
-                </div>
-
-                {/* CONDITION */}
+                {/* TYPE */}
 
                 <div className="relative xl:w-44">
                   <select
-                    value={conditionFilter}
+                    value={typeFilter}
                     onChange={(event) =>
-                      setConditionFilter(event.target.value)
+                      setTypeFilter(
+                        event.target.value,
+                      )
                     }
-                    className="h-10 w-full appearance-none rounded-lg border border-slate-300 bg-white px-3.5 pr-9 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="theme-input theme-border theme-text h-10 w-full appearance-none rounded-lg border px-3.5 pr-9 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]"
                   >
                     <option value="Semua">
-                      Semua Kondisi
+                      Semua Tipe
                     </option>
-                    <option>Baik</option>
-                    <option>Rusak Ringan</option>
-                    <option>Rusak</option>
+
+                    <option value="FISIK">
+                      Buku Fisik
+                    </option>
+
+                    <option value="EBOOK">
+                      E-Book
+                    </option>
                   </select>
 
                   <ChevronDown
                     size={15}
-                    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+                    className="theme-text-muted pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
                   />
                 </div>
 
@@ -1218,294 +1562,338 @@ export default function DataBukuPage() {
                   <select
                     value={statusFilter}
                     onChange={(event) =>
-                      setStatusFilter(event.target.value)
+                      setStatusFilter(
+                        event.target.value,
+                      )
                     }
-                    className="h-10 w-full appearance-none rounded-lg border border-slate-300 bg-white px-3.5 pr-9 text-sm text-slate-700 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100"
+                    className="theme-input theme-border theme-text h-10 w-full appearance-none rounded-lg border px-3.5 pr-9 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]"
                   >
                     <option value="Semua">
                       Semua Status
                     </option>
-                    <option>Aktif</option>
-                    <option>Nonaktif</option>
+
+                    <option value="aktif">
+                      Aktif
+                    </option>
+
+                    <option value="nonaktif">
+                      Nonaktif
+                    </option>
                   </select>
 
                   <ChevronDown
                     size={15}
-                    className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-slate-400"
+                    className="theme-text-muted pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
                   />
                 </div>
 
                 <button
                   type="button"
                   onClick={resetFilter}
-                  className="h-10 px-3 text-left text-sm font-medium text-blue-600 hover:bg-blue-50 xl:text-center"
+                  className={`h-10 px-3 text-left text-sm font-medium text-[var(--color-primary)] transition ${themePrimaryHover} xl:text-center`}
                 >
                   Reset Filter
                 </button>
 
                 <div className="xl:ml-auto">
-                  <span className="text-sm text-slate-500">
+                  <span className="theme-text-secondary text-sm">
                     {filteredBooks.length} data ditemukan
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* =================================================
-                TABLE
-            ================================================= */}
+            {/* TABLE */}
 
-            <div className="mt-5 overflow-hidden rounded-xl border border-slate-200 bg-white shadow-[0_1px_3px_rgba(15,23,42,0.08)]">
-              {/* TABLE HEADER */}
-
-              <div className="flex flex-col gap-1 border-b border-slate-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div
+              className={`theme-card theme-border mt-5 overflow-hidden rounded-xl border ${themeCardShadow}`}
+            >
+              <div className="theme-border flex flex-col gap-1 border-b px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h2 className="text-sm font-bold text-slate-900">
+                  <h2 className="theme-text text-sm font-bold">
                     Koleksi Buku
                   </h2>
 
-                  <p className="mt-0.5 text-xs text-slate-400">
-                    Daftar seluruh buku fisik perpustakaan
+                  <p className="theme-text-muted mt-0.5 text-xs">
+                    Daftar seluruh koleksi buku perpustakaan
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2 text-xs text-slate-500">
+                <div className="theme-text-secondary flex items-center gap-2 text-xs">
                   <BookOpen size={14} />
                   {filteredBooks.length} buku
                 </div>
               </div>
 
-              {/* RESPONSIVE TABLE */}
-
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[1050px] text-left">
                   <thead>
-                    <tr className="border-b border-slate-200 bg-slate-50">
-                      <th className="px-5 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                    <tr className="border-b border-[var(--color-border-soft)] bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]">
+                      <th className="theme-text-muted px-5 py-3 text-[11px] font-semibold uppercase tracking-wide">
                         Buku
                       </th>
 
-                      <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                      <th className="theme-text-muted px-4 py-3 text-[11px] font-semibold uppercase tracking-wide">
                         ISBN
                       </th>
 
-                      <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                      <th className="theme-text-muted px-4 py-3 text-[11px] font-semibold uppercase tracking-wide">
+                        Tipe
+                      </th>
+
+                      <th className="theme-text-muted px-4 py-3 text-[11px] font-semibold uppercase tracking-wide">
                         Kategori
                       </th>
 
-                      <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-                        Jenjang
-                      </th>
-
-                      <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-                        Lokasi
-                      </th>
-
-                      <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                      <th className="theme-text-muted px-4 py-3 text-[11px] font-semibold uppercase tracking-wide">
                         Stok
                       </th>
 
-                      <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-                        Kondisi
-                      </th>
-
-                      <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                      <th className="theme-text-muted px-4 py-3 text-[11px] font-semibold uppercase tracking-wide">
                         Status
                       </th>
 
-                      <th className="px-5 py-3 text-right text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+                      <th className="theme-text-muted px-5 py-3 text-right text-[11px] font-semibold uppercase tracking-wide">
                         Aksi
                       </th>
                     </tr>
                   </thead>
 
-                  <tbody className="divide-y divide-slate-100">
-                    {filteredBooks.length > 0 ? (
-                      filteredBooks.map((book) => (
-                        <tr
-                          key={book.id}
-                          className="transition hover:bg-slate-50/70"
+                  <tbody className="divide-y divide-[var(--color-border-soft)]">
+                    {loading ? (
+                      <tr>
+                        <td
+                          colSpan={7}
+                          className="px-5 py-16 text-center"
                         >
-                          {/* BOOK */}
+                          <div className="flex items-center justify-center gap-2 theme-text-muted text-sm">
+                            <Loader2
+                              size={18}
+                              className="animate-spin"
+                            />
 
-                          <td className="px-5 py-4">
-                            <div className="flex items-center gap-3">
-                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600">
-                                <BookOpen size={19} />
+                            Memuat data buku...
+                          </div>
+                        </td>
+                      </tr>
+                    ) : filteredBooks.length > 0 ? (
+                      filteredBooks.map(
+                        (book) => (
+                          <tr
+                            key={book.id}
+                            className={`transition ${themeTextHover}`}
+                          >
+                            {/* BOOK */}
+
+                            <td className="px-5 py-4">
+                              <div className="flex items-center gap-3">
+                                <div
+                                  className={`flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg ${themePrimarySoft} text-[var(--color-primary)]`}
+                                >
+                                  {book.coverUrl ? (
+                                    <img
+                                      src={
+                                        book.coverUrl
+                                      }
+                                      alt={
+                                        book.judul
+                                      }
+                                      className="h-full w-full object-cover"
+                                    />
+                                  ) : (
+                                    <BookOpen
+                                      size={19}
+                                    />
+                                  )}
+                                </div>
+
+                                <div className="min-w-0">
+                                  <p className="theme-text max-w-[280px] truncate text-sm font-semibold">
+                                    {book.judul}
+                                  </p>
+
+                                  <div className="mt-1 flex items-center gap-2">
+                                    <span className="text-[11px] font-medium text-[var(--color-primary)]">
+                                      {book.kodeBuku}
+                                    </span>
+
+                                    {book.tahunTerbit && (
+                                      <>
+                                        <span className="theme-text-muted text-[11px]">
+                                          •
+                                        </span>
+
+                                        <span className="theme-text-muted text-[11px]">
+                                          {
+                                            book.tahunTerbit
+                                          }
+                                        </span>
+                                      </>
+                                    )}
+                                  </div>
+
+                                  <p className="theme-text-muted mt-0.5 text-xs">
+                                    {book.penulis}
+                                  </p>
+                                </div>
                               </div>
+                            </td>
 
-                              <div className="min-w-0">
-                                <p className="max-w-[270px] truncate text-sm font-semibold text-slate-800">
-                                  {book.judul}
-                                </p>
+                            {/* ISBN */}
 
-                                <div className="mt-1 flex items-center gap-2">
-                                  <span className="text-[11px] font-medium text-blue-600">
-                                    {book.kode}
+                            <td className="px-4 py-4">
+                              <span className="theme-text-secondary text-xs">
+                                {book.isbn ||
+                                  "-"}
+                              </span>
+                            </td>
+
+                            {/* TYPE */}
+
+                            <td className="px-4 py-4">
+                              <TypeBadge
+                                tipe={
+                                  book.tipe
+                                }
+                              />
+                            </td>
+
+                            {/* CATEGORY */}
+
+                            <td className="px-4 py-4">
+                              <span className="theme-card-soft theme-border theme-text-secondary inline-flex rounded-md border px-2.5 py-1 text-xs font-medium">
+                                {book.kategori ||
+                                  "-"}
+                              </span>
+                            </td>
+
+                            {/* STOCK */}
+
+                            <td className="px-4 py-4">
+                              <div className="min-w-[120px]">
+                                <div className="flex items-center justify-between text-xs">
+                                  <span className="theme-text font-semibold">
+                                    {
+                                      book.jumlahTersedia
+                                    }
                                   </span>
 
-                                  <span className="text-[11px] text-slate-400">
-                                    •
-                                  </span>
-
-                                  <span className="text-[11px] text-slate-400">
-                                    {book.tahun}
+                                  <span className="theme-text-muted">
+                                    /{" "}
+                                    {
+                                      book.jumlah
+                                    }
                                   </span>
                                 </div>
 
-                                <p className="mt-0.5 text-xs text-slate-400">
-                                  {book.penulis}
+                                <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)]">
+                                  <div
+                                    className="h-full rounded-full bg-[var(--color-primary)]"
+                                    style={{
+                                      width:
+                                        book.jumlah >
+                                        0
+                                          ? `${Math.min(
+                                              100,
+                                              (book.jumlahTersedia /
+                                                book.jumlah) *
+                                                100,
+                                            )}%`
+                                          : "0%",
+                                    }}
+                                  />
+                                </div>
+
+                                <p className="theme-text-muted mt-1 text-[10px]">
+                                  {
+                                    book.dipinjam
+                                  }{" "}
+                                  dipinjam
                                 </p>
                               </div>
-                            </div>
-                          </td>
+                            </td>
 
-                          {/* ISBN */}
+                            {/* STATUS */}
 
-                          <td className="px-4 py-4">
-                            <span className="text-xs text-slate-600">
-                              {book.isbn || "-"}
-                            </span>
-                          </td>
-
-                          {/* CATEGORY */}
-
-                          <td className="px-4 py-4">
-                            <span className="inline-flex rounded-md bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600">
-                              {book.kategori}
-                            </span>
-                          </td>
-
-                          {/* JENJANG */}
-
-                          <td className="px-4 py-4">
-                            <span className="text-xs font-medium text-slate-600">
-                              {book.jenjang}
-                            </span>
-                          </td>
-
-                          {/* LOCATION */}
-
-                          <td className="px-4 py-4">
-                            <div className="flex items-center gap-1.5 text-xs text-slate-600">
-                              <MapPin
-                                size={14}
-                                className="text-slate-400"
+                            <td className="px-4 py-4">
+                              <StatusBadge
+                                status={
+                                  book.status
+                                }
                               />
+                            </td>
 
-                              {book.lokasi || "-"}
-                            </div>
-                          </td>
+                            {/* ACTION */}
 
-                          {/* STOCK */}
+                            <td className="px-5 py-4">
+                              <div className="flex items-center justify-end gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    openDetail(
+                                      book,
+                                    )
+                                  }
+                                  title="Detail"
+                                  className={`theme-text-muted flex h-8 w-8 items-center justify-center rounded-md transition ${themePrimaryHover} hover:text-[var(--color-primary)]`}
+                                >
+                                  <Eye
+                                    size={16}
+                                  />
+                                </button>
 
-                          <td className="px-4 py-4">
-                            <div className="min-w-[105px]">
-                              <div className="flex items-center justify-between text-xs">
-                                <span className="font-semibold text-slate-700">
-                                  {book.tersedia}
-                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    openEdit(
+                                      book,
+                                    )
+                                  }
+                                  title="Edit"
+                                  className={`theme-text-muted flex h-8 w-8 items-center justify-center rounded-md transition ${themePrimaryHover} hover:text-[var(--color-primary)]`}
+                                >
+                                  <Pencil
+                                    size={16}
+                                  />
+                                </button>
 
-                                <span className="text-slate-400">
-                                  / {book.stok}
-                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    setDeleteBook(
+                                      book,
+                                    )
+                                  }
+                                  title="Hapus"
+                                  className="theme-text-muted flex h-8 w-8 items-center justify-center rounded-md transition hover:bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] theme-danger"
+                                >
+                                  <Trash2
+                                    size={16}
+                                  />
+                                </button>
                               </div>
-
-                              <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-slate-100">
-                                <div
-                                  className="h-full rounded-full bg-blue-500"
-                                  style={{
-                                    width:
-                                      book.stok > 0
-                                        ? `${Math.min(
-                                            100,
-                                            (book.tersedia /
-                                              book.stok) *
-                                              100
-                                          )}%`
-                                        : "0%",
-                                  }}
-                                />
-                              </div>
-
-                              <p className="mt-1 text-[10px] text-slate-400">
-                                {book.dipinjam} dipinjam
-                              </p>
-                            </div>
-                          </td>
-
-                          {/* CONDITION */}
-
-                          <td className="px-4 py-4">
-                            <ConditionBadge
-                              condition={book.kondisi}
-                            />
-                          </td>
-
-                          {/* STATUS */}
-
-                          <td className="px-4 py-4">
-                            <StatusBadge
-                              status={book.status}
-                            />
-                          </td>
-
-                          {/* ACTION */}
-
-                          <td className="px-5 py-4">
-                            <div className="flex items-center justify-end gap-1">
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setDetailBook(book)
-                                }
-                                title="Detail"
-                                className="flex h-8 w-8 items-center justify-center rounded-md text-slate-400 transition hover:bg-blue-50 hover:text-blue-600"
-                              >
-                                <Eye size={16} />
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  openEdit(book)
-                                }
-                                title="Edit"
-                                className="flex h-8 w-8 items-center justify-center rounded-md text-slate-400 transition hover:bg-blue-50 hover:text-blue-600"
-                              >
-                                <Pencil size={16} />
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setDeleteBook(book)
-                                }
-                                title="Hapus"
-                                className="flex h-8 w-8 items-center justify-center rounded-md text-slate-400 transition hover:bg-rose-50 hover:text-rose-600"
-                              >
-                                <Trash2 size={16} />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
+                            </td>
+                          </tr>
+                        ),
+                      )
                     ) : (
                       <tr>
                         <td
-                          colSpan={9}
+                          colSpan={7}
                           className="px-5 py-16 text-center"
                         >
-                          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 text-slate-400">
+                          <div
+                            className={`mx-auto flex h-12 w-12 items-center justify-center rounded-full ${themePrimarySoft} text-[var(--color-primary)]`}
+                          >
                             <Search size={20} />
                           </div>
 
-                          <p className="mt-3 text-sm font-semibold text-slate-700">
+                          <p className="theme-text mt-3 text-sm font-semibold">
                             Data buku tidak ditemukan
                           </p>
 
-                          <p className="mt-1 text-xs text-slate-400">
-                            Coba ubah kata kunci atau filter.
+                          <p className="theme-text-muted mt-1 text-xs">
+                            Belum ada data buku atau filter tidak menemukan hasil.
                           </p>
                         </td>
                       </tr>
@@ -1514,24 +1902,26 @@ export default function DataBukuPage() {
                 </table>
               </div>
 
-              {/* TABLE FOOTER */}
+              {/* FOOTER */}
 
-              <div className="flex flex-col gap-2 border-t border-slate-200 px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
-                <p className="text-xs text-slate-400">
+              <div className="theme-border flex flex-col gap-2 border-t px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
+                <p className="theme-text-muted text-xs">
                   Menampilkan{" "}
-                  <span className="font-medium text-slate-600">
-                    {filteredBooks.length}
+                  <span className="theme-text-secondary font-medium">
+                    {
+                      filteredBooks.length
+                    }
                   </span>{" "}
                   dari{" "}
-                  <span className="font-medium text-slate-600">
+                  <span className="theme-text-secondary font-medium">
                     {books.length}
                   </span>{" "}
                   buku
                 </p>
 
-                <p className="text-xs text-slate-400">
+                <p className="theme-text-muted text-xs">
                   Total{" "}
-                  <span className="font-medium text-slate-600">
+                  <span className="theme-text-secondary font-medium">
                     {totalStok}
                   </span>{" "}
                   eksemplar
@@ -1543,21 +1933,23 @@ export default function DataBukuPage() {
       </div>
 
       {/* =====================================================
-          ADD / EDIT MODAL
+          ADD / EDIT
       ===================================================== */}
 
       {modal && activeBook && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-[2px]">
-          <div className="max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl bg-white shadow-2xl">
-            <div className="sticky top-0 z-10 flex items-center justify-between border-b border-slate-200 bg-white px-5 py-4 sm:px-6">
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4 backdrop-blur-[2px]">
+          <div
+            className={`theme-card theme-border max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl border ${themeCardShadow}`}
+          >
+            <div className="theme-card sticky top-0 z-10 flex items-center justify-between border-b border-[var(--color-border-soft)] px-5 py-4 sm:px-6">
               <div>
-                <h2 className="text-lg font-bold text-slate-900">
+                <h2 className="theme-text text-lg font-bold">
                   {modal === "add"
                     ? "Tambah Data Buku"
                     : "Edit Data Buku"}
                 </h2>
 
-                <p className="mt-0.5 text-xs text-slate-500">
+                <p className="theme-text-muted mt-0.5 text-xs">
                   {modal === "add"
                     ? "Tambahkan koleksi buku baru"
                     : "Perbarui informasi buku"}
@@ -1567,7 +1959,7 @@ export default function DataBukuPage() {
               <button
                 type="button"
                 onClick={closeModal}
-                className="flex h-9 w-9 items-center justify-center rounded-lg text-slate-400 transition hover:bg-slate-100 hover:text-slate-700"
+                className={`theme-text-muted flex h-9 w-9 items-center justify-center rounded-lg transition ${themeTextHover}`}
               >
                 <X size={18} />
               </button>
@@ -1576,9 +1968,13 @@ export default function DataBukuPage() {
             <div className="p-5 sm:p-6">
               <BookForm
                 initial={activeBook}
-                editMode={modal === "edit"}
+                editMode={
+                  modal === "edit"
+                }
                 onCancel={closeModal}
                 onSave={saveBook}
+                saving={saving}
+                error={formError}
               />
             </div>
           </div>
@@ -1589,31 +1985,38 @@ export default function DataBukuPage() {
           DETAIL
       ===================================================== */}
 
-      <DetailModal
-        book={detailBook}
-        onClose={() => setDetailBook(null)}
-      />
+      {(detailBook || detailLoading) && (
+        <DetailModal
+          book={detailBook}
+          loading={detailLoading}
+          onClose={() =>
+            setDetailBook(null)
+          }
+        />
+      )}
 
       {/* =====================================================
           DELETE
       ===================================================== */}
 
       {deleteBook && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-slate-950/40 p-4 backdrop-blur-[2px]">
-          <div className="w-full max-w-md rounded-2xl bg-white p-6 shadow-2xl">
+        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/40 p-4 backdrop-blur-[2px]">
+          <div
+            className={`theme-card theme-border w-full max-w-md rounded-2xl border p-6 ${themeCardShadow}`}
+          >
             <div className="flex items-start gap-4">
-              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-rose-50 text-rose-600">
+              <div className="theme-danger flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)]">
                 <Trash2 size={20} />
               </div>
 
               <div>
-                <h2 className="text-lg font-bold text-slate-900">
+                <h2 className="theme-text text-lg font-bold">
                   Hapus data buku?
                 </h2>
 
-                <p className="mt-1.5 text-sm leading-6 text-slate-500">
+                <p className="theme-text-secondary mt-1.5 text-sm leading-6">
                   Data buku{" "}
-                  <span className="font-semibold text-slate-700">
+                  <span className="theme-text font-semibold">
                     "{deleteBook.judul}"
                   </span>{" "}
                   akan dihapus dari daftar perpustakaan.
@@ -1624,18 +2027,31 @@ export default function DataBukuPage() {
             <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
               <button
                 type="button"
-                onClick={() => setDeleteBook(null)}
-                className="h-10 rounded-lg border border-slate-300 px-5 text-sm font-medium text-slate-600 transition hover:bg-slate-50"
+                disabled={deleting}
+                onClick={() =>
+                  setDeleteBook(null)
+                }
+                className={`theme-card theme-border theme-text-secondary h-10 rounded-lg border px-5 text-sm font-medium transition ${themeTextHover}`}
               >
                 Batal
               </button>
 
               <button
                 type="button"
+                disabled={deleting}
                 onClick={confirmDelete}
-                className="h-10 rounded-lg bg-rose-600 px-5 text-sm font-semibold text-white transition hover:bg-rose-700"
+                className="theme-danger flex h-10 items-center justify-center gap-2 rounded-lg bg-[var(--color-text)] px-5 text-sm font-semibold text-[var(--color-card)] transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Ya, Hapus
+                {deleting && (
+                  <Loader2
+                    size={16}
+                    className="animate-spin"
+                  />
+                )}
+
+                {deleting
+                  ? "Menghapus..."
+                  : "Ya, Hapus"}
               </button>
             </div>
           </div>

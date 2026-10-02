@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import Sidebar from "../../../components/Sidebar";
-import Header from "../../../components/Header";
 
 import {
   Activity,
@@ -32,6 +30,70 @@ import {
   ChevronDown,
   X,
 } from "lucide-react";
+
+// ============================================================
+// THEME HELPERS
+// ============================================================
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
 // ============================================================
 // OPTIONS
@@ -74,7 +136,9 @@ function SmartFilterSelect({
     if (!searchText.trim()) return options;
 
     return options.filter((option) =>
-      option.toLowerCase().includes(searchText.toLowerCase())
+      option
+        .toLowerCase()
+        .includes(searchText.toLowerCase())
     );
   }, [options, searchText]);
 
@@ -88,10 +152,16 @@ function SmartFilterSelect({
       }
     };
 
-    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener(
+      "mousedown",
+      handleClickOutside
+    );
 
     return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener(
+        "mousedown",
+        handleClickOutside
+      );
     };
   }, []);
 
@@ -102,11 +172,11 @@ function SmartFilterSelect({
   };
 
   const handleInputChange = (event) => {
-    const value = event.target.value;
+    const nextValue = event.target.value;
 
-    setSearchText(value);
+    setSearchText(nextValue);
 
-    if (!value.trim()) {
+    if (!nextValue.trim()) {
       onChange("Semua");
     }
   };
@@ -116,7 +186,8 @@ function SmartFilterSelect({
       searchText.trim() &&
       !options.some(
         (option) =>
-          option.toLowerCase() === searchText.toLowerCase()
+          option.toLowerCase() ===
+          searchText.toLowerCase()
       )
     ) {
       setSearchText("");
@@ -125,33 +196,37 @@ function SmartFilterSelect({
   };
 
   // ==========================================================
-  // DROPDOWN
+  // SIMPLE SELECT
   // ==========================================================
 
   if (useDropdown) {
     return (
       <select
         value={value}
-        onChange={(event) => onChange(event.target.value)}
-        className="
+        onChange={(event) =>
+          onChange(event.target.value)
+        }
+        className={`
           h-10 w-full rounded-xl
-          border border-slate-200
-          bg-slate-50
+          border theme-border
+          ${themeNeutralSurface}
           px-3
-          text-sm text-slate-600
+          text-sm theme-text-secondary
           outline-none
           transition-all
-          hover:border-slate-300
-          focus:border-blue-400
-          focus:bg-white
-          focus:ring-4
-          focus:ring-blue-500/10
-        "
+          hover:border-[color-mix(in_srgb,var(--color-primary)_30%,transparent)]
+          ${themeFocus}
+        `}
       >
-        <option value="Semua">{allLabel}</option>
+        <option value="Semua">
+          {allLabel}
+        </option>
 
         {options.map((option) => (
-          <option key={option} value={option}>
+          <option
+            key={option}
+            value={option}
+          >
             {option}
           </option>
         ))}
@@ -180,26 +255,25 @@ function SmartFilterSelect({
           onFocus={() => setIsOpen(true)}
           onBlur={handleInputBlur}
           placeholder={placeholder}
-          className="
+          className={`
             h-10 w-full rounded-xl
-            border border-slate-200
-            bg-slate-50
+            border theme-border
+            ${themeNeutralSurface}
             px-3 pr-8
-            text-sm text-slate-700
+            text-sm theme-text
             outline-none
             transition-all
-            placeholder:text-slate-400
-            focus:border-blue-400
-            focus:bg-white
-            focus:ring-4
-            focus:ring-blue-500/10
-          "
+            placeholder:theme-text-placeholder
+            ${themeFocus}
+          `}
         />
 
         {searchText && (
           <button
             type="button"
-            onMouseDown={(event) => event.preventDefault()}
+            onMouseDown={(event) =>
+              event.preventDefault()
+            }
             onClick={() => {
               setSearchText("");
               onChange("Semua");
@@ -208,9 +282,9 @@ function SmartFilterSelect({
             className="
               absolute right-8 top-1/2
               -translate-y-1/2
-              text-slate-400
+              theme-text-muted
               transition
-              hover:text-slate-600
+              hover:text-[var(--color-text)]
             "
           >
             <X size={14} />
@@ -222,7 +296,7 @@ function SmartFilterSelect({
           className={`
             absolute right-2 top-1/2
             -translate-y-1/2
-            text-slate-400
+            theme-text-muted
             transition-transform
             ${isOpen ? "rotate-180" : ""}
           `}
@@ -231,19 +305,19 @@ function SmartFilterSelect({
 
       {isOpen && (
         <div
-          className="
+          className={`
             absolute z-50 mt-1
             max-h-48 w-full
             overflow-auto
             rounded-xl
-            border border-slate-200
-            bg-white
+            border theme-border
+            bg-[var(--color-card)]
             py-1
-            shadow-lg
-          "
+            ${themeCardShadow}
+          `}
         >
           {filteredOptions.length === 0 ? (
-            <div className="px-3 py-2 text-sm text-slate-400">
+            <div className="px-3 py-2 text-sm theme-text-muted">
               Tidak ada hasil
             </div>
           ) : (
@@ -256,12 +330,13 @@ function SmartFilterSelect({
                 onClick={() =>
                   handleSelect("Semua")
                 }
-                className="
+                className={`
                   w-full px-3 py-2
                   text-left text-sm
+                  theme-text-secondary
                   transition-colors
-                  hover:bg-slate-50
-                "
+                  ${themeNeutralHover}
+                `}
               >
                 {allLabel}
               </button>
@@ -276,12 +351,13 @@ function SmartFilterSelect({
                   onClick={() =>
                     handleSelect(option)
                   }
-                  className="
+                  className={`
                     w-full px-3 py-2
                     text-left text-sm
+                    theme-text-secondary
                     transition-colors
-                    hover:bg-slate-50
-                  "
+                    ${themeNeutralHover}
+                  `}
                 >
                   {option}
                 </button>
@@ -299,12 +375,6 @@ function SmartFilterSelect({
 // ============================================================
 
 export default function LogAktivitasPage() {
-  const [activeMenu, setActiveMenu] =
-    useState("log-aktivitas");
-
-  const [sidebarOpen, setSidebarOpen] =
-    useState(true);
-
   const [isMobile, setIsMobile] =
     useState(false);
 
@@ -376,12 +446,6 @@ export default function LogAktivitasPage() {
   }, []);
 
   // ==========================================================
-  // NOTIFICATIONS
-  // ==========================================================
-
-  const notifications = [];
-
-  // ==========================================================
   // OPTIONS DARI DATA API
   // ==========================================================
 
@@ -438,13 +502,21 @@ export default function LogAktivitasPage() {
   }, [logs]);
 
   // ==========================================================
-  // STATUS COLOR
+  // STATUS STYLE
   // ==========================================================
 
-  const getStatusColor = (status) => {
+  const getStatusStyle = (status) => {
     return status === "success"
-      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-      : "bg-rose-50 text-rose-700 border-rose-200";
+      ? {
+          surface: themeSuccessSurface,
+          text: "text-[var(--color-success)]",
+          border: themeSuccessBorder,
+        }
+      : {
+          surface: themeDangerSurface,
+          text: "theme-text-secondary",
+          border: themeDangerBorder,
+        };
   };
 
   // ==========================================================
@@ -455,12 +527,12 @@ export default function LogAktivitasPage() {
     return status === "success" ? (
       <CheckCircle
         size={12}
-        className="text-emerald-500"
+        className="text-[var(--color-success)]"
       />
     ) : (
       <XCircle
         size={12}
-        className="text-rose-500"
+        className="theme-text-muted"
       />
     );
   };
@@ -497,7 +569,7 @@ export default function LogAktivitasPage() {
     return (
       <Icon
         size={14}
-        className="text-slate-500"
+        className="theme-text-muted"
       />
     );
   };
@@ -549,9 +621,7 @@ export default function LogAktivitasPage() {
 
         const now = new Date();
 
-        if (
-          selectedTime === "today"
-        ) {
+        if (selectedTime === "today") {
           const today = new Date(
             now.getFullYear(),
             now.getMonth(),
@@ -572,15 +642,13 @@ export default function LogAktivitasPage() {
             yesterday.getDate() - 1
           );
 
-          const start =
-            new Date(
-              yesterday.getFullYear(),
-              yesterday.getMonth(),
-              yesterday.getDate()
-            );
+          const start = new Date(
+            yesterday.getFullYear(),
+            yesterday.getMonth(),
+            yesterday.getDate()
+          );
 
-          const end =
-            new Date(start);
+          const end = new Date(start);
 
           end.setDate(
             end.getDate() + 1
@@ -591,9 +659,7 @@ export default function LogAktivitasPage() {
             logDate < end;
         }
 
-        if (
-          selectedTime === "week"
-        ) {
+        if (selectedTime === "week") {
           const weekAgo =
             new Date(now);
 
@@ -605,9 +671,7 @@ export default function LogAktivitasPage() {
             logDate >= weekAgo;
         }
 
-        if (
-          selectedTime === "month"
-        ) {
+        if (selectedTime === "month") {
           const monthAgo =
             new Date(now);
 
@@ -672,15 +736,13 @@ export default function LogAktivitasPage() {
         if (
           sortField === "timestamp"
         ) {
-          const dateA =
-            new Date(
-              a.timestamp || 0
-            );
+          const dateA = new Date(
+            a.timestamp || 0
+          );
 
-          const dateB =
-            new Date(
-              b.timestamp || 0
-            );
+          const dateB = new Date(
+            b.timestamp || 0
+          );
 
           return sortOrder === "asc"
             ? dateA - dateB
@@ -766,7 +828,7 @@ export default function LogAktivitasPage() {
   const renderSortIcon = (field) => {
     if (sortField !== field) {
       return (
-        <span className="text-slate-300">
+        <span className="theme-text-muted opacity-50">
           <ArrowUp
             size={12}
             className="
@@ -782,12 +844,12 @@ export default function LogAktivitasPage() {
     return sortOrder === "asc" ? (
       <ArrowUp
         size={12}
-        className="text-blue-600"
+        className={themePrimaryText}
       />
     ) : (
       <ArrowDown
         size={12}
-        className="text-blue-600"
+        className={themePrimaryText}
       />
     );
   };
@@ -841,1169 +903,1179 @@ export default function LogAktivitasPage() {
   // ==========================================================
 
   return (
-    <div className="flex min-h-screen bg-[#f8fafc]">
-      <Sidebar
-        active={activeMenu}
-        setActive={setActiveMenu}
-        collapsed={!sidebarOpen}
-        setCollapsed={() =>
-          setSidebarOpen(
-            !sidebarOpen
-          )
-        }
-      />
+    <div className="theme-page theme-text min-h-full">
+      <div
+        className="
+          mx-auto w-full
+          max-w-[1600px]
+          space-y-4
+          px-4 py-5
+          sm:space-y-5
+          sm:px-6 sm:py-6
+          lg:space-y-6
+          lg:px-8 lg:py-8
+        "
+      >
+        {/* ==================================================
+            HEADER
+        ================================================== */}
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <Header
-          toggleSidebar={() =>
-            setSidebarOpen(
-              !sidebarOpen
-            )
-          }
-          notifications={notifications}
-          user={{
-            name: "Super Admin",
-            email:
-              "admin@smartschool.com",
-            avatar: "SA",
-          }}
-        />
-
-        <main className="flex-1 p-3 sm:p-5 lg:p-7 xl:p-8">
+        <section
+          className={`
+            relative overflow-hidden
+            rounded-2xl
+            border theme-border
+            theme-card
+            ${themeCardShadow}
+          `}
+        >
           <div
             className="
-              mx-auto w-full
-              max-w-[1600px]
-              space-y-4
-              sm:space-y-5
-              lg:space-y-6
+              pointer-events-none
+              absolute -right-20 -top-24
+              h-64 w-64
+              rounded-full
+              bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]
+              blur-3xl
+            "
+          />
+
+          <div
+            className="
+              relative flex flex-col
+              gap-4 p-5
+              sm:p-6
+              lg:flex-row
+              lg:items-center
+              lg:justify-between
+              lg:px-8
+              lg:py-6
             "
           >
-            {/* ==================================================
-                HEADER
-            ================================================== */}
-
-            <section
-              className="
-                relative overflow-hidden
-                rounded-2xl
-                border border-slate-200
-                bg-white
-                shadow-[0_2px_10px_rgba(15,23,42,0.05)]
-              "
-            >
-              <div
-                className="
-                  pointer-events-none
-                  absolute -right-20 -top-24
-                  h-64 w-64
-                  rounded-full
-                  bg-blue-50/70
-                  blur-3xl
-                "
-              />
-
-              <div
-                className="
-                  relative flex flex-col
-                  gap-4 p-5
-                  sm:p-6
-                  lg:flex-row
-                  lg:items-center
-                  lg:justify-between
-                  lg:px-8
-                  lg:py-6
-                "
-              >
-                <div
-                  className="
-                    flex min-w-0
-                    items-start
-                    gap-3 sm:gap-4
-                  "
-                >
-                  <div
-                    className="
-                      flex h-11 w-11
-                      shrink-0
-                      items-center
-                      justify-center
-                      rounded-xl
-                      bg-gradient-to-br
-                      from-blue-600
-                      to-indigo-600
-                      text-white
-                      shadow-[0_8px_20px_rgba(37,99,235,0.25)]
-                      sm:h-14
-                      sm:w-14
-                    "
-                  >
-                    <Activity
-                      size={22}
-                      strokeWidth={1.9}
-                      className="
-                        sm:h-[25px]
-                        sm:w-[25px]
-                      "
-                    />
-                  </div>
-
-                  <div className="min-w-0">
-                    <div
-                      className="
-                        flex flex-wrap
-                        items-center gap-2
-                      "
-                    >
-                      <h1
-                        className="
-                          text-xl
-                          font-semibold
-                          tracking-[-0.025em]
-                          text-slate-900
-                          sm:text-2xl
-                          lg:text-[26px]
-                        "
-                      >
-                        Log Aktivitas
-                      </h1>
-
-                      <span
-                        className="
-                          inline-flex
-                          items-center
-                          gap-1.5
-                          rounded-full
-                          border
-                          border-blue-100
-                          bg-blue-50
-                          px-2.5 py-0.5
-                          text-[10px]
-                          font-semibold
-                          text-blue-600
-                          sm:px-3
-                          sm:py-1
-                          sm:text-[11px]
-                        "
-                      >
-                        <span
-                          className="
-                            h-1.5 w-1.5
-                            rounded-full
-                            bg-blue-500
-                          "
-                        />
-
-                        Monitoring
-                      </span>
-                    </div>
-
-                    <div
-                      className="
-                        mt-1 flex
-                        items-center
-                        gap-1.5 sm:gap-2
-                      "
-                    >
-                      <Clock
-                        size={13}
-                        className="
-                          shrink-0
-                          text-blue-400
-                          sm:h-[14px]
-                          sm:w-[14px]
-                        "
-                      />
-
-                      <p
-                        className="
-                          text-xs
-                          leading-5
-                          text-slate-500
-                          sm:text-sm
-                        "
-                      >
-                        Pantau seluruh
-                        aktivitas pengguna
-                        di sistem SmartSchool.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                <div
-                  className="
-                    flex w-full
-                    flex-wrap gap-2
-                    lg:w-auto
-                  "
-                >
-                  <button
-                    type="button"
-                    onClick={handleRefresh}
-                    disabled={isLoading}
-                    className="
-                      inline-flex
-                      h-10
-                      flex-1
-                      items-center
-                      justify-center
-                      gap-2
-                      rounded-xl
-                      border
-                      border-slate-200
-                      bg-white
-                      px-4
-                      text-sm
-                      font-medium
-                      text-slate-600
-                      shadow-[0_2px_5px_rgba(15,23,42,0.05)]
-                      transition-all
-                      hover:border-slate-300
-                      hover:bg-slate-50
-                      hover:text-slate-800
-                      active:scale-[0.98]
-                      disabled:opacity-60
-                      sm:h-11
-                      sm:flex-none
-                      sm:px-5
-                    "
-                  >
-                    <RefreshCw
-                      size={16}
-                      className={
-                        isLoading
-                          ? "animate-spin"
-                          : ""
-                      }
-                    />
-
-                    {isLoading
-                      ? "Memuat..."
-                      : "Refresh"}
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={handleExport}
-                    disabled={!sortedData.length}
-                    className="
-                      inline-flex
-                      h-10
-                      flex-1
-                      items-center
-                      justify-center
-                      gap-2
-                      rounded-xl
-                      border
-                      border-slate-200
-                      bg-white
-                      px-4
-                      text-sm
-                      font-medium
-                      text-slate-600
-                      shadow-[0_2px_5px_rgba(15,23,42,0.05)]
-                      transition-all
-                      hover:border-slate-300
-                      hover:bg-slate-50
-                      hover:text-slate-800
-                      active:scale-[0.98]
-                      disabled:cursor-not-allowed
-                      disabled:opacity-40
-                      sm:h-11
-                      sm:flex-none
-                      sm:px-5
-                    "
-                  >
-                    <Download size={16} />
-                    Export
-                  </button>
-                </div>
-              </div>
-            </section>
-
-            {/* ==================================================
-                STATISTICS
-            ================================================== */}
-
             <div
               className="
-                grid grid-cols-2
-                gap-3
-                sm:grid-cols-3
-                lg:grid-cols-5
-              "
-            >
-              <StatCard
-                label="Total Aktivitas"
-                value={stats.total}
-                icon={Activity}
-                color="blue"
-              />
-
-              <StatCard
-                label="Berhasil"
-                value={stats.success}
-                icon={CheckCircle}
-                color="emerald"
-              />
-
-              <StatCard
-                label="Gagal"
-                value={stats.failed}
-                icon={XCircle}
-                color="rose"
-              />
-
-              <StatCard
-                label="Pengguna Aktif"
-                value={stats.users}
-                icon={Users}
-                color="indigo"
-              />
-
-              <StatCard
-                label="Modul Terakses"
-                value={stats.modules}
-                icon={Database}
-                color="amber"
-              />
-            </div>
-
-            {/* ==================================================
-                FILTER
-            ================================================== */}
-
-            <section
-              className="
-                rounded-2xl
-                border border-slate-200
-                bg-white
-                p-4
-                shadow-[0_2px_10px_rgba(15,23,42,0.04)]
-                sm:p-5
+                flex min-w-0
+                items-start
+                gap-3 sm:gap-4
               "
             >
               <div
-                className="
-                  mb-4 flex
+                className={`
+                  flex h-11 w-11
+                  shrink-0
                   items-center
-                  gap-2 sm:gap-3
-                "
+                  justify-center
+                  rounded-xl
+                  ${themePrimaryGradient}
+                  text-[var(--color-card)]
+                  ${themePrimaryShadow}
+                  sm:h-14
+                  sm:w-14
+                `}
               >
+                <Activity
+                  size={22}
+                  strokeWidth={1.9}
+                  className="
+                    sm:h-[25px]
+                    sm:w-[25px]
+                  "
+                />
+              </div>
+
+              <div className="min-w-0">
                 <div
                   className="
-                    flex h-8 w-8
-                    shrink-0
-                    items-center
-                    justify-center
-                    rounded-xl
-                    bg-blue-100
-                    text-blue-600
-                    sm:h-9 sm:w-9
+                    flex flex-wrap
+                    items-center gap-2
                   "
                 >
-                  <Filter
-                    size={14}
+                  <h1
                     className="
-                      sm:h-[16px]
-                      sm:w-[16px]
-                    "
-                  />
-                </div>
-
-                <div>
-                  <p
-                    className="
-                      text-sm
+                      text-xl
                       font-semibold
-                      text-slate-800
+                      tracking-[-0.025em]
+                      theme-text
+                      sm:text-2xl
+                      lg:text-[26px]
                     "
                   >
-                    Filter & Pencarian
-                  </p>
+                    Log Aktivitas
+                  </h1>
+
+                  <span
+                    className={`
+                      inline-flex
+                      items-center
+                      gap-1.5
+                      rounded-full
+                      border
+                      ${themePrimarySoftBorder}
+                      ${themePrimarySoft}
+                      px-2.5 py-0.5
+                      text-[10px]
+                      font-semibold
+                      ${themePrimaryText}
+                      sm:px-3
+                      sm:py-1
+                      sm:text-[11px]
+                    `}
+                  >
+                    <span
+                      className="
+                        h-1.5 w-1.5
+                        rounded-full
+                        bg-[var(--color-primary)]
+                      "
+                    />
+
+                    Monitoring
+                  </span>
+                </div>
+
+                <div
+                  className="
+                    mt-1 flex
+                    items-center
+                    gap-1.5 sm:gap-2
+                  "
+                >
+                  <Clock
+                    size={13}
+                    className={`
+                      shrink-0
+                      ${themePrimaryText}
+                      opacity-70
+                      sm:h-[14px]
+                      sm:w-[14px]
+                    `}
+                  />
 
                   <p
                     className="
                       text-xs
-                      text-slate-400
+                      leading-5
+                      theme-text-muted
+                      sm:text-sm
                     "
                   >
-                    Filter dan cari aktivitas
-                    berdasarkan kriteria
+                    Pantau seluruh
+                    aktivitas pengguna
+                    di sistem SmartSchool.
                   </p>
                 </div>
               </div>
-
-              <div
-                className="
-                  grid gap-3
-                  sm:grid-cols-2
-                  lg:grid-cols-4
-                  xl:grid-cols-5
-                "
-              >
-                {/* SEARCH */}
-
-                <div className="relative">
-                  <Search
-                    size={15}
-                    className="
-                      absolute left-3
-                      top-1/2
-                      -translate-y-1/2
-                      text-slate-400
-                    "
-                  />
-
-                  <input
-                    type="text"
-                    placeholder="Cari aktivitas..."
-                    value={searchQuery}
-                    onChange={(event) => {
-                      setSearchQuery(
-                        event.target.value
-                      );
-                      setCurrentPage(1);
-                    }}
-                    className="
-                      h-10 w-full
-                      rounded-xl
-                      border
-                      border-slate-200
-                      bg-slate-50
-                      pl-9 pr-3
-                      text-sm
-                      text-slate-700
-                      outline-none
-                      transition-all
-                      placeholder:text-slate-400
-                      focus:border-blue-400
-                      focus:bg-white
-                      focus:ring-4
-                      focus:ring-blue-500/10
-                    "
-                  />
-                </div>
-
-                {/* ROLE */}
-
-                <SmartFilterSelect
-                  value={selectedRole}
-                  onChange={(value) => {
-                    setSelectedRole(value);
-                    setCurrentPage(1);
-                  }}
-                  options={roleOptions}
-                  placeholder="Cari role..."
-                  allLabel="Semua Role"
-                />
-
-                {/* MODULE */}
-
-                <SmartFilterSelect
-                  value={selectedModule}
-                  onChange={(value) => {
-                    setSelectedModule(value);
-                    setCurrentPage(1);
-                  }}
-                  options={moduleOptions}
-                  placeholder="Cari modul..."
-                  allLabel="Semua Modul"
-                />
-
-                {/* STATUS */}
-
-                <select
-                  value={selectedStatus}
-                  onChange={(event) => {
-                    setSelectedStatus(
-                      event.target.value
-                    );
-                    setCurrentPage(1);
-                  }}
-                  className="
-                    h-10 w-full
-                    rounded-xl
-                    border
-                    border-slate-200
-                    bg-slate-50
-                    px-3
-                    text-sm
-                    text-slate-600
-                    outline-none
-                    transition-all
-                    hover:border-slate-300
-                    focus:border-blue-400
-                    focus:bg-white
-                    focus:ring-4
-                    focus:ring-blue-500/10
-                  "
-                >
-                  {statusOptions.map(
-                    (option) => (
-                      <option
-                        key={option.value}
-                        value={option.value}
-                      >
-                        {option.label}
-                      </option>
-                    )
-                  )}
-                </select>
-
-                {/* TIME */}
-
-                <select
-                  value={selectedTime}
-                  onChange={(event) => {
-                    setSelectedTime(
-                      event.target.value
-                    );
-                    setCurrentPage(1);
-                  }}
-                  className="
-                    h-10 w-full
-                    rounded-xl
-                    border
-                    border-slate-200
-                    bg-slate-50
-                    px-3
-                    text-sm
-                    text-slate-600
-                    outline-none
-                    transition-all
-                    hover:border-slate-300
-                    focus:border-blue-400
-                    focus:bg-white
-                    focus:ring-4
-                    focus:ring-blue-500/10
-                  "
-                >
-                  {timeOptions.map(
-                    (option) => (
-                      <option
-                        key={option.value}
-                        value={option.value}
-                      >
-                        {option.label}
-                      </option>
-                    )
-                  )}
-                </select>
-              </div>
-
-              {/* CUSTOM DATE */}
-
-              {selectedTime ===
-                "custom" && (
-                <div
-                  className="
-                    mt-3 grid
-                    grid-cols-1
-                    gap-3
-                    border-t
-                    border-slate-100
-                    pt-3
-                    sm:grid-cols-2
-                  "
-                >
-                  <div>
-                    <label
-                      className="
-                        mb-1 block
-                        text-xs
-                        font-medium
-                        text-slate-600
-                      "
-                    >
-                      Tanggal Mulai
-                    </label>
-
-                    <input
-                      type="date"
-                      value={startDate}
-                      onChange={(event) =>
-                        setStartDate(
-                          event.target.value
-                        )
-                      }
-                      className="
-                        h-10 w-full
-                        rounded-xl
-                        border
-                        border-slate-200
-                        bg-slate-50
-                        px-3
-                        text-sm
-                        text-slate-700
-                        outline-none
-                        transition-all
-                        focus:border-blue-400
-                        focus:bg-white
-                        focus:ring-4
-                        focus:ring-blue-500/10
-                      "
-                    />
-                  </div>
-
-                  <div>
-                    <label
-                      className="
-                        mb-1 block
-                        text-xs
-                        font-medium
-                        text-slate-600
-                      "
-                    >
-                      Tanggal Akhir
-                    </label>
-
-                    <input
-                      type="date"
-                      value={endDate}
-                      onChange={(event) =>
-                        setEndDate(
-                          event.target.value
-                        )
-                      }
-                      className="
-                        h-10 w-full
-                        rounded-xl
-                        border
-                        border-slate-200
-                        bg-slate-50
-                        px-3
-                        text-sm
-                        text-slate-700
-                        outline-none
-                        transition-all
-                        focus:border-blue-400
-                        focus:bg-white
-                        focus:ring-4
-                        focus:ring-blue-500/10
-                      "
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* FILTER FOOTER */}
-
-              <div
-                className="
-                  mt-3 flex
-                  flex-col gap-2
-                  border-t
-                  border-slate-100
-                  pt-3
-                  sm:flex-row
-                  sm:items-center
-                  sm:justify-between
-                "
-              >
-                <p
-                  className="
-                    text-xs
-                    text-slate-400
-                  "
-                >
-                  Menampilkan{" "}
-                  <span
-                    className="
-                      font-semibold
-                      text-slate-600
-                    "
-                  >
-                    {filteredData.length}
-                  </span>{" "}
-                  aktivitas
-                </p>
-
-                <button
-                  type="button"
-                  onClick={resetFilters}
-                  className="
-                    self-start
-                    rounded-lg
-                    px-3 py-1.5
-                    text-xs
-                    font-medium
-                    text-slate-500
-                    transition-colors
-                    hover:bg-slate-100
-                    hover:text-slate-700
-                    sm:self-auto
-                  "
-                >
-                  Reset Semua
-                </button>
-              </div>
-            </section>
-
-            {/* ==================================================
-                TABLE
-            ================================================== */}
-
-            <section
-              className="
-                overflow-hidden
-                rounded-2xl
-                border border-slate-200
-                bg-white
-                shadow-[0_3px_14px_rgba(15,23,42,0.05)]
-              "
-            >
-              {isMobile ? (
-                <div className="divide-y divide-slate-100">
-                  {paginatedData.length ===
-                  0 ? (
-                    <EmptyState />
-                  ) : (
-                    paginatedData.map(
-                      (log) => (
-                        <MobileLogCard
-                          key={log.id}
-                          log={log}
-                        />
-                      )
-                    )
-                  )}
-                </div>
-              ) : (
-                <div className="w-full overflow-x-auto">
-                  <table className="w-full min-w-[1000px] border-collapse">
-                    <thead>
-                      <tr
-                        className="
-                          border-b
-                          border-slate-200
-                          bg-slate-50/80
-                        "
-                      >
-                        <TableHead
-                          sortable
-                          onClick={() =>
-                            handleSort("user")
-                          }
-                        >
-                          <span className="group flex cursor-pointer items-center gap-1">
-                            Pengguna
-                            {renderSortIcon(
-                              "user"
-                            )}
-                          </span>
-                        </TableHead>
-
-                        <TableHead
-                          sortable
-                          onClick={() =>
-                            handleSort("role")
-                          }
-                        >
-                          <span className="group flex cursor-pointer items-center gap-1">
-                            Role
-                            {renderSortIcon(
-                              "role"
-                            )}
-                          </span>
-                        </TableHead>
-
-                        <TableHead
-                          sortable
-                          onClick={() =>
-                            handleSort(
-                              "module"
-                            )
-                          }
-                        >
-                          <span className="group flex cursor-pointer items-center gap-1">
-                            Modul
-                            {renderSortIcon(
-                              "module"
-                            )}
-                          </span>
-                        </TableHead>
-
-                        <TableHead
-                          sortable
-                          onClick={() =>
-                            handleSort(
-                              "action"
-                            )
-                          }
-                        >
-                          <span className="group flex cursor-pointer items-center gap-1">
-                            Aktivitas
-                            {renderSortIcon(
-                              "action"
-                            )}
-                          </span>
-                        </TableHead>
-
-                        <TableHead
-                          sortable
-                          onClick={() =>
-                            handleSort(
-                              "status"
-                            )
-                          }
-                        >
-                          <span className="group flex cursor-pointer items-center gap-1">
-                            Status
-                            {renderSortIcon(
-                              "status"
-                            )}
-                          </span>
-                        </TableHead>
-
-                        <TableHead
-                          sortable
-                          onClick={() =>
-                            handleSort(
-                              "timestamp"
-                            )
-                          }
-                        >
-                          <span className="group flex cursor-pointer items-center gap-1">
-                            Waktu
-                            {renderSortIcon(
-                              "timestamp"
-                            )}
-                          </span>
-                        </TableHead>
-
-                        <TableHead>
-                          IP
-                        </TableHead>
-                      </tr>
-                    </thead>
-
-                    <tbody className="divide-y divide-slate-100">
-                      {paginatedData.length ===
-                      0 ? (
-                        <tr>
-                          <td
-                            colSpan={7}
-                            className="px-6 py-16"
-                          >
-                            <EmptyState />
-                          </td>
-                        </tr>
-                      ) : (
-                        paginatedData.map(
-                          (log) => {
-                            const statusClass =
-                              getStatusColor(
-                                log.status
-                              );
-
-                            return (
-                              <tr
-                                key={log.id}
-                                className="
-                                  transition-colors
-                                  hover:bg-slate-50/70
-                                "
-                              >
-                                <td className="px-4 py-3.5">
-                                  <span className="text-sm font-medium text-slate-800">
-                                    {log.user}
-                                  </span>
-                                </td>
-
-                                <td className="px-4 py-3.5">
-                                  <span className="rounded-lg border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-medium text-slate-600">
-                                    {log.role}
-                                  </span>
-                                </td>
-
-                                <td className="px-4 py-3.5">
-                                  <span className="flex items-center gap-1.5 text-sm text-slate-600">
-                                    {getModuleIcon(
-                                      log.module
-                                    )}
-
-                                    {log.module}
-                                  </span>
-                                </td>
-
-                                <td className="px-4 py-3.5">
-                                  <span className="text-sm text-slate-700">
-                                    {log.action}
-                                  </span>
-                                </td>
-
-                                <td className="px-4 py-3.5">
-                                  <span
-                                    className={`
-                                      inline-flex
-                                      items-center
-                                      gap-1.5
-                                      rounded-full
-                                      border
-                                      px-2.5 py-1
-                                      text-xs
-                                      font-medium
-                                      ${statusClass}
-                                    `}
-                                  >
-                                    {getStatusIcon(
-                                      log.status
-                                    )}
-
-                                    {log.status ===
-                                    "success"
-                                      ? "Berhasil"
-                                      : "Gagal"}
-                                  </span>
-                                </td>
-
-                                <td className="px-4 py-3.5">
-                                  <span className="text-sm text-slate-500">
-                                    {log.timestamp}
-                                  </span>
-                                </td>
-
-                                <td className="px-4 py-3.5">
-                                  <span className="font-mono text-xs text-slate-400">
-                                    {log.ip}
-                                  </span>
-                                </td>
-                              </tr>
-                            );
-                          }
-                        )
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              )}
-
-              {/* ==================================================
-                  PAGINATION
-              ================================================== */}
-
-              <div
-                className="
-                  flex flex-col
-                  gap-3
-                  border-t
-                  border-slate-200
-                  px-4 py-4
-                  sm:flex-row
-                  sm:items-center
-                  sm:justify-between
-                  sm:px-5
-                "
-              >
-                <p
-                  className="
-                    text-xs
-                    text-slate-500
-                  "
-                >
-                  Menampilkan{" "}
-                  <span className="font-semibold text-slate-700">
-                    {paginatedData.length ===
-                    0
-                      ? 0
-                      : startIndex + 1}
-                  </span>{" "}
-                  –{" "}
-                  <span className="font-semibold text-slate-700">
-                    {Math.min(
-                      startIndex +
-                        paginatedData.length,
-                      sortedData.length
-                    )}
-                  </span>{" "}
-                  dari{" "}
-                  <span className="font-semibold text-slate-700">
-                    {sortedData.length}
-                  </span>{" "}
-                  data
-                </p>
-
-                <div className="flex items-center justify-center gap-1">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setCurrentPage(
-                        Math.max(
-                          1,
-                          currentPage - 1
-                        )
-                      )
-                    }
-                    disabled={
-                      currentPage === 1
-                    }
-                    className="
-                      flex h-9 w-9
-                      items-center
-                      justify-center
-                      rounded-lg
-                      border
-                      border-slate-200
-                      bg-white
-                      text-slate-400
-                      transition-all
-                      hover:bg-slate-50
-                      disabled:cursor-not-allowed
-                      disabled:opacity-40
-                    "
-                  >
-                    <ArrowUp
-                      size={14}
-                      className="-rotate-90"
-                    />
-                  </button>
-
-                  {sortedData.length >
-                    0 &&
-                    [...Array(
-                      Math.min(
-                        totalPages,
-                        5
-                      )
-                    )].map(
-                      (_, index) => {
-                        const page =
-                          index + 1;
-
-                        return (
-                          <button
-                            key={page}
-                            type="button"
-                            onClick={() =>
-                              setCurrentPage(
-                                page
-                              )
-                            }
-                            className={`
-                              flex h-9 w-9
-                              items-center
-                              justify-center
-                              rounded-lg
-                              text-xs
-                              font-semibold
-                              transition-all
-                              ${
-                                currentPage ===
-                                page
-                                  ? "bg-blue-600 text-white shadow-[0_4px_10px_rgba(37,99,235,0.25)]"
-                                  : "text-slate-500 hover:bg-slate-100"
-                              }
-                            `}
-                          >
-                            {page}
-                          </button>
-                        );
-                      }
-                    )}
-
-                  {sortedData.length >
-                    0 &&
-                    totalPages > 5 && (
-                      <>
-                        <span className="px-0.5 text-slate-400">
-                          …
-                        </span>
-
-                        <button
-                          type="button"
-                          onClick={() =>
-                            setCurrentPage(
-                              totalPages
-                            )
-                          }
-                          className={`
-                            flex h-9 w-9
-                            items-center
-                            justify-center
-                            rounded-lg
-                            text-xs
-                            font-semibold
-                            transition-all
-                            ${
-                              currentPage ===
-                              totalPages
-                                ? "bg-blue-600 text-white"
-                                : "text-slate-500 hover:bg-slate-100"
-                            }
-                          `}
-                        >
-                          {totalPages}
-                        </button>
-                      </>
-                    )}
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setCurrentPage(
-                        Math.min(
-                          totalPages,
-                          currentPage + 1
-                        )
-                      )
-                    }
-                    disabled={
-                      currentPage ===
-                        totalPages ||
-                      totalPages === 0 ||
-                      sortedData.length === 0
-                    }
-                    className="
-                      flex h-9 w-9
-                      items-center
-                      justify-center
-                      rounded-lg
-                      border
-                      border-slate-200
-                      bg-white
-                      text-slate-400
-                      transition-all
-                      hover:bg-slate-50
-                      disabled:cursor-not-allowed
-                      disabled:opacity-40
-                    "
-                  >
-                    <ArrowDown
-                      size={14}
-                      className="-rotate-90"
-                    />
-                  </button>
-                </div>
-              </div>
-            </section>
-
-            {/* ==================================================
-                FOOTER
-            ================================================== */}
+            </div>
 
             <div
               className="
-                border-t
-                border-slate-200/70
-                pt-4
-                text-center
-                sm:pt-5
+                flex w-full
+                flex-wrap gap-2
+                lg:w-auto
               "
             >
+              <button
+                type="button"
+                onClick={handleRefresh}
+                disabled={isLoading}
+                className={`
+                  inline-flex
+                  h-10
+                  flex-1
+                  items-center
+                  justify-center
+                  gap-2
+                  rounded-xl
+                  border theme-border
+                  ${themeNeutralSurface}
+                  px-4
+                  text-sm
+                  font-medium
+                  theme-text-secondary
+                  ${themeSmallShadow}
+                  transition-all
+                  ${themeNeutralHover}
+                  hover:text-[var(--color-text)]
+                  active:scale-[0.98]
+                  disabled:opacity-60
+                  sm:h-11
+                  sm:flex-none
+                  sm:px-5
+                `}
+              >
+                <RefreshCw
+                  size={16}
+                  className={
+                    isLoading
+                      ? "animate-spin"
+                      : ""
+                  }
+                />
+
+                {isLoading
+                  ? "Memuat..."
+                  : "Refresh"}
+              </button>
+
+              <button
+                type="button"
+                onClick={handleExport}
+                disabled={!sortedData.length}
+                className={`
+                  inline-flex
+                  h-10
+                  flex-1
+                  items-center
+                  justify-center
+                  gap-2
+                  rounded-xl
+                  border theme-border
+                  ${themeNeutralSurface}
+                  px-4
+                  text-sm
+                  font-medium
+                  theme-text-secondary
+                  ${themeSmallShadow}
+                  transition-all
+                  ${themeNeutralHover}
+                  hover:text-[var(--color-text)]
+                  active:scale-[0.98]
+                  disabled:cursor-not-allowed
+                  disabled:opacity-40
+                  sm:h-11
+                  sm:flex-none
+                  sm:px-5
+                `}
+              >
+                <Download size={16} />
+                Export
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* ==================================================
+            STATISTICS
+        ================================================== */}
+
+        <div
+          className="
+            grid grid-cols-2
+            gap-3
+            sm:grid-cols-3
+            lg:grid-cols-5
+          "
+        >
+          <StatCard
+            label="Total Aktivitas"
+            value={stats.total}
+            icon={Activity}
+            color="primary"
+          />
+
+          <StatCard
+            label="Berhasil"
+            value={stats.success}
+            icon={CheckCircle}
+            color="success"
+          />
+
+          <StatCard
+            label="Gagal"
+            value={stats.failed}
+            icon={XCircle}
+            color="danger"
+          />
+
+          <StatCard
+            label="Pengguna Aktif"
+            value={stats.users}
+            icon={Users}
+            color="info"
+          />
+
+          <StatCard
+            label="Modul Terakses"
+            value={stats.modules}
+            icon={Database}
+            color="warning"
+          />
+        </div>
+
+        {/* ==================================================
+            FILTER
+        ================================================== */}
+
+        <section
+          className={`
+            rounded-2xl
+            border theme-border
+            theme-card
+            p-4
+            ${themeCardShadow}
+            sm:p-5
+          `}
+        >
+          <div
+            className="
+              mb-4 flex
+              items-center
+              gap-2 sm:gap-3
+            "
+          >
+            <div
+              className={`
+                flex h-8 w-8
+                shrink-0
+                items-center
+                justify-center
+                rounded-xl
+                ${themePrimarySoft}
+                ${themePrimaryText}
+                sm:h-9 sm:w-9
+              `}
+            >
+              <Filter
+                size={14}
+                className="
+                  sm:h-[16px]
+                  sm:w-[16px]
+                "
+              />
+            </div>
+
+            <div>
+              <p
+                className="
+                  text-sm
+                  font-semibold
+                  theme-text
+                "
+              >
+                Filter & Pencarian
+              </p>
+
               <p
                 className="
                   text-xs
-                  text-slate-400
+                  theme-text-muted
                 "
               >
-                © 2026 SmartSchool •
-                Log Aktivitas
+                Filter dan cari aktivitas
+                berdasarkan kriteria
               </p>
             </div>
           </div>
-        </main>
+
+          <div
+            className="
+              grid gap-3
+              sm:grid-cols-2
+              lg:grid-cols-4
+              xl:grid-cols-5
+            "
+          >
+            {/* SEARCH */}
+
+            <div className="relative">
+              <Search
+                size={15}
+                className="
+                  absolute left-3
+                  top-1/2
+                  -translate-y-1/2
+                  theme-text-muted
+                "
+              />
+
+              <input
+                type="text"
+                placeholder="Cari aktivitas..."
+                value={searchQuery}
+                onChange={(event) => {
+                  setSearchQuery(
+                    event.target.value
+                  );
+                  setCurrentPage(1);
+                }}
+                className={`
+                  h-10 w-full
+                  rounded-xl
+                  border theme-border
+                  ${themeNeutralSurface}
+                  pl-9 pr-3
+                  text-sm
+                  theme-text
+                  outline-none
+                  transition-all
+                  placeholder:theme-text-placeholder
+                  ${themeFocus}
+                `}
+              />
+            </div>
+
+            {/* ROLE */}
+
+            <SmartFilterSelect
+              value={selectedRole}
+              onChange={(value) => {
+                setSelectedRole(value);
+                setCurrentPage(1);
+              }}
+              options={roleOptions}
+              placeholder="Cari role..."
+              allLabel="Semua Role"
+            />
+
+            {/* MODULE */}
+
+            <SmartFilterSelect
+              value={selectedModule}
+              onChange={(value) => {
+                setSelectedModule(value);
+                setCurrentPage(1);
+              }}
+              options={moduleOptions}
+              placeholder="Cari modul..."
+              allLabel="Semua Modul"
+            />
+
+            {/* STATUS */}
+
+            <select
+              value={selectedStatus}
+              onChange={(event) => {
+                setSelectedStatus(
+                  event.target.value
+                );
+                setCurrentPage(1);
+              }}
+              className={`
+                h-10 w-full
+                rounded-xl
+                border theme-border
+                ${themeNeutralSurface}
+                px-3
+                text-sm
+                theme-text-secondary
+                outline-none
+                transition-all
+                hover:border-[color-mix(in_srgb,var(--color-primary)_30%,transparent)]
+                ${themeFocus}
+              `}
+            >
+              {statusOptions.map(
+                (option) => (
+                  <option
+                    key={option.value}
+                    value={option.value}
+                  >
+                    {option.label}
+                  </option>
+                )
+              )}
+            </select>
+
+            {/* TIME */}
+
+            <select
+              value={selectedTime}
+              onChange={(event) => {
+                setSelectedTime(
+                  event.target.value
+                );
+                setCurrentPage(1);
+              }}
+              className={`
+                h-10 w-full
+                rounded-xl
+                border theme-border
+                ${themeNeutralSurface}
+                px-3
+                text-sm
+                theme-text-secondary
+                outline-none
+                transition-all
+                hover:border-[color-mix(in_srgb,var(--color-primary)_30%,transparent)]
+                ${themeFocus}
+              `}
+            >
+              {timeOptions.map(
+                (option) => (
+                  <option
+                    key={option.value}
+                    value={option.value}
+                  >
+                    {option.label}
+                  </option>
+                )
+              )}
+            </select>
+          </div>
+
+          {/* CUSTOM DATE */}
+
+          {selectedTime === "custom" && (
+            <div
+              className={`
+                mt-3 grid
+                grid-cols-1
+                gap-3
+                border-t
+                ${themeDivider}
+                pt-3
+                sm:grid-cols-2
+              `}
+            >
+              <div>
+                <label
+                  className="
+                    mb-1 block
+                    text-xs
+                    font-medium
+                    theme-text-secondary
+                  "
+                >
+                  Tanggal Mulai
+                </label>
+
+                <input
+                  type="date"
+                  value={startDate}
+                  onChange={(event) =>
+                    setStartDate(
+                      event.target.value
+                    )
+                  }
+                  className={`
+                    h-10 w-full
+                    rounded-xl
+                    border theme-border
+                    ${themeNeutralSurface}
+                    px-3
+                    text-sm
+                    theme-text
+                    outline-none
+                    transition-all
+                    ${themeFocus}
+                  `}
+                />
+              </div>
+
+              <div>
+                <label
+                  className="
+                    mb-1 block
+                    text-xs
+                    font-medium
+                    theme-text-secondary
+                  "
+                >
+                  Tanggal Akhir
+                </label>
+
+                <input
+                  type="date"
+                  value={endDate}
+                  onChange={(event) =>
+                    setEndDate(
+                      event.target.value
+                    )
+                  }
+                  className={`
+                    h-10 w-full
+                    rounded-xl
+                    border theme-border
+                    ${themeNeutralSurface}
+                    px-3
+                    text-sm
+                    theme-text
+                    outline-none
+                    transition-all
+                    ${themeFocus}
+                  `}
+                />
+              </div>
+            </div>
+          )}
+
+          {/* FILTER FOOTER */}
+
+          <div
+            className={`
+              mt-3 flex
+              flex-col gap-2
+              border-t
+              ${themeDivider}
+              pt-3
+              sm:flex-row
+              sm:items-center
+              sm:justify-between
+            `}
+          >
+            <p
+              className="
+                text-xs
+                theme-text-muted
+              "
+            >
+              Menampilkan{" "}
+              <span
+                className="
+                  font-semibold
+                  theme-text-secondary
+                "
+              >
+                {filteredData.length}
+              </span>{" "}
+              aktivitas
+            </p>
+
+            <button
+              type="button"
+              onClick={resetFilters}
+              className={`
+                self-start
+                rounded-lg
+                px-3 py-1.5
+                text-xs
+                font-medium
+                theme-text-muted
+                transition-colors
+                ${themeNeutralHover}
+                hover:text-[var(--color-text)]
+                sm:self-auto
+              `}
+            >
+              Reset Semua
+            </button>
+          </div>
+        </section>
+
+        {/* ==================================================
+            TABLE
+        ================================================== */}
+
+        <section
+          className={`
+            overflow-hidden
+            rounded-2xl
+            border theme-border
+            theme-card
+            ${themeCardShadow}
+          `}
+        >
+          {isMobile ? (
+            <div
+              className={`
+                divide-y
+                ${themeDivider}
+              `}
+            >
+              {paginatedData.length ===
+              0 ? (
+                <EmptyState />
+              ) : (
+                paginatedData.map(
+                  (log) => (
+                    <MobileLogCard
+                      key={log.id}
+                      log={log}
+                    />
+                  )
+                )
+              )}
+            </div>
+          ) : (
+            <div className="w-full overflow-x-auto">
+              <table className="w-full min-w-[1000px] border-collapse">
+                <thead>
+                  <tr
+                    className={`
+                      border-b
+                      ${themeDivider}
+                      ${themeNeutralSurface}
+                    `}
+                  >
+                    <TableHead
+                      sortable
+                      onClick={() =>
+                        handleSort("user")
+                      }
+                    >
+                      <span className="group flex cursor-pointer items-center gap-1">
+                        Pengguna
+                        {renderSortIcon(
+                          "user"
+                        )}
+                      </span>
+                    </TableHead>
+
+                    <TableHead
+                      sortable
+                      onClick={() =>
+                        handleSort("role")
+                      }
+                    >
+                      <span className="group flex cursor-pointer items-center gap-1">
+                        Role
+                        {renderSortIcon(
+                          "role"
+                        )}
+                      </span>
+                    </TableHead>
+
+                    <TableHead
+                      sortable
+                      onClick={() =>
+                        handleSort(
+                          "module"
+                        )
+                      }
+                    >
+                      <span className="group flex cursor-pointer items-center gap-1">
+                        Modul
+                        {renderSortIcon(
+                          "module"
+                        )}
+                      </span>
+                    </TableHead>
+
+                    <TableHead
+                      sortable
+                      onClick={() =>
+                        handleSort(
+                          "action"
+                        )
+                      }
+                    >
+                      <span className="group flex cursor-pointer items-center gap-1">
+                        Aktivitas
+                        {renderSortIcon(
+                          "action"
+                        )}
+                      </span>
+                    </TableHead>
+
+                    <TableHead
+                      sortable
+                      onClick={() =>
+                        handleSort(
+                          "status"
+                        )
+                      }
+                    >
+                      <span className="group flex cursor-pointer items-center gap-1">
+                        Status
+                        {renderSortIcon(
+                          "status"
+                        )}
+                      </span>
+                    </TableHead>
+
+                    <TableHead
+                      sortable
+                      onClick={() =>
+                        handleSort(
+                          "timestamp"
+                        )
+                      }
+                    >
+                      <span className="group flex cursor-pointer items-center gap-1">
+                        Waktu
+                        {renderSortIcon(
+                          "timestamp"
+                        )}
+                      </span>
+                    </TableHead>
+
+                    <TableHead>
+                      IP
+                    </TableHead>
+                  </tr>
+                </thead>
+
+                <tbody
+                  className={`
+                    divide-y
+                    ${themeDivider}
+                  `}
+                >
+                  {paginatedData.length ===
+                  0 ? (
+                    <tr>
+                      <td
+                        colSpan={7}
+                        className="px-6 py-16"
+                      >
+                        <EmptyState />
+                      </td>
+                    </tr>
+                  ) : (
+                    paginatedData.map(
+                      (log) => {
+                        const statusStyle =
+                          getStatusStyle(
+                            log.status
+                          );
+
+                        return (
+                          <tr
+                            key={log.id}
+                            className="
+                              transition-colors
+                              hover:bg-[color-mix(in_srgb,var(--color-primary)_4%,transparent)]
+                            "
+                          >
+                            <td className="px-4 py-3.5">
+                              <span
+                                className="
+                                  text-sm
+                                  font-medium
+                                  theme-text
+                                "
+                              >
+                                {log.user}
+                              </span>
+                            </td>
+
+                            <td className="px-4 py-3.5">
+                              <span
+                                className={`
+                                  rounded-lg
+                                  border
+                                  ${themeNeutralBorder}
+                                  ${themeNeutralSurface}
+                                  px-2.5 py-1
+                                  text-xs
+                                  font-medium
+                                  theme-text-secondary
+                                `}
+                              >
+                                {log.role}
+                              </span>
+                            </td>
+
+                            <td className="px-4 py-3.5">
+                              <span
+                                className="
+                                  flex items-center
+                                  gap-1.5
+                                  text-sm
+                                  theme-text-secondary
+                                "
+                              >
+                                {getModuleIcon(
+                                  log.module
+                                )}
+
+                                {log.module}
+                              </span>
+                            </td>
+
+                            <td className="px-4 py-3.5">
+                              <span
+                                className="
+                                  text-sm
+                                  theme-text-secondary
+                                "
+                              >
+                                {log.action}
+                              </span>
+                            </td>
+
+                            <td className="px-4 py-3.5">
+                              <span
+                                className={`
+                                  inline-flex
+                                  items-center
+                                  gap-1.5
+                                  rounded-full
+                                  border
+                                  px-2.5 py-1
+                                  text-xs
+                                  font-medium
+                                  ${statusStyle.surface}
+                                  ${statusStyle.text}
+                                  ${statusStyle.border}
+                                `}
+                              >
+                                {getStatusIcon(
+                                  log.status
+                                )}
+
+                                {log.status ===
+                                "success"
+                                  ? "Berhasil"
+                                  : "Gagal"}
+                              </span>
+                            </td>
+
+                            <td className="px-4 py-3.5">
+                              <span
+                                className="
+                                  text-sm
+                                  theme-text-muted
+                                "
+                              >
+                                {log.timestamp}
+                              </span>
+                            </td>
+
+                            <td className="px-4 py-3.5">
+                              <span
+                                className="
+                                  font-mono
+                                  text-xs
+                                  theme-text-muted
+                                "
+                              >
+                                {log.ip}
+                              </span>
+                            </td>
+                          </tr>
+                        );
+                      }
+                    )
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* ==================================================
+              PAGINATION
+          ================================================== */}
+
+          <div
+            className={`
+              flex flex-col
+              gap-3
+              border-t
+              ${themeDivider}
+              px-4 py-4
+              sm:flex-row
+              sm:items-center
+              sm:justify-between
+              sm:px-5
+            `}
+          >
+            <p
+              className="
+                text-xs
+                theme-text-muted
+              "
+            >
+              Menampilkan{" "}
+              <span
+                className="
+                  font-semibold
+                  theme-text-secondary
+                "
+              >
+                {paginatedData.length ===
+                0
+                  ? 0
+                  : startIndex + 1}
+              </span>{" "}
+              –{" "}
+              <span
+                className="
+                  font-semibold
+                  theme-text-secondary
+                "
+              >
+                {Math.min(
+                  startIndex +
+                    paginatedData.length,
+                  sortedData.length
+                )}
+              </span>{" "}
+              dari{" "}
+              <span
+                className="
+                  font-semibold
+                  theme-text-secondary
+                "
+              >
+                {sortedData.length}
+              </span>{" "}
+              data
+            </p>
+
+            <div className="flex items-center justify-center gap-1">
+              <button
+                type="button"
+                onClick={() =>
+                  setCurrentPage(
+                    Math.max(
+                      1,
+                      currentPage - 1
+                    )
+                  )
+                }
+                disabled={
+                  currentPage === 1
+                }
+                className={`
+                  flex h-9 w-9
+                  items-center
+                  justify-center
+                  rounded-lg
+                  border theme-border
+                  ${themeNeutralSurface}
+                  theme-text-muted
+                  transition-all
+                  ${themeNeutralHover}
+                  disabled:cursor-not-allowed
+                  disabled:opacity-40
+                `}
+              >
+                <ArrowUp
+                  size={14}
+                  className="-rotate-90"
+                />
+              </button>
+
+              {sortedData.length > 0 &&
+                [...Array(
+                  Math.min(
+                    totalPages,
+                    5
+                  )
+                )].map(
+                  (_, index) => {
+                    const page =
+                      index + 1;
+
+                    return (
+                      <button
+                        key={page}
+                        type="button"
+                        onClick={() =>
+                          setCurrentPage(
+                            page
+                          )
+                        }
+                        className={`
+                          flex h-9 w-9
+                          items-center
+                          justify-center
+                          rounded-lg
+                          text-xs
+                          font-semibold
+                          transition-all
+                          ${
+                            currentPage ===
+                            page
+                              ? `${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`
+                              : `theme-text-muted ${themeNeutralHover}`
+                          }
+                        `}
+                      >
+                        {page}
+                      </button>
+                    );
+                  }
+                )}
+
+              {sortedData.length > 0 &&
+                totalPages > 5 && (
+                  <>
+                    <span className="px-0.5 theme-text-muted">
+                      …
+                    </span>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        setCurrentPage(
+                          totalPages
+                        )
+                      }
+                      className={`
+                        flex h-9 w-9
+                        items-center
+                        justify-center
+                        rounded-lg
+                        text-xs
+                        font-semibold
+                        transition-all
+                        ${
+                          currentPage ===
+                          totalPages
+                            ? `${themePrimaryGradient} text-[var(--color-card)]`
+                            : `theme-text-muted ${themeNeutralHover}`
+                        }
+                      `}
+                    >
+                      {totalPages}
+                    </button>
+                  </>
+                )}
+
+              <button
+                type="button"
+                onClick={() =>
+                  setCurrentPage(
+                    Math.min(
+                      totalPages,
+                      currentPage + 1
+                    )
+                  )
+                }
+                disabled={
+                  currentPage ===
+                    totalPages ||
+                  totalPages === 0 ||
+                  sortedData.length === 0
+                }
+                className={`
+                  flex h-9 w-9
+                  items-center
+                  justify-center
+                  rounded-lg
+                  border theme-border
+                  ${themeNeutralSurface}
+                  theme-text-muted
+                  transition-all
+                  ${themeNeutralHover}
+                  disabled:cursor-not-allowed
+                  disabled:opacity-40
+                `}
+              >
+                <ArrowDown
+                  size={14}
+                  className="-rotate-90"
+                />
+              </button>
+            </div>
+          </div>
+        </section>
+
+        {/* ==================================================
+            FOOTER
+        ================================================== */}
+
+        <div
+          className={`
+            border-t
+            ${themeDivider}
+            pt-4
+            text-center
+            sm:pt-5
+          `}
+        >
+          <p
+            className="
+              text-xs
+              theme-text-muted
+            "
+          >
+            © 2026 SmartSchool •
+            Log Aktivitas
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -2020,49 +2092,54 @@ function StatCard({
   color,
 }) {
   const colorMap = {
-    blue: {
-      bg: "bg-blue-50",
-      text: "text-blue-600",
+    primary: {
+      bg: themePrimarySoft,
+      text: themePrimaryText,
+      border: themePrimarySoftBorder,
     },
 
-    emerald: {
-      bg: "bg-emerald-50",
-      text: "text-emerald-600",
+    success: {
+      bg: themeSuccessSurface,
+      text: "text-[var(--color-success)]",
+      border: themeSuccessBorder,
     },
 
-    rose: {
-      bg: "bg-rose-50",
-      text: "text-rose-600",
+    danger: {
+      bg: themeDangerSurface,
+      text: "theme-text-secondary",
+      border: themeDangerBorder,
     },
 
-    indigo: {
-      bg: "bg-indigo-50",
-      text: "text-indigo-600",
+    info: {
+      bg: themeInfoSurface,
+      text: "text-[var(--color-info)]",
+      border: themeInfoBorder,
     },
 
-    amber: {
-      bg: "bg-amber-50",
-      text: "text-amber-600",
+    warning: {
+      bg: themeWarningSurface,
+      text: "text-[var(--color-warning)]",
+      border: themeWarningBorder,
     },
   };
 
   const styles =
     colorMap[color] ||
-    colorMap.blue;
+    colorMap.primary;
 
   return (
     <div
-      className="
+      className={`
         group rounded-2xl
-        border border-slate-200
-        bg-white
+        border theme-border
+        theme-card
         p-3.5
-        shadow-[0_2px_10px_rgba(15,23,42,0.04)]
+        ${themeSmallShadow}
         transition-all
         hover:-translate-y-0.5
-        hover:shadow-[0_7px_20px_rgba(15,23,42,0.08)]
+        hover:shadow-[0_7px_20px_color-mix(in_srgb,var(--color-text)_8%,transparent)]
         sm:p-4
-      "
+      `}
     >
       <div
         className="
@@ -2098,7 +2175,7 @@ function StatCard({
               font-semibold
               uppercase
               tracking-[0.06em]
-              text-slate-400
+              theme-text-muted
             "
           >
             {label}
@@ -2109,12 +2186,11 @@ function StatCard({
               text-base
               font-semibold
               tracking-tight
-              text-slate-800
+              theme-text
               sm:text-lg
             "
           >
-            {typeof value ===
-            "number"
+            {typeof value === "number"
               ? value.toLocaleString(
                   "id-ID"
                 )
@@ -2144,20 +2220,20 @@ function TableHead({
         font-semibold
         uppercase
         tracking-[0.08em]
-        text-slate-400
+        theme-text-muted
       "
     >
       {sortable ? (
         <button
           type="button"
           onClick={onClick}
-          className="
+          className={`
             group flex
             items-center
             gap-1
             transition-colors
-            hover:text-blue-600
-          "
+            hover:${themePrimaryText}
+          `}
         >
           {children}
         </button>
@@ -2184,14 +2260,14 @@ function EmptyState() {
       "
     >
       <div
-        className="
+        className={`
           flex h-14 w-14
           items-center
           justify-center
           rounded-2xl
-          bg-slate-100
-          text-slate-400
-        "
+          ${themeNeutralSurface}
+          theme-text-muted
+        `}
       >
         <Activity size={24} />
       </div>
@@ -2201,7 +2277,7 @@ function EmptyState() {
           mt-4
           text-sm
           font-semibold
-          text-slate-700
+          theme-text
         "
       >
         Belum ada aktivitas
@@ -2211,7 +2287,7 @@ function EmptyState() {
         className="
           mt-1
           text-xs
-          text-slate-400
+          theme-text-muted
         "
       >
         Data aktivitas pengguna
@@ -2227,17 +2303,25 @@ function EmptyState() {
 // ============================================================
 
 function MobileLogCard({ log }) {
-  const statusClass =
+  const statusStyle =
     log.status === "success"
-      ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-      : "bg-rose-50 text-rose-700 border-rose-200";
+      ? {
+          surface: themeSuccessSurface,
+          text: "text-[var(--color-success)]",
+          border: themeSuccessBorder,
+        }
+      : {
+          surface: themeDangerSurface,
+          text: "theme-text-secondary",
+          border: themeDangerBorder,
+        };
 
   return (
     <div
       className="
         p-4
         transition-colors
-        hover:bg-slate-50/50
+        hover:bg-[color-mix(in_srgb,var(--color-primary)_4%,transparent)]
       "
     >
       <div
@@ -2259,23 +2343,23 @@ function MobileLogCard({ log }) {
               className="
                 text-sm
                 font-semibold
-                text-slate-800
+                theme-text
               "
             >
               {log.user}
             </span>
 
             <span
-              className="
+              className={`
                 rounded-lg
                 border
-                border-slate-200
-                bg-slate-50
+                ${themeNeutralBorder}
+                ${themeNeutralSurface}
                 px-2 py-0.5
                 text-[10px]
                 font-medium
-                text-slate-600
-              "
+                theme-text-secondary
+              `}
             >
               {log.role}
             </span>
@@ -2285,7 +2369,7 @@ function MobileLogCard({ log }) {
             className="
               mt-1
               text-sm
-              text-slate-700
+              theme-text-secondary
             "
           >
             {log.action}
@@ -2302,26 +2386,26 @@ function MobileLogCard({ log }) {
             <span
               className="
                 text-xs
-                text-slate-500
+                theme-text-muted
               "
             >
               {log.module}
             </span>
 
-            <span className="text-slate-300">
+            <span className="theme-text-muted">
               •
             </span>
 
             <span
               className="
                 text-xs
-                text-slate-400
+                theme-text-muted
               "
             >
               {log.timestamp}
             </span>
 
-            <span className="text-slate-300">
+            <span className="theme-text-muted">
               •
             </span>
 
@@ -2329,7 +2413,7 @@ function MobileLogCard({ log }) {
               className="
                 font-mono
                 text-xs
-                text-slate-400
+                theme-text-muted
               "
             >
               {log.ip}
@@ -2348,7 +2432,9 @@ function MobileLogCard({ log }) {
             px-2 py-0.5
             text-[10px]
             font-medium
-            ${statusClass}
+            ${statusStyle.surface}
+            ${statusStyle.text}
+            ${statusStyle.border}
           `}
         >
           {log.status ===
@@ -2367,4 +2453,3 @@ function MobileLogCard({ log }) {
     </div>
   );
 }
-

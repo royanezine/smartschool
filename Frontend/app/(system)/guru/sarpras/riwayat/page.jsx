@@ -23,6 +23,73 @@ import {
 import { getDaftarPeminjaman } from "../../../../services/sarpras.service";
 
 // =========================================================
+// THEME HELPERS
+// =========================================================
+
+const themePrimaryGradient =
+  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
+
+const themePrimarySoft =
+  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+
+const themePrimarySoftBorder =
+  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
+
+const themePrimaryText =
+  "text-[var(--color-primary)]";
+
+const themePrimaryShadow =
+  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
+
+const themeCardShadow =
+  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeNeutralSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
+
+const themeNeutralHover =
+  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
+
+const themeNeutralBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+
+const themeDivider =
+  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeDividerBg =
+  "bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
+
+const themeInfoBorder =
+  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
+
+const themeSuccessSurface =
+  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
+
+const themeSuccessBorder =
+  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
+
+const themeWarningSurface =
+  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
+
+const themeWarningBorder =
+  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeDangerSurface =
+  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeDangerBorder =
+  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
+
+const themeFocus =
+  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+
+// =========================================================
 // FILTER
 // =========================================================
 
@@ -49,20 +116,28 @@ const hasilConfig = {
   dikembalikan: {
     label: "Dikembalikan",
     icon: CheckCircle2,
-    pill: "bg-emerald-50 text-emerald-700 border-emerald-200/70",
-    dot: "bg-emerald-500",
+    surface: themeSuccessSurface,
+    text: "text-[var(--color-success)]",
+    border: themeSuccessBorder,
+    dot: "bg-[var(--color-success)]",
   },
+
   terlambat: {
     label: "Dikembalikan Terlambat",
     icon: AlertTriangle,
-    pill: "bg-amber-50 text-amber-700 border-amber-200/70",
-    dot: "bg-amber-500",
+    surface: themeWarningSurface,
+    text: "text-[var(--color-warning)]",
+    border: themeWarningBorder,
+    dot: "bg-[var(--color-warning)]",
   },
+
   ditolak: {
     label: "Ditolak",
     icon: XCircle,
-    pill: "bg-red-50 text-red-700 border-red-200/70",
-    dot: "bg-red-500",
+    surface: themeDangerSurface,
+    text: "theme-danger",
+    border: themeDangerBorder,
+    dot: "bg-[var(--color-text)]",
   },
 };
 
@@ -72,8 +147,11 @@ const hasilConfig = {
 
 function formatTanggal(value) {
   if (!value) return "-";
+
   const date = new Date(value);
+
   if (Number.isNaN(date.getTime())) return "-";
+
   return date.toLocaleDateString("id-ID", {
     day: "2-digit",
     month: "short",
@@ -84,28 +162,43 @@ function formatTanggal(value) {
 function getKategori(peminjaman) {
   const detail = peminjaman?.detailPeminjaman?.[0];
   const aset = detail?.aset;
+
   if (!aset) return "Lainnya";
 
   const kategori =
-    aset?.kategori?.nama || aset?.kategori?.namaKategori || aset?.kategoriNama;
+    aset?.kategori?.nama ||
+    aset?.kategori?.namaKategori ||
+    aset?.kategoriNama;
+
   if (!kategori) return "Lainnya";
 
   const k = kategori.toLowerCase();
+
   if (
     k.includes("elektronik") ||
     k.includes("laptop") ||
     k.includes("proyektor") ||
     k.includes("speaker")
-  )
+  ) {
     return "Elektronik";
-  if (k.includes("ruang") || k.includes("gedung")) return "Ruangan";
-  if (k.includes("olahraga") || k.includes("sport")) return "Olahraga";
+  }
+
+  if (k.includes("ruang") || k.includes("gedung")) {
+    return "Ruangan";
+  }
+
+  if (k.includes("olahraga") || k.includes("sport")) {
+    return "Olahraga";
+  }
+
   return "Lainnya";
 }
 
 function getNamaAset(peminjaman) {
   const details = peminjaman?.detailPeminjaman || [];
+
   if (details.length === 0) return "Aset";
+
   if (details.length === 1) {
     return (
       details[0]?.aset?.nama ||
@@ -114,21 +207,29 @@ function getNamaAset(peminjaman) {
       "Aset"
     );
   }
+
   const namaPertama =
     details[0]?.aset?.nama ||
     details[0]?.aset?.namaAset ||
     details[0]?.namaAset ||
     "Aset";
+
   return `${namaPertama} + ${details.length - 1} aset`;
 }
 
 function getJumlah(peminjaman) {
   const details = peminjaman?.detailPeminjaman || [];
-  return details.reduce((total, item) => total + Number(item?.jumlah || 0), 0);
+
+  return details.reduce(
+    (total, item) => total + Number(item?.jumlah || 0),
+    0
+  );
 }
 
 function getHasil(peminjaman) {
-  if (peminjaman?.status === "ditolak") return "ditolak";
+  if (peminjaman?.status === "ditolak") {
+    return "ditolak";
+  }
 
   if (peminjaman?.status === "dikembalikan") {
     const tanggalRencana = peminjaman?.tanggalKembaliRencana;
@@ -137,22 +238,45 @@ function getHasil(peminjaman) {
     if (tanggalRencana && tanggalAktual) {
       const rencana = new Date(tanggalRencana);
       const aktual = new Date(tanggalAktual);
-      if (aktual > rencana) return "terlambat";
+
+      if (aktual > rencana) {
+        return "terlambat";
+      }
     }
+
     return "dikembalikan";
   }
+
   return null;
 }
 
 function normalizeResponse(response) {
   if (!response) return [];
+
   if (Array.isArray(response)) return response;
+
   if (Array.isArray(response.data)) return response.data;
-  if (Array.isArray(response.data?.data)) return response.data.data;
-  if (Array.isArray(response.data?.items)) return response.data.items;
-  if (Array.isArray(response.items)) return response.items;
-  if (Array.isArray(response.peminjaman)) return response.peminjaman;
-  if (Array.isArray(response.data?.peminjaman)) return response.data.peminjaman;
+
+  if (Array.isArray(response.data?.data)) {
+    return response.data.data;
+  }
+
+  if (Array.isArray(response.data?.items)) {
+    return response.data.items;
+  }
+
+  if (Array.isArray(response.items)) {
+    return response.items;
+  }
+
+  if (Array.isArray(response.peminjaman)) {
+    return response.peminjaman;
+  }
+
+  if (Array.isArray(response.data?.peminjaman)) {
+    return response.data.peminjaman;
+  }
+
   return [];
 }
 
@@ -162,10 +286,12 @@ function normalizeResponse(response) {
 
 export default function GuruSarprasRiwayatPage() {
   const router = useRouter();
+
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
   const [kategoriAktif, setKategoriAktif] = useState("Semua");
-  const [rentangAktif, setRentangAktif] = useState("30 Hari Terakhir");
+  const [rentangAktif, setRentangAktif] =
+    useState("30 Hari Terakhir");
   const [pencarian, setPencarian] = useState("");
 
   const [daftarRiwayat, setDaftarRiwayat] = useState([]);
@@ -182,9 +308,9 @@ export default function GuruSarprasRiwayatPage() {
     },
   ];
 
-  /* =======================================================
-     LOAD RIWAYAT — dipisah biar bisa dipanggil refresh
-  ======================================================= */
+  // =======================================================
+  // LOAD RIWAYAT
+  // =======================================================
 
   const loadRiwayat = useCallback(async (isRefresh = false) => {
     try {
@@ -193,20 +319,34 @@ export default function GuruSarprasRiwayatPage() {
       } else {
         setLoading(true);
       }
+
       setError("");
 
-      const response = await getDaftarPeminjaman({ page: 1, limit: 100 });
+      const response = await getDaftarPeminjaman({
+        page: 1,
+        limit: 100,
+      });
+
       const data = normalizeResponse(response);
 
       const history = data.filter(
         (item) =>
-          item?.status === "dikembalikan" || item?.status === "ditolak"
+          item?.status === "dikembalikan" ||
+          item?.status === "ditolak"
       );
 
       setDaftarRiwayat(history);
     } catch (err) {
-      console.error("Gagal mengambil riwayat peminjaman:", err);
-      setError(err?.message || "Gagal mengambil riwayat peminjaman.");
+      console.error(
+        "Gagal mengambil riwayat peminjaman:",
+        err
+      );
+
+      setError(
+        err?.message ||
+          "Gagal mengambil riwayat peminjaman."
+      );
+
       setDaftarRiwayat([]);
     } finally {
       setLoading(false);
@@ -214,52 +354,89 @@ export default function GuruSarprasRiwayatPage() {
     }
   }, []);
 
-  /* LOAD PERTAMA KALI */
+  // =======================================================
+  // LOAD PERTAMA KALI
+  // =======================================================
+
   useEffect(() => {
     loadRiwayat(false);
   }, [loadRiwayat]);
 
-  /* HANDLER REFRESH */
+  // =======================================================
+  // REFRESH
+  // =======================================================
+
   const handleRefresh = () => {
     if (loading || refreshing) return;
+
     loadRiwayat(true);
   };
 
+  // =======================================================
+  // RENTANG TANGGAL
+  // =======================================================
+
   const tanggalMulaiRentang = useMemo(() => {
     const sekarang = new Date();
-    if (rentangAktif === "Semua") return null;
+
+    if (rentangAktif === "Semua") {
+      return null;
+    }
 
     if (rentangAktif === "30 Hari Terakhir") {
       const date = new Date(sekarang);
+
       date.setDate(date.getDate() - 30);
+
       return date;
     }
 
     if (rentangAktif === "3 Bulan Terakhir") {
       const date = new Date(sekarang);
+
       date.setMonth(date.getMonth() - 3);
+
       return date;
     }
 
     if (rentangAktif === "Semester Ini") {
       const bulan = sekarang.getMonth();
-      if (bulan <= 5) return new Date(sekarang.getFullYear(), 0, 1);
-      return new Date(sekarang.getFullYear(), 6, 1);
+
+      if (bulan <= 5) {
+        return new Date(
+          sekarang.getFullYear(),
+          0,
+          1
+        );
+      }
+
+      return new Date(
+        sekarang.getFullYear(),
+        6,
+        1
+      );
     }
 
     return null;
   }, [rentangAktif]);
+
+  // =======================================================
+  // FILTER DATA
+  // =======================================================
 
   const dataTersaring = useMemo(() => {
     const search = pencarian.trim().toLowerCase();
 
     return daftarRiwayat.filter((r) => {
       const hasil = getHasil(r);
+
       if (!hasil) return false;
 
       const kategori = getKategori(r);
+
       const cocokKategori =
-        kategoriAktif === "Semua" || kategori === kategoriAktif;
+        kategoriAktif === "Semua" ||
+        kategori === kategoriAktif;
 
       const namaAset = getNamaAset(r);
       const nomor = r?.nomorPeminjaman || "";
@@ -272,51 +449,92 @@ export default function GuruSarprasRiwayatPage() {
         keperluan.toLowerCase().includes(search);
 
       let cocokRentang = true;
+
       if (tanggalMulaiRentang) {
-        const tanggal = r?.tanggalPinjam || r?.tanggalPengajuan;
+        const tanggal =
+          r?.tanggalPinjam ||
+          r?.tanggalPengajuan;
+
         if (!tanggal) {
           cocokRentang = false;
         } else {
-          cocokRentang = new Date(tanggal) >= tanggalMulaiRentang;
+          cocokRentang =
+            new Date(tanggal) >= tanggalMulaiRentang;
         }
       }
 
-      return cocokKategori && cocokPencarian && cocokRentang;
+      return (
+        cocokKategori &&
+        cocokPencarian &&
+        cocokRentang
+      );
     });
-  }, [daftarRiwayat, kategoriAktif, pencarian, tanggalMulaiRentang]);
+  }, [
+    daftarRiwayat,
+    kategoriAktif,
+    pencarian,
+    tanggalMulaiRentang,
+  ]);
+
+  // =======================================================
+  // RINGKASAN
+  // =======================================================
 
   const ringkasan = useMemo(() => {
     const total = dataTersaring.length;
+
     const tepatWaktu = dataTersaring.filter(
       (r) => getHasil(r) === "dikembalikan"
     ).length;
+
     const terlambat = dataTersaring.filter(
       (r) => getHasil(r) === "terlambat"
     ).length;
+
     const ditolak = dataTersaring.filter(
       (r) => getHasil(r) === "ditolak"
     ).length;
-    return { total, tepatWaktu, terlambat, ditolak };
+
+    return {
+      total,
+      tepatWaktu,
+      terlambat,
+      ditolak,
+    };
   }, [dataTersaring]);
 
-  /* NAVIGATE KE DETAIL */
+  // =======================================================
+  // DETAIL
+  // =======================================================
+
   const bukaDetail = (item) => {
     if (!item?.id) return;
-    router.push(`/guru/sarpras/riwayat/${item.id}`);
+
+    router.push(
+      `/guru/sarpras/riwayat/${item.id}`
+    );
   };
 
+  // =======================================================
+  // RENDER
+  // =======================================================
+
   return (
-    <div className="flex h-screen bg-[#F8FAFC] overflow-hidden">
+    <div className="theme-page flex h-screen overflow-hidden">
       <Sidebar
         active="sarpras"
         setActive={() => {}}
         collapsed={!sidebarOpen}
-        setCollapsed={() => setSidebarOpen(!sidebarOpen)}
+        setCollapsed={() =>
+          setSidebarOpen(!sidebarOpen)
+        }
       />
 
-      <div className="flex-1 flex flex-col min-w-0">
+      <div className="flex min-w-0 flex-1 flex-col">
         <Header
-          toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+          toggleSidebar={() =>
+            setSidebarOpen(!sidebarOpen)
+          }
           notifications={notifications}
           user={{
             name: "Bu Sari",
@@ -325,132 +543,186 @@ export default function GuruSarprasRiwayatPage() {
           }}
         />
 
-        <main className="flex-1 overflow-y-auto bg-[#F8FAFC]">
-          <div className="w-full max-w-[1700px] 2xl:max-w-[1900px] mx-auto px-4 sm:px-6 lg:px-8 py-6 lg:py-8 space-y-6">
+        <main className="theme-page flex-1 overflow-y-auto">
+          <div className="mx-auto w-full max-w-[1700px] space-y-6 px-4 py-6 sm:px-6 lg:px-8 lg:py-8 2xl:max-w-[1900px]">
 
-            {/* =========================================
-                PAGE HEADER + REFRESH
-            ========================================= */}
+            {/* =================================================
+                PAGE HEADER
+            ================================================= */}
 
-            <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-              <div className="flex items-start gap-4 min-w-0">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-[#2563EB] text-white shadow-sm">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div className="flex min-w-0 items-start gap-4">
+                <div
+                  className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-[var(--color-card)] ${themePrimaryGradient} ${themePrimaryShadow}`}
+                >
                   <FileText size={22} />
                 </div>
 
                 <div className="min-w-0">
                   <div className="mb-1.5 flex items-center gap-2">
-                    <span className="w-1.5 h-1.5 rounded-full bg-[#2563EB]" />
-                    <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-[#2563EB]">
+                    <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-primary)]" />
+
+                    <p className="text-[var(--color-primary)] text-[11px] font-bold uppercase tracking-[0.12em]">
                       Sarana & Prasarana
                     </p>
                   </div>
 
-                  <h1 className="text-2xl md:text-[28px] font-bold tracking-tight text-[#0F172A]">
+                  <h1 className="theme-text text-2xl font-bold tracking-tight md:text-[28px]">
                     Riwayat Peminjaman
                   </h1>
 
-                  <p className="mt-1 text-sm text-slate-500 max-w-2xl flex items-center gap-1.5">
-                    <Sparkles size={14} className="text-slate-400 flex-shrink-0" />
+                  <p className="theme-text-secondary mt-1 flex max-w-2xl items-center gap-1.5 text-sm">
+                    <Sparkles
+                      size={14}
+                      className="theme-text-muted flex-shrink-0"
+                    />
+
                     <span className="truncate">
-                      Catatan peminjaman yang telah dikembalikan atau ditolak.
+                      Catatan peminjaman yang telah
+                      dikembalikan atau ditolak.
                     </span>
                   </p>
                 </div>
               </div>
 
-              {/* TOMBOL REFRESH */}
+              {/* REFRESH */}
+
               <button
                 type="button"
                 onClick={handleRefresh}
                 disabled={loading || refreshing}
-                className="inline-flex items-center justify-center gap-2 h-11 px-4 text-sm font-semibold rounded-xl border border-[#60A5FA]/30 bg-white text-[#1E3A5F] shadow-sm hover:border-[#2563EB] hover:bg-[#2563EB]/5 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex-shrink-0"
+                className={`theme-card ${themeNeutralBorder} theme-text-secondary inline-flex h-11 flex-shrink-0 items-center justify-center gap-2 rounded-xl border px-4 text-sm font-semibold ${themeNeutralHover} ${themeSmallShadow} transition-all disabled:cursor-not-allowed disabled:opacity-50`}
               >
                 <RefreshCw
                   size={15}
-                  className={loading || refreshing ? "animate-spin" : ""}
+                  className={
+                    loading || refreshing
+                      ? "animate-spin"
+                      : ""
+                  }
                 />
-                {refreshing ? "Memuat..." : "Refresh"}
+
+                {refreshing
+                  ? "Memuat..."
+                  : "Refresh"}
               </button>
             </div>
 
-            {/* =========================================
+            {/* =================================================
                 ERROR
-            ========================================= */}
+            ================================================= */}
 
             {error && (
-              <div className="flex items-start gap-3 bg-red-50 border border-red-200/70 rounded-xl p-4">
-                <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-white text-red-500 border border-red-100 flex-shrink-0">
+              <div
+                className={`flex items-start gap-3 rounded-xl border p-4 ${themeDangerSurface} ${themeDangerBorder}`}
+              >
+                <div
+                  className={`theme-card theme-danger flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border ${themeDangerBorder}`}
+                >
                   <AlertTriangle size={16} />
                 </div>
+
                 <div>
-                  <p className="text-sm font-bold text-red-800">
+                  <p className="theme-danger text-sm font-bold">
                     Gagal mengambil riwayat
                   </p>
-                  <p className="text-xs text-red-700/80 mt-1">{error}</p>
+
+                  <p className="theme-text-secondary mt-1 text-xs">
+                    {error}
+                  </p>
                 </div>
               </div>
             )}
 
-            {/* =========================================
+            {/* =================================================
                 RINGKASAN
-            ========================================= */}
+            ================================================= */}
 
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
               <RingkasanCard
                 label="Total Riwayat"
-                value={loading ? "—" : ringkasan.total}
+                value={
+                  loading
+                    ? "—"
+                    : ringkasan.total
+                }
                 tone="blue"
               />
+
               <RingkasanCard
                 label="Tepat Waktu"
-                value={loading ? "—" : ringkasan.tepatWaktu}
+                value={
+                  loading
+                    ? "—"
+                    : ringkasan.tepatWaktu
+                }
                 tone="emerald"
               />
+
               <RingkasanCard
                 label="Terlambat"
-                value={loading ? "—" : ringkasan.terlambat}
+                value={
+                  loading
+                    ? "—"
+                    : ringkasan.terlambat
+                }
                 tone="amber"
               />
+
               <RingkasanCard
                 label="Ditolak"
-                value={loading ? "—" : ringkasan.ditolak}
+                value={
+                  loading
+                    ? "—"
+                    : ringkasan.ditolak
+                }
                 tone="red"
               />
             </div>
 
-            {/* =========================================
+            {/* =================================================
                 SEARCH + FILTER
-            ========================================= */}
+            ================================================= */}
 
-            <div className="bg-white rounded-xl border border-[#60A5FA]/20 p-4 shadow-sm space-y-3">
+            <div
+              className={`theme-card ${themeNeutralBorder} ${themeCardShadow} space-y-3 rounded-xl border p-4`}
+            >
               <div className="relative">
                 <Search
                   size={16}
-                  className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                  className="theme-text-muted absolute left-3.5 top-1/2 -translate-y-1/2"
                 />
+
                 <input
                   type="text"
                   value={pencarian}
-                  onChange={(e) => setPencarian(e.target.value)}
+                  onChange={(e) =>
+                    setPencarian(e.target.value)
+                  }
                   placeholder="Cari nama item atau nomor pengajuan..."
-                  className="w-full pl-10 pr-3 h-11 text-sm rounded-lg border border-[#60A5FA]/20 bg-[#F8FAFC] text-[#0F172A] placeholder:text-slate-400 focus:outline-none focus:bg-white focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/15 transition-colors"
+                  className={`theme-input ${themeFocus} theme-text w-full rounded-lg border py-0 pl-10 pr-3 text-sm placeholder:text-[var(--color-text-placeholder)] h-11 outline-none transition-colors`}
                 />
               </div>
 
-              <div className="flex flex-col sm:flex-row sm:items-center gap-3">
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                {/* KATEGORI */}
+
                 <div className="flex gap-2 overflow-x-auto pb-1">
                   {KATEGORI_FILTER.map((kategori) => {
-                    const aktif = kategoriAktif === kategori;
+                    const aktif =
+                      kategoriAktif === kategori;
+
                     return (
                       <button
                         key={kategori}
                         type="button"
-                        onClick={() => setKategoriAktif(kategori)}
-                        className={`inline-flex items-center h-10 px-3.5 text-xs font-semibold rounded-lg border whitespace-nowrap transition-colors ${
+                        onClick={() =>
+                          setKategoriAktif(kategori)
+                        }
+                        className={`inline-flex h-10 items-center whitespace-nowrap rounded-lg border px-3.5 text-xs font-semibold transition-colors ${
                           aktif
-                            ? "bg-[#2563EB] text-white border-[#2563EB]"
-                            : "bg-white text-slate-600 border-[#60A5FA]/25 hover:border-[#2563EB] hover:text-[#2563EB]"
+                            ? `${themePrimaryGradient} border-[var(--color-primary)] text-[var(--color-card)]`
+                            : `theme-card ${themeNeutralBorder} theme-text-secondary ${themeNeutralHover} hover:text-[var(--color-primary)]`
                         }`}
                       >
                         {kategori}
@@ -459,13 +731,20 @@ export default function GuruSarprasRiwayatPage() {
                   })}
                 </div>
 
+                {/* RENTANG */}
+
                 <select
                   value={rentangAktif}
-                  onChange={(e) => setRentangAktif(e.target.value)}
-                  className="h-10 text-xs font-semibold px-3 rounded-lg border border-[#60A5FA]/25 bg-white text-slate-600 focus:outline-none focus:border-[#2563EB] focus:ring-2 focus:ring-[#2563EB]/15 flex-shrink-0"
+                  onChange={(e) =>
+                    setRentangAktif(e.target.value)
+                  }
+                  className={`theme-input ${themeFocus} theme-text-secondary h-10 flex-shrink-0 rounded-lg border px-3 text-xs font-semibold outline-none transition-colors`}
                 >
                   {RENTANG_FILTER.map((rentang) => (
-                    <option key={rentang} value={rentang}>
+                    <option
+                      key={rentang}
+                      value={rentang}
+                    >
                       {rentang}
                     </option>
                   ))}
@@ -473,27 +752,34 @@ export default function GuruSarprasRiwayatPage() {
               </div>
             </div>
 
-            {/* =========================================
+            {/* =================================================
                 LIST
-            ========================================= */}
+            ================================================= */}
 
             <div
-              className={`bg-white rounded-xl border border-[#60A5FA]/20 shadow-sm overflow-hidden transition-opacity duration-200 ${
-                refreshing ? "opacity-60 pointer-events-none" : "opacity-100"
+              className={`theme-card ${themeNeutralBorder} ${themeCardShadow} overflow-hidden rounded-xl border transition-opacity duration-200 ${
+                refreshing
+                  ? "pointer-events-none opacity-60"
+                  : "opacity-100"
               }`}
             >
               {loading ? (
                 <div className="flex flex-col items-center justify-center py-16">
-                  <Loader2 size={24} className="animate-spin text-[#2563EB]" />
-                  <p className="text-sm text-slate-500 mt-3">
+                  <Loader2
+                    size={24}
+                    className="animate-spin text-[var(--color-primary)]"
+                  />
+
+                  <p className="theme-text-secondary mt-3 text-sm">
                     Memuat riwayat peminjaman...
                   </p>
                 </div>
               ) : (
-                <div className="divide-y divide-[#60A5FA]/15">
+                <div>
                   {dataTersaring.map((r) => {
                     const hasil = getHasil(r);
                     const cfg = hasilConfig[hasil];
+
                     const namaAset = getNamaAset(r);
                     const kategori = getKategori(r);
                     const jumlah = getJumlah(r);
@@ -503,64 +789,99 @@ export default function GuruSarprasRiwayatPage() {
                         key={r.id}
                         type="button"
                         onClick={() => bukaDetail(r)}
-                        className="group w-full text-left flex items-center gap-4 p-4 sm:px-5 sm:py-4 hover:bg-[#F8FAFC] transition-colors"
+                        className={`group theme-card flex w-full items-center gap-4 border-b ${themeDivider} p-4 text-left transition-colors last:border-b-0 ${themeNeutralHover} sm:px-5 sm:py-4`}
                       >
-                        <div className="flex h-11 w-11 items-center justify-center rounded-lg bg-[#2563EB]/10 border border-[#2563EB]/20 text-[#2563EB] flex-shrink-0">
+                        {/* ICON */}
+
+                        <div
+                          className={`flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-lg border ${themePrimarySoft} ${themePrimarySoftBorder} ${themePrimaryText}`}
+                        >
                           <Package size={18} />
                         </div>
 
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap">
-                            <h2 className="text-sm font-bold text-[#0F172A] truncate">
+                        {/* CONTENT */}
+
+                        <div className="min-w-0 flex-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h2 className="theme-text truncate text-sm font-bold">
                               {namaAset}
                             </h2>
 
                             {r.nomorPeminjaman && (
-                              <span className="text-[10px] font-mono font-semibold text-slate-400 px-1.5 py-0.5 rounded bg-[#F8FAFC] border border-[#60A5FA]/20">
+                              <span
+                                className={`theme-text-muted ${themeNeutralSurface} ${themeNeutralBorder} rounded border px-1.5 py-0.5 font-mono text-[10px] font-semibold`}
+                              >
                                 {r.nomorPeminjaman}
                               </span>
                             )}
                           </div>
 
-                          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5 text-xs text-slate-500">
+                          <div className="theme-text-secondary mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
                             <span className="flex items-center gap-1">
-                              <CalendarDays size={12} className="text-slate-400" />
-                              {formatTanggal(r.tanggalPinjam || r.tanggalPengajuan)}
+                              <CalendarDays
+                                size={12}
+                                className="theme-text-muted"
+                              />
+
+                              {formatTanggal(
+                                r.tanggalPinjam ||
+                                  r.tanggalPengajuan
+                              )}
                             </span>
 
-                            <span className="hidden sm:inline">{jumlah} unit</span>
+                            <span className="hidden sm:inline">
+                              {jumlah} unit
+                            </span>
 
-                            <span className="hidden md:inline">{kategori}</span>
+                            <span className="hidden md:inline">
+                              {kategori}
+                            </span>
                           </div>
                         </div>
 
+                        {/* STATUS */}
+
                         {cfg && (
                           <span
-                            className={`inline-flex items-center gap-1.5 text-[11px] font-semibold px-2.5 py-1 rounded-full border flex-shrink-0 ${cfg.pill}`}
+                            className={`inline-flex flex-shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-[11px] font-semibold ${cfg.surface} ${cfg.border} ${cfg.text}`}
                           >
-                            <span className={`w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
-                            <span className="hidden sm:inline">{cfg.label}</span>
+                            <span
+                              className={`h-1.5 w-1.5 rounded-full ${cfg.dot}`}
+                            />
+
+                            <span className="hidden sm:inline">
+                              {cfg.label}
+                            </span>
                           </span>
                         )}
 
+                        {/* CHEVRON */}
+
                         <ChevronRight
                           size={16}
-                          className="hidden sm:block text-slate-300 group-hover:text-[#2563EB] transition-colors flex-shrink-0"
+                          className="theme-text-muted hidden flex-shrink-0 transition-colors group-hover:text-[var(--color-primary)] sm:block"
                         />
                       </button>
                     );
                   })}
 
+                  {/* EMPTY */}
+
                   {dataTersaring.length === 0 && (
-                    <div className="text-center py-16 px-4">
-                      <div className="mx-auto w-14 h-14 rounded-xl bg-[#F8FAFC] border border-[#60A5FA]/20 flex items-center justify-center">
-                        <Package size={22} className="text-[#60A5FA]" />
+                    <div className="px-4 py-16 text-center">
+                      <div
+                        className={`mx-auto flex h-14 w-14 items-center justify-center rounded-xl border ${themeNeutralSurface} ${themeNeutralBorder} ${themePrimaryText}`}
+                      >
+                        <Package size={22} />
                       </div>
-                      <p className="text-sm font-bold text-[#0F172A] mt-4">
+
+                      <p className="theme-text mt-4 text-sm font-bold">
                         Tidak ada riwayat peminjaman
                       </p>
-                      <p className="text-xs text-slate-500 mt-1">
-                        Belum ada data yang sesuai dengan filter.
+
+                      <p className="theme-text-secondary mt-1 text-xs">
+                        Belum ada data yang sesuai
+                        dengan filter.
                       </p>
                     </div>
                   )}
@@ -574,45 +895,58 @@ export default function GuruSarprasRiwayatPage() {
   );
 }
 
-/* =========================================================
-   RINGKASAN CARD
-========================================================= */
+// =========================================================
+// RINGKASAN CARD
+// =========================================================
 
-function RingkasanCard({ label, value, tone = "blue" }) {
+function RingkasanCard({
+  label,
+  value,
+  tone = "blue",
+}) {
   const tones = {
     blue: {
-      icon: "bg-[#2563EB]/10 border-[#2563EB]/20 text-[#2563EB]",
-      value: "text-[#0F172A]",
+      icon: `${themePrimarySoft} ${themePrimarySoftBorder} ${themePrimaryText}`,
+      value: "theme-text",
     },
+
     emerald: {
-      icon: "bg-emerald-50 border-emerald-200/70 text-emerald-600",
-      value: "text-emerald-600",
+      icon: `${themeSuccessSurface} ${themeSuccessBorder} text-[var(--color-success)]`,
+      value: "text-[var(--color-success)]",
     },
+
     amber: {
-      icon: "bg-amber-50 border-amber-200/70 text-amber-600",
-      value: "text-amber-600",
+      icon: `${themeWarningSurface} ${themeWarningBorder} text-[var(--color-warning)]`,
+      value: "text-[var(--color-warning)]",
     },
+
     red: {
-      icon: "bg-red-50 border-red-200/70 text-red-600",
-      value: "text-red-600",
+      icon: `${themeDangerSurface} ${themeDangerBorder} theme-danger`,
+      value: "theme-danger",
     },
   };
 
   const t = tones[tone] || tones.blue;
 
   return (
-    <div className="bg-white rounded-xl border border-[#60A5FA]/20 p-4 shadow-sm">
+    <div
+      className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl border p-4`}
+    >
       <div className="flex items-center gap-3">
         <div
-          className={`flex h-9 w-9 items-center justify-center rounded-lg border flex-shrink-0 ${t.icon}`}
+          className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border ${t.icon}`}
         >
-          <span className="w-1.5 h-1.5 rounded-full bg-current" />
+          <span className="h-1.5 w-1.5 rounded-full bg-current" />
         </div>
+
         <div className="min-w-0">
-          <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 truncate">
+          <p className="theme-text-muted truncate text-[10px] font-bold uppercase tracking-wider">
             {label}
           </p>
-          <p className={`text-xl font-bold mt-0.5 truncate ${t.value}`}>
+
+          <p
+            className={`mt-0.5 truncate text-xl font-bold ${t.value}`}
+          >
             {value}
           </p>
         </div>

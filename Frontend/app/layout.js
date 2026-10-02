@@ -26,9 +26,11 @@ export default function RootLayout({ children }) {
     >
       <body className="min-h-full flex flex-col">
         <ThemeProvider>
-          {children}
+          <div className="app-theme min-h-full flex-1">
+            {children}
+          </div>
         </ThemeProvider>
       </body>
     </html>
   );
-} 
+}
