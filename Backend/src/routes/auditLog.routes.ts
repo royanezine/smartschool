@@ -7,7 +7,6 @@ const router = Router();
 
 router.use(authenticate);
 router.use(authorizeRoles("super_admin", "admin_sekolah", "admin_yayasan"));
-
 router.get("/", getAuditLogs);
 
 export default router;

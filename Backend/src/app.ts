@@ -1,9 +1,15 @@
 import dotenv from "dotenv";
 import express, { Application, Request, Response } from "express";
 import cors from "cors";
+import path from "path";
 import { globalErrorHandler } from "./middlewares/error.middleware";
+
+// Import Semua Routes
+import authRoutes from "./routes/auth.routes";
 import userRoutes from "./routes/user.routes";
 import subscriptionRoutes from "./routes/subscription.routes";
+import tenantRoutes from "./routes/tenant.routes";
+import webhookRoutes from "./routes/webhook.routes";
 import paketRoutes from "./routes/paket.routes";
 import sarprasRoutes from "./routes/sarpras.routes";
 import cmsRoutes from "./routes/cms.routes";
@@ -32,18 +38,19 @@ import jalurPpdbRoutes from "./routes/jalurPpdb.routes";
 import perpustakaanRoutes from "./routes/perpustakaan.routes";
 import permohonanIzinRoutes from "./routes/permohonanIzin.routes";
 import peminjamanAsetRoutes from "./routes/peminjamanAset.routes";
+import raportRoutes from "./routes/raport.routes";
+
+// IMPORT ROUTES BARU (YANG SEBELUMNYA HILANG)
+import auditLogRoutes from "./routes/auditLog.routes";
+import pengaturanSistemRoutes from "./routes/pengaturanSistem.routes";
+
+dotenv.config();
 
 const app: Application = express();
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-import authRoutes from "./routes/auth.routes";
-import tenantRoutes from "./routes/tenant.routes";
-import webhookRoutes from "./routes/webhook.routes";
-import path from "path";
-import raportRoutes from "./routes/raport.routes";
 
 app.get("/", (req: Request, res: Response) => {
   res.status(200).json({
@@ -52,6 +59,9 @@ app.get("/", (req: Request, res: Response) => {
   });
 });
 
+app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
+
+// Pendaftaran Routes Utama
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/v1/langganan/sekolah", subscriptionRoutes);
@@ -68,7 +78,6 @@ app.use("/api/mata-pelajaran", mataPelajaranRoutes);
 app.use("/api/kelas-mapel", kelasMapelRoutes);
 app.use("/api/v1/jadwal-mengajar", jadwalMengajar);
 app.use("/api/v1/materi-pembelajaran", materiPembelajaran);
-app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 app.use("/api/v1/tugas", tugasRoutes);
 app.use("/api/v1/notifikasi", notifikasiRoutes);
 app.use("/api/v1/absensi", absensiRoutes);
@@ -79,7 +88,6 @@ app.use("/api/v1/nilai", nilaiRoutes);
 app.use("/api/v1/dashboard", dashboardRoutes);
 app.use("/api/v1/role", roleRoutes);
 app.use("/api/bk", bkRoutes);
-app.use("/api/v1/raport", raportRoutes);
 app.use("/api/v1/yayasan", yayasanRoutes);
 app.use("/api/v1/ppdb", ppdbRoutes);
 app.use("/api/v1/jalur-ppdb", jalurPpdbRoutes);
@@ -87,6 +95,9 @@ app.use("/api/v1/perpustakaan", perpustakaanRoutes);
 app.use("/api/v1/peminjaman-aset", peminjamanAsetRoutes);
 app.use("/api/v1/raport", raportRoutes);
 app.use("/api/v1/permohonan-izin", permohonanIzinRoutes);
+
+app.use("/api/v1/audit-log", auditLogRoutes);
+app.use("/api/v1/pengaturan", pengaturanSistemRoutes);
 
 setInterval(
   () => {
