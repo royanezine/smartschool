@@ -1,9 +1,16 @@
-const API_URL =
+const RAW_API_BASE =
   process.env.NEXT_PUBLIC_API_URL ||
   "http://localhost:5000";
 
-const BASE_ENDPOINT =
-  "/api/v1/nilai";
+const API_BASE = (() => {
+  const base = RAW_API_BASE.replace(/\/+$/, "");
+
+  if (base.endsWith("/api")) {
+    return base;
+  }
+
+  return `${base}/api`;
+})();
 
 /* =========================================================
    TYPES
@@ -30,19 +37,6 @@ function getToken(): string | null {
    EXPORT REKAP NILAI
 ========================================================= */
 
-/**
- * GET /api/v1/nilai/export
- *
- * Backend:
- * authenticate
- *
- * Query:
- * ?kelasId=...
- * ?kelasMapelId=...
- *
- * Response:
- * Excel file (.xlsx)
- */
 export async function exportRekapNilai(
   params: ExportRekapNilaiParams = {}
 ): Promise<Blob> {
@@ -54,14 +48,10 @@ export async function exportRekapNilai(
     );
   }
 
-  const searchParams =
-    new URLSearchParams();
+  const searchParams = new URLSearchParams();
 
   if (params.kelasId) {
-    searchParams.set(
-      "kelasId",
-      params.kelasId
-    );
+    searchParams.set("kelasId", params.kelasId);
   }
 
   if (params.kelasMapelId) {
@@ -71,36 +61,28 @@ export async function exportRekapNilai(
     );
   }
 
-  const query =
-    searchParams.toString();
+  const query = searchParams.toString();
 
   const url =
-    `${API_URL}${BASE_ENDPOINT}/export${
-      query ? `?${query}` : ""
-    }`;
+    `${API_BASE}/v1/nilai/export` +
+    (query ? `?${query}` : "");
 
-  console.log(
-    "[NILAI API] Export Request:",
-    {
-      method: "GET",
-      url,
-      hasToken: Boolean(token),
-    }
-  );
+  console.log("[NILAI API] Export Request:", {
+    method: "GET",
+    url,
+    hasToken: Boolean(token),
+  });
 
   let response: Response;
 
   try {
     response = await fetch(url, {
       method: "GET",
-
       headers: {
         Accept:
           "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        Authorization:
-          `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
-
       cache: "no-store",
     });
   } catch (error) {
@@ -114,31 +96,20 @@ export async function exportRekapNilai(
     );
   }
 
-  console.log(
-    "[NILAI API] Export Response:",
-    {
-      status: response.status,
-      statusText: response.statusText,
-      url,
-      contentType:
-        response.headers.get(
-          "content-type"
-        ),
-    }
-  );
-
-  /* =======================================================
-     ERROR
-  ======================================================= */
+  console.log("[NILAI API] Export Response:", {
+    status: response.status,
+    statusText: response.statusText,
+    url,
+    contentType:
+      response.headers.get("content-type"),
+  });
 
   if (!response.ok) {
     let message =
       `Gagal mengekspor rekap nilai (${response.status}).`;
 
     const contentType =
-      response.headers.get(
-        "content-type"
-      );
+      response.headers.get("content-type");
 
     try {
       if (
@@ -158,8 +129,7 @@ export async function exportRekapNilai(
           await response.text();
 
         if (text.trim()) {
-          message =
-            text.trim();
+          message = text.trim();
         }
       }
     } catch {
@@ -190,10 +160,6 @@ export async function exportRekapNilai(
     throw new Error(message);
   }
 
-  /* =======================================================
-     VALIDASI RESPONSE
-  ======================================================= */
-
   const blob =
     await response.blob();
 
@@ -210,10 +176,6 @@ export async function exportRekapNilai(
    DOWNLOAD HELPER
 ========================================================= */
 
-/**
- * Membuat browser mendownload file Excel
- * hasil dari endpoint backend.
- */
 export function downloadRekapNilai(
   blob: Blob,
   filename = "rekap-nilai.xlsx"
@@ -223,9 +185,7 @@ export function downloadRekapNilai(
   }
 
   const objectUrl =
-    window.URL.createObjectURL(
-      blob
-    );
+    window.URL.createObjectURL(blob);
 
   const link =
     document.createElement("a");
@@ -243,3 +203,5 @@ export function downloadRekapNilai(
     objectUrl
   );
 }
+
+

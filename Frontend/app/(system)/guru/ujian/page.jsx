@@ -476,7 +476,7 @@ export default function UjianGuruPage() {
   }) {
     return (
       <div
-        className={`theme-card group rounded-2xl border ${themeNeutralBorder} p-4 ${themeCardShadow} transition duration-200 hover:-translate-y-0.5 hover:${themePrimaryText} sm:p-5`}
+        className={`theme-card group rounded-2xl border ${themeNeutralBorder} p-4 ${themeCardShadow} transition duration-200 hover:-translate-y-0.5 sm:p-5`}
       >
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
@@ -692,7 +692,9 @@ export default function UjianGuruPage() {
             <section
               className={`theme-card rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
             >
-              <div className={`border-b ${themeDivider} px-5 py-4 sm:px-6`}>
+              <div
+                className={`border-b ${themeDivider} px-5 py-4 sm:px-6`}
+              >
                 <div className="flex items-center gap-3">
 
                   <div
@@ -1301,27 +1303,48 @@ export default function UjianGuruPage() {
                               {/* STATUS */}
 
                               <td className="px-4 py-4 text-center">
+                                <div className="flex flex-col items-center gap-2">
 
-                                {isPublished ? (
+                                  {isPublished ? (
+                                    <span
+                                      className={`inline-flex items-center gap-1.5 rounded-full border ${themeSuccessBorder} ${themeSuccessSurface} px-3 py-1.5 text-[11px] font-bold text-[var(--color-success)]`}
+                                    >
+                                      <CheckCircle2 size={13} />
+                                      Publikasi
+                                    </span>
+                                  ) : (
+                                    <span
+                                      className={`inline-flex items-center gap-1.5 rounded-full border ${themeWarningBorder} ${themeWarningSurface} px-3 py-1.5 text-[11px] font-bold text-[var(--color-warning)]`}
+                                    >
+                                      <XCircle size={13} />
+                                      Draft
+                                    </span>
+                                  )}
 
-                                  <span
-                                    className={`inline-flex items-center gap-1.5 rounded-full border ${themeSuccessBorder} ${themeSuccessSurface} px-3 py-1.5 text-[11px] font-bold text-[var(--color-success)]`}
-                                  >
-                                    <CheckCircle2 size={13} />
-                                    Publikasi
-                                  </span>
+                                  {Number(
+                                    item?._count?.percobaanAsesmen || 0
+                                  ) > 0 ? (
+                                    <span
+                                      className={`inline-flex items-center gap-1.5 rounded-full border ${themeInfoBorder} ${themeInfoSurface} px-2.5 py-1 text-[10px] font-semibold text-[var(--color-info)]`}
+                                    >
+                                      <Users size={12} />
 
-                                ) : (
+                                      {Number(
+                                        item?._count?.percobaanAsesmen || 0
+                                      )}{" "}
+                                      siswa mengerjakan
+                                    </span>
+                                  ) : (
+                                    <span
+                                      className={`inline-flex items-center gap-1.5 rounded-full border ${themeNeutralBorder} ${themeNeutralSurface} px-2.5 py-1 text-[10px] font-semibold theme-text-muted`}
+                                    >
+                                      <Clock3 size={12} />
 
-                                  <span
-                                    className={`inline-flex items-center gap-1.5 rounded-full border ${themeWarningBorder} ${themeWarningSurface} px-3 py-1.5 text-[11px] font-bold text-[var(--color-warning)]`}
-                                  >
-                                    <XCircle size={13} />
-                                    Draft
-                                  </span>
+                                      Belum dikerjakan
+                                    </span>
+                                  )}
 
-                                )}
-
+                                </div>
                               </td>
 
                               {/* QUESTIONS */}
@@ -1352,7 +1375,7 @@ export default function UjianGuruPage() {
                                     type="button"
                                     onClick={() =>
                                       router.push(
-                                        `/guru/ujian/${item.id}/soal`
+                                        `/guru/ujian/${item.id}`
                                       )
                                     }
                                     title="Kelola soal"
@@ -1386,7 +1409,7 @@ export default function UjianGuruPage() {
                                     type="button"
                                     onClick={() =>
                                       router.push(
-                                        `/guru/ujian/${item.id}`
+                                        `/guru/ujian/${item.id}/soal`
                                       )
                                     }
                                     title="Lihat detail"
@@ -1497,9 +1520,7 @@ export default function UjianGuruPage() {
                 </div>
               )}
 
-              {/* =================================================
-                  TABLE FOOTER
-              ================================================= */}
+              {/* TABLE FOOTER */}
 
               {!loadingUjian &&
                 filteredUjian.length > 0 && (
@@ -1542,3 +1563,4 @@ export default function UjianGuruPage() {
     </div>
   );
 }
+

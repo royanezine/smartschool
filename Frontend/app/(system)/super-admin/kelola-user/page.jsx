@@ -30,6 +30,7 @@ import {
   getUsers,
   deleteUser,
   updateUserStatus,
+    resetUserPassword,
 } from "../../../../services/user.service";
 
 // ============================================================

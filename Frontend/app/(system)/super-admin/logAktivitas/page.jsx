@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { getAuditLogs } from "../../../../services/auditLog.service";
+
 import {
   Activity,
   Search,
@@ -21,19 +23,18 @@ import {
   DollarSign,
   BookOpen,
   Lock,
-  BarChart,
+  BarChart3,
   Building2,
   UserCog,
   FileText,
   Globe,
-  Link,
   ChevronDown,
   X,
 } from "lucide-react";
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
+/* ============================================================
+   THEME HELPERS
+============================================================ */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -95,27 +96,9 @@ const themeDangerBorder =
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
-// ============================================================
-// OPTIONS
-// ============================================================
-
-const statusOptions = [
-  { value: "Semua", label: "Semua Status" },
-  { value: "success", label: "Berhasil" },
-  { value: "failed", label: "Gagal" },
-];
-
-const timeOptions = [
-  { value: "today", label: "Hari Ini" },
-  { value: "yesterday", label: "Kemarin" },
-  { value: "week", label: "7 Hari Terakhir" },
-  { value: "month", label: "30 Hari Terakhir" },
-  { value: "custom", label: "Kustom" },
-];
-
-// ============================================================
-// SMART FILTER SELECT
-// ============================================================
+/* ============================================================
+   SMART FILTER SELECT
+============================================================ */
 
 function SmartFilterSelect({
   value,
@@ -132,16 +115,6 @@ function SmartFilterSelect({
 
   const useDropdown = options.length <= 5;
 
-  const filteredOptions = useMemo(() => {
-    if (!searchText.trim()) return options;
-
-    return options.filter((option) =>
-      option
-        .toLowerCase()
-        .includes(searchText.toLowerCase())
-    );
-  }, [options, searchText]);
-
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (
@@ -152,10 +125,7 @@ function SmartFilterSelect({
       }
     };
 
-    document.addEventListener(
-      "mousedown",
-      handleClickOutside
-    );
+    document.addEventListener("mousedown", handleClickOutside);
 
     return () => {
       document.removeEventListener(
@@ -165,47 +135,36 @@ function SmartFilterSelect({
     };
   }, []);
 
-  const handleSelect = (option) => {
-    onChange(option);
+  const filteredOptions = useMemo(() => {
+    if (!searchText.trim()) return options;
+
+    return options.filter((option) =>
+      String(option.label || option.value || "")
+        .toLowerCase()
+        .includes(searchText.toLowerCase())
+    );
+  }, [options, searchText]);
+
+  const selectedOption = options.find(
+    (option) => option.value === value
+  );
+
+  const handleSelect = (nextValue) => {
+    onChange(nextValue);
     setSearchText("");
     setIsOpen(false);
   };
 
   const handleInputChange = (event) => {
-    const nextValue = event.target.value;
-
-    setSearchText(nextValue);
-
-    if (!nextValue.trim()) {
-      onChange("Semua");
-    }
+    setSearchText(event.target.value);
+    setIsOpen(true);
   };
-
-  const handleInputBlur = () => {
-    if (
-      searchText.trim() &&
-      !options.some(
-        (option) =>
-          option.toLowerCase() ===
-          searchText.toLowerCase()
-      )
-    ) {
-      setSearchText("");
-      onChange("Semua");
-    }
-  };
-
-  // ==========================================================
-  // SIMPLE SELECT
-  // ==========================================================
 
   if (useDropdown) {
     return (
       <select
         value={value}
-        onChange={(event) =>
-          onChange(event.target.value)
-        }
+        onChange={(event) => onChange(event.target.value)}
         className={`
           h-10 w-full rounded-xl
           border theme-border
@@ -218,25 +177,23 @@ function SmartFilterSelect({
           ${themeFocus}
         `}
       >
-        <option value="Semua">
+        <option value="all">
           {allLabel}
         </option>
 
-        {options.map((option) => (
-          <option
-            key={option}
-            value={option}
-          >
-            {option}
-          </option>
-        ))}
+        {options
+          .filter((option) => option.value !== "all")
+          .map((option) => (
+            <option
+              key={option.value}
+              value={option.value}
+            >
+              {option.label}
+            </option>
+          ))}
       </select>
     );
   }
-
-  // ==========================================================
-  // SEARCHABLE SELECT
-  // ==========================================================
 
   return (
     <div
@@ -249,11 +206,12 @@ function SmartFilterSelect({
           type="text"
           value={
             searchText ||
-            (value !== "Semua" ? value : "")
+            (value !== "all"
+              ? selectedOption?.label || value
+              : "")
           }
           onChange={handleInputChange}
           onFocus={() => setIsOpen(true)}
-          onBlur={handleInputBlur}
           placeholder={placeholder}
           className={`
             h-10 w-full rounded-xl
@@ -271,12 +229,9 @@ function SmartFilterSelect({
         {searchText && (
           <button
             type="button"
-            onMouseDown={(event) =>
-              event.preventDefault()
-            }
             onClick={() => {
               setSearchText("");
-              onChange("Semua");
+              onChange("all");
               inputRef.current?.focus();
             }}
             className="
@@ -321,48 +276,38 @@ function SmartFilterSelect({
               Tidak ada hasil
             </div>
           ) : (
-            <>
-              <button
-                type="button"
-                onMouseDown={(event) =>
-                  event.preventDefault()
-                }
-                onClick={() =>
-                  handleSelect("Semua")
-                }
-                className={`
-                  w-full px-3 py-2
-                  text-left text-sm
-                  theme-text-secondary
-                  transition-colors
-                  ${themeNeutralHover}
-                `}
-              >
-                {allLabel}
-              </button>
+            filteredOptions.map((option) => {
+              const active = option.value === value;
 
-              {filteredOptions.map((option) => (
+              return (
                 <button
-                  key={option}
+                  key={option.value}
                   type="button"
-                  onMouseDown={(event) =>
-                    event.preventDefault()
-                  }
                   onClick={() =>
-                    handleSelect(option)
+                    handleSelect(option.value)
                   }
                   className={`
-                    w-full px-3 py-2
+                    flex w-full
+                    items-center
+                    justify-between
+                    px-3 py-2
                     text-left text-sm
                     theme-text-secondary
                     transition-colors
                     ${themeNeutralHover}
                   `}
                 >
-                  {option}
+                  <span>{option.label}</span>
+
+                  {active && (
+                    <CheckCircle
+                      size={14}
+                      className={themePrimaryText}
+                    />
+                  )}
                 </button>
-              ))}
-            </>
+              );
+            })
           )}
         </div>
       )}
@@ -370,34 +315,27 @@ function SmartFilterSelect({
   );
 }
 
-// ============================================================
-// MAIN PAGE
-// ============================================================
+/* ============================================================
+   PAGE
+============================================================ */
 
 export default function LogAktivitasPage() {
-  const [isMobile, setIsMobile] =
-    useState(false);
-
-  const [searchQuery, setSearchQuery] =
-    useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   const [selectedRole, setSelectedRole] =
-    useState("Semua");
+    useState("all");
 
   const [selectedModule, setSelectedModule] =
-    useState("Semua");
+    useState("all");
 
   const [selectedStatus, setSelectedStatus] =
-    useState("Semua");
+    useState("all");
 
   const [selectedTime, setSelectedTime] =
     useState("week");
 
-  const [startDate, setStartDate] =
-    useState("");
-
-  const [endDate, setEndDate] =
-    useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
   const [sortField, setSortField] =
     useState("timestamp");
@@ -411,117 +349,541 @@ export default function LogAktivitasPage() {
   const [isLoading, setIsLoading] =
     useState(false);
 
-  const itemsPerPage = 10;
-
-  // ==========================================================
-  // DATA API
-  // ==========================================================
-
-  // Sengaja kosong.
-  // Nanti data backend tinggal dimasukkan ke state ini.
   const [logs, setLogs] = useState([]);
 
-  // ==========================================================
-  // MOBILE CHECK
-  // ==========================================================
+  const itemsPerPage = 10;
+
+  /* ============================================================
+     LOAD AUDIT LOG
+  ============================================================ */
+
+  const loadAuditLogs = async () => {
+    try {
+      setIsLoading(true);
+
+      const response = await getAuditLogs({
+        page: 1,
+        limit: 100,
+      });
+
+      const responseData = response?.data;
+
+      const data = Array.isArray(responseData)
+        ? responseData
+        : Array.isArray(responseData?.data)
+        ? responseData.data
+        : [];
+
+      const mappedLogs = data.map((item) => ({
+        id: item?.id || "-",
+        user:
+          item?.pengguna?.namaLengkap ||
+          item?.penggunaId ||
+          "-",
+        role:
+          item?.pengguna?.peran?.nama ||
+          "-",
+        module: item?.modul || "-",
+        action: item?.aksi || "-",
+        status: item?.status || "success",
+        timestamp: item?.waktu || null,
+        ip:
+          item?.ipAddress ||
+          item?.ip ||
+          "-",
+      }));
+
+      setLogs(mappedLogs);
+      setCurrentPage(1);
+    } catch (error) {
+      console.error(
+        "Gagal mengambil audit log:",
+        error
+      );
+
+      setLogs([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    checkMobile();
-
-    window.addEventListener(
-      "resize",
-      checkMobile
-    );
-
-    return () => {
-      window.removeEventListener(
-        "resize",
-        checkMobile
-      );
-    };
+    loadAuditLogs();
   }, []);
 
-  // ==========================================================
-  // OPTIONS DARI DATA API
-  // ==========================================================
+  /* ============================================================
+     OPTIONS
+  ============================================================ */
 
   const roleOptions = useMemo(() => {
-    return [
+    const roles = [
       ...new Set(
         logs
-          .map((log) => log?.role)
+          .map((log) => log.role)
           .filter(Boolean)
       ),
-    ].sort();
+    ];
+
+    return [
+      {
+        value: "all",
+        label: "Semua Role",
+      },
+      ...roles.map((role) => ({
+        value: role,
+        label: role,
+      })),
+    ];
   }, [logs]);
 
   const moduleOptions = useMemo(() => {
-    return [
+    const modules = [
       ...new Set(
         logs
-          .map((log) => log?.module)
+          .map((log) => log.module)
           .filter(Boolean)
       ),
-    ].sort();
+    ];
+
+    return [
+      {
+        value: "all",
+        label: "Semua Modul",
+      },
+      ...modules.map((module) => ({
+        value: module,
+        label: module,
+      })),
+    ];
   }, [logs]);
 
-  // ==========================================================
-  // STATISTICS
-  // ==========================================================
+  const statusOptions = [
+    {
+      value: "all",
+      label: "Semua Status",
+    },
+    {
+      value: "success",
+      label: "Berhasil",
+    },
+    {
+      value: "failed",
+      label: "Gagal",
+    },
+  ];
+
+  const timeOptions = [
+    {
+      value: "all",
+      label: "Semua Waktu",
+    },
+    {
+      value: "today",
+      label: "Hari Ini",
+    },
+    {
+      value: "week",
+      label: "7 Hari Terakhir",
+    },
+    {
+      value: "month",
+      label: "30 Hari Terakhir",
+    },
+    {
+      value: "custom",
+      label: "Rentang Custom",
+    },
+  ];
+
+  /* ============================================================
+     FILTER
+  ============================================================ */
+
+  const filteredLogs = useMemo(() => {
+    const now = new Date();
+
+    return logs.filter((log) => {
+      const search =
+        searchQuery.trim().toLowerCase();
+
+      const matchesSearch =
+        !search ||
+        String(log.user || "")
+          .toLowerCase()
+          .includes(search) ||
+        String(log.role || "")
+          .toLowerCase()
+          .includes(search) ||
+        String(log.module || "")
+          .toLowerCase()
+          .includes(search) ||
+        String(log.action || "")
+          .toLowerCase()
+          .includes(search) ||
+        String(log.ip || "")
+          .toLowerCase()
+          .includes(search);
+
+      if (!matchesSearch) return false;
+
+      if (
+        selectedRole !== "all" &&
+        log.role !== selectedRole
+      ) {
+        return false;
+      }
+
+      if (
+        selectedModule !== "all" &&
+        log.module !== selectedModule
+      ) {
+        return false;
+      }
+
+      if (
+        selectedStatus !== "all" &&
+        log.status !== selectedStatus
+      ) {
+        return false;
+      }
+
+      if (
+        selectedTime !== "all" &&
+        log.timestamp
+      ) {
+        const logDate = new Date(
+          log.timestamp
+        );
+
+        if (
+          Number.isNaN(
+            logDate.getTime()
+          )
+        ) {
+          return true;
+        }
+
+        if (selectedTime === "today") {
+          if (
+            logDate.toDateString() !==
+            now.toDateString()
+          ) {
+            return false;
+          }
+        }
+
+        if (selectedTime === "week") {
+          const sevenDaysAgo = new Date(
+            now
+          );
+
+          sevenDaysAgo.setDate(
+            now.getDate() - 7
+          );
+
+          if (logDate < sevenDaysAgo) {
+            return false;
+          }
+        }
+
+        if (selectedTime === "month") {
+          const thirtyDaysAgo = new Date(
+            now
+          );
+
+          thirtyDaysAgo.setDate(
+            now.getDate() - 30
+          );
+
+          if (
+            logDate < thirtyDaysAgo
+          ) {
+            return false;
+          }
+        }
+
+        if (
+          selectedTime === "custom" &&
+          startDate &&
+          endDate
+        ) {
+          const start = new Date(
+            startDate
+          );
+
+          const end = new Date(endDate);
+
+          end.setHours(
+            23,
+            59,
+            59,
+            999
+          );
+
+          if (
+            logDate < start ||
+            logDate > end
+          ) {
+            return false;
+          }
+        }
+      }
+
+      return true;
+    });
+  }, [
+    logs,
+    searchQuery,
+    selectedRole,
+    selectedModule,
+    selectedStatus,
+    selectedTime,
+    startDate,
+    endDate,
+  ]);
+
+  /* ============================================================
+     SORT
+  ============================================================ */
+
+  const sortedLogs = useMemo(() => {
+    const result = [...filteredLogs];
+
+    result.sort((a, b) => {
+      let valueA = a?.[sortField];
+      let valueB = b?.[sortField];
+
+      if (sortField === "timestamp") {
+        valueA = valueA
+          ? new Date(valueA).getTime()
+          : 0;
+
+        valueB = valueB
+          ? new Date(valueB).getTime()
+          : 0;
+      } else {
+        valueA = String(
+          valueA ?? ""
+        ).toLowerCase();
+
+        valueB = String(
+          valueB ?? ""
+        ).toLowerCase();
+      }
+
+      if (valueA < valueB) {
+        return sortOrder === "asc"
+          ? -1
+          : 1;
+      }
+
+      if (valueA > valueB) {
+        return sortOrder === "asc"
+          ? 1
+          : -1;
+      }
+
+      return 0;
+    });
+
+    return result;
+  }, [
+    filteredLogs,
+    sortField,
+    sortOrder,
+  ]);
+
+  /* ============================================================
+     PAGINATION
+  ============================================================ */
+
+  const totalPages = Math.max(
+    1,
+    Math.ceil(
+      sortedLogs.length /
+        itemsPerPage
+    )
+  );
+
+  const paginatedLogs = useMemo(() => {
+    const start =
+      (currentPage - 1) *
+      itemsPerPage;
+
+    return sortedLogs.slice(
+      start,
+      start + itemsPerPage
+    );
+  }, [
+    sortedLogs,
+    currentPage,
+  ]);
+
+  useEffect(() => {
+    if (
+      currentPage > totalPages
+    ) {
+      setCurrentPage(totalPages);
+    }
+  }, [
+    currentPage,
+    totalPages,
+  ]);
+
+  /* ============================================================
+     STATISTICS
+  ============================================================ */
 
   const stats = useMemo(() => {
-    const total = logs.length;
-
-    const success = logs.filter(
-      (log) => log.status === "success"
-    ).length;
-
-    const failed = logs.filter(
-      (log) => log.status === "failed"
-    ).length;
-
-    const users = new Set(
-      logs.map((log) => log.user)
-    ).size;
-
-    const modules = new Set(
-      logs.map((log) => log.module)
-    ).size;
-
     return {
-      total,
-      success,
-      failed,
-      users,
-      modules,
+      total: logs.length,
+
+      success: logs.filter(
+        (log) =>
+          log.status === "success"
+      ).length,
+
+      failed: logs.filter(
+        (log) =>
+          log.status === "failed"
+      ).length,
+
+      users: new Set(
+        logs
+          .map((log) => log.user)
+          .filter(Boolean)
+      ).size,
+
+      modules: new Set(
+        logs
+          .map((log) => log.module)
+          .filter(Boolean)
+      ).size,
     };
   }, [logs]);
 
-  // ==========================================================
-  // STATUS STYLE
-  // ==========================================================
+  /* ============================================================
+     HELPERS
+  ============================================================ */
 
-  const getStatusStyle = (status) => {
-    return status === "success"
-      ? {
-          surface: themeSuccessSurface,
-          text: "text-[var(--color-success)]",
-          border: themeSuccessBorder,
-        }
-      : {
-          surface: themeDangerSurface,
-          text: "theme-text-secondary",
-          border: themeDangerBorder,
-        };
+  const formatDateTime = (value) => {
+    if (!value) return "-";
+
+    const date = new Date(value);
+
+    if (
+      Number.isNaN(
+        date.getTime()
+      )
+    ) {
+      return value;
+    }
+
+    return new Intl.DateTimeFormat(
+      "id-ID",
+      {
+        dateStyle: "medium",
+        timeStyle: "short",
+      }
+    ).format(date);
   };
 
-  // ==========================================================
-  // STATUS ICON
-  // ==========================================================
+  const getModuleIcon = (module) => {
+    const value = String(
+      module || ""
+    ).toLowerCase();
+
+    if (value.includes("siswa"))
+      return Users;
+
+    if (value.includes("guru"))
+      return GraduationCap;
+
+    if (
+      value.includes("presensi") ||
+      value.includes("absen")
+    )
+      return Clock;
+
+    if (
+      value.includes("keuangan")
+    )
+      return DollarSign;
+
+    if (
+      value.includes("akademik") ||
+      value.includes("nilai")
+    )
+      return BookOpen;
+
+    if (
+      value.includes("akses") ||
+      value.includes("role") ||
+      value.includes("permission")
+    )
+      return Shield;
+
+    if (
+      value.includes("pengguna") ||
+      value.includes("user")
+    )
+      return UserCog;
+
+    if (
+      value.includes("pengaturan")
+    )
+      return Settings;
+
+    if (
+      value.includes("keamanan")
+    )
+      return Lock;
+
+    if (
+      value.includes("laporan")
+    )
+      return BarChart3;
+
+    if (
+      value.includes("sekolah")
+    )
+      return Building2;
+
+    if (
+      value.includes("database")
+    )
+      return Database;
+
+    if (
+      value.includes("dokumen") ||
+      value.includes("administrasi")
+    )
+      return FileText;
+
+    return Activity;
+  };
+
+  const getStatusStyle = (status) => {
+    if (status === "success") {
+      return {
+        surface:
+          themeSuccessSurface,
+        text:
+          "text-[var(--color-success)]",
+        border:
+          themeSuccessBorder,
+      };
+    }
+
+    return {
+      surface:
+        themeDangerSurface,
+      text:
+        "theme-text-secondary",
+      border:
+        themeDangerBorder,
+    };
+  };
 
   const getStatusIcon = (status) => {
     return status === "success" ? (
@@ -537,293 +899,18 @@ export default function LogAktivitasPage() {
     );
   };
 
-  // ==========================================================
-  // MODULE ICON
-  // ==========================================================
-
-  const getModuleIcon = (module) => {
-    const icons = {
-      Pengaturan: Settings,
-      "Manajemen Siswa": GraduationCap,
-      "Manajemen Guru": Users,
-      "Manajemen Akses": Shield,
-      Keuangan: DollarSign,
-      Akademik: BookOpen,
-      Keamanan: Lock,
-      Laporan: BarChart,
-      Presensi: Clock,
-      "Sarana Prasarana": Building2,
-      "Bimbingan Konseling": UserCog,
-      PPDB: Users,
-      Administrasi: FileText,
-      CMS: Globe,
-      Pembelajaran: GraduationCap,
-      "Manajemen Pengguna": Users,
-      "Manajemen SDM": Users,
-      Integrasi: Link,
-    };
-
-    const Icon =
-      icons[module] || Activity;
-
-    return (
-      <Icon
-        size={14}
-        className="theme-text-muted"
-      />
-    );
-  };
-
-  // ==========================================================
-  // FILTER
-  // ==========================================================
-
-  const filteredData = useMemo(() => {
-    return logs.filter((log) => {
-      const keyword =
-        searchQuery.toLowerCase().trim();
-
-      const matchSearch =
-        !keyword ||
-        log.user
-          ?.toLowerCase()
-          .includes(keyword) ||
-        log.action
-          ?.toLowerCase()
-          .includes(keyword) ||
-        log.ip
-          ?.toLowerCase()
-          .includes(keyword) ||
-        log.module
-          ?.toLowerCase()
-          .includes(keyword) ||
-        log.role
-          ?.toLowerCase()
-          .includes(keyword);
-
-      const matchRole =
-        selectedRole === "Semua" ||
-        log.role === selectedRole;
-
-      const matchModule =
-        selectedModule === "Semua" ||
-        log.module === selectedModule;
-
-      const matchStatus =
-        selectedStatus === "Semua" ||
-        log.status === selectedStatus;
-
-      let matchTime = true;
-
-      if (log.timestamp) {
-        const logDate =
-          new Date(log.timestamp);
-
-        const now = new Date();
-
-        if (selectedTime === "today") {
-          const today = new Date(
-            now.getFullYear(),
-            now.getMonth(),
-            now.getDate()
-          );
-
-          matchTime =
-            logDate >= today;
-        }
-
-        if (
-          selectedTime === "yesterday"
-        ) {
-          const yesterday =
-            new Date(now);
-
-          yesterday.setDate(
-            yesterday.getDate() - 1
-          );
-
-          const start = new Date(
-            yesterday.getFullYear(),
-            yesterday.getMonth(),
-            yesterday.getDate()
-          );
-
-          const end = new Date(start);
-
-          end.setDate(
-            end.getDate() + 1
-          );
-
-          matchTime =
-            logDate >= start &&
-            logDate < end;
-        }
-
-        if (selectedTime === "week") {
-          const weekAgo =
-            new Date(now);
-
-          weekAgo.setDate(
-            weekAgo.getDate() - 7
-          );
-
-          matchTime =
-            logDate >= weekAgo;
-        }
-
-        if (selectedTime === "month") {
-          const monthAgo =
-            new Date(now);
-
-          monthAgo.setDate(
-            monthAgo.getDate() - 30
-          );
-
-          matchTime =
-            logDate >= monthAgo;
-        }
-
-        if (
-          selectedTime === "custom" &&
-          startDate &&
-          endDate
-        ) {
-          const start =
-            new Date(startDate);
-
-          const end =
-            new Date(endDate);
-
-          end.setHours(
-            23,
-            59,
-            59,
-            999
-          );
-
-          matchTime =
-            logDate >= start &&
-            logDate <= end;
-        }
-      }
-
-      return (
-        matchSearch &&
-        matchRole &&
-        matchModule &&
-        matchStatus &&
-        matchTime
-      );
-    });
-  }, [
-    logs,
-    searchQuery,
-    selectedRole,
-    selectedModule,
-    selectedStatus,
-    selectedTime,
-    startDate,
-    endDate,
-  ]);
-
-  // ==========================================================
-  // SORT
-  // ==========================================================
-
-  const sortedData = useMemo(() => {
-    return [...filteredData].sort(
-      (a, b) => {
-        if (
-          sortField === "timestamp"
-        ) {
-          const dateA = new Date(
-            a.timestamp || 0
-          );
-
-          const dateB = new Date(
-            b.timestamp || 0
-          );
-
-          return sortOrder === "asc"
-            ? dateA - dateB
-            : dateB - dateA;
-        }
-
-        const valA =
-          a[sortField]
-            ?.toString()
-            .toLowerCase() || "";
-
-        const valB =
-          b[sortField]
-            ?.toString()
-            .toLowerCase() || "";
-
-        if (valA < valB) {
-          return sortOrder === "asc"
-            ? -1
-            : 1;
-        }
-
-        if (valA > valB) {
-          return sortOrder === "asc"
-            ? 1
-            : -1;
-        }
-
-        return 0;
-      }
-    );
-  }, [
-    filteredData,
-    sortField,
-    sortOrder,
-  ]);
-
-  // ==========================================================
-  // PAGINATION
-  // ==========================================================
-
-  const totalPages = Math.max(
-    1,
-    Math.ceil(
-      sortedData.length /
-        itemsPerPage
-    )
-  );
-
-  const startIndex =
-    (currentPage - 1) *
-    itemsPerPage;
-
-  const paginatedData =
-    sortedData.slice(
-      startIndex,
-      startIndex + itemsPerPage
-    );
-
-  // ==========================================================
-  // SORT HANDLER
-  // ==========================================================
-
   const handleSort = (field) => {
     if (sortField === field) {
-      setSortOrder(
-        sortOrder === "asc"
+      setSortOrder((prev) =>
+        prev === "asc"
           ? "desc"
           : "asc"
       );
     } else {
       setSortField(field);
-      setSortOrder("asc");
+      setSortOrder("desc");
     }
-
-    setCurrentPage(1);
   };
-
-  // ==========================================================
-  // SORT ICON
-  // ==========================================================
 
   const renderSortIcon = (field) => {
     if (sortField !== field) {
@@ -854,53 +941,100 @@ export default function LogAktivitasPage() {
     );
   };
 
-  // ==========================================================
-  // RESET
-  // ==========================================================
+  const handleRefresh = async () => {
+    await loadAuditLogs();
+  };
 
-  const resetFilters = () => {
+  const handleResetFilter = () => {
     setSearchQuery("");
-    setSelectedRole("Semua");
-    setSelectedModule("Semua");
-    setSelectedStatus("Semua");
+    setSelectedRole("all");
+    setSelectedModule("all");
+    setSelectedStatus("all");
     setSelectedTime("week");
     setStartDate("");
     setEndDate("");
-    setSortField("timestamp");
-    setSortOrder("desc");
     setCurrentPage(1);
   };
 
-  // ==========================================================
-  // REFRESH
-  // ==========================================================
-
-  const handleRefresh = () => {
-    setIsLoading(true);
-
-    setTimeout(() => {
-      setIsLoading(false);
-    }, 500);
-  };
-
-  // ==========================================================
-  // EXPORT
-  // ==========================================================
-
   const handleExport = () => {
-    if (!sortedData.length) {
-      return;
-    }
+    if (!sortedLogs.length) return;
 
-    console.log(
-      "Export data:",
-      sortedData
+    const headers = [
+      "User",
+      "Role",
+      "Modul",
+      "Aksi",
+      "Status",
+      "Waktu",
+      "IP Address",
+    ];
+
+    const rows = sortedLogs.map(
+      (log) => [
+        log.user,
+        log.role,
+        log.module,
+        log.action,
+        log.status,
+        formatDateTime(
+          log.timestamp
+        ),
+        log.ip,
+      ]
     );
+
+    const csv = [
+      headers,
+      ...rows,
+    ]
+      .map((row) =>
+        row
+          .map((value) => {
+            const text = String(
+              value ?? ""
+            ).replace(
+              /"/g,
+              '""'
+            );
+
+            return `"${text}"`;
+          })
+          .join(",")
+      )
+      .join("\n");
+
+    const blob = new Blob(
+      [csv],
+      {
+        type:
+          "text/csv;charset=utf-8;",
+      }
+    );
+
+    const url =
+      URL.createObjectURL(blob);
+
+    const link =
+      document.createElement("a");
+
+    link.href = url;
+
+    link.download = `audit-log-${new Date()
+      .toISOString()
+      .slice(0, 10)}.csv`;
+
+    document.body.appendChild(link);
+
+    link.click();
+
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
   };
 
-  // ==========================================================
-  // RENDER
-  // ==========================================================
+  /* ============================================================
+     RENDER
+  ============================================================ */
 
   return (
     <div className="theme-page theme-text min-h-full">
@@ -916,9 +1050,7 @@ export default function LogAktivitasPage() {
           lg:px-8 lg:py-8
         "
       >
-        {/* ==================================================
-            HEADER
-        ================================================== */}
+        {/* HEADER */}
 
         <section
           className={`
@@ -976,10 +1108,6 @@ export default function LogAktivitasPage() {
                 <Activity
                   size={22}
                   strokeWidth={1.9}
-                  className="
-                    sm:h-[25px]
-                    sm:w-[25px]
-                  "
                 />
               </div>
 
@@ -1046,8 +1174,6 @@ export default function LogAktivitasPage() {
                       shrink-0
                       ${themePrimaryText}
                       opacity-70
-                      sm:h-[14px]
-                      sm:w-[14px]
                     `}
                   />
 
@@ -1120,7 +1246,9 @@ export default function LogAktivitasPage() {
               <button
                 type="button"
                 onClick={handleExport}
-                disabled={!sortedData.length}
+                disabled={
+                  !sortedLogs.length
+                }
                 className={`
                   inline-flex
                   h-10
@@ -1154,9 +1282,7 @@ export default function LogAktivitasPage() {
           </div>
         </section>
 
-        {/* ==================================================
-            STATISTICS
-        ================================================== */}
+        {/* STATISTICS */}
 
         <div
           className="
@@ -1202,9 +1328,7 @@ export default function LogAktivitasPage() {
           />
         </div>
 
-        {/* ==================================================
-            FILTER
-        ================================================== */}
+        {/* FILTER */}
 
         <section
           className={`
@@ -1235,13 +1359,7 @@ export default function LogAktivitasPage() {
                 sm:h-9 sm:w-9
               `}
             >
-              <Filter
-                size={14}
-                className="
-                  sm:h-[16px]
-                  sm:w-[16px]
-                "
-              />
+              <Filter size={15} />
             </div>
 
             <div>
@@ -1360,7 +1478,6 @@ export default function LogAktivitasPage() {
                 theme-text-secondary
                 outline-none
                 transition-all
-                hover:border-[color-mix(in_srgb,var(--color-primary)_30%,transparent)]
                 ${themeFocus}
               `}
             >
@@ -1396,7 +1513,6 @@ export default function LogAktivitasPage() {
                 theme-text-secondary
                 outline-none
                 transition-all
-                hover:border-[color-mix(in_srgb,var(--color-primary)_30%,transparent)]
                 ${themeFocus}
               `}
             >
@@ -1442,11 +1558,12 @@ export default function LogAktivitasPage() {
                 <input
                   type="date"
                   value={startDate}
-                  onChange={(event) =>
+                  onChange={(event) => {
                     setStartDate(
                       event.target.value
-                    )
-                  }
+                    );
+                    setCurrentPage(1);
+                  }}
                   className={`
                     h-10 w-full
                     rounded-xl
@@ -1477,11 +1594,12 @@ export default function LogAktivitasPage() {
                 <input
                   type="date"
                   value={endDate}
-                  onChange={(event) =>
+                  onChange={(event) => {
                     setEndDate(
                       event.target.value
-                    )
-                  }
+                    );
+                    setCurrentPage(1);
+                  }}
                   className={`
                     h-10 w-full
                     rounded-xl
@@ -1526,14 +1644,14 @@ export default function LogAktivitasPage() {
                   theme-text-secondary
                 "
               >
-                {filteredData.length}
+                {filteredLogs.length}
               </span>{" "}
               aktivitas
             </p>
 
             <button
               type="button"
-              onClick={resetFilters}
+              onClick={handleResetFilter}
               className={`
                 self-start
                 rounded-lg
@@ -1552,9 +1670,7 @@ export default function LogAktivitasPage() {
           </div>
         </section>
 
-        {/* ==================================================
-            TABLE
-        ================================================== */}
+        {/* TABLE */}
 
         <section
           className={`
@@ -1565,171 +1681,167 @@ export default function LogAktivitasPage() {
             ${themeCardShadow}
           `}
         >
-          {isMobile ? (
-            <div
-              className={`
-                divide-y
-                ${themeDivider}
-              `}
-            >
-              {paginatedData.length ===
-              0 ? (
-                <EmptyState />
-              ) : (
-                paginatedData.map(
-                  (log) => (
-                    <MobileLogCard
-                      key={log.id}
-                      log={log}
-                    />
-                  )
-                )
-              )}
-            </div>
-          ) : (
-            <div className="w-full overflow-x-auto">
-              <table className="w-full min-w-[1000px] border-collapse">
-                <thead>
-                  <tr
-                    className={`
-                      border-b
-                      ${themeDivider}
-                      ${themeNeutralSurface}
-                    `}
-                  >
-                    <TableHead
-                      sortable
-                      onClick={() =>
-                        handleSort("user")
-                      }
-                    >
-                      <span className="group flex cursor-pointer items-center gap-1">
-                        Pengguna
-                        {renderSortIcon(
-                          "user"
-                        )}
-                      </span>
-                    </TableHead>
+          {/* DESKTOP */}
 
-                    <TableHead
-                      sortable
-                      onClick={() =>
-                        handleSort("role")
-                      }
-                    >
-                      <span className="group flex cursor-pointer items-center gap-1">
-                        Role
-                        {renderSortIcon(
-                          "role"
-                        )}
-                      </span>
-                    </TableHead>
-
-                    <TableHead
-                      sortable
-                      onClick={() =>
-                        handleSort(
-                          "module"
-                        )
-                      }
-                    >
-                      <span className="group flex cursor-pointer items-center gap-1">
-                        Modul
-                        {renderSortIcon(
-                          "module"
-                        )}
-                      </span>
-                    </TableHead>
-
-                    <TableHead
-                      sortable
-                      onClick={() =>
-                        handleSort(
-                          "action"
-                        )
-                      }
-                    >
-                      <span className="group flex cursor-pointer items-center gap-1">
-                        Aktivitas
-                        {renderSortIcon(
-                          "action"
-                        )}
-                      </span>
-                    </TableHead>
-
-                    <TableHead
-                      sortable
-                      onClick={() =>
-                        handleSort(
-                          "status"
-                        )
-                      }
-                    >
-                      <span className="group flex cursor-pointer items-center gap-1">
-                        Status
-                        {renderSortIcon(
-                          "status"
-                        )}
-                      </span>
-                    </TableHead>
-
-                    <TableHead
-                      sortable
-                      onClick={() =>
-                        handleSort(
-                          "timestamp"
-                        )
-                      }
-                    >
-                      <span className="group flex cursor-pointer items-center gap-1">
-                        Waktu
-                        {renderSortIcon(
-                          "timestamp"
-                        )}
-                      </span>
-                    </TableHead>
-
-                    <TableHead>
-                      IP
-                    </TableHead>
-                  </tr>
-                </thead>
-
-                <tbody
+          <div className="hidden w-full overflow-x-auto lg:block">
+            <table className="w-full min-w-[1000px] border-collapse">
+              <thead>
+                <tr
                   className={`
-                    divide-y
+                    border-b
                     ${themeDivider}
+                    ${themeNeutralSurface}
                   `}
                 >
-                  {paginatedData.length ===
-                  0 ? (
-                    <tr>
-                      <td
-                        colSpan={7}
-                        className="px-6 py-16"
-                      >
-                        <EmptyState />
-                      </td>
-                    </tr>
-                  ) : (
-                    paginatedData.map(
-                      (log) => {
-                        const statusStyle =
-                          getStatusStyle(
-                            log.status
-                          );
+                  <TableHead
+                    sortable
+                    onClick={() =>
+                      handleSort("user")
+                    }
+                  >
+                    <span className="group flex cursor-pointer items-center gap-1">
+                      Pengguna
+                      {renderSortIcon("user")}
+                    </span>
+                  </TableHead>
 
-                        return (
-                          <tr
-                            key={log.id}
-                            className="
-                              transition-colors
-                              hover:bg-[color-mix(in_srgb,var(--color-primary)_4%,transparent)]
-                            "
-                          >
-                            <td className="px-4 py-3.5">
+                  <TableHead
+                    sortable
+                    onClick={() =>
+                      handleSort("role")
+                    }
+                  >
+                    <span className="group flex cursor-pointer items-center gap-1">
+                      Role
+                      {renderSortIcon("role")}
+                    </span>
+                  </TableHead>
+
+                  <TableHead
+                    sortable
+                    onClick={() =>
+                      handleSort("module")
+                    }
+                  >
+                    <span className="group flex cursor-pointer items-center gap-1">
+                      Modul
+                      {renderSortIcon("module")}
+                    </span>
+                  </TableHead>
+
+                  <TableHead
+                    sortable
+                    onClick={() =>
+                      handleSort("action")
+                    }
+                  >
+                    <span className="group flex cursor-pointer items-center gap-1">
+                      Aktivitas
+                      {renderSortIcon("action")}
+                    </span>
+                  </TableHead>
+
+                  <TableHead
+                    sortable
+                    onClick={() =>
+                      handleSort("status")
+                    }
+                  >
+                    <span className="group flex cursor-pointer items-center gap-1">
+                      Status
+                      {renderSortIcon("status")}
+                    </span>
+                  </TableHead>
+
+                  <TableHead
+                    sortable
+                    onClick={() =>
+                      handleSort("timestamp")
+                    }
+                  >
+                    <span className="group flex cursor-pointer items-center gap-1">
+                      Waktu
+                      {renderSortIcon("timestamp")}
+                    </span>
+                  </TableHead>
+
+                  <TableHead>
+                    IP
+                  </TableHead>
+                </tr>
+              </thead>
+
+              <tbody
+                className={`
+                  divide-y
+                  ${themeDivider}
+                `}
+              >
+                {isLoading ? (
+                  <tr>
+                    <td
+                      colSpan={7}
+                      className="px-6 py-16"
+                    >
+                      <LoadingState />
+                    </td>
+                  </tr>
+                ) : paginatedLogs.length === 0 ? (
+                  <tr>
+                    <td
+                      colSpan={7}
+                      className="px-6 py-16"
+                    >
+                      <EmptyState />
+                    </td>
+                  </tr>
+                ) : (
+                  paginatedLogs.map((log) => {
+                    const statusStyle =
+                      getStatusStyle(
+                        log.status
+                      );
+
+                    const ModuleIcon =
+                      getModuleIcon(
+                        log.module
+                      );
+
+                    return (
+                      <tr
+                        key={log.id}
+                        className="
+                          transition-colors
+                          hover:bg-[color-mix(in_srgb,var(--color-primary)_4%,transparent)]
+                        "
+                      >
+                        <td className="px-4 py-3.5">
+                          <div className="flex items-center gap-3">
+                            <div
+                              className={`
+                                flex h-9 w-9
+                                shrink-0
+                                items-center
+                                justify-center
+                                rounded-xl
+                                ${themePrimarySoft}
+                                ${themePrimaryText}
+                                text-xs
+                                font-semibold
+                              `}
+                            >
+                              {String(
+                                log.user || "-"
+                              )
+                                .charAt(0)
+                                .toUpperCase()}
+                            </div>
+
+                            <div className="min-w-0">
                               <span
                                 className="
+                                  block
+                                  truncate
                                   text-sm
                                   font-medium
                                   theme-text
@@ -1737,115 +1849,157 @@ export default function LogAktivitasPage() {
                               >
                                 {log.user}
                               </span>
-                            </td>
 
-                            <td className="px-4 py-3.5">
-                              <span
-                                className={`
-                                  rounded-lg
-                                  border
-                                  ${themeNeutralBorder}
-                                  ${themeNeutralSurface}
-                                  px-2.5 py-1
-                                  text-xs
-                                  font-medium
-                                  theme-text-secondary
-                                `}
-                              >
-                                {log.role}
-                              </span>
-                            </td>
-
-                            <td className="px-4 py-3.5">
                               <span
                                 className="
-                                  flex items-center
-                                  gap-1.5
-                                  text-sm
-                                  theme-text-secondary
-                                "
-                              >
-                                {getModuleIcon(
-                                  log.module
-                                )}
-
-                                {log.module}
-                              </span>
-                            </td>
-
-                            <td className="px-4 py-3.5">
-                              <span
-                                className="
-                                  text-sm
-                                  theme-text-secondary
-                                "
-                              >
-                                {log.action}
-                              </span>
-                            </td>
-
-                            <td className="px-4 py-3.5">
-                              <span
-                                className={`
-                                  inline-flex
-                                  items-center
-                                  gap-1.5
-                                  rounded-full
-                                  border
-                                  px-2.5 py-1
-                                  text-xs
-                                  font-medium
-                                  ${statusStyle.surface}
-                                  ${statusStyle.text}
-                                  ${statusStyle.border}
-                                `}
-                              >
-                                {getStatusIcon(
-                                  log.status
-                                )}
-
-                                {log.status ===
-                                "success"
-                                  ? "Berhasil"
-                                  : "Gagal"}
-                              </span>
-                            </td>
-
-                            <td className="px-4 py-3.5">
-                              <span
-                                className="
-                                  text-sm
+                                  block
+                                  truncate
+                                  text-[11px]
                                   theme-text-muted
                                 "
                               >
-                                {log.timestamp}
+                                ID: {log.id}
                               </span>
-                            </td>
+                            </div>
+                          </div>
+                        </td>
 
-                            <td className="px-4 py-3.5">
-                              <span
-                                className="
-                                  font-mono
-                                  text-xs
-                                  theme-text-muted
-                                "
-                              >
-                                {log.ip}
-                              </span>
-                            </td>
-                          </tr>
-                        );
-                      }
-                    )
-                  )}
-                </tbody>
-              </table>
-            </div>
-          )}
+                        <td className="px-4 py-3.5">
+                          <span
+                            className={`
+                              rounded-lg
+                              border
+                              ${themeNeutralBorder}
+                              ${themeNeutralSurface}
+                              px-2.5 py-1
+                              text-xs
+                              font-medium
+                              theme-text-secondary
+                            `}
+                          >
+                            {log.role}
+                          </span>
+                        </td>
 
-          {/* ==================================================
-              PAGINATION
-          ================================================== */}
+                        <td className="px-4 py-3.5">
+                          <span
+                            className="
+                              flex items-center
+                              gap-1.5
+                              text-sm
+                              theme-text-secondary
+                            "
+                          >
+                            <ModuleIcon
+                              size={14}
+                              className="theme-text-muted"
+                            />
+
+                            {log.module}
+                          </span>
+                        </td>
+
+                        <td className="px-4 py-3.5">
+                          <span
+                            className="
+                              text-sm
+                              theme-text-secondary
+                            "
+                          >
+                            {log.action}
+                          </span>
+                        </td>
+
+                        <td className="px-4 py-3.5">
+                          <span
+                            className={`
+                              inline-flex
+                              items-center
+                              gap-1.5
+                              rounded-full
+                              border
+                              px-2.5 py-1
+                              text-xs
+                              font-medium
+                              ${statusStyle.surface}
+                              ${statusStyle.text}
+                              ${statusStyle.border}
+                            `}
+                          >
+                            {getStatusIcon(
+                              log.status
+                            )}
+
+                            {log.status ===
+                            "success"
+                              ? "Berhasil"
+                              : "Gagal"}
+                          </span>
+                        </td>
+
+                        <td className="px-4 py-3.5">
+                          <span
+                            className="
+                              text-sm
+                              theme-text-muted
+                            "
+                          >
+                            {formatDateTime(
+                              log.timestamp
+                            )}
+                          </span>
+                        </td>
+
+                        <td className="px-4 py-3.5">
+                          <span
+                            className="
+                              flex items-center
+                              gap-1.5
+                              font-mono
+                              text-xs
+                              theme-text-muted
+                            "
+                          >
+                            <Globe size={13} />
+                            {log.ip}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* MOBILE */}
+
+          <div
+            className={`
+              divide-y
+              ${themeDivider}
+              lg:hidden
+            `}
+          >
+            {isLoading ? (
+              <div className="px-5 py-12">
+                <LoadingState />
+              </div>
+            ) : paginatedLogs.length === 0 ? (
+              <div className="px-5 py-12">
+                <EmptyState />
+              </div>
+            ) : (
+              paginatedLogs.map((log) => (
+                <MobileLogCard
+                  key={log.id}
+                  log={log}
+                />
+              ))
+            )}
+          </div>
+
+          {/* PAGINATION */}
 
           <div
             className={`
@@ -1873,10 +2027,11 @@ export default function LogAktivitasPage() {
                   theme-text-secondary
                 "
               >
-                {paginatedData.length ===
-                0
+                {sortedLogs.length === 0
                   ? 0
-                  : startIndex + 1}
+                  : (currentPage - 1) *
+                      itemsPerPage +
+                    1}
               </span>{" "}
               –{" "}
               <span
@@ -1886,9 +2041,9 @@ export default function LogAktivitasPage() {
                 "
               >
                 {Math.min(
-                  startIndex +
-                    paginatedData.length,
-                  sortedData.length
+                  currentPage *
+                    itemsPerPage,
+                  sortedLogs.length
                 )}
               </span>{" "}
               dari{" "}
@@ -1898,7 +2053,7 @@ export default function LogAktivitasPage() {
                   theme-text-secondary
                 "
               >
-                {sortedData.length}
+                {sortedLogs.length}
               </span>{" "}
               data
             </p>
@@ -1908,22 +2063,24 @@ export default function LogAktivitasPage() {
                 type="button"
                 onClick={() =>
                   setCurrentPage(
-                    Math.max(
-                      1,
-                      currentPage - 1
-                    )
+                    (prev) =>
+                      Math.max(
+                        1,
+                        prev - 1
+                      )
                   )
                 }
                 disabled={
                   currentPage === 1
                 }
                 className={`
-                  flex h-9 w-9
+                  flex h-9
                   items-center
                   justify-center
                   rounded-lg
                   border theme-border
                   ${themeNeutralSurface}
+                  px-3
                   theme-text-muted
                   transition-all
                   ${themeNeutralHover}
@@ -1937,49 +2094,46 @@ export default function LogAktivitasPage() {
                 />
               </button>
 
-              {sortedData.length > 0 &&
-                [...Array(
-                  Math.min(
-                    totalPages,
-                    5
-                  )
-                )].map(
-                  (_, index) => {
-                    const page =
-                      index + 1;
+              {sortedLogs.length > 0 &&
+                Array.from(
+                  {
+                    length: Math.min(
+                      totalPages,
+                      5
+                    ),
+                  },
+                  (_, index) =>
+                    index + 1
+                ).map((page) => (
+                  <button
+                    key={page}
+                    type="button"
+                    onClick={() =>
+                      setCurrentPage(
+                        page
+                      )
+                    }
+                    className={`
+                      flex h-9 w-9
+                      items-center
+                      justify-center
+                      rounded-lg
+                      text-xs
+                      font-semibold
+                      transition-all
+                      ${
+                        currentPage ===
+                        page
+                          ? `${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`
+                          : `theme-text-muted ${themeNeutralHover}`
+                      }
+                    `}
+                  >
+                    {page}
+                  </button>
+                ))}
 
-                    return (
-                      <button
-                        key={page}
-                        type="button"
-                        onClick={() =>
-                          setCurrentPage(
-                            page
-                          )
-                        }
-                        className={`
-                          flex h-9 w-9
-                          items-center
-                          justify-center
-                          rounded-lg
-                          text-xs
-                          font-semibold
-                          transition-all
-                          ${
-                            currentPage ===
-                            page
-                              ? `${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`
-                              : `theme-text-muted ${themeNeutralHover}`
-                          }
-                        `}
-                      >
-                        {page}
-                      </button>
-                    );
-                  }
-                )}
-
-              {sortedData.length > 0 &&
+              {sortedLogs.length > 0 &&
                 totalPages > 5 && (
                   <>
                     <span className="px-0.5 theme-text-muted">
@@ -2018,25 +2172,26 @@ export default function LogAktivitasPage() {
                 type="button"
                 onClick={() =>
                   setCurrentPage(
-                    Math.min(
-                      totalPages,
-                      currentPage + 1
-                    )
+                    (prev) =>
+                      Math.min(
+                        totalPages,
+                        prev + 1
+                      )
                   )
                 }
                 disabled={
                   currentPage ===
                     totalPages ||
-                  totalPages === 0 ||
-                  sortedData.length === 0
+                  sortedLogs.length === 0
                 }
                 className={`
-                  flex h-9 w-9
+                  flex h-9
                   items-center
                   justify-center
                   rounded-lg
                   border theme-border
                   ${themeNeutralSurface}
+                  px-3
                   theme-text-muted
                   transition-all
                   ${themeNeutralHover}
@@ -2053,9 +2208,7 @@ export default function LogAktivitasPage() {
           </div>
         </section>
 
-        {/* ==================================================
-            FOOTER
-        ================================================== */}
+        {/* FOOTER */}
 
         <div
           className={`
@@ -2081,9 +2234,9 @@ export default function LogAktivitasPage() {
   );
 }
 
-// ============================================================
-// STAT CARD
-// ============================================================
+/* ============================================================
+   STAT CARD
+============================================================ */
 
 function StatCard({
   label,
@@ -2095,31 +2248,40 @@ function StatCard({
     primary: {
       bg: themePrimarySoft,
       text: themePrimaryText,
-      border: themePrimarySoftBorder,
+      border:
+        themePrimarySoftBorder,
     },
 
     success: {
       bg: themeSuccessSurface,
-      text: "text-[var(--color-success)]",
-      border: themeSuccessBorder,
+      text:
+        "text-[var(--color-success)]",
+      border:
+        themeSuccessBorder,
     },
 
     danger: {
       bg: themeDangerSurface,
-      text: "theme-text-secondary",
-      border: themeDangerBorder,
+      text:
+        "theme-text-secondary",
+      border:
+        themeDangerBorder,
     },
 
     info: {
       bg: themeInfoSurface,
-      text: "text-[var(--color-info)]",
-      border: themeInfoBorder,
+      text:
+        "text-[var(--color-info)]",
+      border:
+        themeInfoBorder,
     },
 
     warning: {
       bg: themeWarningSurface,
-      text: "text-[var(--color-warning)]",
-      border: themeWarningBorder,
+      text:
+        "text-[var(--color-warning)]",
+      border:
+        themeWarningBorder,
     },
   };
 
@@ -2202,9 +2364,9 @@ function StatCard({
   );
 }
 
-// ============================================================
-// TABLE HEAD
-// ============================================================
+/* ============================================================
+   TABLE HEAD
+============================================================ */
 
 function TableHead({
   children,
@@ -2227,13 +2389,13 @@ function TableHead({
         <button
           type="button"
           onClick={onClick}
-          className={`
+          className="
             group flex
             items-center
             gap-1
             transition-colors
-            hover:${themePrimaryText}
-          `}
+            hover:text-[var(--color-primary)]
+          "
         >
           {children}
         </button>
@@ -2244,9 +2406,44 @@ function TableHead({
   );
 }
 
-// ============================================================
-// EMPTY STATE
-// ============================================================
+/* ============================================================
+   LOADING STATE
+============================================================ */
+
+function LoadingState() {
+  return (
+    <div
+      className="
+        flex flex-col
+        items-center
+        justify-center
+        text-center
+      "
+    >
+      <RefreshCw
+        size={26}
+        className={`
+          animate-spin
+          ${themePrimaryText}
+        `}
+      />
+
+      <p
+        className="
+          mt-3
+          text-sm
+          theme-text-muted
+        "
+      >
+        Mengambil data audit log...
+      </p>
+    </div>
+  );
+}
+
+/* ============================================================
+   EMPTY STATE
+============================================================ */
 
 function EmptyState() {
   return (
@@ -2255,7 +2452,7 @@ function EmptyState() {
         flex flex-col
         items-center
         justify-center
-        py-12
+        py-8
         text-center
       "
     >
@@ -2298,23 +2495,20 @@ function EmptyState() {
   );
 }
 
-// ============================================================
-// MOBILE LOG CARD
-// ============================================================
+/* ============================================================
+   MOBILE LOG CARD
+============================================================ */
 
 function MobileLogCard({ log }) {
   const statusStyle =
-    log.status === "success"
-      ? {
-          surface: themeSuccessSurface,
-          text: "text-[var(--color-success)]",
-          border: themeSuccessBorder,
-        }
-      : {
-          surface: themeDangerSurface,
-          text: "theme-text-secondary",
-          border: themeDangerBorder,
-        };
+    getMobileStatusStyle(
+      log.status
+    );
+
+  const ModuleIcon =
+    getMobileModuleIcon(
+      log.module
+    );
 
   return (
     <div
@@ -2385,10 +2579,13 @@ function MobileLogCard({ log }) {
           >
             <span
               className="
+                flex items-center
+                gap-1
                 text-xs
                 theme-text-muted
               "
             >
+              <ModuleIcon size={12} />
               {log.module}
             </span>
 
@@ -2402,7 +2599,9 @@ function MobileLogCard({ log }) {
                 theme-text-muted
               "
             >
-              {log.timestamp}
+              {formatMobileDateTime(
+                log.timestamp
+              )}
             </span>
 
             <span className="theme-text-muted">
@@ -2452,4 +2651,127 @@ function MobileLogCard({ log }) {
       </div>
     </div>
   );
+}
+
+/* ============================================================
+   MOBILE HELPERS
+============================================================ */
+
+function getMobileStatusStyle(status) {
+  if (status === "success") {
+    return {
+      surface:
+        themeSuccessSurface,
+      text:
+        "text-[var(--color-success)]",
+      border:
+        themeSuccessBorder,
+    };
+  }
+
+  return {
+    surface:
+      themeDangerSurface,
+    text:
+      "theme-text-secondary",
+    border:
+      themeDangerBorder,
+  };
+}
+
+function getMobileModuleIcon(module) {
+  const value = String(
+    module || ""
+  ).toLowerCase();
+
+  if (value.includes("siswa"))
+    return Users;
+
+  if (value.includes("guru"))
+    return GraduationCap;
+
+  if (
+    value.includes("presensi") ||
+    value.includes("absen")
+  )
+    return Clock;
+
+  if (
+    value.includes("keuangan")
+  )
+    return DollarSign;
+
+  if (
+    value.includes("akademik") ||
+    value.includes("nilai")
+  )
+    return BookOpen;
+
+  if (
+    value.includes("akses") ||
+    value.includes("role") ||
+    value.includes("permission")
+  )
+    return Shield;
+
+  if (
+    value.includes("pengguna") ||
+    value.includes("user")
+  )
+    return UserCog;
+
+  if (
+    value.includes("pengaturan")
+  )
+    return Settings;
+
+  if (
+    value.includes("keamanan")
+  )
+    return Lock;
+
+  if (
+    value.includes("laporan")
+  )
+    return BarChart3;
+
+  if (
+    value.includes("sekolah")
+  )
+    return Building2;
+
+  if (
+    value.includes("database")
+  )
+    return Database;
+
+  if (
+    value.includes("dokumen") ||
+    value.includes("administrasi")
+  )
+    return FileText;
+
+  return Activity;
+}
+
+function formatMobileDateTime(value) {
+  if (!value) return "-";
+
+  const date = new Date(value);
+
+  if (
+    Number.isNaN(
+      date.getTime()
+    )
+  ) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat(
+    "id-ID",
+    {
+      dateStyle: "short",
+      timeStyle: "short",
+    }
+  ).format(date);
 }

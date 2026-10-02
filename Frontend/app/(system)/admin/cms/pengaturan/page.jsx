@@ -1,4 +1,4 @@
-// app/cmsAdmin/pengaturan/page.jsx
+
 "use client";
 
 import { useState } from "react";
@@ -28,7 +28,7 @@ export default function PengaturanPage() {
       title: "Identitas Website",
       description: "Atur nama, deskripsi, logo, favicon, dan kontak sekolah.",
       icon: Globe,
-      route: "/cmsAdmin/pengaturan/identitas",
+      route: "/admin/cms/pengaturan/identitas",
       count: "1 Pengaturan",
     },
     {
@@ -36,7 +36,7 @@ export default function PengaturanPage() {
       title: "SEO",
       description: "Optimalkan meta title, description, dan script tracking.",
       icon: Search,
-      route: "/cmsAdmin/pengaturan/seo",
+      route: "/admin/cms/pengaturan/seo",
       count: "4 Pengaturan",
     },
     {
@@ -45,7 +45,7 @@ export default function PengaturanPage() {
       description:
         "Hubungkan akun Facebook, Instagram, YouTube, dan lainnya.",
       icon: Share2,
-      route: "/cmsAdmin/pengaturan/sosial-media",
+      route: "/admin/cms/pengaturan/sosial-media",
       count: "5 Platform",
     },
     {
@@ -54,7 +54,7 @@ export default function PengaturanPage() {
       description:
         "Sesuaikan tema warna, jenis font, dan layout website.",
       icon: Palette,
-      route: "/cmsAdmin/pengaturan/tampilan",
+      route: "/admin/cms/pengaturan/tampilan",
       count: "3 Pengaturan",
     },
   ];
@@ -85,7 +85,7 @@ export default function PengaturanPage() {
             {/* Breadcrumb */}
             <nav className="flex items-center gap-2 text-sm">
               <a
-                href="/cmsAdmin"
+                href="/admin/cms"
                 className="theme-text-muted hover:text-[var(--color-primary)] transition"
               >
                 Dashboard

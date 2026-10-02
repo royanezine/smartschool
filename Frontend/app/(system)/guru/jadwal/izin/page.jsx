@@ -1,22 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+
 import Sidebar from "../../../../components/Sidebar";
 import Header from "../../../../components/Header";
+
 import {
   FileText,
-  Sparkles,
   Plus,
-  X,
   CalendarDays,
   CheckCircle2,
   XCircle,
   Hourglass,
+  Paperclip,
+  ArrowRight,
+  Loader2,
+  RefreshCw,
 } from "lucide-react";
 
-// ============================================================
-// THEME HELPERS
-// ============================================================
+import { getDaftarIzin } from "../../../../../services/izin.service";
+
+/* ============================================================
+   THEME HELPERS
+============================================================ */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -75,53 +82,11 @@ const themeDangerSurface =
 const themeDangerBorder =
   "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
 
-const themeFocus =
-  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
+/* ============================================================
+   STATUS
+============================================================ */
 
-// ============================================================
-// DUMMY DATA
-// Catatan: ganti dengan data asli dari API/DB begitu tersedia.
-// ============================================================
-
-const JENIS_IZIN = [
-  "Sakit",
-  "Izin Pribadi",
-  "Dinas Luar",
-  "Cuti",
-];
-
-const riwayatIzinAwal = [
-  {
-    id: 1,
-    jenis: "Sakit",
-    tanggalMulai: "13 Agustus 2026",
-    tanggalSelesai: "13 Agustus 2026",
-    alasan: "Demam, perlu istirahat di rumah",
-    status: "disetujui",
-  },
-  {
-    id: 2,
-    jenis: "Dinas Luar",
-    tanggalMulai: "5 Agustus 2026",
-    tanggalSelesai: "5 Agustus 2026",
-    alasan: "Menghadiri workshop kurikulum di dinas pendidikan",
-    status: "disetujui",
-  },
-  {
-    id: 3,
-    jenis: "Izin Pribadi",
-    tanggalMulai: "22 Juli 2026",
-    tanggalSelesai: "23 Juli 2026",
-    alasan: "Urusan keluarga di luar kota",
-    status: "ditolak",
-  },
-];
-
-// ============================================================
-// STATUS STYLE
-// ============================================================
-
-const statusStyle = {
+const STATUS_STYLE = {
   disetujui: {
     bg: themeSuccessSurface,
     text: "text-[var(--color-success)]",
@@ -147,109 +112,222 @@ const statusStyle = {
   },
 };
 
-// ============================================================
-// MAIN COMPONENT
-// ============================================================
+/* ============================================================
+   JENIS
+============================================================ */
 
-export default function GuruIzinPage() {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [showForm, setShowForm] = useState(false);
-  const [riwayatIzin, setRiwayatIzin] = useState(riwayatIzinAwal);
+const JENIS_IZIN = [
+  {
+    value: "sakit",
+    label: "Sakit",
+  },
+  {
+    value: "izin",
+    label: "Izin",
+  },
+];
 
-  const [form, setForm] = useState({
-    jenis: JENIS_IZIN[0],
-    tanggalMulai: "",
-    tanggalSelesai: "",
-    alasan: "",
-  });
+/* ============================================================
+   DATE
+============================================================ */
 
-  const [errors, setErrors] = useState({});
+function normalizeDateOnly(value) {
+  if (!value) return null;
 
-  const notifications = [
+  if (
+    typeof value === "string" &&
+    /^\d{4}-\d{2}-\d{2}$/.test(value)
+  ) {
+    return value;
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return null;
+  }
+
+  const year = date.getFullYear();
+
+  const month = String(
+    date.getMonth() + 1
+  ).padStart(2, "0");
+
+  const day = String(
+    date.getDate()
+  ).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+function formatTanggal(tanggal) {
+  const normalized =
+    normalizeDateOnly(tanggal);
+
+  if (!normalized) return "-";
+
+  const date = new Date(
+    `${normalized}T00:00:00`
+  );
+
+  if (Number.isNaN(date.getTime())) {
+    return "-";
+  }
+
+  return date.toLocaleDateString(
+    "id-ID",
     {
-      id: 1,
-      title: "Rapat Wali Kelas",
-      desc: "Dikirim 2 jam lalu",
-      read: false,
-    },
-    {
-      id: 2,
-      title: "Batas Input Nilai Rapor",
-      desc: "Dikirim 5 jam lalu",
-      read: false,
-    },
-  ];
-
-  const summary = {
-    total: riwayatIzin.length,
-    disetujui: riwayatIzin.filter(
-      (r) => r.status === "disetujui"
-    ).length,
-    menunggu: riwayatIzin.filter(
-      (r) => r.status === "menunggu"
-    ).length,
-  };
-
-  const formatTanggal = (iso) => {
-    if (!iso) return "";
-
-    return new Date(iso).toLocaleDateString("id-ID", {
       day: "numeric",
       month: "long",
       year: "numeric",
-    });
+    }
+  );
+}
+
+/* ============================================================
+   JENIS FORMAT
+============================================================ */
+
+function formatJenis(jenis) {
+  if (!jenis) return "-";
+
+  const found =
+    JENIS_IZIN.find(
+      (item) =>
+        item.value ===
+        String(jenis).toLowerCase()
+    );
+
+  return found
+    ? found.label
+    : jenis;
+}
+
+/* ============================================================
+   RESPONSE
+============================================================ */
+
+function normalizeResponseData(response) {
+  if (Array.isArray(response)) {
+    return response;
+  }
+
+  if (Array.isArray(response?.data)) {
+    return response.data;
+  }
+
+  if (Array.isArray(response?.data?.data)) {
+    return response.data.data;
+  }
+
+  if (Array.isArray(response?.items)) {
+    return response.items;
+  }
+
+  return [];
+}
+
+/* ============================================================
+   PAGE
+============================================================ */
+
+export default function GuruIzinPage() {
+  const router = useRouter();
+
+  const [sidebarOpen, setSidebarOpen] =
+    useState(true);
+
+  const [riwayatIzin, setRiwayatIzin] =
+    useState([]);
+
+  const [loading, setLoading] =
+    useState(true);
+
+  const [refreshing, setRefreshing] =
+    useState(false);
+
+  const [pageError, setPageError] =
+    useState("");
+
+  const notifications = [];
+
+  /* ============================================================
+     LOAD DATA
+  ============================================================ */
+
+  async function loadRiwayatIzin(
+    showLoading = true
+  ) {
+    try {
+      if (showLoading) {
+        setLoading(true);
+      } else {
+        setRefreshing(true);
+      }
+
+      setPageError("");
+
+      const response =
+        await getDaftarIzin();
+
+      const daftar =
+        normalizeResponseData(
+          response
+        );
+
+      setRiwayatIzin(daftar);
+    } catch (error) {
+      console.error(
+        "Gagal mengambil riwayat izin:",
+        error
+      );
+
+      setPageError(
+        error?.message ||
+          "Gagal mengambil riwayat pengajuan izin."
+      );
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }
+
+  useEffect(() => {
+    loadRiwayatIzin(true);
+  }, []);
+
+  /* ============================================================
+     SUMMARY
+  ============================================================ */
+
+  const summary = {
+    total: riwayatIzin.length,
+
+    disetujui:
+      riwayatIzin.filter(
+        (item) =>
+          item.status ===
+          "disetujui"
+      ).length,
+
+    menunggu:
+      riwayatIzin.filter(
+        (item) =>
+          item.status ===
+          "menunggu"
+      ).length,
+
+    ditolak:
+      riwayatIzin.filter(
+        (item) =>
+          item.status ===
+          "ditolak"
+      ).length,
   };
 
-  const handleSubmit = () => {
-    const newErrors = {};
-
-    if (!form.tanggalMulai) {
-      newErrors.tanggalMulai = "Pilih tanggal mulai izin.";
-    }
-
-    if (!form.tanggalSelesai) {
-      newErrors.tanggalSelesai = "Pilih tanggal selesai izin.";
-    }
-
-    if (
-      form.tanggalMulai &&
-      form.tanggalSelesai &&
-      form.tanggalSelesai < form.tanggalMulai
-    ) {
-      newErrors.tanggalSelesai =
-        "Tanggal selesai tidak boleh sebelum tanggal mulai.";
-    }
-
-    if (!form.alasan.trim()) {
-      newErrors.alasan = "Isi alasan pengajuan izin.";
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
-
-    const izinBaru = {
-      id: Date.now(),
-      jenis: form.jenis,
-      tanggalMulai: formatTanggal(form.tanggalMulai),
-      tanggalSelesai: formatTanggal(form.tanggalSelesai),
-      alasan: form.alasan.trim(),
-      status: "menunggu",
-    };
-
-    setRiwayatIzin([izinBaru, ...riwayatIzin]);
-
-    setForm({
-      jenis: JENIS_IZIN[0],
-      tanggalMulai: "",
-      tanggalSelesai: "",
-      alasan: "",
-    });
-
-    setErrors({});
-    setShowForm(false);
-  };
+  /* ============================================================
+     RENDER
+  ============================================================ */
 
   return (
     <div className="flex h-screen theme-page overflow-hidden">
@@ -261,16 +339,24 @@ export default function GuruIzinPage() {
         active="izin"
         setActive={() => {}}
         collapsed={!sidebarOpen}
-        setCollapsed={() => setSidebarOpen(!sidebarOpen)}
+        setCollapsed={() =>
+          setSidebarOpen(
+            (prev) => !prev
+          )
+        }
       />
 
       {/* ======================================================
-          MAIN WRAPPER
+          MAIN
       ====================================================== */}
 
       <div className="flex-1 flex flex-col min-w-0 theme-page">
         <Header
-          toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
+          toggleSidebar={() =>
+            setSidebarOpen(
+              (prev) => !prev
+            )
+          }
           notifications={notifications}
           user={{
             name: "Bu Sari",
@@ -283,7 +369,7 @@ export default function GuruIzinPage() {
           <div className="w-full space-y-6">
 
             {/* ==================================================
-                PAGE HEADER
+                HEADER
             ================================================== */}
 
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
@@ -295,383 +381,386 @@ export default function GuruIzinPage() {
                     <FileText size={18} />
                   </div>
 
-                  <h1 className="text-xl sm:text-2xl font-semibold theme-text truncate">
-                    Pengajuan Izin
-                  </h1>
-                </div>
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <h1 className="text-xl sm:text-2xl font-semibold theme-text truncate">
+                        Pengajuan Izin
+                      </h1>
 
-                <p className="text-sm theme-text-secondary mt-1 ml-[42px] flex items-center gap-1.5">
-                  <Sparkles
-                    size={14}
-                    className="theme-text-muted flex-shrink-0"
+                      <span
+                        className={`text-[10px] font-bold px-2 py-1 rounded-md ${themePrimarySoft} ${themePrimaryText} border ${themePrimarySoftBorder}`}
+                      >
+                        Guru
+                      </span>
+                    </div>
+
+                    <p className="text-sm theme-text-secondary mt-1">
+                      Ajukan izin tidak hadir mengajar dan pantau statusnya.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2">
+
+                {/* REFRESH */}
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    loadRiwayatIzin(false)
+                  }
+                  disabled={refreshing}
+                  className={`inline-flex items-center justify-center gap-2 px-3.5 py-2.5 text-sm font-medium theme-text-secondary theme-card border ${themeNeutralBorder} rounded-lg ${themeNeutralHover} disabled:opacity-50 transition-colors`}
+                >
+                  <RefreshCw
+                    size={15}
+                    className={
+                      refreshing
+                        ? "animate-spin"
+                        : ""
+                    }
                   />
 
-                  <span className="truncate">
-                    Ajukan izin tidak hadir mengajar dan pantau statusnya.
+                  <span className="hidden sm:inline">
+                    Refresh
                   </span>
-                </p>
-              </div>
+                </button>
 
-              {/* BUTTON AJUKAN IZIN */}
+                {/* AJUKAN */}
 
-              <button
-                onClick={() => setShowForm(true)}
-                className={`flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-[var(--color-card)] ${themePrimaryGradient} rounded-lg hover:opacity-90 transition-opacity ${themeSmallShadow} whitespace-nowrap flex-shrink-0`}
-              >
-                <Plus size={16} />
-                Ajukan Izin
-              </button>
-            </div>
-
-            {/* ==================================================
-                SUMMARY CARDS
-            ================================================== */}
-
-            <div className="grid grid-cols-3 gap-3">
-
-              {/* TOTAL */}
-
-              <div
-                className={`theme-card rounded-xl ${themeNeutralBorder} p-3.5 ${themeCardShadow} flex items-center gap-3 min-w-0`}
-              >
-                <div
-                  className={`p-2 rounded-lg border ${themePrimarySoft} ${themePrimaryText} ${themePrimarySoftBorder} flex-shrink-0`}
+                <button
+                  type="button"
+                  onClick={() =>
+                    router.push(
+                      "/guru/jadwal/izin/ajukan"
+                    )
+                  }
+                  className={`inline-flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium text-[var(--color-card)] ${themePrimaryGradient} rounded-lg hover:opacity-90 transition-opacity ${themeSmallShadow} whitespace-nowrap`}
                 >
-                  <FileText size={16} />
-                </div>
-
-                <div className="min-w-0">
-                  <p className="text-[11px] font-medium theme-text-muted uppercase tracking-wider truncate">
-                    Total Pengajuan
-                  </p>
-
-                  <p className="text-lg font-bold theme-text">
-                    {summary.total}
-                  </p>
-                </div>
-              </div>
-
-              {/* DISETUJUI */}
-
-              <div
-                className={`theme-card rounded-xl ${themeNeutralBorder} p-3.5 ${themeCardShadow} flex items-center gap-3 min-w-0`}
-              >
-                <div
-                  className={`p-2 rounded-lg border ${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder} flex-shrink-0`}
-                >
-                  <CheckCircle2 size={16} />
-                </div>
-
-                <div className="min-w-0">
-                  <p className="text-[11px] font-medium theme-text-muted uppercase tracking-wider truncate">
-                    Disetujui
-                  </p>
-
-                  <p className="text-lg font-bold theme-text">
-                    {summary.disetujui}
-                  </p>
-                </div>
-              </div>
-
-              {/* MENUNGGU */}
-
-              <div
-                className={`theme-card rounded-xl ${themeNeutralBorder} p-3.5 ${themeCardShadow} flex items-center gap-3 min-w-0`}
-              >
-                <div
-                  className={`p-2 rounded-lg border ${themeWarningSurface} text-[var(--color-warning)] ${themeWarningBorder} flex-shrink-0`}
-                >
-                  <Hourglass size={16} />
-                </div>
-
-                <div className="min-w-0">
-                  <p className="text-[11px] font-medium theme-text-muted uppercase tracking-wider truncate">
-                    Menunggu
-                  </p>
-
-                  <p className="text-lg font-bold theme-text">
-                    {summary.menunggu}
-                  </p>
-                </div>
+                  <Plus size={16} />
+                  Ajukan Izin
+                </button>
               </div>
             </div>
 
             {/* ==================================================
-                FORM PENGAJUAN
+                ERROR
             ================================================== */}
 
-            {showForm && (
+            {pageError && (
               <div
-                className={`theme-card rounded-xl ${themeNeutralBorder} ${themeCardShadow} overflow-hidden`}
+                className={`flex items-start justify-between gap-3 p-4 rounded-xl border ${themeDangerBorder} ${themeDangerSurface} theme-danger`}
               >
-                {/* FORM HEADER */}
+                <div className="text-sm">
+                  <p className="font-semibold">
+                    Gagal memuat data
+                  </p>
 
-                <div
-                  className={`p-4 sm:p-5 ${themeDivider} border-b flex items-center justify-between`}
+                  <p className="mt-1">
+                    {pageError}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    loadRiwayatIzin(true)
+                  }
+                  className="text-sm font-medium underline hover:no-underline whitespace-nowrap"
                 >
-                  <h3 className="text-sm font-semibold theme-text">
-                    Form Pengajuan Izin
-                  </h3>
-
-                  <button
-                    onClick={() => {
-                      setShowForm(false);
-                      setErrors({});
-                    }}
-                    className="theme-text-muted hover:text-[var(--color-primary)] transition-colors"
-                  >
-                    <X size={18} />
-                  </button>
-                </div>
-
-                {/* FORM BODY */}
-
-                <div className="p-4 sm:p-5 space-y-4">
-
-                  {/* JENIS IZIN */}
-
-                  <div>
-                    <label className="block text-xs font-medium theme-text-secondary mb-1.5">
-                      Jenis Izin
-                    </label>
-
-                    <select
-                      value={form.jenis}
-                      onChange={(e) =>
-                        setForm({
-                          ...form,
-                          jenis: e.target.value,
-                        })
-                      }
-                      className={`w-full appearance-none px-3 py-2.5 text-sm font-medium theme-input rounded-lg ${themeFocus} transition-colors cursor-pointer`}
-                    >
-                      {JENIS_IZIN.map((j) => (
-                        <option key={j} value={j}>
-                          {j}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
-
-                  {/* TANGGAL */}
-
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-
-                    {/* TANGGAL MULAI */}
-
-                    <div>
-                      <label className="block text-xs font-medium theme-text-secondary mb-1.5">
-                        Tanggal Mulai
-                      </label>
-
-                      <input
-                        type="date"
-                        value={form.tanggalMulai}
-                        onChange={(e) => {
-                          setForm({
-                            ...form,
-                            tanggalMulai: e.target.value,
-                          });
-
-                          setErrors({
-                            ...errors,
-                            tanggalMulai: undefined,
-                          });
-                        }}
-                        className={`w-full px-3 py-2.5 text-sm theme-input rounded-lg ${themeFocus} transition-colors`}
-                      />
-
-                      {errors.tanggalMulai && (
-                        <p className="text-xs theme-danger mt-1.5">
-                          {errors.tanggalMulai}
-                        </p>
-                      )}
-                    </div>
-
-                    {/* TANGGAL SELESAI */}
-
-                    <div>
-                      <label className="block text-xs font-medium theme-text-secondary mb-1.5">
-                        Tanggal Selesai
-                      </label>
-
-                      <input
-                        type="date"
-                        value={form.tanggalSelesai}
-                        onChange={(e) => {
-                          setForm({
-                            ...form,
-                            tanggalSelesai: e.target.value,
-                          });
-
-                          setErrors({
-                            ...errors,
-                            tanggalSelesai: undefined,
-                          });
-                        }}
-                        className={`w-full px-3 py-2.5 text-sm theme-input rounded-lg ${themeFocus} transition-colors`}
-                      />
-
-                      {errors.tanggalSelesai && (
-                        <p className="text-xs theme-danger mt-1.5">
-                          {errors.tanggalSelesai}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* ALASAN */}
-
-                  <div>
-                    <label className="block text-xs font-medium theme-text-secondary mb-1.5">
-                      Alasan
-                    </label>
-
-                    <textarea
-                      value={form.alasan}
-                      onChange={(e) => {
-                        setForm({
-                          ...form,
-                          alasan: e.target.value,
-                        });
-
-                        setErrors({
-                          ...errors,
-                          alasan: undefined,
-                        });
-                      }}
-                      rows={3}
-                      placeholder="Jelaskan alasan pengajuan izin Anda..."
-                      className={`w-full px-3 py-2.5 text-sm theme-input rounded-lg ${themeFocus} transition-colors resize-none placeholder:text-[var(--color-text-placeholder)]`}
-                    />
-
-                    {errors.alasan && (
-                      <p className="text-xs theme-danger mt-1.5">
-                        {errors.alasan}
-                      </p>
-                    )}
-                  </div>
-
-                  {/* FORM ACTION */}
-
-                  <div className="flex items-center justify-end gap-2 pt-1">
-
-                    {/* BATAL */}
-
-                    <button
-                      onClick={() => {
-                        setShowForm(false);
-                        setErrors({});
-                      }}
-                      className={`px-4 py-2.5 text-sm font-medium theme-text-secondary theme-card border ${themeNeutralBorder} rounded-lg ${themeNeutralHover} transition-colors`}
-                    >
-                      Batal
-                    </button>
-
-                    {/* KIRIM */}
-
-                    <button
-                      onClick={handleSubmit}
-                      className={`px-4 py-2.5 text-sm font-medium text-[var(--color-card)] ${themePrimaryGradient} rounded-lg hover:opacity-90 transition-opacity ${themeSmallShadow}`}
-                    >
-                      Kirim Pengajuan
-                    </button>
-                  </div>
-                </div>
+                  Coba lagi
+                </button>
               </div>
             )}
 
             {/* ==================================================
-                RIWAYAT IZIN
+                SUMMARY
+            ================================================== */}
+
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+
+              <SummaryCard
+                icon={FileText}
+                label="Total Pengajuan"
+                value={
+                  loading
+                    ? "..."
+                    : summary.total
+                }
+                iconClass={`${themePrimarySoft} ${themePrimaryText} ${themePrimarySoftBorder}`}
+              />
+
+              <SummaryCard
+                icon={Hourglass}
+                label="Menunggu"
+                value={
+                  loading
+                    ? "..."
+                    : summary.menunggu
+                }
+                iconClass={`${themeWarningSurface} text-[var(--color-warning)] ${themeWarningBorder}`}
+              />
+
+              <SummaryCard
+                icon={CheckCircle2}
+                label="Disetujui"
+                value={
+                  loading
+                    ? "..."
+                    : summary.disetujui
+                }
+                iconClass={`${themeSuccessSurface} text-[var(--color-success)] ${themeSuccessBorder}`}
+              />
+
+              <SummaryCard
+                icon={XCircle}
+                label="Ditolak"
+                value={
+                  loading
+                    ? "..."
+                    : summary.ditolak
+                }
+                iconClass={`${themeDangerSurface} theme-danger ${themeDangerBorder}`}
+              />
+            </div>
+
+            {/* ==================================================
+                RIWAYAT
             ================================================== */}
 
             <div
               className={`theme-card rounded-xl ${themeNeutralBorder} ${themeCardShadow} overflow-hidden`}
             >
-              {/* HEADER RIWAYAT */}
-
               <div
                 className={`p-4 sm:p-5 ${themeDivider} border-b flex items-center justify-between`}
               >
-                <h3 className="text-sm font-semibold theme-text truncate">
-                  Riwayat Pengajuan
-                </h3>
+                <div>
+                  <h3 className="text-sm font-semibold theme-text">
+                    Riwayat Pengajuan
+                  </h3>
+
+                  <p className="text-xs theme-text-muted mt-1">
+                    Daftar pengajuan izin kamu.
+                  </p>
+                </div>
 
                 <span className="text-xs theme-text-muted flex-shrink-0">
-                  {riwayatIzin.length} pengajuan
+                  {loading
+                    ? "Memuat..."
+                    : `${riwayatIzin.length} pengajuan`}
                 </span>
               </div>
 
-              {/* LIST */}
+              <div
+                className={`divide-y ${themeDivider}`}
+              >
 
-              <div>
-                {riwayatIzin.length === 0 && (
-                  <div
-                    className={`p-10 text-center ${themeNeutralSurface}`}
-                  >
-                    <FileText
+                {/* ==================================================
+                    LOADING
+                ================================================== */}
+
+                {loading && (
+                  <div className="p-10 text-center">
+                    <Loader2
                       size={28}
-                      className="mx-auto theme-text-muted mb-2"
+                      className={`mx-auto ${themePrimaryText} animate-spin mb-3`}
                     />
 
                     <p className="text-sm theme-text-muted">
-                      Belum ada pengajuan izin.
+                      Memuat riwayat izin...
                     </p>
                   </div>
                 )}
 
-                {riwayatIzin.map((r, index) => {
-                  const s = statusStyle[r.status];
-                  const StatusIcon = s.icon;
+                {/* ==================================================
+                    EMPTY
+                ================================================== */}
 
-                  return (
+                {!loading &&
+                  riwayatIzin.length ===
+                    0 && (
                     <div
-                      key={r.id}
-                      className={`p-4 sm:p-5 flex flex-col sm:flex-row sm:items-start gap-3 ${
-                        index !== riwayatIzin.length - 1
-                          ? `border-b ${themeDivider}`
-                          : ""
-                      } ${themeNeutralHover} transition-colors`}
+                      className={`p-10 text-center ${themeNeutralSurface}`}
                     >
-                      <div className="min-w-0 flex-1">
+                      <FileText
+                        size={28}
+                        className="mx-auto theme-text-muted mb-2"
+                      />
 
-                        {/* JENIS + STATUS */}
+                      <p className="text-sm theme-text-muted">
+                        Belum ada pengajuan izin.
+                      </p>
 
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-sm font-semibold theme-text">
-                            {r.jenis}
-                          </span>
-
-                          <span
-                            className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${s.bg} ${s.text} ${s.border} flex items-center gap-1`}
-                          >
-                            <StatusIcon size={11} />
-                            {s.label}
-                          </span>
-                        </div>
-
-                        {/* TANGGAL */}
-
-                        <p className="text-xs theme-text-secondary mt-1.5 flex items-center gap-1.5">
-                          <CalendarDays
-                            size={13}
-                            className="theme-text-muted flex-shrink-0"
-                          />
-
-                          {r.tanggalMulai === r.tanggalSelesai
-                            ? r.tanggalMulai
-                            : `${r.tanggalMulai} - ${r.tanggalSelesai}`}
-                        </p>
-
-                        {/* ALASAN */}
-
-                        <p className="text-sm theme-text-secondary mt-2 leading-relaxed">
-                          {r.alasan}
-                        </p>
-                      </div>
+                      <button
+                        type="button"
+                        onClick={() =>
+                          router.push(
+                            "/guru/jadwal/izin/ajukan"
+                          )
+                        }
+                        className={`mt-3 inline-flex items-center gap-1.5 text-sm font-medium ${themePrimaryText} hover:opacity-80`}
+                      >
+                        Buat pengajuan pertama
+                        <ArrowRight
+                          size={14}
+                        />
+                      </button>
                     </div>
-                  );
-                })}
+                  )}
+
+                {/* ==================================================
+                    DATA
+                ================================================== */}
+
+                {!loading &&
+                  riwayatIzin.map(
+                    (item, index) => {
+                      const status =
+                        STATUS_STYLE[
+                          item.status
+                        ] ||
+                        STATUS_STYLE.menunggu;
+
+                      const StatusIcon =
+                        status.icon;
+
+                      const tanggalMulai =
+                        formatTanggal(
+                          item.tanggalMulai
+                        );
+
+                      const tanggalSelesai =
+                        formatTanggal(
+                          item.tanggalSelesai
+                        );
+
+                      return (
+                        <div
+                          key={
+                            item.id ||
+                            `${item.tanggalMulai}-${index}`
+                          }
+                          className={`p-4 sm:p-5 flex flex-col sm:flex-row sm:items-start gap-4 ${themeNeutralHover} transition-colors`}
+                        >
+
+                          {/* ICON */}
+
+                          <div
+                            className={`w-10 h-10 rounded-lg ${themePrimarySoft} ${themePrimaryText} border ${themePrimarySoftBorder} flex items-center justify-center flex-shrink-0`}
+                          >
+                            <FileText
+                              size={17}
+                            />
+                          </div>
+
+                          {/* CONTENT */}
+
+                          <div className="min-w-0 flex-1">
+
+                            {/* JENIS + ROLE + STATUS */}
+
+                            <div className="flex items-center gap-2 flex-wrap">
+
+                              <span className="text-sm font-semibold theme-text">
+                                {formatJenis(
+                                  item.jenis
+                                )}
+                              </span>
+
+                              <span
+                                className={`text-[10px] font-bold px-2 py-0.5 rounded-md ${themeNeutralSurface} theme-text-secondary border ${themeNeutralBorder}`}
+                              >
+                                Guru
+                              </span>
+
+                              <span
+                                className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${status.bg} ${status.text} ${status.border} flex items-center gap-1`}
+                              >
+                                <StatusIcon
+                                  size={11}
+                                />
+
+                                {
+                                  status.label
+                                }
+                              </span>
+                            </div>
+
+                            {/* TANGGAL */}
+
+                            <p className="text-xs theme-text-secondary mt-1.5 flex items-center gap-1.5">
+                              <CalendarDays
+                                size={13}
+                                className="theme-text-muted flex-shrink-0"
+                              />
+
+                              {tanggalMulai ===
+                              tanggalSelesai
+                                ? tanggalMulai
+                                : `${tanggalMulai} - ${tanggalSelesai}`}
+                            </p>
+
+                            {/* ALASAN */}
+
+                            <p className="text-sm theme-text-secondary mt-2 leading-relaxed">
+                              {item.alasan ||
+                                "-"}
+                            </p>
+
+                            {/* CATATAN ADMIN */}
+
+                            {item.catatan && (
+                              <div
+                                className={`mt-3 px-3 py-2.5 rounded-lg border ${
+                                  item.status ===
+                                  "ditolak"
+                                    ? `${themeDangerSurface} ${themeDangerBorder}`
+                                    : `${themeSuccessSurface} ${themeSuccessBorder}`
+                                }`}
+                              >
+                                <p className="text-[11px] font-medium theme-text-muted uppercase tracking-wide">
+                                  Catatan Admin
+                                </p>
+
+                                <p
+                                  className={`text-xs mt-1 ${
+                                    item.status ===
+                                    "ditolak"
+                                      ? "theme-danger"
+                                      : "text-[var(--color-success)]"
+                                  }`}
+                                >
+                                  {
+                                    item.catatan
+                                  }
+                                </p>
+                              </div>
+                            )}
+
+                            {/* BUKTI */}
+
+                            {item.urlBukti && (
+                              <a
+                                href={buildUploadUrl(
+                                  item.urlBukti
+                                )}
+                                target="_blank"
+                                rel="noreferrer"
+                                className={`inline-flex items-center gap-1.5 mt-3 text-xs font-medium ${themePrimaryText} hover:opacity-80`}
+                              >
+                                <Paperclip
+                                  size={13}
+                                />
+
+                                Lihat bukti
+                              </a>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    }
+                  )}
               </div>
             </div>
           </div>
@@ -679,4 +768,61 @@ export default function GuruIzinPage() {
       </div>
     </div>
   );
+}
+
+/* ============================================================
+   SUMMARY CARD
+============================================================ */
+
+function SummaryCard({
+  icon: Icon,
+  label,
+  value,
+  iconClass,
+}) {
+  return (
+    <div
+      className={`theme-card rounded-xl ${themeNeutralBorder} p-3.5 ${themeCardShadow} flex items-center gap-3 min-w-0`}
+    >
+      <div
+        className={`p-2 rounded-lg border flex-shrink-0 ${iconClass}`}
+      >
+        <Icon size={16} />
+      </div>
+
+      <div className="min-w-0">
+        <p className="text-[11px] font-medium theme-text-muted uppercase tracking-wider truncate">
+          {label}
+        </p>
+
+        <p className="text-lg font-bold theme-text">
+          {value}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+/* ============================================================
+   UPLOAD URL
+============================================================ */
+
+function buildUploadUrl(path) {
+  if (!path) return "#";
+
+  if (
+    path.startsWith("http://") ||
+    path.startsWith("https://")
+  ) {
+    return path;
+  }
+
+  const apiUrl =
+    process.env.NEXT_PUBLIC_API_URL ||
+    "http://localhost:5000";
+
+  return `${apiUrl.replace(
+    /\/$/,
+    ""
+  )}${path.startsWith("/") ? "" : "/"}${path}`;
 }

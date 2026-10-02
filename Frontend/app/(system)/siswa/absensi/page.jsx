@@ -1,3 +1,5 @@
+/* app/(system)/siswa/absensi/page.jsx */
+
 "use client";
 
 import {
@@ -16,28 +18,32 @@ import {
   RefreshCw,
   CalendarDays,
   Clock3,
-  UserCheck,
-  X,
-  Loader2,
   FileText,
-  HeartPulse,
-  UserX,
-  ScanFace,
-  Video,
-  ChevronDown,
+  X,
   History,
+  UserCheck,
+  ChevronDown,
+  HeartPulse,
+  ScanFace,
+  UserX,
+  Video,
+  Loader2,
 } from "lucide-react";
 
 import {
   getAbsensiSaya,
   absenDenganFace,
-  absenManual,
 } from "../../../../services/absensi.service";
 
-import { getKelasSaya } from "../../../../services/siswa.service";
+import {
+  getKelasSayaDariAnggota,
+} from "../../../../services/kelas.service";
+
+import { ajukanIzin } from "../../../../services/izin.service";
+import { apiFetch } from "../../../../lib/api";
 
 /* =========================================================
-   THEME HELPERS
+   THEME COMPATIBILITY
 ========================================================= */
 
 const themePrimaryGradient =
@@ -101,129 +107,193 @@ const themeFocus =
   "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
 
 /* =========================================================
-   GPS
+   STATUS CONSTANT
 ========================================================= */
 
-function getCurrentLocation() {
-  return new Promise((resolve, reject) => {
-    if (
-      typeof navigator === "undefined" ||
-      !navigator.geolocation
-    ) {
-      reject(
-        new Error(
-          "Browser kamu tidak mendukung fitur lokasi."
-        )
-      );
+const STATUS_LABEL = {
+  hadir: "Hadir",
+  izin: "Izin",
+  sakit: "Sakit",
+  alpha: "Alpha",
+};
 
-      return;
+const STATUS_CLASS = {
+  hadir:
+    "bg-emerald-50 text-emerald-700 border-emerald-200",
+  izin:
+    "bg-blue-50 text-blue-700 border-blue-200",
+  sakit:
+    "bg-amber-50 text-amber-700 border-amber-200",
+  alpha:
+    "bg-rose-50 text-rose-700 border-rose-200",
+};
+
+/* =========================================================
+   DATE HELPER
+========================================================= */
+
+function getDateKey(date = new Date()) {
+  const year = date.getFullYear();
+
+  const month = String(
+    date.getMonth() + 1
+  ).padStart(2, "0");
+
+  const day = String(
+    date.getDate()
+  ).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+function formatDate(dateString) {
+  if (!dateString) return "-";
+
+  const date = new Date(dateString);
+
+  if (Number.isNaN(date.getTime())) {
+    return "-";
+  }
+
+  return new Intl.DateTimeFormat(
+    "id-ID",
+    {
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    }
+  ).format(date);
+}
+
+function formatTime(dateString) {
+  if (!dateString) return "-";
+
+  const date = new Date(dateString);
+
+  if (Number.isNaN(date.getTime())) {
+    return "-";
+  }
+
+  return new Intl.DateTimeFormat(
+    "id-ID",
+    {
+      hour: "2-digit",
+      minute: "2-digit",
+    }
+  ).format(date);
+}
+
+/* =========================================================
+   RESPONSE HELPER
+========================================================= */
+
+function getResponseData(response) {
+  if (Array.isArray(response)) {
+    return response;
+  }
+
+  if (Array.isArray(response?.data)) {
+    return response.data;
+  }
+
+  if (Array.isArray(response?.data?.data)) {
+    return response.data.data;
+  }
+
+  if (Array.isArray(response?.items)) {
+    return response.items;
+  }
+
+  if (Array.isArray(response?.data?.items)) {
+    return response.data.items;
+  }
+
+  return [];
+}
+
+function getResponseObject(response) {
+  if (!response) {
+    return null;
+  }
+
+  if (
+    response?.data &&
+    !Array.isArray(response.data) &&
+    typeof response.data === "object"
+  ) {
+    if (
+      response.data.data &&
+      typeof response.data.data === "object" &&
+      !Array.isArray(response.data.data)
+    ) {
+      return response.data.data;
     }
 
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        resolve(position);
-      },
-      (error) => {
-        let message = "Gagal mendapatkan lokasi.";
+    return response.data;
+  }
 
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            message =
-              "Izin lokasi ditolak. Aktifkan lokasi dan izinkan website ini mengakses GPS.";
-            break;
+  return response;
+}
 
-          case error.POSITION_UNAVAILABLE:
-            message =
-              "Lokasi tidak tersedia. Pastikan GPS perangkat aktif.";
-            break;
+function getErrorMessage(error, fallback) {
+  if (
+    error instanceof Error &&
+    error.message
+  ) {
+    return error.message;
+  }
 
-          case error.TIMEOUT:
-            message =
-              "Waktu mengambil lokasi habis. Silakan coba lagi.";
-            break;
+  if (
+    typeof error?.message === "string" &&
+    error.message
+  ) {
+    return error.message;
+  }
 
-          default:
-            message =
-              "Gagal mendapatkan lokasi GPS.";
-        }
+  if (
+    typeof error?.response?.message === "string"
+  ) {
+    return error.response.message;
+  }
 
-        reject(new Error(message));
-      },
-      {
-        enableHighAccuracy: true,
-        timeout: 20000,
-        maximumAge: 0,
-      }
-    );
-  });
+  if (
+    typeof error?.data?.message === "string"
+  ) {
+    return error.data.message;
+  }
+
+  return fallback;
 }
 
 /* =========================================================
-   FORMAT TANGGAL
+   NORMALIZE ABSENSI
 ========================================================= */
 
-function formatTanggal(tanggal) {
-  if (!tanggal) {
-    return "-";
-  }
+function normalizeAbsensi(item) {
+  return {
+    id: item?.id,
 
-  const date = new Date(tanggal);
+    tanggal:
+      item?.tanggal ||
+      item?.dibuatPada ||
+      item?.createdAt,
 
-  if (Number.isNaN(date.getTime())) {
-    return "-";
-  }
+    status: item?.status || "",
 
-  return date.toLocaleDateString("id-ID", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-}
+    keterangan:
+      item?.keterangan || "",
 
-/* =========================================================
-   FORMAT JAM
-========================================================= */
+    metode:
+      item?.metode || "",
 
-function formatJam(tanggal) {
-  if (!tanggal) {
-    return "-";
-  }
+    dibuatPada:
+      item?.dibuatPada ||
+      item?.createdAt,
 
-  const date = new Date(tanggal);
+    lintang: item?.lintang,
 
-  if (Number.isNaN(date.getTime())) {
-    return "-";
-  }
-
-  return date.toLocaleTimeString("id-ID", {
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-}
-
-/* =========================================================
-   STATUS LABEL
-========================================================= */
-
-function getStatusLabel(status) {
-  switch (String(status || "").toLowerCase()) {
-    case "hadir":
-      return "Hadir";
-
-    case "izin":
-      return "Izin";
-
-    case "sakit":
-      return "Sakit";
-
-    case "alpha":
-    case "alpa":
-      return "Alpha";
-
-    default:
-      return status || "-";
-  }
+    bujur: item?.bujur,
+  };
 }
 
 /* =========================================================
@@ -266,803 +336,266 @@ function isVirtualCamera(device) {
    PAGE
 ========================================================= */
 
-export default function AbsensiSiswaPage() {
-  const [activeTab, setActiveTab] = useState("absensi");
-
-  const [kelasId, setKelasId] = useState(null);
-  const [kelasSaya, setKelasSaya] = useState(null);
-  const [loadingKelas, setLoadingKelas] = useState(true);
-
-  const [absensiData, setAbsensiData] = useState([]);
-  const [loadingData, setLoadingData] = useState(true);
-  const [loadingAbsen, setLoadingAbsen] = useState(false);
-
-  const [currentMonth, setCurrentMonth] = useState(
-    () => new Date()
-  );
-
-  const [cameraOpen, setCameraOpen] = useState(false);
-  const [cameraLoading, setCameraLoading] = useState(false);
-  const [cameraError, setCameraError] = useState("");
-  const [cameras, setCameras] = useState([]);
-  const [selectedCameraId, setSelectedCameraId] =
-    useState("");
-  const [capturedImage, setCapturedImage] =
-    useState(null);
-
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
-
-  const [showIzinForm, setShowIzinForm] =
-    useState(false);
-  const [jenisIzin, setJenisIzin] =
-    useState("izin");
-  const [keterangan, setKeterangan] =
-    useState("");
-
-  const [locationStatus, setLocationStatus] =
-    useState("idle");
-  const [locationText, setLocationText] =
-    useState("");
-  const [locationData, setLocationData] =
-    useState(null);
+export default function SiswaAbsensiPage() {
+  /* =======================================================
+     REF
+  ======================================================= */
 
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
   const streamRef = useRef(null);
 
-  /* =========================================================
-     LOAD KELAS
-  ========================================================= */
+  /* =======================================================
+     UI STATE
+  ======================================================= */
 
-  const loadKelasSaya = useCallback(async () => {
-    try {
-      setLoadingKelas(true);
-      setError("");
+  const [activeTab, setActiveTab] =
+    useState("absensi");
 
-      const response = await getKelasSaya();
+  const [mounted, setMounted] =
+    useState(false);
 
-      const data =
-        response?.data?.data ||
-        response?.data ||
-        response;
+  /* =======================================================
+     DATA STATE
+  ======================================================= */
 
-      if (!data?.kelasId) {
-        throw new Error(
-          "Siswa belum terdaftar di kelas."
-        );
-      }
+  const [kelas, setKelas] =
+    useState(null);
 
-      setKelasSaya(data);
-      setKelasId(data.kelasId);
-    } catch (err) {
-      setKelasId(null);
-      setKelasSaya(null);
+  const [absensi, setAbsensi] =
+    useState([]);
 
-      setError(
-        err?.message ||
-          "Gagal mengambil data kelas siswa."
-      );
-    } finally {
-      setLoadingKelas(false);
-    }
-  }, []);
+  /* =======================================================
+     LOADING STATE
+  ======================================================= */
 
-  /* =========================================================
-     LOAD ABSENSI
-  ========================================================= */
+  const [loading, setLoading] =
+    useState(true);
 
-  const loadAbsensi = useCallback(async () => {
-    try {
-      setLoadingData(true);
-      setError("");
+  const [loadingAbsen, setLoadingAbsen] =
+    useState(false);
 
-      const response = await getAbsensiSaya();
+  const [cameraReady, setCameraReady] =
+    useState(false);
 
-      let data = [];
+  const [cameraLoading, setCameraLoading] =
+    useState(false);
 
-      if (Array.isArray(response)) {
-        data = response;
-      } else if (Array.isArray(response?.data)) {
-        data = response.data;
-      } else if (
-        Array.isArray(response?.data?.data)
-      ) {
-        data = response.data.data;
-      } else if (Array.isArray(response?.items)) {
-        data = response.items;
-      } else if (
-        Array.isArray(response?.data?.items)
-      ) {
-        data = response.data.items;
-      }
+  const [location, setLocation] =
+    useState(null);
 
-      setAbsensiData(data);
-    } catch (err) {
-      setAbsensiData([]);
+  const [locationLoading, setLocationLoading] =
+    useState(false);
 
-      setError(
-        err?.message ||
-          "Gagal mengambil data absensi."
-      );
-    } finally {
-      setLoadingData(false);
-    }
-  }, []);
+  /* =======================================================
+     KAMERA STATE
+  ======================================================= */
+
+  const [cameraOpen, setCameraOpen] =
+    useState(false);
+
+  const [cameraError, setCameraError] =
+    useState("");
+
+  const [cameras, setCameras] =
+    useState([]);
+
+  const [selectedCameraId, setSelectedCameraId] =
+    useState("");
+
+  const [capturedImage, setCapturedImage] =
+    useState(null);
+
+  /* =======================================================
+     LOCATION UI STATE
+  ======================================================= */
+
+  const [locationStatus, setLocationStatus] =
+    useState("idle");
+
+  const [locationText, setLocationText] =
+    useState("");
+
+  const [locationData, setLocationData] =
+    useState(null);
+
+  /* =======================================================
+     IZIN STATE
+  ======================================================= */
+
+  const [showIzinForm, setShowIzinForm] =
+    useState(false);
+
+  const [jenisIzin, setJenisIzin] =
+    useState("izin");
+
+  const [tanggalMulai, setTanggalMulai] =
+    useState("");
+
+  const [tanggalSelesai, setTanggalSelesai] =
+    useState("");
+
+  const [keterangan, setKeterangan] =
+    useState("");
+
+  const [bukti, setBukti] =
+    useState(null);
+
+  /* =======================================================
+     MESSAGE STATE
+  ======================================================= */
+
+  const [error, setError] =
+    useState("");
+
+  const [success, setSuccess] =
+    useState("");
+
+  /* =======================================================
+     MOUNT
+  ======================================================= */
 
   useEffect(() => {
-    loadKelasSaya();
-    loadAbsensi();
-  }, [loadKelasSaya, loadAbsensi]);
+    setMounted(true);
+  }, []);
 
-  /* =========================================================
+  /* =======================================================
      TODAY
-  ========================================================= */
+  ======================================================= */
 
   const today = new Date();
 
-  const todayString = [
-    today.getFullYear(),
-    String(today.getMonth() + 1).padStart(2, "0"),
-    String(today.getDate()).padStart(2, "0"),
-  ].join("-");
+  const todayKey = mounted
+    ? getDateKey(today)
+    : "";
 
-  /* =========================================================
-     ABSENSI HARI INI
-  ========================================================= */
+  /* =======================================================
+     AMBIL DATA KELAS SISWA
+  ======================================================= */
 
-  const absensiHariIni = useMemo(() => {
-    return absensiData.find((item) => {
-      if (!item?.tanggal) {
-        return false;
-      }
-
-      const itemDate = new Date(item.tanggal);
-
-      if (Number.isNaN(itemDate.getTime())) {
-        return false;
-      }
-
-      const itemDateString = [
-        itemDate.getFullYear(),
-        String(itemDate.getMonth() + 1).padStart(2, "0"),
-        String(itemDate.getDate()).padStart(2, "0"),
-      ].join("-");
-
-      const tanggalSama =
-        itemDateString === todayString;
-
-      const kelasSama =
-        !kelasId || item.kelasId === kelasId;
-
-      return tanggalSama && kelasSama;
-    });
-  }, [absensiData, kelasId, todayString]);
-
-  const sudahAbsen = Boolean(absensiHariIni);
-
-  /* =========================================================
-     STATISTIK
-  ========================================================= */
-
-  const statistikAbsensi = useMemo(() => {
-    const total = absensiData.length;
-
-    const hadir = absensiData.filter(
-      (item) =>
-        String(item?.status || "").toLowerCase() ===
-        "hadir"
-    ).length;
-
-    const izin = absensiData.filter((item) => {
-      const s = String(
-        item?.status || ""
-      ).toLowerCase();
-
-      return s === "izin" || s === "sakit";
-    }).length;
-
-    const alpha = absensiData.filter((item) => {
-      const s = String(
-        item?.status || ""
-      ).toLowerCase();
-
-      return s === "alpha" || s === "alpa";
-    }).length;
-
-    return {
-      total,
-      hadir,
-      izin,
-      alpha,
-    };
-  }, [absensiData]);
-
-  /* =========================================================
-     SORT HISTORI
-  ========================================================= */
-
-  const sortedAbsensiData = useMemo(() => {
-    return absensiData
-      .slice()
-      .sort(
-        (a, b) =>
-          new Date(
-            b?.tanggal ||
-              b?.dibuatPada ||
-              0
-          ).getTime() -
-          new Date(
-            a?.tanggal ||
-              a?.dibuatPada ||
-              0
-          ).getTime()
-      );
-  }, [absensiData]);
-
-  /* =========================================================
-     CALENDAR
-  ========================================================= */
-
-  const calendarYear =
-    currentMonth.getFullYear();
-
-  const calendarMonth =
-    currentMonth.getMonth();
-
-  const firstDay = new Date(
-    calendarYear,
-    calendarMonth,
-    1
-  ).getDay();
-
-  const daysInMonth = new Date(
-    calendarYear,
-    calendarMonth + 1,
-    0
-  ).getDate();
-
-  const calendarDays = [
-    ...Array(firstDay).fill(null),
-    ...Array.from(
-      { length: daysInMonth },
-      (_, i) => i + 1
-    ),
-  ];
-
-  function hasAttendanceOnDate(date) {
-    return absensiData.some((item) => {
-      if (!item?.tanggal) {
-        return false;
-      }
-
-      const d = new Date(item.tanggal);
-
-      if (Number.isNaN(d.getTime())) {
-        return false;
-      }
-
-      return (
-        d.getDate() === date &&
-        d.getMonth() === calendarMonth &&
-        d.getFullYear() === calendarYear
-      );
-    });
-  }
-
-  /* =========================================================
-     CAMERA
-  ========================================================= */
-
-  const loadCameras = useCallback(async () => {
-    try {
-      if (
-        typeof navigator === "undefined" ||
-        !navigator.mediaDevices ||
-        !navigator.mediaDevices.enumerateDevices
-      ) {
-        throw new Error(
-          "Browser tidak mendukung daftar kamera."
-        );
-      }
-
-      const devices =
-        await navigator.mediaDevices.enumerateDevices();
-
-      const videoDevices = devices.filter(
-        (device) =>
-          device.kind === "videoinput"
-      );
-
-      setCameras(videoDevices);
-
-      if (videoDevices.length === 0) {
-        setSelectedCameraId("");
-        return;
-      }
-
-      const selectedStillExists =
-        videoDevices.some(
-          (device) =>
-            device.deviceId ===
-            selectedCameraId
-        );
-
-      if (selectedStillExists) {
-        return;
-      }
-
-      const realCamera =
-        videoDevices.find(
-          (device) =>
-            !isVirtualCamera(device)
-        );
-
-      const firstCamera =
-        realCamera || videoDevices[0];
-
-      setSelectedCameraId(
-        firstCamera.deviceId
-      );
-    } catch (err) {
-      setCameraError(
-        err?.message ||
-          "Tidak dapat membaca daftar kamera."
-      );
-    }
-  }, [selectedCameraId]);
-
-  const stopCamera = useCallback(() => {
-    if (streamRef.current) {
-      streamRef.current
-        .getTracks()
-        .forEach((track) => {
-          track.stop();
-        });
-
-      streamRef.current = null;
-    }
-
-    if (videoRef.current) {
-      videoRef.current.srcObject = null;
-    }
-  }, []);
-
-  const startCamera = useCallback(
-    async (deviceId = null) => {
+  const loadKelas =
+    useCallback(async () => {
       try {
-        setCameraError("");
-        setError("");
-        setCameraLoading(true);
-        setCameraOpen(true);
-
-        if (
-          typeof navigator === "undefined" ||
-          !navigator.mediaDevices ||
-          !navigator.mediaDevices.getUserMedia
-        ) {
-          throw new Error(
-            "Browser tidak mendukung kamera."
-          );
-        }
-
-        stopCamera();
-
-        let cameraId =
-          deviceId || selectedCameraId;
-
-        if (!cameraId) {
-          const devices =
-            await navigator.mediaDevices.enumerateDevices();
-
-          const videoDevices =
-            devices.filter(
-              (device) =>
-                device.kind === "videoinput"
-            );
-
-          if (videoDevices.length === 0) {
-            throw new Error(
-              "Kamera tidak ditemukan. Pastikan webcam terhubung."
-            );
-          }
-
-          const realCamera =
-            videoDevices.find(
-              (device) =>
-                !isVirtualCamera(device)
-            );
-
-          cameraId = (
-            realCamera ||
-            videoDevices[0]
-          ).deviceId;
-
-          setCameras(videoDevices);
-          setSelectedCameraId(cameraId);
-        }
-
-        const stream =
-          await navigator.mediaDevices.getUserMedia(
+        const siswaResponse =
+          await apiFetch(
+            "/api/v1/siswa/me",
             {
-              video: {
-                deviceId: {
-                  exact: cameraId,
-                },
-                width: {
-                  ideal: 1280,
-                },
-                height: {
-                  ideal: 720,
-                },
-              },
-              audio: false,
+              method: "GET",
             }
           );
 
-        streamRef.current = stream;
+        const siswa =
+          getResponseObject(
+            siswaResponse
+          );
 
-        if (videoRef.current) {
-          videoRef.current.srcObject =
-            stream;
-
-          await videoRef.current.play();
+        if (!siswa?.id) {
+          throw new Error(
+            "Data siswa tidak ditemukan."
+          );
         }
 
-        await loadCameras();
+        const kelasSaya =
+          await getKelasSayaDariAnggota(
+            siswa.id
+          );
+
+        if (!kelasSaya) {
+          throw new Error(
+            "Kelas siswa belum ditemukan."
+          );
+        }
+
+        setKelas({
+          ...kelasSaya,
+
+          kelasId:
+            kelasSaya?.kelasId ||
+            kelasSaya?.id ||
+            null,
+
+          nama:
+            kelasSaya?.nama ||
+            kelasSaya?.namaKelas ||
+            "-",
+        });
       } catch (err) {
-        setCameraError(
-          err?.message ||
-            "Kamera tidak dapat dibuka."
+        setKelas(null);
+
+        setError(
+          getErrorMessage(
+            err,
+            "Gagal mengambil data kelas siswa."
+          )
+        );
+      }
+    }, []);
+
+  /* =======================================================
+     AMBIL HISTORI ABSENSI
+  ======================================================= */
+
+  const loadAbsensi =
+    useCallback(async () => {
+      try {
+        setLoading(true);
+
+        const response =
+          await getAbsensiSaya();
+
+        const data =
+          getResponseData(
+            response
+          );
+
+        setAbsensi(
+          data.map(
+            normalizeAbsensi
+          )
+        );
+      } catch (err) {
+        setError(
+          getErrorMessage(
+            err,
+            "Gagal mengambil data absensi."
+          )
         );
       } finally {
-        setCameraLoading(false);
+        setLoading(false);
       }
-    },
-    [
-      loadCameras,
-      selectedCameraId,
-      stopCamera,
-    ]
-  );
+    }, []);
+
+  /* =======================================================
+     LOAD SEMUA DATA
+  ======================================================= */
+
+  const loadPage =
+    useCallback(async () => {
+      setError("");
+
+      await Promise.all([
+        loadKelas(),
+        loadAbsensi(),
+      ]);
+    }, [
+      loadKelas,
+      loadAbsensi,
+    ]);
 
   useEffect(() => {
-    loadCameras();
-  }, [loadCameras]);
-
-  useEffect(() => {
-    if (
-      typeof navigator === "undefined" ||
-      !navigator.mediaDevices
-    ) {
+    if (!mounted) {
       return;
     }
 
-    const handleDeviceChange = () =>
-      loadCameras();
+    loadPage();
+  }, [
+    mounted,
+    loadPage,
+  ]);
 
-    navigator.mediaDevices.addEventListener(
-      "devicechange",
-      handleDeviceChange
-    );
-
-    return () => {
-      navigator.mediaDevices.removeEventListener(
-        "devicechange",
-        handleDeviceChange
-      );
-    };
-  }, [loadCameras]);
-
-  async function handleCameraChange(event) {
-    const deviceId =
-      event.target.value;
-
-    setSelectedCameraId(deviceId);
-
-    if (
-      cameraOpen &&
-      deviceId
-    ) {
-      await startCamera(deviceId);
-    }
-  }
-
-  function closeCamera() {
-    stopCamera();
-    setCameraOpen(false);
-    setCameraError("");
-  }
-
-  function takePhoto() {
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-
-    if (!video || !canvas) {
-      setCameraError(
-        "Kamera belum siap."
-      );
-      return;
-    }
-
-    if (
-      video.videoWidth === 0 ||
-      video.videoHeight === 0
-    ) {
-      setCameraError(
-        "Kamera belum siap. Tunggu sebentar lalu coba lagi."
-      );
-      return;
-    }
-
-    canvas.width =
-      video.videoWidth;
-
-    canvas.height =
-      video.videoHeight;
-
-    const context =
-      canvas.getContext("2d");
-
-    if (!context) {
-      setCameraError(
-        "Gagal memproses foto."
-      );
-      return;
-    }
-
-    context.drawImage(
-      video,
-      0,
-      0,
-      canvas.width,
-      canvas.height
-    );
-
-    const image =
-      canvas.toDataURL(
-        "image/jpeg",
-        0.9
-      );
-
-    setCapturedImage(image);
-
-    stopCamera();
-    setCameraOpen(false);
-    setCameraError("");
-  }
-
-  /* =========================================================
-     LOCATION
-  ========================================================= */
-
-  async function getLocation() {
-    try {
-      setLocationStatus("loading");
-      setLocationText(
-        "Mengambil lokasi GPS terbaru..."
-      );
-      setLocationData(null);
-
-      const position =
-        await getCurrentLocation();
-
-      const latitude = Number(
-        position?.coords?.latitude
-      );
-
-      const longitude = Number(
-        position?.coords?.longitude
-      );
-
-      const accuracy = Number(
-        position?.coords?.accuracy
-      );
-
-      if (
-        !Number.isFinite(latitude) ||
-        !Number.isFinite(longitude)
-      ) {
-        throw new Error(
-          "Koordinat GPS tidak valid."
-        );
-      }
-
-      const data = {
-        latitude,
-        longitude,
-        accuracy: Number.isFinite(
-          accuracy
-        )
-          ? accuracy
-          : null,
-      };
-
-      setLocationData(data);
-      setLocationStatus("success");
-
-      if (
-        Number.isFinite(accuracy)
-      ) {
-        setLocationText(
-          `GPS aktif • Akurasi ±${Math.round(
-            accuracy
-          )} meter`
-        );
-      } else {
-        setLocationText(
-          "GPS aktif"
-        );
-      }
-
-      return {
-        latitude,
-        longitude,
-      };
-    } catch (err) {
-      setLocationStatus("error");
-      setLocationData(null);
-      setLocationText(
-        err?.message ||
-          "Lokasi tidak tersedia."
-      );
-
-      throw err;
-    }
-  }
-
-  /* =========================================================
-     SUBMIT FACE ABSENSI
-  ========================================================= */
-
-  async function handleSubmitAbsen() {
-    if (!kelasId) {
-      setError(
-        "Kelas siswa belum tersedia. Pastikan akun siswa sudah terdaftar di kelas."
-      );
-      return;
-    }
-
-    if (sudahAbsen) {
-      setError(
-        "Kamu sudah melakukan absensi hari ini."
-      );
-      return;
-    }
-
-    if (!capturedImage) {
-      setError(
-        "Silakan ambil foto terlebih dahulu."
-      );
-      return;
-    }
-
-    try {
-      setLoadingAbsen(true);
-      setError("");
-      setSuccess("");
-
-      const position =
-        await getLocation();
-
-      const response =
-        await fetch(capturedImage);
-
-      if (!response.ok) {
-        throw new Error(
-          "Gagal memproses foto."
-        );
-      }
-
-      const blob =
-        await response.blob();
-
-      await absenDenganFace({
-        kelasId,
-        snapshot: blob,
-        status: "hadir",
-        keterangan:
-          "Absen masuk melalui verifikasi wajah",
-        lintang:
-          position.latitude,
-        bujur:
-          position.longitude,
-      });
-
-      setSuccess(
-        "Absensi berhasil dicatat!"
-      );
-
-      setCapturedImage(null);
-      setLocationStatus("idle");
-      setLocationText("");
-      setLocationData(null);
-
-      await loadAbsensi();
-    } catch (err) {
-      setError(
-        err?.message ||
-          "Gagal melakukan absensi."
-      );
-    } finally {
-      setLoadingAbsen(false);
-    }
-  }
-
-  /* =========================================================
-     SUBMIT MANUAL
-  ========================================================= */
-
-  async function handleSubmitManual() {
-    if (!kelasId) {
-      setError(
-        "Kelas siswa belum tersedia."
-      );
-      return;
-    }
-
-    if (sudahAbsen) {
-      setError(
-        "Kamu sudah melakukan absensi hari ini."
-      );
-      return;
-    }
-
-    if (!keterangan.trim()) {
-      setError(
-        "Keterangan wajib diisi."
-      );
-      return;
-    }
-
-    try {
-      setLoadingAbsen(true);
-      setError("");
-      setSuccess("");
-
-      await absenManual({
-        kelasId,
-        status: jenisIzin,
-        keterangan:
-          keterangan.trim(),
-      });
-
-      setSuccess(
-        `Pengajuan ${getStatusLabel(
-          jenisIzin
-        ).toLowerCase()} berhasil dikirim.`
-      );
-
-      setKeterangan("");
-      setShowIzinForm(false);
-
-      await loadAbsensi();
-    } catch (err) {
-      setError(
-        err?.message ||
-          "Gagal mengirim absensi."
-      );
-    } finally {
-      setLoadingAbsen(false);
-    }
-  }
-
-  /* =========================================================
-     RESET PHOTO
-  ========================================================= */
-
-  function resetPhoto() {
-    setCapturedImage(null);
-    setError("");
-    setSuccess("");
-    setLocationStatus("idle");
-    setLocationText("");
-    setLocationData(null);
-  }
-
-  /* =========================================================
-     CLEANUP
-  ========================================================= */
+  /* =======================================================
+     CLEANUP CAMERA
+  ======================================================= */
 
   useEffect(() => {
     return () => {
@@ -1076,9 +609,1009 @@ export default function AbsensiSiswaPage() {
     };
   }, []);
 
-  /* =========================================================
+  /* =======================================================
+     ABSENSI HARI INI
+  ======================================================= */
+
+  const todayAttendance =
+    useMemo(() => {
+      if (
+        !mounted ||
+        !todayKey
+      ) {
+        return undefined;
+      }
+
+      return absensi.find(
+        (item) => {
+          if (!item.tanggal) {
+            return false;
+          }
+
+          const date =
+            new Date(
+              item.tanggal
+            );
+
+          if (
+            Number.isNaN(
+              date.getTime()
+            )
+          ) {
+            return false;
+          }
+
+          return (
+            getDateKey(date) ===
+            todayKey
+          );
+        }
+      );
+    }, [
+      absensi,
+      todayKey,
+      mounted,
+    ]);
+
+  /* =======================================================
+     HISTORI
+  ======================================================= */
+
+  const history =
+    useMemo(() => {
+      return [...absensi]
+        .sort((a, b) => {
+          const dateA =
+            new Date(
+              a.tanggal ||
+                a.dibuatPada ||
+                0
+            ).getTime();
+
+          const dateB =
+            new Date(
+              b.tanggal ||
+                b.dibuatPada ||
+                0
+            ).getTime();
+
+          return dateB - dateA;
+        })
+        .slice(0, 20);
+    }, [absensi]);
+
+  /* =======================================================
+     START CAMERA
+  ======================================================= */
+
+  const startCamera =
+    async (deviceId = "") => {
+      try {
+        setCameraLoading(true);
+        setCameraOpen(true);
+        setCameraError("");
+        setError("");
+        setSuccess("");
+
+        if (
+          !navigator
+            .mediaDevices
+            ?.getUserMedia
+        ) {
+          throw new Error(
+            "Browser tidak mendukung kamera."
+          );
+        }
+
+        if (
+          streamRef.current
+        ) {
+          streamRef.current
+            .getTracks()
+            .forEach(
+              (track) =>
+                track.stop()
+            );
+        }
+
+        const videoConstraints =
+          deviceId
+            ? {
+                deviceId: {
+                  exact: deviceId,
+                },
+                width: {
+                  ideal: 1280,
+                },
+                height: {
+                  ideal: 720,
+                },
+              }
+            : {
+                facingMode: "user",
+                width: {
+                  ideal: 1280,
+                },
+                height: {
+                  ideal: 720,
+                },
+              };
+
+        const stream =
+          await navigator.mediaDevices.getUserMedia({
+            video: videoConstraints,
+            audio: false,
+          });
+
+        streamRef.current =
+          stream;
+
+        if (
+          videoRef.current
+        ) {
+          videoRef.current.srcObject =
+            stream;
+
+          await videoRef.current.play();
+        }
+
+        setCameraReady(true);
+        setCameraOpen(true);
+      } catch (err) {
+        setCameraReady(false);
+        setCameraOpen(false);
+
+        const message =
+          getErrorMessage(
+            err,
+            "Kamera tidak dapat digunakan. Pastikan izin kamera sudah diberikan."
+          );
+
+        setCameraError(message);
+        setError(message);
+      } finally {
+        setCameraLoading(false);
+      }
+    };
+
+  /* =======================================================
+     STOP CAMERA
+  ======================================================= */
+
+  const stopCamera =
+    () => {
+      if (
+        streamRef.current
+      ) {
+        streamRef.current
+          .getTracks()
+          .forEach(
+            (track) =>
+              track.stop()
+          );
+
+        streamRef.current = null;
+      }
+
+      if (
+        videoRef.current
+      ) {
+        videoRef.current.srcObject =
+          null;
+      }
+
+      setCameraReady(false);
+    };
+
+  /* =======================================================
+     GPS
+  ======================================================= */
+
+  const getLocation =
+    async () => {
+      if (
+        !navigator.geolocation
+      ) {
+        throw new Error(
+          "Browser tidak mendukung GPS."
+        );
+      }
+
+      setLocationLoading(true);
+      setLocationStatus("loading");
+
+      try {
+        const position =
+          await new Promise(
+            (
+              resolve,
+              reject
+            ) => {
+              navigator.geolocation.getCurrentPosition(
+                resolve,
+                reject,
+                {
+                  enableHighAccuracy:
+                    true,
+                  timeout: 15000,
+                  maximumAge: 0,
+                }
+              );
+            }
+          );
+
+        const nextLocation =
+          {
+            lintang:
+              position.coords
+                .latitude,
+
+            bujur:
+              position.coords
+                .longitude,
+
+            akurasi:
+              position.coords
+                .accuracy,
+          };
+
+        setLocation(
+          nextLocation
+        );
+
+        return nextLocation;
+      } catch (err) {
+        setLocationStatus("error");
+
+        let message =
+          "Lokasi GPS tidak dapat diperoleh.";
+
+        if (
+          err?.code === 1
+        ) {
+          message =
+            "Izin lokasi ditolak. Aktifkan akses lokasi pada browser untuk melakukan absensi.";
+        } else if (
+          err?.code === 2
+        ) {
+          message =
+            "Lokasi tidak tersedia. Coba aktifkan GPS lalu ulangi.";
+        } else if (
+          err?.code === 3
+        ) {
+          message =
+            "Pengambilan lokasi terlalu lama. Silakan coba lagi.";
+        }
+
+        throw new Error(
+          message
+        );
+      } finally {
+        setLocationLoading(
+          false
+        );
+      }
+    };
+
+  /* =======================================================
+     CAPTURE SNAPSHOT
+  ======================================================= */
+
+  const captureSnapshot =
+    () => {
+      if (
+        !videoRef.current ||
+        !canvasRef.current
+      ) {
+        throw new Error(
+          "Kamera belum siap."
+        );
+      }
+
+      const video =
+        videoRef.current;
+
+      const canvas =
+        canvasRef.current;
+
+      if (
+        !video.videoWidth ||
+        !video.videoHeight
+      ) {
+        throw new Error(
+          "Kamera belum siap mengambil foto."
+        );
+      }
+
+      canvas.width =
+        video.videoWidth;
+
+      canvas.height =
+        video.videoHeight;
+
+      const context =
+        canvas.getContext(
+          "2d"
+        );
+
+      if (!context) {
+        throw new Error(
+          "Gagal memproses kamera."
+        );
+      }
+
+      context.drawImage(
+        video,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+
+      return new Promise(
+        (
+          resolve,
+          reject
+        ) => {
+          canvas.toBlob(
+            (blob) => {
+              if (!blob) {
+                reject(
+                  new Error(
+                    "Gagal mengambil foto wajah."
+                  )
+                );
+
+                return;
+              }
+
+              resolve(blob);
+            },
+            "image/jpeg",
+            0.9
+          );
+        }
+      );
+    };
+
+  /* =======================================================
+     HANDLE ABSEN
+  ======================================================= */
+
+  const handleAbsen =
+    async () => {
+      try {
+        setLoadingAbsen(true);
+        setError("");
+        setSuccess("");
+
+        if (
+          !kelas?.kelasId
+        ) {
+          throw new Error(
+            "Data kelas belum tersedia. Silakan refresh halaman."
+          );
+        }
+
+        if (!cameraReady) {
+          throw new Error(
+            "Kamera belum aktif."
+          );
+        }
+
+        const currentLocation =
+          await getLocation();
+
+        const snapshot =
+          await captureSnapshot();
+
+        await absenDenganFace({
+          kelasId:
+            kelas.kelasId,
+
+          snapshot,
+
+          status: "hadir",
+
+          lintang:
+            currentLocation.lintang,
+
+          bujur:
+            currentLocation.bujur,
+        });
+
+        setSuccess(
+          "Absensi berhasil dicatat."
+        );
+
+        stopCamera();
+
+        setCameraOpen(false);
+        setCapturedImage(null);
+
+        await loadAbsensi();
+      } catch (err) {
+        setError(
+          getErrorMessage(
+            err,
+            "Gagal melakukan absensi."
+          )
+        );
+      } finally {
+        setLoadingAbsen(false);
+      }
+    };
+
+  /* =======================================================
+     AJUKAN IZIN / SAKIT
+  ======================================================= */
+
+  const handleSubmitManual =
+    async () => {
+      if (!tanggalMulai) {
+        setError(
+          "Tanggal mulai wajib diisi."
+        );
+
+        return;
+      }
+
+      if (!tanggalSelesai) {
+        setError(
+          "Tanggal selesai wajib diisi."
+        );
+
+        return;
+      }
+
+      if (
+        tanggalSelesai <
+        tanggalMulai
+      ) {
+        setError(
+          "Tanggal selesai tidak boleh sebelum tanggal mulai."
+        );
+
+        return;
+      }
+
+      if (
+        !keterangan.trim()
+      ) {
+        setError(
+          "Alasan wajib diisi."
+        );
+
+        return;
+      }
+
+      try {
+        setLoadingAbsen(true);
+        setError("");
+        setSuccess("");
+
+        await ajukanIzin({
+          jenis: jenisIzin,
+
+          tanggalMulai,
+
+          tanggalSelesai,
+
+          alasan:
+            keterangan.trim(),
+
+          bukti,
+        });
+
+        setSuccess(
+          `Permohonan ${
+            jenisIzin === "sakit"
+              ? "sakit"
+              : "izin"
+          } berhasil diajukan dan menunggu verifikasi.`
+        );
+
+        setKeterangan("");
+        setTanggalMulai("");
+        setTanggalSelesai("");
+        setJenisIzin("izin");
+        setBukti(null);
+        setShowIzinForm(false);
+      } catch (err) {
+        setError(
+          getErrorMessage(
+            err,
+            "Gagal mengajukan permohonan izin."
+          )
+        );
+      } finally {
+        setLoadingAbsen(false);
+      }
+    };
+
+  /* =======================================================
+     STATUS
+  ======================================================= */
+
+  const getStatusLabel =
+    (status) => {
+      return (
+        STATUS_LABEL[
+          String(
+            status || ""
+          ).toLowerCase()
+        ] ||
+        status ||
+        "-"
+      );
+    };
+
+  const getTodayStatus =
+    () => {
+      if (!todayAttendance) {
+        return {
+          label: "Belum Absen",
+
+          className:
+            "bg-slate-100 text-slate-600 border-slate-200",
+        };
+      }
+
+      return {
+        label:
+          getStatusLabel(
+            todayAttendance.status
+          ),
+
+        className:
+          STATUS_CLASS[
+            String(
+              todayAttendance.status ||
+                ""
+            ).toLowerCase()
+          ] ||
+          "bg-slate-100 text-slate-600 border-slate-200",
+      };
+    };
+
+  const todayStatus =
+    getTodayStatus();
+
+  /* =======================================================
+     THEME / DATA COMPATIBILITY
+  ======================================================= */
+
+  const kelasSaya = kelas;
+
+  const kelasId =
+    kelasSaya?.kelasId ||
+    kelasSaya?.id ||
+    null;
+
+  const absensiData =
+    absensi;
+
+  const loadingKelas =
+    loading;
+
+  const loadingData =
+    loading;
+
+  const loadKelasSaya =
+    loadKelas;
+
+  const absensiHariIni =
+    todayAttendance;
+
+  const sudahAbsen =
+    Boolean(todayAttendance);
+
+  const statistikAbsensi =
+    useMemo(() => {
+      const total =
+        absensi.length;
+
+      const hadir =
+        absensi.filter(
+          (item) =>
+            String(
+              item?.status || ""
+            ).toLowerCase() ===
+            "hadir"
+        ).length;
+
+      const izin =
+        absensi.filter(
+          (item) => {
+            const status =
+              String(
+                item?.status || ""
+              ).toLowerCase();
+
+            return (
+              status === "izin" ||
+              status === "sakit"
+            );
+          }
+        ).length;
+
+      const alpha =
+        absensi.filter(
+          (item) => {
+            const status =
+              String(
+                item?.status || ""
+              ).toLowerCase();
+
+            return (
+              status === "alpha" ||
+              status === "alpa"
+            );
+          }
+        ).length;
+
+      return {
+        total,
+        hadir,
+        izin,
+        alpha,
+      };
+    }, [absensi]);
+
+  /* =======================================================
+     CALENDAR
+  ======================================================= */
+
+  const [
+    currentMonth,
+    setCurrentMonth,
+  ] = useState(
+    () => new Date()
+  );
+
+  const calendarYear =
+    currentMonth.getFullYear();
+
+  const calendarMonth =
+    currentMonth.getMonth();
+
+  const firstDay =
+    new Date(
+      calendarYear,
+      calendarMonth,
+      1
+    ).getDay();
+
+  const daysInMonth =
+    new Date(
+      calendarYear,
+      calendarMonth + 1,
+      0
+    ).getDate();
+
+  const calendarDays = [
+    ...Array(
+      firstDay
+    ).fill(null),
+
+    ...Array.from(
+      {
+        length:
+          daysInMonth,
+      },
+      (_, index) =>
+        index + 1
+    ),
+  ];
+
+  function hasAttendanceOnDate(
+    date
+  ) {
+    return absensiData.some(
+      (item) => {
+        if (!item?.tanggal) {
+          return false;
+        }
+
+        const value =
+          new Date(
+            item.tanggal
+          );
+
+        if (
+          Number.isNaN(
+            value.getTime()
+          )
+        ) {
+          return false;
+        }
+
+        return (
+          value.getDate() ===
+            date &&
+          value.getMonth() ===
+            calendarMonth &&
+          value.getFullYear() ===
+            calendarYear
+        );
+      }
+    );
+  }
+
+  const sortedAbsensiData =
+    history;
+
+  const formatTanggal =
+    formatDate;
+
+  const formatJam =
+    formatTime;
+
+  /* =======================================================
+     CAMERA LIST
+  ======================================================= */
+
+  const loadCameras =
+    useCallback(async () => {
+      try {
+        if (
+          typeof navigator ===
+            "undefined" ||
+          !navigator
+            .mediaDevices
+            ?.enumerateDevices
+        ) {
+          return;
+        }
+
+        const devices =
+          await navigator.mediaDevices.enumerateDevices();
+
+        const videoDevices =
+          devices.filter(
+            (device) =>
+              device.kind ===
+              "videoinput"
+          );
+
+        setCameras(
+          videoDevices
+        );
+
+        if (
+          !videoDevices.length
+        ) {
+          setSelectedCameraId(
+            ""
+          );
+
+          return;
+        }
+
+        const exists =
+          videoDevices.some(
+            (device) =>
+              device.deviceId ===
+              selectedCameraId
+          );
+
+        if (!exists) {
+          setSelectedCameraId(
+            videoDevices[0]
+              .deviceId
+          );
+        }
+      } catch (err) {
+        setCameraError(
+          getErrorMessage(
+            err,
+            "Tidak dapat membaca daftar kamera."
+          )
+        );
+      }
+    }, [
+      selectedCameraId,
+    ]);
+
+  /* =======================================================
+     CAMERA CHANGE
+  ======================================================= */
+
+  const handleCameraChange =
+    async (event) => {
+      const deviceId =
+        event.target.value;
+
+      setSelectedCameraId(
+        deviceId
+      );
+
+      if (
+        cameraOpen &&
+        deviceId
+      ) {
+        await startCamera(
+          deviceId
+        );
+      }
+    };
+
+  /* =======================================================
+     CLOSE CAMERA
+  ======================================================= */
+
+  const closeCamera =
+    () => {
+      stopCamera();
+
+      setCameraOpen(false);
+      setCameraError("");
+    };
+
+  /* =======================================================
+     TAKE PHOTO
+  ======================================================= */
+
+  const takePhoto =
+    () => {
+      const video =
+        videoRef.current;
+
+      const canvas =
+        canvasRef.current;
+
+      if (
+        !video ||
+        !canvas ||
+        !video.videoWidth ||
+        !video.videoHeight
+      ) {
+        setCameraError(
+          "Kamera belum siap. Tunggu sebentar lalu coba lagi."
+        );
+
+        return;
+      }
+
+      canvas.width =
+        video.videoWidth;
+
+      canvas.height =
+        video.videoHeight;
+
+      const context =
+        canvas.getContext(
+          "2d"
+        );
+
+      if (!context) {
+        setCameraError(
+          "Gagal memproses foto."
+        );
+
+        return;
+      }
+
+      context.drawImage(
+        video,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+      );
+
+      setCapturedImage(
+        canvas.toDataURL(
+          "image/jpeg",
+          0.9
+        )
+      );
+
+      stopCamera();
+      setCameraOpen(false);
+      setCameraError("");
+    };
+
+  const handleSubmitAbsen =
+    handleAbsen;
+
+  /* =======================================================
+     RESET PHOTO
+  ======================================================= */
+
+  const resetPhoto =
+    () => {
+      setCapturedImage(null);
+      setError("");
+      setSuccess("");
+      setLocationStatus(
+        "idle"
+      );
+      setLocationText("");
+      setLocationData(null);
+    };
+
+  /* =======================================================
+     LOAD CAMERA DEVICES
+  ======================================================= */
+
+  useEffect(() => {
+    if (
+      typeof navigator ===
+        "undefined" ||
+      !navigator.mediaDevices
+    ) {
+      return;
+    }
+
+    loadCameras();
+
+    const handleDeviceChange =
+      () =>
+        loadCameras();
+
+    navigator.mediaDevices.addEventListener?.(
+      "devicechange",
+      handleDeviceChange
+    );
+
+    return () => {
+      navigator.mediaDevices.removeEventListener?.(
+        "devicechange",
+        handleDeviceChange
+      );
+    };
+  }, [loadCameras]);
+
+  /* =======================================================
+     LOCATION UI
+  ======================================================= */
+
+  useEffect(() => {
+    if (!location) {
+      return;
+    }
+
+    const accuracy =
+      Number(
+        location.akurasi
+      );
+
+    setLocationData({
+      latitude: Number(
+        location.lintang
+      ),
+
+      longitude: Number(
+        location.bujur
+      ),
+
+      accuracy:
+        Number.isFinite(
+          accuracy
+        )
+          ? accuracy
+          : null,
+    });
+
+    setLocationStatus(
+      "success"
+    );
+
+    setLocationText(
+      Number.isFinite(
+        accuracy
+      )
+        ? `GPS aktif • Akurasi ±${Math.round(
+            accuracy
+          )} meter`
+        : "GPS aktif"
+    );
+  }, [location]);
+
+  /* =======================================================
      RENDER
-  ========================================================= */
+  ======================================================= */
 
   return (
     <div className="theme-page min-h-full w-full">
@@ -1104,19 +1637,25 @@ export default function AbsensiSiswaPage() {
                 </h1>
 
                 <p className="mt-1.5 text-sm text-[color-mix(in_srgb,var(--color-card)_78%,transparent)]">
-                  {formatTanggal(new Date())}
+                  {formatTanggal(
+                    new Date()
+                  )}
 
                   <span className="mx-2 opacity-60">
                     •
                   </span>
 
-                  {formatJam(new Date())}
+                  {formatJam(
+                    new Date()
+                  )}
                 </p>
               </div>
 
               {kelasSaya && (
                 <div className="inline-flex items-center gap-2 self-start rounded-lg bg-[color-mix(in_srgb,var(--color-card)_14%,transparent)] px-3 py-2 text-xs font-semibold text-[var(--color-card)] backdrop-blur-sm sm:self-auto">
-                  <UserCheck size={14} />
+                  <UserCheck
+                    size={14}
+                  />
 
                   {kelasSaya.nama}
                 </div>
@@ -1174,19 +1713,25 @@ export default function AbsensiSiswaPage() {
             <button
               type="button"
               onClick={() =>
-                setActiveTab("absensi")
+                setActiveTab(
+                  "absensi"
+                )
               }
               className={`relative flex items-center gap-2 pb-3 text-sm font-semibold transition ${
-                activeTab === "absensi"
+                activeTab ===
+                "absensi"
                   ? themePrimaryText
                   : "theme-text-muted hover:text-[var(--color-primary)]"
               }`}
             >
-              <ScanFace size={16} />
+              <ScanFace
+                size={16}
+              />
 
               Absensi
 
-              {activeTab === "absensi" && (
+              {activeTab ===
+                "absensi" && (
                 <span className="absolute inset-x-0 -bottom-px h-0.5 rounded-full bg-[var(--color-primary)]" />
               )}
             </button>
@@ -1194,21 +1739,27 @@ export default function AbsensiSiswaPage() {
             <button
               type="button"
               onClick={() =>
-                setActiveTab("histori")
+                setActiveTab(
+                  "histori"
+                )
               }
               className={`relative flex items-center gap-2 pb-3 text-sm font-semibold transition ${
-                activeTab === "histori"
+                activeTab ===
+                "histori"
                   ? themePrimaryText
                   : "theme-text-muted hover:text-[var(--color-primary)]"
               }`}
             >
-              <History size={16} />
+              <History
+                size={16}
+              />
 
               Histori
 
               <span
                 className={`rounded-full px-1.5 py-0.5 text-[10px] font-bold ${
-                  activeTab === "histori"
+                  activeTab ===
+                  "histori"
                     ? `${themePrimarySoft} ${themePrimaryText}`
                     : `${themeNeutralSurface} theme-text-muted`
                 }`}
@@ -1216,7 +1767,8 @@ export default function AbsensiSiswaPage() {
                 {absensiData.length}
               </span>
 
-              {activeTab === "histori" && (
+              {activeTab ===
+                "histori" && (
                 <span className="absolute inset-x-0 -bottom-px h-0.5 rounded-full bg-[var(--color-primary)]" />
               )}
             </button>
@@ -1268,27 +1820,31 @@ export default function AbsensiSiswaPage() {
           </div>
         )}
 
-        {!loadingKelas && !kelasId && (
-          <div
-            className={`flex items-start gap-3 rounded-xl border ${themeWarningBorder} ${themeWarningSurface} p-4`}
-          >
-            <AlertCircle
-              size={18}
-              className="mt-0.5 shrink-0 text-[var(--color-warning)]"
-            />
+        {!loadingKelas &&
+          !kelasId && (
+            <div
+              className={`flex items-start gap-3 rounded-xl border ${themeWarningBorder} ${themeWarningSurface} p-4`}
+            >
+              <AlertCircle
+                size={18}
+                className="mt-0.5 shrink-0 text-[var(--color-warning)]"
+              />
 
-            <div>
-              <h3 className="text-sm font-semibold theme-text">
-                Kelas belum tersedia
-              </h3>
+              <div>
+                <h3 className="text-sm font-semibold theme-text">
+                  Kelas belum tersedia
+                </h3>
 
-              <p className="mt-1 text-sm leading-6 theme-text-secondary">
-                Akun siswa belum terdaftar pada kelas.
-                Silakan hubungi admin sekolah.
-              </p>
+                <p className="mt-1 text-sm leading-6 theme-text-secondary">
+                  Akun siswa belum
+                  terdaftar pada
+                  kelas. Silakan
+                  hubungi admin
+                  sekolah.
+                </p>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
         {error && (
           <div
@@ -1356,12 +1912,11 @@ export default function AbsensiSiswaPage() {
             TAB ABSENSI
         ================================================= */}
 
-        {activeTab === "absensi" && (
+        {activeTab ===
+          "absensi" && (
           <div className="grid gap-5 lg:grid-cols-[minmax(0,1fr)_320px]">
 
-            {/* =================================================
-                KAMERA
-            ================================================= */}
+            {/* KAMERA */}
 
             <section
               className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -1374,16 +1929,20 @@ export default function AbsensiSiswaPage() {
                   <div
                     className={`flex h-9 w-9 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText}`}
                   >
-                    <ScanFace size={18} />
+                    <ScanFace
+                      size={18}
+                    />
                   </div>
 
                   <div>
                     <h2 className="text-sm font-bold theme-text">
-                      Verifikasi Wajah
+                      Verifikasi
+                      Wajah
                     </h2>
 
                     <p className="text-xs theme-text-muted">
-                      Foto wajah & GPS
+                      Foto wajah &
+                      GPS
                     </p>
                   </div>
                 </div>
@@ -1392,8 +1951,11 @@ export default function AbsensiSiswaPage() {
                   <span
                     className={`inline-flex items-center gap-1.5 rounded-full ${themeSuccessSurface} px-2.5 py-1 text-[10px] font-bold text-[var(--color-success)]`}
                   >
-                    <CheckCircle2 size={11} />
-                    Sudah Absen
+                    <CheckCircle2
+                      size={11}
+                    />
+                    Sudah
+                    Absen
                   </span>
                 )}
               </div>
@@ -1407,9 +1969,12 @@ export default function AbsensiSiswaPage() {
                   <label className="mb-1.5 flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest theme-text-muted">
                     <Video
                       size={12}
-                      className={themePrimaryText}
+                      className={
+                        themePrimaryText
+                      }
                     />
-                    Pilih Kamera
+                    Pilih
+                    Kamera
                   </label>
 
                   <div className="relative">
@@ -1427,9 +1992,11 @@ export default function AbsensiSiswaPage() {
                       }
                       className={`theme-input w-full appearance-none rounded-lg border px-3 py-2.5 pr-9 text-sm font-medium outline-none transition ${themeFocus} disabled:cursor-not-allowed disabled:opacity-60`}
                     >
-                      {cameras.length === 0 ? (
+                      {cameras.length ===
+                      0 ? (
                         <option value="">
-                          Kamera belum terdeteksi
+                          Kamera belum
+                          terdeteksi
                         </option>
                       ) : (
                         cameras.map(
@@ -1477,7 +2044,9 @@ export default function AbsensiSiswaPage() {
                     <div className="relative overflow-hidden rounded-xl bg-[color-mix(in_srgb,var(--color-text)_92%,var(--color-card))]">
 
                       <video
-                        ref={videoRef}
+                        ref={
+                          videoRef
+                        }
                         autoPlay
                         muted
                         playsInline
@@ -1500,7 +2069,8 @@ export default function AbsensiSiswaPage() {
                             />
 
                             <span className="text-xs">
-                              Membuka kamera...
+                              Membuka
+                              kamera...
                             </span>
                           </div>
                         </div>
@@ -1511,7 +2081,9 @@ export default function AbsensiSiswaPage() {
                       <div
                         className={`rounded-lg border ${themeDangerBorder} ${themeDangerSurface} p-3 text-xs theme-text-secondary`}
                       >
-                        {cameraError}
+                        {
+                          cameraError
+                        }
                       </div>
                     )}
 
@@ -1527,8 +2099,11 @@ export default function AbsensiSiswaPage() {
                         }
                         className={`flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-[var(--color-card)] transition ${themePrimaryGradient} hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-60`}
                       >
-                        <Camera size={16} />
-                        Ambil Foto
+                        <Camera
+                          size={16}
+                        />
+                        Ambil
+                        Foto
                       </button>
 
                       <button
@@ -1538,7 +2113,9 @@ export default function AbsensiSiswaPage() {
                         }
                         className={`flex items-center justify-center gap-2 rounded-lg border ${themeNeutralBorder} theme-card px-4 py-2.5 text-sm font-semibold theme-text-secondary transition ${themeNeutralHover}`}
                       >
-                        <X size={15} />
+                        <X
+                          size={15}
+                        />
                         Batal
                       </button>
 
@@ -1565,7 +2142,9 @@ export default function AbsensiSiswaPage() {
                         }
                         className={`absolute right-3 top-3 flex h-8 w-8 items-center justify-center rounded-full theme-card theme-text-secondary ${themeSmallShadow} transition ${themeNeutralHover}`}
                       >
-                        <X size={15} />
+                        <X
+                          size={15}
+                        />
                       </button>
                     </div>
 
@@ -1604,7 +2183,8 @@ export default function AbsensiSiswaPage() {
                       <div className="min-w-0 flex-1">
 
                         <p className="text-[10px] font-bold uppercase tracking-widest theme-text-muted">
-                          Lokasi GPS
+                          Lokasi
+                          GPS
                         </p>
 
                         <p className="mt-0.5 text-xs font-medium theme-text-secondary">
@@ -1667,14 +2247,16 @@ export default function AbsensiSiswaPage() {
                             <CheckCircle2
                               size={16}
                             />
-                            Sudah Absen
+                            Sudah
+                            Absen
                           </>
                         ) : (
                           <>
                             <UserCheck
                               size={16}
                             />
-                            Kirim Absensi
+                            Kirim
+                            Absensi
                           </>
                         )}
                       </button>
@@ -1692,7 +2274,9 @@ export default function AbsensiSiswaPage() {
                         }
                         className={`flex items-center justify-center gap-2 rounded-lg border ${themeNeutralBorder} theme-card px-4 py-2.5 text-sm font-semibold theme-text-secondary transition ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-50`}
                       >
-                        <Camera size={15} />
+                        <Camera
+                          size={15}
+                        />
                         Foto Ulang
                       </button>
 
@@ -1705,16 +2289,22 @@ export default function AbsensiSiswaPage() {
                     <div
                       className={`mb-4 flex h-14 w-14 items-center justify-center rounded-full ${themePrimarySoft} ${themePrimaryText}`}
                     >
-                      <Camera size={26} />
+                      <Camera
+                        size={26}
+                      />
                     </div>
 
                     <h3 className="text-sm font-bold theme-text">
-                      Kamera belum dibuka
+                      Kamera belum
+                      dibuka
                     </h3>
 
                     <p className="mt-1.5 max-w-sm text-xs leading-6 theme-text-muted">
-                      Pilih kamera, lalu buka
-                      untuk memulai verifikasi
+                      Pilih kamera,
+                      lalu buka
+                      untuk
+                      memulai
+                      verifikasi
                       wajah.
                     </p>
 
@@ -1728,11 +2318,14 @@ export default function AbsensiSiswaPage() {
                       disabled={
                         !kelasId ||
                         sudahAbsen ||
-                        cameras.length === 0
+                        cameras.length ===
+                          0
                       }
                       className={`mt-5 inline-flex items-center justify-center gap-2 rounded-lg px-5 py-2.5 text-sm font-semibold text-[var(--color-card)] transition ${themePrimaryGradient} hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50`}
                     >
-                      <Camera size={16} />
+                      <Camera
+                        size={16}
+                      />
 
                       {sudahAbsen
                         ? "Sudah Absen"
@@ -1803,7 +2396,9 @@ export default function AbsensiSiswaPage() {
                       <div
                         className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeWarningSurface} text-[var(--color-warning)]`}
                       >
-                        <Clock3 size={18} />
+                        <Clock3
+                          size={18}
+                        />
                       </div>
 
                       <div>
@@ -1812,7 +2407,8 @@ export default function AbsensiSiswaPage() {
                         </p>
 
                         <p className="text-xs theme-text-muted">
-                          Silakan lakukan absensi
+                          Silakan lakukan
+                          absensi
                         </p>
                       </div>
 
@@ -1834,7 +2430,9 @@ export default function AbsensiSiswaPage() {
 
                   <CalendarDays
                     size={14}
-                    className={themePrimaryText}
+                    className={
+                      themePrimaryText
+                    }
                   />
                 </div>
 
@@ -1846,8 +2444,10 @@ export default function AbsensiSiswaPage() {
                       {currentMonth.toLocaleDateString(
                         "id-ID",
                         {
-                          month: "long",
-                          year: "numeric",
+                          month:
+                            "long",
+                          year:
+                            "numeric",
                         }
                       )}
                     </span>
@@ -1860,7 +2460,8 @@ export default function AbsensiSiswaPage() {
                           setCurrentMonth(
                             new Date(
                               calendarYear,
-                              calendarMonth - 1,
+                              calendarMonth -
+                                1,
                               1
                             )
                           )
@@ -1880,7 +2481,8 @@ export default function AbsensiSiswaPage() {
                           setCurrentMonth(
                             new Date(
                               calendarYear,
-                              calendarMonth + 1,
+                              calendarMonth +
+                                1,
                               1
                             )
                           )
@@ -1900,38 +2502,47 @@ export default function AbsensiSiswaPage() {
                   <div className="mt-2 grid grid-cols-7 gap-0.5 text-center">
 
                     {[
+                      "M",
                       "S",
                       "S",
                       "R",
                       "K",
                       "J",
                       "S",
-                      "M",
                     ].map(
-                      (d, i) => (
+                      (
+                        day,
+                        index
+                      ) => (
                         <div
-                          key={i}
+                          key={
+                            `${day}-${index}`
+                          }
                           className="py-1 text-[9px] font-bold uppercase theme-text-placeholder"
                         >
-                          {d}
+                          {day}
                         </div>
                       )
                     )}
 
                     {calendarDays.map(
-                      (date, index) => {
+                      (
+                        date,
+                        index
+                      ) => {
                         if (
-                          date === null
+                          date ===
+                          null
                         ) {
                           return (
                             <div
-                              key={`e-${index}`}
+                              key={`empty-${index}`}
                               className="aspect-square"
                             />
                           );
                         }
 
-                        const isToday =
+                        const isCurrentDay =
                           date ===
                             today.getDate() &&
                           calendarMonth ===
@@ -1948,7 +2559,7 @@ export default function AbsensiSiswaPage() {
                           <div
                             key={date}
                             className={`flex aspect-square items-center justify-center rounded text-[11px] font-medium ${
-                              isToday
+                              isCurrentDay
                                 ? `${themePrimaryGradient} font-bold text-[var(--color-card)]`
                                 : hasAbsen
                                 ? `${themePrimarySoft} font-semibold ${themePrimaryText}`
@@ -1990,16 +2601,20 @@ export default function AbsensiSiswaPage() {
                   <div
                     className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText}`}
                   >
-                    <FileText size={16} />
+                    <FileText
+                      size={16}
+                    />
                   </div>
 
                   <div>
                     <h3 className="text-sm font-bold theme-text">
-                      Ajukan Keterangan
+                      Ajukan
+                      Keterangan
                     </h3>
 
                     <p className="mt-0.5 text-xs theme-text-muted">
-                      Izin, sakit, atau alpha
+                      Izin, sakit,
+                      atau alpha
                     </p>
                   </div>
                 </div>
@@ -2008,7 +2623,9 @@ export default function AbsensiSiswaPage() {
                   <button
                     type="button"
                     onClick={() =>
-                      setShowIzinForm(true)
+                      setShowIzinForm(
+                        true
+                      )
                     }
                     disabled={
                       !kelasId ||
@@ -2016,8 +2633,11 @@ export default function AbsensiSiswaPage() {
                     }
                     className={`mt-3 flex w-full items-center justify-center gap-2 rounded-lg border ${themeNeutralBorder} theme-card px-3 py-2 text-xs font-semibold theme-text-secondary transition hover:border-[color-mix(in_srgb,var(--color-primary)_30%,transparent)] hover:text-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-50`}
                   >
-                    <FileText size={13} />
-                    Ajukan Sekarang
+                    <FileText
+                      size={13}
+                    />
+                    Ajukan
+                    Sekarang
                   </button>
                 ) : (
                   <div className="mt-3 space-y-3">
@@ -2074,14 +2694,81 @@ export default function AbsensiSiswaPage() {
                       >
                         Alpha
                       </button>
+
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+
+                      <div>
+                        <label
+                          htmlFor="tanggalMulai"
+                          className="mb-1 block text-[10px] font-semibold uppercase tracking-wider theme-text-muted"
+                        >
+                          Tanggal
+                          Mulai
+                        </label>
+
+                        <input
+                          id="tanggalMulai"
+                          type="date"
+                          value={
+                            tanggalMulai
+                          }
+                          onChange={(
+                            event
+                          ) =>
+                            setTanggalMulai(
+                              event
+                                .target
+                                .value
+                            )
+                          }
+                          className={`theme-input w-full rounded-lg border px-3 py-2 text-xs outline-none transition ${themeFocus}`}
+                        />
+                      </div>
+
+                      <div>
+                        <label
+                          htmlFor="tanggalSelesai"
+                          className="mb-1 block text-[10px] font-semibold uppercase tracking-wider theme-text-muted"
+                        >
+                          Tanggal
+                          Selesai
+                        </label>
+
+                        <input
+                          id="tanggalSelesai"
+                          type="date"
+                          value={
+                            tanggalSelesai
+                          }
+                          onChange={(
+                            event
+                          ) =>
+                            setTanggalSelesai(
+                              event
+                                .target
+                                .value
+                            )
+                          }
+                          className={`theme-input w-full rounded-lg border px-3 py-2 text-xs outline-none transition ${themeFocus}`}
+                        />
+                      </div>
+
                     </div>
 
                     <textarea
                       id="keterangan"
-                      value={keterangan}
-                      onChange={(event) =>
+                      value={
+                        keterangan
+                      }
+                      onChange={(
+                        event
+                      ) =>
                         setKeterangan(
-                          event.target.value
+                          event
+                            .target
+                            .value
                         )
                       }
                       rows={3}
@@ -2097,8 +2784,26 @@ export default function AbsensiSiswaPage() {
                           setShowIzinForm(
                             false
                           );
-                          setKeterangan("");
-                          setError("");
+
+                          setKeterangan(
+                            ""
+                          );
+
+                          setTanggalMulai(
+                            ""
+                          );
+
+                          setTanggalSelesai(
+                            ""
+                          );
+
+                          setBukti(
+                            null
+                          );
+
+                          setError(
+                            ""
+                          );
                         }}
                         className={`flex-1 rounded-lg border ${themeNeutralBorder} theme-card px-3 py-2 text-xs font-semibold theme-text-secondary transition ${themeNeutralHover}`}
                       >
@@ -2134,7 +2839,8 @@ export default function AbsensiSiswaPage() {
             TAB HISTORI
         ================================================= */}
 
-        {activeTab === "histori" && (
+        {activeTab ===
+          "histori" && (
           <div
             className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
           >
@@ -2146,16 +2852,20 @@ export default function AbsensiSiswaPage() {
                 <div
                   className={`flex h-10 w-10 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText}`}
                 >
-                  <History size={18} />
+                  <History
+                    size={18}
+                  />
                 </div>
 
                 <div>
                   <h2 className="text-sm font-bold theme-text">
-                    Riwayat Absensi
+                    Riwayat
+                    Absensi
                   </h2>
 
                   <p className="text-xs theme-text-muted">
-                    Seluruh data absensi kamu
+                    Seluruh data
+                    absensi kamu
                   </p>
                 </div>
               </div>
@@ -2163,7 +2873,8 @@ export default function AbsensiSiswaPage() {
               <span
                 className={`inline-flex items-center gap-1.5 self-start rounded-full ${themeNeutralSurface} px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest theme-text-secondary sm:self-auto`}
               >
-                {absensiData.length} Data
+                {absensiData.length}{" "}
+                Data
               </span>
             </div>
 
@@ -2189,15 +2900,20 @@ export default function AbsensiSiswaPage() {
                   <div
                     className={`flex h-14 w-14 items-center justify-center rounded-full theme-card theme-text-placeholder ${themeSmallShadow}`}
                   >
-                    <History size={24} />
+                    <History
+                      size={24}
+                    />
                   </div>
 
                   <h3 className="mt-4 text-sm font-bold theme-text">
-                    Belum ada riwayat absensi
+                    Belum ada
+                    riwayat
+                    absensi
                   </h3>
 
                   <p className="mt-1 max-w-sm text-xs leading-5 theme-text-muted">
-                    Data absensi akan muncul
+                    Data absensi
+                    akan muncul
                     di sini.
                   </p>
 
@@ -2210,8 +2926,11 @@ export default function AbsensiSiswaPage() {
                     }
                     className={`mt-5 inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-semibold text-[var(--color-card)] transition ${themePrimaryGradient} hover:brightness-95`}
                   >
-                    <ScanFace size={13} />
-                    Mulai Absensi
+                    <ScanFace
+                      size={13}
+                    />
+                    Mulai
+                    Absensi
                   </button>
                 </div>
               ) : (
@@ -2219,7 +2938,10 @@ export default function AbsensiSiswaPage() {
                   className={`divide-y ${themeDivider}`}
                 >
                   {sortedAbsensiData.map(
-                    (item, index) => {
+                    (
+                      item,
+                      index
+                    ) => {
                       const status =
                         String(
                           item?.status ||
@@ -2302,7 +3024,9 @@ export default function AbsensiSiswaPage() {
                                     size={10}
                                   />
 
-                                  {item.metode}
+                                  {
+                                    item.metode
+                                  }
                                 </span>
                               )}
                             </div>
@@ -2332,7 +3056,9 @@ export default function AbsensiSiswaPage() {
 
                             {item?.keterangan && (
                               <p className="mt-2 text-xs leading-5 theme-text-muted">
-                                {item.keterangan}
+                                {
+                                  item.keterangan
+                                }
                               </p>
                             )}
                           </div>

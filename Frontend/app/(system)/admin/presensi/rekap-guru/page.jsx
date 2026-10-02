@@ -1,7 +1,6 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useRouter } from "next/navigation";
 
 import Sidebar from "../../../../components/Sidebar";
 import Header from "../../../../components/Header";
@@ -9,10 +8,8 @@ import Header from "../../../../components/Header";
 import {
   Search,
   RefreshCw,
-  Download,
   CalendarDays,
   Users,
-  CheckCircle2,
   Clock3,
   CircleAlert,
   ChevronLeft,
@@ -20,10 +17,7 @@ import {
   Eye,
   X,
   Database,
-  Activity,
-  FileSpreadsheet,
   UserCheck,
-  UserX,
   Loader2,
 } from "lucide-react";
 
@@ -31,14 +25,12 @@ import {
    API
 ========================================================= */
 
-const API_URL =
+const RAW_API_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
-const REKAP_GURU_ENDPOINT =
-  `${API_URL}/api/v1/absensi/rekap-guru`;
+const API_URL = RAW_API_URL.replace(/\/+$/, "");
 
-const EXPORT_ENDPOINT =
-  `${API_URL}/api/v1/absensi/export`;
+const GURU_ENDPOINT = `${API_URL}/api/users/`;
 
 /* =========================================================
    HELPER
@@ -52,48 +44,6 @@ function getTodayDate() {
   const day = String(now.getDate()).padStart(2, "0");
 
   return `${year}-${month}-${day}`;
-}
-
-function normalizeStatus(status, item = {}) {
-  const value = String(status || "")
-    .toLowerCase()
-    .trim();
-
-  if (value === "hadir") {
-    return "hadir";
-  }
-
-  if (
-    value === "terlambat" ||
-    value === "late"
-  ) {
-    return "terlambat";
-  }
-
-  if (value === "izin") {
-    return "izin";
-  }
-
-  if (value === "sakit") {
-    return "sakit";
-  }
-
-  if (
-    value === "alpha" ||
-    value === "alpa"
-  ) {
-    return "alpha";
-  }
-
-  if (
-    item?.jamMasuk ||
-    item?.waktuMasuk ||
-    item?.jam_masuk
-  ) {
-    return "hadir";
-  }
-
-  return "alpha";
 }
 
 function formatTanggalIndonesia(tanggal) {
@@ -113,234 +63,178 @@ function formatTanggalIndonesia(tanggal) {
   });
 }
 
-function formatJam(value) {
-  if (!value || value === "-") {
-    return "-";
+function getToken() {
+  if (typeof window === "undefined") {
+    return null;
   }
 
-  try {
-    const date = new Date(value);
-
-    if (!Number.isNaN(date.getTime())) {
-      return date.toLocaleTimeString("id-ID", {
-        hour: "2-digit",
-        minute: "2-digit",
-      });
-    }
-  } catch {
-    // ignore
-  }
-
-  const stringValue = String(value);
-
-  if (/^\d{2}:\d{2}(:\d{2})?$/.test(stringValue)) {
-    return stringValue.slice(0, 5);
-  }
-
-  return stringValue;
+  return (
+    localStorage.getItem("token") ||
+    localStorage.getItem("accessToken") ||
+    localStorage.getItem("access_token") ||
+    localStorage.getItem("authToken") ||
+    localStorage.getItem("jwt")
+  );
 }
 
 /* =========================================================
-   NORMALIZE DATA GURU
+   NORMALIZE RESPONSE USER
+========================================================= */
+
+function extractUserData(result) {
+  if (Array.isArray(result)) {
+    return result;
+  }
+
+  if (Array.isArray(result?.data)) {
+    return result.data;
+  }
+
+  if (Array.isArray(result?.data?.data)) {
+    return result.data.data;
+  }
+
+  if (Array.isArray(result?.rows)) {
+    return result.rows;
+  }
+
+  if (Array.isArray(result?.results)) {
+    return result.results;
+  }
+
+  if (Array.isArray(result?.users)) {
+    return result.users;
+  }
+
+  return [];
+}
+
+/* =========================================================
+   NORMALIZE GURU
 ========================================================= */
 
 function normalizeGuru(item, index) {
-  const guru = item?.pengguna || item?.guru || {};
+  const pengguna = item?.pengguna || item?.user || {};
 
   const id =
     item?.id ??
-    item?.penggunaId ??
-    guru?.id ??
+    pengguna?.id ??
     `guru-${index}`;
 
   const nama =
-    item?.nama ??
     item?.namaLengkap ??
-    item?.namaGuru ??
-    item?.pengguna?.namaLengkap ??
-    guru?.namaLengkap ??
-    guru?.nama ??
+    item?.nama ??
+    pengguna?.namaLengkap ??
+    pengguna?.nama ??
     "-";
 
   const nip =
     item?.nip ??
-    item?.pengguna?.nip ??
-    guru?.nip ??
+    pengguna?.nip ??
     "-";
 
   const jabatan =
     item?.jabatan ??
-    item?.pengguna?.jabatan ??
-    guru?.jabatan ??
-    item?.peran?.nama ??
-    guru?.peran?.nama ??
+    pengguna?.jabatan ??
     "Guru";
-
-  const status = normalizeStatus(
-    item?.status ??
-      item?.statusAbsensi ??
-      item?.statusKehadiran ??
-      item?.kehadiran,
-    item
-  );
-
-  const jamMasuk =
-    item?.jamMasuk ??
-    item?.waktuMasuk ??
-    item?.jam_masuk ??
-    item?.checkIn ??
-    item?.waktuCheckIn ??
-    "-";
-
-  const jamPulang =
-    item?.jamPulang ??
-    item?.waktuPulang ??
-    item?.jam_pulang ??
-    item?.checkOut ??
-    item?.waktuCheckOut ??
-    "-";
-
-  const terlambat = Number(
-    item?.terlambat ??
-      item?.jumlahTerlambat ??
-      item?.totalTerlambat ??
-      0
-  );
-
-  const izin = Number(
-    item?.izin ??
-      item?.totalIzin ??
-      0
-  );
-
-  const sakit = Number(
-    item?.sakit ??
-      item?.totalSakit ??
-      0
-  );
-
-  const alpha = Number(
-    item?.alpha ??
-      item?.alpa ??
-      item?.totalAlpha ??
-      item?.totalAlpa ??
-      0
-  );
 
   return {
     id,
     nama,
     nip,
     jabatan,
-    status,
-    jamMasuk: formatJam(jamMasuk),
-    jamPulang: formatJam(jamPulang),
-    terlambat,
-    izin,
-    sakit,
-    alpha,
+
+    status: "belum_tersedia",
+    jamMasuk: "-",
+    jamPulang: "-",
+
+    terlambat: 0,
+    izin: 0,
+    sakit: 0,
+    alpha: 0,
+
     original: item,
   };
 }
 
 /* =========================================================
-   STATUS CONFIG
+   STATUS BADGE
 ========================================================= */
 
-const STATUS_CONFIG = {
-  hadir: {
-    label: "Hadir",
-    icon: CheckCircle2,
-    className: "theme-success",
-  },
-
-  terlambat: {
-    label: "Terlambat",
-    icon: Clock3,
-    className: "theme-warning",
-  },
-
-  izin: {
-    label: "Izin",
-    icon: CircleAlert,
-    className: "theme-info",
-  },
-
-  sakit: {
-    label: "Sakit",
-    icon: CircleAlert,
-    className: "theme-warning",
-  },
-
-  alpha: {
-    label: "Alpha",
-    icon: CircleAlert,
-    className: "theme-danger",
-  },
-};
+function StatusBadge() {
+  return (
+    <span
+      className="
+        inline-flex
+        items-center
+        gap-1.5
+        rounded-full
+        border
+        border-theme-border
+        bg-theme-card-soft
+        px-2.5
+        py-1
+        text-[11px]
+        font-semibold
+        text-theme-text-muted
+        whitespace-nowrap
+      "
+    >
+      <CircleAlert size={12} />
+      Belum tersedia
+    </span>
+  );
+}
 
 /* =========================================================
    PAGE
 ========================================================= */
 
 export default function RekapGuruPage() {
-  const router = useRouter();
-
   const [sidebarOpen, setSidebarOpen] = useState(true);
 
-  const [tanggal, setTanggal] = useState(
-    () => getTodayDate()
+  const [tanggal, setTanggal] = useState(() =>
+    getTodayDate()
   );
 
   const [data, setData] = useState([]);
+
   const [loading, setLoading] = useState(false);
+
   const [error, setError] = useState("");
+
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] =
-    useState("semua");
-  const [selectedGuru, setSelectedGuru] =
-    useState(null);
+
+  const [selectedGuru, setSelectedGuru] = useState(null);
+
   const [page, setPage] = useState(1);
+
   const [limit, setLimit] = useState(10);
-  const [exportLoading, setExportLoading] =
-    useState(false);
-
-  const getToken = () => {
-    if (typeof window === "undefined") {
-      return null;
-    }
-
-    return (
-      localStorage.getItem("token") ||
-      localStorage.getItem("accessToken")
-    );
-  };
 
   /* =======================================================
-     FETCH
+     FETCH GURU
   ======================================================= */
 
-  const fetchRekapGuru = useCallback(
-    async (showRefreshLoading = true) => {
+  const fetchGuru = useCallback(
+    async (showLoading = true) => {
       const token = getToken();
 
       if (!token) {
         setError(
           "Sesi login tidak ditemukan. Silakan login kembali."
         );
+
         return;
       }
 
-      if (showRefreshLoading) {
+      if (showLoading) {
         setLoading(true);
       }
 
       setError("");
 
       try {
-        const url =
-          `${REKAP_GURU_ENDPOINT}?tanggal=` +
-          encodeURIComponent(tanggal);
+        const url = `${GURU_ENDPOINT}?role=guru`;
 
         const response = await fetch(url, {
           method: "GET",
@@ -368,7 +262,7 @@ export default function RekapGuruPage() {
           throw new Error(
             `Response dari server bukan JSON yang valid: ${text.slice(
               0,
-              500
+              300
             )}`
           );
         }
@@ -378,27 +272,11 @@ export default function RekapGuruPage() {
             result?.message ||
               result?.error ||
               result?.detail ||
-              `Gagal mengambil rekap guru (${response.status})`
+              `Gagal mengambil data guru (${response.status})`
           );
         }
 
-        let rawData = [];
-
-        if (Array.isArray(result)) {
-          rawData = result;
-        } else if (Array.isArray(result?.data)) {
-          rawData = result.data;
-        } else if (
-          Array.isArray(result?.data?.data)
-        ) {
-          rawData = result.data.data;
-        } else if (Array.isArray(result?.rows)) {
-          rawData = result.rows;
-        } else if (
-          Array.isArray(result?.results)
-        ) {
-          rawData = result.results;
-        }
+        const rawData = extractUserData(result);
 
         const normalized = rawData.map(
           normalizeGuru
@@ -408,7 +286,7 @@ export default function RekapGuruPage() {
         setPage(1);
       } catch (err) {
         console.error(
-          "ERROR FETCH REKAP GURU:",
+          "ERROR FETCH DATA GURU:",
           err
         );
 
@@ -416,54 +294,46 @@ export default function RekapGuruPage() {
 
         setError(
           err?.message ||
-            "Gagal mengambil data rekap guru."
+            "Gagal mengambil data guru."
         );
       } finally {
         setLoading(false);
       }
     },
-    [tanggal]
+    []
   );
 
   useEffect(() => {
-    fetchRekapGuru();
-  }, [fetchRekapGuru]);
-
-  /* =======================================================
-     AUTO REFRESH
-  ======================================================= */
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      fetchRekapGuru(false);
-    }, 10000);
-
-    return () => {
-      clearInterval(interval);
-    };
-  }, [fetchRekapGuru]);
+    fetchGuru();
+  }, [fetchGuru]);
 
   /* =======================================================
      FILTER
   ======================================================= */
 
   const filteredData = useMemo(() => {
-    const keyword = search.toLowerCase().trim();
+    const keyword = search
+      .toLowerCase()
+      .trim();
+
+    if (!keyword) {
+      return data;
+    }
 
     return data.filter((guru) => {
-      const matchSearch =
-        !keyword ||
-        guru.nama.toLowerCase().includes(keyword) ||
-        guru.nip.toLowerCase().includes(keyword) ||
-        guru.jabatan.toLowerCase().includes(keyword);
-
-      const matchStatus =
-        statusFilter === "semua" ||
-        guru.status === statusFilter;
-
-      return matchSearch && matchStatus;
+      return (
+        guru.nama
+          .toLowerCase()
+          .includes(keyword) ||
+        guru.nip
+          .toLowerCase()
+          .includes(keyword) ||
+        guru.jabatan
+          .toLowerCase()
+          .includes(keyword)
+      );
     });
-  }, [data, search, statusFilter]);
+  }, [data, search]);
 
   /* =======================================================
      PAGINATION
@@ -471,170 +341,66 @@ export default function RekapGuruPage() {
 
   const totalPages = Math.max(
     1,
-    Math.ceil(filteredData.length / limit)
+    Math.ceil(
+      filteredData.length / limit
+    )
   );
 
   const paginatedData = useMemo(() => {
-    const start = (page - 1) * limit;
+    const start =
+      (page - 1) * limit;
+
     const end = start + limit;
 
-    return filteredData.slice(start, end);
-  }, [filteredData, page, limit]);
+    return filteredData.slice(
+      start,
+      end
+    );
+  }, [
+    filteredData,
+    page,
+    limit,
+  ]);
 
   useEffect(() => {
     if (page > totalPages) {
       setPage(totalPages);
     }
-  }, [page, totalPages]);
+  }, [
+    page,
+    totalPages,
+  ]);
 
   /* =======================================================
      STATISTICS
   ======================================================= */
 
   const statistics = useMemo(() => {
-    const total = data.length;
-
-    const hadir = data.filter(
-      (guru) => guru.status === "hadir"
-    ).length;
-
-    const terlambat = data.filter(
-      (guru) => guru.status === "terlambat"
-    ).length;
-
-    const izin = data.filter(
-      (guru) => guru.status === "izin"
-    ).length;
-
-    const sakit = data.filter(
-      (guru) => guru.status === "sakit"
-    ).length;
-
-    const alpha = data.filter(
-      (guru) => guru.status === "alpha"
-    ).length;
-
     return {
-      total,
-      hadir,
-      terlambat,
-      izin,
-      sakit,
-      alpha,
+      total: data.length,
+      hadir: 0,
+      terlambat: 0,
+      izin: 0,
+      alpha: 0,
     };
   }, [data]);
 
   /* =======================================================
-     HANDLERS
+     HANDLER
   ======================================================= */
 
-  const handleTanggalChange = (event) => {
-    setTanggal(event.target.value);
+  const handleTanggalChange = (
+    event
+  ) => {
+    setTanggal(
+      event.target.value
+    );
+
     setPage(1);
   };
 
   const handleRefresh = () => {
-    fetchRekapGuru(true);
-  };
-
-  const handleExport = async () => {
-    const token = getToken();
-
-    if (!token) {
-      setError("Sesi login tidak ditemukan.");
-      return;
-    }
-
-    setExportLoading(true);
-
-    try {
-      const url =
-        `${EXPORT_ENDPOINT}?tanggal=` +
-        encodeURIComponent(tanggal);
-
-      const response = await fetch(url, {
-        method: "GET",
-
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
-
-      if (!response.ok) {
-        let message = "Gagal melakukan export.";
-
-        try {
-          const result = await response.json();
-
-          message =
-            result?.message ||
-            result?.error ||
-            message;
-        } catch {
-          // ignore
-        }
-
-        throw new Error(message);
-      }
-
-      const blob = await response.blob();
-
-      const downloadUrl =
-        window.URL.createObjectURL(blob);
-
-      const link = document.createElement("a");
-
-      link.href = downloadUrl;
-
-      link.download = `rekap-guru-${tanggal}.xlsx`;
-
-      document.body.appendChild(link);
-
-      link.click();
-
-      link.remove();
-
-      window.URL.revokeObjectURL(downloadUrl);
-    } catch (err) {
-      console.error("EXPORT ERROR:", err);
-
-      setError(
-        err?.message ||
-          "Gagal melakukan export."
-      );
-    } finally {
-      setExportLoading(false);
-    }
-  };
-
-  const renderStatus = (status) => {
-    const config =
-      STATUS_CONFIG[status] ||
-      STATUS_CONFIG.alpha;
-
-    const Icon = config.icon;
-
-    return (
-      <span
-        className={`
-          inline-flex
-          items-center
-          gap-1.5
-          rounded-full
-          border
-          px-2.5
-          py-1
-          text-[11px]
-          font-semibold
-          whitespace-nowrap
-          ${config.className}
-        `}
-      >
-        <Icon size={12} />
-
-        {config.label}
-      </span>
-    );
+    fetchGuru(true);
   };
 
   /* =======================================================
@@ -642,7 +408,15 @@ export default function RekapGuruPage() {
   ======================================================= */
 
   return (
-    <div className="flex h-screen w-full theme-page overflow-hidden">
+    <div
+      className="
+        flex
+        h-screen
+        w-full
+        overflow-hidden
+        theme-page
+      "
+    >
       {/* =====================================================
           SIDEBAR
       ===================================================== */}
@@ -657,10 +431,20 @@ export default function RekapGuruPage() {
       />
 
       {/* =====================================================
-          MAIN CONTENT
+          MAIN
       ===================================================== */}
 
-      <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
+      <div
+        className="
+          flex
+          flex-1
+          min-w-0
+          h-full
+          flex-col
+          overflow-hidden
+          theme-page
+        "
+      >
         <Header
           title="Rekap Absensi Guru"
           onMenuClick={() =>
@@ -668,122 +452,173 @@ export default function RekapGuruPage() {
           }
         />
 
-        {/* =====================================================
-            PAGE
-        ===================================================== */}
-
-        <main className="flex-1 overflow-y-auto">
-          <div className="p-4 sm:p-6 lg:p-8 space-y-5 sm:space-y-6">
-
+        <main
+          className="
+            flex-1
+            overflow-y-auto
+            theme-page
+          "
+        >
+          <div
+            className="
+              space-y-5
+              p-4
+              sm:space-y-6
+              sm:p-6
+              lg:p-8
+            "
+          >
             {/* =================================================
-                PAGE HEADER
-            ================================================== */}
+                HEADER
+            ================================================= */}
 
-            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div
+              className="
+                flex
+                flex-col
+                gap-4
+                lg:flex-row
+                lg:items-center
+                lg:justify-between
+              "
+            >
               <div className="flex items-center gap-3">
-                <div className="w-11 h-11 rounded-xl theme-primary flex items-center justify-center shadow-lg shrink-0">
+                <div
+                  className="
+                    flex
+                    h-11
+                    w-11
+                    shrink-0
+                    items-center
+                    justify-center
+                    rounded-xl
+                    bg-[var(--school-primary,#155DFC)]
+                    text-white
+                    shadow-lg
+                    shadow-black/10
+                  "
+                >
                   <Users size={20} />
                 </div>
 
                 <div className="min-w-0">
-                  <h1 className="text-xl sm:text-2xl font-bold theme-text truncate">
+                  <h1
+                    className="
+                      text-xl
+                      font-bold
+                      sm:text-2xl
+                      theme-text
+                    "
+                  >
                     Rekap Absensi Guru
                   </h1>
 
-                  <p className="text-xs sm:text-sm theme-text-muted mt-1">
-                    Pantau kehadiran guru berdasarkan tanggal yang dipilih.
+                  <p
+                    className="
+                      mt-1
+                      text-xs
+                      sm:text-sm
+                      theme-text-muted
+                    "
+                  >
+                    Daftar guru berdasarkan data
+                    pengguna yang tersedia.
                   </p>
                 </div>
               </div>
 
-              {/* ACTION */}
-
-              <div className="flex flex-col sm:flex-row gap-2">
-                <button
-                  type="button"
-                  onClick={handleRefresh}
-                  disabled={loading}
-                  className="
-                    inline-flex
-                    items-center
-                    justify-center
-                    gap-2
-                    px-4
-                    py-2.5
-                    rounded-xl
-                    border
-                    theme-border
-                    theme-input
-                    text-sm
-                    font-semibold
-                    theme-sidebar-hover
-                    transition
-                    disabled:cursor-not-allowed
-                    disabled:opacity-60
-                  "
-                >
-                  <RefreshCw
-                    size={15}
-                    className={
-                      loading
-                        ? "animate-spin"
-                        : ""
-                    }
-                  />
-
-                  Refresh
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleExport}
-                  disabled={
-                    exportLoading ||
-                    data.length === 0
+              <button
+                type="button"
+                onClick={handleRefresh}
+                disabled={loading}
+                className="
+                  inline-flex
+                  items-center
+                  justify-center
+                  gap-2
+                  rounded-xl
+                  border
+                  border-theme-border
+                  bg-theme-card
+                  px-4
+                  py-2.5
+                  text-sm
+                  font-semibold
+                  theme-text-secondary
+                  transition
+                  hover:bg-theme-card-soft
+                  disabled:cursor-not-allowed
+                  disabled:opacity-60
+                "
+              >
+                <RefreshCw
+                  size={15}
+                  className={
+                    loading
+                      ? "animate-spin"
+                      : ""
                   }
-                  className="
-                    inline-flex
-                    items-center
-                    justify-center
-                    gap-2
-                    px-4
-                    py-2.5
-                    rounded-xl
-                    theme-primary
-                    text-sm
-                    font-semibold
-                    shadow-sm
-                    transition
-                    disabled:cursor-not-allowed
-                    disabled:opacity-60
-                  "
-                >
-                  {exportLoading ? (
-                    <>
-                      <Loader2
-                        size={15}
-                        className="animate-spin"
-                      />
-                      Export...
-                    </>
-                  ) : (
-                    <>
-                      <FileSpreadsheet
-                        size={15}
-                      />
-                      Export Excel
-                    </>
-                  )}
-                </button>
+                />
+
+                Refresh
+              </button>
+            </div>
+
+            {/* =================================================
+                INFO
+            ================================================= */}
+
+            <div
+              className="
+                flex
+                items-start
+                gap-3
+                rounded-xl
+                border
+                border-theme-border
+                p-4
+                theme-info
+              "
+            >
+              <CircleAlert
+                size={18}
+                className="mt-0.5 shrink-0"
+              />
+
+              <div>
+                <p className="text-sm font-semibold">
+                  Data absensi guru belum tersedia
+                  dari backend
+                </p>
+
+                <p className="mt-1 text-xs leading-5 opacity-90">
+                  Halaman ini menggunakan data guru
+                  dari endpoint pengguna yang tersedia.
+                  Status, jam masuk, dan jam pulang belum
+                  ditampilkan karena backend saat ini
+                  belum menyediakan endpoint rekap
+                  absensi guru.
+                </p>
               </div>
             </div>
 
             {/* =================================================
                 ERROR
-            ================================================== */}
+            ================================================= */}
 
             {error && (
-              <div className="flex items-start gap-3 rounded-xl border theme-danger p-4">
+              <div
+                className="
+                  flex
+                  items-start
+                  gap-3
+                  rounded-xl
+                  border
+                  border-theme-border
+                  p-4
+                  theme-danger
+                "
+              >
                 <CircleAlert
                   size={19}
                   className="mt-0.5 shrink-0"
@@ -801,11 +636,13 @@ export default function RekapGuruPage() {
 
                 <button
                   type="button"
-                  onClick={() => setError("")}
+                  onClick={() =>
+                    setError("")
+                  }
                   className="
                     opacity-70
-                    hover:opacity-100
                     transition
+                    hover:opacity-100
                   "
                 >
                   <X size={18} />
@@ -815,15 +652,38 @@ export default function RekapGuruPage() {
 
             {/* =================================================
                 FILTER TANGGAL
-            ================================================== */}
+            ================================================= */}
 
-            <section className="theme-card rounded-2xl border theme-border shadow-sm overflow-hidden">
+            <section
+              className="
+                overflow-hidden
+                rounded-2xl
+                border
+                border-theme-border
+                shadow-sm
+                theme-card
+              "
+            >
               <div className="p-4 sm:p-5 lg:p-6">
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-end">
+                <div
+                  className="
+                    flex
+                    flex-col
+                    gap-4
+                    lg:flex-row
+                    lg:items-end
+                  "
+                >
                   <div className="w-full lg:max-w-xs">
                     <label
                       htmlFor="tanggal"
-                      className="mb-2 block text-xs font-semibold theme-text-secondary"
+                      className="
+                        mb-2
+                        block
+                        text-xs
+                        font-semibold
+                        theme-text-secondary
+                      "
                     >
                       Tanggal Absensi
                     </label>
@@ -837,7 +697,7 @@ export default function RekapGuruPage() {
                           left-3
                           top-1/2
                           -translate-y-1/2
-                          theme-text-placeholder
+                          theme-text-muted
                         "
                       />
 
@@ -860,15 +720,29 @@ export default function RekapGuruPage() {
                           font-medium
                           outline-none
                           transition
-                          focus:outline-none
+                          focus:border-[var(--school-primary,#155DFC)]
+                          focus:ring-2
+                          focus:ring-[var(--school-primary,#155DFC)]/20
                         "
                       />
                     </div>
                   </div>
 
-                  <div className="pb-2 text-xs sm:text-sm theme-text-muted">
-                    Menampilkan data untuk:{" "}
-                    <span className="font-semibold theme-text">
+                  <div
+                    className="
+                      pb-2
+                      text-xs
+                      sm:text-sm
+                      theme-text-muted
+                    "
+                  >
+                    Tanggal yang dipilih:{" "}
+                    <span
+                      className="
+                        font-semibold
+                        theme-text
+                      "
+                    >
                       {formatTanggalIndonesia(
                         tanggal
                       )}
@@ -880,233 +754,247 @@ export default function RekapGuruPage() {
 
             {/* =================================================
                 STATISTICS
-            ================================================== */}
+            ================================================= */}
 
-            <div className="grid grid-cols-2 lg:grid-cols-5 gap-3 sm:gap-4">
+            <div
+              className="
+                grid
+                grid-cols-2
+                gap-3
+                lg:grid-cols-5
+                sm:gap-4
+              "
+            >
               <StatCard
                 title="Total Guru"
                 value={statistics.total}
-                description="Total data guru"
+                description="Data guru"
                 icon={Users}
-                iconClass="theme-text"
+                iconClass="text-[var(--school-primary,#155DFC)]"
                 loading={loading}
               />
 
               <StatCard
                 title="Hadir"
-                value={statistics.hadir}
-                description="Guru hadir"
+                value="-"
+                description="Belum tersedia"
                 icon={UserCheck}
-                iconClass="text-[var(--color-success)]"
-                loading={loading}
+                iconClass="text-emerald-500"
+                loading={false}
               />
 
               <StatCard
                 title="Terlambat"
-                value={statistics.terlambat}
-                description="Guru terlambat"
+                value="-"
+                description="Belum tersedia"
                 icon={Clock3}
-                iconClass="text-[var(--color-warning)]"
-                loading={loading}
+                iconClass="text-amber-500"
+                loading={false}
               />
 
               <StatCard
                 title="Izin"
-                value={statistics.izin}
-                description="Guru izin"
+                value="-"
+                description="Belum tersedia"
                 icon={CircleAlert}
-                iconClass="text-[var(--color-info)]"
-                loading={loading}
+                iconClass="text-sky-500"
+                loading={false}
               />
 
               <StatCard
                 title="Alpha"
-                value={statistics.alpha}
-                description="Guru alpha"
-                icon={UserX}
-                iconClass="text-[var(--color-danger)]"
-                loading={loading}
+                value="-"
+                description="Belum tersedia"
+                icon={CircleAlert}
+                iconClass="text-red-500"
+                loading={false}
               />
             </div>
 
             {/* =================================================
-                SEARCH + FILTER STATUS
-            ================================================== */}
+                SEARCH
+            ================================================= */}
 
-            <section className="theme-card rounded-2xl border theme-border shadow-sm p-4">
-              <div className="flex flex-col lg:flex-row gap-3">
-                {/* SEARCH */}
+            <section
+              className="
+                rounded-2xl
+                border
+                border-theme-border
+                p-4
+                shadow-sm
+                theme-card
+              "
+            >
+              <div className="relative">
+                <Search
+                  size={16}
+                  className="
+                    absolute
+                    left-3
+                    top-1/2
+                    -translate-y-1/2
+                    theme-text-muted
+                  "
+                />
 
-                <div className="relative flex-1">
-                  <Search
-                    size={16}
-                    className="
-                      absolute
-                      left-3
-                      top-1/2
-                      -translate-y-1/2
-                      theme-text-placeholder
-                    "
-                  />
+                <input
+                  type="text"
+                  value={search}
+                  onChange={(event) => {
+                    setSearch(
+                      event.target.value
+                    );
 
-                  <input
-                    type="text"
-                    value={search}
-                    onChange={(event) => {
-                      setSearch(
-                        event.target.value
-                      );
+                    setPage(1);
+                  }}
+                  placeholder="Cari nama guru, NIP, atau jabatan..."
+                  className="
+                    theme-input
+                    w-full
+                    rounded-xl
+                    border
+                    py-2.5
+                    pl-9
+                    pr-10
+                    text-sm
+                    outline-none
+                    transition
+                    focus:border-[var(--school-primary,#155DFC)]
+                    focus:ring-2
+                    focus:ring-[var(--school-primary,#155DFC)]/20
+                  "
+                />
+
+                {search && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setSearch("");
                       setPage(1);
                     }}
-                    placeholder="Cari nama guru, NIP, atau jabatan..."
                     className="
-                      theme-input
-                      w-full
-                      pl-9
-                      pr-10
-                      py-2.5
-                      text-sm
-                      rounded-xl
-                      border
-                      outline-none
+                      absolute
+                      right-3
+                      top-1/2
+                      -translate-y-1/2
+                      theme-text-muted
                       transition
-                      focus:outline-none
+                      hover:opacity-70
                     "
-                  />
-
-                  {search && (
-                    <button
-                      type="button"
-                      onClick={() => {
-                        setSearch("");
-                        setPage(1);
-                      }}
-                      className="
-                        absolute
-                        right-3
-                        top-1/2
-                        -translate-y-1/2
-                        theme-text-muted
-                        hover:theme-text
-                        transition
-                      "
-                    >
-                      <X size={15} />
-                    </button>
-                  )}
-                </div>
-
-                {/* STATUS FILTER */}
-
-                <div className="flex items-center gap-2 overflow-x-auto pb-1 lg:pb-0">
-                  {[
-                    ["semua", "Semua"],
-                    ["hadir", "Hadir"],
-                    ["terlambat", "Terlambat"],
-                    ["izin", "Izin"],
-                    ["sakit", "Sakit"],
-                    ["alpha", "Alpha"],
-                  ].map(([value, label]) => (
-                    <button
-                      key={value}
-                      type="button"
-                      onClick={() => {
-                        setStatusFilter(value);
-                        setPage(1);
-                      }}
-                      className={`
-                        whitespace-nowrap
-                        rounded-xl
-                        border
-                        px-3.5
-                        py-2
-                        text-xs
-                        font-semibold
-                        transition
-                        ${
-                          statusFilter === value
-                            ? "theme-primary"
-                            : "theme-input theme-sidebar-hover"
-                        }
-                      `}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
+                  >
+                    <X size={15} />
+                  </button>
+                )}
               </div>
             </section>
 
             {/* =================================================
                 TABLE
-            ================================================== */}
+            ================================================= */}
 
-            <section className="theme-card rounded-2xl border theme-border shadow-sm overflow-hidden">
+            <section
+              className="
+                overflow-hidden
+                rounded-2xl
+                border
+                border-theme-border
+                shadow-sm
+                theme-card
+              "
+            >
               {/* TABLE HEADER */}
 
               <div
                 className="
-                  px-4
-                  sm:px-5
-                  lg:px-6
-                  py-4
-                  border-b
-                  theme-border
                   flex
                   flex-col
+                  gap-3
+                  border-b
+                  border-theme-border
+                  px-4
+                  py-4
                   sm:flex-row
                   sm:items-center
                   sm:justify-between
-                  gap-3
+                  sm:px-5
+                  lg:px-6
                 "
               >
                 <div>
                   <div className="flex items-center gap-2">
                     <div
                       className="
-                        w-8
-                        h-8
-                        rounded-lg
-                        theme-info
-                        border
-                        theme-border
                         flex
+                        h-8
+                        w-8
                         items-center
                         justify-center
+                        rounded-lg
+                        border
+                        border-theme-border
+                        bg-theme-card-soft
                       "
                     >
                       <Database
                         size={15}
+                        className="
+                          text-[var(--school-primary,#155DFC)]
+                        "
                       />
                     </div>
 
-                    <h2 className="text-sm font-bold theme-text">
-                      Data Rekap Guru
+                    <h2
+                      className="
+                        text-sm
+                        font-bold
+                        theme-text
+                      "
+                    >
+                      Data Guru
                     </h2>
                   </div>
 
-                  <p className="text-xs theme-text-muted mt-1">
-                    Daftar kehadiran guru pada tanggal yang dipilih.
+                  <p
+                    className="
+                      mt-1
+                      text-xs
+                      theme-text-muted
+                    "
+                  >
+                    Data guru yang tersedia dari
+                    backend.
                   </p>
                 </div>
 
-                <div className="flex items-center gap-2 text-xs theme-text-muted">
-                  <Activity
-                    size={14}
-                    className="text-[var(--color-primary)]"
-                  />
-
-                  Auto-refresh setiap 10 detik
+                <div
+                  className="
+                    text-xs
+                    theme-text-muted
+                  "
+                >
+                  {filteredData.length} guru
                 </div>
               </div>
 
               {/* TABLE */}
 
               <div className="overflow-x-auto">
-                <table className="w-full min-w-[1000px] text-sm border-collapse">
+                <table
+                  className="
+                    w-full
+                    min-w-[900px]
+                    border-collapse
+                    text-sm
+                  "
+                >
                   <thead>
-                    <tr className="theme-primary">
-                      <th className="px-4 py-3 text-center font-semibold w-[65px]">
+                    <tr
+                      className="
+                        bg-[var(--school-primary,#155DFC)]
+                        text-white
+                      "
+                    >
+                      <th className="w-[65px] px-4 py-3 text-center font-semibold">
                         No
                       </th>
 
@@ -1144,48 +1032,127 @@ export default function RekapGuruPage() {
                     {loading ? (
                       Array.from({
                         length: limit,
-                      }).map((_, index) => (
-                        <tr
-                          key={index}
-                          className="border-b theme-border last:border-0"
-                        >
-                          <td className="px-4 py-3 text-center">
-                            <div className="mx-auto h-7 w-7 animate-pulse rounded-lg theme-card-soft" />
-                          </td>
+                      }).map(
+                        (_, index) => (
+                          <tr
+                            key={index}
+                            className="
+                              border-b
+                              border-theme-border-soft
+                            "
+                          >
+                            <td className="px-4 py-3 text-center">
+                              <div
+                                className="
+                                  mx-auto
+                                  h-7
+                                  w-7
+                                  animate-pulse
+                                  rounded-lg
+                                  bg-theme-card-soft
+                                "
+                              />
+                            </td>
 
-                          <td className="px-4 py-3">
-                            <div className="space-y-2">
-                              <div className="h-4 w-36 animate-pulse rounded theme-card-soft" />
+                            <td className="px-4 py-3">
+                              <div className="space-y-2">
+                                <div
+                                  className="
+                                    h-4
+                                    w-36
+                                    animate-pulse
+                                    rounded
+                                    bg-theme-card-soft
+                                  "
+                                />
 
-                              <div className="h-3 w-24 animate-pulse rounded theme-card-soft" />
-                            </div>
-                          </td>
+                                <div
+                                  className="
+                                    h-3
+                                    w-24
+                                    animate-pulse
+                                    rounded
+                                    bg-theme-card-soft
+                                  "
+                                />
+                              </div>
+                            </td>
 
-                          <td className="px-4 py-3">
-                            <div className="h-4 w-24 animate-pulse rounded theme-card-soft" />
-                          </td>
+                            <td className="px-4 py-3">
+                              <div
+                                className="
+                                  h-4
+                                  w-24
+                                  animate-pulse
+                                  rounded
+                                  bg-theme-card-soft
+                                "
+                              />
+                            </td>
 
-                          <td className="px-4 py-3">
-                            <div className="h-4 w-28 animate-pulse rounded theme-card-soft" />
-                          </td>
+                            <td className="px-4 py-3">
+                              <div
+                                className="
+                                  h-4
+                                  w-28
+                                  animate-pulse
+                                  rounded
+                                  bg-theme-card-soft
+                                "
+                              />
+                            </td>
 
-                          <td className="px-4 py-3">
-                            <div className="h-6 w-20 animate-pulse rounded-full theme-card-soft" />
-                          </td>
+                            <td className="px-4 py-3">
+                              <div
+                                className="
+                                  h-6
+                                  w-24
+                                  animate-pulse
+                                  rounded-full
+                                  bg-theme-card-soft
+                                "
+                              />
+                            </td>
 
-                          <td className="px-4 py-3">
-                            <div className="h-4 w-16 animate-pulse rounded theme-card-soft" />
-                          </td>
+                            <td className="px-4 py-3">
+                              <div
+                                className="
+                                  h-4
+                                  w-16
+                                  animate-pulse
+                                  rounded
+                                  bg-theme-card-soft
+                                "
+                              />
+                            </td>
 
-                          <td className="px-4 py-3">
-                            <div className="h-4 w-16 animate-pulse rounded theme-card-soft" />
-                          </td>
+                            <td className="px-4 py-3">
+                              <div
+                                className="
+                                  h-4
+                                  w-16
+                                  animate-pulse
+                                  rounded
+                                  bg-theme-card-soft
+                                "
+                              />
+                            </td>
 
-                          <td className="px-4 py-3">
-                            <div className="mx-auto h-8 w-20 animate-pulse rounded-lg theme-card-soft" />
-                          </td>
-                        </tr>
-                      ))
+                            <td className="px-4 py-3">
+                              <div
+                                className="
+                                  mx-auto
+                                  h-8
+                                  w-20
+                                  animate-pulse
+                                  rounded-lg
+                                  bg-theme-card-soft
+                                "
+                              />
+                            </td>
+                          </tr>
+                        )
+                      )
                     ) : paginatedData.length === 0 ? (
                       <tr>
                         <td
@@ -1195,33 +1162,45 @@ export default function RekapGuruPage() {
                           <div className="mx-auto flex max-w-md flex-col items-center">
                             <div
                               className="
-                                w-14
-                                h-14
-                                rounded-full
-                                theme-info
-                                border
-                                theme-border
                                 flex
+                                h-14
+                                w-14
                                 items-center
                                 justify-center
+                                rounded-full
+                                border
+                                border-theme-border
+                                bg-theme-card-soft
                               "
                             >
-                              <Users size={24} />
+                              <Users
+                                size={24}
+                                className="
+                                  text-[var(--school-primary,#155DFC)]
+                                "
+                              />
                             </div>
 
-                            <h3 className="mt-4 text-base font-bold theme-text">
+                            <h3
+                              className="
+                                mt-4
+                                text-base
+                                font-bold
+                                theme-text
+                              "
+                            >
                               Data guru tidak ditemukan
                             </h3>
 
-                            <p className="mt-1 text-xs theme-text-muted text-center">
-                              Tidak ada data absensi guru untuk
-                              tanggal{" "}
-                              <span className="font-semibold theme-text">
-                                {formatTanggalIndonesia(
-                                  tanggal
-                                )}
-                              </span>
-                              .
+                            <p
+                              className="
+                                mt-1
+                                text-xs
+                                theme-text-muted
+                              "
+                            >
+                              Tidak ada guru yang sesuai
+                              dengan pencarian.
                             </p>
                           </div>
                         </td>
@@ -1233,7 +1212,7 @@ export default function RekapGuruPage() {
                             key={guru.id}
                             className="
                               border-b
-                              theme-border
+                              border-theme-border-soft
                               last:border-0
                               theme-table-hover
                               transition-colors
@@ -1245,16 +1224,17 @@ export default function RekapGuruPage() {
                               <span
                                 className="
                                   inline-flex
+                                  h-7
+                                  w-7
                                   items-center
                                   justify-center
-                                  w-7
-                                  h-7
                                   rounded-lg
-                                  theme-info
                                   border
-                                  theme-border
+                                  border-theme-border
+                                  bg-theme-card-soft
                                   text-xs
                                   font-bold
+                                  text-[var(--school-primary,#155DFC)]
                                 "
                               >
                                 {(page - 1) *
@@ -1270,34 +1250,51 @@ export default function RekapGuruPage() {
                               <div className="flex items-center gap-3">
                                 <div
                                   className="
-                                    w-10
-                                    h-10
-                                    rounded-full
-                                    theme-primary
                                     flex
+                                    h-10
+                                    w-10
+                                    shrink-0
                                     items-center
                                     justify-center
+                                    rounded-full
+                                    bg-[var(--school-primary,#155DFC)]
                                     text-xs
                                     font-bold
-                                    shrink-0
+                                    text-white
                                   "
                                 >
                                   {guru.nama
                                     .split(" ")
                                     .slice(0, 2)
                                     .map(
-                                      (w) => w[0]
+                                      (word) =>
+                                        word[0]
                                     )
                                     .join("")
                                     .toUpperCase()}
                                 </div>
 
                                 <div className="min-w-0">
-                                  <p className="font-semibold theme-text truncate max-w-[200px]">
+                                  <p
+                                    className="
+                                      max-w-[200px]
+                                      truncate
+                                      font-semibold
+                                      theme-text
+                                    "
+                                  >
                                     {guru.nama}
                                   </p>
 
-                                  <p className="text-[11px] theme-text-muted mt-0.5 truncate max-w-[200px]">
+                                  <p
+                                    className="
+                                      mt-0.5
+                                      max-w-[200px]
+                                      truncate
+                                      text-[11px]
+                                      theme-text-muted
+                                    "
+                                  >
                                     {guru.jabatan}
                                   </p>
                                 </div>
@@ -1306,51 +1303,74 @@ export default function RekapGuruPage() {
 
                             {/* NIP */}
 
-                            <td className="px-4 py-3 text-xs font-medium theme-text-secondary">
+                            <td
+                              className="
+                                px-4
+                                py-3
+                                text-xs
+                                font-medium
+                                theme-text-secondary
+                              "
+                            >
                               {guru.nip}
                             </td>
 
                             {/* JABATAN */}
 
-                            <td className="px-4 py-3 text-xs theme-text-secondary">
+                            <td
+                              className="
+                                px-4
+                                py-3
+                                text-xs
+                                theme-text-secondary
+                              "
+                            >
                               {guru.jabatan}
                             </td>
 
                             {/* STATUS */}
 
                             <td className="px-4 py-3">
-                              {renderStatus(
-                                guru.status
-                              )}
+                              <StatusBadge />
                             </td>
 
                             {/* JAM MASUK */}
 
                             <td className="px-4 py-3">
-                              <span className="inline-flex items-center gap-1.5 text-xs font-semibold theme-text-secondary">
-                                <Clock3
-                                  size={12}
-                                  className="theme-text-muted"
-                                />
-
-                                {guru.jamMasuk}
+                              <span
+                                className="
+                                  inline-flex
+                                  items-center
+                                  gap-1.5
+                                  text-xs
+                                  font-semibold
+                                  theme-text-muted
+                                "
+                              >
+                                <Clock3 size={12} />
+                                -
                               </span>
                             </td>
 
                             {/* JAM PULANG */}
 
                             <td className="px-4 py-3">
-                              <span className="inline-flex items-center gap-1.5 text-xs font-semibold theme-text-secondary">
-                                <Clock3
-                                  size={12}
-                                  className="theme-text-muted"
-                                />
-
-                                {guru.jamPulang}
+                              <span
+                                className="
+                                  inline-flex
+                                  items-center
+                                  gap-1.5
+                                  text-xs
+                                  font-semibold
+                                  theme-text-muted
+                                "
+                              >
+                                <Clock3 size={12} />
+                                -
                               </span>
                             </td>
 
-                            {/* AKSI */}
+                            {/* DETAIL */}
 
                             <td className="px-4 py-3 text-center">
                               <button
@@ -1366,15 +1386,16 @@ export default function RekapGuruPage() {
                                   gap-1.5
                                   rounded-lg
                                   border
-                                  theme-border
-                                  theme-input
+                                  border-theme-border
+                                  bg-theme-card
                                   px-3
                                   py-2
                                   text-xs
                                   font-semibold
                                   theme-text-secondary
                                   transition
-                                  theme-sidebar-hover
+                                  hover:bg-theme-card-soft
+                                  hover:text-[var(--school-primary,#155DFC)]
                                 "
                               >
                                 <Eye size={13} />
@@ -1391,30 +1412,37 @@ export default function RekapGuruPage() {
 
               {/* =================================================
                   PAGINATION
-              ================================================== */}
+              ================================================= */}
 
               {!loading &&
                 filteredData.length > 0 && (
                   <div
                     className="
-                      px-4
-                      sm:px-5
-                      py-3
-                      border-t
-                      theme-border
-                      theme-card-soft
                       flex
                       flex-col
+                      gap-3
+                      border-t
+                      border-theme-border
+                      bg-theme-card-soft
+                      px-4
+                      py-3
                       sm:flex-row
                       sm:items-center
                       sm:justify-between
-                      gap-3
+                      sm:px-5
                     "
                   >
-                    <p className="text-xs theme-text-muted">
+                    <p
+                      className="
+                        text-xs
+                        theme-text-muted
+                      "
+                    >
                       Menampilkan{" "}
                       <span className="font-semibold theme-text">
-                        {(page - 1) * limit + 1}
+                        {(page - 1) *
+                          limit +
+                          1}
                       </span>{" "}
                       -{" "}
                       <span className="font-semibold theme-text">
@@ -1439,17 +1467,20 @@ export default function RekapGuruPage() {
                               event.target.value
                             )
                           );
+
                           setPage(1);
                         }}
                         className="
                           theme-input
-                          text-xs
                           rounded-lg
                           border
                           px-3
                           py-2
+                          text-xs
                           outline-none
-                          focus:outline-none
+                          focus:border-[var(--school-primary,#155DFC)]
+                          focus:ring-2
+                          focus:ring-[var(--school-primary,#155DFC)]/20
                         "
                       >
                         <option value={10}>
@@ -1475,25 +1506,34 @@ export default function RekapGuruPage() {
                           )
                         }
                         className="
-                          w-8
-                          h-8
-                          rounded-lg
-                          border
-                          theme-border
-                          theme-input
-                          theme-text-muted
                           flex
+                          h-8
+                          w-8
                           items-center
                           justify-center
-                          disabled:opacity-40
+                          rounded-lg
+                          border
+                          border-theme-border
+                          bg-theme-card
+                          theme-text-muted
+                          transition
+                          hover:bg-theme-card-soft
                           disabled:cursor-not-allowed
-                          theme-sidebar-hover
+                          disabled:opacity-40
                         "
                       >
                         <ChevronLeft size={15} />
                       </button>
 
-                      <span className="min-w-[60px] text-center text-xs font-semibold theme-text-secondary">
+                      <span
+                        className="
+                          min-w-[60px]
+                          text-center
+                          text-xs
+                          font-semibold
+                          theme-text-secondary
+                        "
+                      >
                         {page} / {totalPages}
                       </span>
 
@@ -1509,19 +1549,20 @@ export default function RekapGuruPage() {
                           )
                         }
                         className="
-                          w-8
-                          h-8
-                          rounded-lg
-                          border
-                          theme-border
-                          theme-input
-                          theme-text-muted
                           flex
+                          h-8
+                          w-8
                           items-center
                           justify-center
-                          disabled:opacity-40
+                          rounded-lg
+                          border
+                          border-theme-border
+                          bg-theme-card
+                          theme-text-muted
+                          transition
+                          hover:bg-theme-card-soft
                           disabled:cursor-not-allowed
-                          theme-sidebar-hover
+                          disabled:opacity-40
                         "
                       >
                         <ChevronRight size={15} />
@@ -1536,7 +1577,7 @@ export default function RekapGuruPage() {
 
       {/* =====================================================
           DETAIL MODAL
-      ====================================================== */}
+      ===================================================== */}
 
       {selectedGuru && (
         <div
@@ -1547,7 +1588,7 @@ export default function RekapGuruPage() {
             flex
             items-center
             justify-center
-            bg-slate-950/40
+            bg-slate-950/60
             p-4
             backdrop-blur-sm
           "
@@ -1560,21 +1601,71 @@ export default function RekapGuruPage() {
             }
           }}
         >
-          <div className="w-full max-w-lg rounded-2xl theme-card shadow-2xl overflow-hidden">
-            {/* MODAL HEADER */}
+          <div
+            className="
+              w-full
+              max-w-lg
+              overflow-hidden
+              rounded-2xl
+              border
+              border-theme-border
+              shadow-2xl
+              theme-card
+            "
+          >
+            {/* HEADER */}
 
-            <div className="flex items-center justify-between border-b theme-border px-6 py-5">
+            <div
+              className="
+                flex
+                items-center
+                justify-between
+                border-b
+                border-theme-border
+                px-6
+                py-5
+              "
+            >
               <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-lg theme-info border theme-border flex items-center justify-center">
-                  <Eye size={17} />
+                <div
+                  className="
+                    flex
+                    h-9
+                    w-9
+                    items-center
+                    justify-center
+                    rounded-lg
+                    border
+                    border-theme-border
+                    bg-theme-card-soft
+                  "
+                >
+                  <Eye
+                    size={17}
+                    className="
+                      text-[var(--school-primary,#155DFC)]
+                    "
+                  />
                 </div>
 
                 <div>
-                  <h2 className="text-sm font-bold theme-text">
-                    Detail Absensi Guru
+                  <h2
+                    className="
+                      text-sm
+                      font-bold
+                      theme-text
+                    "
+                  >
+                    Detail Guru
                   </h2>
 
-                  <p className="text-[11px] theme-text-muted mt-0.5">
+                  <p
+                    className="
+                      mt-0.5
+                      text-[11px]
+                      theme-text-muted
+                    "
+                  >
                     {formatTanggalIndonesia(
                       tanggal
                     )}
@@ -1595,155 +1686,253 @@ export default function RekapGuruPage() {
                   justify-center
                   rounded-lg
                   theme-text-muted
-                  theme-sidebar-hover
                   transition
+                  hover:bg-theme-card-soft
+                  hover:text-[var(--school-primary,#155DFC)]
                 "
               >
                 <X size={18} />
               </button>
             </div>
 
-            {/* MODAL BODY */}
+            {/* BODY */}
 
-            <div className="px-6 py-5 space-y-5 max-h-[60vh] overflow-y-auto">
+            <div
+              className="
+                space-y-5
+                px-6
+                py-5
+              "
+            >
               {/* PROFIL */}
 
-              <div className="flex items-center gap-4 p-4 rounded-xl theme-card-soft border theme-border">
+              <div
+                className="
+                  flex
+                  items-center
+                  gap-4
+                  rounded-xl
+                  border
+                  border-theme-border
+                  bg-theme-card-soft
+                  p-4
+                "
+              >
                 <div
                   className="
-                    w-14
-                    h-14
-                    rounded-full
-                    theme-primary
                     flex
+                    h-14
+                    w-14
+                    shrink-0
                     items-center
                     justify-center
+                    rounded-full
+                    bg-[var(--school-primary,#155DFC)]
                     text-lg
                     font-bold
-                    shrink-0
+                    text-white
                   "
                 >
                   {selectedGuru.nama
                     .split(" ")
                     .slice(0, 2)
-                    .map((w) => w[0])
+                    .map(
+                      (word) =>
+                        word[0]
+                    )
                     .join("")
                     .toUpperCase()}
                 </div>
 
                 <div className="min-w-0">
-                  <p className="text-base font-bold theme-text truncate">
+                  <p
+                    className="
+                      truncate
+                      text-base
+                      font-bold
+                      theme-text
+                    "
+                  >
                     {selectedGuru.nama}
                   </p>
 
-                  <p className="text-xs theme-text-secondary mt-0.5 truncate">
+                  <p
+                    className="
+                      mt-0.5
+                      text-xs
+                      theme-text-secondary
+                    "
+                  >
                     {selectedGuru.jabatan}
                   </p>
 
-                  <p className="text-[11px] theme-text-muted mt-0.5">
+                  <p
+                    className="
+                      mt-0.5
+                      text-[11px]
+                      theme-text-muted
+                    "
+                  >
                     NIP: {selectedGuru.nip}
                   </p>
+                </div>
+              </div>
+
+              {/* INFO ABSENSI */}
+
+              <div
+                className="
+                  rounded-xl
+                  border
+                  border-theme-border
+                  p-4
+                  theme-info
+                "
+              >
+                <div className="flex items-start gap-3">
+                  <CircleAlert
+                    size={17}
+                    className="mt-0.5 shrink-0"
+                  />
+
+                  <div>
+                    <p className="text-sm font-semibold">
+                      Data absensi belum tersedia
+                    </p>
+
+                    <p className="mt-1 text-xs leading-5 opacity-90">
+                      Backend saat ini belum
+                      menyediakan endpoint rekap
+                      absensi guru. Karena itu
+                      status, jam masuk, dan jam
+                      pulang tidak dibuat secara
+                      dummy.
+                    </p>
+                  </div>
                 </div>
               </div>
 
               {/* STATUS */}
 
               <div>
-                <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide theme-text-muted">
+                <p
+                  className="
+                    mb-2
+                    text-[10px]
+                    font-semibold
+                    uppercase
+                    tracking-wide
+                    theme-text-muted
+                  "
+                >
                   Status Kehadiran
                 </p>
 
-                {renderStatus(
-                  selectedGuru.status
-                )}
+                <StatusBadge />
               </div>
 
               {/* JAM */}
 
               <div className="grid grid-cols-2 gap-3">
-                <div className="rounded-xl border theme-border p-4 theme-card">
-                  <div className="flex items-center gap-2 theme-text-muted">
+                <div
+                  className="
+                    rounded-xl
+                    border
+                    border-theme-border
+                    bg-theme-card
+                    p-4
+                  "
+                >
+                  <div
+                    className="
+                      flex
+                      items-center
+                      gap-2
+                      theme-text-muted
+                    "
+                  >
                     <Clock3 size={14} />
 
-                    <p className="text-[10px] font-medium uppercase tracking-wide">
+                    <p
+                      className="
+                        text-[10px]
+                        font-medium
+                        uppercase
+                        tracking-wide
+                      "
+                    >
                       Jam Masuk
                     </p>
                   </div>
 
-                  <p className="mt-2 text-lg font-bold theme-text">
-                    {selectedGuru.jamMasuk}
+                  <p
+                    className="
+                      mt-2
+                      text-lg
+                      font-bold
+                      theme-text
+                    "
+                  >
+                    -
                   </p>
                 </div>
 
-                <div className="rounded-xl border theme-border p-4 theme-card">
-                  <div className="flex items-center gap-2 theme-text-muted">
+                <div
+                  className="
+                    rounded-xl
+                    border
+                    border-theme-border
+                    bg-theme-card
+                    p-4
+                  "
+                >
+                  <div
+                    className="
+                      flex
+                      items-center
+                      gap-2
+                      theme-text-muted
+                    "
+                  >
                     <Clock3 size={14} />
 
-                    <p className="text-[10px] font-medium uppercase tracking-wide">
+                    <p
+                      className="
+                        text-[10px]
+                        font-medium
+                        uppercase
+                        tracking-wide
+                      "
+                    >
                       Jam Pulang
                     </p>
                   </div>
 
-                  <p className="mt-2 text-lg font-bold theme-text">
-                    {selectedGuru.jamPulang}
+                  <p
+                    className="
+                      mt-2
+                      text-lg
+                      font-bold
+                      theme-text
+                    "
+                  >
+                    -
                   </p>
-                </div>
-              </div>
-
-              {/* RINGKASAN */}
-
-              <div>
-                <p className="mb-3 text-[10px] font-semibold uppercase tracking-wide theme-text-muted">
-                  Ringkasan Bulan Ini
-                </p>
-
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                  <div className="rounded-xl border theme-border theme-warning p-3">
-                    <p className="text-[10px] font-medium">
-                      Terlambat
-                    </p>
-
-                    <p className="mt-1 text-lg font-bold">
-                      {selectedGuru.terlambat}
-                    </p>
-                  </div>
-
-                  <div className="rounded-xl border theme-border theme-info p-3">
-                    <p className="text-[10px] font-medium">
-                      Izin
-                    </p>
-
-                    <p className="mt-1 text-lg font-bold">
-                      {selectedGuru.izin}
-                    </p>
-                  </div>
-
-                  <div className="rounded-xl border theme-border theme-warning p-3">
-                    <p className="text-[10px] font-medium">
-                      Sakit
-                    </p>
-
-                    <p className="mt-1 text-lg font-bold">
-                      {selectedGuru.sakit}
-                    </p>
-                  </div>
-
-                  <div className="rounded-xl border theme-border theme-danger p-3">
-                    <p className="text-[10px] font-medium">
-                      Alpha
-                    </p>
-
-                    <p className="mt-1 text-lg font-bold">
-                      {selectedGuru.alpha}
-                    </p>
-                  </div>
                 </div>
               </div>
             </div>
 
-            {/* MODAL FOOTER */}
+            {/* FOOTER */}
 
-            <div className="border-t theme-border px-6 py-4 theme-card-soft">
+            <div
+              className="
+                border-t
+                border-theme-border
+                bg-theme-card-soft
+                px-6
+                py-4
+              "
+            >
               <button
                 type="button"
                 onClick={() =>
@@ -1752,12 +1941,14 @@ export default function RekapGuruPage() {
                 className="
                   w-full
                   rounded-xl
-                  theme-primary
+                  bg-[var(--school-primary,#155DFC)]
                   px-4
                   py-2.5
                   text-sm
                   font-semibold
+                  text-white
                   transition
+                  hover:brightness-110
                 "
               >
                 Tutup
@@ -1785,55 +1976,96 @@ function StatCard({
   return (
     <div
       className="
-        theme-card
         rounded-2xl
         border
-        theme-border
+        border-theme-border
         p-4
-        sm:p-5
         shadow-sm
-        theme-sidebar-hover
         transition-all
         duration-200
+        hover:shadow-md
+        theme-card
+        sm:p-5
       "
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-[11px] sm:text-xs font-medium theme-text-muted">
+          <p
+            className="
+              text-[11px]
+              font-medium
+              sm:text-xs
+              theme-text-muted
+            "
+          >
             {title}
           </p>
 
           {loading ? (
-            <div className="mt-2 h-8 w-16 animate-pulse rounded-lg theme-card-soft" />
+            <div
+              className="
+                mt-2
+                h-8
+                w-16
+                animate-pulse
+                rounded-lg
+                bg-theme-card-soft
+              "
+            />
           ) : (
-            <p className="mt-1.5 text-2xl sm:text-3xl font-bold theme-text">
+            <p
+              className="
+                mt-1.5
+                text-2xl
+                font-bold
+                sm:text-3xl
+                theme-text
+              "
+            >
               {value}
             </p>
           )}
 
-          <p className="mt-1 text-[10px] sm:text-xs theme-text-muted">
+          <p
+            className="
+              mt-1
+              text-[10px]
+              sm:text-xs
+              theme-text-muted
+            "
+          >
             {description}
           </p>
         </div>
 
         <div
           className="
-            w-10
-            h-10
-            rounded-xl
-            theme-card-soft
-            border
-            theme-border
             flex
+            h-10
+            w-10
+            shrink-0
             items-center
             justify-center
-            shrink-0
+            rounded-xl
+            border
+            border-theme-border
+            bg-theme-card-soft
           "
         >
-          <Icon
-            size={18}
-            className={iconClass}
-          />
+          {loading ? (
+            <Loader2
+              size={18}
+              className="
+                animate-spin
+                theme-text-muted
+              "
+            />
+          ) : (
+            <Icon
+              size={18}
+              className={iconClass}
+            />
+          )}
         </div>
       </div>
     </div>

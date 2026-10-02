@@ -31,8 +31,7 @@ const themePrimarySoft =
 const themePrimarySoftBorder =
   "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
 
-const themePrimaryText =
-  "text-[var(--color-primary)]";
+const themePrimaryText = "text-[var(--color-primary)]";
 
 const themePrimaryShadow =
   "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
@@ -164,6 +163,71 @@ function formatJam(jam) {
 }
 
 /* =========================================================
+   HELPER NAMA KELAS
+   Menghindari [object Object]
+========================================================= */
+
+function getNamaKelas(kelas) {
+  if (!kelas) {
+    return "-";
+  }
+
+  /* Kalau API langsung mengirim string */
+  if (typeof kelas === "string") {
+    return kelas;
+  }
+
+  /* Kalau API mengirim object */
+  if (typeof kelas === "object") {
+    return (
+      kelas?.nama ||
+      kelas?.namaKelas ||
+      kelas?.nama_kelas ||
+      kelas?.kode ||
+      kelas?.kodeKelas ||
+      kelas?.kode_kelas ||
+      kelas?.tingkat ||
+      kelas?.namaTingkat ||
+      kelas?.nama_tingkat ||
+      "-"
+    );
+  }
+
+  return String(kelas);
+}
+
+/* =========================================================
+   HELPER NAMA RUANGAN
+   Menghindari [object Object]
+========================================================= */
+
+function getNamaRuangan(ruangan) {
+  if (!ruangan) {
+    return "-";
+  }
+
+  /* Kalau API langsung mengirim string */
+  if (typeof ruangan === "string") {
+    return ruangan;
+  }
+
+  /* Kalau API mengirim object */
+  if (typeof ruangan === "object") {
+    return (
+      ruangan?.nama ||
+      ruangan?.namaRuangan ||
+      ruangan?.nama_ruangan ||
+      ruangan?.kode ||
+      ruangan?.kodeRuangan ||
+      ruangan?.kode_ruangan ||
+      "-"
+    );
+  }
+
+  return String(ruangan);
+}
+
+/* =========================================================
    ACCENT PALETTE
    Semuanya mengikuti global theme.
 ========================================================= */
@@ -288,14 +352,27 @@ export default function JadwalSiswaPage() {
 
   /* =======================================================
      KELAS SISWA
+     FIX [object Object]
   ======================================================= */
 
   const kelasSiswa = useMemo(() => {
-    const kelas = jadwalData
-      .map((item) => item?.kelasMapel?.kelas)
-      .filter(Boolean);
+    const daftarKelas = jadwalData
+      .map((item) => {
+        const kelas = item?.kelasMapel?.kelas;
 
-    return [...new Set(kelas)];
+        if (!kelas) {
+          return null;
+        }
+
+        return getNamaKelas(kelas);
+      })
+      .filter(
+        (namaKelasItem) =>
+          namaKelasItem &&
+          namaKelasItem !== "-"
+      );
+
+    return [...new Set(daftarKelas)];
   }, [jadwalData]);
 
   /* =======================================================
@@ -335,13 +412,14 @@ export default function JadwalSiswaPage() {
     setHariAktif(hariList[nextIndex]);
   };
 
-  /* =======================================================
+  /* =========================================================
      RENDER
-  ======================================================= */
+  ========================================================= */
 
   return (
     <div className="theme-page min-h-full">
       <div className="mx-auto w-full max-w-[1600px] px-4 py-5 sm:px-6 lg:px-8">
+
         {/* =================================================
             BREADCRUMB
         ================================================= */}
@@ -367,8 +445,6 @@ export default function JadwalSiswaPage() {
         <section
           className={`relative mb-6 overflow-hidden rounded-2xl ${themePrimaryGradient} ${themePrimaryShadow}`}
         >
-          {/* Decorative */}
-
           <div
             className="absolute -right-20 -top-24 h-64 w-64 rounded-full blur-2xl"
             style={{
@@ -387,6 +463,7 @@ export default function JadwalSiswaPage() {
 
           <div className="relative px-5 py-6 sm:px-7 sm:py-7">
             <div className="flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
+
               {/* LEFT */}
 
               <div className="flex items-start gap-4">
@@ -513,8 +590,6 @@ export default function JadwalSiswaPage() {
                 Pilih hari untuk melihat jadwal.
               </p>
             </div>
-
-            {/* Mobile arrows */}
 
             <div className="flex gap-1.5 sm:hidden">
               <button
@@ -685,11 +760,13 @@ export default function JadwalSiswaPage() {
                         item?.guru?.user?.name ||
                         "-";
 
-                      const namaRuangan =
-                        item?.ruangan?.nama ||
-                        item?.ruangan ||
-                        item?.kelasMapel?.kelas?.nama ||
-                        "-";
+                      const namaKelasItem = getNamaKelas(
+                        item?.kelasMapel?.kelas
+                      );
+
+                      const namaRuangan = getNamaRuangan(
+                        item?.ruangan
+                      );
 
                       return (
                         <tr
@@ -737,9 +814,9 @@ export default function JadwalSiswaPage() {
                                   {namaMapel}
                                 </p>
 
-                                {item?.kelasMapel?.kelas?.nama && (
+                                {namaKelasItem !== "-" && (
                                   <p className="mt-0.5 text-[11px] theme-text-muted">
-                                    {item.kelasMapel.kelas.nama}
+                                    {namaKelasItem}
                                   </p>
                                 )}
                               </div>
@@ -806,11 +883,13 @@ export default function JadwalSiswaPage() {
                   item?.guru?.user?.name ||
                   "-";
 
-                const namaRuangan =
-                  item?.ruangan?.nama ||
-                  item?.ruangan ||
-                  item?.kelasMapel?.kelas?.nama ||
-                  "-";
+                const namaKelasItem = getNamaKelas(
+                  item?.kelasMapel?.kelas
+                );
+
+                const namaRuangan = getNamaRuangan(
+                  item?.ruangan
+                );
 
                 return (
                   <article
@@ -835,9 +914,9 @@ export default function JadwalSiswaPage() {
                             {namaMapel}
                           </h3>
 
-                          {item?.kelasMapel?.kelas?.nama && (
+                          {namaKelasItem !== "-" && (
                             <p className="mt-1 text-[11px] theme-text-muted">
-                              {item.kelasMapel.kelas.nama}
+                              {namaKelasItem}
                             </p>
                           )}
                         </div>

@@ -562,28 +562,17 @@ export interface KelasSaya {
   tahunAjaranId: string;
 }
 
-export async function getKelasSaya(): Promise<KelasSaya> {
-  const response = await apiFetch(
-    "/api/v1/siswa/kelas-saya",
-    {
-      method: "GET",
-    },
-  );
+export async function getKelasSaya() {
+  const response = await apiFetch("/api/v1/siswa/me", {
+    method: "GET",
+  });
 
-  console.log(
-    "========== KELAS SAYA ==========",
-  );
-
-  console.log(
-    "RESPONSE:",
-    response,
-  );
-
-  console.log(
-    "================================",
-  );
-
-  return response.data;
+  return {
+    kelasId: response.data?.kelasId ?? null,
+    nama: response.data?.kelas?.nama ?? "",
+    tingkat: response.data?.kelas?.tingkat ?? "",
+    tahunAjaranId: response.data?.tahunAjaranId ?? "",
+  };
 }
 
 export default absensiService;

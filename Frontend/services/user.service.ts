@@ -526,3 +526,26 @@ success: true,
 data: guru,
 };
 }
+
+
+/* =========================================================
+   RESET PASSWORD
+   PATCH /api/users/:id/reset-password
+========================================================= */
+
+export async function resetUserPassword(
+  id: string
+): Promise<UserMutationResponse> {
+  if (!id) {
+    throw new Error(
+      "ID pengguna tidak ditemukan."
+    );
+  }
+
+  return request<UserMutationResponse>(
+    `/users/${id}/reset-password`,
+    {
+      method: "PATCH",
+    }
+  );
+}

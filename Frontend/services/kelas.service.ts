@@ -357,3 +357,61 @@ export async function deleteKelas(
 
   return response;
 }
+
+export async function getKelasSayaDariAnggota(siswaId) {
+  if (!siswaId) {
+    throw new Error("ID siswa wajib diisi.");
+  }
+
+  const response = await getKelas({
+    page: 1,
+    limit: 100,
+  });
+
+  const rows =
+    response?.data?.data ??
+    response?.data ??
+    response?.items ??
+    [];
+
+  if (!Array.isArray(rows)) {
+    throw new Error("Format data kelas dari server tidak valid.");
+  }
+
+  for (const kelas of rows) {
+    if (!kelas?.id) continue;
+
+    try {
+      const detailResponse = await getKelasById(kelas.id);
+
+      const detail =
+        detailResponse?.data?.data ??
+        detailResponse?.data ??
+        detailResponse;
+
+      const anggota = Array.isArray(detail?.anggota)
+        ? detail.anggota
+        : [];
+
+      const ditemukan = anggota.some((item) => {
+        const idAnggota =
+          item?.siswa?.id ??
+          item?.siswaId ??
+          item?.penggunaId;
+
+        return String(idAnggota) === String(siswaId);
+      });
+
+      if (ditemukan) {
+        return detail;
+      }
+    } catch (error) {
+      console.warn(
+        `Gagal mengambil detail kelas ${kelas.id}:`,
+        error
+      );
+    }
+  }
+
+  return null;
+}

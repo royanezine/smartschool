@@ -356,12 +356,7 @@ export const adminSidebarConfig = {
           label: "Sesi Konseling Siswa",
           path: "/admin/bk/sesi-konseling",
         },
-        {
-          key: "prestasiSiswa",
-          icon: Award,
-          label: "Prestasi Siswa",
-          path: "/admin/bk/prestasi",
-        },
+        
         {
           key: "pelanggaranSiswa",
           icon: AlertTriangle,
@@ -523,8 +518,8 @@ export const adminSidebarConfig = {
         {
           key: "cmsMedia",
           icon: FileInput,
-          label: "Media, Files, Banner & Slider",
-          path: "/admin/cms/media",
+          label: "Artikel",
+          path: "/admin/cms/articles",
         },
         {
           key: "cmsSettings",

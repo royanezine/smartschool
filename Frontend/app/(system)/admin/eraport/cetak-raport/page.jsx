@@ -1,984 +1,538 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { useRouter } from "next/navigation";
+
 import Sidebar from "../../../../components/Sidebar";
 import Header from "../../../../components/Header";
 
 import {
-  Search,
-  Printer,
-  Eye,
-  X,
-  FileText,
-  CheckCircle2,
-  AlertCircle,
-  Users,
+  ArrowLeft,
   BookOpen,
-  Download,
-  CalendarDays,
-  GraduationCap,
+  CheckCircle2,
+  ChevronLeft,
+  ChevronRight,
+  Eye,
+  FileText,
+  Filter,
+  Loader2,
+  Printer,
+  RefreshCw,
+  Search,
+  Users,
+  X,
 } from "lucide-react";
 
-/* =========================================================
-   DATA SISWA
-========================================================= */
+import {
+  getRaportSiswa,
+  getKelas,
+  getDetailKelas,
+  getTahunAjaran,
+} from "../../../../../services/raport.service";
 
-const initialStudents = [
-  {
-    id: 1,
-    nama: "Ahmad Fauzan",
-    nis: "2024001",
-    nisn: "0061234567",
-    kelas: "XII PPLG 1",
-    totalMapel: 10,
-    nilaiTerisi: 10,
-    rataRata: 89,
-    status: "Siap Dicetak",
-  },
-  {
-    id: 2,
-    nama: "Budi Santoso",
-    nis: "2024002",
-    nisn: "0061234568",
-    kelas: "XII PPLG 1",
-    totalMapel: 10,
-    nilaiTerisi: 10,
-    rataRata: 86,
-    status: "Siap Dicetak",
-  },
-  {
-    id: 3,
-    nama: "Citra Lestari",
-    nis: "2024003",
-    nisn: "0061234569",
-    kelas: "XII PPLG 1",
-    totalMapel: 10,
-    nilaiTerisi: 9,
-    rataRata: 84,
-    status: "Belum Lengkap",
-  },
-  {
-    id: 4,
-    nama: "Dimas Pratama",
-    nis: "2024004",
-    nisn: "0061234570",
-    kelas: "XII PPLG 1",
-    totalMapel: 10,
-    nilaiTerisi: 10,
-    rataRata: 91,
-    status: "Siap Dicetak",
-  },
-  {
-    id: 5,
-    nama: "Eka Saputra",
-    nis: "2024005",
-    nisn: "0061234571",
-    kelas: "XII PPLG 1",
-    totalMapel: 10,
-    nilaiTerisi: 8,
-    rataRata: 81,
-    status: "Belum Lengkap",
-  },
-  {
-    id: 6,
-    nama: "Fajar Ramadhan",
-    nis: "2024006",
-    nisn: "0061234572",
-    kelas: "XII PPLG 2",
-    totalMapel: 10,
-    nilaiTerisi: 10,
-    rataRata: 88,
-    status: "Siap Dicetak",
-  },
-  {
-    id: 7,
-    nama: "Gilang Maulana",
-    nis: "2024007",
-    nisn: "0061234573",
-    kelas: "XII PPLG 2",
-    totalMapel: 10,
-    nilaiTerisi: 10,
-    rataRata: 90,
-    status: "Siap Dicetak",
-  },
-  {
-    id: 8,
-    nama: "Hana Putri",
-    nis: "2024008",
-    nisn: "0061234574",
-    kelas: "XII PPLG 2",
-    totalMapel: 10,
-    nilaiTerisi: 9,
-    rataRata: 87,
-    status: "Belum Lengkap",
-  },
-];
+import {
+  getNilaiUjianUntukKelas,
+} from "../../../../../services/ujian.service";
 
 /* =========================================================
-   DATA NILAI DETAIL
+   CONSTANT
 ========================================================= */
 
-const nilaiSiswa = {
-  1: [
-    {
-      mapel: "Pendidikan Agama",
-      tugas: 90,
-      uts: 88,
-      uas: 90,
-      praktik: 92,
-      nilaiAkhir: 90,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Pendidikan Pancasila",
-      tugas: 88,
-      uts: 86,
-      uas: 89,
-      praktik: 88,
-      nilaiAkhir: 88,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Bahasa Indonesia",
-      tugas: 87,
-      uts: 89,
-      uas: 88,
-      praktik: 90,
-      nilaiAkhir: 89,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Matematika",
-      tugas: 85,
-      uts: 87,
-      uas: 86,
-      praktik: 88,
-      nilaiAkhir: 87,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Bahasa Inggris",
-      tugas: 89,
-      uts: 90,
-      uas: 88,
-      praktik: 91,
-      nilaiAkhir: 90,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Pemrograman Dasar",
-      tugas: 92,
-      uts: 90,
-      uas: 94,
-      praktik: 95,
-      nilaiAkhir: 93,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Pemrograman Web",
-      tugas: 90,
-      uts: 88,
-      uas: 92,
-      praktik: 94,
-      nilaiAkhir: 91,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Basis Data",
-      tugas: 88,
-      uts: 86,
-      uas: 90,
-      praktik: 92,
-      nilaiAkhir: 89,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Jaringan Komputer",
-      tugas: 84,
-      uts: 86,
-      uas: 87,
-      praktik: 88,
-      nilaiAkhir: 86,
-      predikat: "B",
-      keterangan: "Baik",
-    },
-    {
-      mapel: "Produk Kreatif dan Kewirausahaan",
-      tugas: 88,
-      uts: 87,
-      uas: 90,
-      praktik: 91,
-      nilaiAkhir: 89,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-  ],
+const ITEMS_PER_PAGE = 10;
 
-  2: [
-    {
-      mapel: "Pendidikan Agama",
-      tugas: 86,
-      uts: 85,
-      uas: 88,
-      praktik: 87,
-      nilaiAkhir: 87,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Pendidikan Pancasila",
-      tugas: 84,
-      uts: 86,
-      uas: 85,
-      praktik: 87,
-      nilaiAkhir: 85,
-      predikat: "B",
-      keterangan: "Baik",
-    },
-    {
-      mapel: "Bahasa Indonesia",
-      tugas: 85,
-      uts: 87,
-      uas: 86,
-      praktik: 88,
-      nilaiAkhir: 87,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Matematika",
-      tugas: 82,
-      uts: 84,
-      uas: 85,
-      praktik: 86,
-      nilaiAkhir: 84,
-      predikat: "B",
-      keterangan: "Baik",
-    },
-    {
-      mapel: "Bahasa Inggris",
-      tugas: 86,
-      uts: 88,
-      uas: 87,
-      praktik: 89,
-      nilaiAkhir: 88,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Pemrograman Dasar",
-      tugas: 89,
-      uts: 87,
-      uas: 90,
-      praktik: 92,
-      nilaiAkhir: 89,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Pemrograman Web",
-      tugas: 88,
-      uts: 86,
-      uas: 89,
-      praktik: 91,
-      nilaiAkhir: 89,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Basis Data",
-      tugas: 85,
-      uts: 84,
-      uas: 87,
-      praktik: 89,
-      nilaiAkhir: 86,
-      predikat: "B",
-      keterangan: "Baik",
-    },
-    {
-      mapel: "Jaringan Komputer",
-      tugas: 83,
-      uts: 82,
-      uas: 85,
-      praktik: 87,
-      nilaiAkhir: 84,
-      predikat: "B",
-      keterangan: "Baik",
-    },
-    {
-      mapel: "Produk Kreatif dan Kewirausahaan",
-      tugas: 86,
-      uts: 85,
-      uas: 88,
-      praktik: 89,
-      nilaiAkhir: 87,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-  ],
+/* =========================================================
+   GENERIC RESPONSE HELPER
+========================================================= */
 
-  3: [
-    {
-      mapel: "Pendidikan Agama",
-      tugas: 84,
-      uts: 83,
-      uas: 85,
-      praktik: 86,
-      nilaiAkhir: 84,
-      predikat: "B",
-      keterangan: "Baik",
-    },
-    {
-      mapel: "Pendidikan Pancasila",
-      tugas: 82,
-      uts: 84,
-      uas: 83,
-      praktik: 85,
-      nilaiAkhir: 83,
-      predikat: "B",
-      keterangan: "Baik",
-    },
-    {
-      mapel: "Bahasa Indonesia",
-      tugas: 85,
-      uts: 84,
-      uas: 86,
-      praktik: 87,
-      nilaiAkhir: 85,
-      predikat: "B",
-      keterangan: "Baik",
-    },
-    {
-      mapel: "Matematika",
-      tugas: 80,
-      uts: 81,
-      uas: 83,
-      praktik: 84,
-      nilaiAkhir: 82,
-      predikat: "B",
-      keterangan: "Baik",
-    },
-    {
-      mapel: "Bahasa Inggris",
-      tugas: 84,
-      uts: 85,
-      uas: 86,
-      praktik: 87,
-      nilaiAkhir: 85,
-      predikat: "B",
-      keterangan: "Baik",
-    },
-    {
-      mapel: "Pemrograman Dasar",
-      tugas: 87,
-      uts: 86,
-      uas: 89,
-      praktik: 91,
-      nilaiAkhir: 88,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Pemrograman Web",
-      tugas: 86,
-      uts: 85,
-      uas: 88,
-      praktik: 90,
-      nilaiAkhir: 87,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Basis Data",
-      tugas: 82,
-      uts: 83,
-      uas: 85,
-      praktik: 87,
-      nilaiAkhir: 84,
-      predikat: "B",
-      keterangan: "Baik",
-    },
-    {
-      mapel: "Jaringan Komputer",
-      tugas: 80,
-      uts: 81,
-      uas: 83,
-      praktik: 85,
-      nilaiAkhir: 82,
-      predikat: "B",
-      keterangan: "Baik",
-    },
-  ],
+const getRows = (result) => {
+  if (Array.isArray(result)) {
+    return result;
+  }
 
-  4: [
-    {
-      mapel: "Pendidikan Agama",
-      tugas: 92,
-      uts: 90,
-      uas: 93,
-      praktik: 94,
-      nilaiAkhir: 92,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Pendidikan Pancasila",
-      tugas: 90,
-      uts: 91,
-      uas: 89,
-      praktik: 92,
-      nilaiAkhir: 90,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Bahasa Indonesia",
-      tugas: 91,
-      uts: 89,
-      uas: 92,
-      praktik: 93,
-      nilaiAkhir: 91,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Matematika",
-      tugas: 88,
-      uts: 90,
-      uas: 89,
-      praktik: 91,
-      nilaiAkhir: 89,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Bahasa Inggris",
-      tugas: 92,
-      uts: 91,
-      uas: 90,
-      praktik: 93,
-      nilaiAkhir: 91,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Pemrograman Dasar",
-      tugas: 95,
-      uts: 93,
-      uas: 96,
-      praktik: 98,
-      nilaiAkhir: 96,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Pemrograman Web",
-      tugas: 94,
-      uts: 92,
-      uas: 95,
-      praktik: 97,
-      nilaiAkhir: 95,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Basis Data",
-      tugas: 92,
-      uts: 90,
-      uas: 94,
-      praktik: 96,
-      nilaiAkhir: 93,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Jaringan Komputer",
-      tugas: 89,
-      uts: 88,
-      uas: 91,
-      praktik: 93,
-      nilaiAkhir: 90,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Produk Kreatif dan Kewirausahaan",
-      tugas: 90,
-      uts: 91,
-      uas: 92,
-      praktik: 94,
-      nilaiAkhir: 92,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-  ],
+  if (Array.isArray(result?.data)) {
+    return result.data;
+  }
 
-  5: [
-    {
-      mapel: "Pendidikan Agama",
-      tugas: 80,
-      uts: 81,
-      uas: 82,
-      praktik: 83,
-      nilaiAkhir: 81,
-      predikat: "B",
-      keterangan: "Baik",
-    },
-    {
-      mapel: "Pendidikan Pancasila",
-      tugas: 79,
-      uts: 80,
-      uas: 81,
-      praktik: 82,
-      nilaiAkhir: 80,
-      predikat: "B",
-      keterangan: "Baik",
-    },
-    {
-      mapel: "Bahasa Indonesia",
-      tugas: 82,
-      uts: 81,
-      uas: 83,
-      praktik: 84,
-      nilaiAkhir: 82,
-      predikat: "B",
-      keterangan: "Baik",
-    },
-    {
-      mapel: "Matematika",
-      tugas: 78,
-      uts: 80,
-      uas: 81,
-      praktik: 82,
-      nilaiAkhir: 80,
-      predikat: "B",
-      keterangan: "Baik",
-    },
-    {
-      mapel: "Bahasa Inggris",
-      tugas: 80,
-      uts: 82,
-      uas: 81,
-      praktik: 83,
-      nilaiAkhir: 81,
-      predikat: "B",
-      keterangan: "Baik",
-    },
-    {
-      mapel: "Pemrograman Dasar",
-      tugas: 84,
-      uts: 83,
-      uas: 85,
-      praktik: 87,
-      nilaiAkhir: 85,
-      predikat: "B",
-      keterangan: "Baik",
-    },
-    {
-      mapel: "Pemrograman Web",
-      tugas: 83,
-      uts: 82,
-      uas: 84,
-      praktik: 86,
-      nilaiAkhir: 84,
-      predikat: "B",
-      keterangan: "Baik",
-    },
-    {
-      mapel: "Basis Data",
-      tugas: 81,
-      uts: 80,
-      uas: 83,
-      praktik: 85,
-      nilaiAkhir: 82,
-      predikat: "B",
-      keterangan: "Baik",
-    },
-  ],
+  if (Array.isArray(result?.data?.data)) {
+    return result.data.data;
+  }
 
-  6: [
-    {
-      mapel: "Pendidikan Agama",
-      tugas: 88,
-      uts: 87,
-      uas: 89,
-      praktik: 90,
-      nilaiAkhir: 89,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Pendidikan Pancasila",
-      tugas: 86,
-      uts: 85,
-      uas: 88,
-      praktik: 89,
-      nilaiAkhir: 87,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Bahasa Indonesia",
-      tugas: 87,
-      uts: 86,
-      uas: 88,
-      praktik: 90,
-      nilaiAkhir: 88,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Matematika",
-      tugas: 84,
-      uts: 83,
-      uas: 86,
-      praktik: 88,
-      nilaiAkhir: 85,
-      predikat: "B",
-      keterangan: "Baik",
-    },
-    {
-      mapel: "Bahasa Inggris",
-      tugas: 88,
-      uts: 87,
-      uas: 89,
-      praktik: 91,
-      nilaiAkhir: 89,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Pemrograman Dasar",
-      tugas: 91,
-      uts: 90,
-      uas: 92,
-      praktik: 94,
-      nilaiAkhir: 92,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Pemrograman Web",
-      tugas: 90,
-      uts: 88,
-      uas: 92,
-      praktik: 93,
-      nilaiAkhir: 91,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Basis Data",
-      tugas: 87,
-      uts: 86,
-      uas: 89,
-      praktik: 91,
-      nilaiAkhir: 88,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Jaringan Komputer",
-      tugas: 85,
-      uts: 84,
-      uas: 87,
-      praktik: 89,
-      nilaiAkhir: 86,
-      predikat: "B",
-      keterangan: "Baik",
-    },
-    {
-      mapel: "Produk Kreatif dan Kewirausahaan",
-      tugas: 88,
-      uts: 87,
-      uas: 90,
-      praktik: 91,
-      nilaiAkhir: 89,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-  ],
+  if (Array.isArray(result?.data?.items)) {
+    return result.data.items;
+  }
 
-  7: [
-    {
-      mapel: "Pendidikan Agama",
-      tugas: 90,
-      uts: 89,
-      uas: 91,
-      praktik: 92,
-      nilaiAkhir: 91,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Pendidikan Pancasila",
-      tugas: 89,
-      uts: 88,
-      uas: 90,
-      praktik: 91,
-      nilaiAkhir: 90,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Bahasa Indonesia",
-      tugas: 90,
-      uts: 89,
-      uas: 91,
-      praktik: 92,
-      nilaiAkhir: 91,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Matematika",
-      tugas: 87,
-      uts: 89,
-      uas: 88,
-      praktik: 90,
-      nilaiAkhir: 89,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Bahasa Inggris",
-      tugas: 91,
-      uts: 90,
-      uas: 92,
-      praktik: 93,
-      nilaiAkhir: 92,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Pemrograman Dasar",
-      tugas: 93,
-      uts: 92,
-      uas: 95,
-      praktik: 97,
-      nilaiAkhir: 94,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Pemrograman Web",
-      tugas: 92,
-      uts: 91,
-      uas: 94,
-      praktik: 96,
-      nilaiAkhir: 93,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Basis Data",
-      tugas: 90,
-      uts: 89,
-      uas: 92,
-      praktik: 94,
-      nilaiAkhir: 91,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Jaringan Komputer",
-      tugas: 88,
-      uts: 87,
-      uas: 90,
-      praktik: 92,
-      nilaiAkhir: 89,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Produk Kreatif dan Kewirausahaan",
-      tugas: 89,
-      uts: 90,
-      uas: 91,
-      praktik: 93,
-      nilaiAkhir: 91,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-  ],
+  if (Array.isArray(result?.data?.rows)) {
+    return result.data.rows;
+  }
 
-  8: [
-    {
-      mapel: "Pendidikan Agama",
-      tugas: 86,
-      uts: 85,
-      uas: 87,
-      praktik: 88,
-      nilaiAkhir: 87,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Pendidikan Pancasila",
-      tugas: 85,
-      uts: 84,
-      uas: 86,
-      praktik: 87,
-      nilaiAkhir: 86,
-      predikat: "B",
-      keterangan: "Baik",
-    },
-    {
-      mapel: "Bahasa Indonesia",
-      tugas: 87,
-      uts: 86,
-      uas: 88,
-      praktik: 89,
-      nilaiAkhir: 88,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Matematika",
-      tugas: 83,
-      uts: 82,
-      uas: 85,
-      praktik: 86,
-      nilaiAkhir: 84,
-      predikat: "B",
-      keterangan: "Baik",
-    },
-    {
-      mapel: "Bahasa Inggris",
-      tugas: 86,
-      uts: 85,
-      uas: 87,
-      praktik: 89,
-      nilaiAkhir: 87,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Pemrograman Dasar",
-      tugas: 89,
-      uts: 88,
-      uas: 91,
-      praktik: 93,
-      nilaiAkhir: 90,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Pemrograman Web",
-      tugas: 88,
-      uts: 87,
-      uas: 90,
-      praktik: 92,
-      nilaiAkhir: 89,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Basis Data",
-      tugas: 85,
-      uts: 84,
-      uas: 88,
-      praktik: 90,
-      nilaiAkhir: 87,
-      predikat: "A",
-      keterangan: "Sangat Baik",
-    },
-    {
-      mapel: "Jaringan Komputer",
-      tugas: 84,
-      uts: 83,
-      uas: 86,
-      praktik: 88,
-      nilaiAkhir: 85,
-      predikat: "B",
-      keterangan: "Baik",
-    },
-  ],
+  if (Array.isArray(result?.data?.siswa)) {
+    return result.data.siswa;
+  }
+
+  if (Array.isArray(result?.data?.users)) {
+    return result.data.users;
+  }
+
+  if (Array.isArray(result?.data?.pengguna)) {
+    return result.data.pengguna;
+  }
+
+  return [];
 };
 
 /* =========================================================
-   STATUS BADGE
+   HELPER NILAI UJIAN
 ========================================================= */
 
-function StatusBadge({ status }) {
-  const ready = status === "Siap Dicetak";
+const getExamRows = (result) => {
+  if (Array.isArray(result)) {
+    return result;
+  }
 
-  return (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-semibold ${
-        ready
-          ? "theme-success"
-          : "theme-warning"
-      }`}
-    >
-      {ready ? (
-        <CheckCircle2 size={14} />
-      ) : (
-        <AlertCircle size={14} />
-      )}
+  if (Array.isArray(result?.data)) {
+    return result.data;
+  }
 
-      {status}
-    </span>
+  if (Array.isArray(result?.data?.data)) {
+    return result.data.data;
+  }
+
+  if (Array.isArray(result?.data?.items)) {
+    return result.data.items;
+  }
+
+  if (Array.isArray(result?.data?.rows)) {
+    return result.data.rows;
+  }
+
+  if (Array.isArray(result?.data?.nilaiSiswa)) {
+    return result.data.nilaiSiswa;
+  }
+
+  if (Array.isArray(result?.data?.percobaanUjian)) {
+    return result.data.percobaanUjian;
+  }
+
+  if (Array.isArray(result?.data?.percobaanAsesmen)) {
+    return result.data.percobaanAsesmen;
+  }
+
+  return [];
+};
+
+/* =========================================================
+   AMBIL ID SISWA DARI DATA UJIAN
+========================================================= */
+
+const getExamStudentId = (item) => {
+  if (!item || typeof item !== "object") {
+    return null;
+  }
+
+  const directId =
+    item?.siswaId ??
+    item?.siswa_id ??
+    item?.studentId ??
+    item?.student_id ??
+    item?.pesertaDidikId ??
+    item?.peserta_didik_id;
+
+  if (directId) {
+    return String(directId);
+  }
+
+  if (item?.siswa?.id) {
+    return String(item.siswa.id);
+  }
+
+  if (item?.student?.id) {
+    return String(item.student.id);
+  }
+
+  if (item?.pesertaDidik?.id) {
+    return String(item.pesertaDidik.id);
+  }
+
+  if (item?.peserta?.siswaId) {
+    return String(item.peserta.siswaId);
+  }
+
+  if (item?.hasilUjian?.siswaId) {
+    return String(item.hasilUjian.siswaId);
+  }
+
+  if (item?.hasilAsesmen?.siswaId) {
+    return String(item.hasilAsesmen.siswaId);
+  }
+
+  return null;
+};
+
+/* =========================================================
+   AMBIL NILAI UJIAN
+========================================================= */
+
+const getExamScore = (item) => {
+  const candidates = [
+    item?.nilai,
+    item?.totalNilai,
+    item?.score,
+    item?.skor,
+    item?.hasilUjian?.totalNilai,
+    item?.hasilAsesmen?.totalNilai,
+    item?.hasil?.totalNilai,
+  ];
+
+  for (const value of candidates) {
+    if (
+      value !== null &&
+      value !== undefined &&
+      value !== "" &&
+      !Number.isNaN(Number(value))
+    ) {
+      return Number(value);
+    }
+  }
+
+  return null;
+};
+
+/* =========================================================
+   STATUS UJIAN
+========================================================= */
+
+const getExamStatus = (item) => {
+  const rawStatus = String(
+    item?.status ??
+      item?.hasilUjian?.status ??
+      item?.hasilAsesmen?.status ??
+      ""
+  ).toLowerCase();
+
+  if (
+    rawStatus === "selesai" ||
+    rawStatus === "completed" ||
+    rawStatus === "submitted"
+  ) {
+    return "Selesai";
+  }
+
+  return item?.status || "";
+};
+
+/* =========================================================
+   PARSE NILAI UJIAN
+========================================================= */
+
+const getExamDataFromRows = (rows) => {
+  const result = {};
+
+  if (!Array.isArray(rows)) {
+    return result;
+  }
+
+  rows.forEach((item) => {
+    const siswaId = getExamStudentId(item);
+
+    if (!siswaId) {
+      return;
+    }
+
+    const nilai = getExamScore(item);
+
+    if (nilai === null) {
+      return;
+    }
+
+    const key = String(siswaId);
+
+    const current = result[key];
+
+    if (
+      !current ||
+      Number(nilai) > Number(current.nilai)
+    ) {
+      result[key] = {
+        nilai: Number(nilai),
+        status: getExamStatus(item),
+
+        ujianId:
+          item?.ujianId ||
+          item?.asesmenId ||
+          item?.id ||
+          null,
+
+        judul:
+          item?.judul ||
+          item?.judulUjian ||
+          item?.namaUjian ||
+          item?.asesmen?.judul ||
+          "Ujian Online",
+
+        selesaiPada:
+          item?.selesaiPada ||
+          item?.waktuSelesai ||
+          item?.hasilUjian?.dibuatPada ||
+          item?.hasilAsesmen?.dibuatPada ||
+          null,
+      };
+    }
+  });
+
+  return result;
+};
+
+/* =========================================================
+   PARSE DETAIL NILAI UJIAN
+========================================================= */
+
+const getExamDataFromDetail = (detail) => {
+  if (!detail || typeof detail !== "object") {
+    return {};
+  }
+
+  const sources = [
+    detail?.nilaiSiswa,
+    detail?.percobaanUjian,
+    detail?.percobaanAsesmen,
+    detail?.data?.nilaiSiswa,
+    detail?.data?.percobaanUjian,
+    detail?.data?.percobaanAsesmen,
+  ];
+
+  const rows = sources
+    .filter(Array.isArray)
+    .flat();
+
+  return getExamDataFromRows(rows);
+};
+
+/* =========================================================
+   NORMALIZE SISWA
+========================================================= */
+
+const normalizeStudent = (
+  student,
+  kelas = null,
+  kelasMapelIds = []
+) => {
+  if (!student) {
+    return null;
+  }
+
+  const siswa =
+    student?.siswa ||
+    student?.student ||
+    student?.pesertaDidik ||
+    student;
+
+  const kelasSiswa = Array.isArray(
+    siswa?.kelasSiswa
+  )
+    ? siswa.kelasSiswa
+    : [];
+
+  const kelasDariRelasi =
+    kelasSiswa?.[0]?.kelas?.nama ||
+    kelasSiswa?.[0]?.kelas?.namaKelas ||
+    kelasSiswa?.[0]?.namaKelas ||
+    "";
+
+  const kelasNama =
+    kelasDariRelasi ||
+    kelas?.nama ||
+    kelas?.namaKelas ||
+    kelas?.name ||
+    siswa?.kelas?.nama ||
+    siswa?.kelas?.namaKelas ||
+    siswa?.namaKelas ||
+    siswa?.kelasNama ||
+    "-";
+
+  const id =
+    siswa?.id ||
+    siswa?.siswaId ||
+    siswa?.siswa_id ||
+    student?.siswaId ||
+    student?.siswa_id ||
+    student?.id;
+
+  if (!id) {
+    return null;
+  }
+
+  return {
+    id: String(id),
+
+    nama:
+      siswa?.namaLengkap ||
+      siswa?.nama ||
+      siswa?.name ||
+      "-",
+
+    nis: String(
+      siswa?.nis ||
+        siswa?.nomorInduk ||
+        siswa?.nomor_induk ||
+        "-"
+    ),
+
+    nisn: String(
+      siswa?.nisn || "-"
+    ),
+
+    kelas: kelasNama,
+
+    kelasId:
+      kelas?.id ||
+      kelas?.kelasId ||
+      kelas?.kelas_id ||
+      siswa?.kelas?.id ||
+      null,
+
+    kelasMapelIds: Array.from(
+      new Set(
+        kelasMapelIds
+          .filter(Boolean)
+          .map(String)
+      )
+    ),
+  };
+};
+
+/* =========================================================
+   REPORT SUMMARY
+========================================================= */
+
+const getReportSummary = (report) => {
+  if (!report) {
+    return {
+      totalMapel: 0,
+      nilaiTerisi: 0,
+      rataRata: 0,
+      status: "Belum Dicek",
+    };
+  }
+
+  const akademik = Array.isArray(
+    report?.akademik
+  )
+    ? report.akademik
+    : Array.isArray(
+        report?.data?.akademik
+      )
+      ? report.data.akademik
+      : [];
+
+  const nilaiValid = akademik.filter(
+    (item) =>
+      item &&
+      item.totalNilai !== null &&
+      item.totalNilai !== undefined &&
+      item.totalNilai !== "" &&
+      !Number.isNaN(
+        Number(item.totalNilai)
+      )
   );
-}
+
+  const totalNilai =
+    nilaiValid.reduce(
+      (total, item) =>
+        total +
+        Number(item.totalNilai),
+      0
+    );
+
+  const rataRata =
+    nilaiValid.length > 0
+      ? Math.round(
+          totalNilai /
+            nilaiValid.length
+        )
+      : 0;
+
+  const semuaNilaiLengkap =
+    akademik.length > 0 &&
+    nilaiValid.length ===
+      akademik.length;
+
+  return {
+    totalMapel: akademik.length,
+    nilaiTerisi: nilaiValid.length,
+    rataRata,
+
+    status: semuaNilaiLengkap
+      ? "Siap Dicetak"
+      : akademik.length > 0
+        ? "Belum Lengkap"
+        : "Belum Dicek",
+  };
+};
+
+/* =========================================================
+   STATUS CLASS
+========================================================= */
+
+const getStatusClass = (status) => {
+  if (status === "Siap Dicetak") {
+    return "theme-success";
+  }
+
+  if (status === "Belum Lengkap") {
+    return "theme-warning";
+  }
+
+  return "theme-card-soft theme-text-muted";
+};
 
 /* =========================================================
    STAT CARD
 ========================================================= */
 
-function StatCard({ icon: Icon, label, value, type = "blue" }) {
-  const styles = {
-    blue: {
-      box: "theme-info",
-      icon: "text-[var(--color-info)]",
-      value: "theme-text",
-    },
-    green: {
-      box: "theme-success",
-      icon: "text-[var(--color-success)]",
-      value: "text-[var(--color-success)]",
-    },
-    amber: {
-      box: "theme-warning",
-      icon: "text-[var(--color-warning)]",
-      value: "text-[var(--color-warning)]",
-    },
-    purple: {
-      box: "theme-info",
-      icon: "text-[var(--color-primary)]",
-      value: "text-[var(--color-primary)]",
-    },
-  };
-
-  const style = styles[type];
+function StatCard({
+  icon: Icon,
+  label,
+  value,
+  description,
+  type = "blue",
+}) {
+  const iconClass =
+    type === "green"
+      ? "theme-success"
+      : type === "amber"
+        ? "theme-warning"
+        : type === "purple"
+          ? "theme-info"
+          : "theme-info";
 
   return (
-    <div className="theme-card rounded-xl border px-4 py-4 shadow-sm sm:px-5">
-      <div className="flex items-center gap-3">
-        <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${style.box} ${style.icon}`}
-        >
-          <Icon size={19} />
-        </div>
-
+    <div className="theme-card rounded-xl border p-4 shadow-sm">
+      <div className="flex items-center justify-between gap-3">
         <div>
-          <p className="theme-text-secondary text-[11px] font-medium uppercase tracking-wide">
+          <p className="theme-text-muted text-xs font-medium">
             {label}
           </p>
 
-          <p
-            className={`mt-1 text-2xl font-bold tracking-tight ${style.value}`}
-          >
+          <p className="theme-text mt-1 text-2xl font-bold">
             {value}
           </p>
+
+          {description ? (
+            <p className="theme-text-muted mt-1 text-[11px]">
+              {description}
+            </p>
+          ) : null}
+        </div>
+
+        <div
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${iconClass}`}
+        >
+          <Icon size={19} />
         </div>
       </div>
     </div>
@@ -990,218 +544,1290 @@ function StatCard({ icon: Icon, label, value, type = "blue" }) {
 ========================================================= */
 
 export default function CetakRaportPage() {
-  const [students, setStudents] = useState(initialStudents);
-
-  const [search, setSearch] = useState("");
-  const [tahunAjaran, setTahunAjaran] = useState("2025/2026");
-  const [semester, setSemester] = useState("Genap");
-  const [kelas, setKelas] = useState("Semua Kelas");
-  const [statusFilter, setStatusFilter] = useState("Semua Status");
-
-  const [selectedIds, setSelectedIds] = useState([]);
-  const [detailStudent, setDetailStudent] = useState(null);
-
-  const filteredStudents = useMemo(() => {
-    return students.filter((student) => {
-      const keyword = search.toLowerCase();
-
-      const matchSearch =
-        student.nama.toLowerCase().includes(keyword) ||
-        student.nis.toLowerCase().includes(keyword) ||
-        student.nisn.toLowerCase().includes(keyword);
-
-      const matchKelas =
-        kelas === "Semua Kelas" || student.kelas === kelas;
-
-      const matchStatus =
-        statusFilter === "Semua Status" ||
-        student.status === statusFilter;
-
-      return matchSearch && matchKelas && matchStatus;
-    });
-  }, [students, search, kelas, statusFilter]);
+  const router = useRouter();
 
   /* =======================================================
-     STATISTIK
+     STATE
   ======================================================= */
 
-  const totalSiswa = students.length;
+  const [students, setStudents] =
+    useState([]);
 
-  const siapCetak = students.filter(
-    (student) => student.status === "Siap Dicetak"
-  ).length;
+  const [tahunAjaran, setTahunAjaran] =
+    useState([]);
 
-  const belumLengkap = students.filter(
-    (student) => student.status === "Belum Lengkap"
-  ).length;
+  const [selectedYearId, setSelectedYearId] =
+    useState("");
 
-  const rataRata =
-    students.length > 0
-      ? Math.round(
-          students.reduce(
-            (total, student) => total + student.rataRata,
+  const [semester, setSemester] =
+    useState("");
+
+  const [kelasFilter, setKelasFilter] =
+    useState("Semua Kelas");
+
+  const [statusFilter, setStatusFilter] =
+    useState("Semua Status");
+
+  const [search, setSearch] =
+    useState("");
+
+  const [selectedIds, setSelectedIds] =
+    useState([]);
+
+  const [reportCache, setReportCache] =
+    useState({});
+
+  const [examScoreCache, setExamScoreCache] =
+    useState({});
+
+  const [loadingStudents, setLoadingStudents] =
+    useState(true);
+
+  const [loadingYears, setLoadingYears] =
+    useState(true);
+
+  const [loadingReports, setLoadingReports] =
+    useState(false);
+
+  const [loadingExamScores, setLoadingExamScores] =
+    useState(false);
+
+  const [error, setError] =
+    useState("");
+
+  const [currentPage, setCurrentPage] =
+    useState(1);
+
+  /* =======================================================
+     LOAD TAHUN AJARAN
+  ======================================================= */
+
+  const loadTahunAjaran =
+    useCallback(async () => {
+      try {
+        setLoadingYears(true);
+        setError("");
+
+        const result =
+          await getTahunAjaran();
+
+        const rows =
+          getRows(result);
+
+        const normalized =
+          rows
+            .map((item) => ({
+              id: item?.id
+                ? String(item.id)
+                : "",
+
+              nama:
+                item?.nama ||
+                item?.namaTahunAjaran ||
+                item?.tahunAjaran ||
+                item?.name ||
+                "-",
+
+              semester:
+                item?.semester ||
+                item?.semesterAktif ||
+                "",
+
+              status:
+                item?.status ||
+                "",
+            }))
+            .filter(
+              (item) => item.id
+            );
+
+        setTahunAjaran(
+          normalized
+        );
+
+        const tahunAktif =
+          normalized.find(
+            (item) =>
+              String(
+                item.status
+              ).toLowerCase() ===
+              "aktif"
+          ) ||
+          normalized[0];
+
+        if (tahunAktif) {
+          setSelectedYearId(
+            tahunAktif.id
+          );
+
+          setSemester(
+            tahunAktif.semester ||
+              ""
+          );
+        }
+      } catch (err) {
+        console.error(
+          "Gagal mengambil tahun ajaran:",
+          err
+        );
+
+        setError(
+          err?.message ||
+            "Gagal mengambil data tahun ajaran."
+        );
+      } finally {
+        setLoadingYears(false);
+      }
+    }, []);
+
+  /* =======================================================
+     LOAD SISWA
+  ======================================================= */
+
+  const loadStudents =
+    useCallback(async () => {
+      if (!selectedYearId) {
+        setStudents([]);
+        return;
+      }
+
+      try {
+        setLoadingStudents(true);
+        setError("");
+
+        const kelasResult =
+          await getKelas({
+            page: 1,
+            limit: 100,
+            tahunAjaranId:
+              selectedYearId,
+          });
+
+        const kelasRows =
+          getRows(kelasResult);
+
+        const detailResults =
+          await Promise.all(
+            kelasRows.map(
+              async (kelas) => {
+                try {
+                  const result =
+                    await getDetailKelas(
+                      kelas.id
+                    );
+
+                  const detail =
+                    result?.data?.data ||
+                    result?.data ||
+                    result ||
+                    null;
+
+                  return {
+                    kelas,
+                    detail,
+                  };
+                } catch (err) {
+                  console.error(
+                    `Gagal mengambil detail kelas ${kelas?.id}:`,
+                    err
+                  );
+
+                  return {
+                    kelas,
+                    detail: null,
+                  };
+                }
+              }
+            )
+          );
+
+        const normalized =
+          detailResults.flatMap(
+            ({
+              kelas,
+              detail,
+            }) => {
+              const anggota =
+                Array.isArray(
+                  detail?.anggota
+                )
+                  ? detail.anggota
+                  : Array.isArray(
+                      detail?.data?.anggota
+                    )
+                    ? detail.data
+                        .anggota
+                    : [];
+
+              const kelasMapelRows =
+                detail?.kelasMapel ||
+                detail?.kelasMapels ||
+                detail?.mapelKelas ||
+                detail?.mataPelajaranKelas ||
+                detail?.data?.kelasMapel ||
+                detail?.data?.kelasMapels ||
+                kelas?.kelasMapel ||
+                kelas?.kelasMapels ||
+                [];
+
+              const kelasMapelIds =
+                Array.isArray(
+                  kelasMapelRows
+                )
+                  ? kelasMapelRows
+                      .map(
+                        (item) =>
+                          item?.id ||
+                          item?.kelasMapelId ||
+                          item?.kelas_mapel_id
+                      )
+                      .filter(Boolean)
+                      .map(String)
+                  : [];
+
+              return anggota
+                .map(
+                  (anggotaItem) => {
+                    const siswa =
+                      anggotaItem?.siswa ||
+                      anggotaItem?.student ||
+                      anggotaItem;
+
+                    return normalizeStudent(
+                      siswa,
+                      kelas,
+                      kelasMapelIds
+                    );
+                  }
+                )
+                .filter(Boolean);
+            }
+          );
+
+        const uniqueStudents =
+          Array.from(
+            new Map(
+              normalized.map(
+                (student) => [
+                  student.id,
+                  student,
+                ]
+              )
+            ).values()
+          );
+
+        setStudents(
+          uniqueStudents
+        );
+
+        setSelectedIds([]);
+        setCurrentPage(1);
+      } catch (err) {
+        console.error(
+          "Gagal mengambil data siswa:",
+          err
+        );
+
+        setStudents([]);
+
+        setError(
+          err?.message ||
+            "Gagal mengambil daftar siswa."
+        );
+      } finally {
+        setLoadingStudents(false);
+      }
+    }, [selectedYearId]);
+
+  /* =======================================================
+     LOAD RAPORT
+  ======================================================= */
+
+  const loadReports =
+    useCallback(
+      async (
+        studentList,
+        yearId
+      ) => {
+        if (
+          !studentList?.length ||
+          !yearId
+        ) {
+          setReportCache({});
+          return;
+        }
+
+        try {
+          setLoadingReports(true);
+
+          const results =
+            await Promise.allSettled(
+              studentList.map(
+                async (student) => {
+                  const result =
+                    await getRaportSiswa(
+                      student.id,
+                      yearId
+                    );
+
+                  return {
+                    studentId:
+                      student.id,
+
+                    report:
+                      result?.data ||
+                      result ||
+                      null,
+                  };
+                }
+              )
+            );
+
+          const nextCache = {};
+
+          results.forEach(
+            (result) => {
+              if (
+                result.status ===
+                  "fulfilled" &&
+                result.value?.studentId
+              ) {
+                nextCache[
+                  `${yearId}:${result.value.studentId}`
+                ] =
+                  result.value.report;
+              }
+            }
+          );
+
+          setReportCache(
+            nextCache
+          );
+        } catch (err) {
+          console.error(
+            "Gagal mengambil data raport:",
+            err
+          );
+
+          setError(
+            err?.message ||
+              "Gagal mengambil data raport."
+          );
+        } finally {
+          setLoadingReports(false);
+        }
+      },
+      []
+    );
+
+  /* =======================================================
+     LOAD NILAI UJIAN
+  ======================================================= */
+
+  const loadExamScores =
+    useCallback(
+      async (studentList) => {
+        if (
+          !studentList?.length
+        ) {
+          setExamScoreCache({});
+          return;
+        }
+
+        try {
+          setLoadingExamScores(
+            true
+          );
+
+          const allKelasMapelIds =
+            Array.from(
+              new Set(
+                studentList.flatMap(
+                  (student) =>
+                    Array.isArray(
+                      student?.kelasMapelIds
+                    )
+                      ? student.kelasMapelIds
+                      : []
+                )
+              )
+            );
+
+          if (
+            !allKelasMapelIds.length
+          ) {
+            setExamScoreCache({});
+            return;
+          }
+
+          const cache = {};
+
+          const results =
+            await Promise.allSettled(
+              allKelasMapelIds.map(
+                async (
+                  kelasMapelId
+                ) => {
+                  try {
+                    const result =
+                      await getNilaiUjianUntukKelas(
+                        kelasMapelId
+                      );
+
+                    return {
+                      result,
+                    };
+                  } catch (err) {
+                    console.error(
+                      `Gagal mengambil nilai kelas-mapel ${kelasMapelId}:`,
+                      err
+                    );
+
+                    return {
+                      result: null,
+                    };
+                  }
+                }
+              )
+            );
+
+          results.forEach(
+            (result) => {
+              if (
+                result.status !==
+                "fulfilled"
+              ) {
+                return;
+              }
+
+              const rawResult =
+                result.value?.result;
+
+              const rows =
+                getExamRows(
+                  rawResult
+                );
+
+              const directData =
+                getExamDataFromRows(
+                  rows
+                );
+
+              Object.entries(
+                directData
+              ).forEach(
+                ([
+                  siswaId,
+                  data,
+                ]) => {
+                  const old =
+                    cache[siswaId];
+
+                  if (
+                    !old ||
+                    Number(
+                      data.nilai
+                    ) >
+                      Number(
+                        old.nilai
+                      )
+                  ) {
+                    cache[
+                      siswaId
+                    ] = data;
+                  }
+                }
+              );
+
+              rows.forEach(
+                (item) => {
+                  const detail =
+                    item?.detail ||
+                    item?.data ||
+                    item;
+
+                  const detailData =
+                    getExamDataFromDetail(
+                      detail
+                    );
+
+                  Object.entries(
+                    detailData
+                  ).forEach(
+                    ([
+                      siswaId,
+                      data,
+                    ]) => {
+                      const old =
+                        cache[
+                          siswaId
+                        ];
+
+                      if (
+                        !old ||
+                        Number(
+                          data.nilai
+                        ) >
+                          Number(
+                            old.nilai
+                          )
+                      ) {
+                        cache[
+                          siswaId
+                        ] = data;
+                      }
+                    }
+                  );
+                }
+              );
+            }
+          );
+
+          setExamScoreCache(
+            cache
+          );
+        } catch (err) {
+          console.error(
+            "Gagal mengambil nilai ujian:",
+            err
+          );
+
+          setExamScoreCache({});
+        } finally {
+          setLoadingExamScores(
+            false
+          );
+        }
+      },
+      []
+    );
+
+  /* =======================================================
+     EFFECTS
+  ======================================================= */
+
+  useEffect(() => {
+    loadTahunAjaran();
+  }, [loadTahunAjaran]);
+
+  useEffect(() => {
+    if (!selectedYearId) {
+      return;
+    }
+
+    loadStudents();
+  }, [
+    selectedYearId,
+    loadStudents,
+  ]);
+
+  useEffect(() => {
+    if (
+      !selectedYearId ||
+      !students.length
+    ) {
+      setReportCache({});
+      setExamScoreCache({});
+      return;
+    }
+
+    loadReports(
+      students,
+      selectedYearId
+    );
+
+    loadExamScores(
+      students
+    );
+  }, [
+    selectedYearId,
+    students,
+    loadReports,
+    loadExamScores,
+  ]);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [
+    search,
+    kelasFilter,
+    statusFilter,
+    selectedYearId,
+  ]);
+
+  /* =======================================================
+     FILTER OPTIONS
+  ======================================================= */
+
+  const kelasOptions =
+    useMemo(() => {
+      const values =
+        students
+          .map(
+            (student) =>
+              student.kelas
+          )
+          .filter(
+            (kelas) =>
+              kelas &&
+              kelas !== "-"
+          );
+
+      return [
+        "Semua Kelas",
+        ...Array.from(
+          new Set(values)
+        ),
+      ];
+    }, [students]);
+
+  /* =======================================================
+     REPORT KEY
+  ======================================================= */
+
+  const getReportKey =
+    useCallback(
+      (studentId) =>
+        `${selectedYearId}:${studentId}`,
+      [selectedYearId]
+    );
+
+  /* =======================================================
+     FILTER STUDENTS
+  ======================================================= */
+
+  const filteredStudents =
+    useMemo(() => {
+      const keyword =
+        search
+          .trim()
+          .toLowerCase();
+
+      return students.filter(
+        (student) => {
+          const report =
+            reportCache[
+              getReportKey(
+                student.id
+              )
+            ];
+
+          const summary =
+            getReportSummary(
+              report
+            );
+
+          const matchSearch =
+            !keyword ||
+            student.nama
+              .toLowerCase()
+              .includes(keyword) ||
+            student.nis
+              .toLowerCase()
+              .includes(keyword) ||
+            student.nisn
+              .toLowerCase()
+              .includes(keyword);
+
+          const matchKelas =
+            kelasFilter ===
+              "Semua Kelas" ||
+            student.kelas ===
+              kelasFilter;
+
+          const matchStatus =
+            statusFilter ===
+              "Semua Status" ||
+            summary.status ===
+              statusFilter;
+
+          return (
+            matchSearch &&
+            matchKelas &&
+            matchStatus
+          );
+        }
+      );
+    }, [
+      students,
+      reportCache,
+      getReportKey,
+      search,
+      kelasFilter,
+      statusFilter,
+    ]);
+
+  /* =======================================================
+     PAGINATION
+  ======================================================= */
+
+  const totalPages =
+    Math.max(
+      1,
+      Math.ceil(
+        filteredStudents.length /
+          ITEMS_PER_PAGE
+      )
+    );
+
+  const safeCurrentPage =
+    Math.min(
+      currentPage,
+      totalPages
+    );
+
+  const paginatedStudents =
+    filteredStudents.slice(
+      (safeCurrentPage - 1) *
+        ITEMS_PER_PAGE,
+      safeCurrentPage *
+        ITEMS_PER_PAGE
+    );
+
+  /* =======================================================
+     STATISTICS
+  ======================================================= */
+
+  const statistics =
+    useMemo(() => {
+      let siap = 0;
+      let belum = 0;
+      let totalNilai = 0;
+      let jumlahNilai = 0;
+
+      students.forEach(
+        (student) => {
+          const report =
+            reportCache[
+              getReportKey(
+                student.id
+              )
+            ];
+
+          const summary =
+            getReportSummary(
+              report
+            );
+
+          if (
+            summary.status ===
+            "Siap Dicetak"
+          ) {
+            siap++;
+          }
+
+          if (
+            summary.status ===
+              "Belum Lengkap" ||
+            summary.status ===
+              "Belum Dicek"
+          ) {
+            belum++;
+          }
+
+          if (
+            summary.rataRata >
             0
-          ) / students.length
-        )
-      : 0;
+          ) {
+            totalNilai +=
+              summary.rataRata;
+
+            jumlahNilai++;
+          }
+        }
+      );
+
+      return {
+        total:
+          students.length,
+
+        siap,
+
+        belum,
+
+        rataRata:
+          jumlahNilai > 0
+            ? Math.round(
+                totalNilai /
+                  jumlahNilai
+              )
+            : 0,
+      };
+    }, [
+      students,
+      reportCache,
+      getReportKey,
+    ]);
 
   /* =======================================================
-     CHECKBOX
+     SELECT
   ======================================================= */
 
-  const toggleStudent = (id) => {
-    setSelectedIds((prev) =>
-      prev.includes(id)
-        ? prev.filter((item) => item !== id)
-        : [...prev, id]
+  const toggleStudent = (
+    studentId
+  ) => {
+    setSelectedIds(
+      (current) =>
+        current.includes(
+          studentId
+        )
+          ? current.filter(
+              (id) =>
+                id !==
+                studentId
+            )
+          : [
+              ...current,
+              studentId,
+            ]
     );
   };
 
   const toggleAll = () => {
-    const filteredIds = filteredStudents.map((student) => student.id);
+    const visibleIds =
+      paginatedStudents.map(
+        (student) =>
+          student.id
+      );
 
-    const allSelected = filteredIds.every((id) =>
-      selectedIds.includes(id)
-    );
+    const allSelected =
+      visibleIds.length >
+        0 &&
+      visibleIds.every(
+        (id) =>
+          selectedIds.includes(
+            id
+          )
+      );
 
     if (allSelected) {
-      setSelectedIds((prev) =>
-        prev.filter((id) => !filteredIds.includes(id))
+      setSelectedIds(
+        (current) =>
+          current.filter(
+            (id) =>
+              !visibleIds.includes(
+                id
+              )
+          )
       );
     } else {
-      setSelectedIds((prev) => [
-        ...new Set([...prev, ...filteredIds]),
-      ]);
+      setSelectedIds(
+        (current) =>
+          Array.from(
+            new Set([
+              ...current,
+              ...visibleIds,
+            ])
+          )
+      );
     }
   };
 
   /* =======================================================
-     PREVIEW / DETAIL
+     RESET FILTER
   ======================================================= */
 
-  const openDetail = (student) => {
-    setDetailStudent(student);
+  const resetFilter = () => {
+    setSearch("");
+    setKelasFilter(
+      "Semua Kelas"
+    );
+    setStatusFilter(
+      "Semua Status"
+    );
+    setSelectedIds([]);
+    setCurrentPage(1);
   };
 
   /* =======================================================
-     CETAK
+     NAVIGASI DETAIL
   ======================================================= */
 
-  const handlePrint = (student) => {
-    if (student.status !== "Siap Dicetak") {
-      alert("Raport siswa belum lengkap.");
-      return;
-    }
-
-    setDetailStudent(student);
-
-    setTimeout(() => {
-      window.print();
-    }, 300);
-  };
-
-  const handleBulkPrint = () => {
-    const selectedStudents = students.filter((student) =>
-      selectedIds.includes(student.id)
-    );
-
-    const incomplete = selectedStudents.filter(
-      (student) => student.status !== "Siap Dicetak"
-    );
-
-    if (selectedStudents.length === 0) {
-      alert("Pilih siswa terlebih dahulu.");
-      return;
-    }
-
-    if (incomplete.length > 0) {
-      alert(
-        "Ada siswa yang raportnya belum lengkap. Hanya raport yang lengkap yang dapat dicetak."
+  const goToDetail = (
+    student,
+    autoPrint = false
+  ) => {
+    if (!student?.id) {
+      setError(
+        "ID siswa tidak ditemukan."
       );
       return;
     }
 
-    setDetailStudent(selectedStudents[0]);
+    const params =
+      new URLSearchParams();
 
-    setTimeout(() => {
-      window.print();
-    }, 300);
+    if (selectedYearId) {
+      params.set(
+        "tahunAjaranId",
+        selectedYearId
+      );
+    }
+
+    if (semester) {
+      params.set(
+        "semester",
+        semester
+      );
+    }
+
+    if (autoPrint) {
+      params.set(
+        "print",
+        "1"
+      );
+    }
+
+    const query =
+      params.toString();
+
+    const targetUrl =
+      `/admin/eraport/cetak-raport/${encodeURIComponent(
+        student.id
+      )}${
+        query
+          ? `?${query}`
+          : ""
+      }`;
+
+    router.push(
+      targetUrl
+    );
   };
 
+  const handleDetail = (
+    student
+  ) => {
+    goToDetail(
+      student,
+      false
+    );
+  };
+
+  const handlePrint = (
+    student
+  ) => {
+    goToDetail(
+      student,
+      true
+    );
+  };
+
+  const handleBulkPrint =
+    () => {
+      if (
+        selectedIds.length ===
+        0
+      ) {
+        setError(
+          "Pilih minimal satu siswa terlebih dahulu."
+        );
+        return;
+      }
+
+      const firstStudent =
+        students.find(
+          (student) =>
+            student.id ===
+            selectedIds[0]
+        );
+
+      if (firstStudent) {
+        goToDetail(
+          firstStudent,
+          true
+        );
+      }
+    };
+
+  /* =======================================================
+     REFRESH
+  ======================================================= */
+
+  const handleRefresh =
+    async () => {
+      setError("");
+
+      await loadTahunAjaran();
+      await loadStudents();
+    };
+
+  /* =======================================================
+     LOADING
+  ======================================================= */
+
+  const isLoading =
+    loadingStudents ||
+    loadingYears;
+
+  const isProcessing =
+    loadingReports ||
+    loadingExamScores;
+
+  /* =======================================================
+     RENDER
+  ======================================================= */
+
   return (
-    <>
-      <div className="theme-page flex min-h-screen w-full print:block">
-        <Sidebar />
+    <div className="theme-page flex min-h-screen w-full">
+      <Sidebar />
 
-        <div className="flex min-w-0 flex-1 flex-col print:block">
-          <Header />
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <Header />
 
-          <main className="flex-1 px-4 py-6 md:px-6 lg:px-8 print:p-0">
+        <main className="flex-1 overflow-y-auto">
+          <div className="mx-auto w-full max-w-[1400px] space-y-6 p-4 sm:p-6 lg:p-8">
+
             {/* =================================================
                 HEADER
             ================================================= */}
 
-            <div className="mb-6 flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-              <div>
-                <div className="flex items-center gap-2">
-                  <div className="theme-info flex h-10 w-10 items-center justify-center rounded-xl">
-                    <Printer size={21} />
-                  </div>
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              <div className="flex items-start gap-3">
+                <button
+                  type="button"
+                  onClick={() =>
+                    router.back()
+                  }
+                  className="theme-card theme-text-secondary mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border transition hover:opacity-75"
+                  title="Kembali"
+                >
+                  <ArrowLeft
+                    size={19}
+                  />
+                </button>
 
-                  <div>
-                    <h1 className="theme-text text-xl font-bold">
-                      Cetak Raport Siswa
-                    </h1>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <div className="theme-info flex h-10 w-10 items-center justify-center rounded-xl">
+                      <Printer
+                        size={21}
+                      />
+                    </div>
 
-                    <p className="theme-text-muted mt-0.5 text-sm">
-                      Kelola preview dan pencetakan raport siswa
-                    </p>
+                    <div>
+                      <h1 className="theme-text text-xl font-bold">
+                        Cetak Raport Siswa
+                      </h1>
+
+                      <p className="theme-text-muted mt-0.5 text-sm">
+                        Kelola preview dan
+                        pencetakan raport
+                        siswa.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {selectedIds.length > 0 && (
+              <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
-                  onClick={handleBulkPrint}
-                  className="theme-primary inline-flex h-10 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition"
+                  onClick={
+                    handleRefresh
+                  }
+                  disabled={
+                    isLoading ||
+                    isProcessing
+                  }
+                  className="theme-card theme-text-secondary inline-flex h-10 items-center gap-2 rounded-lg border px-4 text-sm font-semibold transition hover:opacity-75 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  <Printer size={17} />
-                  Cetak {selectedIds.length} Raport
+                  <RefreshCw
+                    size={17}
+                    className={
+                      isLoading ||
+                      isProcessing
+                        ? "animate-spin"
+                        : ""
+                    }
+                  />
+
+                  Refresh
                 </button>
-              )}
+
+                {selectedIds.length >
+                0 ? (
+                  <button
+                    type="button"
+                    onClick={
+                      handleBulkPrint
+                    }
+                    className="theme-primary inline-flex h-10 items-center gap-2 rounded-lg px-4 text-sm font-semibold"
+                  >
+                    <Printer
+                      size={17}
+                    />
+
+                    Cetak{" "}
+                    {
+                      selectedIds.length
+                    }{" "}
+                    Raport
+                  </button>
+                ) : null}
+              </div>
+            </div>
+
+            {/* =================================================
+                ERROR
+            ================================================= */}
+
+            {error ? (
+              <div className="theme-danger flex items-start justify-between gap-4 rounded-lg border px-4 py-3 text-sm">
+                <div>
+                  <p className="font-semibold">
+                    Terjadi kesalahan
+                  </p>
+
+                  <p className="mt-1">
+                    {error}
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    setError("")
+                  }
+                  className="opacity-70 transition hover:opacity-100"
+                >
+                  <X size={18} />
+                </button>
+              </div>
+            ) : null}
+
+            {/* =================================================
+                INFO
+            ================================================= */}
+
+            <div className="theme-info rounded-xl border px-4 py-4">
+              <div className="flex items-start gap-3">
+                <FileText
+                  size={18}
+                  className="mt-0.5 shrink-0"
+                />
+
+                <div>
+                  <p className="theme-text text-sm font-semibold">
+                    Informasi data raport
+                  </p>
+
+                  <p className="theme-text-secondary mt-1 text-xs leading-5">
+                    Data nilai raport dan
+                    nilai ujian online
+                    diambil dari Backend.
+                    Gunakan tombol Detail
+                    untuk membuka halaman
+                    raport siswa sebelum
+                    mencetak.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* =================================================
+                STATISTICS
+            ================================================= */}
+
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+              <StatCard
+                icon={Users}
+                label="Total Siswa"
+                value={
+                  statistics.total
+                }
+                description="Siswa terdaftar"
+                type="blue"
+              />
+
+              <StatCard
+                icon={
+                  CheckCircle2
+                }
+                label="Siap Dicetak"
+                value={
+                  statistics.siap
+                }
+                description="Nilai lengkap"
+                type="green"
+              />
+
+              <StatCard
+                icon={FileText}
+                label="Belum Lengkap"
+                value={
+                  statistics.belum
+                }
+                description="Perlu dilengkapi"
+                type="amber"
+              />
+
+              <StatCard
+                icon={BookOpen}
+                label="Rata-rata Nilai"
+                value={
+                  statistics.rataRata ||
+                  "-"
+                }
+                description="Rata-rata nilai"
+                type="purple"
+              />
             </div>
 
             {/* =================================================
                 FILTER
             ================================================= */}
 
-            <div className="theme-card rounded-xl border p-4 shadow-sm">
-              <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-4">
+            <div className="theme-card rounded-xl border p-4 shadow-sm sm:p-5">
+              <div className="mb-4 flex items-center gap-2">
+                <Filter
+                  size={18}
+                  className="theme-text-secondary"
+                />
+
+                <h2 className="theme-text font-semibold">
+                  Filter Data
+                </h2>
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
+
                 {/* TAHUN AJARAN */}
                 <div>
                   <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
                     Tahun Ajaran
                   </label>
 
-                  <div className="relative">
-                    <CalendarDays
-                      size={16}
-                      className="theme-text-muted pointer-events-none absolute left-3 top-1/2 -translate-y-1/2"
-                    />
+                  <select
+                    value={
+                      selectedYearId
+                    }
+                    onChange={(event) =>
+                      setSelectedYearId(
+                        event.target.value
+                      )
+                    }
+                    disabled={
+                      loadingYears
+                    }
+                    className="theme-input h-10 w-full rounded-lg border px-3 text-sm font-medium outline-none"
+                  >
+                    <option value="">
+                      Pilih Tahun
+                      Ajaran
+                    </option>
 
-                    <select
-                      value={tahunAjaran}
-                      onChange={(e) =>
-                        setTahunAjaran(e.target.value)
-                      }
-                      className="theme-input h-10 w-full rounded-lg border pl-9 pr-3 text-sm font-medium outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
-                    >
-                      <option>2025/2026</option>
-                      <option>2024/2025</option>
-                      <option>2023/2024</option>
-                    </select>
-                  </div>
+                    {tahunAjaran.map(
+                      (item) => (
+                        <option
+                          key={item.id}
+                          value={item.id}
+                        >
+                          {item.nama}
+                        </option>
+                      )
+                    )}
+                  </select>
                 </div>
 
                 {/* SEMESTER */}
@@ -1212,11 +1838,24 @@ export default function CetakRaportPage() {
 
                   <select
                     value={semester}
-                    onChange={(e) => setSemester(e.target.value)}
-                    className="theme-input h-10 w-full rounded-lg border px-3 text-sm font-medium outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                    onChange={(event) =>
+                      setSemester(
+                        event.target.value
+                      )
+                    }
+                    className="theme-input h-10 w-full rounded-lg border px-3 text-sm font-medium outline-none"
                   >
-                    <option>Ganjil</option>
-                    <option>Genap</option>
+                    <option value="">
+                      Semua Semester
+                    </option>
+
+                    <option value="Ganjil">
+                      Ganjil
+                    </option>
+
+                    <option value="Genap">
+                      Genap
+                    </option>
                   </select>
                 </div>
 
@@ -1227,13 +1866,26 @@ export default function CetakRaportPage() {
                   </label>
 
                   <select
-                    value={kelas}
-                    onChange={(e) => setKelas(e.target.value)}
-                    className="theme-input h-10 w-full rounded-lg border px-3 text-sm font-medium outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                    value={
+                      kelasFilter
+                    }
+                    onChange={(event) =>
+                      setKelasFilter(
+                        event.target.value
+                      )
+                    }
+                    className="theme-input h-10 w-full rounded-lg border px-3 text-sm font-medium outline-none"
                   >
-                    <option>Semua Kelas</option>
-                    <option>XII PPLG 1</option>
-                    <option>XII PPLG 2</option>
+                    {kelasOptions.map(
+                      (kelas) => (
+                        <option
+                          key={kelas}
+                          value={kelas}
+                        >
+                          {kelas}
+                        </option>
+                      )
+                    )}
                   </select>
                 </div>
 
@@ -1244,47 +1896,68 @@ export default function CetakRaportPage() {
                   </label>
 
                   <select
-                    value={statusFilter}
-                    onChange={(e) =>
-                      setStatusFilter(e.target.value)
+                    value={
+                      statusFilter
                     }
-                    className="theme-input h-10 w-full rounded-lg border px-3 text-sm font-medium outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                    onChange={(event) =>
+                      setStatusFilter(
+                        event.target.value
+                      )
+                    }
+                    className="theme-input h-10 w-full rounded-lg border px-3 text-sm font-medium outline-none"
                   >
-                    <option>Semua Status</option>
-                    <option>Siap Dicetak</option>
-                    <option>Belum Lengkap</option>
+                    <option value="Semua Status">
+                      Semua Status
+                    </option>
+
+                    <option value="Siap Dicetak">
+                      Siap Dicetak
+                    </option>
+
+                    <option value="Belum Lengkap">
+                      Belum Lengkap
+                    </option>
+
+                    <option value="Belum Dicek">
+                      Belum Dicek
+                    </option>
                   </select>
+                </div>
+
+                {/* SEARCH */}
+                <div>
+                  <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
+                    Cari Siswa
+                  </label>
+
+                  <div className="relative">
+                    <Search
+                      size={17}
+                      className="theme-text-muted pointer-events-none absolute left-3 top-1/2 -translate-y-1/2"
+                    />
+
+                    <input
+                      type="text"
+                      value={search}
+                      onChange={(event) =>
+                        setSearch(
+                          event.target.value
+                        )
+                      }
+                      placeholder="Nama, NIS, atau NISN..."
+                      className="theme-input h-10 w-full rounded-lg border pl-10 pr-3 text-sm outline-none"
+                    />
+                  </div>
                 </div>
               </div>
 
-              {/* SEARCH */}
-              <div className="mt-4 flex flex-col gap-3 sm:flex-row">
-                <div className="relative flex-1">
-                  <Search
-                    size={17}
-                    className="theme-text-muted pointer-events-none absolute left-3 top-1/2 -translate-y-1/2"
-                  />
-
-                  <input
-                    type="text"
-                    value={search}
-                    onChange={(e) => setSearch(e.target.value)}
-                    placeholder="Cari nama siswa, NIS, atau NISN..."
-                    className="theme-input h-10 w-full rounded-lg border pl-9 pr-3 text-sm font-medium outline-none placeholder:text-[var(--color-text-placeholder)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[var(--color-primary)]/20"
-                  />
-                </div>
-
+              <div className="mt-4 flex justify-end">
                 <button
                   type="button"
-                  onClick={() => {
-                    setSearch("");
-                    setTahunAjaran("2025/2026");
-                    setSemester("Genap");
-                    setKelas("Semua Kelas");
-                    setStatusFilter("Semua Status");
-                    setSelectedIds([]);
-                  }}
-                  className="theme-sidebar-text-active theme-sidebar-hover h-10 rounded-lg px-4 text-sm font-semibold transition"
+                  onClick={
+                    resetFilter
+                  }
+                  className="theme-sidebar-text-active theme-sidebar-hover rounded-lg px-3 py-2 text-xs font-semibold transition"
                 >
                   Reset Filter
                 </button>
@@ -1292,738 +1965,478 @@ export default function CetakRaportPage() {
             </div>
 
             {/* =================================================
-                STATISTICS
-            ================================================= */}
-
-            <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              <StatCard
-                icon={Users}
-                label="Total Siswa"
-                value={totalSiswa}
-                type="blue"
-              />
-
-              <StatCard
-                icon={CheckCircle2}
-                label="Siap Dicetak"
-                value={siapCetak}
-                type="green"
-              />
-
-              <StatCard
-                icon={AlertCircle}
-                label="Belum Lengkap"
-                value={belumLengkap}
-                type="amber"
-              />
-
-              <StatCard
-                icon={BookOpen}
-                label="Rata-rata Nilai"
-                value={rataRata}
-                type="purple"
-              />
-            </div>
-
-            {/* =================================================
                 TABLE
             ================================================= */}
 
-            <div className="theme-card mt-5 overflow-hidden rounded-xl border shadow-sm">
-              <div className="theme-border flex items-center justify-between border-b px-5 py-4">
+            <div className="theme-card overflow-hidden rounded-xl border shadow-sm">
+              <div className="theme-card-soft flex flex-col gap-2 border-b px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
                 <div>
-                  <h2 className="theme-text text-sm font-bold">
+                  <h2 className="theme-text font-semibold">
                     Data Raport Siswa
                   </h2>
 
-                  <p className="theme-text-muted mt-0.5 text-xs font-medium">
-                    {filteredStudents.length} siswa ditemukan
+                  <p className="theme-text-muted mt-1 text-xs">
+                    {
+                      filteredStudents.length
+                    }{" "}
+                    siswa ditemukan
                   </p>
                 </div>
 
-                {selectedIds.length > 0 && (
+                {selectedIds.length >
+                0 ? (
                   <span className="theme-sidebar-text-active text-xs font-semibold">
-                    {selectedIds.length} dipilih
+                    {
+                      selectedIds.length
+                    }{" "}
+                    siswa dipilih
                   </span>
-                )}
+                ) : null}
               </div>
 
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[1000px] border-collapse">
-                  <thead>
-                    <tr className="theme-primary text-xs font-semibold uppercase tracking-wide">
-                      <th className="w-12 px-4 py-3.5 text-center">
-                        <input
-                          type="checkbox"
-                          checked={
-                            filteredStudents.length > 0 &&
-                            filteredStudents.every((student) =>
-                              selectedIds.includes(student.id)
-                            )
-                          }
-                          onChange={toggleAll}
-                          className="h-4 w-4 rounded border-[var(--color-border)] accent-[var(--color-primary)]"
-                        />
-                      </th>
+              {isLoading ||
+              isProcessing ? (
+                <div className="flex min-h-[320px] flex-col items-center justify-center">
+                  <Loader2
+                    size={32}
+                    className="theme-text-secondary animate-spin"
+                  />
 
-                      <th className="w-14 px-4 py-3.5 text-center">
-                        No
-                      </th>
+                  <p className="theme-text mt-3 text-sm font-semibold">
+                    {loadingStudents
+                      ? "Mengambil data siswa..."
+                      : loadingReports
+                        ? "Mengambil data raport..."
+                        : "Mengambil nilai ujian online..."}
+                  </p>
 
-                      <th className="px-5 py-3.5 text-left">
-                        Siswa
-                      </th>
+                  <p className="theme-text-muted mt-1 text-xs">
+                    Mohon tunggu
+                    sebentar.
+                  </p>
+                </div>
+              ) : paginatedStudents.length ===
+                0 ? (
+                <div className="flex min-h-[320px] flex-col items-center justify-center px-5 text-center">
+                  <div className="theme-card-soft theme-text-muted flex h-14 w-14 items-center justify-center rounded-xl">
+                    <Users
+                      size={25}
+                    />
+                  </div>
 
-                      <th className="px-5 py-3.5 text-left">
-                        NIS / NISN
-                      </th>
+                  <h3 className="theme-text mt-4 font-semibold">
+                    Data tidak
+                    ditemukan
+                  </h3>
 
-                      <th className="px-5 py-3.5 text-left">
-                        Kelas
-                      </th>
-
-                      <th className="px-5 py-3.5 text-center">
-                        Nilai
-                      </th>
-
-                      <th className="px-5 py-3.5 text-center">
-                        Rata-rata
-                      </th>
-
-                      <th className="px-5 py-3.5 text-left">
-                        Status
-                      </th>
-
-                      <th className="px-5 py-3.5 text-right">
-                        Aksi
-                      </th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {filteredStudents.map((student, index) => {
-                      const selected = selectedIds.includes(student.id);
-
-                      return (
-                        <tr
-                          key={student.id}
-                          className={`theme-table-hover border-b transition last:border-0 ${
-                            selected
-                              ? "bg-[var(--color-sidebar-active)]"
-                              : ""
-                          }`}
-                        >
-                          <td className="px-4 py-4 text-center">
+                  <p className="theme-text-muted mt-1 max-w-md text-sm">
+                    Belum ada siswa
+                    yang sesuai
+                    dengan filter
+                    yang dipilih.
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-[1150px]">
+                      <thead className="theme-table-header">
+                        <tr>
+                          <th className="w-12 px-4 py-3 text-center">
                             <input
                               type="checkbox"
-                              checked={selected}
-                              onChange={() =>
-                                toggleStudent(student.id)
+                              checked={
+                                paginatedStudents.length >
+                                  0 &&
+                                paginatedStudents.every(
+                                  (
+                                    student
+                                  ) =>
+                                    selectedIds.includes(
+                                      student.id
+                                    )
+                                )
                               }
-                              className="h-4 w-4 rounded border-[var(--color-border)] accent-[var(--color-primary)]"
+                              onChange={
+                                toggleAll
+                              }
+                              className="h-4 w-4"
                             />
-                          </td>
+                          </th>
 
-                          <td className="theme-text-secondary px-4 py-4 text-center text-sm font-medium">
-                            {index + 1}
-                          </td>
+                          <th className="w-14 px-4 py-3 text-center text-xs font-semibold">
+                            No
+                          </th>
 
-                          <td className="px-5 py-4">
-                            <div className="flex items-center gap-3">
-                              <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg">
-                                <GraduationCap size={18} />
-                              </div>
+                          <th className="px-4 py-3 text-left text-xs font-semibold">
+                            Siswa
+                          </th>
 
-                              <div className="min-w-0">
-                                <p className="theme-text truncate text-sm font-semibold">
-                                  {student.nama}
-                                </p>
+                          <th className="px-4 py-3 text-left text-xs font-semibold">
+                            NIS / NISN
+                          </th>
 
-                                <p className="theme-text-muted mt-0.5 text-xs font-medium">
-                                  NIS {student.nis}
-                                </p>
-                              </div>
-                            </div>
-                          </td>
+                          <th className="px-4 py-3 text-left text-xs font-semibold">
+                            Kelas
+                          </th>
 
-                          <td className="px-5 py-4">
-                            <p className="theme-text-secondary text-sm font-medium">
-                              {student.nis}
-                            </p>
+                          <th className="px-4 py-3 text-center text-xs font-semibold">
+                            Nilai Ujian
+                          </th>
 
-                            <p className="theme-text-muted mt-0.5 text-xs font-medium">
-                              NISN {student.nisn}
-                            </p>
-                          </td>
+                          <th className="px-4 py-3 text-center text-xs font-semibold">
+                            Rata-rata
+                          </th>
 
-                          <td className="theme-text-secondary px-5 py-4 text-sm font-semibold">
-                            {student.kelas}
-                          </td>
+                          <th className="px-4 py-3 text-center text-xs font-semibold">
+                            Status
+                          </th>
 
-                          <td className="px-5 py-4 text-center">
-                            <span
-                              className={`text-sm font-bold ${
-                                student.nilaiTerisi ===
-                                student.totalMapel
-                                  ? "text-[var(--color-success)]"
-                                  : "text-[var(--color-warning)]"
-                              }`}
-                            >
-                              {student.nilaiTerisi}/
-                              {student.totalMapel}
-                            </span>
-                          </td>
+                          <th className="px-5 py-3 text-right text-xs font-semibold">
+                            Aksi
+                          </th>
+                        </tr>
+                      </thead>
 
-                          <td className="px-5 py-4 text-center">
-                            <span className="theme-text text-sm font-bold">
-                              {student.rataRata}
-                            </span>
-                          </td>
+                      <tbody>
+                        {paginatedStudents.map(
+                          (
+                            student,
+                            index
+                          ) => {
+                            const report =
+                              reportCache[
+                                getReportKey(
+                                  student.id
+                                )
+                              ];
 
-                          <td className="px-5 py-4">
-                            <StatusBadge status={student.status} />
-                          </td>
+                            const summary =
+                              getReportSummary(
+                                report
+                              );
 
-                          <td className="px-5 py-4">
-                            <div className="flex items-center justify-end gap-1">
-                              {/* DETAIL */}
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  openDetail(student)
+                            const examData =
+                              examScoreCache[
+                                String(
+                                  student.id
+                                )
+                              ];
+
+                            const examScore =
+                              examData?.nilai;
+
+                            const selected =
+                              selectedIds.includes(
+                                student.id
+                              );
+
+                            return (
+                              <tr
+                                key={
+                                  student.id
                                 }
-                                title="Lihat detail raport"
-                                className="theme-text-muted theme-sidebar-hover flex h-8 w-8 items-center justify-center rounded-md transition hover:text-[var(--color-primary)]"
-                              >
-                                <Eye size={16} />
-                              </button>
-
-                              {/* CETAK */}
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  handlePrint(student)
-                                }
-                                title="Cetak raport"
-                                disabled={
-                                  student.status !==
-                                  "Siap Dicetak"
-                                }
-                                className={`flex h-8 w-8 items-center justify-center rounded-md transition ${
-                                  student.status ===
-                                  "Siap Dicetak"
-                                    ? "theme-text-muted theme-sidebar-hover hover:text-[var(--color-success)]"
-                                    : "cursor-not-allowed text-[var(--color-text-placeholder)]"
+                                className={`theme-table-hover border-b last:border-b-0 ${
+                                  selected
+                                    ? "theme-selected"
+                                    : ""
                                 }`}
                               >
-                                <Printer size={16} />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
+                                {/* CHECKBOX */}
+                                <td className="px-4 py-4 text-center">
+                                  <input
+                                    type="checkbox"
+                                    checked={
+                                      selected
+                                    }
+                                    onChange={() =>
+                                      toggleStudent(
+                                        student.id
+                                      )
+                                    }
+                                    className="h-4 w-4"
+                                  />
+                                </td>
 
-                    {filteredStudents.length === 0 && (
-                      <tr>
-                        <td
-                          colSpan={9}
-                          className="px-5 py-16 text-center"
-                        >
-                          <div className="mx-auto flex max-w-sm flex-col items-center">
-                            <div className="theme-card-soft theme-text-muted flex h-12 w-12 items-center justify-center rounded-full">
-                              <Search size={21} />
-                            </div>
+                                {/* NO */}
+                                <td className="theme-text-secondary px-4 py-4 text-center text-sm">
+                                  {(safeCurrentPage -
+                                    1) *
+                                    ITEMS_PER_PAGE +
+                                    index +
+                                    1}
+                                </td>
 
-                            <p className="theme-text mt-3 text-sm font-semibold">
-                              Data tidak ditemukan
-                            </p>
+                                {/* SISWA */}
+                                <td className="px-4 py-4">
+                                  <div className="flex items-center gap-3">
+                                    <div className="theme-info flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-xs font-bold">
+                                      {student.nama
+                                        .charAt(
+                                          0
+                                        )
+                                        .toUpperCase()}
+                                    </div>
 
-                            <p className="theme-text-muted mt-1 text-xs font-medium">
-                              Coba ubah kata kunci atau filter
-                              yang digunakan.
-                            </p>
-                          </div>
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                                    <div className="min-w-0">
+                                      <p className="theme-text truncate text-sm font-semibold">
+                                        {
+                                          student.nama
+                                        }
+                                      </p>
+
+                                      <p className="theme-text-muted mt-0.5 text-xs">
+                                        NIS{" "}
+                                        {
+                                          student.nis
+                                        }
+                                      </p>
+                                    </div>
+                                  </div>
+                                </td>
+
+                                {/* NIS / NISN */}
+                                <td className="px-4 py-4">
+                                  <p className="theme-text-secondary text-sm font-medium">
+                                    {
+                                      student.nis
+                                    }
+                                  </p>
+
+                                  <p className="theme-text-muted mt-0.5 text-xs">
+                                    NISN{" "}
+                                    {
+                                      student.nisn
+                                    }
+                                  </p>
+                                </td>
+
+                                {/* KELAS */}
+                                <td className="theme-text-secondary px-4 py-4 text-sm font-medium">
+                                  {
+                                    student.kelas
+                                  }
+                                </td>
+
+                                {/* NILAI UJIAN */}
+                                <td className="px-4 py-4 text-center">
+                                  {examScore !==
+                                    undefined &&
+                                  examScore !==
+                                    null ? (
+                                    <div className="flex flex-col items-center">
+                                      <span className="theme-sidebar-text-active text-base font-bold">
+                                        {Number(
+                                          examScore
+                                        ).toFixed(
+                                          2
+                                        )}
+                                      </span>
+
+                                      <span className="theme-text-muted mt-0.5 text-[11px]">
+                                        {
+                                          examData?.judul
+                                        }
+                                      </span>
+                                    </div>
+                                  ) : (
+                                    <span className="theme-text-muted text-xs">
+                                      Belum ada
+                                    </span>
+                                  )}
+                                </td>
+
+                                {/* RATA-RATA */}
+                                <td className="px-4 py-4 text-center">
+                                  <span className="theme-text text-sm font-bold">
+                                    {summary.rataRata ||
+                                      "-"}
+                                  </span>
+                                </td>
+
+                                {/* STATUS */}
+                                <td className="px-4 py-4 text-center">
+                                  <span
+                                    className={`inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold ${getStatusClass(
+                                      summary.status
+                                    )}`}
+                                  >
+                                    {
+                                      summary.status
+                                    }
+                                  </span>
+                                </td>
+
+                                {/* AKSI */}
+                                <td className="px-5 py-4">
+                                  <div className="flex justify-end gap-2">
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        handleDetail(
+                                          student
+                                        )
+                                      }
+                                      title="Lihat detail raport"
+                                      className="theme-card theme-text-secondary theme-sidebar-hover flex h-9 w-9 items-center justify-center rounded-lg border transition"
+                                    >
+                                      <Eye
+                                        size={
+                                          17
+                                        }
+                                      />
+                                    </button>
+
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        handlePrint(
+                                          student
+                                        )
+                                      }
+                                      disabled={
+                                        !report ||
+                                        summary.status !==
+                                          "Siap Dicetak"
+                                      }
+                                      title="Cetak raport"
+                                      className="theme-primary flex h-9 w-9 items-center justify-center rounded-lg transition disabled:cursor-not-allowed disabled:opacity-40"
+                                    >
+                                      <Printer
+                                        size={
+                                          17
+                                        }
+                                      />
+                                    </button>
+                                  </div>
+                                </td>
+                              </tr>
+                            );
+                          }
+                        )}
+                      </tbody>
+                    </table>
+                  </div>
+
+                  {/* =================================================
+                      PAGINATION
+                  ================================================= */}
+
+                  <div className="theme-card-soft flex flex-col gap-3 border-t px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="theme-text-muted text-sm">
+                      Menampilkan{" "}
+                      <span className="theme-text font-semibold">
+                        {filteredStudents.length ===
+                        0
+                          ? 0
+                          : (safeCurrentPage -
+                              1) *
+                              ITEMS_PER_PAGE +
+                            1}
+                      </span>{" "}
+                      -{" "}
+                      <span className="theme-text font-semibold">
+                        {Math.min(
+                          safeCurrentPage *
+                            ITEMS_PER_PAGE,
+                          filteredStudents.length
+                        )}
+                      </span>{" "}
+                      dari{" "}
+                      <span className="theme-text font-semibold">
+                        {
+                          filteredStudents.length
+                        }
+                      </span>{" "}
+                      siswa
+                    </p>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setCurrentPage(
+                            (page) =>
+                              Math.max(
+                                1,
+                                page - 1
+                              )
+                          )
+                        }
+                        disabled={
+                          safeCurrentPage ===
+                          1
+                        }
+                        className="theme-card theme-text-secondary flex h-9 w-9 items-center justify-center rounded-lg border transition hover:opacity-75 disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        <ChevronLeft
+                          size={17}
+                        />
+                      </button>
+
+                      <span className="theme-text min-w-[70px] text-center text-xs font-semibold">
+                        {safeCurrentPage}{" "}
+                        /{" "}
+                        {totalPages}
+                      </span>
+
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setCurrentPage(
+                            (page) =>
+                              Math.min(
+                                totalPages,
+                                page + 1
+                              )
+                          )
+                        }
+                        disabled={
+                          safeCurrentPage ===
+                          totalPages
+                        }
+                        className="theme-card theme-text-secondary flex h-9 w-9 items-center justify-center rounded-lg border transition hover:opacity-75 disabled:cursor-not-allowed disabled:opacity-40"
+                      >
+                        <ChevronRight
+                          size={17}
+                        />
+                      </button>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
 
             {/* =================================================
-                INFO
+                FOOTER INFO
             ================================================= */}
 
-            <div className="theme-info mt-5 rounded-xl border px-4 py-4">
+            <div className="theme-card-soft rounded-xl border p-4">
               <div className="flex gap-3">
-                <div className="mt-0.5">
-                  <FileText size={18} />
-                </div>
+                <FileText
+                  size={18}
+                  className="theme-text-secondary mt-0.5 shrink-0"
+                />
 
                 <div>
                   <p className="theme-text text-sm font-semibold">
                     Informasi Cetak Raport
                   </p>
 
-                  <p className="theme-text-secondary mt-1 text-xs font-medium leading-5">
-                    Raport hanya dapat dicetak apabila seluruh
-                    nilai mata pelajaran siswa sudah lengkap.
-                    Gunakan tombol Detail untuk melihat seluruh
-                    nilai siswa sebelum mencetak raport.
+                  <p className="theme-text-secondary mt-1 text-xs leading-5">
+                    Raport dapat dicetak
+                    melalui halaman detail
+                    siswa. Gunakan checkbox
+                    untuk memilih beberapa
+                    siswa sebelum menjalankan
+                    aksi cetak.
                   </p>
                 </div>
               </div>
-            </div>
-          </main>
-        </div>
-      </div>
-
-      {/* =====================================================
-          MODAL DETAIL RAPORT
-      ===================================================== */}
-
-      {detailStudent && (
-        <div className="theme-overlay fixed inset-0 z-[100] flex items-center justify-center p-3 sm:p-5">
-          <div className="theme-card theme-modal flex max-h-[94vh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl shadow-xl">
-            {/* MODAL HEADER */}
-            <div className="theme-header theme-border flex shrink-0 items-center justify-between border-b px-5 py-4">
-              <div className="flex items-center gap-3">
-                <div className="theme-info flex h-10 w-10 items-center justify-center rounded-xl">
-                  <FileText size={20} />
-                </div>
-
-                <div>
-                  <h2 className="theme-text text-base font-bold">
-                    Detail Raport Siswa
-                  </h2>
-
-                  <p className="theme-text-muted mt-0.5 text-xs font-medium">
-                    {detailStudent.nama} • {detailStudent.kelas}
-                  </p>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setDetailStudent(null)}
-                className="theme-text-muted theme-sidebar-hover flex h-9 w-9 items-center justify-center rounded-lg transition hover:text-[var(--color-text)]"
-              >
-                <X size={19} />
-              </button>
-            </div>
-
-            {/* MODAL CONTENT */}
-            <div className="theme-card-soft min-h-0 flex-1 overflow-y-auto p-4 sm:p-6">
-              {/* IDENTITAS */}
-              <div className="theme-card rounded-xl border p-5">
-                <div className="mb-4 flex items-center gap-2">
-                  <GraduationCap
-                    size={18}
-                    className="text-[var(--color-primary)]"
-                  />
-
-                  <h3 className="theme-text text-sm font-bold">
-                    Identitas Siswa
-                  </h3>
-                </div>
-
-                <div className="grid grid-cols-1 gap-x-8 gap-y-3 sm:grid-cols-2 lg:grid-cols-4">
-                  <div>
-                    <p className="theme-text-muted text-[11px] font-semibold uppercase tracking-wide">
-                      Nama Siswa
-                    </p>
-
-                    <p className="theme-text mt-1 text-sm font-bold">
-                      {detailStudent.nama}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="theme-text-muted text-[11px] font-semibold uppercase tracking-wide">
-                      NIS
-                    </p>
-
-                    <p className="theme-text-secondary mt-1 text-sm font-semibold">
-                      {detailStudent.nis}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="theme-text-muted text-[11px] font-semibold uppercase tracking-wide">
-                      NISN
-                    </p>
-
-                    <p className="theme-text-secondary mt-1 text-sm font-semibold">
-                      {detailStudent.nisn}
-                    </p>
-                  </div>
-
-                  <div>
-                    <p className="theme-text-muted text-[11px] font-semibold uppercase tracking-wide">
-                      Kelas
-                    </p>
-
-                    <p className="theme-text-secondary mt-1 text-sm font-semibold">
-                      {detailStudent.kelas}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                  <div className="theme-card-soft rounded-lg border p-3">
-                    <p className="theme-text-muted text-xs font-semibold">
-                      Tahun Ajaran
-                    </p>
-
-                    <p className="theme-text mt-1 text-sm font-bold">
-                      {tahunAjaran}
-                    </p>
-                  </div>
-
-                  <div className="theme-card-soft rounded-lg border p-3">
-                    <p className="theme-text-muted text-xs font-semibold">
-                      Semester
-                    </p>
-
-                    <p className="theme-text mt-1 text-sm font-bold">
-                      {semester}
-                    </p>
-                  </div>
-
-                  <div className="theme-card-soft rounded-lg border p-3">
-                    <p className="theme-text-muted text-xs font-semibold">
-                      Status Raport
-                    </p>
-
-                    <div className="mt-1">
-                      <StatusBadge
-                        status={detailStudent.status}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* RINGKASAN */}
-              <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-3">
-                <div className="theme-card rounded-xl border p-4">
-                  <p className="theme-text-muted text-xs font-semibold">
-                    Mata Pelajaran
-                  </p>
-
-                  <p className="theme-text mt-1 text-xl font-bold">
-                    {detailStudent.nilaiTerisi}/
-                    {detailStudent.totalMapel}
-                  </p>
-                </div>
-
-                <div className="theme-card rounded-xl border p-4">
-                  <p className="theme-text-muted text-xs font-semibold">
-                    Rata-rata Nilai
-                  </p>
-
-                  <p className="mt-1 text-xl font-bold text-[var(--color-primary)]">
-                    {detailStudent.rataRata}
-                  </p>
-                </div>
-
-                <div className="theme-card rounded-xl border p-4">
-                  <p className="theme-text-muted text-xs font-semibold">
-                    Status
-                  </p>
-
-                  <div className="mt-1">
-                    <StatusBadge
-                      status={detailStudent.status}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* SELURUH NILAI */}
-              <div className="theme-card mt-4 overflow-hidden rounded-xl border">
-                <div className="theme-border border-b px-5 py-4">
-                  <h3 className="theme-text text-sm font-bold">
-                    Seluruh Nilai Mata Pelajaran
-                  </h3>
-
-                  <p className="theme-text-muted mt-0.5 text-xs font-medium">
-                    Detail nilai akademik siswa pada semester{" "}
-                    {semester.toLowerCase()}
-                  </p>
-                </div>
-
-                <div className="overflow-x-auto">
-                  <table className="w-full min-w-[1050px] border-collapse">
-                    <thead>
-                      <tr className="theme-table-header text-xs font-bold">
-                        <th className="w-14 px-4 py-3 text-center">
-                          No
-                        </th>
-
-                        <th className="px-4 py-3 text-left">
-                          Mata Pelajaran
-                        </th>
-
-                        <th className="px-4 py-3 text-center">
-                          Tugas
-                        </th>
-
-                        <th className="px-4 py-3 text-center">
-                          UTS
-                        </th>
-
-                        <th className="px-4 py-3 text-center">
-                          UAS
-                        </th>
-
-                        <th className="px-4 py-3 text-center">
-                          Praktik
-                        </th>
-
-                        <th className="px-4 py-3 text-center">
-                          Nilai Akhir
-                        </th>
-
-                        <th className="px-4 py-3 text-center">
-                          Predikat
-                        </th>
-
-                        <th className="px-4 py-3 text-left">
-                          Keterangan
-                        </th>
-                      </tr>
-                    </thead>
-
-                    <tbody>
-                      {(nilaiSiswa[detailStudent.id] || []).map(
-                        (nilai, index) => (
-                          <tr
-                            key={`${detailStudent.id}-${index}`}
-                            className="theme-table-hover border-t transition"
-                          >
-                            <td className="theme-text-secondary px-4 py-3 text-center text-sm font-medium">
-                              {index + 1}
-                            </td>
-
-                            <td className="theme-text px-4 py-3 text-sm font-semibold">
-                              {nilai.mapel}
-                            </td>
-
-                            <td className="theme-text-secondary px-4 py-3 text-center text-sm font-semibold">
-                              {nilai.tugas}
-                            </td>
-
-                            <td className="theme-text-secondary px-4 py-3 text-center text-sm font-semibold">
-                              {nilai.uts}
-                            </td>
-
-                            <td className="theme-text-secondary px-4 py-3 text-center text-sm font-semibold">
-                              {nilai.uas}
-                            </td>
-
-                            <td className="theme-text-secondary px-4 py-3 text-center text-sm font-semibold">
-                              {nilai.praktik}
-                            </td>
-
-                            <td className="px-4 py-3 text-center">
-                              <span className="theme-text text-sm font-bold">
-                                {nilai.nilaiAkhir}
-                              </span>
-                            </td>
-
-                            <td className="px-4 py-3 text-center">
-                              <span
-                                className={`inline-flex min-w-8 items-center justify-center rounded-md px-2 py-1 text-xs font-bold ${
-                                  nilai.predikat === "A"
-                                    ? "theme-success"
-                                    : "theme-info"
-                                }`}
-                              >
-                                {nilai.predikat}
-                              </span>
-                            </td>
-
-                            <td className="theme-text-secondary px-4 py-3 text-sm font-medium">
-                              {nilai.keterangan}
-                            </td>
-                          </tr>
-                        )
-                      )}
-
-                      {(!nilaiSiswa[detailStudent.id] ||
-                        nilaiSiswa[detailStudent.id].length === 0) && (
-                        <tr>
-                          <td
-                            colSpan={9}
-                            className="px-5 py-10 text-center"
-                          >
-                            <p className="theme-text-secondary text-sm font-semibold">
-                              Data nilai belum tersedia
-                            </p>
-                          </td>
-                        </tr>
-                      )}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-
-              {/* KEHADIRAN */}
-              <div className="theme-card mt-4 rounded-xl border p-5">
-                <div className="mb-4 flex items-center gap-2">
-                  <CalendarDays
-                    size={18}
-                    className="text-[var(--color-primary)]"
-                  />
-
-                  <h3 className="theme-text text-sm font-bold">
-                    Rekap Kehadiran
-                  </h3>
-                </div>
-
-                <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                  <div className="theme-card-soft rounded-lg border p-3 text-center">
-                    <p className="theme-text-muted text-xs font-semibold">
-                      Sakit
-                    </p>
-                    <p className="theme-text mt-1 text-lg font-bold">
-                      2
-                    </p>
-                  </div>
-
-                  <div className="theme-card-soft rounded-lg border p-3 text-center">
-                    <p className="theme-text-muted text-xs font-semibold">
-                      Izin
-                    </p>
-                    <p className="theme-text mt-1 text-lg font-bold">
-                      1
-                    </p>
-                  </div>
-
-                  <div className="theme-card-soft rounded-lg border p-3 text-center">
-                    <p className="theme-text-muted text-xs font-semibold">
-                      Alpa
-                    </p>
-                    <p className="theme-text mt-1 text-lg font-bold">
-                      0
-                    </p>
-                  </div>
-
-                  <div className="theme-success rounded-lg border p-3 text-center">
-                    <p className="theme-text-muted text-xs font-semibold">
-                      Kehadiran
-                    </p>
-                    <p className="mt-1 text-lg font-bold text-[var(--color-success)]">
-                      98%
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            {/* MODAL FOOTER */}
-            <div className="theme-header theme-border flex shrink-0 flex-col-reverse gap-2 border-t px-5 py-4 sm:flex-row sm:justify-end">
-              <button
-                type="button"
-                onClick={() => setDetailStudent(null)}
-                className="theme-card theme-text-secondary theme-sidebar-hover theme-border inline-flex h-10 items-center justify-center gap-2 rounded-lg border px-4 text-sm font-semibold transition"
-              >
-                <X size={16} />
-                Tutup
-              </button>
-
-              <button
-                type="button"
-                onClick={() => {
-                  alert(
-                    "Fitur Download PDF siap dihubungkan ke backend/PDF generator."
-                  );
-                }}
-                className="theme-card theme-text-secondary theme-sidebar-hover theme-border inline-flex h-10 items-center justify-center gap-2 rounded-lg border px-4 text-sm font-semibold transition"
-              >
-                <Download size={16} />
-                Download PDF
-              </button>
-
-              <button
-                type="button"
-                disabled={
-                  detailStudent.status !== "Siap Dicetak"
-                }
-                onClick={() => handlePrint(detailStudent)}
-                className={`inline-flex h-10 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold text-white transition ${
-                  detailStudent.status === "Siap Dicetak"
-                    ? "theme-primary"
-                    : "cursor-not-allowed theme-disabled"
-                }`}
-              >
-                <Printer size={16} />
-                Cetak Raport
-              </button>
             </div>
           </div>
-        </div>
-      )}
-
-      {/* =====================================================
-          PRINT STYLE
-      ===================================================== */}
-
-      <style jsx global>{`
-        /* =====================================================
-           PAGE THEME SAFETY
-           Semua warna tambahan tetap mengambil token theme.
-        ===================================================== */
-        .theme-overlay {
-          background: color-mix(in srgb, var(--color-text) 55%, transparent);
-        }
-
-        .theme-selected {
-          background: var(--color-sidebar-active);
-        }
-
-        .theme-disabled {
-          background: var(--color-text-placeholder);
-          color: var(--color-card);
-        }
-
-        .theme-modal {
-          border-color: var(--color-border);
-          box-shadow: var(--theme-shadow-lg, 0 20px 45px color-mix(in srgb, var(--color-text) 18%, transparent));
-        }
-
-        @media (prefers-reduced-motion: reduce) {
-          .theme-modal,
-          .theme-card,
-          button,
-          input,
-          select {
-            transition: none !important;
-          }
-        }
-
-        @media print {
-          body * {
-            visibility: hidden !important;
-          }
-
-          .print\\:block,
-          .print\\:block * {
-            visibility: visible !important;
-          }
-
-          .fixed {
-            position: static !important;
-          }
-
-          header {
-            display: none !important;
-          }
-        }
-      `}</style>
-    </>
+        </main>
+      </div>
+    </div>
   );
 }

@@ -8,6 +8,7 @@ export default function ThemeProvider({ children }) {
       attribute="class"
       defaultTheme="light"
       enableSystem={false}
+      storageKey="theme"
       disableTransitionOnChange
     >
       {children}

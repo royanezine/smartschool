@@ -1,23 +1,29 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import {
+  useParams,
+  useRouter,
+  useSearchParams,
+} from "next/navigation";
 
 import {
   ArrowLeft,
   Plus,
-  Pencil,
-  Trash2,
-  ClipboardList,
-  BookOpen,
-  Clock3,
-  CheckCircle2,
-  AlertCircle,
-  Loader2,
-  FileText,
-  ListChecks,
   X,
   Save,
+  ClipboardList,
+  Loader2,
+  AlertCircle,
+  CheckCircle2,
+  FileText,
+  BookOpen,
+  Info,
+  ListChecks,
+  Clock3,
+  Target,
+  Lightbulb,
+  ShieldCheck,
 } from "lucide-react";
 
 import Header from "../../../../../components/Header";
@@ -29,8 +35,7 @@ import {
   getSoalByUjian,
   createSoal,
   updateSoal,
-  deleteSoal,
-} from "../../../../../services/soalUjian.service";
+} from "../../../../../../services/soalUjian.service";
 
 /* =====================================================
    THEME HELPERS
@@ -101,64 +106,21 @@ const themeFocus =
 ===================================================== */
 
 function parseData(response) {
-  if (Array.isArray(response)) {
-    return response;
-  }
-
-  if (Array.isArray(response?.data)) {
-    return response.data;
-  }
-
-  if (Array.isArray(response?.data?.data)) {
-    return response.data.data;
-  }
-
+  if (Array.isArray(response)) return response;
+  if (Array.isArray(response?.data)) return response.data;
+  if (Array.isArray(response?.data?.data)) return response.data.data;
   return [];
 }
 
 function parseObject(response) {
-  if (response?.data?.data) {
-    return response.data.data;
-  }
-
-  if (response?.data) {
-    return response.data;
-  }
-
+  if (response?.data?.data) return response.data.data;
+  if (response?.data) return response.data;
   return response;
-}
-
-function formatPoin(value) {
-  const number = Number(value || 0);
-
-  return Number.isInteger(number)
-    ? number
-    : number.toFixed(2);
-}
-
-function getJenisLabel(jenis) {
-  if (jenis === "pilihan_ganda") {
-    return "Pilihan Ganda";
-  }
-
-  if (jenis === "esai") {
-    return "Esai";
-  }
-
-  if (jenis === "benar_salah") {
-    return "Benar / Salah";
-  }
-
-  return jenis || "-";
 }
 
 function getChoiceLetter(index) {
   return String.fromCharCode(65 + index);
 }
-
-/* =====================================================
-   DEFAULT FORM
-===================================================== */
 
 const emptyForm = {
   teksSoal: "",
@@ -173,82 +135,96 @@ const emptyForm = {
    PAGE
 ===================================================== */
 
-export default function KelolaSoalUjianPage() {
+export default function FormSoalUjianPage() {
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
 
   const ujianId = params?.id;
+  const soalId = searchParams?.get("soalId") || "";
+  const isEdit = Boolean(soalId);
 
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   const [ujian, setUjian] = useState(null);
-
-  const [soal, setSoal] = useState([]);
-
   const [loading, setLoading] = useState(true);
-
   const [saving, setSaving] = useState(false);
 
-  const [deleting, setDeleting] = useState(null);
-
   const [error, setError] = useState("");
-
   const [success, setSuccess] = useState("");
 
-  const [showForm, setShowForm] = useState(false);
-
-  const [editingId, setEditingId] = useState(null);
-
   const [form, setForm] = useState(emptyForm);
+  const [totalSoal, setTotalSoal] = useState(0);
 
   /* =====================================================
-     LOAD DATA
+     LOAD
   ===================================================== */
 
   useEffect(() => {
-    if (!ujianId) {
-      return;
-    }
+    if (!ujianId) return;
 
     loadData();
-  }, [ujianId]);
+  }, [ujianId, soalId]);
 
   async function loadData() {
     try {
       setLoading(true);
       setError("");
 
-      const [ujianResponse, soalResponse] =
-        await Promise.all([
-          getUjianById(ujianId),
-          getSoalByUjian(ujianId),
-        ]);
+      const [ujianResponse, soalResponse] = await Promise.all([
+        getUjianById(ujianId),
+        getSoalByUjian(ujianId),
+      ]);
 
-      const ujianData =
-        parseObject(ujianResponse);
+      setUjian(parseObject(ujianResponse));
 
-      setUjian(ujianData);
+      const soalData = parseData(soalResponse);
 
-      const soalData =
-        parseData(soalResponse);
+      setTotalSoal(soalData.length);
 
-      const sortedSoal =
-        [...soalData].sort(
-          (a, b) =>
-            Number(a.nomorUrut || 0) -
-            Number(b.nomorUrut || 0)
+      if (isEdit) {
+        const found = soalData.find(
+          (item) => String(item.id) === String(soalId)
         );
 
-      setSoal(sortedSoal);
+        if (!found) {
+          setError("Soal tidak ditemukan.");
+          return;
+        }
+
+        const pilihan = Array.isArray(found.pilihan)
+          ? found.pilihan.map((value) => String(value ?? ""))
+          : [];
+
+        const normalizedPilihan =
+          found.jenisSoal === "pilihan_ganda"
+            ? pilihan.length >= 2
+              ? pilihan
+              : ["", "", "", ""]
+            : ["", "", "", ""];
+
+        setForm({
+          teksSoal: found.teksSoal || "",
+          jenisSoal: found.jenisSoal || "pilihan_ganda",
+          pilihan: normalizedPilihan,
+          jawabanBenar: found.jawabanBenar
+            ? String(found.jawabanBenar)
+            : "",
+          poin: Number(found.poin || 10),
+          nomorUrut: Number(found.nomorUrut || 1),
+        });
+      } else {
+        setForm({
+          ...emptyForm,
+          pilihan: ["", "", "", ""],
+          nomorUrut: soalData.length + 1,
+        });
+      }
     } catch (err) {
-      console.error(
-        "LOAD SOAL ERROR:",
-        err
-      );
+      console.error("LOAD ERROR:", err);
 
       setError(
-        err?.message ||
-          "Gagal mengambil data ujian dan soal."
+        err?.message || "Gagal mengambil data."
       );
     } finally {
       setLoading(false);
@@ -256,144 +232,11 @@ export default function KelolaSoalUjianPage() {
   }
 
   /* =====================================================
-     STATISTICS
-  ===================================================== */
-
-  const stats = useMemo(() => {
-    const total = soal.length;
-
-    const pilihanGanda =
-      soal.filter(
-        (item) =>
-          item.jenisSoal ===
-          "pilihan_ganda"
-      ).length;
-
-    const esai =
-      soal.filter(
-        (item) =>
-          item.jenisSoal === "esai"
-      ).length;
-
-    const benarSalah =
-      soal.filter(
-        (item) =>
-          item.jenisSoal ===
-          "benar_salah"
-      ).length;
-
-    const totalPoin =
-      soal.reduce(
-        (sum, item) =>
-          sum +
-          Number(item.poin || 0),
-        0
-      );
-
-    return {
-      total,
-      pilihanGanda,
-      esai,
-      benarSalah,
-      totalPoin,
-    };
-  }, [soal]);
-
-  /* =====================================================
-     OPEN CREATE
-  ===================================================== */
-
-  function handleOpenCreate() {
-    setEditingId(null);
-
-    setForm({
-      ...emptyForm,
-      nomorUrut: soal.length + 1,
-    });
-
-    setError("");
-    setSuccess("");
-    setShowForm(true);
-  }
-
-  /* =====================================================
-     OPEN EDIT
-  ===================================================== */
-
-  function handleOpenEdit(item) {
-    setEditingId(item.id);
-
-    const pilihan =
-      Array.isArray(item.pilihan)
-        ? item.pilihan.map((value) =>
-            String(value ?? "")
-          )
-        : [];
-
-    const normalizedPilihan =
-      item.jenisSoal ===
-      "pilihan_ganda"
-        ? pilihan.length >= 2
-          ? pilihan
-          : ["", "", "", ""]
-        : ["", "", "", ""];
-
-    const jawabanBenar =
-      item.jawabanBenar
-        ? String(item.jawabanBenar)
-        : "";
-
-    setForm({
-      teksSoal:
-        item.teksSoal || "",
-
-      jenisSoal:
-        item.jenisSoal ||
-        "pilihan_ganda",
-
-      pilihan:
-        normalizedPilihan,
-
-      jawabanBenar,
-
-      poin:
-        Number(item.poin || 10),
-
-      nomorUrut:
-        Number(item.nomorUrut || 1),
-    });
-
-    setError("");
-    setSuccess("");
-    setShowForm(true);
-  }
-
-  /* =====================================================
-     CLOSE FORM
-  ===================================================== */
-
-  function handleCloseForm() {
-    if (saving) {
-      return;
-    }
-
-    setShowForm(false);
-    setEditingId(null);
-    setForm({
-      ...emptyForm,
-      pilihan: ["", "", "", ""],
-    });
-  }
-
-  /* =====================================================
-     CHANGE FORM
+     CHANGE
   ===================================================== */
 
   function handleChange(event) {
-    const {
-      name,
-      value,
-    } = event.target;
+    const { name, value } = event.target;
 
     setError("");
     setSuccess("");
@@ -404,24 +247,14 @@ export default function KelolaSoalUjianPage() {
     }));
   }
 
-  /* =====================================================
-     CHANGE PILIHAN
-  ===================================================== */
-
-  function handleChoiceChange(
-    index,
-    value
-  ) {
+  function handleChoiceChange(index, value) {
     setError("");
     setSuccess("");
 
     setForm((prev) => {
-      const pilihan = [
-        ...prev.pilihan,
-      ];
+      const pilihan = [...prev.pilihan];
 
-      const oldValue =
-        pilihan[index];
+      const oldValue = pilihan[index];
 
       pilihan[index] = value;
 
@@ -429,89 +262,62 @@ export default function KelolaSoalUjianPage() {
         ...prev,
         pilihan,
         jawabanBenar:
-          prev.jawabanBenar ===
-          oldValue
+          prev.jawabanBenar === oldValue
             ? value
             : prev.jawabanBenar,
       };
     });
   }
 
-  /* =====================================================
-     ADD PILIHAN
-  ===================================================== */
-
   function addChoice() {
-    if (form.pilihan.length >= 6) {
-      return;
-    }
+    if (form.pilihan.length >= 6) return;
 
     setForm((prev) => ({
       ...prev,
-      pilihan: [
-        ...prev.pilihan,
-        "",
-      ],
+      pilihan: [...prev.pilihan, ""],
     }));
   }
 
-  /* =====================================================
-     REMOVE PILIHAN
-  ===================================================== */
-
   function removeChoice(index) {
-    if (form.pilihan.length <= 2) {
-      return;
-    }
+    if (form.pilihan.length <= 2) return;
 
     setForm((prev) => {
-      const removed =
-        prev.pilihan[index];
+      const removed = prev.pilihan[index];
 
-      const pilihan =
-        prev.pilihan.filter(
-          (_, i) => i !== index
-        );
+      const pilihan = prev.pilihan.filter(
+        (_, i) => i !== index
+      );
 
       return {
         ...prev,
         pilihan,
         jawabanBenar:
-          prev.jawabanBenar ===
-          removed
+          prev.jawabanBenar === removed
             ? ""
             : prev.jawabanBenar,
       };
     });
   }
 
-  /* =====================================================
-     CHANGE TYPE
-  ===================================================== */
-
   function handleJenisChange(event) {
-    const jenisSoal =
-      event.target.value;
+    const jenisSoal = event.target.value;
 
     setError("");
     setSuccess("");
 
     setForm((prev) => ({
       ...prev,
-
       jenisSoal,
 
       pilihan:
-        jenisSoal ===
-        "pilihan_ganda"
+        jenisSoal === "pilihan_ganda"
           ? prev.pilihan.length >= 2
             ? prev.pilihan
             : ["", "", "", ""]
           : ["", "", "", ""],
 
       jawabanBenar:
-        jenisSoal ===
-        "pilihan_ganda"
+        jenisSoal === "pilihan_ganda"
           ? prev.jawabanBenar
           : "",
     }));
@@ -527,45 +333,31 @@ export default function KelolaSoalUjianPage() {
     setError("");
     setSuccess("");
 
-    const teksSoal =
-      String(
-        form.teksSoal || ""
-      ).trim();
+    const teksSoal = String(
+      form.teksSoal || ""
+    ).trim();
 
     if (!teksSoal) {
-      setError(
-        "Teks soal wajib diisi."
-      );
+      setError("Teks soal wajib diisi.");
       return;
     }
 
     if (teksSoal.length < 5) {
-      setError(
-        "Teks soal terlalu pendek."
-      );
+      setError("Teks soal terlalu pendek.");
       return;
     }
 
-    const poin =
-      Number(form.poin);
+    const poin = Number(form.poin);
 
-    if (
-      !Number.isFinite(poin) ||
-      poin <= 0
-    ) {
-      setError(
-        "Poin harus lebih dari 0."
-      );
+    if (!Number.isFinite(poin) || poin <= 0) {
+      setError("Poin harus lebih dari 0.");
       return;
     }
 
-    const nomorUrut =
-      Number(form.nomorUrut);
+    const nomorUrut = Number(form.nomorUrut);
 
     if (
-      !Number.isInteger(
-        nomorUrut
-      ) ||
+      !Number.isInteger(nomorUrut) ||
       nomorUrut <= 0
     ) {
       setError(
@@ -575,17 +367,11 @@ export default function KelolaSoalUjianPage() {
     }
 
     let pilihan = undefined;
-
     let jawabanBenar = undefined;
 
-    if (
-      form.jenisSoal ===
-      "pilihan_ganda"
-    ) {
+    if (form.jenisSoal === "pilihan_ganda") {
       pilihan = form.pilihan
-        .map((item) =>
-          String(item || "").trim()
-        )
+        .map((item) => String(item || "").trim())
         .filter(Boolean);
 
       if (pilihan.length < 2) {
@@ -602,27 +388,20 @@ export default function KelolaSoalUjianPage() {
         return;
       }
 
-      const uniquePilihan =
-        new Set(
-          pilihan.map((item) =>
-            item.toLowerCase()
-          )
-        );
+      const uniquePilihan = new Set(
+        pilihan.map((item) => item.toLowerCase())
+      );
 
-      if (
-        uniquePilihan.size !==
-        pilihan.length
-      ) {
+      if (uniquePilihan.size !== pilihan.length) {
         setError(
           "Setiap pilihan jawaban harus berbeda."
         );
         return;
       }
 
-      jawabanBenar =
-        String(
-          form.jawabanBenar || ""
-        ).trim();
+      jawabanBenar = String(
+        form.jawabanBenar || ""
+      ).trim();
 
       if (!jawabanBenar) {
         setError(
@@ -631,13 +410,11 @@ export default function KelolaSoalUjianPage() {
         return;
       }
 
-      const jawabanBenarExists =
-        pilihan.some(
-          (item) =>
-            item === jawabanBenar
-        );
+      const exists = pilihan.some(
+        (item) => item === jawabanBenar
+      );
 
-      if (!jawabanBenarExists) {
+      if (!exists) {
         setError(
           "Jawaban benar harus berasal dari pilihan yang tersedia."
         );
@@ -645,107 +422,48 @@ export default function KelolaSoalUjianPage() {
       }
     }
 
-    if (
-      form.jenisSoal ===
-      "esai"
-    ) {
+    if (form.jenisSoal === "esai") {
       pilihan = undefined;
       jawabanBenar = undefined;
     }
 
     const payload = {
       ujianId,
-
       teksSoal,
-
-      jenisSoal:
-        form.jenisSoal,
-
+      jenisSoal: form.jenisSoal,
       pilihan,
-
       jawabanBenar,
-
       poin,
-
       nomorUrut,
     };
-
-    console.log(
-      "================================"
-    );
-
-    console.log(
-      editingId
-        ? "UPDATE SOAL"
-        : "CREATE SOAL"
-    );
-
-    console.log(
-      "PAYLOAD SOAL:"
-    );
-
-    console.log(
-      JSON.stringify(
-        payload,
-        null,
-        2
-      )
-    );
-
-    console.log(
-      "================================"
-    );
 
     try {
       setSaving(true);
 
-      if (editingId) {
-        await updateSoal(
-          editingId,
-          {
-            teksSoal,
-
-            jenisSoal:
-              form.jenisSoal,
-
-            pilihan,
-
-            jawabanBenar,
-
-            poin,
-
-            nomorUrut,
-          }
-        );
+      if (isEdit) {
+        await updateSoal(soalId, {
+          teksSoal,
+          jenisSoal: form.jenisSoal,
+          pilihan,
+          jawabanBenar,
+          poin,
+          nomorUrut,
+        });
 
         setSuccess(
           "Soal berhasil diperbarui."
         );
       } else {
-        await createSoal(
-          payload
-        );
+        await createSoal(payload);
 
         setSuccess(
           "Soal berhasil ditambahkan."
         );
       }
 
-      setShowForm(false);
-
-      setEditingId(null);
-
-      setForm({
-        ...emptyForm,
-        pilihan: [
-          "",
-          "",
-          "",
-          "",
-        ],
-      });
-
-      await loadData();
+      setTimeout(() => {
+        router.push(`/guru/ujian/${ujianId}`);
+      }, 600);
     } catch (err) {
       console.error(
         "SAVE SOAL ERROR:",
@@ -761,46 +479,8 @@ export default function KelolaSoalUjianPage() {
     }
   }
 
-  /* =====================================================
-     DELETE
-  ===================================================== */
-
-  async function handleDelete(item) {
-    const confirmed =
-      window.confirm(
-        `Hapus soal nomor ${item.nomorUrut}?`
-      );
-
-    if (!confirmed) {
-      return;
-    }
-
-    try {
-      setDeleting(item.id);
-
-      setError("");
-      setSuccess("");
-
-      await deleteSoal(item.id);
-
-      setSuccess(
-        "Soal berhasil dihapus."
-      );
-
-      await loadData();
-    } catch (err) {
-      console.error(
-        "DELETE SOAL ERROR:",
-        err
-      );
-
-      setError(
-        err?.message ||
-          "Gagal menghapus soal."
-      );
-    } finally {
-      setDeleting(null);
-    }
+  function handleCancel() {
+    router.push(`/guru/ujian/${ujianId}`);
   }
 
   /* =====================================================
@@ -814,24 +494,19 @@ export default function KelolaSoalUjianPage() {
           active="ujian"
           setActive={() => {}}
           collapsed={isCollapsed}
-          setCollapsed={
-            setIsCollapsed
-          }
+          setCollapsed={setIsCollapsed}
           role="guru"
         />
 
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
           <Header
             toggleSidebar={() =>
-              setIsCollapsed(
-                (prev) => !prev
-              )
+              setIsCollapsed((prev) => !prev)
             }
             notifications={[]}
             user={{
               name: "Guru",
-              email:
-                "guru@smartschool.com",
+              email: "guru@smartschool.com",
               avatar: "GR",
             }}
           />
@@ -863,97 +538,154 @@ export default function KelolaSoalUjianPage() {
         active="ujian"
         setActive={() => {}}
         collapsed={isCollapsed}
-        setCollapsed={
-          setIsCollapsed
-        }
+        setCollapsed={setIsCollapsed}
         role="guru"
       />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <Header
           toggleSidebar={() =>
-            setIsCollapsed(
-              (prev) => !prev
-            )
+            setIsCollapsed((prev) => !prev)
           }
           notifications={[]}
           user={{
             name: "Guru",
-            email:
-              "guru@smartschool.com",
+            email: "guru@smartschool.com",
             avatar: "GR",
           }}
         />
 
         <main className="theme-page flex-1 overflow-y-auto">
-          <div className="mx-auto w-full max-w-[1500px] space-y-6 p-4 sm:p-6 lg:p-8">
+          <div className="mx-auto w-full max-w-[1600px] space-y-5 p-4 sm:p-6 lg:p-8">
 
-            {/* =================================================
-                HEADER
-            ================================================= */}
+            {/* =====================================================
+                HERO HEADER
+            ===================================================== */}
 
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex min-w-0 items-start gap-3">
-                <button
-                  type="button"
-                  onClick={() =>
-                    router.push(
-                      "/guru/ujian"
-                    )
-                  }
-                  className={`theme-card theme-text-secondary mt-1 flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${themeNeutralBorder} ${themeNeutralHover} transition`}
-                >
-                  <ArrowLeft
-                    size={18}
-                  />
-                </button>
+            <section
+              className={`theme-card relative overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+            >
+              <div className="pointer-events-none absolute inset-0">
+                <div
+                  className={`absolute -right-24 -top-24 h-64 w-64 rounded-full ${themePrimarySoft} blur-3xl`}
+                />
 
                 <div
-                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
-                >
-                  <ClipboardList
-                    size={22}
-                  />
-                </div>
-
-                <div className="min-w-0">
-                  <h1 className="theme-text truncate text-xl font-bold sm:text-2xl">
-                    Kelola Soal
-                  </h1>
-
-                  <p className="theme-text-secondary mt-1 text-sm">
-                    Kelola pertanyaan dan
-                    jawaban untuk ujian ini.
-                  </p>
-                </div>
+                  className={`absolute -bottom-28 left-1/3 h-56 w-56 rounded-full ${themeInfoSurface} blur-3xl`}
+                />
               </div>
 
-              <button
-                type="button"
-                onClick={
-                  handleOpenCreate
-                }
-                className={`inline-flex items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-4 py-3 text-sm font-semibold text-[var(--color-card)] ${themePrimaryShadow} transition hover:brightness-95`}
-              >
-                <Plus size={17} />
-                Tambah Soal
-              </button>
-            </div>
+              <div className="relative flex flex-col gap-5 p-5 sm:p-6 lg:flex-row lg:items-center lg:justify-between">
 
-            {/* =================================================
+                <div className="flex min-w-0 items-start gap-4">
+
+                  <button
+                    type="button"
+                    onClick={handleCancel}
+                    className={`theme-card theme-text-secondary mt-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border ${themeNeutralBorder} ${themeSmallShadow} transition ${themeNeutralHover}`}
+                  >
+                    <ArrowLeft size={19} />
+                  </button>
+
+                  <div
+                    className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl ${themePrimaryGradient} text-[var(--color-card)] ${themePrimaryShadow}`}
+                  >
+                    <ClipboardList size={23} />
+                  </div>
+
+                  <div className="min-w-0">
+
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h1 className="theme-text text-2xl font-bold tracking-tight sm:text-3xl">
+                        {isEdit
+                          ? "Edit Soal"
+                          : "Tambah Soal"}
+                      </h1>
+
+                      <span
+                        className={`rounded-full border px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide ${
+                          isEdit
+                            ? `${themeWarningSurface} ${themeWarningBorder} text-[var(--color-warning)]`
+                            : `${themeSuccessSurface} ${themeSuccessBorder} text-[var(--color-success)]`
+                        }`}
+                      >
+                        {isEdit
+                          ? "Mode Edit"
+                          : "Soal Baru"}
+                      </span>
+                    </div>
+
+                    <p className="theme-text-secondary mt-1.5 max-w-2xl text-sm leading-6">
+                      {isEdit
+                        ? "Perbarui pertanyaan dan konfigurasi jawaban soal."
+                        : "Isi pertanyaan dan konfigurasi jawaban untuk soal baru pada ujian ini."}
+                    </p>
+
+                    {ujian && (
+                      <div className="mt-3 flex flex-wrap items-center gap-2">
+
+                        <span
+                          className={`inline-flex items-center gap-1.5 rounded-lg border ${themePrimarySoftBorder} ${themePrimarySoft} px-2.5 py-1.5 text-xs font-semibold ${themePrimaryText}`}
+                        >
+                          <BookOpen size={13} />
+
+                          {ujian?.kelasMapel?.kelas?.nama ||
+                            "Kelas"}
+                        </span>
+
+                        <span
+                          className={`inline-flex items-center gap-1.5 rounded-lg border ${themeInfoBorder} ${themeInfoSurface} px-2.5 py-1.5 text-xs font-semibold text-[var(--color-info)]`}
+                        >
+                          <FileText size={13} />
+
+                          {ujian?.kelasMapel?.mataPelajaran?.nama ||
+                            "Mata Pelajaran"}
+                        </span>
+
+                        <span
+                          className={`inline-flex items-center gap-1.5 rounded-lg border ${themeNeutralBorder} ${themeNeutralSurface} px-2.5 py-1.5 text-xs font-semibold theme-text-secondary`}
+                        >
+                          <Clock3 size={13} />
+
+                          {ujian?.durasi || 0} menit
+                        </span>
+
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex shrink-0 flex-col items-start gap-2 sm:flex-row sm:items-center lg:flex-col lg:items-end">
+                  <div
+                    className={`theme-card rounded-xl border ${themeNeutralBorder} px-3.5 py-2.5 ${themeSmallShadow}`}
+                  >
+                    <p className="theme-text-muted text-[10px] font-bold uppercase tracking-wide">
+                      Total Soal
+                    </p>
+
+                    <p className="theme-text mt-0.5 text-lg font-bold">
+                      {totalSoal} soal
+                    </p>
+                  </div>
+                </div>
+
+              </div>
+            </section>
+
+            {/* =====================================================
                 ERROR
-            ================================================= */}
+            ===================================================== */}
 
             {error && (
               <div
-                className={`flex items-start gap-3 rounded-xl border ${themeDangerBorder} ${themeDangerSurface} theme-danger px-4 py-3 text-sm`}
+                className={`flex items-start gap-3 rounded-2xl border ${themeDangerBorder} ${themeDangerSurface} theme-danger px-4 py-3.5 text-sm`}
               >
                 <AlertCircle
                   size={18}
                   className="mt-0.5 shrink-0"
                 />
 
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <p className="font-semibold">
                     Terjadi masalah
                   </p>
@@ -965,23 +697,21 @@ export default function KelolaSoalUjianPage() {
 
                 <button
                   type="button"
-                  onClick={() =>
-                    setError("")
-                  }
-                  className="ml-auto shrink-0 transition-opacity hover:opacity-70"
+                  onClick={() => setError("")}
+                  className="shrink-0 transition-opacity hover:opacity-70"
                 >
                   <X size={17} />
                 </button>
               </div>
             )}
 
-            {/* =================================================
+            {/* =====================================================
                 SUCCESS
-            ================================================= */}
+            ===================================================== */}
 
             {success && (
               <div
-                className={`flex items-start gap-3 rounded-xl border ${themeSuccessBorder} ${themeSuccessSurface} px-4 py-3 text-sm text-[var(--color-success)]`}
+                className={`flex items-start gap-3 rounded-2xl border ${themeSuccessBorder} ${themeSuccessSurface} px-4 py-3.5 text-sm text-[var(--color-success)]`}
               >
                 <CheckCircle2
                   size={18}
@@ -1000,476 +730,62 @@ export default function KelolaSoalUjianPage() {
 
                 <button
                   type="button"
-                  onClick={() =>
-                    setSuccess("")
-                  }
-                  className="ml-auto transition-opacity hover:opacity-70"
+                  onClick={() => setSuccess("")}
+                  className="ml-auto shrink-0 transition-opacity hover:opacity-70"
                 >
                   <X size={17} />
                 </button>
               </div>
             )}
 
-            {/* =================================================
-                UJIAN INFO
-            ================================================= */}
+            {/* =====================================================
+                MAIN GRID
+            ===================================================== */}
 
-            {ujian && (
-              <section
-                className={`theme-card rounded-2xl border ${themeNeutralBorder} p-5 ${themeCardShadow} sm:p-6`}
+            <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_minmax(0,360px)] 2xl:grid-cols-[minmax(0,1fr)_400px]">
+
+              {/* =================================================
+                  KOLOM KIRI — FORM
+              ================================================= */}
+
+              <form
+                onSubmit={handleSubmit}
+                className={`theme-card space-y-5 rounded-2xl border ${themeNeutralBorder} p-5 ${themeCardShadow} sm:p-6`}
               >
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h2 className="theme-text text-lg font-bold sm:text-xl">
-                        {ujian.judul}
-                      </h2>
-
-                      {ujian.dipublikasikan ? (
-                        <span
-                          className={`inline-flex items-center gap-1 rounded-full ${themeSuccessSurface} ${themeSuccessBorder} border px-2.5 py-1 text-xs font-semibold text-[var(--color-success)]`}
-                        >
-                          <CheckCircle2
-                            size={12}
-                          />
-                          Dipublikasi
-                        </span>
-                      ) : (
-                        <span
-                          className={`inline-flex items-center gap-1 rounded-full ${themeWarningSurface} ${themeWarningBorder} border px-2.5 py-1 text-xs font-semibold text-[var(--color-warning)]`}
-                        >
-                          Draft
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="theme-text-secondary mt-3 flex flex-wrap gap-x-5 gap-y-2 text-sm">
-                      <span className="inline-flex items-center gap-1.5">
-                        <BookOpen
-                          size={15}
-                          className={themePrimaryText}
-                        />
-
-                        {ujian.kelasMapel
-                          ?.kelas
-                          ?.nama ||
-                          "Kelas"}
-                      </span>
-
-                      <span className="inline-flex items-center gap-1.5">
-                        <FileText
-                          size={15}
-                          className="text-[var(--color-info)]"
-                        />
-
-                        {ujian.kelasMapel
-                          ?.mataPelajaran
-                          ?.nama ||
-                          "Mata Pelajaran"}
-                      </span>
-
-                      <span className="inline-flex items-center gap-1.5">
-                        <Clock3
-                          size={15}
-                          className="theme-text-muted"
-                        />
-
-                        {ujian.durasi ||
-                          0}{" "}
-                        menit
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </section>
-            )}
-
-            {/* =================================================
-                STATS
-            ================================================= */}
-
-            <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
-              <div
-                className={`theme-card rounded-2xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}
-              >
-                <div className="theme-text-secondary flex items-center gap-2 text-xs font-medium">
-                  <ListChecks
-                    size={15}
-                    className={themePrimaryText}
-                  />
-                  Total Soal
-                </div>
-
-                <p className="theme-text mt-2 text-2xl font-bold">
-                  {stats.total}
-                </p>
-              </div>
-
-              <div
-                className={`theme-card rounded-2xl border ${themeSuccessBorder} p-4 ${themeCardShadow}`}
-              >
-                <div className="theme-text-secondary flex items-center gap-2 text-xs font-medium">
-                  <CheckCircle2
-                    size={15}
-                    className="text-[var(--color-success)]"
-                  />
-                  Pilihan Ganda
-                </div>
-
-                <p className="theme-text mt-2 text-2xl font-bold">
-                  {stats.pilihanGanda}
-                </p>
-              </div>
-
-              <div
-                className={`theme-card rounded-2xl border ${themeInfoBorder} p-4 ${themeCardShadow}`}
-              >
-                <div className="theme-text-secondary flex items-center gap-2 text-xs font-medium">
-                  <FileText
-                    size={15}
-                    className="text-[var(--color-info)]"
-                  />
-                  Esai
-                </div>
-
-                <p className="theme-text mt-2 text-2xl font-bold">
-                  {stats.esai}
-                </p>
-              </div>
-
-              <div
-                className={`theme-card rounded-2xl border ${themeWarningBorder} p-4 ${themeCardShadow}`}
-              >
-                <div className="theme-text-secondary flex items-center gap-2 text-xs font-medium">
-                  <ClipboardList
-                    size={15}
-                    className="text-[var(--color-warning)]"
-                  />
-                  Total Poin
-                </div>
-
-                <p className="theme-text mt-2 text-2xl font-bold">
-                  {formatPoin(
-                    stats.totalPoin
-                  )}
-                </p>
-              </div>
-            </div>
-
-            {/* =================================================
-                SOAL LIST
-            ================================================= */}
-
-            <section
-              className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
-            >
-              <div
-                className={`border-b ${themeDivider} px-5 py-4 sm:px-6`}
-              >
-                <div>
-                  <h2 className="theme-text text-base font-bold">
-                    Daftar Soal
-                  </h2>
-
-                  <p className="theme-text-secondary mt-1 text-xs sm:text-sm">
-                    Urutan soal mengikuti nomor
-                    yang ditentukan.
-                  </p>
-                </div>
-              </div>
-
-              {soal.length === 0 ? (
-                <div className="px-5 py-16 text-center sm:px-6">
-                  <div
-                    className={`mx-auto flex h-14 w-14 items-center justify-center rounded-2xl ${themePrimarySoft} ${themePrimaryText}`}
-                  >
-                    <ClipboardList
-                      size={26}
-                    />
-                  </div>
-
-                  <h3 className="theme-text mt-4 text-sm font-bold">
-                    Belum ada soal
-                  </h3>
-
-                  <p className="theme-text-secondary mx-auto mt-1 max-w-md text-xs leading-5 sm:text-sm">
-                    Tambahkan soal pertama
-                    untuk mulai menyusun ujian
-                    ini.
-                  </p>
-
-                  <button
-                    type="button"
-                    onClick={
-                      handleOpenCreate
-                    }
-                    className={`mt-5 inline-flex items-center gap-2 rounded-xl ${themePrimaryGradient} px-4 py-2.5 text-sm font-semibold text-[var(--color-card)] ${themePrimaryShadow} transition hover:brightness-95`}
-                  >
-                    <Plus size={16} />
-                    Tambah Soal
-                  </button>
-                </div>
-              ) : (
-                <div>
-                  {soal.map(
-                    (item, index) => (
-                      <div
-                        key={item.id}
-                        className={`border-b ${themeDivider} p-5 last:border-b-0 transition ${themeNeutralHover} sm:p-6`}
-                      >
-                        <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
-
-                          {/* NOMOR */}
-
-                          <div className="flex shrink-0 items-center gap-3 lg:w-16 lg:flex-col lg:items-center">
-                            <div
-                              className={`flex h-10 w-10 items-center justify-center rounded-xl ${themePrimarySoft} text-sm font-bold ${themePrimaryText}`}
-                            >
-                              {item.nomorUrut ||
-                                index + 1}
-                            </div>
-
-                            <span className="theme-text-muted text-xs font-medium lg:hidden">
-                              Nomor soal
-                            </span>
-                          </div>
-
-                          {/* CONTENT */}
-
-                          <div className="min-w-0 flex-1">
-                            <div className="flex flex-wrap items-center gap-2">
-                              <span
-                                className={`rounded-full ${themeNeutralSurface} ${themeNeutralBorder} border px-2.5 py-1 text-xs font-semibold theme-text-secondary`}
-                              >
-                                {getJenisLabel(
-                                  item.jenisSoal
-                                )}
-                              </span>
-
-                              <span
-                                className={`rounded-full ${themeInfoSurface} ${themeInfoBorder} border px-2.5 py-1 text-xs font-semibold text-[var(--color-info)]`}
-                              >
-                                {formatPoin(
-                                  item.poin
-                                )}{" "}
-                                poin
-                              </span>
-                            </div>
-
-                            <p className="theme-text mt-3 whitespace-pre-wrap text-sm font-medium leading-6">
-                              {item.teksSoal}
-                            </p>
-
-                            {/* PILIHAN */}
-
-                            {item.jenisSoal ===
-                              "pilihan_ganda" &&
-                              Array.isArray(
-                                item.pilihan
-                              ) && (
-                                <div className="mt-4 grid gap-2 sm:grid-cols-2">
-                                  {item.pilihan.map(
-                                    (
-                                      pilihan,
-                                      pilihanIndex
-                                    ) => {
-                                      const isCorrect =
-                                        String(
-                                          item.jawabanBenar ??
-                                            ""
-                                        ).trim() ===
-                                        String(
-                                          pilihan ??
-                                            ""
-                                        ).trim();
-
-                                      return (
-                                        <div
-                                          key={`${item.id}-${pilihanIndex}`}
-                                          className={`flex items-start gap-2 rounded-xl border px-3 py-2.5 text-sm ${
-                                            isCorrect
-                                              ? `${themeSuccessBorder} ${themeSuccessSurface} text-[var(--color-success)]`
-                                              : `theme-card ${themeNeutralBorder} theme-text-secondary`
-                                          }`}
-                                        >
-                                          <span
-                                            className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-lg ${
-                                              isCorrect
-                                                ? "bg-[color-mix(in_srgb,var(--color-success)_14%,transparent)]"
-                                                : themeNeutralSurface
-                                            } text-xs font-bold`}
-                                          >
-                                            {getChoiceLetter(
-                                              pilihanIndex
-                                            )}
-                                          </span>
-
-                                          <span className="pt-0.5">
-                                            {pilihan}
-                                          </span>
-
-                                          {isCorrect && (
-                                            <CheckCircle2
-                                              size={
-                                                16
-                                              }
-                                              className="ml-auto mt-0.5 shrink-0"
-                                            />
-                                          )}
-                                        </div>
-                                      );
-                                    }
-                                  )}
-                                </div>
-                              )}
-
-                            {/* ESAI */}
-
-                            {item.jenisSoal ===
-                              "esai" && (
-                              <div
-                                className={`mt-4 rounded-xl border ${themeInfoBorder} ${themeInfoSurface} px-4 py-3`}
-                              >
-                                <p className="text-xs font-semibold text-[var(--color-info)]">
-                                  Soal Esai
-                                </p>
-
-                                <p className="theme-text-secondary mt-1 text-xs">
-                                  Jawaban akan
-                                  diperiksa oleh
-                                  guru.
-                                </p>
-                              </div>
-                            )}
-                          </div>
-
-                          {/* ACTION */}
-
-                          <div className="flex shrink-0 items-center gap-2 lg:ml-4">
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handleOpenEdit(
-                                  item
-                                )
-                              }
-                              title="Edit soal"
-                              className={`inline-flex h-9 w-9 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText} transition hover:bg-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]`}
-                            >
-                              <Pencil
-                                size={15}
-                              />
-                            </button>
-
-                            <button
-                              type="button"
-                              onClick={() =>
-                                handleDelete(
-                                  item
-                                )
-                              }
-                              disabled={
-                                deleting ===
-                                item.id
-                              }
-                              title="Hapus soal"
-                              className={`inline-flex h-9 w-9 items-center justify-center rounded-lg ${themeDangerSurface} theme-danger transition hover:bg-[color-mix(in_srgb,var(--color-text)_9%,transparent)] disabled:cursor-not-allowed disabled:opacity-50`}
-                            >
-                              {deleting ===
-                              item.id ? (
-                                <Loader2
-                                  size={15}
-                                  className="animate-spin"
-                                />
-                              ) : (
-                                <Trash2
-                                  size={15}
-                                />
-                              )}
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    )
-                  )}
-                </div>
-              )}
-            </section>
-          </div>
-        </main>
-      </div>
-
-      {/* =====================================================
-          MODAL FORM
-      ===================================================== */}
-
-      {showForm && (
-        <div className="fixed inset-0 z-50 flex items-end justify-center bg-[color-mix(in_srgb,var(--color-text)_55%,transparent)] p-0 backdrop-blur-[2px] sm:items-center sm:p-4">
-          <div
-            className={`theme-card flex max-h-[95vh] w-full max-w-3xl flex-col overflow-hidden rounded-t-2xl border ${themeNeutralBorder} ${themeCardShadow} sm:max-h-[90vh] sm:rounded-2xl`}
-          >
-
-            {/* HEADER */}
-
-            <div
-              className={`flex items-center justify-between border-b ${themeDivider} px-5 py-4 sm:px-6`}
-            >
-              <div>
-                <h2 className="theme-text text-lg font-bold">
-                  {editingId
-                    ? "Edit Soal"
-                    : "Tambah Soal"}
-                </h2>
-
-                <p className="theme-text-secondary mt-1 text-xs">
-                  Isi pertanyaan dan konfigurasi
-                  jawaban soal.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={
-                  handleCloseForm
-                }
-                disabled={saving}
-                className={`theme-text-muted flex h-9 w-9 items-center justify-center rounded-lg transition ${themeNeutralHover} hover:text-[var(--color-primary)] disabled:opacity-50`}
-              >
-                <X size={19} />
-              </button>
-            </div>
-
-            {/* BODY */}
-
-            <form
-              onSubmit={handleSubmit}
-              className="min-h-0 flex-1 overflow-y-auto"
-            >
-              <div className="space-y-5 p-5 sm:p-6">
 
                 {/* PERTANYAAN */}
 
                 <div>
-                  <label
-                    htmlFor="teksSoal"
-                    className="theme-text mb-2 block text-sm font-semibold"
-                  >
-                    Pertanyaan
-                    <span className="theme-danger ml-1">
-                      *
+                  <div className="mb-2 flex items-center justify-between">
+
+                    <label
+                      htmlFor="teksSoal"
+                      className="theme-text flex items-center gap-2 text-sm font-semibold"
+                    >
+                      <span
+                        className={`flex h-6 w-6 items-center justify-center rounded-md ${themePrimarySoft} ${themePrimaryText}`}
+                      >
+                        <FileText size={13} />
+                      </span>
+
+                      Pertanyaan
+
+                      <span className="theme-danger">
+                        *
+                      </span>
+                    </label>
+
+                    <span className="theme-text-muted text-[11px] font-medium">
+                      {form.teksSoal.length} karakter
                     </span>
-                  </label>
+                  </div>
 
                   <textarea
                     id="teksSoal"
                     name="teksSoal"
-                    value={
-                      form.teksSoal
-                    }
-                    onChange={
-                      handleChange
-                    }
-                    rows={5}
+                    value={form.teksSoal}
+                    onChange={handleChange}
+                    rows={7}
                     required
                     disabled={saving}
                     placeholder="Contoh: Sebuah benda bermassa 5 kg diberi gaya sebesar 20 N. Berapakah percepatan benda tersebut?"
@@ -1477,7 +793,7 @@ export default function KelolaSoalUjianPage() {
                   />
                 </div>
 
-                {/* TYPE + POINT + NOMOR */}
+                {/* TYPE + POIN + NOMOR */}
 
                 <div className="grid gap-4 sm:grid-cols-3">
 
@@ -1492,12 +808,8 @@ export default function KelolaSoalUjianPage() {
                     <select
                       id="jenisSoal"
                       name="jenisSoal"
-                      value={
-                        form.jenisSoal
-                      }
-                      onChange={
-                        handleJenisChange
-                      }
+                      value={form.jenisSoal}
+                      onChange={handleJenisChange}
                       disabled={saving}
                       className={`theme-input w-full rounded-xl border px-3 py-3 text-sm font-medium outline-none transition ${themeFocus}`}
                     >
@@ -1525,12 +837,8 @@ export default function KelolaSoalUjianPage() {
                       type="number"
                       min="0.01"
                       step="0.01"
-                      value={
-                        form.poin
-                      }
-                      onChange={
-                        handleChange
-                      }
+                      value={form.poin}
+                      onChange={handleChange}
                       disabled={saving}
                       className={`theme-input w-full rounded-xl border px-3 py-3 text-sm font-medium outline-none transition ${themeFocus}`}
                     />
@@ -1550,137 +858,144 @@ export default function KelolaSoalUjianPage() {
                       type="number"
                       min="1"
                       step="1"
-                      value={
-                        form.nomorUrut
-                      }
-                      onChange={
-                        handleChange
-                      }
+                      value={form.nomorUrut}
+                      onChange={handleChange}
                       disabled={saving}
                       className={`theme-input w-full rounded-xl border px-3 py-3 text-sm font-medium outline-none transition ${themeFocus}`}
                     />
                   </div>
+
                 </div>
 
                 {/* PILIHAN GANDA */}
 
-                {form.jenisSoal ===
-                  "pilihan_ganda" && (
+                {form.jenisSoal === "pilihan_ganda" && (
                   <div
                     className={`rounded-2xl border ${themeNeutralBorder} ${themeNeutralSurface} p-4 sm:p-5`}
                   >
                     <div className="mb-4 flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
+
                       <div>
-                        <h3 className="theme-text text-sm font-bold">
+                        <h3 className="theme-text flex items-center gap-2 text-sm font-bold">
+                          <ListChecks
+                            size={15}
+                            className={themePrimaryText}
+                          />
+
                           Pilihan Jawaban
                         </h3>
 
-                        <p className="theme-text-secondary text-xs">
-                          Minimal 2 pilihan dan
-                          maksimal 6 pilihan.
+                        <p className="theme-text-secondary mt-0.5 text-xs">
+                          Minimal 2, maksimal 6 pilihan.
                         </p>
                       </div>
 
-                      {form.pilihan.length <
-                        6 && (
-                        <button
-                          type="button"
-                          onClick={
-                            addChoice
-                          }
-                          disabled={saving}
-                          className={`theme-card ${themePrimaryText} ${themeNeutralBorder} inline-flex items-center gap-1.5 self-start rounded-lg border px-3 py-2 text-xs font-semibold transition hover:bg-[color-mix(in_srgb,var(--color-primary)_7%,transparent)] disabled:opacity-50`}
+                      <div className="flex items-center gap-2">
+
+                        <span
+                          className={`theme-card theme-text-secondary rounded-full px-2.5 py-1 text-[11px] font-bold ${themeSmallShadow}`}
                         >
-                          <Plus
-                            size={14}
-                          />
-                          Tambah pilihan
-                        </button>
-                      )}
+                          {form.pilihan.length} pilihan
+                        </span>
+
+                        {form.pilihan.length < 6 && (
+                          <button
+                            type="button"
+                            onClick={addChoice}
+                            disabled={saving}
+                            className={`theme-card ${themePrimaryText} ${themeNeutralBorder} inline-flex items-center gap-1.5 rounded-lg border px-3 py-2 text-xs font-semibold transition hover:bg-[color-mix(in_srgb,var(--color-primary)_7%,transparent)] disabled:opacity-50`}
+                          >
+                            <Plus size={14} />
+                            Tambah
+                          </button>
+                        )}
+
+                      </div>
                     </div>
 
-                    <div className="space-y-3">
+                    <div className="grid gap-3 sm:grid-cols-2">
+
                       {form.pilihan.map(
-                        (
-                          pilihan,
-                          index
-                        ) => {
+                        (pilihan, index) => {
                           const letter =
-                            getChoiceLetter(
-                              index
-                            );
+                            getChoiceLetter(index);
+
+                          const isCorrect =
+                            String(
+                              form.jawabanBenar || ""
+                            ).trim() ===
+                            String(
+                              pilihan || ""
+                            ).trim();
 
                           return (
                             <div
                               key={index}
-                              className="flex items-center gap-2"
+                              className={`flex items-center gap-2 rounded-xl border p-2 transition ${
+                                isCorrect
+                                  ? `${themeSuccessBorder} ${themeSuccessSurface}`
+                                  : `${themeNeutralBorder} theme-card`
+                              }`}
                             >
                               <span
-                                className={`theme-card theme-text-secondary ${themeNeutralBorder} flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border text-sm font-bold`}
+                                className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg text-sm font-bold ${
+                                  isCorrect
+                                    ? "bg-[var(--color-success)] text-[var(--color-card)]"
+                                    : `${themeNeutralSurface} theme-text-secondary`
+                                }`}
                               >
                                 {letter}
                               </span>
 
                               <input
                                 type="text"
-                                value={
-                                  pilihan
-                                }
-                                onChange={(
-                                  event
-                                ) =>
+                                value={pilihan}
+                                onChange={(event) =>
                                   handleChoiceChange(
                                     index,
-                                    event
-                                      .target
-                                      .value
+                                    event.target.value
                                   )
                                 }
-                                disabled={
-                                  saving
-                                }
+                                disabled={saving}
                                 placeholder={`Pilihan ${letter}`}
-                                className={`theme-input min-w-0 flex-1 rounded-xl border px-3 py-2.5 text-sm outline-none transition ${themeFocus} placeholder:text-[var(--color-text-placeholder)]`}
+                                className={`theme-input min-w-0 flex-1 rounded-lg border border-transparent bg-transparent px-2 py-2 text-sm outline-none transition ${themeFocus} placeholder:text-[var(--color-text-placeholder)]`}
                               />
 
-                              {form
-                                .pilihan
-                                .length >
-                                2 && (
+                              {form.pilihan.length > 2 && (
                                 <button
                                   type="button"
                                   onClick={() =>
-                                    removeChoice(
-                                      index
-                                    )
+                                    removeChoice(index)
                                   }
-                                  disabled={
-                                    saving
-                                  }
-                                  className={`theme-text-muted flex h-9 w-9 shrink-0 items-center justify-center rounded-lg transition hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)] hover:text-[var(--color-primary)] disabled:opacity-50`}
+                                  disabled={saving}
+                                  className="theme-text-muted flex h-8 w-8 shrink-0 items-center justify-center rounded-lg transition hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)] hover:text-[var(--color-primary)] disabled:opacity-50"
                                 >
-                                  <X
-                                    size={
-                                      16
-                                    }
-                                  />
+                                  <X size={15} />
                                 </button>
                               )}
                             </div>
                           );
                         }
                       )}
+
                     </div>
 
                     {/* JAWABAN BENAR */}
 
                     <div className="mt-5">
+
                       <label
                         htmlFor="jawabanBenar"
-                        className="theme-text mb-2 block text-sm font-semibold"
+                        className="theme-text mb-2 flex items-center gap-2 text-sm font-semibold"
                       >
+                        <Target
+                          size={14}
+                          className="text-[var(--color-success)]"
+                        />
+
                         Jawaban Benar
-                        <span className="theme-danger ml-1">
+
+                        <span className="theme-danger">
                           *
                         </span>
                       </label>
@@ -1688,51 +1003,34 @@ export default function KelolaSoalUjianPage() {
                       <select
                         id="jawabanBenar"
                         name="jawabanBenar"
-                        value={
-                          form.jawabanBenar
-                        }
-                        onChange={
-                          handleChange
-                        }
-                        disabled={
-                          saving
-                        }
+                        value={form.jawabanBenar}
+                        onChange={handleChange}
+                        disabled={saving}
                         className={`theme-input w-full rounded-xl border px-3 py-3 text-sm font-medium outline-none transition ${themeFocus}`}
                       >
                         <option value="">
                           Pilih jawaban yang benar
                         </option>
 
-                        {form.pilihan
-                          .map(
-                            (
-                              pilihan,
-                              index
-                            ) => {
-                              const value =
-                                String(
-                                  pilihan ||
-                                    ""
-                                ).trim();
+                        {form.pilihan.map(
+                          (pilihan, index) => {
+                            const value = String(
+                              pilihan || ""
+                            ).trim();
 
-                              if (!value) {
-                                return null;
-                              }
+                            if (!value) return null;
 
-                              return (
-                                <option
-                                  key={`${value}-${index}`}
-                                  value={value}
-                                >
-                                  {getChoiceLetter(
-                                    index
-                                  )}{" "}
-                                  —{" "}
-                                  {value}
-                                </option>
-                              );
-                            }
-                          )}
+                            return (
+                              <option
+                                key={`${value}-${index}`}
+                                value={value}
+                              >
+                                {getChoiceLetter(index)} —{" "}
+                                {value}
+                              </option>
+                            );
+                          }
+                        )}
                       </select>
                     </div>
 
@@ -1751,8 +1049,7 @@ export default function KelolaSoalUjianPage() {
                           "20 m/s"
                         </strong>
                         , maka nilai tersebut yang
-                        dibandingkan dengan jawaban
-                        siswa.
+                        dibandingkan dengan jawaban siswa.
                       </p>
                     </div>
                   </div>
@@ -1760,19 +1057,20 @@ export default function KelolaSoalUjianPage() {
 
                 {/* ESAI */}
 
-                {form.jenisSoal ===
-                  "esai" && (
+                {form.jenisSoal === "esai" && (
                   <div
-                    className={`rounded-2xl border ${themeInfoBorder} ${themeInfoSurface} p-4`}
+                    className={`rounded-2xl border ${themeInfoBorder} ${themeInfoSurface} p-4 sm:p-5`}
                   >
                     <div className="flex gap-3">
-                      <FileText
-                        size={19}
-                        className="mt-0.5 shrink-0 text-[var(--color-info)]"
-                      />
+
+                      <div
+                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themeInfoSurface} text-[var(--color-info)] ${themeSmallShadow}`}
+                      >
+                        <FileText size={19} />
+                      </div>
 
                       <div>
-                        <p className="text-sm font-semibold text-[var(--color-info)]">
+                        <p className="text-sm font-bold text-[var(--color-info)]">
                           Soal Esai
                         </p>
 
@@ -1785,57 +1083,376 @@ export default function KelolaSoalUjianPage() {
                           oleh guru.
                         </p>
                       </div>
+
                     </div>
                   </div>
                 )}
-              </div>
 
-              {/* FOOTER */}
+                {/* FOOTER ACTIONS */}
 
-              <div
-                className={`sticky bottom-0 flex flex-col-reverse gap-3 border-t ${themeDivider} theme-card px-5 py-4 sm:flex-row sm:justify-end sm:px-6`}
-              >
-                <button
-                  type="button"
-                  onClick={
-                    handleCloseForm
-                  }
-                  disabled={saving}
-                  className={`theme-card theme-text-secondary ${themeNeutralBorder} ${themeNeutralHover} w-full rounded-xl border px-4 py-2.5 text-sm font-semibold transition disabled:opacity-50 sm:w-auto`}
+                <div
+                  className={`flex flex-col-reverse gap-3 border-t ${themeDivider} pt-5 sm:flex-row sm:justify-end`}
                 >
-                  Batal
-                </button>
+                  <button
+                    type="button"
+                    onClick={handleCancel}
+                    disabled={saving}
+                    className={`theme-card theme-text-secondary ${themeNeutralBorder} ${themeNeutralHover} w-full rounded-xl border px-4 py-2.5 text-sm font-semibold transition disabled:opacity-50 sm:w-auto`}
+                  >
+                    Batal
+                  </button>
 
-                <button
-                  type="submit"
-                  disabled={saving}
-                  className={`inline-flex w-full items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-4 py-2.5 text-sm font-semibold text-[var(--color-card)] ${themePrimaryShadow} transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto`}
+                  <button
+                    type="submit"
+                    disabled={saving}
+                    className={`inline-flex w-full items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-5 py-2.5 text-sm font-semibold text-[var(--color-card)] ${themePrimaryShadow} transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto`}
+                  >
+                    {saving ? (
+                      <>
+                        <Loader2
+                          size={16}
+                          className="animate-spin"
+                        />
+                        Menyimpan...
+                      </>
+                    ) : (
+                      <>
+                        <Save size={16} />
+
+                        {isEdit
+                          ? "Simpan Perubahan"
+                          : "Tambah Soal"}
+                      </>
+                    )}
+                  </button>
+                </div>
+
+              </form>
+
+              {/* =================================================
+                  KOLOM KANAN — PANEL INFO
+              ================================================= */}
+
+              <aside className="space-y-5">
+
+                {/* INFO UJIAN */}
+
+                <div
+                  className={`theme-card rounded-2xl border ${themeNeutralBorder} p-5 ${themeCardShadow}`}
                 >
-                  {saving ? (
-                    <>
-                      <Loader2
-                        size={16}
-                        className="animate-spin"
-                      />
-                      Menyimpan...
-                    </>
-                  ) : (
-                    <>
-                      <Save
-                        size={16}
+                  <div className="flex items-center gap-2.5">
+
+                    <div
+                      className={`flex h-9 w-9 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText}`}
+                    >
+                      <BookOpen size={17} />
+                    </div>
+
+                    <div>
+                      <p className="theme-text-muted text-xs font-bold uppercase tracking-wide">
+                        Ujian
+                      </p>
+
+                      <p className="theme-text text-sm font-bold">
+                        Informasi Ujian
+                      </p>
+                    </div>
+
+                  </div>
+
+                  <div className="mt-4 space-y-3">
+
+                    <div
+                      className={`rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} px-3.5 py-3`}
+                    >
+                      <p className="theme-text-muted text-[10px] font-bold uppercase tracking-wide">
+                        Judul
+                      </p>
+
+                      <p className="theme-text mt-1 text-sm font-semibold">
+                        {ujian?.judul || "-"}
+                      </p>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+
+                      <div
+                        className={`rounded-xl border ${themePrimarySoftBorder} ${themePrimarySoft} px-3.5 py-3`}
+                      >
+                        <p className={`text-[10px] font-bold uppercase tracking-wide ${themePrimaryText}`}>
+                          Kelas
+                        </p>
+
+                        <p className={`mt-1 text-sm font-semibold ${themePrimaryText}`}>
+                          {ujian?.kelasMapel?.kelas?.nama ||
+                            "-"}
+                        </p>
+                      </div>
+
+                      <div
+                        className={`rounded-xl border ${themeInfoBorder} ${themeInfoSurface} px-3.5 py-3`}
+                      >
+                        <p className="text-[10px] font-bold uppercase tracking-wide text-[var(--color-info)]">
+                          Mapel
+                        </p>
+
+                        <p className="mt-1 truncate text-sm font-semibold text-[var(--color-info)]">
+                          {ujian?.kelasMapel?.mataPelajaran?.nama ||
+                            "-"}
+                        </p>
+                      </div>
+
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+
+                      <div
+                        className={`theme-card rounded-xl border ${themeNeutralBorder} px-3.5 py-3`}
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <Clock3
+                            size={12}
+                            className="theme-text-muted"
+                          />
+
+                          <p className="theme-text-muted text-[10px] font-bold uppercase tracking-wide">
+                            Durasi
+                          </p>
+                        </div>
+
+                        <p className="theme-text mt-1 text-sm font-semibold">
+                          {ujian?.durasi || 0} menit
+                        </p>
+                      </div>
+
+                      <div
+                        className={`theme-card rounded-xl border ${themeNeutralBorder} px-3.5 py-3`}
+                      >
+                        <div className="flex items-center gap-1.5">
+                          <ListChecks
+                            size={12}
+                            className="theme-text-muted"
+                          />
+
+                          <p className="theme-text-muted text-[10px] font-bold uppercase tracking-wide">
+                            Soal
+                          </p>
+                        </div>
+
+                        <p className="theme-text mt-1 text-sm font-semibold">
+                          {totalSoal} soal
+                        </p>
+                      </div>
+
+                    </div>
+
+                    <div>
+                      <p className="theme-text-muted mb-1.5 text-[10px] font-bold uppercase tracking-wide">
+                        Status
+                      </p>
+
+                      {ujian?.dipublikasikan ? (
+                        <span
+                          className={`inline-flex items-center gap-1.5 rounded-full border ${themeSuccessBorder} ${themeSuccessSurface} px-2.5 py-1.5 text-xs font-bold text-[var(--color-success)]`}
+                        >
+                          <CheckCircle2 size={12} />
+                          Dipublikasi
+                        </span>
+                      ) : (
+                        <span
+                          className={`inline-flex items-center gap-1.5 rounded-full border ${themeWarningBorder} ${themeWarningSurface} px-2.5 py-1.5 text-xs font-bold text-[var(--color-warning)]`}
+                        >
+                          <AlertCircle size={12} />
+                          Draft
+                        </span>
+                      )}
+                    </div>
+
+                  </div>
+                </div>
+
+                {/* TIPS */}
+
+                <div
+                  className={`rounded-2xl border ${themeWarningBorder} ${themeWarningSurface} p-5 ${themeCardShadow}`}
+                >
+                  <div className="flex items-center gap-2.5">
+
+                    <div
+                      className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeWarningSurface} text-[var(--color-warning)] ${themeSmallShadow}`}
+                    >
+                      <Lightbulb size={17} />
+                    </div>
+
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-wide text-[var(--color-warning)]">
+                        Tips
+                      </p>
+
+                      <p className="theme-text text-sm font-bold">
+                        Panduan Menulis Soal
+                      </p>
+                    </div>
+
+                  </div>
+
+                  <ul className="theme-text-secondary mt-4 space-y-2.5 text-xs leading-5">
+
+                    <li className="flex gap-2.5">
+                      <span
+                        className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full"
+                        style={{
+                          backgroundColor:
+                            "var(--color-warning)",
+                        }}
                       />
 
-                      {editingId
-                        ? "Simpan Perubahan"
-                        : "Tambah Soal"}
-                    </>
-                  )}
-                </button>
-              </div>
-            </form>
+                      Gunakan bahasa yang jelas dan tidak ambigu.
+                    </li>
+
+                    <li className="flex gap-2.5">
+                      <span
+                        className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full"
+                        style={{
+                          backgroundColor:
+                            "var(--color-warning)",
+                        }}
+                      />
+
+                      Untuk pilihan ganda, buat pengecoh yang masuk akal.
+                    </li>
+
+                    <li className="flex gap-2.5">
+                      <span
+                        className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full"
+                        style={{
+                          backgroundColor:
+                            "var(--color-warning)",
+                        }}
+                      />
+
+                      Pastikan kunci jawaban benar dan tidak ambigu.
+                    </li>
+
+                    <li className="flex gap-2.5">
+                      <span
+                        className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full"
+                        style={{
+                          backgroundColor:
+                            "var(--color-warning)",
+                        }}
+                      />
+
+                      Atur poin sesuai tingkat kesulitan soal.
+                    </li>
+
+                  </ul>
+                </div>
+
+                {/* VALIDASI */}
+
+                <div
+                  className={`rounded-2xl border ${themeSuccessBorder} ${themeSuccessSurface} p-5 ${themeCardShadow}`}
+                >
+                  <div className="flex items-center gap-2.5">
+
+                    <div
+                      className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeSuccessSurface} text-[var(--color-success)] ${themeSmallShadow}`}
+                    >
+                      <ShieldCheck size={17} />
+                    </div>
+
+                    <div>
+                      <p className="text-xs font-bold uppercase tracking-wide text-[var(--color-success)]">
+                        Validasi
+                      </p>
+
+                      <p className="theme-text text-sm font-bold">
+                        Sebelum Disimpan
+                      </p>
+                    </div>
+
+                  </div>
+
+                  <ul className="theme-text-secondary mt-4 space-y-2.5 text-xs leading-5">
+
+                    <li className="flex gap-2.5">
+                      <CheckCircle2
+                        size={14}
+                        className="mt-0.5 shrink-0 text-[var(--color-success)]"
+                      />
+
+                      Teks soal minimal 5 karakter.
+                    </li>
+
+                    <li className="flex gap-2.5">
+                      <CheckCircle2
+                        size={14}
+                        className="mt-0.5 shrink-0 text-[var(--color-success)]"
+                      />
+
+                      Poin harus lebih dari 0.
+                    </li>
+
+                    <li className="flex gap-2.5">
+                      <CheckCircle2
+                        size={14}
+                        className="mt-0.5 shrink-0 text-[var(--color-success)]"
+                      />
+
+                      Pilihan ganda minimal 2 pilihan berbeda.
+                    </li>
+
+                    <li className="flex gap-2.5">
+                      <CheckCircle2
+                        size={14}
+                        className="mt-0.5 shrink-0 text-[var(--color-success)]"
+                      />
+
+                      Kunci jawaban wajib dipilih.
+                    </li>
+
+                  </ul>
+                </div>
+
+                {/* QUICK HELP */}
+
+                <div
+                  className={`theme-card rounded-2xl border ${themeNeutralBorder} p-5 ${themeCardShadow}`}
+                >
+                  <div className="flex items-center gap-2.5">
+
+                    <div
+                      className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeNeutralSurface} theme-text-secondary`}
+                    >
+                      <Info size={17} />
+                    </div>
+
+                    <div>
+                      <p className="theme-text-muted text-xs font-bold uppercase tracking-wide">
+                        Butuh Bantuan?
+                      </p>
+
+                      <p className="theme-text text-sm font-bold">
+                        Info Singkat
+                      </p>
+                    </div>
+
+                  </div>
+
+                  <p className="theme-text-secondary mt-3 text-xs leading-5">
+                    Nomor urut menentukan urutan soal
+                    saat ujian berlangsung. Kamu bisa
+                    mengubahnya kapan saja melalui
+                    halaman kelola soal.
+                  </p>
+                </div>
+
+              </aside>
+            </div>
           </div>
-        </div>
-      )}
+        </main>
+      </div>
     </div>
   );
 }

@@ -7,6 +7,8 @@ import {
   useState,
 } from "react";
 
+import { useRouter } from "next/navigation";
+
 import Header from "../../../../components/Header";
 import Sidebar from "../../../../components/Sidebar";
 
@@ -21,9 +23,6 @@ import {
   AlertCircle,
   XCircle,
   MapPin,
-  Camera,
-  Navigation,
-  UserRound,
   ClipboardCheck,
   RefreshCw,
   FileSpreadsheet,
@@ -376,31 +375,6 @@ function StatCard({
   );
 }
 
-function DetailBox({
-  icon: Icon,
-  label,
-  value,
-}) {
-  return (
-    <div className="p-3 rounded-xl border theme-border">
-      <div className="flex items-center gap-2">
-        <Icon
-          size={14}
-          className="text-[var(--color-primary)]"
-        />
-
-        <span className="text-[11px] theme-text-muted">
-          {label}
-        </span>
-      </div>
-
-      <p className="text-sm font-semibold theme-text-secondary mt-2">
-        {value || "-"}
-      </p>
-    </div>
-  );
-}
-
 /* =========================================================
    EXPORT HELPERS
 ========================================================= */
@@ -566,6 +540,8 @@ async function downloadExcel({
 ========================================================= */
 
 export default function AbsenSiswaPage() {
+  const router = useRouter();
+
   const [
     isCollapsed,
     setIsCollapsed,
@@ -620,16 +596,6 @@ export default function AbsenSiswaPage() {
     tanggalFilter,
     setTanggalFilter,
   ] = useState("");
-
-  const [
-    selectedAbsen,
-    setSelectedAbsen,
-  ] = useState(null);
-
-  const [
-    showDetail,
-    setShowDetail,
-  ] = useState(false);
 
   /* =========================================================
      LOAD DATA
@@ -895,13 +861,31 @@ export default function AbsenSiswaPage() {
       : 0;
 
   /* =========================================================
-     DETAIL
+     DETAIL — PINDAH HALAMAN
   ========================================================= */
 
   const handleDetail =
     (item) => {
-      setSelectedAbsen(item);
-      setShowDetail(true);
+      if (!item?.id) return;
+
+      const params =
+        new URLSearchParams();
+
+      if (item.kelasId) {
+        params.set(
+          "kelasId",
+          item.kelasId
+        );
+      }
+
+      const query =
+        params.toString();
+
+      router.push(
+        `/admin/siswa/absen/${item.id}${
+          query ? `?${query}` : ""
+        }`
+      );
     };
 
   /* =========================================================
@@ -977,8 +961,6 @@ export default function AbsenSiswaPage() {
       />
 
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
-        {/* HEADER */}
-
         <Header
           toggleSidebar={() =>
             setIsCollapsed(
@@ -1059,8 +1041,6 @@ export default function AbsenSiswaPage() {
                     ? "Mengexport..."
                     : "Export Excel"}
                 </button>
-
-                {/* REFRESH */}
 
                 <button
                   type="button"
@@ -1293,8 +1273,6 @@ export default function AbsenSiswaPage() {
                   "
                 />
 
-                {/* DATE */}
-
                 <div className="relative">
                   <CalendarDays
                     size={14}
@@ -1326,8 +1304,6 @@ export default function AbsenSiswaPage() {
                   />
                 </div>
 
-                {/* KELAS */}
-
                 <select
                   value={
                     kelasFilter
@@ -1357,8 +1333,6 @@ export default function AbsenSiswaPage() {
                   )}
                 </select>
 
-                {/* STATUS */}
-
                 <select
                   value={
                     statusFilter
@@ -1387,8 +1361,6 @@ export default function AbsenSiswaPage() {
                     )
                   )}
                 </select>
-
-                {/* RESET */}
 
                 <button
                   type="button"
@@ -1717,324 +1689,6 @@ export default function AbsenSiswaPage() {
           </div>
         </main>
       </div>
-
-      {/* =====================================================
-          DETAIL MODAL
-      ===================================================== */}
-
-      {showDetail &&
-        selectedAbsen && (
-          <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
-            <div className="w-full max-w-2xl max-h-[90vh] overflow-y-auto theme-card rounded-2xl shadow-2xl">
-
-              {/* MODAL HEADER */}
-
-              <div className="flex items-center justify-between p-5 border-b theme-border">
-                <div>
-                  <h3 className="font-bold theme-text">
-                    Detail Absensi
-                    Siswa
-                  </h3>
-
-                  <p className="text-xs theme-text-muted mt-1">
-                    Data diambil dari
-                    backend
-                  </p>
-                </div>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    setShowDetail(
-                      false
-                    )
-                  }
-                  className="
-                    w-9 h-9 rounded-lg
-                    theme-sidebar-hover
-                    flex items-center
-                    justify-center
-                    theme-text-muted
-                  "
-                >
-                  <XCircle
-                    size={20}
-                  />
-                </button>
-              </div>
-
-              <div className="p-5 space-y-5">
-
-                {/* PROFIL */}
-
-                <div className="flex items-center gap-4 p-4 rounded-xl theme-info border theme-border">
-                  <div className="w-14 h-14 rounded-full theme-primary flex items-center justify-center font-bold">
-                    {getInitials(
-                      selectedAbsen.nama
-                    )}
-                  </div>
-
-                  <div className="flex-1">
-                    <h4 className="font-bold theme-text">
-                      {
-                        selectedAbsen.nama
-                      }
-                    </h4>
-
-                    <p className="text-xs theme-text-muted mt-1">
-                      NISN:{" "}
-                      {
-                        selectedAbsen.nisn
-                      }
-                    </p>
-
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      <span className="px-2.5 py-1 rounded-lg theme-info border theme-border text-[11px] font-bold">
-                        {
-                          selectedAbsen.kelas
-                        }
-                      </span>
-
-                      <StatusBadge
-                        status={
-                          selectedAbsen.status
-                        }
-                      />
-                    </div>
-                  </div>
-                </div>
-
-                {/* DETAIL */}
-
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  <DetailBox
-                    icon={
-                      CalendarDays
-                    }
-                    label="Tanggal"
-                    value={
-                      selectedAbsen.tanggalLabel
-                    }
-                  />
-
-                  <DetailBox
-                    icon={Clock3}
-                    label="Jam Masuk"
-                    value={
-                      selectedAbsen.jamMasuk
-                    }
-                  />
-
-                  <DetailBox
-                    icon={
-                      UserRound
-                    }
-                    label="Wali Kelas"
-                    value={
-                      selectedAbsen.waliKelas
-                    }
-                  />
-
-                  <DetailBox
-                    icon={
-                      ClipboardCheck
-                    }
-                    label="Metode"
-                    value={
-                      selectedAbsen.metode
-                    }
-                  />
-                </div>
-
-                {/* FOTO + GPS */}
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-                  {/* FOTO */}
-
-                  <div className="border theme-border rounded-xl overflow-hidden">
-                    <div className="px-4 py-3 theme-card-soft border-b theme-border">
-                      <div className="flex items-center gap-2">
-                        <Camera
-                          size={15}
-                          className="text-[var(--color-primary)]"
-                        />
-
-                        <p className="text-xs font-semibold theme-text-secondary">
-                          Foto
-                          Kehadiran
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="aspect-video theme-card-soft flex items-center justify-center">
-                      {selectedAbsen.foto ? (
-                        <img
-                          src={
-                            selectedAbsen.foto
-                          }
-                          alt="Foto kehadiran"
-                          className="w-full h-full object-cover"
-                        />
-                      ) : (
-                        <div className="flex flex-col items-center">
-                          <Camera
-                            size={32}
-                            className="theme-text-placeholder"
-                          />
-
-                          <p className="text-xs theme-text-muted mt-2">
-                            Foto belum
-                            tersedia
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* GPS */}
-
-                  <div className="border theme-border rounded-xl overflow-hidden">
-                    <div className="px-4 py-3 theme-card-soft border-b theme-border">
-                      <div className="flex items-center gap-2">
-                        <Navigation
-                          size={15}
-                          className="text-[var(--color-primary)]"
-                        />
-
-                        <p className="text-xs font-semibold theme-text-secondary">
-                          Lokasi
-                          GPS
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="p-4">
-                      {Number.isFinite(
-                        selectedAbsen.latitude
-                      ) ? (
-                        <>
-                          <div className="h-28 rounded-lg theme-info flex items-center justify-center relative overflow-hidden">
-                            <div className="absolute inset-0 opacity-30">
-                              <div
-                                className="
-                                  w-full h-full
-                                  bg-[linear-gradient(90deg,transparent_49%,var(--color-primary)_50%,transparent_51%),linear-gradient(0deg,transparent_49%,var(--color-primary)_50%,transparent_51%)]
-                                  bg-[size:30px_30px]
-                                "
-                              />
-                            </div>
-
-                            <div className="relative w-10 h-10 rounded-full theme-primary flex items-center justify-center">
-                              <MapPin
-                                size={22}
-                                fill="currentColor"
-                              />
-                            </div>
-                          </div>
-
-                          <div className="mt-3 space-y-2">
-
-                            <div>
-                              <p className="text-[10px] theme-text-muted">
-                                Latitude
-                              </p>
-
-                              <p className="font-mono text-xs theme-text-secondary">
-                                {selectedAbsen.latitude.toFixed(
-                                  6
-                                )}
-                              </p>
-                            </div>
-
-                            <div>
-                              <p className="text-[10px] theme-text-muted">
-                                Longitude
-                              </p>
-
-                              <p className="font-mono text-xs theme-text-secondary">
-                                {Number.isFinite(
-                                  selectedAbsen.longitude
-                                )
-                                  ? selectedAbsen.longitude.toFixed(
-                                      6
-                                    )
-                                  : "-"}
-                              </p>
-                            </div>
-
-                            {Number.isFinite(
-                              selectedAbsen.akurasi
-                            ) && (
-                              <div className="flex items-center gap-2 text-[11px] theme-success">
-                                <Navigation
-                                  size={12}
-                                />
-
-                                Akurasi GPS
-                                ±
-                                {
-                                  selectedAbsen.akurasi
-                                }{" "}
-                                meter
-                              </div>
-                            )}
-                          </div>
-                        </>
-                      ) : (
-                        <div className="h-44 flex flex-col items-center justify-center">
-                          <MapPin
-                            size={32}
-                            className="theme-text-placeholder"
-                          />
-
-                          <p className="text-xs theme-text-muted mt-2">
-                            Lokasi tidak
-                            tersedia
-                          </p>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                {/* KETERANGAN */}
-
-                <div className="p-4 rounded-xl theme-card-soft border theme-border">
-                  <p className="text-[10px] uppercase tracking-wide font-bold theme-text-muted">
-                    Keterangan
-                  </p>
-
-                  <p className="text-sm theme-text-secondary mt-2">
-                    {
-                      selectedAbsen.keterangan
-                    }
-                  </p>
-                </div>
-
-                {/* CLOSE */}
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    setShowDetail(
-                      false
-                    )
-                  }
-                  className="
-                    w-full px-4 py-3
-                    rounded-xl
-                    theme-primary
-                    font-semibold text-sm
-                    transition-all
-                  "
-                >
-                  Tutup Detail
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
     </div>
   );
 }

@@ -38,6 +38,21 @@ export default function Header({
 
   const { theme, setTheme } = useTheme();
 
+  /* ============================================================
+     THEME MOUNT
+     Mencegah hydration mismatch antara server dan browser.
+  ============================================================ */
+
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  /* ============================================================
+     STATE
+  ============================================================ */
+
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
 
@@ -49,9 +64,9 @@ export default function Header({
   const [loadingNotif, setLoadingNotif] = useState(false);
   const [notifError, setNotifError] = useState("");
 
-  // ============================================================
-  // DETEKSI ROLE DARI PATHNAME
-  // ============================================================
+  /* ============================================================
+     DETEKSI ROLE DARI PATHNAME
+  ============================================================ */
 
   const resolveRole = (currentPathname) => {
     if (currentPathname?.startsWith("/super-admin")) {
@@ -83,9 +98,9 @@ export default function Header({
 
   const role = resolveRole(pathname);
 
-  // ============================================================
-  // MAPPING PATH PER ROLE
-  // ============================================================
+  /* ============================================================
+     MAPPING PATH PER ROLE
+  ============================================================ */
 
   const pathMap = {
     "super-admin": {
@@ -125,9 +140,9 @@ export default function Header({
     },
   };
 
-  // ============================================================
-  // ROLE LABEL
-  // ============================================================
+  /* ============================================================
+     ROLE LABEL
+  ============================================================ */
 
   const roleLabel =
     {
@@ -149,46 +164,30 @@ export default function Header({
       siswa: "text-cyan-600 bg-cyan-100",
     }[role] || "text-slate-600 bg-slate-100";
 
-  // ============================================================
-  // LOAD NOTIFIKASI DARI BACKEND
-  // ============================================================
+  /* ============================================================
+     LOAD NOTIFIKASI
+  ============================================================ */
 
-  const loadNotifications = useCallback(async (showLoading = false) => {
-    try {
-      if (showLoading) {
-        setLoadingNotif(true);
-      }
+  const loadNotifications = useCallback(
+    async (showLoading = false) => {
+      try {
+        if (showLoading) {
+          setLoadingNotif(true);
+        }
 
-      setNotifError("");
+        setNotifError("");
 
-      const result = await getNotifikasi();
+        const result = await getNotifikasi();
 
-      console.log("📢 RESPONSE NOTIFIKASI:", result);
+        console.log("📢 RESPONSE NOTIFIKASI:", result);
 
-      /*
-       * Backend successResponse kemungkinan menghasilkan:
-       *
-       * {
-       *   success: true,
-       *   message: "...",
-       *   data: {
-       *     unreadCount: 1,
-       *     list: [...]
-       *   }
-       * }
-       *
-       * Tetapi kita buat fleksibel kalau apiFetch
-       * ternyata sudah meng-unwrapping data.
-       */
+        const notificationData =
+          result?.data?.data ??
+          result?.data ??
+          result ??
+          {};
 
-      const notificationData =
-        result?.data?.data ??
-        result?.data ??
-        result ??
-        {};
-
-      const list =
-        Array.isArray(notificationData?.list)
+        const list = Array.isArray(notificationData?.list)
           ? notificationData.list
           : Array.isArray(result?.list)
             ? result.list
@@ -196,62 +195,56 @@ export default function Header({
               ? notificationData
               : [];
 
-      const unreadFromBackend =
-        notificationData?.unreadCount ??
-        result?.unreadCount;
+        const unreadFromBackend =
+          notificationData?.unreadCount ??
+          result?.unreadCount;
 
-      const unread =
-        unreadFromBackend !== undefined &&
-        unreadFromBackend !== null
-          ? Number(unreadFromBackend)
-          : list.filter(
-              (item) => !item?.dibaca
-            ).length;
+        const unread =
+          unreadFromBackend !== undefined &&
+          unreadFromBackend !== null
+            ? Number(unreadFromBackend)
+            : list.filter(
+                (item) => !item?.dibaca
+              ).length;
 
-      setNotifList(list);
+        setNotifList(list);
 
-      setUnreadCount(
-        Number.isFinite(unread)
-          ? unread
-          : 0
-      );
-    } catch (error) {
-      console.error(
-        "❌ Gagal mengambil notifikasi:",
-        error
-      );
+        setUnreadCount(
+          Number.isFinite(unread)
+            ? unread
+            : 0
+        );
+      } catch (error) {
+        console.error(
+          "❌ Gagal mengambil notifikasi:",
+          error
+        );
 
-      /*
-       * Jangan langsung menghapus notifikasi lama
-       * ketika polling gagal.
-       */
-
-      setNotifError(
-        error?.message ||
-          "Gagal mengambil notifikasi."
-      );
-    } finally {
-      if (showLoading) {
-        setLoadingNotif(false);
+        setNotifError(
+          error?.message ||
+            "Gagal mengambil notifikasi."
+        );
+      } finally {
+        if (showLoading) {
+          setLoadingNotif(false);
+        }
       }
-    }
-  }, []);
+    },
+    []
+  );
 
-  // ============================================================
-  // LOAD PERTAMA KALI
-  // ============================================================
+  /* ============================================================
+     LOAD PERTAMA KALI
+  ============================================================ */
 
   useEffect(() => {
     loadNotifications(true);
   }, [loadNotifications]);
 
-  // ============================================================
-  // AUTO REFRESH NOTIFIKASI
-  //
-  // Setiap 10 detik.
-  // Jadi kalau guru baru menilai tugas,
-  // badge notifikasi siswa akan muncul otomatis.
-  // ============================================================
+  /* ============================================================
+     AUTO REFRESH NOTIFIKASI
+     Setiap 10 detik.
+  ============================================================ */
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -263,9 +256,9 @@ export default function Header({
     };
   }, [loadNotifications]);
 
-  // ============================================================
-  // REFRESH SAAT DROPDOWN DIBUKA
-  // ============================================================
+  /* ============================================================
+     REFRESH SAAT DROPDOWN NOTIFIKASI DIBUKA
+  ============================================================ */
 
   useEffect(() => {
     if (isNotifOpen) {
@@ -273,9 +266,9 @@ export default function Header({
     }
   }, [isNotifOpen, loadNotifications]);
 
-  // ============================================================
-  // FORMAT WAKTU
-  // ============================================================
+  /* ============================================================
+     FORMAT WAKTU
+  ============================================================ */
 
   const formatNotificationTime = (dateString) => {
     if (!dateString) {
@@ -339,13 +332,11 @@ export default function Header({
     );
   };
 
-  // ============================================================
-  // KLIK NOTIFIKASI
-  // ============================================================
+  /* ============================================================
+     KLIK NOTIFIKASI
+  ============================================================ */
 
-  const handleNotificationClick = async (
-    notif
-  ) => {
+  const handleNotificationClick = async (notif) => {
     try {
       if (!notif?.id) {
         return;
@@ -377,9 +368,7 @@ export default function Header({
       setIsNotifOpen(false);
 
       if (notif.targetUrl) {
-        router.push(
-          notif.targetUrl
-        );
+        router.push(notif.targetUrl);
       }
     } catch (error) {
       console.error(
@@ -389,9 +378,9 @@ export default function Header({
     }
   };
 
-  // ============================================================
-  // TANDAI SEMUA DIBACA
-  // ============================================================
+  /* ============================================================
+     TANDAI SEMUA DIBACA
+  ============================================================ */
 
   const handleMarkAllAsRead = async () => {
     if (unreadCount === 0) {
@@ -420,9 +409,9 @@ export default function Header({
     }
   };
 
-  // ============================================================
-  // NAVIGASI PROFILE
-  // ============================================================
+  /* ============================================================
+     NAVIGASI PROFILE
+  ============================================================ */
 
   const navigateTo = (path) => {
     setIsProfileOpen(false);
@@ -432,9 +421,9 @@ export default function Header({
     }
   };
 
-  // ============================================================
-  // LOGOUT
-  // ============================================================
+  /* ============================================================
+     LOGOUT
+  ============================================================ */
 
   const handleLogout = () => {
     setIsProfileOpen(false);
@@ -446,9 +435,9 @@ export default function Header({
     router.push("/login");
   };
 
-  // ============================================================
-  // MENU PROFILE
-  // ============================================================
+  /* ============================================================
+     MENU PROFILE
+  ============================================================ */
 
   const currentPathMap =
     pathMap[role] ||
@@ -478,9 +467,9 @@ export default function Header({
     },
   ];
 
-  // ============================================================
-  // RENDER
-  // ============================================================
+  /* ============================================================
+     RENDER
+  ============================================================ */
 
   return (
     <header
@@ -492,7 +481,12 @@ export default function Header({
         dark:border-slate-700/70
       "
     >
-      <div className="h-full flex items-center justify-between px-4 md:px-6 lg:px-8">
+      <div
+        className="
+          h-full flex items-center justify-between
+          px-4 md:px-6 lg:px-8
+        "
+      >
 
         {/* ======================================================
             LEFT
@@ -515,7 +509,8 @@ export default function Header({
               className="
                 pl-10 pr-16 py-2
                 bg-slate-50/80 dark:bg-slate-800/80
-                border border-slate-200/60 dark:border-slate-700
+                border border-slate-200/60
+                dark:border-slate-700
                 rounded-xl
                 text-sm
                 text-slate-900 dark:text-white
@@ -544,7 +539,8 @@ export default function Header({
                   bg-slate-100 dark:bg-slate-700
                   px-1.5 py-0.5
                   rounded
-                  border border-slate-200 dark:border-slate-600
+                  border border-slate-200
+                  dark:border-slate-600
                   flex items-center gap-0.5
                 "
               >
@@ -579,67 +575,80 @@ export default function Header({
         <div className="flex items-center gap-1 md:gap-2">
 
           {/* ====================================================
-              DARK MODE
+              DARK / LIGHT MODE
+
+              mounted digunakan agar theme tidak dibaca
+              sebelum client selesai hydration.
           ==================================================== */}
 
-          <button
-            type="button"
-            onClick={() =>
-              setTheme(
-                theme === "dark"
-                  ? "light"
-                  : "dark"
-              )
-            }
-            className="
-              p-2 rounded-xl
-              hover:bg-slate-100
-              dark:hover:bg-slate-800
-              transition-all duration-200
-              text-slate-400
-              hover:text-slate-600
-              dark:hover:text-slate-200
-              hover:scale-105
-              relative group
-            "
-            aria-label={
-              theme === "dark"
-                ? "Mode terang"
-                : "Mode gelap"
-            }
-          >
-            {theme === "dark" ? (
-              <Sun
-                size={18}
-                className="text-yellow-500"
-              />
-            ) : (
-              <Moon size={18} />
-            )}
-
-            <span
+          {mounted ? (
+            <button
+              type="button"
+              onClick={() =>
+                setTheme(
+                  theme === "dark"
+                    ? "light"
+                    : "dark"
+                )
+              }
               className="
-                absolute -bottom-8
-                left-1/2
-                -translate-x-1/2
-                px-2 py-0.5
-                bg-slate-800
-                text-white
-                text-[10px]
-                rounded
-                opacity-0
-                group-hover:opacity-100
-                transition-opacity duration-200
-                whitespace-nowrap
-                pointer-events-none
-                z-50
+                p-2 rounded-xl
+                hover:bg-slate-100
+                dark:hover:bg-slate-800
+                transition-all duration-200
+                text-slate-400
+                hover:text-slate-600
+                dark:hover:text-slate-200
+                hover:scale-105
+                relative group
               "
+              aria-label={
+                theme === "dark"
+                  ? "Mode terang"
+                  : "Mode gelap"
+              }
             >
-              {theme === "dark"
-                ? "Mode Terang"
-                : "Mode Gelap"}
-            </span>
-          </button>
+              {theme === "dark" ? (
+                <Sun
+                  size={18}
+                  className="text-yellow-500"
+                />
+              ) : (
+                <Moon size={18} />
+              )}
+
+              <span
+                className="
+                  absolute -bottom-8
+                  left-1/2
+                  -translate-x-1/2
+                  px-2 py-0.5
+                  bg-slate-800
+                  text-white
+                  text-[10px]
+                  rounded
+                  opacity-0
+                  group-hover:opacity-100
+                  transition-opacity duration-200
+                  whitespace-nowrap
+                  pointer-events-none
+                  z-50
+                "
+              >
+                {theme === "dark"
+                  ? "Mode Terang"
+                  : "Mode Gelap"}
+              </span>
+            </button>
+          ) : (
+            <div
+              className="
+                p-2 rounded-xl
+                w-9 h-9
+              "
+              aria-hidden="true"
+            />
+          )}
 
           {/* ====================================================
               NOTIFIKASI
@@ -670,17 +679,52 @@ export default function Header({
 
               {unreadCount > 0 && (
                 <>
-                  <span className="absolute -top-0.5 -right-0.5 min-w-5 h-5 px-1 bg-gradient-to-r from-red-500 to-rose-500 text-white text-[10px] rounded-full flex items-center justify-center font-bold shadow-lg shadow-red-500/30">
+                  <span
+                    className="
+                      absolute -top-0.5 -right-0.5
+                      min-w-5 h-5 px-1
+                      bg-gradient-to-r
+                      from-red-500 to-rose-500
+                      text-white text-[10px]
+                      rounded-full
+                      flex items-center justify-center
+                      font-bold
+                      shadow-lg
+                      shadow-red-500/30
+                    "
+                  >
                     {unreadCount > 99
                       ? "99+"
                       : unreadCount}
                   </span>
 
-                  <span className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full animate-ping bg-red-400/30" />
+                  <span
+                    className="
+                      absolute -top-0.5 -right-0.5
+                      w-5 h-5 rounded-full
+                      animate-ping
+                      bg-red-400/30
+                    "
+                  />
                 </>
               )}
 
-              <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-slate-800 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
+              <span
+                className="
+                  absolute -bottom-8
+                  left-1/2
+                  -translate-x-1/2
+                  px-2 py-0.5
+                  bg-slate-800
+                  text-white text-[10px]
+                  rounded
+                  opacity-0
+                  group-hover:opacity-100
+                  transition-opacity duration-200
+                  whitespace-nowrap
+                  pointer-events-none
+                "
+              >
                 Notifikasi
               </span>
             </button>
@@ -701,7 +745,6 @@ export default function Header({
                   overflow-hidden
                 "
               >
-
                 {/* HEADER */}
 
                 <div
@@ -716,7 +759,8 @@ export default function Header({
                     <div
                       className="
                         w-8 h-8 rounded-lg
-                        bg-blue-50 dark:bg-blue-950/40
+                        bg-blue-50
+                        dark:bg-blue-950/40
                         flex items-center justify-center
                       "
                     >
@@ -767,7 +811,11 @@ export default function Header({
                     <div className="px-4 py-10 text-center">
                       <Loader2
                         size={25}
-                        className="text-blue-500 animate-spin mx-auto mb-2"
+                        className="
+                          text-blue-500
+                          animate-spin
+                          mx-auto mb-2
+                        "
                       />
 
                       <p className="text-xs text-slate-400">
@@ -776,7 +824,17 @@ export default function Header({
                     </div>
                   ) : notifError ? (
                     <div className="px-4 py-8 text-center">
-                      <div className="w-10 h-10 rounded-full bg-red-50 dark:bg-red-950/30 flex items-center justify-center mx-auto mb-2">
+                      <div
+                        className="
+                          w-10 h-10
+                          rounded-full
+                          bg-red-50
+                          dark:bg-red-950/30
+                          flex items-center
+                          justify-center
+                          mx-auto mb-2
+                        "
+                      >
                         <Bell
                           size={18}
                           className="text-red-400"
@@ -794,11 +852,14 @@ export default function Header({
                       <button
                         type="button"
                         onClick={() =>
-                          loadNotifications(
-                            true
-                          )
+                          loadNotifications(true)
                         }
-                        className="mt-2 text-[11px] text-blue-600 hover:underline"
+                        className="
+                          mt-2
+                          text-[11px]
+                          text-blue-600
+                          hover:underline
+                        "
                       >
                         Coba lagi
                       </button>
@@ -815,19 +876,35 @@ export default function Header({
                               notif
                             )
                           }
-                          className={`w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-150 border-l-4 ${
-                            !notif.dibaca
-                              ? "border-l-blue-500 bg-blue-50/30 dark:bg-blue-950/20"
-                              : "border-l-transparent"
-                          }`}
+                          className={`
+                            w-full text-left
+                            px-4 py-3
+                            hover:bg-slate-50
+                            dark:hover:bg-slate-800
+                            transition-all duration-150
+                            border-l-4
+                            ${
+                              !notif.dibaca
+                                ? "border-l-blue-500 bg-blue-50/30 dark:bg-blue-950/20"
+                                : "border-l-transparent"
+                            }
+                          `}
                         >
                           <div className="flex gap-3">
                             <div
-                              className={`mt-0.5 w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                                !notif.dibaca
-                                  ? "bg-blue-100 dark:bg-blue-950/50 text-blue-600"
-                                  : "bg-slate-100 dark:bg-slate-800 text-slate-400"
-                              }`}
+                              className={`
+                                mt-0.5
+                                w-8 h-8
+                                rounded-lg
+                                flex items-center
+                                justify-center
+                                flex-shrink-0
+                                ${
+                                  !notif.dibaca
+                                    ? "bg-blue-100 dark:bg-blue-950/50 text-blue-600"
+                                    : "bg-slate-100 dark:bg-slate-800 text-slate-400"
+                                }
+                              `}
                             >
                               <Bell size={14} />
                             </div>
@@ -835,33 +912,72 @@ export default function Header({
                             <div className="min-w-0 flex-1">
                               <div className="flex items-start justify-between gap-2">
                                 <p
-                                  className={`text-sm leading-tight ${
-                                    !notif.dibaca
-                                      ? "font-semibold text-slate-700 dark:text-slate-100"
-                                      : "font-medium text-slate-600 dark:text-slate-300"
-                                  }`}
+                                  className={`
+                                    text-sm leading-tight
+                                    ${
+                                      !notif.dibaca
+                                        ? "font-semibold text-slate-700 dark:text-slate-100"
+                                        : "font-medium text-slate-600 dark:text-slate-300"
+                                    }
+                                  `}
                                 >
                                   {notif.judul ||
                                     "Notifikasi"}
                                 </p>
 
                                 {!notif.dibaca && (
-                                  <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0 mt-1.5" />
+                                  <span
+                                    className="
+                                      w-2 h-2
+                                      rounded-full
+                                      bg-blue-500
+                                      flex-shrink-0
+                                      mt-1.5
+                                    "
+                                  />
                                 )}
                               </div>
 
-                              <p className="text-xs text-slate-400 mt-1 line-clamp-2">
+                              <p
+                                className="
+                                  text-xs
+                                  text-slate-400
+                                  mt-1
+                                  line-clamp-2
+                                "
+                              >
                                 {notif.isi || "-"}
                               </p>
 
-                              <div className="flex items-center gap-2 mt-1.5">
+                              <div
+                                className="
+                                  flex items-center
+                                  gap-2 mt-1.5
+                                "
+                              >
                                 {notif.kategori && (
-                                  <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
+                                  <span
+                                    className="
+                                      text-[9px]
+                                      px-1.5 py-0.5
+                                      rounded-full
+                                      bg-slate-100
+                                      dark:bg-slate-800
+                                      text-slate-500
+                                      dark:text-slate-400
+                                    "
+                                  >
                                     {notif.kategori}
                                   </span>
                                 )}
 
-                                <span className="text-[10px] text-slate-300 dark:text-slate-500">
+                                <span
+                                  className="
+                                    text-[10px]
+                                    text-slate-300
+                                    dark:text-slate-500
+                                  "
+                                >
                                   {formatNotificationTime(
                                     notif.dibuatPada
                                   )}
@@ -873,14 +989,30 @@ export default function Header({
                       ))
                   ) : (
                     <div className="px-4 py-10 text-center">
-                      <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-3">
+                      <div
+                        className="
+                          w-12 h-12
+                          rounded-full
+                          bg-slate-100
+                          dark:bg-slate-800
+                          flex items-center
+                          justify-center
+                          mx-auto mb-3
+                        "
+                      >
                         <Bell
                           size={22}
                           className="text-slate-300"
                         />
                       </div>
 
-                      <p className="text-sm font-medium text-slate-500 dark:text-slate-300">
+                      <p
+                        className="
+                          text-sm font-medium
+                          text-slate-500
+                          dark:text-slate-300
+                        "
+                      >
                         Tidak ada notifikasi
                       </p>
 
@@ -893,21 +1025,35 @@ export default function Header({
 
                 {/* FOOTER */}
 
-                <div className="px-4 py-2.5 border-t border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
+                <div
+                  className="
+                    px-4 py-2.5
+                    border-t
+                    border-slate-100
+                    dark:border-slate-700
+                    bg-slate-50/50
+                    dark:bg-slate-800/50
+                  "
+                >
                   <button
                     type="button"
                     onClick={() => {
                       setIsNotifOpen(false);
 
-                      if (
-                        currentPathMap.profile
-                      ) {
+                      if (currentPathMap.profile) {
                         router.push(
                           currentPathMap.profile
                         );
                       }
                     }}
-                    className="text-xs text-blue-600 font-medium hover:text-blue-700 transition-colors w-full text-center"
+                    className="
+                      text-xs
+                      text-blue-600
+                      font-medium
+                      hover:text-blue-700
+                      transition-colors
+                      w-full text-center
+                    "
                   >
                     Lihat semua notifikasi →
                   </button>
@@ -940,32 +1086,77 @@ export default function Header({
               aria-label="Menu profil"
             >
               <div className="relative">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white text-xs font-bold shadow-md shadow-blue-500/20 group-hover:shadow-blue-500/30 transition-shadow">
+                <div
+                  className="
+                    w-8 h-8
+                    rounded-full
+                    bg-gradient-to-br
+                    from-blue-500 to-indigo-500
+                    flex items-center
+                    justify-center
+                    text-white text-xs
+                    font-bold
+                    shadow-md
+                    shadow-blue-500/20
+                    group-hover:shadow-blue-500/30
+                    transition-shadow
+                  "
+                >
                   {user?.avatar ||
                     user?.name?.charAt(0) ||
                     "U"}
                 </div>
 
-                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-white dark:border-slate-900 shadow-sm" />
+                <div
+                  className="
+                    absolute -bottom-0.5 -right-0.5
+                    w-3 h-3
+                    bg-emerald-400
+                    rounded-full
+                    border-2
+                    border-white
+                    dark:border-slate-900
+                    shadow-sm
+                  "
+                />
               </div>
 
               <div className="hidden md:block text-left">
-                <p className="text-sm font-semibold text-slate-700 dark:text-slate-100 leading-tight">
+                <p
+                  className="
+                    text-sm font-semibold
+                    text-slate-700
+                    dark:text-slate-100
+                    leading-tight
+                  "
+                >
                   {user?.name || "User"}
                 </p>
 
-                <p className="text-[10px] text-slate-400 leading-tight">
+                <p
+                  className="
+                    text-[10px]
+                    text-slate-400
+                    leading-tight
+                  "
+                >
                   {user?.email || "-"}
                 </p>
               </div>
 
               <ChevronDown
                 size={16}
-                className={`text-slate-400 transition-all duration-200 group-hover:text-slate-600 dark:group-hover:text-slate-200 ${
-                  isProfileOpen
-                    ? "rotate-180"
-                    : ""
-                }`}
+                className={`
+                  text-slate-400
+                  transition-all duration-200
+                  group-hover:text-slate-600
+                  dark:group-hover:text-slate-200
+                  ${
+                    isProfileOpen
+                      ? "rotate-180"
+                      : ""
+                  }
+                `}
               />
             </button>
 
@@ -984,10 +1175,21 @@ export default function Header({
                   overflow-hidden
                 "
               >
-
                 {/* ROLE */}
 
-                <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-700 flex items-center gap-1.5 text-[10px] font-medium text-slate-500 dark:text-slate-400">
+                <div
+                  className="
+                    px-4 py-2
+                    border-b
+                    border-slate-100
+                    dark:border-slate-700
+                    flex items-center gap-1.5
+                    text-[10px]
+                    font-medium
+                    text-slate-500
+                    dark:text-slate-400
+                  "
+                >
                   <Crown
                     size={11}
                     className="text-yellow-500"
@@ -996,7 +1198,11 @@ export default function Header({
                   <span>Role:</span>
 
                   <span
-                    className={`px-2 py-0.5 rounded-full ${roleBadgeColor}`}
+                    className={`
+                      px-2 py-0.5
+                      rounded-full
+                      ${roleBadgeColor}
+                    `}
                   >
                     {roleLabel}
                   </span>
@@ -1028,7 +1234,16 @@ export default function Header({
                         "
                       >
                         <div
-                          className={`w-8 h-8 rounded-lg ${item.iconBg} flex items-center justify-center ${item.iconColor} group-hover:scale-110 transition-transform`}
+                          className={`
+                            w-8 h-8
+                            rounded-lg
+                            ${item.iconBg}
+                            flex items-center
+                            justify-center
+                            ${item.iconColor}
+                            group-hover:scale-110
+                            transition-transform
+                          `}
                         >
                           <Icon size={16} />
                         </div>
@@ -1043,7 +1258,14 @@ export default function Header({
 
                 {/* LOGOUT */}
 
-                <div className="border-t border-slate-100 dark:border-slate-700 pt-1">
+                <div
+                  className="
+                    border-t
+                    border-slate-100
+                    dark:border-slate-700
+                    pt-1
+                  "
+                >
                   <button
                     type="button"
                     onClick={handleLogout}
@@ -1057,7 +1279,21 @@ export default function Header({
                       group
                     "
                   >
-                    <div className="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-950/30 flex items-center justify-center text-red-400 group-hover:bg-red-100 dark:group-hover:bg-red-950/50 group-hover:scale-110 transition-all">
+                    <div
+                      className="
+                        w-8 h-8
+                        rounded-lg
+                        bg-red-50
+                        dark:bg-red-950/30
+                        flex items-center
+                        justify-center
+                        text-red-400
+                        group-hover:bg-red-100
+                        dark:group-hover:bg-red-950/50
+                        group-hover:scale-110
+                        transition-all
+                      "
+                    >
                       <LogOut size={16} />
                     </div>
 
@@ -1069,8 +1305,24 @@ export default function Header({
 
                 {/* VERSION */}
 
-                <div className="px-4 py-2 border-t border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
-                  <p className="text-[10px] text-slate-400 text-center tracking-widest">
+                <div
+                  className="
+                    px-4 py-2
+                    border-t
+                    border-slate-100
+                    dark:border-slate-700
+                    bg-slate-50/50
+                    dark:bg-slate-800/50
+                  "
+                >
+                  <p
+                    className="
+                      text-[10px]
+                      text-slate-400
+                      text-center
+                      tracking-widest
+                    "
+                  >
                     v2.0.0 • 2026
                   </p>
                 </div>
