@@ -1,18 +1,18 @@
-import Navbar from "./components/landingPage/Navbar";
-import Hero from "./components/landingPage/Hero";
-import Vision from "./components/landingPage/Vision";
-import Problems from "./components/landingPage/Problems";
-import Solutions from "./components/landingPage/Solutions";
-import Features from "./components/landingPage/Features";
-import Testimonial from "./components/landingPage/Testimonial";
-import EducationLevel from "./components/landingPage/EducationLevel";
-import Implementation from "./components/landingPage/Implementation";
-import FeaturedModule from "./components/landingPage/FeaturedModule";
-import Pricing from "./components/landingPage/Pricing";
-import FAQ from "./components/landingPage/FAQ";
-import CTA from "./components/landingPage/CTA";
-import Newsletter from "./components/landingPage/Newsletter";
-import Footer from "./components/landingPage/Footer";
+import Navbar from "@/app/components/landingPage/Navbar";
+import Hero from "@/app/components/landingPage/Hero";
+import Vision from "@/app/components/landingPage/Vision";
+import Problems from "@/app/components/landingPage/Problems";
+import Solutions from "@/app/components/landingPage/Solutions";
+import Features from "@/app/components/landingPage/Features";
+import Testimonial from "@/app/components/landingPage/Testimonial";
+import EducationLevel from "@/app/components/landingPage/EducationLevel";
+import Implementation from "@/app/components/landingPage/Implementation";
+import FeaturedModule from "@/app/components/landingPage/FeaturedModule";
+import Pricing from "@/app/components/landingPage/Pricing";
+import FAQ from "@/app/components/landingPage/FAQ";
+import CTA from "@/app/components/landingPage/CTA";
+import Newsletter from "@/app/components/landingPage/Newsletter";
+import Footer from "@/app/components/landingPage/Footer";
 
 export default function Home() {
   return (

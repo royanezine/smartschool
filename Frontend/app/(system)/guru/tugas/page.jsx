@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import Sidebar from "../../../components/Sidebar";
-import Header from "../../../components/Header";
+import Sidebar from "@/app/components/Sidebar";
+import Header from "@/app/components/Header";
 
 import {
   AlertCircle,
@@ -29,7 +29,7 @@ import {
   X,
 } from "lucide-react";
 
-import { getTugasGuru } from "../../../../services/tugas.service";
+import { getTugasGuru } from "@/services/tugas.service";
 
 /* =========================================================
    THEME HELPERS

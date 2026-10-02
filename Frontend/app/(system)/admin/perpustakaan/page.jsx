@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 
-import Header from "../../../components/Header";
-import Sidebar from "../../../components/Sidebar";
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
 
 import {
   ArrowUpRight,
@@ -30,7 +30,7 @@ import {
 import {
   getBuku,
   getPeminjaman,
-} from "../../../../services/perpustakaan.service";
+} from "@/services/perpustakaan.service";
 
 /* =========================================================
    THEME HELPERS

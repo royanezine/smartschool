@@ -3,8 +3,8 @@
 import { useState, useEffect, useMemo } from "react";
 import { useRouter, useParams } from "next/navigation";
 
-import Header from "../../../../../../components/Header";
-import Sidebar from "../../../../../../components/Sidebar";
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
 
 import {
   Building,
@@ -28,7 +28,7 @@ import {
   getGedung,
   getLantaiByGedung,
   deleteGedung,
-} from "../../../../../../../services/infrastruktur.service";
+} from "@/services/infrastruktur.service";
 
 /* ============================================================
    THEME HELPERS

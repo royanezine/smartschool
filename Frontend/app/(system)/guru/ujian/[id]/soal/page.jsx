@@ -26,16 +26,16 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
-import Header from "../../../../../components/Header";
-import Sidebar from "../../../../../components/Sidebar";
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
 
-import { getUjianById } from "../../../../../../services/ujian.service";
+import { getUjianById } from "@/services/ujian.service";
 
 import {
   getSoalByUjian,
   createSoal,
   updateSoal,
-} from "../../../../../../services/soalUjian.service";
+} from "@/services/soalUjian.service";
 
 /* =====================================================
    THEME HELPERS

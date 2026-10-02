@@ -24,7 +24,7 @@ import {
     AlertCircle,
 } from "lucide-react";
 import { useState, useEffect } from "react";
-import { getDetailSekolahBinaan } from "../../../../../services/yayasan.service";
+import { getDetailSekolahBinaan } from "@/services/yayasan.service";
 
 // =============================================================
 // THEME HELPERS

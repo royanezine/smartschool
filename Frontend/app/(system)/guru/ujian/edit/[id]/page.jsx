@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
-import Sidebar from "../../../../../components/Sidebar";
-import Header from "../../../../../components/Header";
+import Sidebar from "@/app/components/Sidebar";
+import Header from "@/app/components/Header";
 
 import {
   ArrowLeft,
@@ -23,7 +23,7 @@ import {
 import {
   getUjianById,
   updateUjian,
-} from "../../../../../../services/ujian.service";
+} from "@/services/ujian.service";
 
 /* =========================================================
    THEME HELPERS

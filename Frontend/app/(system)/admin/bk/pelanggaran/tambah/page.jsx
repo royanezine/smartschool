@@ -3,13 +3,13 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import Header from "../../../../../components/Header";
-import Sidebar from "../../../../../components/Sidebar";
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
 
 import {
   createPelanggaranSiswa,
   getKategoriPelanggaran,
-} from "../../../../../../services/bk.service";
+} from "@/services/bk.service";
 
 const inputClass =
   "theme-input w-full rounded-xl border px-4 py-2.5 text-sm font-medium shadow-sm outline-none transition focus:border-[var(--color-primary)]";

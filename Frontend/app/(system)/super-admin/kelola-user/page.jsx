@@ -31,7 +31,7 @@ import {
   deleteUser,
   updateUserStatus,
     resetUserPassword,
-} from "../../../../services/user.service";
+} from "@/services/user.service";
 
 // ============================================================
 // THEME HELPERS

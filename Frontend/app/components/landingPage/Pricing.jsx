@@ -19,7 +19,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 
-import { getPaket } from "../../../services/paket.service";
+import { getPaket } from "@/services/paket.service";
 
 export default function PricingSection() {
   const [paket, setPaket] = useState([]);

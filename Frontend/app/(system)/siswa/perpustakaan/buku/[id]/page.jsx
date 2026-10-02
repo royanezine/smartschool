@@ -28,7 +28,7 @@ import {
   getPeminjaman,
   pinjamBuku,
   kembalikanBuku,
-} from "../../../../services/perpustakaan.service";
+} from "@/services/perpustakaan.service";
 
 /* =========================================================
    THEME HELPERS

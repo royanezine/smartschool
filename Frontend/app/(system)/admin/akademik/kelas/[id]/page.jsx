@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 
-import Header from "../../../../../components/Header";
-import Sidebar from "../../../../../components/Sidebar";
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
 
 import {
   ArrowLeft,
@@ -26,8 +26,8 @@ import {
   RefreshCw,
 } from "lucide-react";
 
-import { getKelasById } from "../../../../../../services/kelas.service";
-import { getJadwalMengajar } from "../../../../../../services/jadwalMengajar.service";
+import { getKelasById } from "@/services/kelas.service";
+import { getJadwalMengajar } from "@/services/jadwalMengajar.service";
 
 const HARI_LIST = [
   "Senin",

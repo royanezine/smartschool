@@ -22,7 +22,7 @@ import {
   getPaketById,
   getFitur,
   updatePaket,
-} from "../../../../../../services/paket.service";
+} from "@/services/paket.service";
 
 /* ============================================================
    THEME HELPERS

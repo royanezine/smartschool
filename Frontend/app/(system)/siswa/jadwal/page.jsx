@@ -15,7 +15,7 @@ import {
   UserRound,
 } from "lucide-react";
 
-import { getJadwalMengajar } from "../../../../services/jadwalMengajar.service";
+import { getJadwalMengajar } from "@/services/jadwalMengajar.service";
 
 /* =========================================================
    THEME HELPERS

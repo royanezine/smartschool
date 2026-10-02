@@ -23,7 +23,7 @@ import {
   Sparkles,
 } from "lucide-react";
 
-import { createUser } from "../../../../../services/user.service";
+import { createUser } from "@/services/user.service";
 
 // ============================================================
 // THEME HELPERS

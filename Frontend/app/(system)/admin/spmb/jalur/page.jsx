@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import Header from "../../../../components/Header";
-import Sidebar from "../../../../components/Sidebar";
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
 
 import {
   Plus,
@@ -20,7 +20,7 @@ import {
   createJalurPpdb,
   updateJalurPpdb,
   deleteJalurPpdb,
-} from "../../../../../services/jalurPpdb.service";
+} from "@/services/jalurPpdb.service";
 
 // =========================================================
 // THEME HELPERS

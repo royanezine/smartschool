@@ -10,7 +10,7 @@ import {
   Users,
 } from "lucide-react";
 
-import LoginForm from "../../components/auth/LoginForm";
+import LoginForm from "@/app/components/auth/LoginForm";
 
 export default function LoginPage() {
   return (

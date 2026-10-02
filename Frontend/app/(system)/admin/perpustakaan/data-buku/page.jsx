@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import Sidebar from "../../../../components/Sidebar";
-import Header from "../../../../components/Header";
+import Sidebar from "@/app/components/Sidebar";
+import Header from "@/app/components/Header";
 
 import {
   BookOpen,
@@ -29,7 +29,7 @@ import {
   createBuku,
   updateBuku,
   deleteBuku,
-} from "../../../../../services/perpustakaan.service";
+} from "@/services/perpustakaan.service";
 
 /* =========================================================
    THEME HELPERS

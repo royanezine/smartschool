@@ -17,14 +17,14 @@ import {
   Info,
 } from "lucide-react";
 
-import Header from "../../../../../../../components/Header";
-import Sidebar from "../../../../../../../components/Sidebar";
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
 
 import {
   getGedung,
   getLantaiByGedung,
   updateLantai,
-} from "../../../../../../../../services/infrastruktur.service";
+} from "@/services/infrastruktur.service";
 
 // ============================================================
 // THEME HELPERS

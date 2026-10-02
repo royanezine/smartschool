@@ -26,10 +26,10 @@ import {
 import {
   getKelas,
   getKelasById,
-} from "../../../../services/kelas.service";
+} from "@/services/kelas.service";
 
-import { getKelasMapel } from "../../../../services/kelasMapel.service";
-import { getUjianByKelasMapel } from "../../../../services/ujian.service";
+import { getKelasMapel } from "@/services/kelasMapel.service";
+import { getUjianByKelasMapel } from "@/services/ujian.service";
 
 // =========================================================
 // THEME HELPERS

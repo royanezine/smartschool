@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import Sidebar from "../../../components/Sidebar";
-import Header from "../../../components/Header";
+import Sidebar from "@/app/components/Sidebar";
+import Header from "@/app/components/Header";
 
 import {
   Search,
@@ -31,8 +31,8 @@ import {
   Database,
 } from "lucide-react";
 
-import { getAbsensiKelas } from "../../../../services/absensi.service";
-import { getKelas } from "../../../../services/kelas.service";
+import { getAbsensiKelas } from "@/services/absensi.service";
+import { getKelas } from "@/services/kelas.service";
 
 /* =========================================================
    DATE HELPERS

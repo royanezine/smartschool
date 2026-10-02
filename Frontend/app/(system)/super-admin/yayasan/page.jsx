@@ -31,7 +31,7 @@ import {
 import {
   getYayasanSummary,
   getSekolahBinaan,
-} from "../../../../services/yayasan.service";
+} from "@/services/yayasan.service";
 
 // =========================================================
 // CONSTANT

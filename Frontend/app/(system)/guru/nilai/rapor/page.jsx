@@ -2,21 +2,21 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import Sidebar from "../../../../components/Sidebar";
-import Header from "../../../../components/Header";
+import Sidebar from "@/app/components/Sidebar";
+import Header from "@/app/components/Header";
 
 import {
   getKelas,
   getKelasById,
-} from "../../../../../services/kelas.service";
+} from "@/services/kelas.service";
 
 import {
   getTahunAjaran,
-} from "../../../../../services/tahunAjaran.service";
+} from "@/services/tahunAjaran.service";
 
-import { getRaportSiswa } from "../../../../../services/raport.service";
+import { getRaportSiswa } from "@/services/raport.service";
 
-import { getNilaiUjianUntukKelas } from "../../../../../services/ujian.service";
+import { getNilaiUjianUntukKelas } from "@/services/ujian.service";
 
 import {
   FileCheck2,

@@ -9,8 +9,8 @@ import {
 
 import { useRouter } from "next/navigation";
 
-import Header from "../../../../components/Header";
-import Sidebar from "../../../../components/Sidebar";
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
 
 import {
   Search,
@@ -28,8 +28,8 @@ import {
   FileSpreadsheet,
 } from "lucide-react";
 
-import { getAbsensiKelas } from "../../../../../services/absensi.service";
-import { getKelas } from "../../../../../services/kelas.service";
+import { getAbsensiKelas } from "@/services/absensi.service";
+import { getKelas } from "@/services/kelas.service";
 
 /* =========================================================
    API CONFIG

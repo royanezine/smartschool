@@ -4,8 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-import Header from "../../../../../components/Header";
-import Sidebar from "../../../../../components/Sidebar";
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
 
 import {
   ArrowLeft,
@@ -24,8 +24,8 @@ import {
   Search,
 } from "lucide-react";
 
-import { getKelasMapel } from "../../../../../../services/kelasMapel.service";
-import { createJadwalMengajar } from "../../../../../../services/jadwalMengajar.service";
+import { getKelasMapel } from "@/services/kelasMapel.service";
+import { createJadwalMengajar } from "@/services/jadwalMengajar.service";
 
 // ============================================================
 // THEME HELPERS

@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 
-import { getAuditLogs } from "../../../../services/auditLog.service";
+import { getAuditLogs } from "@/services/auditLog.service";
 
 import {
   Activity,

@@ -3,8 +3,8 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-import Header from "../../../../../components/Header";
-import Sidebar from "../../../../../components/Sidebar";
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
 
 import {
   Building,
@@ -18,7 +18,7 @@ import {
   Image as ImageIcon,
 } from "lucide-react";
 
-import { createGedung } from "../../../../../../services/infrastruktur.service";
+import { createGedung } from "@/services/infrastruktur.service";
 
 // ============================================================
 // GLOBAL THEME HELPERS

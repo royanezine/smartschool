@@ -2,8 +2,8 @@
 
 import { useState, useMemo, useRef } from "react";
 import * as XLSX from "xlsx";
-import Header from "../../../../components/Header";
-import Sidebar from "../../../../components/Sidebar";
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
 
 import {
   CalendarDays,

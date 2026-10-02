@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import {
   getSekolahBinaan,
   getYayasanSummary,
-} from "../../../../services/yayasan.service";
+} from "@/services/yayasan.service";
 
 import {
   Building2,

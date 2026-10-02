@@ -23,7 +23,7 @@ import {
   getNotifikasi,
   markNotifikasiAsRead,
   markAllNotifikasiAsRead,
-} from "../../services/notifikasi.service";
+} from "@/services/notifikasi.service";
 
 export default function Header({
   notifications = [],

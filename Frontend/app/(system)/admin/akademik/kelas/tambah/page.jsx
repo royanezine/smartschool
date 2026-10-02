@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import Header from "../../../../../components/Header";
-import Sidebar from "../../../../../components/Sidebar";
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
 
 import {
   GraduationCap,
@@ -25,12 +25,12 @@ import {
   AlertCircle,
 } from "lucide-react";
 
-import { createKelas } from "../../../../../../services/kelas.service";
-import { getTahunAjaran } from "../../../../../../services/tahunAjaran.service";
+import { createKelas } from "@/services/kelas.service";
+import { getTahunAjaran } from "@/services/tahunAjaran.service";
 import {
   getGedung,
   getLantaiByGedung,
-} from "../../../../../../services/infrastruktur.service";
+} from "@/services/infrastruktur.service";
 
 const TINGKAT_OPTIONS = [
   { value: 10, label: "X (Sepuluh)" },

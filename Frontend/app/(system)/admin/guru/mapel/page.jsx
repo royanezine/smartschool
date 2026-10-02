@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import Header from "../../../../components/Header";
-import Sidebar from "../../../../components/Sidebar";
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
 
 import {
   Search,
@@ -29,9 +29,9 @@ import {
 import {
   getMataPelajaran,
   deleteMataPelajaran,
-} from "../../../../../services/mataPelajaran.service";
+} from "@/services/mataPelajaran.service";
 
-import { getKelasMapel } from "../../../../../services/kelasMapel.service";
+import { getKelasMapel } from "@/services/kelasMapel.service";
 
 /* =========================================================
    STATUS BADGE

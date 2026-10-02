@@ -41,7 +41,7 @@ import {
   getFitur,
   deletePaket,
   updatePaket,
-} from "../../../../services/paket.service";
+} from "@/services/paket.service";
 
 /* =========================================================
    THEME HELPERS

@@ -1,10 +1,11 @@
+
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
-import Sidebar from "../../../../components/Sidebar";
-import Header from "../../../../components/Header";
+import Sidebar from "@/app/components/Sidebar";
+import Header from "@/app/components/Header";
 
 import {
   ArrowLeft,
@@ -25,19 +26,44 @@ import {
 import {
   getUserById,
   updateUser,
-} from "../../../../../services/user.service";
+} from "@/services/user.service";
+
+/* =========================================================
+   HALAMAN UTAMA
+   Suspense membungkus komponen yang memakai useSearchParams
+========================================================= */
 
 export default function EditUserPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-slate-50">
+          <div className="text-center">
+            <RefreshCw className="mx-auto mb-3 h-7 w-7 animate-spin text-blue-600" />
+            <p className="text-sm font-medium text-slate-600">
+              Memuat halaman edit pengguna...
+            </p>
+          </div>
+        </div>
+      }
+    >
+      <EditUserContent />
+    </Suspense>
+  );
+}
+
+/* =========================================================
+   KONTEN EDIT USER
+========================================================= */
+
+function EditUserContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-
   const userId = searchParams.get("id");
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
 
@@ -63,77 +89,75 @@ export default function EditUserPage() {
   ========================================================= */
 
   useEffect(() => {
-    if (!userId) {
-      setError("ID pengguna tidak ditemukan.");
-      setLoading(false);
-      return;
+    let cancelled = false;
+
+    async function loadUser() {
+      if (!userId) {
+        setError("ID pengguna tidak ditemukan.");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await getUserById(userId);
+
+        const user =
+          response?.data?.user ??
+          response?.data ??
+          response?.user ??
+          null;
+
+        if (!user) {
+          throw new Error("Data pengguna tidak ditemukan.");
+        }
+
+        if (cancelled) return;
+
+        setForm({
+          email: user.email || "",
+          namaPengguna:
+            user.namaPengguna || user.username || "",
+          namaLengkap:
+            user.namaLengkap || user.nama || "",
+          kataSandi: "",
+          peranId:
+            user.peranId || user.peran?.id || "",
+          sekolahId:
+            user.sekolahId || user.sekolah?.id || "",
+          yayasanId:
+            user.yayasanId || user.yayasan?.id || "",
+          jenisKelamin: user.jenisKelamin || "",
+          nip: user.nip || "",
+          nipd: user.nipd || "",
+          nisn: user.nisn || "",
+          jabatan: user.jabatan || "",
+          golongan: user.golongan || "",
+          status: user.status || "aktif",
+        });
+      } catch (err) {
+        console.error("Gagal mengambil detail user:", err);
+
+        if (!cancelled) {
+          setError(
+            err?.message || "Gagal mengambil data pengguna."
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
     }
 
     loadUser();
+
+    return () => {
+      cancelled = true;
+    };
   }, [userId]);
-
-  const loadUser = async () => {
-    try {
-      setLoading(true);
-      setError("");
-
-      const response = await getUserById(userId);
-
-      const user = response?.data;
-
-      if (!user) {
-        throw new Error("Data pengguna tidak ditemukan.");
-      }
-
-      setForm({
-        email: user.email || "",
-        namaPengguna:
-          user.namaPengguna ||
-          user.username ||
-          "",
-        namaLengkap:
-          user.namaLengkap ||
-          user.nama ||
-          "",
-        kataSandi: "",
-        peranId:
-          user.peranId ||
-          user.peran?.id ||
-          "",
-        sekolahId:
-          user.sekolahId ||
-          user.sekolah?.id ||
-          "",
-        yayasanId:
-          user.yayasanId ||
-          user.yayasan?.id ||
-          "",
-        jenisKelamin:
-          user.jenisKelamin || "",
-        nip: user.nip || "",
-        nipd: user.nipd || "",
-        nisn: user.nisn || "",
-        jabatan:
-          user.jabatan || "",
-        golongan:
-          user.golongan || "",
-        status:
-          user.status || "aktif",
-      });
-    } catch (err) {
-      console.error(
-        "Gagal mengambil detail user:",
-        err
-      );
-
-      setError(
-        err?.message ||
-          "Gagal mengambil data pengguna."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
 
   /* =========================================================
      HANDLE FORM
@@ -177,79 +201,58 @@ export default function EditUserPage() {
 
       const payload = {
         email: form.email.trim(),
-        namaPengguna:
-          form.namaPengguna.trim() || undefined,
-        namaLengkap:
-          form.namaLengkap.trim(),
-
-        peranId:
-          form.peranId.trim() || null,
-
-        sekolahId:
-          form.sekolahId.trim() || null,
-
-        yayasanId:
-          form.yayasanId.trim() || null,
-
-        jenisKelamin:
-          form.jenisKelamin || null,
-
-        nip:
-          form.nip.trim() || null,
-
-        nipd:
-          form.nipd.trim() || null,
-
-        nisn:
-          form.nisn.trim() || null,
-
-        jabatan:
-          form.jabatan.trim() || null,
-
-        golongan:
-          form.golongan.trim() || null,
-
-        status:
-          form.status,
+        namaPengguna: form.namaPengguna.trim() || undefined,
+        namaLengkap: form.namaLengkap.trim(),
+        peranId: form.peranId.trim() || null,
+        sekolahId: form.sekolahId.trim() || null,
+        yayasanId: form.yayasanId.trim() || null,
+        jenisKelamin: form.jenisKelamin || null,
+        nip: form.nip.trim() || null,
+        nipd: form.nipd.trim() || null,
+        nisn: form.nisn.trim() || null,
+        jabatan: form.jabatan.trim() || null,
+        golongan: form.golongan.trim() || null,
+        status: form.status,
       };
 
-      /*
-       * Password hanya dikirim jika user
-       * memang mengisinya.
-       */
+      // Password hanya dikirim jika diisi.
       if (form.kataSandi.trim()) {
-        payload.kataSandi =
-          form.kataSandi.trim();
+        payload.kataSandi = form.kataSandi.trim();
       }
 
-      await updateUser(
-        userId,
-        payload
-      );
+      await updateUser(userId, payload);
 
-      setSuccess(
-        "Data pengguna berhasil diperbarui."
-      );
+      setSuccess("Data pengguna berhasil diperbarui.");
 
       setTimeout(() => {
-        router.push(
-          "/super-admin/kelola-user"
-        );
+        router.push("/super-admin/kelola-user");
       }, 800);
     } catch (err) {
-      console.error(
-        "Gagal memperbarui user:",
-        err
-      );
+      console.error("Gagal memperbarui user:", err);
 
       setError(
-        err?.message ||
-          "Gagal memperbarui data pengguna."
+        err?.message || "Gagal memperbarui data pengguna."
       );
     } finally {
       setSaving(false);
     }
   };
+
+  /* =========================================================
+     HEADER COMPONENT
+  ========================================================= */
+
+  const renderHeader = () => (
+    <Header
+      onMenuClick={() => setSidebarOpen(true)}
+      notifications={[]}
+      user={{
+        name: "Super Admin",
+        email: "admin@smartschool.com",
+        avatar: "SA",
+      }}
+    />
+  );
 
   /* =========================================================
      LOADING
@@ -264,19 +267,8 @@ export default function EditUserPage() {
           setOpen={setSidebarOpen}
         />
 
-        <div className="flex h-screen flex-1 flex-col overflow-hidden">
-          <Header
-            onMenuClick={() =>
-              setSidebarOpen(true)
-            }
-            notifications={[]}
-            user={{
-              name: "Super Admin",
-              email:
-                "admin@smartschool.com",
-              avatar: "SA",
-            }}
-          />
+        <div className="flex h-screen min-w-0 flex-1 flex-col overflow-hidden">
+          {renderHeader()}
 
           <main className="flex flex-1 items-center justify-center">
             <div className="text-center">
@@ -289,8 +281,7 @@ export default function EditUserPage() {
               </p>
 
               <p className="mt-1 text-xs text-slate-400">
-                Mengambil data dari server
-                SmartSchool.
+                Mengambil data dari server SmartSchool.
               </p>
             </div>
           </main>
@@ -298,6 +289,10 @@ export default function EditUserPage() {
       </div>
     );
   }
+
+  /* =========================================================
+     RENDER
+  ========================================================= */
 
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50">
@@ -307,35 +302,18 @@ export default function EditUserPage() {
         setOpen={setSidebarOpen}
       />
 
-      <div className="flex h-screen flex-1 flex-col overflow-hidden">
-        <Header
-          onMenuClick={() =>
-            setSidebarOpen(true)
-          }
-          notifications={[]}
-          user={{
-            name: "Super Admin",
-            email:
-              "admin@smartschool.com",
-            avatar: "SA",
-          }}
-        />
+      <div className="flex h-screen min-w-0 flex-1 flex-col overflow-hidden">
+        {renderHeader()}
 
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
           <div className="mx-auto w-full max-w-[1200px]">
-
-            {/* =================================================
-                HEADER
-            ================================================= */}
-
+            {/* HEADER */}
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <button
                   type="button"
                   onClick={() =>
-                    router.push(
-                      "/super-admin/kelola-user"
-                    )
+                    router.push("/super-admin/kelola-user")
                   }
                   className="mb-3 inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-blue-600"
                 >
@@ -348,18 +326,17 @@ export default function EditUserPage() {
                 </h1>
 
                 <p className="mt-1 text-sm text-slate-500">
-                  Perbarui informasi akun
-                  pengguna SmartSchool.
+                  Perbarui informasi akun pengguna SmartSchool.
                 </p>
               </div>
             </div>
 
-            {/* =================================================
-                ALERT ERROR
-            ================================================= */}
-
+            {/* ERROR */}
             {error && (
-              <div className="mb-6 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4">
+              <div
+                role="alert"
+                className="mb-6 flex items-start gap-3 rounded-2xl border border-red-200 bg-red-50 p-4"
+              >
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-red-100">
                   <AlertCircle className="h-5 w-5 text-red-600" />
                 </div>
@@ -368,7 +345,6 @@ export default function EditUserPage() {
                   <p className="font-semibold text-red-800">
                     Terjadi kesalahan
                   </p>
-
                   <p className="mt-1 text-sm text-red-700">
                     {error}
                   </p>
@@ -376,12 +352,12 @@ export default function EditUserPage() {
               </div>
             )}
 
-            {/* =================================================
-                SUCCESS
-            ================================================= */}
-
+            {/* SUCCESS */}
             {success && (
-              <div className="mb-6 flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4">
+              <div
+                role="status"
+                className="mb-6 flex items-start gap-3 rounded-2xl border border-emerald-200 bg-emerald-50 p-4"
+              >
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-emerald-100">
                   <CheckCircle2 className="h-5 w-5 text-emerald-600" />
                 </div>
@@ -390,7 +366,6 @@ export default function EditUserPage() {
                   <p className="font-semibold text-emerald-800">
                     Berhasil
                   </p>
-
                   <p className="mt-1 text-sm text-emerald-700">
                     {success}
                   </p>
@@ -398,47 +373,22 @@ export default function EditUserPage() {
               </div>
             )}
 
-            {/* =================================================
-                FORM
-            ================================================= */}
-
-            <form
-              onSubmit={handleSubmit}
-              className="space-y-6"
-            >
-
-              {/* AKUN */}
-
+            <form onSubmit={handleSubmit} className="space-y-6">
+              {/* INFORMASI AKUN */}
               <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
-                <div className="border-b border-slate-100 px-6 py-5">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
-                      <User className="h-5 w-5" />
-                    </div>
-
-                    <div>
-                      <h2 className="font-bold text-slate-900">
-                        Informasi Akun
-                      </h2>
-
-                      <p className="mt-0.5 text-xs text-slate-500">
-                        Data utama akun pengguna.
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                <SectionHeader
+                  icon={User}
+                  title="Informasi Akun"
+                  description="Data utama akun pengguna."
+                  color="blue"
+                />
 
                 <div className="grid grid-cols-1 gap-5 p-6 md:grid-cols-2">
-
                   <FormInput
                     label="Nama Lengkap"
                     name="namaLengkap"
-                    value={
-                      form.namaLengkap
-                    }
-                    onChange={
-                      handleChange
-                    }
+                    value={form.namaLengkap}
+                    onChange={handleChange}
                     placeholder="Masukkan nama lengkap"
                     icon={User}
                     required
@@ -447,12 +397,8 @@ export default function EditUserPage() {
                   <FormInput
                     label="Username"
                     name="namaPengguna"
-                    value={
-                      form.namaPengguna
-                    }
-                    onChange={
-                      handleChange
-                    }
+                    value={form.namaPengguna}
+                    onChange={handleChange}
                     placeholder="Masukkan username"
                     icon={User}
                   />
@@ -462,9 +408,7 @@ export default function EditUserPage() {
                     name="email"
                     type="email"
                     value={form.email}
-                    onChange={
-                      handleChange
-                    }
+                    onChange={handleChange}
                     placeholder="contoh@email.com"
                     icon={Mail}
                     required
@@ -474,50 +418,30 @@ export default function EditUserPage() {
                     label="Password Baru"
                     name="kataSandi"
                     type="password"
-                    value={
-                      form.kataSandi
-                    }
-                    onChange={
-                      handleChange
-                    }
+                    value={form.kataSandi}
+                    onChange={handleChange}
                     placeholder="Kosongkan jika tidak diubah"
                     icon={ShieldCheck}
+                    autoComplete="new-password"
                   />
-
                 </div>
               </section>
 
-              {/* ROLE */}
-
+              {/* ROLE DAN AKSES */}
               <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
-                <div className="border-b border-slate-100 px-6 py-5">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-indigo-50 text-indigo-600">
-                      <ShieldCheck className="h-5 w-5" />
-                    </div>
-
-                    <div>
-                      <h2 className="font-bold text-slate-900">
-                        Role & Akses
-                      </h2>
-
-                      <p className="mt-0.5 text-xs text-slate-500">
-                        Pengaturan role dan status
-                        akun pengguna.
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                <SectionHeader
+                  icon={ShieldCheck}
+                  title="Role & Akses"
+                  description="Pengaturan role dan status akun pengguna."
+                  color="indigo"
+                />
 
                 <div className="grid grid-cols-1 gap-5 p-6 md:grid-cols-2">
-
                   <FormInput
                     label="Role ID"
                     name="peranId"
                     value={form.peranId}
-                    onChange={
-                      handleChange
-                    }
+                    onChange={handleChange}
                     placeholder="ID role"
                     icon={ShieldCheck}
                   />
@@ -526,58 +450,31 @@ export default function EditUserPage() {
                     label="Status"
                     name="status"
                     value={form.status}
-                    onChange={
-                      handleChange
-                    }
+                    onChange={handleChange}
                     icon={CheckCircle2}
                     options={[
-                      {
-                        value: "aktif",
-                        label: "Aktif",
-                      },
-                      {
-                        value: "nonaktif",
-                        label: "Nonaktif",
-                      },
+                      { value: "aktif", label: "Aktif" },
+                      { value: "nonaktif", label: "Nonaktif" },
                     ]}
                   />
-
                 </div>
               </section>
 
-              {/* SEKOLAH / YAYASAN */}
-
+              {/* SEKOLAH DAN YAYASAN */}
               <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
-                <div className="border-b border-slate-100 px-6 py-5">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600">
-                      <Building2 className="h-5 w-5" />
-                    </div>
-
-                    <div>
-                      <h2 className="font-bold text-slate-900">
-                        Relasi Sekolah & Yayasan
-                      </h2>
-
-                      <p className="mt-0.5 text-xs text-slate-500">
-                        Hubungan akun dengan sekolah
-                        atau yayasan.
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                <SectionHeader
+                  icon={Building2}
+                  title="Relasi Sekolah & Yayasan"
+                  description="Hubungan akun dengan sekolah atau yayasan."
+                  color="emerald"
+                />
 
                 <div className="grid grid-cols-1 gap-5 p-6 md:grid-cols-2">
-
                   <FormInput
                     label="Sekolah ID"
                     name="sekolahId"
-                    value={
-                      form.sekolahId
-                    }
-                    onChange={
-                      handleChange
-                    }
+                    value={form.sekolahId}
+                    onChange={handleChange}
                     placeholder="ID sekolah"
                     icon={Building2}
                   />
@@ -585,69 +482,37 @@ export default function EditUserPage() {
                   <FormInput
                     label="Yayasan ID"
                     name="yayasanId"
-                    value={
-                      form.yayasanId
-                    }
-                    onChange={
-                      handleChange
-                    }
+                    value={form.yayasanId}
+                    onChange={handleChange}
                     placeholder="ID yayasan"
                     icon={Landmark}
                   />
-
                 </div>
               </section>
 
-              {/* DATA IDENTITAS */}
-
+              {/* IDENTITAS */}
               <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
-                <div className="border-b border-slate-100 px-6 py-5">
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-50 text-orange-600">
-                      <GraduationCap className="h-5 w-5" />
-                    </div>
-
-                    <div>
-                      <h2 className="font-bold text-slate-900">
-                        Data Identitas
-                      </h2>
-
-                      <p className="mt-0.5 text-xs text-slate-500">
-                        Informasi identitas dan data
-                        kepegawaian pengguna.
-                      </p>
-                    </div>
-                  </div>
-                </div>
+                <SectionHeader
+                  icon={GraduationCap}
+                  title="Data Identitas"
+                  description="Informasi identitas dan data kepegawaian pengguna."
+                  color="orange"
+                />
 
                 <div className="grid grid-cols-1 gap-5 p-6 md:grid-cols-2">
-
                   <FormSelect
                     label="Jenis Kelamin"
                     name="jenisKelamin"
-                    value={
-                      form.jenisKelamin
-                    }
-                    onChange={
-                      handleChange
-                    }
+                    value={form.jenisKelamin}
+                    onChange={handleChange}
                     icon={Users}
                     options={[
                       {
                         value: "",
-                        label:
-                          "Pilih jenis kelamin",
+                        label: "Pilih jenis kelamin",
                       },
-                      {
-                        value: "L",
-                        label:
-                          "Laki-laki",
-                      },
-                      {
-                        value: "P",
-                        label:
-                          "Perempuan",
-                      },
+                      { value: "L", label: "Laki-laki" },
+                      { value: "P", label: "Perempuan" },
                     ]}
                   />
 
@@ -655,9 +520,7 @@ export default function EditUserPage() {
                     label="NIP"
                     name="nip"
                     value={form.nip}
-                    onChange={
-                      handleChange
-                    }
+                    onChange={handleChange}
                     placeholder="Nomor Induk Pegawai"
                     icon={BriefcaseBusiness}
                   />
@@ -666,9 +529,7 @@ export default function EditUserPage() {
                     label="NIPD"
                     name="nipd"
                     value={form.nipd}
-                    onChange={
-                      handleChange
-                    }
+                    onChange={handleChange}
                     placeholder="Nomor Induk Peserta Didik"
                     icon={GraduationCap}
                   />
@@ -677,9 +538,7 @@ export default function EditUserPage() {
                     label="NISN"
                     name="nisn"
                     value={form.nisn}
-                    onChange={
-                      handleChange
-                    }
+                    onChange={handleChange}
                     placeholder="Nomor Induk Siswa Nasional"
                     icon={GraduationCap}
                   />
@@ -687,12 +546,8 @@ export default function EditUserPage() {
                   <FormInput
                     label="Jabatan"
                     name="jabatan"
-                    value={
-                      form.jabatan
-                    }
-                    onChange={
-                      handleChange
-                    }
+                    value={form.jabatan}
+                    onChange={handleChange}
                     placeholder="Contoh: Guru"
                     icon={BriefcaseBusiness}
                   />
@@ -700,28 +555,20 @@ export default function EditUserPage() {
                   <FormInput
                     label="Golongan"
                     name="golongan"
-                    value={
-                      form.golongan
-                    }
-                    onChange={
-                      handleChange
-                    }
+                    value={form.golongan}
+                    onChange={handleChange}
                     placeholder="Contoh: III/a"
                     icon={BriefcaseBusiness}
                   />
-
                 </div>
               </section>
 
-              {/* BUTTON */}
-
+              {/* TOMBOL */}
               <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
                 <button
                   type="button"
                   onClick={() =>
-                    router.push(
-                      "/super-admin/kelola-user"
-                    )
+                    router.push("/super-admin/kelola-user")
                   }
                   disabled={saving}
                   className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-5 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
@@ -747,10 +594,48 @@ export default function EditUserPage() {
                   )}
                 </button>
               </div>
-
             </form>
           </div>
         </main>
+      </div>
+    </div>
+  );
+}
+
+/* =========================================================
+   SECTION HEADER
+========================================================= */
+
+function SectionHeader({
+  icon: Icon,
+  title,
+  description,
+  color = "blue",
+}) {
+  const colors = {
+    blue: "bg-blue-50 text-blue-600",
+    indigo: "bg-indigo-50 text-indigo-600",
+    emerald: "bg-emerald-50 text-emerald-600",
+    orange: "bg-orange-50 text-orange-600",
+  };
+
+  return (
+    <div className="border-b border-slate-100 px-6 py-5">
+      <div className="flex items-center gap-3">
+        <div
+          className={`flex h-10 w-10 items-center justify-center rounded-xl ${
+            colors[color] || colors.blue
+          }`}
+        >
+          <Icon className="h-5 w-5" />
+        </div>
+
+        <div>
+          <h2 className="font-bold text-slate-900">{title}</h2>
+          <p className="mt-0.5 text-xs text-slate-500">
+            {description}
+          </p>
+        </div>
       </div>
     </div>
   );
@@ -769,16 +654,17 @@ function FormInput({
   type = "text",
   icon: Icon,
   required = false,
+  autoComplete,
 }) {
   return (
     <div>
-      <label className="mb-2 block text-sm font-semibold text-slate-700">
+      <label
+        htmlFor={name}
+        className="mb-2 block text-sm font-semibold text-slate-700"
+      >
         {label}
-
         {required && (
-          <span className="ml-1 text-red-500">
-            *
-          </span>
+          <span className="ml-1 text-red-500">*</span>
         )}
       </label>
 
@@ -788,16 +674,16 @@ function FormInput({
         )}
 
         <input
+          id={name}
           type={type}
           name={name}
-          value={value || ""}
+          value={value ?? ""}
           onChange={onChange}
           placeholder={placeholder}
           required={required}
+          autoComplete={autoComplete}
           className={`h-11 w-full rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 hover:border-slate-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-50 ${
-            Icon
-              ? "pl-10 pr-4"
-              : "px-4"
+            Icon ? "pl-10 pr-4" : "px-4"
           }`}
         />
       </div>
@@ -819,7 +705,10 @@ function FormSelect({
 }) {
   return (
     <div>
-      <label className="mb-2 block text-sm font-semibold text-slate-700">
+      <label
+        htmlFor={name}
+        className="mb-2 block text-sm font-semibold text-slate-700"
+      >
         {label}
       </label>
 
@@ -829,25 +718,19 @@ function FormSelect({
         )}
 
         <select
+          id={name}
           name={name}
-          value={value || ""}
+          value={value ?? ""}
           onChange={onChange}
           className={`h-11 w-full appearance-none rounded-xl border border-slate-200 bg-slate-50 pr-10 text-sm text-slate-800 outline-none transition hover:border-slate-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-50 ${
-            Icon
-              ? "pl-10"
-              : "pl-4"
+            Icon ? "pl-10" : "pl-4"
           }`}
         >
-          {options.map(
-            (option) => (
-              <option
-                key={option.value}
-                value={option.value}
-              >
-                {option.label}
-              </option>
-            )
-          )}
+          {options.map((option) => (
+            <option key={option.value} value={option.value}>
+              {option.label}
+            </option>
+          ))}
         </select>
 
         <span className="pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400">

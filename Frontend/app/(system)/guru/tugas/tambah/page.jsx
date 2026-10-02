@@ -15,13 +15,13 @@ import {
   Loader2,
 } from "lucide-react";
 
-import Sidebar from "../../../../components/Sidebar";
-import Header from "../../../../components/Header";
+import Sidebar from "@/app/components/Sidebar";
+import Header from "@/app/components/Header";
 
 import {
   getKelasMapelGuru,
   createTugas,
-} from "../../../../../services/tugas.service";
+} from "@/services/tugas.service";
 
 // ======================================================
 // THEME HELPERS

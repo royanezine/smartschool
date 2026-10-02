@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import Header from "../../../../components/Header";
-import Sidebar from "../../../../components/Sidebar";
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
 
 import {
   GraduationCap,
@@ -26,11 +26,11 @@ import {
 import {
   getKelas,
   deleteKelas,
-} from "../../../../../services/kelas.service";
+} from "@/services/kelas.service";
 
 import {
   getTahunAjaran,
-} from "../../../../../services/tahunAjaran.service";
+} from "@/services/tahunAjaran.service";
 
 // =========================================================
 // HELPER

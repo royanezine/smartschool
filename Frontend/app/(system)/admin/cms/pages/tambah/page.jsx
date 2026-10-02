@@ -24,9 +24,9 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 
-import Sidebar from "../../../../../components/Sidebar";
-import Header from "../../../../../components/Header";
-import RichTextEditor from "../../../../../components/cms/RichTextEditor";
+import Sidebar from "@/app/components/Sidebar";
+import Header from "@/app/components/Header";
+import RichTextEditor from "@/app/components/cms/RichTextEditor";
 import { apiFetch } from "../../../../../../lib/api";
 
 /* ============================================================

@@ -13,8 +13,8 @@ import {
   XCircle,
 } from "lucide-react";
 
-import Header from "../../../../../components/Header";
-import Sidebar from "../../../../../components/Sidebar";
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
 
 // Data dummy (sama dengan data di halaman utama)
 const DUMMY_DATA = [

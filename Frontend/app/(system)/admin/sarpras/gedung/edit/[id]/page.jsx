@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 
-import Header from "../../../../../../components/Header";
-import Sidebar from "../../../../../../components/Sidebar";
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
 
 import {
   Building,
@@ -25,7 +25,7 @@ import {
 import {
   getGedung,
   updateGedung,
-} from "../../../../../../../services/infrastruktur.service";
+} from "@/services/infrastruktur.service";
 
 export default function EditGedungPage() {
   const router = useRouter();

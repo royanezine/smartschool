@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -17,7 +17,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
-import { verifyTenant } from "../../../services/tenant.service";
+import { verifyTenant } from "@/services/tenant.service";
 
 function VerifyTenantPageContent() {
   const router = useRouter();

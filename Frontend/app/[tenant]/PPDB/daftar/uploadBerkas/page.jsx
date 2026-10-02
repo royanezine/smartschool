@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Suspense, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -19,10 +19,10 @@ import {
   FileCheck2,
 } from "lucide-react";
 
-import PpdbHeader from "../../../../components/ppdb/PpdbHeader";
-import PpdbFooter from "../../../../components/ppdb/PpdbFooter";
+import PpdbHeader from "@/app/components/ppdb/PpdbHeader";
+import PpdbFooter from "@/app/components/ppdb/PpdbFooter";
 
-import { uploadBerkasPpdb } from "../../../../../services/ppdb.service";
+import { uploadBerkasPpdb } from "@/services/ppdb.service";
 
 /* =========================================================
    DOKUMEN SESUAI BACKEND

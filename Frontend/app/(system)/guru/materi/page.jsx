@@ -9,8 +9,8 @@ import {
 } from "react";
 import { useRouter } from "next/navigation";
 
-import Sidebar from "../../../components/Sidebar";
-import Header from "../../../components/Header";
+import Sidebar from "@/app/components/Sidebar";
+import Header from "@/app/components/Header";
 
 import {
   BookOpen,
@@ -41,7 +41,7 @@ import {
 import {
   getMateriPembelajaran,
   deleteMateriPembelajaran,
-} from "../../../../services/materiPembelajaran.service";
+} from "@/services/materiPembelajaran.service";
 
 // ============================================================
 // THEME HELPERS

@@ -12,8 +12,8 @@ import {
   useSearchParams,
 } from "next/navigation";
 
-import Header from "../../../../../components/Header";
-import Sidebar from "../../../../../components/Sidebar";
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
 
 import {
   ArrowLeft,
@@ -30,11 +30,11 @@ import {
 
 import {
   getAbsensiKelas,
-} from "../../../../../../services/absensi.service";
+} from "@/services/absensi.service";
 
 import {
   getKelas,
-} from "../../../../../../services/kelas.service";
+} from "@/services/kelas.service";
 
 /* =========================================================
    HELPERS

@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 
-import Sidebar from "../../../../../components/Sidebar";
-import Header from "../../../../../components/Header";
+import Sidebar from "@/app/components/Sidebar";
+import Header from "@/app/components/Header";
 
 import {
   FileText,
@@ -22,7 +22,7 @@ import {
   Clock,
 } from "lucide-react";
 
-import { getDetailPeminjaman } from "../../../../../../services/sarpras.service";
+import { getDetailPeminjaman } from "@/services/sarpras.service";
 
 // =========================================================
 // THEME HELPERS

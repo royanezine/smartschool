@@ -9,7 +9,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 
-import { uploadBerkasPpdb } from "../../services/ppdb.services";
+import { uploadBerkasPpdb } from "@/services/ppdb.services";
 
 const jenisBerkas = [
   {

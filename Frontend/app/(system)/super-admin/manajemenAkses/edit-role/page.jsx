@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Suspense, useState, useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -36,7 +36,7 @@ import {
   getRoleById,
   getPermissions,
   updateRole,
-} from "../../../../../services/role.service";
+} from "@/services/role.service";
 
 // ============================================================
 // THEME HELPERS

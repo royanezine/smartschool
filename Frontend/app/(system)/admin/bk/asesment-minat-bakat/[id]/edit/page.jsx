@@ -3,13 +3,13 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
-import Header from "../../../../../../components/Header";
-import Sidebar from "../../../../../../components/Sidebar";
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
 
 import {
   getAsesmenMinatBakat,
   updateAsesmenMinatBakat,
-} from "../../../../../../../services/bk.service";
+} from "@/services/bk.service";
 
 /* =========================================================
    GLOBAL THEME INPUT

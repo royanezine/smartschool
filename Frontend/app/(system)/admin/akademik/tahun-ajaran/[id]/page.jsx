@@ -4,8 +4,8 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 
-import Header from "../../../../../components/Header";
-import Sidebar from "../../../../../components/Sidebar";
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
 
 import {
   CalendarDays,
@@ -24,8 +24,8 @@ import {
   GraduationCap,
 } from "lucide-react";
 
-import { getTahunAjaran } from "../../../../../../services/tahunAjaran.service";
-import { getKelas } from "../../../../../../services/kelas.service";
+import { getTahunAjaran } from "@/services/tahunAjaran.service";
+import { getKelas } from "@/services/kelas.service";
 
 export default function DetailTahunAjaranPage() {
   const router = useRouter();

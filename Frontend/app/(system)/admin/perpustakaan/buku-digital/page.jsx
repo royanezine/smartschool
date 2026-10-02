@@ -24,10 +24,10 @@ import {
   createBuku,
   updateBuku,
   deleteBuku,
-} from "../../../../../services/perpustakaan.service";
+} from "@/services/perpustakaan.service";
 
-import Sidebar from "../../../../components/Sidebar";
-import Header from "../../../../components/Header";
+import Sidebar from "@/app/components/Sidebar";
+import Header from "@/app/components/Header";
 
 /* =========================================================
    THEME HELPERS

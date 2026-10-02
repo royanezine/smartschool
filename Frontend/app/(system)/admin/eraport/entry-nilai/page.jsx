@@ -2,8 +2,8 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import Sidebar from "../../../../components/Sidebar";
-import Header from "../../../../components/Header";
+import Sidebar from "@/app/components/Sidebar";
+import Header from "@/app/components/Header";
 
 import {
   GraduationCap,
@@ -28,16 +28,16 @@ import {
   getKelas,
   getDetailKelas,
   getRaportSiswa,
-} from "../../../../../services/raport.service";
+} from "@/services/raport.service";
 
 import {
   exportRekapNilai,
   downloadRekapNilai,
-} from "../../../../../services/nilai.service";
+} from "@/services/nilai.service";
 
 import {
   getNilaiUjianUntukKelas,
-} from "../../../../../services/ujian.service";
+} from "@/services/ujian.service";
 
 /* =========================================================
    HELPERS

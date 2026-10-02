@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import Header from "../../../components/Header";
-import Sidebar from "../../../components/Sidebar";
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
 
 import { adminSidebarConfig } from "../../../../configs/navigation/admin";
 
@@ -25,7 +25,7 @@ import {
   Loader2,
 } from "lucide-react";
 
-import { getDashboardSekolah } from "../../../../services/dashboard.service";
+import { getDashboardSekolah } from "@/services/dashboard.service";
 
 const ADMIN_BRAND_NAME =
   adminSidebarConfig?.brandName || "Admin Sekolah";

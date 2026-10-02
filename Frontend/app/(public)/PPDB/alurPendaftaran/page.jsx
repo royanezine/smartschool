@@ -12,7 +12,7 @@ import {
   ChevronRight,
 } from "lucide-react";
 
-import PpdbNavbar from "../../../components/ppdb/PpdbNavbar";
+import PpdbNavbar from "@/app/components/ppdb/PpdbNavbar";
 
 
 

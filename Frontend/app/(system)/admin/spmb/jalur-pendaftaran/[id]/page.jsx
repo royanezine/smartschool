@@ -23,9 +23,9 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
-import Header from "../../../../../components/Header";
-import Sidebar from "../../../../../components/Sidebar";
-import { getJalurPpdb } from "../../../../../../services/jalurPpdb.service";
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
+import { getJalurPpdb } from "@/services/jalurPpdb.service";
 
 // =========================================================
 // THEME HELPERS

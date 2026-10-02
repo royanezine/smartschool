@@ -22,8 +22,8 @@ import {
   FileText,
 } from "lucide-react";
 
-import Header from "../../../../components/Header";
-import Sidebar from "../../../../components/Sidebar";
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
 
 export default function TrackingTunggakanPage() {
   const [isCollapsed, setIsCollapsed] = useState(false);

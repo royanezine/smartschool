@@ -17,10 +17,10 @@ import {
   Info,
 } from "lucide-react";
 
-import Header from "../../../../../components/Header";
-import Sidebar from "../../../../../components/Sidebar";
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
 
-import { createKategoriAset } from "../../../../../../services/sarpras.service";
+import { createKategoriAset } from "@/services/sarpras.service";
 
 // ============================================================
 // GLOBAL THEME HELPERS

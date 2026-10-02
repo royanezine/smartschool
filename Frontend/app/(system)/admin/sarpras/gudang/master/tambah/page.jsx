@@ -19,12 +19,12 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
-import Header from "../../../../../../components/Header";
-import Sidebar from "../../../../../../components/Sidebar";
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
 
 import {
   createGudang,
-} from "../../../../../../../services/sarpras.service";
+} from "@/services/sarpras.service";
 
 /* =========================================================
    GLOBAL THEME

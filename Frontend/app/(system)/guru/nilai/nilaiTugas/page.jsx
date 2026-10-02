@@ -2,8 +2,8 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import Sidebar from "../../../../components/Sidebar";
-import Header from "../../../../components/Header";
+import Sidebar from "@/app/components/Sidebar";
+import Header from "@/app/components/Header";
 
 import {
   GraduationCap,
@@ -28,7 +28,7 @@ import {
   getTugasGuru,
   getPengumpulanByTugas,
   beriNilaiTugas,
-} from "../../../../../services/tugas.service";
+} from "@/services/tugas.service";
 
 const KKM = 75;
 

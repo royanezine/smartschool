@@ -20,14 +20,14 @@ import {
   XCircle,
 } from "lucide-react";
 
-import Sidebar from "../../../../components/Sidebar";
-import Header from "../../../../components/Header";
+import Sidebar from "@/app/components/Sidebar";
+import Header from "@/app/components/Header";
 
 import {
   getDaftarIzin,
   verifikasiIzin,
   verifikasiPengajuan,
-} from "../../../../../services/izin.service";
+} from "@/services/izin.service";
 
 import { apiFetch } from "../../../../../lib/api";
 

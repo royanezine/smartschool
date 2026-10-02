@@ -25,16 +25,16 @@ import {
   ChevronUp,
 } from "lucide-react";
 
-import Header from "../../../../components/Header";
-import Sidebar from "../../../../components/Sidebar";
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
 
 import {
   getTahunAjaran,
   updateTahunAjaran,
   deleteTahunAjaran,
-} from "../../../../../services/tahunAjaran.service";
+} from "@/services/tahunAjaran.service";
 
-import { getKelas } from "../../../../../services/kelas.service";
+import { getKelas } from "@/services/kelas.service";
 
 export default function AdminTahunAjaranPage() {
   const [isCollapsed, setIsCollapsed] = useState(false);

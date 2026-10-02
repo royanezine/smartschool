@@ -17,13 +17,13 @@ import {
   AlertCircle,
 } from "lucide-react";
 
-import Header from "../../../../components/Header";
-import Sidebar from "../../../../components/Sidebar";
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
 
 import {
   verifikasiPpdb,
   uploadBerkasPpdb,
-} from "../../../../../services/ppdb.service";
+} from "@/services/ppdb.service";
 
 // =========================================================
 // THEME HELPERS

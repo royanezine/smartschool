@@ -14,7 +14,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 
-import { login } from "../../../services/auth.services";
+import { login } from "@/services/auth.services";
 
 export default function LoginForm() {
   const router = useRouter();

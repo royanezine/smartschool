@@ -3,8 +3,8 @@
 import { useState, useEffect } from "react";
 import { useRouter, useParams } from "next/navigation";
 
-import Sidebar from "../../../../components/Sidebar";
-import Header from "../../../../components/Header";
+import Sidebar from "@/app/components/Sidebar";
+import Header from "@/app/components/Header";
 
 import {
   ArrowLeft,
@@ -25,7 +25,7 @@ import {
   School,
 } from "lucide-react";
 
-import { getUsers } from "../../../../../services/user.service";
+import { getUsers } from "@/services/user.service";
 
 // =========================================================
 // INITIALS

@@ -21,9 +21,9 @@ import {
   RefreshCw,
 } from "lucide-react";
 
-import Sidebar from "../../../../components/Sidebar";
-import Header from "../../../../components/Header";
-import { getPendaftarPpdb } from "../../../../../services/ppdb.service";
+import Sidebar from "@/app/components/Sidebar";
+import Header from "@/app/components/Header";
+import { getPendaftarPpdb } from "@/services/ppdb.service";
 
 // ============================================================
 // THEME HELPERS

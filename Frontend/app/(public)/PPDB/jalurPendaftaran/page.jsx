@@ -13,7 +13,7 @@ import {
   ArrowLeftRight,
 } from "lucide-react";
 
-import PpdbNavbar from "../../../components/ppdb/PpdbNavbar";
+import PpdbNavbar from "@/app/components/ppdb/PpdbNavbar";
 
 const SEKOLAH_ID =
   "703e2791-49b4-419c-abbe-3f665c0bb87d";

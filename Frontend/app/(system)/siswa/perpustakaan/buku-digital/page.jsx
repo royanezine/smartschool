@@ -16,7 +16,7 @@ import {
   X,
 } from "lucide-react";
 
-import { getBuku } from "../../../../../services/perpustakaan.service";
+import { getBuku } from "@/services/perpustakaan.service";
 
 /* =========================================================
    THEME HELPERS

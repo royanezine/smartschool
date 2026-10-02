@@ -19,15 +19,15 @@ import {
   X,
 } from "lucide-react";
 
-import Header from "../../../../components/Header";
-import Sidebar from "../../../../components/Sidebar";
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
 
-import { getUjianById } from "../../../../../services/ujian.service";
+import { getUjianById } from "@/services/ujian.service";
 
 import {
   getSoalByUjian,
   deleteSoal,
-} from "../../../../../services/soalUjian.service";
+} from "@/services/soalUjian.service";
 
 /* =====================================================
    HELPER

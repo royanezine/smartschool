@@ -3,8 +3,8 @@
 import { useEffect, useState, Suspense } from "react";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
 
-import Sidebar from "../../../../../../components/Sidebar";
-import Header from "../../../../../../components/Header";
+import Sidebar from "@/app/components/Sidebar";
+import Header from "@/app/components/Header";
 
 import {
   Package,
@@ -26,7 +26,7 @@ import {
   verifikasiPeminjaman,
   serahkanPeminjaman,
   kembalikanPeminjaman,
-} from "../../../../../../../services/sarpras.service";
+} from "@/services/sarpras.service";
 
 /* =========================================================
    THEME HELPERS

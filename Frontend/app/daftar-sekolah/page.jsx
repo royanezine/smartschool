@@ -27,7 +27,7 @@ import {
   XCircle,
 } from "lucide-react";
 
-import { registerTenant } from "../../services/tenant.service";
+import { registerTenant } from "@/services/tenant.service";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 

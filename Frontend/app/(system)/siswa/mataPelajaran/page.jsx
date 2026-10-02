@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { getKelas, getKelasById } from "../../../../services/kelas.service";
+import { getKelas, getKelasById } from "@/services/kelas.service";
 
 import {
   AlertCircle,

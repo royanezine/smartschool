@@ -3,10 +3,10 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import Header from "../../../../components/Header";
-import Sidebar from "../../../../components/Sidebar";
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
 
-import { createUser, getUsers } from "../../../../../services/user.service";
+import { createUser, getUsers } from "@/services/user.service";
 
 import {
   ArrowLeft,

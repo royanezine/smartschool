@@ -33,13 +33,13 @@ import {
 import {
   getAbsensiSaya,
   absenDenganFace,
-} from "../../../../services/absensi.service";
+} from "@/services/absensi.service";
 
 import {
   getKelasSayaDariAnggota,
-} from "../../../../services/kelas.service";
+} from "@/services/kelas.service";
 
-import { ajukanIzin } from "../../../../services/izin.service";
+import { ajukanIzin } from "@/services/izin.service";
 import { apiFetch } from "../../../../lib/api";
 
 /* =========================================================

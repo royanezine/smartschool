@@ -10,7 +10,7 @@ import {
   Loader2,
 } from "lucide-react";
 
-import { verifyTenant } from "../../../../services/tenant.service";
+import { verifyTenant } from "@/services/tenant.service";
 
 export default function VerifyPage() {
   const router = useRouter();

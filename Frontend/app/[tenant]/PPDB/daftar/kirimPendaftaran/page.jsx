@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -10,9 +10,9 @@ import {
   Hash,
 } from "lucide-react";
 
-import PpdbHeader from "../../../../components/ppdb/PpdbHeader";
-import PpdbFooter from "../../../../components/ppdb/PpdbFooter";
-import PpdbStepper from "../../../components/ppdb/PpdbStepper";
+import PpdbHeader from "@/app/components/ppdb/PpdbHeader";
+import PpdbFooter from "@/app/components/ppdb/PpdbFooter";
+import PpdbStepper from "@/app/components/ppdb/PpdbStepper";
 
 function KirimPendaftaranPageContent() {
   const router = useRouter();

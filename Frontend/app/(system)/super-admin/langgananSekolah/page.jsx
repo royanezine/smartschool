@@ -15,7 +15,7 @@ import {
   ShieldCheck,
 } from "lucide-react";
 
-import { getAllLangganan } from "../../../../services/langganan.service";
+import { getAllLangganan } from "@/services/langganan.service";
 
 // =========================================================
 // THEME HELPERS

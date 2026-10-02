@@ -3,11 +3,11 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { getKelasMapel } from "../../../services/kelasMapel.service";
+import { getKelasMapel } from "@/services/kelasMapel.service";
 import {
   getKelas,
   getKelasById,
-} from "../../../services/kelas.service";
+} from "@/services/kelas.service";
 
 import {
   BookOpen,

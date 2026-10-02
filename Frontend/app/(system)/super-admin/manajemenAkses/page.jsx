@@ -43,7 +43,7 @@ import {
 import {
   getRoles,
   deleteRole,
-} from "../../../../services/role.service";
+} from "@/services/role.service";
 
 /* ============================================================
    THEME HELPERS

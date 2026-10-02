@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import LanggananForm from "../../../../../components/LanggananForm";
+import LanggananForm from "@/app/components/LanggananForm";
 import { dummyLangganan } from "../../../../../../lib/data";
 
 export default function EditLanggananPage() {

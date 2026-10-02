@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Suspense, useEffect, useState } from "react";
 import {
@@ -16,11 +16,11 @@ import {
   ClipboardList,
 } from "lucide-react";
 
-import PpdbHeader from "../../../components/ppdb/PpdbHeader";
-import PpdbStepper from "../../../components/ppdb/PpdbStepper";
-import PpdbFooter from "../../../components/ppdb/PpdbFooter";
+import PpdbHeader from "@/app/components/ppdb/PpdbHeader";
+import PpdbStepper from "@/app/components/ppdb/PpdbStepper";
+import PpdbFooter from "@/app/components/ppdb/PpdbFooter";
 
-import { daftarPpdb } from "../../../../services/ppdb.service";
+import { daftarPpdb } from "@/services/ppdb.service";
 
 function DaftarPageContent() {
   const router = useRouter();

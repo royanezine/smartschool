@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import Header from "../../../../../components/Header";
-import Sidebar from "../../../../../components/Sidebar";
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
 
 import {
   ArrowLeft,
@@ -29,11 +29,11 @@ import {
 
 import {
   getKelasMapel,
-} from "../../../../../../services/kelasMapel.service";
+} from "@/services/kelasMapel.service";
 
 import {
   createJadwalMengajar,
-} from "../../../../../../services/jadwalMengajar.service";
+} from "@/services/jadwalMengajar.service";
 
 /* =========================================================
    HARI

@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
@@ -21,10 +22,9 @@ import {
   Users,
 } from "lucide-react";
 
-import Sidebar from "../../../../components/Sidebar";
-import Header from "../../../../components/Header";
-
-import { getUserById } from "../../../../../services/user.service";
+import Sidebar from "@/app/components/Sidebar";
+import Header from "@/app/components/Header";
+import { getUserById } from "@/services/user.service";
 
 /* =========================================================
    HELPERS
@@ -40,11 +40,7 @@ function getUserName(user) {
 }
 
 function getUsername(user) {
-  return (
-    user?.namaPengguna ||
-    user?.username ||
-    "-"
-  );
+  return user?.namaPengguna || user?.username || "-";
 }
 
 function getRoleName(user) {
@@ -59,28 +55,17 @@ function getRoleName(user) {
 }
 
 function getSchoolName(user) {
-  return (
-    user?.sekolah?.nama ||
-    "-"
-  );
+  return user?.sekolah?.nama || "-";
 }
 
 function getFoundationName(user) {
-  return (
-    user?.yayasan?.nama ||
-    "-"
-  );
+  return user?.yayasan?.nama || "-";
 }
 
 function isActiveStatus(status) {
-  const value = String(status || "").toLowerCase();
+  const value = String(status ?? "").toLowerCase();
 
-  return [
-    "aktif",
-    "active",
-    "true",
-    "1",
-  ].includes(value);
+  return ["aktif", "active", "true", "1"].includes(value);
 }
 
 function formatStatus(status) {
@@ -88,13 +73,10 @@ function formatStatus(status) {
     return "Aktif";
   }
 
-  const value = String(status || "").toLowerCase();
+  const value = String(status ?? "").toLowerCase();
 
   if (
-    value === "nonaktif" ||
-    value === "inactive" ||
-    value === "false" ||
-    value === "0"
+    ["nonaktif", "inactive", "false", "0"].includes(value)
   ) {
     return "Nonaktif";
   }
@@ -108,22 +90,26 @@ function formatGender(value) {
   const gender = String(value).toLowerCase();
 
   if (
-    gender === "l" ||
-    gender === "lk" ||
-    gender === "laki-laki" ||
-    gender === "laki laki" ||
-    gender === "male" ||
-    gender === "pria"
+    [
+      "l",
+      "lk",
+      "laki-laki",
+      "laki laki",
+      "male",
+      "pria",
+    ].includes(gender)
   ) {
     return "Laki-laki";
   }
 
   if (
-    gender === "p" ||
-    gender === "pr" ||
-    gender === "perempuan" ||
-    gender === "female" ||
-    gender === "wanita"
+    [
+      "p",
+      "pr",
+      "perempuan",
+      "female",
+      "wanita",
+    ].includes(gender)
   ) {
     return "Perempuan";
   }
@@ -151,11 +137,7 @@ function formatDate(date) {
    INFO ITEM
 ========================================================= */
 
-function InfoItem({
-  icon: Icon,
-  label,
-  value,
-}) {
+function InfoItem({ icon: Icon, label, value }) {
   return (
     <div className="flex gap-4 border-b border-slate-100 py-4 last:border-b-0">
       <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600">
@@ -176,10 +158,11 @@ function InfoItem({
 }
 
 /* =========================================================
-   PAGE
+   DETAIL USER CONTENT
+   useSearchParams digunakan di dalam komponen ini.
 ========================================================= */
 
-export default function DetailUserPage() {
+function DetailUserContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -194,6 +177,8 @@ export default function DetailUserPage() {
   ======================================================= */
 
   useEffect(() => {
+    let cancelled = false;
+
     async function loadUser() {
       if (!userId) {
         setError("ID pengguna tidak ditemukan.");
@@ -209,33 +194,39 @@ export default function DetailUserPage() {
 
         const userData =
           response?.data?.user ||
+          response?.data?.data ||
           response?.data ||
           response?.user ||
           null;
 
-        if (!userData) {
-          throw new Error(
-            "Data pengguna tidak ditemukan."
-          );
+        if (!userData || typeof userData !== "object") {
+          throw new Error("Data pengguna tidak ditemukan.");
         }
 
-        setUser(userData);
+        if (!cancelled) {
+          setUser(userData);
+        }
       } catch (err) {
-        console.error(
-          "Gagal mengambil detail pengguna:",
-          err
-        );
+        console.error("Gagal mengambil detail pengguna:", err);
 
-        setError(
-          err?.message ||
-            "Gagal mengambil detail pengguna."
-        );
+        if (!cancelled) {
+          setError(
+            err?.message || "Gagal mengambil detail pengguna."
+          );
+          setUser(null);
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     }
 
     loadUser();
+
+    return () => {
+      cancelled = true;
+    };
   }, [userId]);
 
   const active = isActiveStatus(user?.status);
@@ -258,16 +249,13 @@ export default function DetailUserPage() {
 
         <main className="px-4 py-6 sm:px-6 lg:px-8">
           <div className="mx-auto max-w-6xl">
-
             {/* HEADER */}
             <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
               <div>
                 <button
                   type="button"
                   onClick={() =>
-                    router.push(
-                      "/super-admin/kelola-user"
-                    )
+                    router.push("/super-admin/kelola-user")
                   }
                   className="mb-3 inline-flex items-center gap-2 text-sm font-medium text-slate-500 transition hover:text-blue-600"
                 >
@@ -289,7 +277,7 @@ export default function DetailUserPage() {
                   type="button"
                   onClick={() =>
                     router.push(
-                      `/super-admin/kelola-user/edit-user?id=${user.id}`
+                      `/super-admin/kelola-user/edit-user?id=${encodeURIComponent(user.id)}`
                     )
                   }
                   className="inline-flex items-center justify-center gap-2 rounded-lg bg-blue-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700"
@@ -310,9 +298,7 @@ export default function DetailUserPage() {
                     Terjadi kesalahan
                   </p>
 
-                  <p className="mt-1 text-sm">
-                    {error}
-                  </p>
+                  <p className="mt-1 text-sm">{error}</p>
                 </div>
               </div>
             )}
@@ -330,20 +316,13 @@ export default function DetailUserPage() {
               </div>
             ) : user ? (
               <div className="grid gap-6 lg:grid-cols-[300px_1fr]">
-
-                {/* =================================================
-                    LEFT PROFILE
-                ================================================== */}
+                {/* LEFT PROFILE */}
                 <div className="h-fit rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                   <div className="flex flex-col items-center text-center">
-
                     <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full bg-blue-50 text-blue-600">
-                      {user?.avatar || user?.fotoProfil ? (
+                      {user.avatar || user.fotoProfil ? (
                         <img
-                          src={
-                            user.avatar ||
-                            user.fotoProfil
-                          }
+                          src={user.avatar || user.fotoProfil}
                           alt={getUserName(user)}
                           className="h-full w-full object-cover"
                         />
@@ -385,7 +364,6 @@ export default function DetailUserPage() {
                   </div>
 
                   <div className="mt-6 border-t border-slate-100 pt-4">
-
                     <div className="flex items-start gap-3 py-3">
                       <Mail className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
 
@@ -403,12 +381,12 @@ export default function DetailUserPage() {
                     <div className="flex items-start gap-3 py-3">
                       <Building2 className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
 
-                      <div>
+                      <div className="min-w-0">
                         <p className="text-xs text-slate-400">
                           Sekolah
                         </p>
 
-                        <p className="mt-1 text-sm font-medium text-slate-700">
+                        <p className="mt-1 break-words text-sm font-medium text-slate-700">
                           {getSchoolName(user)}
                         </p>
                       </div>
@@ -417,12 +395,12 @@ export default function DetailUserPage() {
                     <div className="flex items-start gap-3 py-3">
                       <Landmark className="mt-0.5 h-4 w-4 shrink-0 text-slate-400" />
 
-                      <div>
+                      <div className="min-w-0">
                         <p className="text-xs text-slate-400">
                           Yayasan
                         </p>
 
-                        <p className="mt-1 text-sm font-medium text-slate-700">
+                        <p className="mt-1 break-words text-sm font-medium text-slate-700">
                           {getFoundationName(user)}
                         </p>
                       </div>
@@ -430,12 +408,9 @@ export default function DetailUserPage() {
                   </div>
                 </div>
 
-                {/* =================================================
-                    RIGHT CONTENT
-                ================================================== */}
+                {/* RIGHT CONTENT */}
                 <div className="space-y-6">
-
-                  {/* AKUN */}
+                  {/* INFORMASI AKUN */}
                   <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                     <div className="mb-3 border-b border-slate-100 pb-4">
                       <h2 className="text-lg font-bold text-slate-900">
@@ -451,13 +426,13 @@ export default function DetailUserPage() {
                       <InfoItem
                         icon={User}
                         label="Nama Lengkap"
-                        value={user.namaLengkap}
+                        value={user.namaLengkap || user.nama}
                       />
 
                       <InfoItem
                         icon={User}
                         label="Username"
-                        value={user.namaPengguna}
+                        value={user.namaPengguna || user.username}
                       />
 
                       <InfoItem
@@ -508,9 +483,7 @@ export default function DetailUserPage() {
                       <InfoItem
                         icon={Users}
                         label="Jenis Kelamin"
-                        value={formatGender(
-                          user.jenisKelamin
-                        )}
+                        value={formatGender(user.jenisKelamin)}
                       />
 
                       <InfoItem
@@ -527,7 +500,7 @@ export default function DetailUserPage() {
                     </div>
                   </div>
 
-                  {/* SEKOLAH */}
+                  {/* INFORMASI SEKOLAH */}
                   <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                     <div className="mb-3 border-b border-slate-100 pb-4">
                       <h2 className="text-lg font-bold text-slate-900">
@@ -566,7 +539,7 @@ export default function DetailUserPage() {
                     </div>
                   </div>
 
-                  {/* INFORMASI AKUN */}
+                  {/* INFORMASI SISTEM */}
                   <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
                     <div className="mb-3 border-b border-slate-100 pb-4">
                       <h2 className="text-lg font-bold text-slate-900">
@@ -579,7 +552,7 @@ export default function DetailUserPage() {
                         icon={CalendarDays}
                         label="Dibuat Pada"
                         value={formatDate(
-                          user.dibuatPada
+                          user.dibuatPada || user.createdAt
                         )}
                       />
 
@@ -587,14 +560,14 @@ export default function DetailUserPage() {
                         icon={CalendarDays}
                         label="Diperbarui Pada"
                         value={formatDate(
-                          user.diperbaruiPada
+                          user.diperbaruiPada || user.updatedAt
                         )}
                       />
 
                       <InfoItem
                         icon={ShieldCheck}
                         label="Peran ID"
-                        value={user.peranId}
+                        value={user.peranId || user.roleId}
                       />
                     </div>
                   </div>
@@ -617,13 +590,42 @@ export default function DetailUserPage() {
                       </div>
                     </div>
                   </div>
-
                 </div>
               </div>
-            ) : null}
+            ) : (
+              !error && (
+                <div className="rounded-xl border border-slate-200 bg-white p-8 text-center text-sm text-slate-500">
+                  Data pengguna tidak ditemukan.
+                </div>
+              )
+            )}
           </div>
         </main>
       </div>
     </div>
+  );
+}
+
+/* =========================================================
+   PAGE WRAPPER
+   Suspense menangani useSearchParams saat production build.
+========================================================= */
+
+export default function DetailUserPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="flex min-h-screen items-center justify-center bg-slate-50">
+          <div className="flex flex-col items-center gap-3 text-slate-500">
+            <Loader2 className="h-8 w-8 animate-spin text-blue-600" />
+            <p className="text-sm">
+              Memuat halaman detail pengguna...
+            </p>
+          </div>
+        </div>
+      }
+    >
+      <DetailUserContent />
+    </Suspense>
   );
 }

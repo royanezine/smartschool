@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import Header from "../../../../../components/Header";
-import Sidebar from "../../../../../components/Sidebar";
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
 
 import {
   ArrowLeft,
@@ -28,19 +28,19 @@ import {
 
 import {
   createMataPelajaran,
-} from "../../../../../../services/mataPelajaran.service";
+} from "@/services/mataPelajaran.service";
 
 import {
   createKelasMapel,
-} from "../../../../../../services/kelasMapel.service";
+} from "@/services/kelasMapel.service";
 
 import {
   getKelas,
-} from "../../../../../../services/kelas.service";
+} from "@/services/kelas.service";
 
 import {
   getUsers,
-} from "../../../../../../services/user.service";
+} from "@/services/user.service";
 
 /* =========================================================
    STATUS BADGE

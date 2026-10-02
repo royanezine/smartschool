@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Sidebar from "../../../components/Sidebar";
-import Header from "../../../components/Header";
+import Sidebar from "@/app/components/Sidebar";
+import Header from "@/app/components/Header";
 
 import {
   BarChart3,
@@ -19,7 +19,7 @@ import {
 import {
   exportRekapNilai,
   downloadRekapNilai,
-} from "../../../../services/nilai.service";
+} from "@/services/nilai.service";
 
 /* =========================================================
    CONFIG

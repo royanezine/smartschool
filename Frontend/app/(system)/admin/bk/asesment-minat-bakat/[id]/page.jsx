@@ -3,10 +3,10 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 
-import Header from "../../../../../components/Header";
-import Sidebar from "../../../../../components/Sidebar";
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
 
-import { getAsesmenMinatBakat } from "../../../../../../services/bk.service";
+import { getAsesmenMinatBakat } from "@/services/bk.service";
 
 export default function DetailAsesmenPage() {
   const router = useRouter();

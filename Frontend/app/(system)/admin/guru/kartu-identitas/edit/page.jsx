@@ -1,9 +1,9 @@
-﻿"use client";
+"use client";
 
 import { Suspense, useState, useMemo, useRef, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import Header from "../../../../components/Header";
-import Sidebar from "../../../../components/Sidebar";
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
 import {
   ArrowLeft,
   Save,

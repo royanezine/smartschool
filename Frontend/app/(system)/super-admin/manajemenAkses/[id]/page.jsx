@@ -28,7 +28,7 @@ import {
   getPermissions,
   getRoleById,
   getRoles,
-} from "../../../../../services/role.service";
+} from "@/services/role.service";
 
 /* ============================================================
    THEME HELPERS

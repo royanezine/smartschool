@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 
-import Sidebar from "../../../../components/Sidebar";
-import Header from "../../../../components/Header";
+import Sidebar from "@/app/components/Sidebar";
+import Header from "@/app/components/Header";
 
 import {
   Package,
@@ -25,7 +25,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 
-import { getAset } from "../../../../../services/sarpras.service";
+import { getAset } from "@/services/sarpras.service";
 
 /* =========================================================
    THEME HELPERS

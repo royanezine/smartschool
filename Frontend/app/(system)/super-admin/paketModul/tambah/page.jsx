@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -22,7 +22,7 @@ import {
 import {
   getFitur,
   createPaket,
-} from "../../../../../services/paket.service";
+} from "@/services/paket.service";
 
 /* =========================================================
    THEME HELPERS

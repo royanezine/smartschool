@@ -4,9 +4,9 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 
-import Sidebar from "../../../../../../components/Sidebar";
-import Header from "../../../../../../components/Header";
-import RichTextEditor from "../../../../../../components/cms/RichTextEditor";
+import Sidebar from "@/app/components/Sidebar";
+import Header from "@/app/components/Header";
+import RichTextEditor from "@/app/components/cms/RichTextEditor";
 import { apiFetch } from "../../../../../../../lib/api";
 
 import {

@@ -4,8 +4,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 
-import Header from "../../../../../../components/Header";
-import Sidebar from "../../../../../../components/Sidebar";
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
 
 import {
   ArrowLeft,
@@ -27,9 +27,9 @@ import {
 import {
   getJadwalMengajarById,
   updateJadwalMengajar,
-} from "../../../../../../../services/jadwalMengajar.service";
+} from "@/services/jadwalMengajar.service";
 
-import { getKelasMapel } from "../../../../../../../services/kelasMapel.service";
+import { getKelasMapel } from "@/services/kelasMapel.service";
 
 const HARI = [
   { value: "senin", label: "Senin" },

@@ -3,8 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import Sidebar from "../../../../components/Sidebar";
-import Header from "../../../../components/Header";
+import Sidebar from "@/app/components/Sidebar";
+import Header from "@/app/components/Header";
 
 import {
   Search,
@@ -22,7 +22,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 
-import { getPendaftarPpdb } from "../../../../../services/ppdb.service";
+import { getPendaftarPpdb } from "@/services/ppdb.service";
 
 // ============================================================
 // THEME HELPERS

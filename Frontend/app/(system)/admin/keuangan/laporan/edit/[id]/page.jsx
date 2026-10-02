@@ -14,9 +14,9 @@ import {
   XCircle,
 } from "lucide-react";
 
-import Header from "../../../../../../components/Header";
-import Sidebar from "../../../../../../components/Sidebar";
-import { THEME_CLASSES } from "../../../../../../lib/constants/theme";
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
+import { THEME_CLASSES } from "@/lib/constants/theme";
 
 // Data dummy (sama dengan data di halaman utama)
 // Dalam aplikasi nyata, ini akan diambil dari API / database

@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
 
-import Header from "../../../../../../components/Header";
-import Sidebar from "../../../../../../components/Sidebar";
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
 
 import {
   GraduationCap,
@@ -27,16 +27,16 @@ import {
 import {
   getKelasById,
   updateKelas,
-} from "../../../../../../../services/kelas.service";
+} from "@/services/kelas.service";
 
 import {
   getTahunAjaran,
-} from "../../../../../../../services/tahunAjaran.service";
+} from "@/services/tahunAjaran.service";
 
 import {
   getGedung,
   getLantaiByGedung,
-} from "../../../../../../../services/infrastruktur.service";
+} from "@/services/infrastruktur.service";
 
 const TINGKAT_OPTIONS = [
   {
