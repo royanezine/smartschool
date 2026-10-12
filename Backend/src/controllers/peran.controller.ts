@@ -1,17 +1,18 @@
 import { Response } from "express";
+import { z } from "zod";
 import { prisma } from "../config/db";
 import { AuthRequest } from "../middlewares/auth.middleware";
 import {
   createRoleSchema,
   updateRoleSchema,
 } from "../validations/role.validation";
+import { isSuperAdmin as checkIsSuperAdmin } from "../utils/rbac";
 
 // Helper
 function isSuperAdmin(req: AuthRequest): boolean {
   const user = req.user;
   if (!user) return false;
-  if (user.role === "super_admin") return true;
-  return user.izin.includes("*");
+  return checkIsSuperAdmin(user.role);
 }
 
 // Get Izin
@@ -227,11 +228,18 @@ export const createRole = async (req: AuthRequest, res: Response) => {
       message: "Role berhasil dibuat",
       data: role,
     });
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.name === "ZodError" || error instanceof z.ZodError) {
+      return res.status(400).json({
+        success: false,
+        message: error.issues?.map((i: any) => i.message).join(", ") || "Data tidak valid",
+        errorCode: "VALIDATION_ERROR",
+      });
+    }
     console.error("Create role error:", error);
     return res
       .status(500)
-      .json({ success: false, message: "Gagal membuat role" });
+      .json({ success: false, message: "Gagal membuat role", errorCode: "INTERNAL_SERVER_ERROR" });
   }
 };
 
@@ -341,11 +349,18 @@ export const updateRole = async (req: AuthRequest, res: Response) => {
       message: "Role berhasil diupdate",
       data: updated,
     });
-  } catch (error) {
+  } catch (error: any) {
+    if (error?.name === "ZodError" || error instanceof z.ZodError) {
+      return res.status(400).json({
+        success: false,
+        message: error.issues?.map((i: any) => i.message).join(", ") || "Data tidak valid",
+        errorCode: "VALIDATION_ERROR",
+      });
+    }
     console.error("Update role error:", error);
     return res
       .status(500)
-      .json({ success: false, message: "Gagal mengupdate role" });
+      .json({ success: false, message: "Gagal mengupdate role", errorCode: "INTERNAL_SERVER_ERROR" });
   }
 };
 

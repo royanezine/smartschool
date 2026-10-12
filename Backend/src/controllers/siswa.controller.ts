@@ -87,6 +87,14 @@ export const updateSiswa = async (
         status,
         diperbaruiOleh: req.user?.userId,
       },
+      select: {
+        id: true,
+        namaLengkap: true,
+        email: true,
+        nis: true,
+        nisn: true,
+        status: true,
+      },
     });
 
     return successResponse(res, "Data siswa berhasil diperbarui", siswa);
@@ -291,6 +299,16 @@ export const updateSiswaAdmin = async (
         jenisKelamin,
         noTelepon,
         diperbaruiOleh: (req as AuthRequest).user?.userId,
+      },
+      select: {
+        id: true,
+        namaLengkap: true,
+        email: true,
+        nis: true,
+        nisn: true,
+        status: true,
+        jenisKelamin: true,
+        noTelepon: true,
       },
     });
     return successResponse(res, "Data siswa berhasil diperbarui", siswa);

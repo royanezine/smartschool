@@ -13,6 +13,7 @@ import { sendOtpEmail } from "../utils/email";
 import { AppError } from "../utils/appError";
 import { generateAccessToken } from "../utils/generateToken";
 import { ambilIzinDanModul } from "../services/auth.services";
+import { isSuperAdmin } from "../utils/rbac";
 
 export const register = async (req: Request, res: Response) => {
   const data = registerSchema.parse(req.body);
@@ -131,9 +132,11 @@ export const verifyRegister = async (req: Request, res: Response) => {
     throw new AppError("Data pengguna tidak ditemukan", 404);
   }
 
+  const isSuperRegister = isSuperAdmin(userWithRole.peran?.nama);
   const { izin, modulAktif } = await ambilIzinDanModul(
     user.peranId ?? null,
     user.sekolahId ?? null,
+    isSuperRegister,
   );
 
   const token = generateAccessToken({
@@ -187,9 +190,11 @@ export const login = async (req: Request, res: Response) => {
     data: { terakhirLogin: new Date() },
   });
 
+  const isSuper = isSuperAdmin(user.peran?.nama);
   const { izin, modulAktif } = await ambilIzinDanModul(
     user.peranId ?? null,
     user.sekolahId ?? null,
+    isSuper,
   );
 
   const token = generateAccessToken({

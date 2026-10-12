@@ -20,8 +20,8 @@ import {
 
 import { validate } from "../middlewares/validation.middleware";
 import { requireSekolah } from "../middlewares/perpustakaan.middleware";
-
 import { authenticate } from "../middlewares/auth.middleware";
+import { authorizeRoles } from "../middlewares/role.middleware";
 
 const router = Router();
 
@@ -34,18 +34,21 @@ router.get("/buku/:id", getBukuById);
 
 router.post(
   "/buku",
+  authorizeRoles("super_admin", "admin_sekolah", "guru"),
   validate(createBukuSchema),
   createBuku
 );
 
 router.put(
   "/buku/:id",
+  authorizeRoles("super_admin", "admin_sekolah", "guru"),
   validate(updateBukuSchema),
   updateBuku
 );
 
 router.delete(
   "/buku/:id",
+  authorizeRoles("super_admin", "admin_sekolah", "guru"),
   deleteBuku
 );
 
@@ -62,6 +65,7 @@ router.post(
 
 router.put(
   "/peminjaman/:id/kembali",
+  authorizeRoles("super_admin", "admin_sekolah", "guru"),
   validate(pengembalianBukuSchema),
   kembalikanBuku
 );

@@ -10,6 +10,7 @@ export const requireIzin = (...izinWajib: string[]) => {
       return res.status(401).json({
         success: false,
         message: "Unauthorized: belum login",
+        errorCode: "UNAUTHORIZED",
       });
     }
 
@@ -25,6 +26,7 @@ export const requireIzin = (...izinWajib: string[]) => {
       return res.status(403).json({
         success: false,
         message: `Akses ditolak: butuh izin ${izinWajib.join(" atau ")}`,
+        errorCode: "FORBIDDEN_PERMISSION",
       });
     }
 
@@ -40,6 +42,7 @@ export const requireModul = (kodeModul: string) => {
       return res.status(401).json({
         success: false,
         message: "Unauthorized: belum login",
+        errorCode: "UNAUTHORIZED",
       });
     }
 
@@ -53,6 +56,7 @@ export const requireModul = (kodeModul: string) => {
       return res.status(403).json({
         success: false,
         message: `Akses ditolak: modul "${kodeModul}" tidak aktif untuk sekolah ini`,
+        errorCode: "MODULE_NOT_ACTIVE",
       });
     }
 

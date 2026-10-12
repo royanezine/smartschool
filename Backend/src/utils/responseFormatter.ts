@@ -22,16 +22,24 @@ export const paginatedResponse = (
   totalData: number,
   statusCode = 200,
 ) => {
-  const totalPages = Math.ceil(totalData / limit);
+  const safeLimit = limit > 0 ? limit : 10;
+  const safePage = page > 0 ? page : 1;
+  const totalPages = totalData > 0 ? Math.ceil(totalData / safeLimit) : 0;
+  const hasNext = safePage < totalPages;
+  const hasPrev = safePage > 1 && totalPages > 0;
+
   return res.status(statusCode).json({
     success: true,
     message,
     data,
     meta: {
-      page,
-      limit,
+      page: safePage,
+      limit: safeLimit,
+      total: totalData,
       totalData,
       totalPages,
+      hasNext,
+      hasPrev,
     },
   });
 };

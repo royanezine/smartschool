@@ -23,7 +23,7 @@ import jadwalMengajar from "./routes/jadwalMengajar.routes";
 import materiPembelajaran from "./routes/materiPembelajaran.routes";
 import tugasRoutes from "./routes/tugas.routes";
 import notifikasiRoutes from "./routes/notifikasi.routes";
-import { triggerDeadlineH1Notification } from "./controllers/notifikasi.controller";
+import { prisma } from "./config/db";
 import absensiRoutes from "./routes/absensi.routes";
 import soalUjianRoutes from "./routes/soalUjian.routes";
 import ujianRoutes from "./routes/ujian.routes";
@@ -57,6 +57,34 @@ app.get("/", (req: Request, res: Response) => {
     success: true,
     message: "SmartSchool API is running smoothly! 🚀",
   });
+});
+
+app.get("/health", (req: Request, res: Response) => {
+  res.status(200).json({
+    success: true,
+    status: "ok",
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+  });
+});
+
+app.get("/ready", async (req: Request, res: Response) => {
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    res.status(200).json({
+      success: true,
+      status: "ready",
+      database: "connected",
+      timestamp: new Date().toISOString(),
+    });
+  } catch (error) {
+    res.status(503).json({
+      success: false,
+      status: "unready",
+      database: "disconnected",
+      message: (error as Error).message,
+    });
+  }
 });
 
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
@@ -97,13 +125,6 @@ app.use("/api/raport", raportRoutes);
 app.use("/api/permohonan-izin", permohonanIzinRoutes);
 app.use("/api/audit-log", auditLogRoutes);
 app.use("/api/pengaturan", pengaturanSistemRoutes);
-
-setInterval(
-  () => {
-    triggerDeadlineH1Notification().catch(console.error);
-  },
-  30 * 60 * 1000,
-);
 
 app.use(globalErrorHandler);
 

@@ -4,6 +4,7 @@ import { AuthRequest } from "../middlewares/auth.middleware";
 import { AppError } from "../utils/appError";
 import { paginatedResponse, successResponse } from "../utils/responseFormatter";
 import { ajukanIzinSchema } from "../validations/permohonanIzin.validation";
+import { normalizeRole } from "../utils/rbac";
 
 export const ajukanIzin = async (
   req: AuthRequest,
@@ -52,12 +53,24 @@ export const getDaftarIzin = async (
   next: NextFunction,
 ) => {
   try {
+    const actorRole = normalizeRole(req.user?.role);
     const sekolahId = req.user?.sekolahId;
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const status = req.query.status as string;
 
-    const where: any = { sekolahId };
+    const where: any = {};
+    if (actorRole !== "super_admin") {
+      if (!sekolahId) throw new AppError("Akses ditolak: sekolah tidak valid", 403);
+      where.sekolahId = sekolahId;
+    } else if (req.query.sekolahId) {
+      where.sekolahId = req.query.sekolahId as string;
+    }
+
+    if (actorRole === "siswa") {
+      where.penggunaId = req.user?.userId;
+    }
+
     if (status) where.status = status;
 
     const skip = (page - 1) * limit;
@@ -103,6 +116,7 @@ export const verifikasiIzin = async (
     if (!id) throw new AppError("ID izin tidak valid", 400);
 
     const penyetujuId = req.user?.userId;
+    const actorRole = normalizeRole(req.user?.role);
     const { status, catatan } = req.body; // status harus "disetujui" atau "ditolak"
 
     if (!["disetujui", "ditolak"].includes(status)) {
@@ -111,6 +125,11 @@ export const verifikasiIzin = async (
 
     const existing = await prisma.permohonanIzin.findUnique({ where: { id } });
     if (!existing) throw new AppError("Permohonan izin tidak ditemukan", 404);
+
+    if (actorRole !== "super_admin" && existing.sekolahId !== req.user?.sekolahId) {
+      throw new AppError("Akses ditolak: permohonan izin milik sekolah lain", 403);
+    }
+
     if (existing.status !== "menunggu")
       throw new AppError(`Permohonan sudah berstatus ${existing.status}`, 400);
 

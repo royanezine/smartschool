@@ -14,7 +14,7 @@ const router = Router();
 router.get(
   "/",
   authenticate,
-  requireIzin("langganan.view_all"),
+  requireIzin("langganan.view", "langganan.view_all"),
   getAllLanggananSekolah,
 );
 
