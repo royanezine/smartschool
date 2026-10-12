@@ -264,7 +264,7 @@ export const resetPassword = async (req: Request, res: Response) => {
   });
 
   if (!user || user.status !== "aktif") {
-    throw new AppError("Pengguna tidak ditemukan atau tidak aktif", 401);
+    throw new AppError("Kode OTP tidak valid atau akun tidak aktif", 400);
   }
 
   if (user.kodeOtp !== data.kodeOtp) {

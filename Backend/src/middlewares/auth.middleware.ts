@@ -184,10 +184,34 @@ export const authenticate = async (
       });
     }
 
-    return res.status(401).json({
+    if (error?.name === "JsonWebTokenError" || error?.name === "NotBeforeError") {
+      return res.status(401).json({
+        success: false,
+        message: "Token tidak valid",
+        errorCode: "INVALID_TOKEN",
+      });
+    }
+
+    // Database errors or other infrastructure issues — do NOT return 401
+    // as that would mask the real problem (service unavailability)
+    if (
+      error?.name === "PrismaClientInitializationError" ||
+      error?.name === "PrismaClientKnownRequestError" ||
+      error?.name === "PrismaClientUnknownRequestError" ||
+      error?.name === "PrismaClientRustPanicError"
+    ) {
+      return res.status(503).json({
+        success: false,
+        message: "Layanan database tidak tersedia sementara",
+        errorCode: "DATABASE_UNAVAILABLE",
+      });
+    }
+
+    // Unexpected errors — return 500 Internal Server Error
+    return res.status(500).json({
       success: false,
-      message: "Token tidak valid",
-      errorCode: "INVALID_TOKEN",
+      message: "Terjadi kesalahan internal server",
+      errorCode: "INTERNAL_SERVER_ERROR",
     });
   }
 };
