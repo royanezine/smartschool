@@ -97,6 +97,9 @@ model Pengguna {
   izinDiajukan   PermohonanIzin[] @relation("PemohonIzin")
   izinDisetujui  PermohonanIzin[] @relation("PenyetujuIzin")
 
+  nilaiAkhirMapel NilaiAkhirMapel[]
+  rapot           Rapot[]
+
   @@map("pengguna")
   permohonanIzins PermohonanIzin[] @relation("GuruPenggantiIzin")
 }
@@ -218,6 +221,9 @@ model Sekolah {
   buku           Buku[]
   peminjamanBuku PeminjamanBuku[]
   permohonanIzin PermohonanIzin[]
+
+  nilaiAkhirMapel NilaiAkhirMapel[]
+  rapot           Rapot[]
 
   @@map("sekolah")
 }
@@ -520,7 +526,8 @@ model TahunAjaran {
 
   sekolah Sekolah @relation(fields: [sekolahId], references: [id])
   kelas   Kelas[]
-
+  rapot   Rapot[]
+  
   @@map("tahun_ajaran")
 }
 
@@ -555,6 +562,7 @@ model Kelas {
   anggota    AnggotaKelas[]
   kelasMapel KelasMapel[]
   absensi    Absensi[]
+  rapot      Rapot[]
 
   @@map("kelas")
 }
@@ -604,6 +612,7 @@ model KelasMapel {
   tugas              Tugas[]
   materiPembelajaran MateriPembelajaran[]
   jadwalMengajar     JadwalMengajar[]
+  nilaiAkhirMapel NilaiAkhirMapel[]
 
   @@map("kelas_mapel")
 }
@@ -669,6 +678,78 @@ model Nilai {
   komponenNilai KomponenNilai @relation(fields: [komponenNilaiId], references: [id])
 
   @@map("nilai")
+  
+@@unique([penggunaId, komponenNilaiId])
+}
+
+model NilaiAkhirMapel {
+  id             String  @id @default(uuid())
+  kelasMapelId   String  @map("kelas_mapel_id")
+  penggunaId     String  @map("pengguna_id")
+  sekolahId      String  @map("sekolah_id")
+  dibuatOleh     String? @map("dibuat_oleh")
+  diperbaruiOleh String? @map("diperbarui_oleh")
+  dihapusOleh    String? @map("dihapus_oleh")
+
+  nilaiAkhir     Decimal   @map("nilai_akhir") @db.Decimal(5, 2)
+  predikat       String    @db.VarChar(2)
+  kkm            Int       @default(75)
+  totalBobot     Decimal   @map("total_bobot") @db.Decimal(5, 2)
+  detailKomponen Json      @map("detail_komponen")
+  status         String    @default("draft") @db.VarChar(20)
+  difinalkanOleh String?   @map("difinalkan_oleh")
+  difinalkanPada DateTime? @map("difinalkan_pada") @db.Timestamp()
+
+  dibuatPada     DateTime  @default(now()) @map("dibuat_pada") @db.Timestamp()
+  diperbaruiPada DateTime  @updatedAt @map("diperbarui_pada") @db.Timestamp()
+  dihapusPada    DateTime? @map("dihapus_pada") @db.Timestamp()
+
+  kelasMapel KelasMapel @relation(fields: [kelasMapelId], references: [id])
+  pengguna   Pengguna   @relation(fields: [penggunaId], references: [id])
+  sekolah    Sekolah    @relation(fields: [sekolahId], references: [id])
+
+  @@unique([kelasMapelId, penggunaId])
+  @@index([sekolahId])
+  @@map("nilai_akhir_mapel")
+}
+
+model Rapot {
+  id             String  @id @default(uuid())
+  penggunaId     String  @map("pengguna_id")
+  kelasId        String  @map("kelas_id")
+  tahunAjaranId  String  @map("tahun_ajaran_id")
+  sekolahId      String  @map("sekolah_id")
+  dibuatOleh     String? @map("dibuat_oleh")
+  diperbaruiOleh String? @map("diperbarui_oleh")
+  dihapusOleh    String? @map("dihapus_oleh")
+
+  semester         String    @db.VarChar(10)
+  jenisRapot       String    @map("jenis_rapot") @db.VarChar(20)
+  nilaiSnapshot    Json      @map("nilai_snapshot")
+  rataRata         Decimal?  @map("rata_rata") @db.Decimal(5, 2)
+  ranking          Int?
+  catatanWaliKelas String?   @map("catatan_wali_kelas") @db.Text
+  keterangan       String?   @db.Text
+  jumlahHadir      Int       @default(0) @map("jumlah_hadir")
+  jumlahIzin       Int       @default(0) @map("jumlah_izin")
+  jumlahSakit      Int       @default(0) @map("jumlah_sakit")
+  jumlahAlpha      Int       @default(0) @map("jumlah_alpha")
+  status           String    @default("draft") @db.VarChar(20)
+  dipublishOleh    String?   @map("dipublish_oleh")
+  dipublishPada    DateTime? @map("dipublish_pada") @db.Timestamp()
+
+  dibuatPada     DateTime  @default(now()) @map("dibuat_pada") @db.Timestamp()
+  diperbaruiPada DateTime  @updatedAt @map("diperbarui_pada") @db.Timestamp()
+  dihapusPada    DateTime? @map("dihapus_pada") @db.Timestamp()
+
+  pengguna    Pengguna    @relation(fields: [penggunaId], references: [id])
+  kelas       Kelas       @relation(fields: [kelasId], references: [id])
+  tahunAjaran TahunAjaran @relation(fields: [tahunAjaranId], references: [id])
+  sekolah     Sekolah     @relation(fields: [sekolahId], references: [id])
+
+  @@unique([penggunaId, kelasId, tahunAjaranId, semester, jenisRapot])
+  @@index([sekolahId, kelasId])
+  @@map("rapot")
 }
 
 model Absensi {

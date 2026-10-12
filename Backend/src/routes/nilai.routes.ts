@@ -1,10 +1,13 @@
 import { Router } from "express";
 import {
   exportRekapNilai,
+  getKelasSaya,
   getKomponenNilaiByMapel,
-  inputNilai,
+  createKomponenNilai,
+  getGridNilai,
+  inputNilaiBulk,
+  finalisasiNilai,
 } from "../controllers/nilai.controller";
-import { createKomponenNilai } from "../controllers/raport.controller";
 import { authenticate } from "../middlewares/auth.middleware";
 import { authorizeRoles } from "../middlewares/role.middleware";
 
@@ -14,12 +17,22 @@ router.use(authenticate);
 
 router.get("/export", exportRekapNilai);
 
-router.post(
-  "/komponen",
-  authorizeRoles("guru", "admin_sekolah"),
-  createKomponenNilai,
+router.get("/kelas-saya", authorizeRoles("guru"), getKelasSaya);
+
+router.get(
+  "/komponen/:kelasMapelId",
+  authorizeRoles("guru"),
+  getKomponenNilaiByMapel,
 );
-router.get("/komponen/:kelasMapelId", getKomponenNilaiByMapel);
-router.post("/input", authorizeRoles("guru"), inputNilai);
+router.post("/komponen", authorizeRoles("guru"), createKomponenNilai);
+
+router.get("/input/:kelasMapelId", authorizeRoles("guru"), getGridNilai);
+router.post("/input/bulk", authorizeRoles("guru"), inputNilaiBulk);
+
+router.post(
+  "/finalisasi/:kelasMapelId",
+  authorizeRoles("guru"),
+  finalisasiNilai,
+);
 
 export default router;

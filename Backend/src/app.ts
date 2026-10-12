@@ -39,6 +39,7 @@ import perpustakaanRoutes from "./routes/perpustakaan.routes";
 import permohonanIzinRoutes from "./routes/permohonanIzin.routes";
 import peminjamanAsetRoutes from "./routes/peminjamanAset.routes";
 import raportRoutes from "./routes/raport.routes";
+import kkmRoutes from "./routes/kkm.routes";
 
 // IMPORT ROUTES BARU (YANG SEBELUMNYA HILANG)
 import auditLogRoutes from "./routes/auditLog.routes";
@@ -125,6 +126,9 @@ app.use("/api/raport", raportRoutes);
 app.use("/api/permohonan-izin", permohonanIzinRoutes);
 app.use("/api/audit-log", auditLogRoutes);
 app.use("/api/pengaturan", pengaturanSistemRoutes);
+app.use("/api/pengaturan/kkm", kkmRoutes);
+app.use("/api/pengaturan", pengaturanSistemRoutes);
+
 
 app.use(globalErrorHandler);
 
