@@ -227,6 +227,34 @@ function getNamaRuangan(ruangan) {
   return String(ruangan);
 }
 
+
+function getNamaGuru(item) {
+  const kandidatNama = [
+    item?.guru?.namaLengkap,
+    item?.guru?.nama,
+    item?.guru?.namaGuru,
+    item?.guru?.user?.namaLengkap,
+    item?.guru?.user?.nama,
+    item?.guru?.user?.name,
+    item?.kelasMapel?.guru?.namaLengkap,
+    item?.kelasMapel?.guru?.nama,
+    item?.kelasMapel?.guruPengajar?.namaLengkap,
+    item?.kelasMapel?.guruPengajar?.nama,
+    item?.kelasMapel?.guruPengajar?.user?.namaLengkap,
+    item?.kelasMapel?.guruPengajar?.user?.nama,
+    item?.kelasMapel?.guruPengajar?.user?.name,
+  ];
+
+  return (
+    kandidatNama.find(
+      (nama) =>
+        typeof nama === "string" &&
+        nama.trim() !== ""
+    ) || "Nama guru belum tersedia"
+  );
+}
+
+
 /* =========================================================
    ACCENT PALETTE
    Semuanya mengikuti global theme.
@@ -742,119 +770,108 @@ export default function JadwalSiswaPage() {
                   </thead>
 
                   <tbody>
-                    {jadwalHariIni.map((item, index) => {
-                      const accent =
-                        accentPalette[index % accentPalette.length];
+                   
+{jadwalHariIni.map((item, index) => {
+  const accent =
+    accentPalette[index % accentPalette.length];
 
-                      const namaMapel =
-                        item?.kelasMapel?.mapel?.nama ||
-                        item?.kelasMapel?.mapel?.namaMapel ||
-                        item?.mapel?.nama ||
-                        item?.mapel?.namaMapel ||
-                        "Mata Pelajaran";
+  const namaMapel =
+    item?.kelasMapel?.mapel?.nama ||
+    item?.kelasMapel?.mataPelajaran?.nama ||
+    item?.kelasMapel?.mapel?.namaMapel ||
+    item?.mapel?.nama ||
+    item?.mataPelajaran?.nama ||
+    item?.mapel?.namaMapel ||
+    "Mata Pelajaran";
 
-                      const namaGuru =
-                        item?.guru?.namaLengkap ||
-                        item?.guru?.nama ||
-                        item?.guru?.user?.namaLengkap ||
-                        item?.guru?.user?.name ||
-                        "-";
+  const namaGuru = getNamaGuru(item);
 
-                      const namaKelasItem = getNamaKelas(
-                        item?.kelasMapel?.kelas
-                      );
+  const namaKelasItem = getNamaKelas(
+    item?.kelasMapel?.kelas
+  );
 
-                      const namaRuangan = getNamaRuangan(
-                        item?.ruangan
-                      );
+  const namaRuangan = getNamaRuangan(
+    item?.ruangan
+  );
 
-                      return (
-                        <tr
-                          key={
-                            item?.id ||
-                            `${hariAktif}-${index}`
-                          }
-                          className={`border-b ${themeDivider} last:border-b-0 transition-colors ${themeNeutralHover}`}
-                        >
-                          {/* TIME */}
+  return (
+    <tr
+      key={item?.id || `${hariAktif}-${index}`}
+      className={`border-b ${themeDivider} last:border-b-0 transition-colors ${themeNeutralHover}`}
+    >
+      {/* WAKTU */}
+      <td className="px-5 py-4">
+        <div className="flex items-center gap-2">
+          <div
+            className={`flex h-9 w-9 items-center justify-center rounded-lg ${accent.bg} ${accent.border} border`}
+          >
+            <Clock3 className={`h-4 w-4 ${accent.text}`} />
+          </div>
 
-                          <td className="px-5 py-4">
-                            <div className="flex items-center gap-2">
-                              <div
-                                className={`flex h-9 w-9 items-center justify-center rounded-lg ${accent.bg} ${accent.border} border`}
-                              >
-                                <Clock3
-                                  className={`h-4 w-4 ${accent.text}`}
-                                />
-                              </div>
+          <div>
+            <p className="text-sm font-semibold theme-text">
+              {formatJam(item?.jamMulai)}
+            </p>
 
-                              <div>
-                                <p className="text-sm font-semibold theme-text">
-                                  {formatJam(item?.jamMulai)}
-                                </p>
+            <p className="mt-0.5 text-[11px] theme-text-muted">
+              sampai {formatJam(item?.jamSelesai)}
+            </p>
+          </div>
+        </div>
+      </td>
 
-                                <p className="mt-0.5 text-[11px] theme-text-muted">
-                                  sampai{" "}
-                                  {formatJam(item?.jamSelesai)}
-                                </p>
-                              </div>
-                            </div>
-                          </td>
+      {/* MATA PELAJARAN */}
+      <td className="px-5 py-4">
+        <div className="flex items-center gap-3">
+          <div
+            className={`h-2.5 w-2.5 shrink-0 rounded-full ${accent.dot} ring-4 ${accent.ring}`}
+          />
 
-                          {/* MAPEL */}
+          <div>
+            <p className="text-sm font-semibold theme-text">
+              {namaMapel}
+            </p>
 
-                          <td className="px-5 py-4">
-                            <div className="flex items-center gap-3">
-                              <div
-                                className={`h-2.5 w-2.5 shrink-0 rounded-full ${accent.dot} ring-4 ${accent.ring}`}
-                              />
+            {namaKelasItem !== "-" && (
+              <p className="mt-0.5 text-[11px] theme-text-muted">
+                {namaKelasItem}
+              </p>
+            )}
+          </div>
+        </div>
+      </td>
 
-                              <div>
-                                <p className="text-sm font-semibold theme-text">
-                                  {namaMapel}
-                                </p>
+      {/* GURU */}
+      <td className="px-5 py-4">
+        <div className="flex items-center gap-2.5">
+          <div
+            className={`flex h-8 w-8 items-center justify-center rounded-full ${themeNeutralSurface}`}
+          >
+            <UserRound className="h-4 w-4 theme-text-muted" />
+          </div>
 
-                                {namaKelasItem !== "-" && (
-                                  <p className="mt-0.5 text-[11px] theme-text-muted">
-                                    {namaKelasItem}
-                                  </p>
-                                )}
-                              </div>
-                            </div>
-                          </td>
+          <span className="text-sm theme-text-secondary">
+            {namaGuru}
+          </span>
+        </div>
+      </td>
 
-                          {/* GURU */}
+      {/* RUANGAN */}
+      <td className="px-5 py-4">
+        <div
+          className={`inline-flex items-center gap-1.5 rounded-lg border ${themeNeutralBorder} ${themeNeutralSurface} px-2.5 py-1.5`}
+        >
+          <MapPin className="h-3.5 w-3.5 theme-text-muted" />
 
-                          <td className="px-5 py-4">
-                            <div className="flex items-center gap-2.5">
-                              <div
-                                className={`flex h-8 w-8 items-center justify-center rounded-full ${themeNeutralSurface}`}
-                              >
-                                <UserRound className="h-4 w-4 theme-text-muted" />
-                              </div>
+          <span className="text-xs font-medium theme-text-secondary">
+            {namaRuangan}
+          </span>
+        </div>
+      </td>
+    </tr>
+  );
+})}
 
-                              <span className="text-sm theme-text-secondary">
-                                {namaGuru}
-                              </span>
-                            </div>
-                          </td>
-
-                          {/* RUANGAN */}
-
-                          <td className="px-5 py-4">
-                            <div
-                              className={`inline-flex items-center gap-1.5 rounded-lg border ${themeNeutralBorder} ${themeNeutralSurface} px-2.5 py-1.5`}
-                            >
-                              <MapPin className="h-3.5 w-3.5 theme-text-muted" />
-
-                              <span className="text-xs font-medium theme-text-secondary">
-                                {namaRuangan}
-                              </span>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
                   </tbody>
                 </table>
               </div>
@@ -864,125 +881,144 @@ export default function JadwalSiswaPage() {
                 MOBILE CARDS
             ================================================= */}
 
-            <section className="space-y-3 md:hidden">
-              {jadwalHariIni.map((item, index) => {
-                const accent =
-                  accentPalette[index % accentPalette.length];
+            
+{/* =================================================
+    MOBILE CARDS
+================================================= */}
 
-                const namaMapel =
-                  item?.kelasMapel?.mapel?.nama ||
-                  item?.kelasMapel?.mapel?.namaMapel ||
-                  item?.mapel?.nama ||
-                  item?.mapel?.namaMapel ||
-                  "Mata Pelajaran";
+<section className="space-y-3 md:hidden">
+  {jadwalHariIni.map((item, index) => {
+    const accent =
+      accentPalette[index % accentPalette.length];
 
-                const namaGuru =
-                  item?.guru?.namaLengkap ||
-                  item?.guru?.nama ||
-                  item?.guru?.user?.namaLengkap ||
-                  item?.guru?.user?.name ||
-                  "-";
+    const namaMapel =
+      item?.kelasMapel?.mapel?.nama ||
+      item?.kelasMapel?.mataPelajaran?.nama ||
+      item?.kelasMapel?.mapel?.namaMapel ||
+      item?.mapel?.nama ||
+      item?.mataPelajaran?.nama ||
+      item?.mapel?.namaMapel ||
+      "Mata Pelajaran";
 
-                const namaKelasItem = getNamaKelas(
-                  item?.kelasMapel?.kelas
-                );
+    const namaGuru = getNamaGuru(item);
 
-                const namaRuangan = getNamaRuangan(
-                  item?.ruangan
-                );
+    const namaKelasItem = getNamaKelas(
+      item?.kelasMapel?.kelas
+    );
 
-                return (
-                  <article
-                    key={
-                      item?.id ||
-                      `${hariAktif}-mobile-${index}`
-                    }
-                    className={`theme-card rounded-2xl border ${themeNeutralBorder} p-4 ${themeCardShadow}`}
-                  >
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-start gap-3">
-                        <div
-                          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${accent.bg} ${accent.border} border`}
-                        >
-                          <BookOpen
-                            className={`h-5 w-5 ${accent.text}`}
-                          />
-                        </div>
+    const namaRuangan = getNamaRuangan(
+      item?.ruangan
+    );
 
-                        <div>
-                          <h3 className="text-sm font-bold theme-text">
-                            {namaMapel}
-                          </h3>
+    return (
+      <article
+        key={item?.id || `${hariAktif}-${index}`}
+        className={`overflow-hidden rounded-2xl border ${themeNeutralBorder} theme-card ${themeCardShadow}`}
+      >
+        {/* HEADER: WAKTU */}
+        <div
+          className={`flex items-center justify-between border-b ${themeDivider} ${themeNeutralSurface} px-4 py-3`}
+        >
+          <div className="flex items-center gap-3">
+            <div
+              className={`flex h-10 w-10 items-center justify-center rounded-xl border ${accent.bg} ${accent.border}`}
+            >
+              <Clock3
+                className={`h-5 w-5 ${accent.text}`}
+              />
+            </div>
 
-                          {namaKelasItem !== "-" && (
-                            <p className="mt-1 text-[11px] theme-text-muted">
-                              {namaKelasItem}
-                            </p>
-                          )}
-                        </div>
-                      </div>
+            <div>
+              <p className="text-sm font-bold theme-text">
+                {formatJam(item?.jamMulai)}
+                {" - "}
+                {formatJam(item?.jamSelesai)}
+              </p>
 
-                      <div
-                        className={`shrink-0 rounded-lg ${accent.bg} px-2.5 py-1.5`}
-                      >
-                        <span
-                          className={`text-xs font-bold ${accent.text}`}
-                        >
-                          {formatJam(item?.jamMulai)}
-                        </span>
-                      </div>
-                    </div>
+              <p className="mt-0.5 text-[11px] theme-text-muted">
+                Jam pelajaran
+              </p>
+            </div>
+          </div>
 
-                    <div
-                      className={`mt-4 grid grid-cols-2 gap-2 border-t ${themeDivider} pt-4`}
-                    >
-                      <div className="flex items-center gap-2">
-                        <Clock3 className="h-4 w-4 theme-text-muted" />
+          <span
+            className={`rounded-lg border ${accent.border} ${accent.bg} px-2.5 py-1 text-xs font-semibold ${accent.text}`}
+          >
+            {hariAktif}
+          </span>
+        </div>
 
-                        <div>
-                          <p className="text-[10px] theme-text-muted">
-                            Waktu
-                          </p>
+        {/* DETAIL JADWAL */}
+        <div className="space-y-4 p-4">
+          {/* MATA PELAJARAN */}
+          <div className="flex items-start gap-3">
+            <div
+              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${accent.bg}`}
+            >
+              <BookOpen
+                className={`h-5 w-5 ${accent.text}`}
+              />
+            </div>
 
-                          <p className="text-xs font-semibold theme-text-secondary">
-                            {formatJam(item?.jamMulai)} -{" "}
-                            {formatJam(item?.jamSelesai)}
-                          </p>
-                        </div>
-                      </div>
+            <div className="min-w-0 flex-1">
+              <p className="text-[11px] theme-text-muted">
+                Mata Pelajaran
+              </p>
 
-                      <div className="flex items-center gap-2">
-                        <UserRound className="h-4 w-4 theme-text-muted" />
+              <p className="mt-1 break-words text-sm font-semibold theme-text">
+                {namaMapel}
+              </p>
 
-                        <div className="min-w-0">
-                          <p className="text-[10px] theme-text-muted">
-                            Guru
-                          </p>
+              {namaKelasItem !== "-" && (
+                <p className="mt-1 text-xs theme-text-muted">
+                  Kelas {namaKelasItem}
+                </p>
+              )}
+            </div>
+          </div>
 
-                          <p className="truncate text-xs font-semibold theme-text-secondary">
-                            {namaGuru}
-                          </p>
-                        </div>
-                      </div>
+          {/* GURU */}
+          <div className="flex items-start gap-3">
+            <div
+              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themeNeutralSurface}`}
+            >
+              <UserRound className="h-5 w-5 theme-text-muted" />
+            </div>
 
-                      <div className="col-span-2 flex items-center gap-2">
-                        <MapPin className="h-4 w-4 theme-text-muted" />
+            <div className="min-w-0 flex-1">
+              <p className="text-[11px] theme-text-muted">
+                Guru Pengajar
+              </p>
 
-                        <div>
-                          <p className="text-[10px] theme-text-muted">
-                            Ruangan
-                          </p>
+              <p className="mt-1 break-words text-sm font-semibold theme-text">
+                {namaGuru}
+              </p>
+            </div>
+          </div>
 
-                          <p className="text-xs font-semibold theme-text-secondary">
-                            {namaRuangan}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  </article>
-                );
-              })}
-            </section>
+          {/* RUANGAN */}
+          <div className="flex items-start gap-3">
+            <div
+              className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themeNeutralSurface}`}
+            >
+              <MapPin className="h-5 w-5 theme-text-muted" />
+            </div>
+
+            <div className="min-w-0 flex-1">
+              <p className="text-[11px] theme-text-muted">
+                Ruangan
+              </p>
+
+              <p className="mt-1 break-words text-sm font-medium theme-text-secondary">
+                {namaRuangan}
+              </p>
+            </div>
+          </div>
+        </div>
+      </article>
+    );
+  })}
+</section>
           </>
         ) : (
           /* =================================================

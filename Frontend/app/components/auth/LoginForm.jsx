@@ -23,7 +23,6 @@ export default function LoginForm() {
   const [kataSandi, setKataSandi] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [rememberMe, setRememberMe] = useState(true);
-
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -32,17 +31,10 @@ export default function LoginForm() {
   // =====================================================
 
   const ROLE_IDS = {
-    super_admin:
-      "4da87e0a-a994-4fe7-87f1-cdb9f57078a8",
-
-    admin_sekolah:
-      "edeb2f0a-0486-47af-a0d7-536734c34f3e",
-
-    guru:
-      "11181899-51aa-4b53-8165-1fc87e022d81",
-
-    siswa:
-      "c643899d-6a7d-4552-a310-a39b6e9103ee",
+    super_admin: "4da87e0a-a994-4fe7-87f1-cdb9f57078a8",
+    admin_sekolah: "edeb2f0a-0486-47af-a0d7-536734c34f3e",
+    guru: "11181899-51aa-4b53-8165-1fc87e022d81",
+    siswa: "c643899d-6a7d-4552-a310-a39b6e9103ee",
   };
 
   // =====================================================
@@ -50,9 +42,7 @@ export default function LoginForm() {
   // =====================================================
 
   const normalizeRole = (value) => {
-    if (!value) {
-      return "";
-    }
+    if (!value) return "";
 
     return String(value)
       .trim()
@@ -68,19 +58,15 @@ export default function LoginForm() {
     try {
       const parts = token.split(".");
 
-      if (parts.length !== 3) {
-        return null;
-      }
+      if (parts.length !== 3) return null;
 
       const base64Url = parts[1];
-
       const base64 = base64Url
         .replace(/-/g, "+")
         .replace(/_/g, "/");
 
       const paddedBase64 = base64.padEnd(
-        base64.length +
-          ((4 - (base64.length % 4)) % 4),
+        base64.length + ((4 - (base64.length % 4)) % 4),
         "="
       );
 
@@ -92,21 +78,14 @@ export default function LoginForm() {
           .map(
             (char) =>
               "%" +
-              (
-                "00" +
-                char.charCodeAt(0).toString(16)
-              ).slice(-2)
+              ("00" + char.charCodeAt(0).toString(16)).slice(-2)
           )
           .join("")
       );
 
       return JSON.parse(jsonPayload);
     } catch (err) {
-      console.error(
-        "Gagal membaca payload JWT:",
-        err
-      );
-
+      console.error("Gagal membaca payload JWT:", err);
       return null;
     }
   };
@@ -116,11 +95,8 @@ export default function LoginForm() {
   // =====================================================
 
   const getRoleFromPayload = (payload) => {
-    if (!payload) {
-      return "";
-    }
+    if (!payload) return "";
 
-    // Cek nama role terlebih dahulu
     const directRole =
       payload.role ||
       payload.jabatan ||
@@ -129,45 +105,32 @@ export default function LoginForm() {
       payload.roleName;
 
     if (directRole) {
-      return normalizeRole(directRole);
+      return normalizeRole(
+        typeof directRole === "object"
+          ? directRole.nama || directRole.name || directRole.namaPeran
+          : directRole
+      );
     }
 
-    // Cek role ID
-    const roleId = String(
-      payload.roleId || ""
-    )
+    const roleId = String(payload.roleId || "")
       .trim()
       .toLowerCase();
 
-    if (!roleId) {
-      return "";
-    }
+    if (!roleId) return "";
 
-    if (
-      roleId ===
-      ROLE_IDS.super_admin.toLowerCase()
-    ) {
+    if (roleId === ROLE_IDS.super_admin.toLowerCase()) {
       return "super_admin";
     }
 
-    if (
-      roleId ===
-      ROLE_IDS.admin_sekolah.toLowerCase()
-    ) {
+    if (roleId === ROLE_IDS.admin_sekolah.toLowerCase()) {
       return "admin_sekolah";
     }
 
-    if (
-      roleId ===
-      ROLE_IDS.guru.toLowerCase()
-    ) {
+    if (roleId === ROLE_IDS.guru.toLowerCase()) {
       return "guru";
     }
 
-    if (
-      roleId ===
-      ROLE_IDS.siswa.toLowerCase()
-    ) {
+    if (roleId === ROLE_IDS.siswa.toLowerCase()) {
       return "siswa";
     }
 
@@ -178,39 +141,7 @@ export default function LoginForm() {
   // REDIRECT BERDASARKAN ROLE
   // =====================================================
 
-  const getRedirectPath = (token) => {
-    const payload = decodeJwtPayload(token);
-
-    console.log(
-      "========== JWT LOGIN =========="
-    );
-
-    console.log(
-      "JWT PAYLOAD:",
-      payload
-    );
-
-    if (!payload) {
-      console.error(
-        "JWT tidak bisa dibaca."
-      );
-
-      return "/login";
-    }
-
-    const role =
-      getRoleFromPayload(payload);
-
-    console.log(
-      "ROLE ID:",
-      payload.roleId
-    );
-
-    console.log(
-      "ROLE TERDETEKSI:",
-      role
-    );
-
+  const getRedirectPath = (role) => {
     switch (role) {
       case "super_admin":
         return "/super-admin";
@@ -232,11 +163,6 @@ export default function LoginForm() {
         return "/yayasan";
 
       default:
-        console.error(
-          "ROLE TIDAK DIKENALI:",
-          payload
-        );
-
         return "/admin/dashboard";
     }
   };
@@ -248,207 +174,168 @@ export default function LoginForm() {
   const handleLogin = async (e) => {
     e.preventDefault();
 
-    if (loading) {
-      return;
-    }
+    if (loading) return;
 
     setError("");
 
-    const loginIdentifier =
-      identifier.trim();
-
-    // ===================================================
-    // VALIDATION
-    // ===================================================
+    const loginIdentifier = identifier.trim();
 
     if (!loginIdentifier) {
-      setError(
-        "Email atau username wajib diisi."
-      );
-
+      setError("Email atau username wajib diisi.");
       return;
     }
 
     if (!kataSandi) {
-      setError(
-        "Password wajib diisi."
-      );
-
+      setError("Password wajib diisi.");
       return;
     }
 
     setLoading(true);
 
     try {
-      // =================================================
-      // PANGGIL AUTH SERVICE
-      // =================================================
+      // Panggil auth service
+      const data = await login(loginIdentifier, kataSandi);
 
-      const data = await login(
-        loginIdentifier,
-        kataSandi
-      );
+      console.log("RESPONS LOGIN:", data);
 
-      console.log(
-        "========== LOGIN RESPONSE =========="
-      );
-
-      console.log(
-        "DATA:",
-        data
-      );
-
-      // =================================================
-      // AMBIL TOKEN
-      // =================================================
-
-      const token =
-        data?.token;
+      // Ambil token
+      const token = data?.token ?? data?.data?.token;
 
       if (!token) {
-        console.error(
-          "TOKEN TIDAK DITEMUKAN:",
-          data
-        );
-
-        throw new Error(
-          "Token login tidak diterima dari server."
-        );
+        throw new Error("Token login tidak diterima dari server.");
       }
 
-      // =================================================
-      // DECODE TOKEN
-      // =================================================
-
-      const payload =
-        decodeJwtPayload(token);
+      // Decode JWT
+      const payload = decodeJwtPayload(token);
 
       if (!payload) {
-        throw new Error(
-          "Token login tidak valid."
-        );
+        throw new Error("Token login tidak valid.");
       }
 
-      console.log(
-        "========== USER LOGIN =========="
-      );
+      // Ambil data user dari beberapa kemungkinan struktur respons
+      const userData =
+        data?.user ??
+        data?.data?.user ??
+        data?.data?.data?.user ??
+        {};
 
-      console.log(
-        "USER ID:",
-        payload.userId ||
-          payload.id ||
-          null
-      );
-
-      console.log(
-        "EMAIL:",
-        payload.email ||
-          null
-      );
-
-      console.log(
-        "ROLE ID:",
-        payload.roleId ||
-          null
-      );
-
-      console.log(
-        "SEKOLAH ID:",
-        payload.sekolahId ||
-          null
-      );
-
-      console.log(
-        "================================"
-      );
-
-      // =================================================
-      // TENTUKAN ROLE
-      // =================================================
-
+      // Tentukan role
       const role =
-        getRoleFromPayload(
-          payload
-        );
+        getRoleFromPayload({
+          ...payload,
+          role:
+            userData.role ??
+            userData.namaPeran ??
+            payload.role,
+          roleId:
+            userData.roleId ??
+            userData.peranId ??
+            payload.roleId,
+        }) ||
+        getRoleFromPayload(userData);
 
       if (!role) {
-        console.error(
-          "ROLE TIDAK DAPAT DITENTUKAN:",
-          payload
-        );
+        console.error("ROLE TIDAK DIKENALI:", {
+          payload,
+          userData,
+        });
 
         throw new Error(
-          "Role pengguna tidak dapat ditentukan."
+          "Role pengguna tidak dapat ditentukan. Periksa role atau roleId dari backend."
         );
       }
 
       // =================================================
-      // USER INFO
+      // SUSUN DATA PENGGUNA
       // =================================================
 
-      const userInfo = {
-        identifier:
-          loginIdentifier,
+      const namaLengkap =
+        userData.namaLengkap ??
+        userData.nama_lengkap ??
+        userData.name ??
+        userData.nama ??
+        userData.fullName ??
+        payload.namaLengkap ??
+        payload.nama_lengkap ??
+        payload.name ??
+        payload.nama ??
+        payload.fullName ??
+        "";
 
-        userId:
+      const userInfo = {
+        id:
+          userData.id ??
+          userData.userId ??
           payload.userId ??
           payload.id ??
           null,
 
-        email:
-          payload.email ??
-          loginIdentifier ??
+        userId:
+          userData.userId ??
+          userData.id ??
+          payload.userId ??
+          payload.id ??
           null,
 
+        identifier: loginIdentifier,
+
+        namaLengkap,
+
+        namaPengguna:
+          userData.namaPengguna ??
+          userData.username ??
+          payload.namaPengguna ??
+          payload.username ??
+          "",
+
+        // Utamakan email dari backend
+        email:
+          userData.email ??
+          payload.email ??
+          (loginIdentifier.includes("@")
+            ? loginIdentifier
+            : ""),
+
         sekolahId:
+          userData.sekolahId ??
           payload.sekolahId ??
           payload.schoolId ??
           null,
 
+        yayasanId:
+          userData.yayasanId ??
+          payload.yayasanId ??
+          null,
+
         roleId:
+          userData.roleId ??
+          userData.peranId ??
           payload.roleId ??
           null,
 
         role,
       };
 
-      // =================================================
-      // CLEAN STORAGE
-      // =================================================
-
-      localStorage.removeItem(
-        "token"
-      );
-
-      localStorage.removeItem(
-        "user"
-      );
-
-      sessionStorage.removeItem(
-        "token"
-      );
-
-      sessionStorage.removeItem(
-        "user"
-      );
+      console.log("USER YANG DISIMPAN:", userInfo);
 
       // =================================================
-      // SAVE TOKEN
+      // BERSIHKAN SESSION LAMA
       // =================================================
 
-      localStorage.setItem(
-        "token",
-        token
-      );
+      localStorage.removeItem("token");
+      localStorage.removeItem("user");
+      sessionStorage.removeItem("token");
+      sessionStorage.removeItem("user");
 
       // =================================================
-      // SAVE USER
+      // SIMPAN TOKEN DAN USER
       // =================================================
 
-      localStorage.setItem(
-        "user",
-        JSON.stringify(userInfo)
-      );
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(userInfo));
+
+      // Beri tahu Header pada tab yang sama bahwa user berubah
+      window.dispatchEvent(new Event("user-updated"));
 
       // =================================================
       // REMEMBER ME
@@ -460,64 +347,33 @@ export default function LoginForm() {
           loginIdentifier
         );
       } else {
-        localStorage.removeItem(
-          "remembered_identifier"
-        );
+        localStorage.removeItem("remembered_identifier");
       }
 
       // =================================================
-      // CLEAR ONBOARDING
+      // BERSIHKAN DATA ONBOARDING LAMA
       // =================================================
 
-      sessionStorage.removeItem(
-        "onboarding_email"
-      );
-
-      sessionStorage.removeItem(
-        "onboarding_paket_id"
-      );
-
-      sessionStorage.removeItem(
-        "onboarding_pendaftaran_id"
-      );
-
-      sessionStorage.removeItem(
-        "onboarding_payment_url"
-      );
+      sessionStorage.removeItem("onboarding_email");
+      sessionStorage.removeItem("onboarding_paket_id");
+      sessionStorage.removeItem("onboarding_pendaftaran_id");
+      sessionStorage.removeItem("onboarding_payment_url");
 
       // =================================================
       // REDIRECT
       // =================================================
 
-      const redirectPath =
-        getRedirectPath(token);
+      const redirectPath = getRedirectPath(role);
 
-      console.log(
-        "========== LOGIN BERHASIL =========="
-      );
+      console.log("LOGIN BERHASIL:", {
+        role,
+        redirectPath,
+        userInfo,
+      });
 
-      console.log(
-        "ROLE:",
-        role
-      );
-
-      console.log(
-        "REDIRECT:",
-        redirectPath
-      );
-
-      console.log(
-        "===================================="
-      );
-
-      router.replace(
-        redirectPath
-      );
+      router.replace(redirectPath);
     } catch (err) {
-      console.error(
-        "LOGIN ERROR:",
-        err
-      );
+      console.error("LOGIN ERROR:", err);
 
       setError(
         err?.message ||
@@ -533,19 +389,14 @@ export default function LoginForm() {
   // =====================================================
 
   const handleIdentifierFocus = () => {
-    if (identifier) {
-      return;
-    }
+    if (identifier) return;
 
-    const remembered =
-      localStorage.getItem(
-        "remembered_identifier"
-      );
+    const remembered = localStorage.getItem(
+      "remembered_identifier"
+    );
 
     if (remembered) {
-      setIdentifier(
-        remembered
-      );
+      setIdentifier(remembered);
     }
   };
 
@@ -556,13 +407,9 @@ export default function LoginForm() {
   return (
     <div className="w-full">
       <div className="rounded-2xl bg-white p-5 shadow-2xl sm:p-6">
-
         {/* HEADER */}
-
         <div className="mb-6 text-center">
-
           <div className="mb-3 inline-flex h-14 w-14 items-center justify-center rounded-xl bg-white shadow-lg shadow-blue-500/20">
-
             <Image
               src="/logo/logoSS.png"
               alt="Smart School Logo"
@@ -570,7 +417,6 @@ export default function LoginForm() {
               height={32}
               className="object-contain"
             />
-
           </div>
 
           <h2 className="text-xl font-bold text-slate-800">
@@ -578,17 +424,13 @@ export default function LoginForm() {
           </h2>
 
           <p className="mt-0.5 text-xs text-gray-500">
-            Masukkan email/username
-            dan password
+            Masukkan email/username dan password
           </p>
-
         </div>
 
         {/* ERROR */}
-
         {error && (
           <div className="mb-4 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-3 py-2.5">
-
             <AlertCircle
               size={16}
               className="mt-0.5 shrink-0 text-red-500"
@@ -597,21 +439,13 @@ export default function LoginForm() {
             <p className="text-xs leading-5 text-red-600">
               {error}
             </p>
-
           </div>
         )}
 
         {/* FORM */}
-
-        <form
-          onSubmit={handleLogin}
-          className="space-y-4"
-        >
-
+        <form onSubmit={handleLogin} className="space-y-4">
           {/* IDENTIFIER */}
-
           <div>
-
             <label
               htmlFor="identifier"
               className="mb-1.5 block text-xs font-semibold text-slate-700"
@@ -620,7 +454,6 @@ export default function LoginForm() {
             </label>
 
             <div className="relative">
-
               <Mail
                 size={16}
                 className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
@@ -630,30 +463,19 @@ export default function LoginForm() {
                 id="identifier"
                 type="text"
                 value={identifier}
-                onChange={(e) =>
-                  setIdentifier(
-                    e.target.value
-                  )
-                }
-                onFocus={
-                  handleIdentifierFocus
-                }
+                onChange={(e) => setIdentifier(e.target.value)}
+                onFocus={handleIdentifierFocus}
                 placeholder="Masukkan email atau username"
                 disabled={loading}
                 autoComplete="username"
                 className="w-full rounded-xl border border-gray-200 bg-white py-2.5 pl-10 pr-3.5 text-sm text-black outline-none transition-all duration-200 placeholder:text-gray-400 focus:border-transparent focus:ring-2 focus:ring-blue-500 disabled:cursor-not-allowed disabled:bg-gray-50"
               />
-
             </div>
-
           </div>
 
           {/* PASSWORD */}
-
           <div>
-
             <div className="mb-1.5 flex items-center justify-between">
-
               <label
                 htmlFor="password"
                 className="text-xs font-semibold text-slate-700"
@@ -667,11 +489,9 @@ export default function LoginForm() {
               >
                 Lupa password?
               </Link>
-
             </div>
 
             <div className="relative">
-
               <Lock
                 size={16}
                 className="absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400"
@@ -679,17 +499,9 @@ export default function LoginForm() {
 
               <input
                 id="password"
-                type={
-                  showPassword
-                    ? "text"
-                    : "password"
-                }
+                type={showPassword ? "text" : "password"}
                 value={kataSandi}
-                onChange={(e) =>
-                  setKataSandi(
-                    e.target.value
-                  )
-                }
+                onChange={(e) => setKataSandi(e.target.value)}
                 placeholder="Masukkan password"
                 disabled={loading}
                 autoComplete="current-password"
@@ -698,11 +510,7 @@ export default function LoginForm() {
 
               <button
                 type="button"
-                onClick={() =>
-                  setShowPassword(
-                    (prev) => !prev
-                  )
-                }
+                onClick={() => setShowPassword((prev) => !prev)}
                 disabled={loading}
                 className="absolute right-3.5 top-1/2 -translate-y-1/2 text-gray-400 transition-colors hover:text-gray-600"
                 aria-label={
@@ -717,24 +525,16 @@ export default function LoginForm() {
                   <Eye size={16} />
                 )}
               </button>
-
             </div>
-
           </div>
 
           {/* REMEMBER ME */}
-
           <div className="flex items-center gap-2">
-
             <input
               id="remember"
               type="checkbox"
               checked={rememberMe}
-              onChange={(e) =>
-                setRememberMe(
-                  e.target.checked
-                )
-              }
+              onChange={(e) => setRememberMe(e.target.checked)}
               disabled={loading}
               className="h-3.5 w-3.5 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
             />
@@ -745,17 +545,14 @@ export default function LoginForm() {
             >
               Ingat saya
             </label>
-
           </div>
 
           {/* LOGIN BUTTON */}
-
           <button
             type="submit"
             disabled={loading}
             className="flex w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 py-2.5 text-sm font-semibold text-white shadow-lg shadow-blue-500/20 transition-all duration-300 hover:from-blue-700 hover:to-indigo-700 hover:shadow-xl hover:shadow-blue-500/30 disabled:cursor-not-allowed disabled:from-blue-300 disabled:to-indigo-300"
           >
-
             {loading ? (
               <>
                 <svg
@@ -787,29 +584,22 @@ export default function LoginForm() {
                 Masuk
               </>
             )}
-
           </button>
 
           {/* DIVIDER */}
-
           <div className="relative">
-
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-gray-200" />
             </div>
 
             <div className="relative flex justify-center">
-
               <span className="bg-white px-3 text-xs text-gray-400">
                 atau
               </span>
-
             </div>
-
           </div>
 
           {/* GOOGLE */}
-
           <button
             type="button"
             disabled={loading}
@@ -820,13 +610,9 @@ export default function LoginForm() {
             }
             className="flex w-full items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white py-2.5 text-sm font-semibold text-slate-700 transition-all duration-300 hover:border-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:bg-gray-50"
           >
-
             <GoogleIcon />
-
             Masuk dengan Google
-
           </button>
-
         </form>
       </div>
     </div>

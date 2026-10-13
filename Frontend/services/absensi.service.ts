@@ -609,6 +609,21 @@ export async function getKelasSaya(): Promise<KelasSaya> {
   };
 }
 
+
+
+export async function getAbsensiSiswa(siswaId) {
+  if (!siswaId) {
+    throw new Error("ID siswa wajib diisi.");
+  }
+
+  return request(
+    `/absensi/siswa/${encodeURIComponent(siswaId)}`,
+    {
+      method: "GET",
+    }
+  );
+}
+
 /* =========================================================
    SERVICE
 ========================================================= */
@@ -616,6 +631,7 @@ export async function getKelasSaya(): Promise<KelasSaya> {
 const absensiService = {
   getAbsensiSaya,
   getAbsensiKelas,
+  getAbsensiSiswa,
   createAbsensi,
   absenDenganLokasi,
   absenDenganBarcode,

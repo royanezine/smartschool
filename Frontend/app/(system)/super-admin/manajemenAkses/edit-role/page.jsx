@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { Suspense, useState, useEffect, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -983,194 +983,170 @@ function EditRolePageContent() {
                 DETAIL ROLE
             ==================================================== */}
 
-            <section
-              className={`theme-card theme-border rounded-2xl border ${themeCardShadow}`}
-            >
-              <div
-                className={`border-b ${themeDivider} px-5 py-5`}
-              >
-                <div className="flex items-center gap-3">
-                  <div
-                    className={`flex h-10 w-10 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
-                  >
-                    <Settings size={18} />
-                  </div>
+            
+<section className={`theme-card theme-border rounded-2xl border ${themeCardShadow}`}>
+  {/* Header Detail Peran */}
+  <div className={`border-b ${themeDivider} px-5 py-5`}>
+    <div className="flex items-center gap-3">
+      <div
+        className={`flex h-10 w-10 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
+      >
+        <Settings size={18} />
+      </div>
 
-                  <div>
-                    <h2 className="theme-text text-sm font-semibold">
-                      Detail Peran
-                    </h2>
+      <div>
+        <h2 className="theme-text text-sm font-semibold">
+          Detail Peran
+        </h2>
+        <p className="theme-text-muted mt-0.5 text-xs">
+          Informasi dasar role
+        </p>
+      </div>
+    </div>
+  </div>
 
-                    <p className="theme-text-muted mt-0.5 text-xs">
-                      Informasi dasar role
-                    </p>
-                  </div>
-                </div>
-              </div>
+  <div className="space-y-5 p-5">
+    {/* Nama Peran */}
+    <div>
+      <label className="theme-text-secondary mb-2 block text-xs font-semibold">
+        Nama Peran
+        <span className="ml-1 text-[var(--color-warning)]">*</span>
+      </label>
 
-              <div className="space-y-5 p-5">
+      <div className="relative">
+        <UserCog
+          size={16}
+          className="theme-text-muted absolute left-3.5 top-1/2 -translate-y-1/2"
+        />
 
-                {/* Nama Peran */}
-                <div>
-                  <label className="theme-text-secondary mb-2 block text-xs font-semibold">
-                    Nama Peran
-                    <span className="ml-1 text-[var(--color-warning)]">
-                      *
-                    </span>
-                  </label>
+        <input
+          type="text"
+          value={form.nama}
+          onChange={(e) => handleChange("nama", e.target.value)}
+          placeholder="Contoh: Admin Perpustakaan"
+          className={`theme-input theme-text h-11 w-full rounded-xl border pl-10 pr-3 text-sm outline-none transition-all placeholder:theme-text-placeholder theme-focus ${
+            errors.nama
+              ? "border-[var(--color-warning)] focus:border-[var(--color-warning)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-warning)_14%,transparent)]"
+              : "theme-border"
+          }`}
+        />
+      </div>
 
-                  <div className="relative">
-                    <UserCog
-                      size={16}
-                      className="theme-text-muted absolute left-3.5 top-1/2 -translate-y-1/2"
-                    />
+      {errors.nama && (
+        <p className="mt-1.5 flex items-center gap-1 text-xs text-[var(--color-warning)]">
+          <AlertCircle size={12} />
+          {errors.nama}
+        </p>
+      )}
+    </div>
 
-                    <input
-                      type="text"
-                      value={form.nama}
-                      onChange={(e) =>
-                        handleChange(
-                          "nama",
-                          e.target.value
-                        )
-                      }
-                      placeholder="Contoh: Admin Perpustakaan"
-                      className={`theme-input theme-text h-11 w-full rounded-xl border pl-10 pr-3 text-sm outline-none transition-all placeholder:theme-text-placeholder ${themeFocus} ${
-                        errors.nama
-                          ? "border-[var(--color-warning)] focus:border-[var(--color-warning)] focus:ring-[color-mix(in_srgb,var(--color-warning)_14%,transparent)]"
-                          : "theme-border"
-                      }`}
-                    />
-                  </div>
+    {/* Nama Tampilan */}
+    <div>
+      <label className="theme-text-secondary mb-2 block text-xs font-semibold">
+        Nama Tampilan
+        <span className="ml-1 text-[var(--color-warning)]">*</span>
+      </label>
 
-                  {errors.nama && (
-                    <p className="mt-1.5 flex items-center gap-1 text-xs text-[var(--color-warning)]">
-                      <AlertCircle size={12} />
-                      {errors.nama}
-                    </p>
-                  )}
-                </div>
+      <input
+        type="text"
+        value={form.namaTampilan}
+        onChange={(e) =>
+          handleChange("namaTampilan", e.target.value)
+        }
+        placeholder="admin-perpustakaan"
+        className={`theme-input theme-text h-11 w-full rounded-xl border px-3 font-mono text-sm outline-none transition-all placeholder:font-sans placeholder:theme-text-placeholder theme-focus ${
+          errors.namaTampilan
+            ? "border-[var(--color-warning)] focus:border-[var(--color-warning)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-warning)_14%,transparent)]"
+            : "theme-border"
+        }`}
+      />
 
-                {/* Nama Tampilan */}
-                <div>
-                  <label className="theme-text-secondary mb-2 block text-xs font-semibold">
-                    Nama Tampilan
-                    <span className="ml-1 text-[var(--color-warning)]">
-                      *
-                    </span>
-                  </label>
+      {errors.namaTampilan && (
+        <p className="mt-1.5 flex items-center gap-1 text-xs text-[var(--color-warning)]">
+          <AlertCircle size={12} />
+          {errors.namaTampilan}
+        </p>
+      )}
+    </div>
 
-                  <input
-                    type="text"
-                    value={form.namaTampilan}
-                    onChange={(e) =>
-                      handleChange(
-                        "namaTampilan",
-                        e.target.value
-                      )
-                    }
-                    placeholder="admin-perpustakaan"
-                    className={`theme-input theme-text h-11 w-full rounded-xl border px-3 font-mono text-sm outline-none transition-all placeholder:font-sans placeholder:theme-text-placeholder ${themeFocus} ${
-                      errors.namaTampilan
-                        ? "border-[var(--color-warning)] focus:border-[var(--color-warning)] focus:ring-[color-mix(in_srgb,var(--color-warning)_14%,transparent)]"
-                        : "theme-border"
-                    }`}
-                  />
+    {/* Deskripsi */}
+    <div>
+      <label className="theme-text-secondary mb-2 block text-xs font-semibold">
+        Deskripsi
+      </label>
 
-                  {errors.namaTampilan && (
-                    <p className="mt-1.5 flex items-center gap-1 text-xs text-[var(--color-warning)]">
-                      <AlertCircle size={12} />
-                      {errors.namaTampilan}
-                    </p>
-                  )}
-                </div>
+      <textarea
+        value={form.deskripsi}
+        onChange={(e) =>
+          handleChange("deskripsi", e.target.value)
+        }
+        rows={5}
+        placeholder="Jelaskan tanggung jawab dan cakupan akses peran ini..."
+        className="theme-input theme-text theme-focus w-full resize-none rounded-xl border px-3 py-3 text-sm leading-6 outline-none transition-all placeholder:theme-text-placeholder theme-border"
+      />
+    </div>
 
-                {/* Deskripsi */}
-                <div>
-                  <label className="theme-text-secondary mb-2 block text-xs font-semibold">
-                    Deskripsi
-                  </label>
+    {/* Pengguna Role */}
+    <div
+      className={`rounded-xl border ${themeInfoBorder} ${themeInfoSurface} p-4`}
+    >
+      <div className="flex items-start gap-3">
+        <div
+          className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg theme-card ${themePrimaryText} ${themeCardShadow}`}
+        >
+          <UserCheck size={16} />
+        </div>
 
-                  <textarea
-                    value={form.deskripsi}
-                    onChange={(e) =>
-                      handleChange(
-                        "deskripsi",
-                        e.target.value
-                      )
-                    }
-                    rows={5}
-                    placeholder="Jelaskan tanggung jawab dan cakupan akses peran ini..."
-                    className={`theme-input theme-text w-full resize-none rounded-xl border px-3 py-3 text-sm leading-6 outline-none transition-all placeholder:theme-text-placeholder ${themeFocus}`}
-                  />
-                </div>
+        <div className="min-w-0">
+          <p className="theme-text text-xs font-semibold">
+            Pengguna role
+          </p>
 
-                {/* Pengguna Role */}
-                <div
-                  className={`rounded-xl border ${themeInfoBorder} ${themeInfoSurface} p-4`}
-                >
-                  <div className="flex items-start gap-3">
-                    <div
-                      className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${theme-card} ${themePrimaryText} ${themeCardShadow}`}
-                    >
-                      <UserCheck size={16} />
-                    </div>
+          <p className="theme-text-secondary mt-1 text-xs leading-5">
+            Saat ini terdapat{" "}
+            <span className="font-semibold text-[var(--color-primary)]">
+              {jumlahPengguna.toLocaleString("id-ID")}
+            </span>{" "}
+            pengguna yang menggunakan role ini.
+          </p>
+        </div>
+      </div>
+    </div>
 
-                    <div className="min-w-0">
-                      <p className="theme-text text-xs font-semibold">
-                        Pengguna role
-                      </p>
+    {/* Scope Akses */}
+    <div
+      className={`rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} p-4`}
+    >
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2.5">
+          <div
+            className={`flex h-8 w-8 items-center justify-center rounded-lg theme-card theme-text-muted ${themeCardShadow}`}
+          >
+            <Database size={15} />
+          </div>
 
-                      <p className="theme-text-secondary mt-1 text-xs leading-5">
-                        Saat ini terdapat{" "}
-                        <span className="font-semibold text-[var(--color-primary)]">
-                          {jumlahPengguna.toLocaleString(
-                            "id-ID"
-                          )}
-                        </span>{" "}
-                        pengguna yang menggunakan
-                        role ini.
-                      </p>
-                    </div>
-                  </div>
-                </div>
+          <div>
+            <p className="theme-text-secondary text-xs font-semibold">
+              Scope Akses
+            </p>
 
-                {/* Scope */}
-                <div
-                  className={`rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface} p-4`}
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <div className="flex items-center gap-2.5">
-                      <div
-                        className={`flex h-8 w-8 items-center justify-center rounded-lg theme-card theme-text-muted ${themeCardShadow}`}
-                      >
-                        <Database size={15} />
-                      </div>
+            <p className="theme-text-muted text-[11px]">
+              {role.sekolahId
+                ? "Terikat pada sekolah"
+                : "Berlaku secara global"}
+            </p>
+          </div>
+        </div>
 
-                      <div>
-                        <p className="theme-text-secondary text-xs font-semibold">
-                          Scope Akses
-                        </p>
-
-                        <p className="theme-text-muted text-[11px]">
-                          {role.sekolahId
-                            ? "Terikat pada sekolah"
-                            : "Berlaku secara global"}
-                        </p>
-                      </div>
-                    </div>
-
-                    <span
-                      className={`rounded-full border ${themeNeutralBorder} theme-card theme-text-secondary px-2.5 py-1 text-[10px] font-semibold`}
-                    >
-                      {role.sekolahId
-                        ? "Sekolah"
-                        : "Global"}
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </section>
+        <span
+          className={`rounded-full border ${themeNeutralBorder} theme-card theme-text-secondary px-2.5 py-1 text-[10px] font-semibold`}
+        >
+          {role.sekolahId ? "Sekolah" : "Global"}
+        </span>
+      </div>
+    </div>
+  </div>
+</section>
 
             {/* ====================================================
                 HAK AKSES

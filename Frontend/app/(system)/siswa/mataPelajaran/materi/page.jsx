@@ -1,3 +1,4 @@
+﻿
 "use client";
 
 import { Suspense, useEffect, useMemo, useState } from "react";
@@ -38,61 +39,6 @@ import {
 } from "@/services/materiPembelajaran.service";
 
 /* =========================================================
-   MATA PELAJARAN
-========================================================= */
-
-const mataPelajaranList = [
-  {
-    id: "matematika",
-    nama: "Matematika",
-    guru: "Budi Santoso",
-    icon: Calculator,
-  },
-  {
-    id: "bindo",
-    nama: "Bahasa Indonesia",
-    guru: "Pak Budi",
-    icon: Languages,
-  },
-  {
-    id: "ipa",
-    nama: "IPA",
-    guru: "Bu Dewi",
-    icon: FlaskConical,
-  },
-  {
-    id: "ips",
-    nama: "IPS",
-    guru: "Pak Anwar",
-    icon: Globe2,
-  },
-  {
-    id: "binggris",
-    nama: "Bahasa Inggris",
-    guru: "Bu Rina",
-    icon: BookOpen,
-  },
-  {
-    id: "seni",
-    nama: "Seni Budaya",
-    guru: "Bu Wulan",
-    icon: Palette,
-  },
-  {
-    id: "musik",
-    nama: "Seni Musik",
-    guru: "Pak Doni",
-    icon: Music,
-  },
-  {
-    id: "penjas",
-    nama: "Penjaskes",
-    guru: "Pak Rudi",
-    icon: Dumbbell,
-  },
-];
-
-/* =========================================================
    THEME
 ========================================================= */
 
@@ -108,8 +54,7 @@ const themePrimaryBorder =
 const themePrimaryBorderStrong =
   "border-[color-mix(in_srgb,var(--color-primary)_30%,transparent)]";
 
-const themePrimaryText =
-  "text-[var(--color-primary)]";
+const themePrimaryText = "text-[var(--color-primary)]";
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -141,26 +86,17 @@ const themeInfoSurface =
 const themeInfoBorder =
   "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
 
-const themeInfoText =
-  "text-[var(--color-info)]";
+const themeInfoText = "text-[var(--color-info)]";
 
 const themeSuccessSurface =
   "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
 
-const themeSuccessBorder =
-  "border-[color-mix(in_srgb,var(--color-success)_22%,transparent)]";
-
-const themeSuccessText =
-  "text-[var(--color-success)]";
+const themeSuccessText = "text-[var(--color-success)]";
 
 const themeWarningSurface =
   "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
 
-const themeWarningBorder =
-  "border-[color-mix(in_srgb,var(--color-warning)_22%,transparent)]";
-
-const themeWarningText =
-  "text-[var(--color-warning)]";
+const themeWarningText = "text-[var(--color-warning)]";
 
 const themeDangerSurface =
   "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
@@ -183,7 +119,6 @@ const FILE_TYPE_STYLE = {
     border: themeDangerBorder,
     label: "PDF",
   },
-
   video: {
     icon: Video,
     bg: themePrimarySurface,
@@ -191,23 +126,20 @@ const FILE_TYPE_STYLE = {
     border: themePrimaryBorder,
     label: "Video",
   },
-
   ppt: {
     icon: Presentation,
     bg: themeWarningSurface,
     text: themeWarningText,
-    border: themeWarningBorder,
+    border: themeDangerBorder,
     label: "Slide",
   },
-
   pptx: {
     icon: Presentation,
     bg: themeWarningSurface,
     text: themeWarningText,
-    border: themeWarningBorder,
+    border: themeDangerBorder,
     label: "Slide",
   },
-
   gambar: {
     icon: ImageIcon,
     bg: themeInfoSurface,
@@ -215,7 +147,6 @@ const FILE_TYPE_STYLE = {
     border: themeInfoBorder,
     label: "Gambar",
   },
-
   image: {
     icon: ImageIcon,
     bg: themeInfoSurface,
@@ -223,7 +154,6 @@ const FILE_TYPE_STYLE = {
     border: themeInfoBorder,
     label: "Gambar",
   },
-
   link: {
     icon: ExternalLink,
     bg: themePrimarySurface,
@@ -231,7 +161,6 @@ const FILE_TYPE_STYLE = {
     border: themePrimaryBorder,
     label: "Link",
   },
-
   lainnya: {
     icon: File,
     bg: themeNeutralSurface,
@@ -239,7 +168,6 @@ const FILE_TYPE_STYLE = {
     border: themeNeutralBorder,
     label: "File",
   },
-
   file: {
     icon: File,
     bg: themeNeutralSurface,
@@ -254,48 +182,111 @@ const FILE_TYPE_STYLE = {
 ========================================================= */
 
 function normalizeText(value) {
-  return String(value || "")
-    .toLowerCase()
-    .trim();
+  return String(value ?? "").toLowerCase().trim();
+}
+
+function getMapelId(item) {
+  const mapel = item?.mataPelajaran;
+
+  return (
+    mapel?.id ??
+    item?.mataPelajaranId ??
+    item?.mata_pelajaran_id ??
+    null
+  );
+}
+
+function getMapelNama(item) {
+  const mapel = item?.mataPelajaran ?? item;
+
+  return (
+    mapel?.nama ??
+    mapel?.namaMapel ??
+    mapel?.nama_mata_pelajaran ??
+    mapel?.namaMataPelajaran ??
+    ""
+  );
+}
+
+function getKelasId(item) {
+  return (
+    item?.kelasId ??
+    item?.kelas_id ??
+    item?.kelas?.id ??
+    null
+  );
+}
+
+function getMapelIcon(nama) {
+  const text = normalizeText(nama);
+
+  if (text.includes("matematika")) return Calculator;
+
+  if (text.includes("bahasa indonesia")) {
+    return Languages;
+  }
+
+  if (
+    text === "ipa" ||
+    text.includes("ilmu pengetahuan alam") ||
+    text.includes("biologi") ||
+    text.includes("fisika") ||
+    text.includes("kimia")
+  ) {
+    return FlaskConical;
+  }
+
+  if (
+    text === "ips" ||
+    text.includes("ilmu pengetahuan sosial") ||
+    text.includes("sejarah") ||
+    text.includes("geografi")
+  ) {
+    return Globe2;
+  }
+
+  if (text.includes("bahasa inggris")) return BookOpen;
+  if (text.includes("seni budaya")) return Palette;
+  if (text.includes("seni musik")) return Music;
+
+  if (
+    text.includes("penjaskes") ||
+    text.includes("pendidikan jasmani") ||
+    text.includes("pjok")
+  ) {
+    return Dumbbell;
+  }
+
+  return BookOpen;
 }
 
 function getFileType(item) {
-  const tipe = String(item?.tipe || "").toLowerCase();
+  const tipe = normalizeText(item?.tipe);
 
   if (FILE_TYPE_STYLE[tipe]) {
     return tipe;
   }
 
-  const url = String(item?.urlFile || "").toLowerCase();
-  const judul = String(item?.judul || "").toLowerCase();
+  const url = normalizeText(item?.urlFile);
+  const judul = normalizeText(item?.judul);
 
-  if (url.includes(".pdf") || judul.includes(".pdf")) {
+  if (/\.(pdf)(?:$|[?#])/.test(url) || judul.endsWith(".pdf")) {
     return "pdf";
   }
 
   if (
-    url.includes(".ppt") ||
-    url.includes(".pptx") ||
-    judul.includes(".ppt") ||
-    judul.includes(".pptx")
+    /\.(ppt|pptx)(?:$|[?#])/.test(url) ||
+    judul.endsWith(".ppt") ||
+    judul.endsWith(".pptx")
   ) {
     return "ppt";
   }
 
-  if (
-    url.includes(".png") ||
-    url.includes(".jpg") ||
-    url.includes(".jpeg") ||
-    url.includes(".webp")
-  ) {
+  if (/\.(png|jpg|jpeg|webp|gif)(?:$|[?#])/.test(url)) {
     return "gambar";
   }
 
-  if (
-    url.includes(".mp4") ||
-    url.includes(".mov") ||
-    url.includes(".webm")
-  ) {
+  if (/\.(mp4|mov|webm)(?:$|[?#])/.test(url)) {
     return "video";
   }
 
@@ -325,11 +316,7 @@ function formatTanggal(value) {
 function getBackendFileUrl(url) {
   if (!url) return null;
 
-  if (
-    url.startsWith("http://") ||
-    url.startsWith("https://") ||
-    url.startsWith("blob:")
-  ) {
+  if (/^(https?:\/\/|blob:)/i.test(url)) {
     return url;
   }
 
@@ -354,74 +341,11 @@ function getCurrentUser() {
   try {
     const rawUser = localStorage.getItem("user");
 
-    if (!rawUser) {
-      return null;
-    }
-
-    return JSON.parse(rawUser);
+    return rawUser ? JSON.parse(rawUser) : null;
   } catch (error) {
-    console.error(
-      "Gagal membaca user dari localStorage:",
-      error
-    );
-
+    console.error("[SISWA MATERI] Gagal membaca user:", error);
     return null;
   }
-}
-
-function getMapelSlug(nama) {
-  const text = normalizeText(nama);
-
-  if (text.includes("matematika")) {
-    return "matematika";
-  }
-
-  if (
-    text.includes("bahasa indonesia") ||
-    text === "bindo"
-  ) {
-    return "bindo";
-  }
-
-  if (
-    text === "ipa" ||
-    text.includes("ilmu pengetahuan alam") ||
-    text.includes("biologi")
-  ) {
-    return "ipa";
-  }
-
-  if (
-    text === "ips" ||
-    text.includes("ilmu pengetahuan sosial")
-  ) {
-    return "ips";
-  }
-
-  if (
-    text.includes("bahasa inggris") ||
-    text === "inggris"
-  ) {
-    return "binggris";
-  }
-
-  if (text.includes("seni budaya")) {
-    return "seni";
-  }
-
-  if (text.includes("seni musik")) {
-    return "musik";
-  }
-
-  if (
-    text.includes("penjaskes") ||
-    text.includes("pendidikan jasmani") ||
-    text.includes("pjok")
-  ) {
-    return "penjas";
-  }
-
-  return null;
 }
 
 /* =========================================================
@@ -435,10 +359,7 @@ function PageLoading() {
         <div
           className={`w-10 h-10 rounded-xl ${themePrimarySurface} flex items-center justify-center ${themePrimaryText}`}
         >
-          <Loader2
-            size={20}
-            className="animate-spin"
-          />
+          <Loader2 size={20} className="animate-spin" />
         </div>
 
         <p className="text-sm font-medium theme-text-secondary mt-3">
@@ -458,11 +379,10 @@ function MateriPageInner() {
   const searchParams = useSearchParams();
 
   const mapelParam = searchParams.get("mapel");
-  const kelasMapelParam =
-    searchParams.get("kelasMapelId");
+  const kelasMapelParam = searchParams.get("kelasMapelId");
 
   const [activeMapel, setActiveMapel] = useState(
-    mapelParam || "semua"
+    kelasMapelParam || mapelParam || "semua"
   );
 
   const [query, setQuery] = useState("");
@@ -477,76 +397,61 @@ function MateriPageInner() {
   ======================================================= */
 
   useEffect(() => {
-    const user = getCurrentUser();
-
-    console.log(
-      "[SISWA MATERI] CURRENT USER:",
-      user
-    );
-
-    setCurrentUser(user);
+    setCurrentUser(getCurrentUser());
   }, []);
 
   /* =======================================================
      LOAD DATA
   ======================================================= */
 
-  useEffect(() => {
-    loadData();
-  }, []);
-
   async function loadData() {
     try {
       setLoading(true);
       setError("");
 
-      const [
-        kelasMapelResponse,
-        materiResponse,
-      ] = await Promise.all([
-        getKelasMapel(),
-        getMateriPembelajaran(),
-      ]);
+      const [kelasMapelResponse, materiResponse] =
+        await Promise.all([
+          getKelasMapel(),
+          getMateriPembelajaran(),
+        ]);
 
-      const kelasMapelData = Array.isArray(
-        kelasMapelResponse?.data
-      )
-        ? kelasMapelResponse.data
-        : [];
+      const unwrapArray = (response) => {
+        if (Array.isArray(response)) return response;
+        if (Array.isArray(response?.data)) return response.data;
+        if (Array.isArray(response?.data?.data)) {
+          return response.data.data;
+        }
+        if (Array.isArray(response?.kelasMapel)) {
+          return response.kelasMapel;
+        }
+        if (Array.isArray(response?.materi)) {
+          return response.materi;
+        }
+        return [];
+      };
 
-      const materiData = Array.isArray(
-        materiResponse?.data
-      )
-        ? materiResponse.data
-        : [];
-
-      setKelasMapelList(kelasMapelData);
-      setMateriList(materiData);
+      setKelasMapelList(unwrapArray(kelasMapelResponse));
+      setMateriList(unwrapArray(materiResponse));
     } catch (err) {
-      console.error(
-        "[SISWA MATERI] GAGAL LOAD:",
-        err
-      );
+      console.error("[SISWA MATERI] Gagal load:", err);
 
       setError(
         err?.message ||
           "Materi gagal dimuat. Silakan coba lagi."
       );
+
+      setKelasMapelList([]);
+      setMateriList([]);
     } finally {
       setLoading(false);
     }
   }
 
-  /* =======================================================
-     SELECTED MAPEL
-  ======================================================= */
-
-  const selectedMapel = mataPelajaranList.find(
-    (m) => m.id === activeMapel
-  );
-
-  const SelectedMapelIcon =
-    selectedMapel?.icon;
+  useEffect(() => {
+    loadData();
+    // Muat data saat halaman pertama kali dibuka.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   /* =======================================================
      KELAS SISWA
@@ -557,6 +462,7 @@ function MateriPageInner() {
     currentUser?.kelas_id ??
     currentUser?.kelas?.id ??
     currentUser?.siswa?.kelasId ??
+    currentUser?.siswa?.kelas?.id ??
     currentUser?.data?.kelasId ??
     null;
 
@@ -565,27 +471,23 @@ function MateriPageInner() {
   ======================================================= */
 
   const kelasMapelSiswa = useMemo(() => {
-    if (!currentUser) {
-      return [];
-    }
+    if (!currentUser) return [];
 
     let data = kelasMapelList;
 
+    // Jika URL menyertakan kelasMapelId, tampilkan relasi tersebut saja.
     if (kelasMapelParam) {
       return data.filter(
-        (item) => item.id === kelasMapelParam
+        (item) => String(item?.id) === String(kelasMapelParam)
       );
     }
 
-    if (userKelasId) {
-      data = data.filter((item) => {
-        const kelasId =
-          item?.kelasId ??
-          item?.kelas?.id ??
-          null;
-
-        return kelasId === userKelasId;
-      });
+    // Filter berdasarkan kelas yang tersimpan pada user.
+    if (userKelasId != null) {
+      data = data.filter(
+        (item) =>
+          String(getKelasId(item)) === String(userKelasId)
+      );
     }
 
     return data;
@@ -597,6 +499,65 @@ function MateriPageInner() {
   ]);
 
   /* =======================================================
+     MATA PELAJARAN DINAMIS DARI DATABASE
+  ======================================================= */
+
+  const mataPelajaranList = useMemo(() => {
+    const mapelUnik = new Map();
+
+    kelasMapelSiswa.forEach((item) => {
+      const mapelId = getMapelId(item);
+      const nama = getMapelNama(item);
+
+      if (mapelId == null || !nama) return;
+
+      const key = String(mapelId);
+
+      if (!mapelUnik.has(key)) {
+        mapelUnik.set(key, {
+          id: key,
+          nama,
+          icon: getMapelIcon(nama),
+        });
+      }
+    });
+
+    return Array.from(mapelUnik.values()).sort((a, b) =>
+      a.nama.localeCompare(b.nama, "id")
+    );
+  }, [kelasMapelSiswa]);
+
+  /* =======================================================
+     SINKRONKAN FILTER DENGAN DATA AKTUAL
+  ======================================================= */
+
+  useEffect(() => {
+    if (activeMapel === "semua") return;
+
+    const exists = mataPelajaranList.some(
+      (item) => item.id === String(activeMapel)
+    );
+
+    const kelasMapelExists = kelasMapelSiswa.some(
+      (item) => String(item.id) === String(activeMapel)
+    );
+
+    if (!exists && !kelasMapelExists) {
+      setActiveMapel("semua");
+    }
+  }, [activeMapel, mataPelajaranList, kelasMapelSiswa]);
+
+  /* =======================================================
+     SELECTED MAPEL
+  ======================================================= */
+
+  const selectedMapel = mataPelajaranList.find(
+    (item) => item.id === String(activeMapel)
+  );
+
+  const SelectedMapelIcon = selectedMapel?.icon;
+
+  /* =======================================================
      KELAS MAPEL AKTIF
   ======================================================= */
 
@@ -606,22 +567,12 @@ function MateriPageInner() {
     }
 
     return kelasMapelSiswa.filter((item) => {
-      const namaMapel =
-        item?.mataPelajaran?.nama ??
-        item?.mataPelajaran?.namaMapel ??
-        item?.mataPelajaran
-          ?.nama_mata_pelajaran ??
-        "";
-
       return (
-        getMapelSlug(namaMapel) ===
-        activeMapel
+        String(getMapelId(item)) === String(activeMapel) ||
+        String(item?.id) === String(activeMapel)
       );
     });
-  }, [
-    activeMapel,
-    kelasMapelSiswa,
-  ]);
+  }, [activeMapel, kelasMapelSiswa]);
 
   /* =======================================================
      FILTER MATERI
@@ -630,80 +581,62 @@ function MateriPageInner() {
   const filteredMateri = useMemo(() => {
     let data = materiList;
 
-    if (kelasMapelSiswa.length > 0) {
-      const allowedIds = new Set(
-        kelasMapelSiswa.map(
-          (item) => item.id
-        )
-      );
+    // Hanya tampilkan materi yang terhubung dengan kelas-mapel siswa.
+    const allowedIds = new Set(
+      kelasMapelSiswa.map((item) => String(item.id))
+    );
 
-      data = data.filter((materi) =>
-        allowedIds.has(
-          materi.kelasMapelId
-        )
+    data = data.filter((materi) => {
+      const kelasMapelId =
+        materi?.kelasMapelId ??
+        materi?.kelas_mapel_id ??
+        materi?.kelasMapel?.id ??
+        null;
+
+      return (
+        kelasMapelId != null &&
+        allowedIds.has(String(kelasMapelId))
       );
-    }
+    });
 
     if (activeMapel !== "semua") {
-      data = data.filter((materi) => {
-        const kelasMapel =
-          kelasMapelSiswa.find(
-            (item) =>
-              item.id ===
-              materi.kelasMapelId
-          );
+      const selectedClassMapelIds = new Set(
+        kelasMapelAktif.map((item) => String(item.id))
+      );
 
-        const namaMapel =
-          kelasMapel
-            ?.mataPelajaran
-            ?.nama ??
-          kelasMapel
-            ?.mataPelajaran
-            ?.namaMapel ??
-          kelasMapel
-            ?.mataPelajaran
-            ?.nama_mata_pelajaran ??
-          "";
+      data = data.filter((materi) => {
+        const kelasMapelId =
+          materi?.kelasMapelId ??
+          materi?.kelas_mapel_id ??
+          materi?.kelasMapel?.id ??
+          null;
 
         return (
-          getMapelSlug(namaMapel) ===
-          activeMapel
+          kelasMapelId != null &&
+          selectedClassMapelIds.has(String(kelasMapelId))
         );
       });
     }
 
     if (query.trim()) {
-      const keyword =
-        normalizeText(query);
+      const keyword = normalizeText(query);
 
       data = data.filter((materi) => {
         return (
-          normalizeText(
-            materi?.judul
-          ).includes(keyword) ||
-          normalizeText(
-            materi?.deskripsi
-          ).includes(keyword) ||
-          normalizeText(
-            materi?.kategori
-          ).includes(keyword)
+          normalizeText(materi?.judul).includes(keyword) ||
+          normalizeText(materi?.deskripsi).includes(keyword) ||
+          normalizeText(materi?.kategori).includes(keyword)
         );
       });
     }
 
     return [...data].sort((a, b) => {
       const dateA = new Date(
-        a?.dibuatPada ??
-          a?.createdAt ??
-          a?.tanggalDibuat ??
-          0
+        a?.dibuatPada ?? a?.createdAt ?? a?.tanggalDibuat ?? 0
       ).getTime();
 
       const dateB = new Date(
-        b?.dibuatPada ??
-          b?.createdAt ??
-          b?.tanggalDibuat ??
-          0
+        b?.dibuatPada ?? b?.createdAt ?? b?.tanggalDibuat ?? 0
       ).getTime();
 
       return dateB - dateA;
@@ -711,6 +644,7 @@ function MateriPageInner() {
   }, [
     materiList,
     kelasMapelSiswa,
+    kelasMapelAktif,
     activeMapel,
     query,
   ]);
@@ -719,54 +653,54 @@ function MateriPageInner() {
      STATISTICS
   ======================================================= */
 
-  const totalMateri =
-    filteredMateri.length;
+  const totalMateri = filteredMateri.length;
 
   const totalMapel = useMemo(() => {
     const ids = new Set();
 
     filteredMateri.forEach((materi) => {
-      const kelasMapel =
-        kelasMapelSiswa.find(
-          (item) =>
-            item.id ===
-            materi.kelasMapelId
-        );
+      const kelasMapelId =
+        materi?.kelasMapelId ??
+        materi?.kelas_mapel_id ??
+        materi?.kelasMapel?.id;
 
-      if (kelasMapel) {
-        ids.add(kelasMapel.id);
-      }
+      const kelasMapel = kelasMapelSiswa.find(
+        (item) => String(item.id) === String(kelasMapelId)
+      );
+
+      const mapelId = getMapelId(kelasMapel);
+
+      if (mapelId != null) ids.add(String(mapelId));
     });
 
     return ids.size;
-  }, [
-    filteredMateri,
-    kelasMapelSiswa,
-  ]);
+  }, [filteredMateri, kelasMapelSiswa]);
 
-  const totalFile = useMemo(() => {
-    return filteredMateri.filter(
-      (item) => item?.urlFile
-    ).length;
-  }, [filteredMateri]);
+  const totalFile = useMemo(
+    () => filteredMateri.filter((item) => item?.urlFile).length,
+    [filteredMateri]
+  );
 
-  const totalLink = useMemo(() => {
-    return filteredMateri.filter(
-      (item) =>
-        item?.urlLink &&
-        !item?.urlFile
-    ).length;
-  }, [filteredMateri]);
+  const totalLink = useMemo(
+    () =>
+      filteredMateri.filter(
+        (item) => item?.urlLink && !item?.urlFile
+      ).length,
+    [filteredMateri]
+  );
 
   /* =======================================================
      GET KELAS MAPEL
   ======================================================= */
 
   function getKelasMapelFromMateri(materi) {
+    const kelasMapelId =
+      materi?.kelasMapelId ??
+      materi?.kelas_mapel_id ??
+      materi?.kelasMapel?.id;
+
     return kelasMapelSiswa.find(
-      (item) =>
-        item.id ===
-        materi.kelasMapelId
+      (item) => String(item.id) === String(kelasMapelId)
     );
   }
 
@@ -776,49 +710,193 @@ function MateriPageInner() {
 
   function handleOpenFile(item) {
     const url = item?.urlFile
-      ? getBackendFileUrl(
-          item.urlFile
-        )
+      ? getBackendFileUrl(item.urlFile)
       : item?.urlLink || null;
 
     if (!url) {
-      alert(
-        "File atau link materi belum tersedia."
-      );
+      alert("File atau link materi belum tersedia.");
       return;
     }
 
-    window.open(
-      url,
-      "_blank",
-      "noopener,noreferrer"
-    );
+    window.open(url, "_blank", "noopener,noreferrer");
   }
 
   /* =======================================================
      DOWNLOAD
   ======================================================= */
 
-  function handleDownload(item) {
-    const url = item?.urlFile
-      ? getBackendFileUrl(
-          item.urlFile
-        )
-      : item?.urlLink || null;
+async function handleDownload(item) {
+  const url = item?.urlFile
+    ? getBackendFileUrl(item.urlFile)
+    : null;
 
-    if (!url) {
-      alert(
-        "File materi belum tersedia."
+  if (!url) {
+    alert("File materi belum tersedia.");
+    return;
+  }
+
+  try {
+    const token =
+      typeof window !== "undefined"
+        ? localStorage.getItem("token")
+        : null;
+
+    const response = await fetch(url, {
+      method: "GET",
+      headers: token
+        ? {
+            Authorization: `Bearer ${token}`,
+          }
+        : {},
+    });
+
+    if (!response.ok) {
+      throw new Error(
+        `Gagal mengunduh file. Status: ${response.status}`
       );
-      return;
     }
 
-    window.open(
-      url,
-      "_blank",
-      "noopener,noreferrer"
+    const blob = await response.blob();
+
+    if (blob.size === 0) {
+      throw new Error("File yang diterima kosong.");
+    }
+
+    // 1. Cari nama file asli dari data materi.
+    const namaAsli =
+      item?.namaFileAsli ||
+      item?.namaFile ||
+      item?.fileName ||
+      item?.originalName ||
+      item?.originalFilename ||
+      item?.nama_file ||
+      item?.nama_file_asli ||
+      item?.judulFile ||
+      "";
+
+    // 2. Cari nama file dari header server.
+    const disposition =
+      response.headers.get("Content-Disposition") || "";
+
+    const utf8Match = disposition.match(
+      /filename\*=UTF-8''([^;]+)/i
+    );
+
+    const normalMatch = disposition.match(
+      /filename="?([^";]+)"?/i
+    );
+
+    let namaHeader = "";
+
+    if (utf8Match?.[1]) {
+      try {
+        namaHeader = decodeURIComponent(
+          utf8Match[1].trim()
+        );
+      } catch {
+        namaHeader = utf8Match[1].trim();
+      }
+    } else if (normalMatch?.[1]) {
+      namaHeader = normalMatch[1].trim();
+    }
+
+    // 3. Jika belum ada, ambil nama file dari URL.
+    let namaUrl = "";
+
+    try {
+      const pathname = new URL(url).pathname;
+      namaUrl = decodeURIComponent(
+        pathname.split("/").filter(Boolean).pop() || ""
+      );
+    } catch {
+      namaUrl = "";
+    }
+
+    // Prioritas: nama asli > header server > URL.
+    let filename = String(
+      namaAsli || namaHeader || namaUrl || "materi"
+    ).trim();
+
+    // Hindari karakter yang tidak valid pada nama file.
+    filename = filename
+      .replace(/^["']|["']$/g, "")
+      .replace(/[<>:"/\\|?*\x00-\x1F]/g, "_")
+      .trim();
+
+    if (!filename) {
+      filename = "materi";
+    }
+
+    // Jika belum memiliki ekstensi, coba gunakan ekstensi URL.
+    if (!/\.[a-z0-9]{1,10}$/i.test(filename)) {
+      const extensionMatch = namaUrl.match(
+        /\.([a-z0-9]{1,10})$/i
+      );
+
+      if (extensionMatch) {
+        filename += `.${extensionMatch[1]}`;
+      } else {
+        const contentType = blob.type.toLowerCase();
+
+        if (contentType.includes("pdf")) {
+          filename += ".pdf";
+        } else if (
+          contentType.includes(
+            "officedocument.presentationml"
+          )
+        ) {
+          filename += ".pptx";
+        } else if (
+          contentType.includes("presentation")
+        ) {
+          filename += ".ppt";
+        } else if (
+          contentType.includes(
+            "officedocument.wordprocessingml"
+          )
+        ) {
+          filename += ".docx";
+        } else if (contentType.includes("msword")) {
+          filename += ".doc";
+        } else if (contentType.includes("image/png")) {
+          filename += ".png";
+        } else if (
+          contentType.includes("image/jpeg")
+        ) {
+          filename += ".jpg";
+        }
+      }
+    }
+
+    // Buat file sementara untuk memulai download.
+    const blobUrl = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+
+    link.href = blobUrl;
+    link.download = filename;
+    link.style.display = "none";
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+
+    // Bersihkan URL sementara.
+    setTimeout(() => {
+      URL.revokeObjectURL(blobUrl);
+    }, 2000);
+  } catch (error) {
+    console.error(
+      "[SISWA MATERI] Gagal mengunduh file:",
+      error
+    );
+
+    alert(
+      "File gagal diunduh. Periksa URL file, koneksi, dan izin akses server."
     );
   }
+}
+
+
 
   /* =======================================================
      RENDER
@@ -828,46 +906,30 @@ function MateriPageInner() {
     <div className="theme-page theme-text min-h-full">
       <div className="w-full max-w-[1280px] mx-auto px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
 
-        {/* =================================================
-            TOP NAV
-        ================================================= */}
+        {/* TOP NAV */}
 
         <button
-          onClick={() =>
-            router.push(
-              "/siswa/mataPelajaran"
-            )
-          }
-          className={`group inline-flex items-center gap-2 text-sm font-medium theme-text-secondary hover:text-[var(--color-primary)] transition-colors mb-5`}
+          onClick={() => router.push("/siswa/mataPelajaran")}
+          className="group inline-flex items-center gap-2 text-sm font-medium theme-text-secondary hover:text-[var(--color-primary)] transition-colors mb-5"
         >
           <span
             className={`w-8 h-8 rounded-lg ${themeNeutralBorder} theme-card flex items-center justify-center group-hover:border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)] ${themePrimaryText} transition-all`}
           >
             <ArrowLeft size={15} />
           </span>
-
           Kembali ke mata pelajaran
         </button>
 
-        {/* =================================================
-            HERO
-        ================================================= */}
+        {/* HERO */}
 
         <section
           className={`relative overflow-hidden rounded-2xl ${themePrimaryGradient} p-5 sm:p-6 lg:p-7 ${themePrimaryShadow} mb-6`}
         >
-          {/* Decorative */}
-          <div
-            className="absolute -right-16 -top-20 w-56 h-56 rounded-full bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)]"
-          />
+          <div className="absolute -right-16 -top-20 w-56 h-56 rounded-full bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)]" />
 
-          <div
-            className="absolute right-20 -bottom-24 w-44 h-44 rounded-full bg-[color-mix(in_srgb,var(--color-card)_7%,transparent)]"
-          />
+          <div className="absolute right-20 -bottom-24 w-44 h-44 rounded-full bg-[color-mix(in_srgb,var(--color-card)_7%,transparent)]" />
 
-          <div
-            className="absolute right-0 top-0 bottom-0 w-1/3 bg-[linear-gradient(to_left,color-mix(in_srgb,var(--color-card)_6%,transparent),transparent)] pointer-events-none"
-          />
+          <div className="absolute right-0 top-0 bottom-0 w-1/3 bg-[linear-gradient(to_left,color-mix(in_srgb,var(--color-card)_6%,transparent),transparent)] pointer-events-none" />
 
           <div className="relative flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div className="max-w-2xl">
@@ -881,45 +943,38 @@ function MateriPageInner() {
               </h1>
 
               <p className="text-sm sm:text-[15px] leading-6 text-[color-mix(in_srgb,var(--color-card)_78%,transparent)] mt-2 max-w-xl">
-                Akses materi yang dibagikan
-                guru untuk membantu kamu
+                Akses materi yang dibagikan guru untuk membantu kamu
                 belajar dengan lebih terarah.
               </p>
 
-              {selectedMapel &&
-                SelectedMapelIcon && (
-                  <div className="flex items-center gap-2 mt-5">
-                    <div className="w-8 h-8 rounded-lg bg-[color-mix(in_srgb,var(--color-card)_14%,transparent)] flex items-center justify-center">
-                      <SelectedMapelIcon
-                        size={16}
-                        className="text-[var(--color-card)]"
-                      />
-                    </div>
-
-                    <div>
-                      <p className="text-[11px] text-[color-mix(in_srgb,var(--color-card)_72%,transparent)]">
-                        Mata pelajaran aktif
-                      </p>
-
-                      <p className="text-sm font-semibold text-[var(--color-card)]">
-                        {selectedMapel.nama}
-                      </p>
-                    </div>
+              {selectedMapel && SelectedMapelIcon && (
+                <div className="flex items-center gap-2 mt-5">
+                  <div className="w-8 h-8 rounded-lg bg-[color-mix(in_srgb,var(--color-card)_14%,transparent)] flex items-center justify-center">
+                    <SelectedMapelIcon
+                      size={16}
+                      className="text-[var(--color-card)]"
+                    />
                   </div>
-                )}
+
+                  <div>
+                    <p className="text-[11px] text-[color-mix(in_srgb,var(--color-card)_72%,transparent)]">
+                      Mata pelajaran aktif
+                    </p>
+                    <p className="text-sm font-semibold text-[var(--color-card)]">
+                      {selectedMapel.nama}
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
 
-            {/* Hero summary */}
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-2 gap-2.5 min-w-0 lg:min-w-[280px]">
               <div className="rounded-xl bg-[color-mix(in_srgb,var(--color-card)_10%,transparent)] border border-[color-mix(in_srgb,var(--color-card)_10%,transparent)] px-4 py-3.5">
                 <p className="text-[11px] text-[color-mix(in_srgb,var(--color-card)_72%,transparent)]">
                   Total materi
                 </p>
-
                 <p className="text-2xl font-bold text-[var(--color-card)] mt-1">
-                  {loading
-                    ? "—"
-                    : totalMateri}
+                  {loading ? "—" : totalMateri}
                 </p>
               </div>
 
@@ -927,11 +982,8 @@ function MateriPageInner() {
                 <p className="text-[11px] text-[color-mix(in_srgb,var(--color-card)_72%,transparent)]">
                   File tersedia
                 </p>
-
                 <p className="text-2xl font-bold text-[var(--color-card)] mt-1">
-                  {loading
-                    ? "—"
-                    : totalFile}
+                  {loading ? "—" : totalFile}
                 </p>
               </div>
 
@@ -939,7 +991,6 @@ function MateriPageInner() {
                 <p className="text-[11px] text-[color-mix(in_srgb,var(--color-card)_72%,transparent)]">
                   Sumber belajar
                 </p>
-
                 <div className="flex items-center gap-3 mt-1">
                   <div>
                     <p className="text-sm font-semibold text-[var(--color-card)]">
@@ -948,7 +999,6 @@ function MateriPageInner() {
                         : `${totalMapel} mata pelajaran`}
                     </p>
                   </div>
-
                   <div className="ml-auto">
                     <Sparkles
                       size={17}
@@ -961,134 +1011,83 @@ function MateriPageInner() {
           </div>
         </section>
 
-        {/* =================================================
-            STAT CARDS
-        ================================================= */}
+        {/* STAT CARDS */}
 
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
-          <div
-            className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl px-4 py-4`}
-          >
+          <div className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl px-4 py-4`}>
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-xs theme-text-muted">
-                  Materi
-                </p>
-
+                <p className="text-xs theme-text-muted">Materi</p>
                 <p className="text-xl font-bold theme-text mt-1">
-                  {loading
-                    ? "—"
-                    : totalMateri}
+                  {loading ? "—" : totalMateri}
                 </p>
               </div>
-
-              <div
-                className={`w-9 h-9 rounded-lg ${themePrimarySurface} ${themePrimaryText} flex items-center justify-center`}
-              >
+              <div className={`w-9 h-9 rounded-lg ${themePrimarySurface} ${themePrimaryText} flex items-center justify-center`}>
                 <Layers3 size={17} />
               </div>
             </div>
           </div>
 
-          <div
-            className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl px-4 py-4`}
-          >
+          <div className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl px-4 py-4`}>
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-xs theme-text-muted">
-                  File
-                </p>
-
+                <p className="text-xs theme-text-muted">File</p>
                 <p className="text-xl font-bold theme-text mt-1">
-                  {loading
-                    ? "—"
-                    : totalFile}
+                  {loading ? "—" : totalFile}
                 </p>
               </div>
-
-              <div
-                className={`w-9 h-9 rounded-lg ${themeSuccessSurface} ${themeSuccessText} flex items-center justify-center`}
-              >
+              <div className={`w-9 h-9 rounded-lg ${themeSuccessSurface} ${themeSuccessText} flex items-center justify-center`}>
                 <FileText size={17} />
               </div>
             </div>
           </div>
 
-          <div
-            className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl px-4 py-4`}
-          >
+          <div className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl px-4 py-4`}>
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-xs theme-text-muted">
-                  Link
-                </p>
-
+                <p className="text-xs theme-text-muted">Link</p>
                 <p className="text-xl font-bold theme-text mt-1">
-                  {loading
-                    ? "—"
-                    : totalLink}
+                  {loading ? "—" : totalLink}
                 </p>
               </div>
-
-              <div
-                className={`w-9 h-9 rounded-lg ${themeInfoSurface} ${themeInfoText} flex items-center justify-center`}
-              >
+              <div className={`w-9 h-9 rounded-lg ${themeInfoSurface} ${themeInfoText} flex items-center justify-center`}>
                 <ExternalLink size={17} />
               </div>
             </div>
           </div>
 
-          <div
-            className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl px-4 py-4`}
-          >
+          <div className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl px-4 py-4`}>
             <div className="flex items-center justify-between gap-3">
               <div>
-                <p className="text-xs theme-text-muted">
-                  Mata pelajaran
-                </p>
-
+                <p className="text-xs theme-text-muted">Mata pelajaran</p>
                 <p className="text-xl font-bold theme-text mt-1">
-                  {loading
-                    ? "—"
-                    : totalMapel}
+                  {loading ? "—" : totalMapel}
                 </p>
               </div>
-
-              <div
-                className={`w-9 h-9 rounded-lg ${themeWarningSurface} ${themeWarningText} flex items-center justify-center`}
-              >
+              <div className={`w-9 h-9 rounded-lg ${themeWarningSurface} ${themeWarningText} flex items-center justify-center`}>
                 <BookOpen size={17} />
               </div>
             </div>
           </div>
         </div>
 
-        {/* =================================================
-            FILTER AREA
-        ================================================= */}
+        {/* FILTER AREA */}
 
-        <section
-          className={`theme-card ${themeNeutralBorder} rounded-2xl p-4 sm:p-5 ${themeCardShadow} mb-5`}
-        >
+        <section className={`theme-card ${themeNeutralBorder} rounded-2xl p-4 sm:p-5 ${themeCardShadow} mb-5`}>
           <div className="flex flex-col lg:flex-row lg:items-center gap-4">
-            {/* Search */}
             <div className="relative flex-1 min-w-0">
               <Search
                 size={17}
                 className="absolute left-3.5 top-1/2 -translate-y-1/2 theme-text-muted pointer-events-none"
               />
-
               <input
                 value={query}
-                onChange={(e) =>
-                  setQuery(e.target.value)
-                }
+                onChange={(e) => setQuery(e.target.value)}
                 placeholder="Cari judul, deskripsi, atau kategori materi..."
                 className={`w-full h-11 rounded-xl ${themeNeutralBorder} ${themeNeutralSurface} pl-10 pr-4 text-sm theme-text theme-text-placeholder outline-none transition-all ${themeFocus}`}
               />
             </div>
 
-            {/* Refresh */}
             <button
               onClick={loadData}
               disabled={loading}
@@ -1096,43 +1095,27 @@ function MateriPageInner() {
             >
               <RefreshCw
                 size={15}
-                className={
-                  loading
-                    ? "animate-spin"
-                    : ""
-                }
+                className={loading ? "animate-spin" : ""}
               />
-
-              <span className="hidden sm:inline">
-                Refresh
-              </span>
+              <span className="hidden sm:inline">Refresh</span>
             </button>
           </div>
 
-          {/* Mapel filters */}
-          <div
-            className={`mt-4 pt-4 border-t ${themeDivider}`}
-          >
+          <div className={`mt-4 pt-4 border-t ${themeDivider}`}>
             <div className="flex items-center gap-2 mb-2.5">
               <span className="text-xs font-semibold theme-text-secondary">
                 Mata pelajaran
               </span>
-
               {activeMapel !== "semua" && (
-                <span
-                  className={`text-[10px] font-medium ${themePrimaryText} ${themePrimarySurface} px-2 py-0.5 rounded-full`}
-                >
+                <span className={`text-[10px] font-medium ${themePrimaryText} ${themePrimarySurface} px-2 py-0.5 rounded-full`}>
                   1 dipilih
                 </span>
               )}
             </div>
 
             <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
-              {/* Semua */}
               <button
-                onClick={() =>
-                  setActiveMapel("semua")
-                }
+                onClick={() => setActiveMapel("semua")}
                 className={`flex-shrink-0 h-9 px-4 rounded-lg text-xs font-semibold border transition-all ${
                   activeMapel === "semua"
                     ? `${themePrimaryGradient} ${themePrimaryBorderStrong} text-[var(--color-card)] ${themeSmallShadow}`
@@ -1144,38 +1127,24 @@ function MateriPageInner() {
 
               {mataPelajaranList.map((m) => {
                 const Icon = m.icon;
-                const active =
-                  activeMapel === m.id;
+                const active = String(activeMapel) === String(m.id);
 
                 return (
                   <button
                     key={m.id}
-                    onClick={() =>
-                      setActiveMapel(m.id)
-                    }
+                    onClick={() => setActiveMapel(m.id)}
                     className={`flex-shrink-0 h-9 px-3 rounded-lg text-xs font-medium border transition-all flex items-center gap-2 ${
                       active
                         ? `${themePrimarySurface} ${themePrimaryBorder} ${themePrimaryText}`
                         : `theme-card ${themeNeutralBorder} theme-text-secondary hover:border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)] hover:text-[var(--color-primary)]`
                     }`}
                   >
-                    <span
-                      className={`w-5 h-5 rounded-md flex items-center justify-center ${
-                        active
-                          ? themePrimarySurfaceStrong
-                          : themeNeutralSurface
-                      }`}
-                    >
+                    <span className={`w-5 h-5 rounded-md flex items-center justify-center ${active ? themePrimarySurfaceStrong : themeNeutralSurface}`}>
                       <Icon
                         size={12}
-                        className={
-                          active
-                            ? themePrimaryText
-                            : "theme-text-muted"
-                        }
+                        className={active ? themePrimaryText : "theme-text-muted"}
                       />
                     </span>
-
                     {m.nama}
                   </button>
                 );
@@ -1184,31 +1153,22 @@ function MateriPageInner() {
           </div>
         </section>
 
-        {/* =================================================
-            ERROR
-        ================================================= */}
+        {/* ERROR */}
 
         {error && (
-          <div
-            className={`mb-5 ${themeDangerSurface} ${themeDangerBorder} rounded-xl p-4`}
-          >
+          <div className={`mb-5 ${themeDangerSurface} ${themeDangerBorder} rounded-xl p-4`}>
             <div className="flex items-start gap-3">
-              <div
-                className={`w-9 h-9 rounded-lg theme-card flex items-center justify-center theme-text flex-shrink-0`}
-              >
+              <div className="w-9 h-9 rounded-lg theme-card flex items-center justify-center theme-text flex-shrink-0">
                 <AlertCircle size={18} />
               </div>
-
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-semibold theme-text">
                   Gagal memuat materi
                 </p>
-
                 <p className="text-xs theme-text-secondary mt-1 leading-5">
                   {error}
                 </p>
               </div>
-
               <button
                 onClick={loadData}
                 className="flex-shrink-0 inline-flex items-center gap-1.5 text-xs font-semibold theme-text-secondary hover:text-[var(--color-primary)]"
@@ -1220,173 +1180,99 @@ function MateriPageInner() {
           </div>
         )}
 
-        {/* =================================================
-            CLASS INFO
-        ================================================= */}
+        {/* CLASS INFO */}
 
-        {!loading &&
-          activeMapel !== "semua" &&
-          kelasMapelAktif.length > 0 && (
-            <div
-              className={`mb-5 ${themeInfoSurface} ${themeInfoBorder} rounded-xl p-4`}
-            >
-              <div className="flex items-center gap-3">
-                <div
-                  className={`w-9 h-9 rounded-lg theme-card flex items-center justify-center ${themeInfoText} flex-shrink-0`}
-                >
-                  <BookOpen size={17} />
-                </div>
-
-                <div className="min-w-0">
-                  <p
-                    className={`text-xs font-semibold ${themeInfoText}`}
-                  >
-                    Materi untuk kelas kamu
-                  </p>
-
-                  <p
-                    className={`text-xs ${themeInfoText} mt-1 truncate`}
-                  >
-                    {kelasMapelAktif
-                      .map(
-                        (item) =>
-                          item?.kelas
-                            ?.nama ||
-                          item?.kelas
-                            ?.namaKelas ||
-                          "-"
-                      )
-                      .filter(Boolean)
-                      .join(", ")}
-                  </p>
-                </div>
+        {!loading && activeMapel !== "semua" && kelasMapelAktif.length > 0 && (
+          <div className={`mb-5 ${themeInfoSurface} ${themeInfoBorder} rounded-xl p-4`}>
+            <div className="flex items-center gap-3">
+              <div className={`w-9 h-9 rounded-lg theme-card flex items-center justify-center ${themeInfoText} flex-shrink-0`}>
+                <BookOpen size={17} />
+              </div>
+              <div className="min-w-0">
+                <p className={`text-xs font-semibold ${themeInfoText}`}>
+                  Materi untuk kelas kamu
+                </p>
+                <p className={`text-xs ${themeInfoText} mt-1 truncate`}>
+                  {kelasMapelAktif
+                    .map(
+                      (item) =>
+                        item?.kelas?.nama ??
+                        item?.kelas?.namaKelas ??
+                        "-"
+                    )
+                    .filter(Boolean)
+                    .join(", ")}
+                </p>
               </div>
             </div>
-          )}
+          </div>
+        )}
 
-        {/* =================================================
-            RESULT HEADER
-        ================================================= */}
+        {/* RESULT HEADER */}
 
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3 px-1">
           <div>
             <h2 className="text-sm font-semibold theme-text">
               Materi tersedia
             </h2>
-
             {!loading && (
               <p className="text-xs theme-text-muted mt-0.5">
                 {totalMateri} materi
-                {activeMapel !== "semua" &&
-                selectedMapel
-                  ? ` · ${selectedMapel.nama}`
-                  : ""}
-                {query
-                  ? " · hasil pencarian"
-                  : ""}
+                {selectedMapel ? ` · ${selectedMapel.nama}` : ""}
+                {query ? " · hasil pencarian" : ""}
               </p>
             )}
           </div>
-
-          {!loading &&
-            filteredMateri.length > 0 && (
-              <div className="inline-flex items-center gap-1.5 text-xs theme-text-muted">
-                <Clock3 size={13} />
-                Terbaru
-              </div>
-            )}
+          {!loading && filteredMateri.length > 0 && (
+            <div className="inline-flex items-center gap-1.5 text-xs theme-text-muted">
+              <Clock3 size={13} />
+              Terbaru
+            </div>
+          )}
         </div>
 
-        {/* =================================================
-            MATERIAL LIST
-        ================================================= */}
+        {/* MATERIAL LIST */}
 
-        <section
-          className={`theme-card ${themeNeutralBorder} rounded-2xl ${themeCardShadow} overflow-hidden`}
-        >
-          {/* LOADING */}
-
+        <section className={`theme-card ${themeNeutralBorder} rounded-2xl ${themeCardShadow} overflow-hidden`}>
           {loading ? (
-            <div
-              className={`divide-y ${themeDivider}`}
-            >
-              {Array.from({
-                length: 5,
-              }).map((_, index) => (
+            <div className={`divide-y ${themeDivider}`}>
+              {Array.from({ length: 5 }).map((_, index) => (
                 <div
                   key={index}
                   className="p-4 sm:p-5 animate-pulse"
                 >
                   <div className="flex items-center gap-4">
-                    <div
-                      className={`w-11 h-11 rounded-xl ${themeNeutralSurface} flex-shrink-0`}
-                    />
-
+                    <div className={`w-11 h-11 rounded-xl ${themeNeutralSurface} flex-shrink-0`} />
                     <div className="flex-1 min-w-0">
-                      <div
-                        className={`h-3 w-20 ${themeNeutralSurface} rounded mb-2`}
-                      />
-
-                      <div
-                        className={`h-4 w-2/3 ${themeNeutralSurface} rounded mb-2`}
-                      />
-
-                      <div
-                        className={`h-3 w-1/2 ${themeNeutralSurface} rounded`}
-                      />
+                      <div className={`h-3 w-20 ${themeNeutralSurface} rounded mb-2`} />
+                      <div className={`h-4 w-2/3 ${themeNeutralSurface} rounded mb-2`} />
+                      <div className={`h-3 w-1/2 ${themeNeutralSurface} rounded`} />
                     </div>
-
-                    <div
-                      className={`hidden sm:block w-20 h-8 rounded-lg ${themeNeutralSurface}`}
-                    />
+                    <div className={`hidden sm:block w-20 h-8 rounded-lg ${themeNeutralSurface}`} />
                   </div>
                 </div>
               ))}
             </div>
           ) : filteredMateri.length > 0 ? (
-            <div
-              className={`divide-y ${themeDivider}`}
-            >
+            <div className={`divide-y ${themeDivider}`}>
               {filteredMateri.map((item) => {
-                const kelasMapel =
-                  getKelasMapelFromMateri(
-                    item
-                  );
-
-                const tipe =
-                  getFileType(item);
-
-                const ft =
-                  FILE_TYPE_STYLE[
-                    tipe
-                  ] ||
-                  FILE_TYPE_STYLE.lainnya;
-
+                const kelasMapel = getKelasMapelFromMateri(item);
+                const tipe = getFileType(item);
+                const ft = FILE_TYPE_STYLE[tipe] || FILE_TYPE_STYLE.lainnya;
                 const FtIcon = ft.icon;
 
-                const mapelNama =
-                  kelasMapel
-                    ?.mataPelajaran
-                    ?.nama ||
-                  kelasMapel
-                    ?.mataPelajaran
-                    ?.namaMapel ||
-                  "-";
+                const mapelNama = getMapelNama(kelasMapel) || "-";
 
                 const kelasNama =
-                  kelasMapel
-                    ?.kelas?.nama ||
-                  kelasMapel
-                    ?.kelas?.namaKelas ||
+                  kelasMapel?.kelas?.nama ??
+                  kelasMapel?.kelas?.namaKelas ??
                   "-";
 
                 const guruNama =
-                  kelasMapel
-                    ?.guruPengajar
-                    ?.namaLengkap ||
-                  item?.guru
-                    ?.namaLengkap ||
-                  item?.guruNama ||
+                  kelasMapel?.guruPengajar?.namaLengkap ??
+                  kelasMapel?.guruPengajar?.nama ??
+                  item?.guru?.namaLengkap ??
+                  item?.guruNama ??
                   "-";
 
                 const tanggal =
@@ -1394,56 +1280,33 @@ function MateriPageInner() {
                   item?.createdAt ??
                   item?.tanggalDibuat;
 
-                const fileUrl =
-                  item?.urlFile
-                    ? getBackendFileUrl(
-                        item.urlFile
-                      )
-                    : item?.urlLink ||
-                      null;
-
-                const mapelSlug =
-                  getMapelSlug(
-                    mapelNama
-                  );
+                const fileUrl = item?.urlFile
+                  ? getBackendFileUrl(item.urlFile)
+                  : item?.urlLink || null;
 
                 return (
                   <article
                     key={item.id}
-                    className={`group p-4 sm:p-5 hover:${""} hover:bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] transition-colors`}
+                    className="group p-4 sm:p-5 hover:bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] transition-colors"
                   >
                     <div className="flex flex-col sm:flex-row sm:items-center gap-4">
-                      {/* File icon */}
-
-                      <div
-                        className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${ft.bg} ${ft.text}`}
-                      >
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${ft.bg} ${ft.text}`}>
                         <FtIcon size={20} />
                       </div>
 
-                      {/* Content */}
-
                       <div className="flex-1 min-w-0">
                         <div className="flex flex-wrap items-center gap-1.5 mb-1.5">
-                          <span
-                            className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold ${ft.bg} ${ft.text}`}
-                          >
+                          <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold ${ft.bg} ${ft.text}`}>
                             {ft.label}
                           </span>
 
-                          {activeMapel ===
-                            "semua" &&
-                            mapelNama !==
-                              "-" && (
-                              <span
-                                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold ${themePrimarySurface} ${themePrimaryText}`}
-                              >
-                                {mapelNama}
-                              </span>
-                            )}
+                          {activeMapel === "semua" && mapelNama !== "-" && (
+                            <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold ${themePrimarySurface} ${themePrimaryText}`}>
+                              {mapelNama}
+                            </span>
+                          )}
 
-                          {kelasNama !==
-                            "-" && (
+                          {kelasNama !== "-" && (
                             <span className="text-[10px] theme-text-muted">
                               {kelasNama}
                             </span>
@@ -1451,8 +1314,7 @@ function MateriPageInner() {
                         </div>
 
                         <h3 className="text-sm sm:text-[15px] font-semibold theme-text truncate group-hover:text-[var(--color-primary)] transition-colors">
-                          {item?.judul ||
-                            "Materi tanpa judul"}
+                          {item?.judul || "Materi tanpa judul"}
                         </h3>
 
                         {item?.deskripsi && (
@@ -1465,82 +1327,43 @@ function MateriPageInner() {
                           <span className="font-medium theme-text-secondary">
                             {guruNama}
                           </span>
-
-                          <span className="theme-text-placeholder">
-                            •
-                          </span>
-
-                          <span>
-                            {formatTanggal(
-                              tanggal
-                            )}
-                          </span>
+                          <span className="theme-text-placeholder">•</span>
+                          <span>{formatTanggal(tanggal)}</span>
 
                           {item?.ukuran && (
                             <>
-                              <span className="theme-text-placeholder">
-                                •
-                              </span>
-
-                              <span>
-                                {item.ukuran}
-                              </span>
+                              <span className="theme-text-placeholder">•</span>
+                              <span>{item.ukuran}</span>
                             </>
                           )}
                         </div>
                       </div>
 
-                      {/* Actions */}
-
                       <div className="flex items-center gap-2 sm:flex-shrink-0">
                         {fileUrl ? (
                           <>
                             <button
-                              onClick={() =>
-                                handleOpenFile(
-                                  item
-                                )
-                              }
-                              className={`flex-1 sm:flex-none h-9 px-3 rounded-lg ${themeNeutralBorder} theme-card theme-text-secondary hover:border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)] hover:${""} hover:text-[var(--color-primary)] hover:bg-[color-mix(in_srgb,var(--color-primary)_7%,transparent)] transition-all inline-flex items-center justify-center gap-1.5 text-xs font-semibold`}
+                              onClick={() => handleOpenFile(item)}
+                              className={`flex-1 sm:flex-none h-9 px-3 rounded-lg ${themeNeutralBorder} theme-card theme-text-secondary hover:border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)] hover:text-[var(--color-primary)] hover:bg-[color-mix(in_srgb,var(--color-primary)_7%,transparent)] transition-all inline-flex items-center justify-center gap-1.5 text-xs font-semibold`}
                             >
-                              <Eye
-                                size={14}
-                              />
-
-                              <span>
-                                Lihat
-                              </span>
+                              <Eye size={14} />
+                              <span>Lihat</span>
                             </button>
 
                             {item?.urlFile && (
                               <button
-                                onClick={() =>
-                                  handleDownload(
-                                    item
-                                  )
-                                }
+                                onClick={() => handleDownload(item)}
                                 className={`h-9 px-3 rounded-lg bg-[var(--color-primary)] text-[var(--color-card)] hover:opacity-90 transition-all inline-flex items-center justify-center gap-1.5 text-xs font-semibold ${themeSmallShadow}`}
                               >
-                                <Download
-                                  size={14}
-                                />
-
-                                <span className="hidden sm:inline">
-                                  Unduh
-                                </span>
+                                <Download size={14} />
+                                <span className="hidden sm:inline">Unduh</span>
                               </button>
                             )}
                           </>
                         ) : (
-                          <span
-                            className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg ${themeNeutralSurface} text-[11px] font-medium theme-text-muted`}
-                          >
-                            <File
-                              size={13}
-                            />
-
-                            File belum
-                            tersedia
+                          <span className={`inline-flex items-center gap-1.5 px-3 py-2 rounded-lg ${themeNeutralSurface} text-[11px] font-medium theme-text-muted`}>
+                            <File size={13} />
+                            File belum tersedia
                           </span>
                         )}
                       </div>
@@ -1550,27 +1373,13 @@ function MateriPageInner() {
               })}
             </div>
           ) : (
-            /* EMPTY */
-
             <div className="py-16 px-5 text-center">
               <div className="relative mx-auto w-fit mb-4">
-                <div
-                  className={`w-16 h-16 rounded-2xl ${themePrimarySurface} ${themePrimaryText} flex items-center justify-center`}
-                >
-                  <BookMarked
-                    size={27}
-                  />
+                <div className={`w-16 h-16 rounded-2xl ${themePrimarySurface} ${themePrimaryText} flex items-center justify-center`}>
+                  <BookMarked size={27} />
                 </div>
-
-                <div
-                  className={`absolute -right-1 -top-1 w-5 h-5 rounded-full theme-card ${themePrimaryBorder} flex items-center justify-center`}
-                >
-                  <FileText
-                    size={10}
-                    className={
-                      themePrimaryText
-                    }
-                  />
+                <div className={`absolute -right-1 -top-1 w-5 h-5 rounded-full theme-card ${themePrimaryBorder} flex items-center justify-center`}>
+                  <FileText size={10} className={themePrimaryText} />
                 </div>
               </div>
 
@@ -1581,57 +1390,43 @@ function MateriPageInner() {
               <p className="text-xs theme-text-muted max-w-md mx-auto mt-1.5 leading-5">
                 {query
                   ? "Tidak ada materi yang sesuai dengan kata kunci pencarian."
-                  : activeMapel !==
-                    "semua"
+                  : activeMapel !== "semua"
                   ? "Guru belum mengupload materi untuk mata pelajaran ini."
                   : "Belum ada materi pembelajaran yang tersedia untuk kelas kamu."}
               </p>
 
-              {(query ||
-                activeMapel !==
-                  "semua") && (
+              {(query || activeMapel !== "semua") && (
                 <button
                   onClick={() => {
                     setQuery("");
-                    setActiveMapel(
-                      "semua"
-                    );
+                    setActiveMapel("semua");
                   }}
                   className={`mt-5 inline-flex items-center gap-2 h-9 px-4 rounded-lg ${themePrimarySurface} ${themePrimaryText} hover:bg-[color-mix(in_srgb,var(--color-primary)_14%,transparent)] transition-colors text-xs font-semibold`}
                 >
-                  Tampilkan semua
-                  materi
-
-                  <ChevronRight
-                    size={14}
-                  />
+                  Tampilkan semua materi
+                  <ChevronRight size={14} />
                 </button>
               )}
             </div>
           )}
         </section>
 
-        {/* =================================================
-            FOOTER INFO
-        ================================================= */}
+        {/* FOOTER INFO */}
 
-        {!loading &&
-          filteredMateri.length > 0 && (
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-1 pt-1 pb-5">
-              <p className="text-[11px] theme-text-muted">
-                Menampilkan{" "}
-                <span className="font-semibold theme-text-secondary">
-                  {filteredMateri.length}
-                </span>{" "}
-                materi pembelajaran
-              </p>
-
-              <p className="text-[11px] theme-text-muted">
-                Materi terbaru ditampilkan
-                terlebih dahulu
-              </p>
-            </div>
-          )}
+        {!loading && filteredMateri.length > 0 && (
+          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 px-1 pt-1 pb-5">
+            <p className="text-[11px] theme-text-muted">
+              Menampilkan{" "}
+              <span className="font-semibold theme-text-secondary">
+                {filteredMateri.length}
+              </span>{" "}
+              materi pembelajaran
+            </p>
+            <p className="text-[11px] theme-text-muted">
+              Materi terbaru ditampilkan terlebih dahulu
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

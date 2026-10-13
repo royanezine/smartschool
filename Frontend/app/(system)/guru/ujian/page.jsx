@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -31,6 +32,7 @@ import { getKelasMapel } from "@/services/kelasMapel.service";
 import {
   getUjianByKelasMapel,
   deleteUjian,
+  updateUjian,
 } from "@/services/ujian.service";
 
 /* =========================================================
@@ -166,6 +168,7 @@ function formatTanggal(value) {
   });
 }
 
+
 function getJenisLabel(jenis) {
   const map = {
     UTS: "UTS",
@@ -181,7 +184,17 @@ function getJenisLabel(jenis) {
     lainnya: "Lainnya",
   };
 
-  return map[jenis] || jenis || "-";
+  if (!jenis || !String(jenis).trim()) {
+    return "Harian";
+  }
+
+  const normalizedJenis = String(jenis).trim();
+
+  return (
+    map[normalizedJenis] ||
+    map[normalizedJenis.toLowerCase()] ||
+    normalizedJenis
+  );
 }
 
 /* =========================================================
@@ -211,6 +224,10 @@ export default function UjianGuruPage() {
   const [error, setError] = useState("");
 
   const [deleteLoading, setDeleteLoading] =
+    useState(null);
+
+  // TAMBAHAN: loading khusus tombol publikasi
+  const [publishLoading, setPublishLoading] =
     useState(null);
 
   /* =======================================================
@@ -453,6 +470,50 @@ export default function UjianGuruPage() {
   }
 
   /* =======================================================
+     PUBLIKASI / BATALKAN PUBLIKASI
+  ======================================================= */
+
+  async function handleTogglePublikasi(item) {
+    const nextPublished =
+      item?.dipublikasikan !== true;
+
+    const action = nextPublished
+      ? "mempublikasikan"
+      : "membatalkan publikasi";
+
+    const confirmed = window.confirm(
+      `Yakin ingin ${action} ujian "${item?.judul}"?`
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setPublishLoading(item.id);
+      setError("");
+
+      await updateUjian(item.id, {
+        dipublikasikan: nextPublished,
+      });
+
+      await loadUjian(selectedKelasMapel);
+    } catch (err) {
+      console.error(
+        "TOGGLE PUBLIKASI UJIAN ERROR:",
+        err
+      );
+
+      setError(
+        err?.message ||
+          "Gagal mengubah status publikasi ujian."
+      );
+    } finally {
+      setPublishLoading(null);
+    }
+  }
+
+  /* =======================================================
      RETRY
   ======================================================= */
 
@@ -527,27 +588,20 @@ export default function UjianGuruPage() {
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
 
-        <Header
-          toggleSidebar={() =>
-            setIsCollapsed(
-              (prev) => !prev
-            )
-          }
-          notifications={[]}
-          user={{
-            name: "Guru",
-            email:
-              "guru@smartschool.com",
-            avatar: "GR",
-          }}
-        />
+        
+<Header
+  role="guru"
+  toggleSidebar={() =>
+    setIsCollapsed((prev) => !prev)
+  }
+  notifications={[]}
+/>
+
 
         <main className="theme-page min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="mx-auto w-full max-w-[1600px] space-y-6 p-4 sm:p-6 lg:p-8">
 
-            {/* =================================================
-                PAGE HEADER
-            ================================================= */}
+            {/* PAGE HEADER */}
 
             <section
               className={`theme-card relative overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -636,9 +690,7 @@ export default function UjianGuruPage() {
               </div>
             </section>
 
-            {/* =================================================
-                ERROR
-            ================================================= */}
+            {/* ERROR */}
 
             {error && (
               <div
@@ -685,9 +737,7 @@ export default function UjianGuruPage() {
               </div>
             )}
 
-            {/* =================================================
-                KELAS MAPEL
-            ================================================= */}
+            {/* KELAS MAPEL */}
 
             <section
               className={`theme-card rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -837,9 +887,7 @@ export default function UjianGuruPage() {
               </div>
             </section>
 
-            {/* =================================================
-                STATISTICS
-            ================================================= */}
+            {/* STATISTICS */}
 
             <section>
 
@@ -904,9 +952,7 @@ export default function UjianGuruPage() {
               </div>
             </section>
 
-            {/* =================================================
-                SEARCH
-            ================================================= */}
+            {/* SEARCH */}
 
             <section
               className={`theme-card rounded-2xl border ${themeNeutralBorder} p-4 ${themeCardShadow} sm:p-5`}
@@ -972,9 +1018,7 @@ export default function UjianGuruPage() {
               </div>
             </section>
 
-            {/* =================================================
-                TABLE
-            ================================================= */}
+            {/* TABLE */}
 
             <section
               className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -1369,6 +1413,36 @@ export default function UjianGuruPage() {
 
                                 <div className="flex items-center justify-center gap-1.5">
 
+                                  {/* PUBLIKASI - TAMBAHAN */}
+
+                                  <button
+                                    type="button"
+                                    onClick={() =>
+                                      handleTogglePublikasi(item)
+                                    }
+                                    disabled={
+                                      publishLoading === item.id
+                                    }
+                                    title={
+                                      isPublished
+                                        ? "Batalkan publikasi"
+                                        : "Publikasikan ujian"
+                                    }
+                                    className={`flex h-9 w-9 items-center justify-center rounded-lg border transition hover:brightness-95 disabled:cursor-not-allowed disabled:opacity-50 ${
+                                      isPublished
+                                        ? `${themeWarningBorder} ${themeWarningSurface} text-[var(--color-warning)]`
+                                        : `${themeSuccessBorder} ${themeSuccessSurface} text-[var(--color-success)]`
+                                    }`}
+                                  >
+                                    {publishLoading === item.id ? (
+                                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                                    ) : isPublished ? (
+                                      <XCircle size={15} />
+                                    ) : (
+                                      <CheckCircle2 size={15} />
+                                    )}
+                                  </button>
+
                                   {/* SOAL */}
 
                                   <button
@@ -1409,7 +1483,7 @@ export default function UjianGuruPage() {
                                     type="button"
                                     onClick={() =>
                                       router.push(
-                                        `/guru/ujian/${item.id}/soal`
+                                        `/guru/ujian/${item.id}`
                                       )
                                     }
                                     title="Lihat detail"
@@ -1563,4 +1637,3 @@ export default function UjianGuruPage() {
     </div>
   );
 }
-

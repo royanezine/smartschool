@@ -1,15 +1,17 @@
+"use client";
+
 import {
   Home,
   BookOpen,
-  FileText,
   ClipboardList,
+  FileCheck2,
   ClipboardCheck,
-  User,
+  FileBarChart,
   CalendarDays,
-  GraduationCap,
   Library,
   BookOpenCheck,
   MonitorPlay,
+  User,
 } from "lucide-react";
 
 /**
@@ -18,61 +20,43 @@ import {
  * Struktur halaman:
  *
  * /siswa
- * ├── page.jsx
+ * ├── page.jsx                      (Dashboard)
+ * │
+ * ├── materi
+ * │   └── page.jsx
+ * │
+ * ├── tugas
+ * │   └── page.jsx
+ * │
+ * ├── ujian
+ * │   ├── page.jsx
+ * │   └── [id]/page.jsx             (detail — bukan menu)
  * │
  * ├── absensi
+ * │   └── page.jsx                  (tab: Absen Hari Ini, Histori, Ajukan Izin)
+ * │
+ * ├── rapor
  * │   └── page.jsx
  * │
  * ├── jadwal
  * │   └── page.jsx
  * │
- * ├── kode-pin
- * │   └── page.jsx
- * │
- * ├── mataPelajaran
- * │   ├── page.jsx
- * │   │
- * │   ├── materi
- * │   │   └── page.jsx
- * │   │
- * │   ├── tugas
- * │   │   └── page.jsx
- * │   │
- * │   └── ujian
- * │       └── page.jsx
- * │
- * ├── ujian
- * │   ├── page.jsx
- * │   └── [id]
- * │       └── page.jsx
- * │
- * ├── perpustakaan
- * │   ├── page.jsx
- * │   ├── buku
- * │   │   └── [id]
- * │   │       └── page.jsx
- * │   ├── buku-digital
- * │   │   └── page.jsx
- * │   └── peminjaman
- * │       └── page.jsx
- * │
- * ├── hasil-ujian
- * │   └── [id]
- * │       └── page.jsx
- * │
- * └── pengaturan
- *     └── page.jsx
+ * └── perpustakaan
+ *     ├── page.jsx                  (Katalog Buku)
+ *     ├── buku-digital
+ *     │   └── page.jsx
+ *     ├── peminjaman
+ *     │   └── page.jsx
+ *     └── buku/[id]/page.jsx        (detail — bukan menu)
  *
  * Halaman [id] merupakan halaman detail,
  * bukan menu utama Sidebar.
  */
 
 export const siswaSidebarConfig = {
-  basePath: "/siswa",
+  role: "siswa",
 
   brandName: "Portal Siswa",
-  initials: "SW",
-  email: "siswa@smartschool.com",
 
   menuSections: [
     // ============================================================
@@ -81,121 +65,125 @@ export const siswaSidebarConfig = {
     {
       type: "item",
       key: "dashboard",
-      icon: Home,
       label: "Dashboard",
+      icon: Home,
       path: "/siswa",
     },
 
     // ============================================================
-    // ABSENSI
+    // PROSES BELAJAR
     // ============================================================
     {
-      type: "item",
-      key: "absensi",
-      icon: ClipboardCheck,
-      label: "Absensi",
-      path: "/siswa/absensi",
+      type: "header",
+      key: "proses-belajar-header",
+      label: "Proses Belajar",
     },
 
-    // ============================================================
-    // JADWAL
-    // ============================================================
     {
       type: "item",
-      key: "jadwal",
-      icon: CalendarDays,
-      label: "Jadwal",
-      path: "/siswa/jadwal",
+      key: "materi",
+      label: "Materi",
+      icon: BookOpen,
+      path: "/siswa/mataPelajaran/materi",
     },
 
-    // ============================================================
-    // UJIAN
-    // ============================================================
+    {
+      type: "item",
+      key: "tugas",
+      label: "Tugas",
+      icon: ClipboardList,
+      path: "/siswa/mataPelajaran/tugas",
+    },
+
     {
       type: "item",
       key: "ujian",
-      icon: GraduationCap,
       label: "Ujian",
+      icon: FileCheck2,
       path: "/siswa/ujian",
     },
 
     // ============================================================
-    // MATA PELAJARAN
+    // AKADEMIK
     // ============================================================
     {
+      type: "header",
+      key: "akademik-header",
+      label: "Akademik",
+    },
+
+    // Absensi (tab: Absen Hari Ini, Histori, Ajukan Izin)
+    {
       type: "item",
-      key: "mataPelajaran",
-      icon: BookOpen,
-      label: "Mata Pelajaran",
-      path: "/siswa/mataPelajaran",
+      key: "absensi",
+      label: "Absensi",
+      icon: ClipboardCheck,
+      path: "/siswa/absensi",
+    },
 
-      children: [
-        {
-          key: "materi",
-          icon: FileText,
-          label: "Materi",
-          path: "/siswa/mataPelajaran/materi",
-        },
+   
 
-        {
-          key: "tugas",
-          icon: ClipboardList,
-          label: "Tugas",
-          path: "/siswa/mataPelajaran/tugas",
-        },
-
-        {
-          key: "ujianMataPelajaran",
-          icon: ClipboardCheck,
-          label: "Quiz",
-          path: "/siswa/mataPelajaran/ujian",
-        },
-      ],
+    // Jadwal
+    {
+      type: "item",
+      key: "jadwal",
+      label: "Jadwal",
+      icon: CalendarDays,
+      path: "/siswa/jadwal",
     },
 
     // ============================================================
     // PERPUSTAKAAN
     // ============================================================
     {
-      type: "item",
-      key: "perpustakaan",
-      icon: Library,
+      type: "header",
+      key: "perpustakaan-header",
       label: "Perpustakaan",
+    },
+
+    {
+      type: "dropdown",
+      key: "perpustakaan",
+      label: "Perpustakaan",
+      icon: Library,
       path: "/siswa/perpustakaan",
 
       children: [
         {
+          type: "item",
           key: "katalogBuku",
-          icon: BookOpen,
           label: "Katalog Buku",
+          icon: BookOpen,
           path: "/siswa/perpustakaan",
         },
 
         {
+          type: "item",
           key: "bukuDigital",
-          icon: MonitorPlay,
           label: "Buku Digital",
+          icon: MonitorPlay,
           path: "/siswa/perpustakaan/buku-digital",
         },
 
         {
+          type: "item",
           key: "peminjamanSaya",
-          icon: BookOpenCheck,
           label: "Peminjaman Saya",
+          icon: BookOpenCheck,
           path: "/siswa/perpustakaan/peminjaman",
         },
       ],
     },
 
     // ============================================================
-    // PENGATURAN
+    // AKUN
     // ============================================================
     {
-      type: "item",
-      key: "pengaturan",
-      icon: User,
-      label: "Pengaturan",
-      path: "/siswa/pengaturan",
+      type: "header",
+      key: "akun-header",
+      label: "Akun",
     },
+
+    
   ],
 };

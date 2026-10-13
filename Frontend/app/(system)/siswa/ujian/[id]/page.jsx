@@ -388,6 +388,8 @@ export default function UjianPage() {
       const ujianData =
         normalizeObjectResponse(ujianResponse);
 
+        console.log("DATA UJIAN DARI API:", ujianData);
+
       if (!ujianData?.id) {
         throw new Error(
           "Data ujian tidak ditemukan."
@@ -442,14 +444,15 @@ export default function UjianPage() {
   }, [id]);
 
   useEffect(() => {
-    loadUjian();
+  loadUjian();
 
-    return () => {
-      if (timerRef.current) {
-        clearInterval(timerRef.current);
-      }
-    };
-  }, [loadUjian]);
+  return () => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+  };
+}, [loadUjian]);
 
   /* -------------------------------------------------------
      START UJIAN
@@ -822,6 +825,20 @@ export default function UjianPage() {
   const currentSoal =
     soal[currentIndex] || null;
 
+
+    const jenisUjian =
+  ujian?.jenis?.nama ??
+  ujian?.jenis?.label ??
+  (typeof ujian?.jenis === "string"
+    ? ujian.jenis
+    : null) ??
+  ujian?.jenisUjian?.nama ??
+  ujian?.jenisUjian ??
+  ujian?.jenisAsesmen?.nama ??
+  ujian?.jenisAsesmen ??
+  ujian?.tipe ??
+  "-";
+
   const timerTheme =
     waktu <= 300
       ? `${themeDangerSurface} ${themeDangerBorder} text-[var(--color-text)]`
@@ -996,11 +1013,11 @@ export default function UjianPage() {
                 />
 
                 <StatChip
-                  icon={Info}
-                  tone="success"
-                  label="Jenis"
-                  value={ujian?.jenis || "-"}
-                />
+  icon={Info}
+  tone="success"
+  label="Jenis"
+  value={jenisUjian}
+/>
               </div>
             </div>
           </section>

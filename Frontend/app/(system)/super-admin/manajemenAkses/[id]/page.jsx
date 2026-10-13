@@ -16,6 +16,7 @@ import {
   Search,
   Shield,
   ShieldCheck,
+  Lock ,
   Sparkles,
   Users,
   Activity,

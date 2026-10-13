@@ -1,101 +1,87 @@
+
 "use client";
 
 import { useEffect } from "react";
 
 const API_URL = (
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
-).replace(/\/$/, "");
+).replace(/\/+$/, "");
+
+function getPublicApiBase() {
+  if (API_URL.endsWith("/api")) {
+    return `${API_URL}/v1/publik`;
+  }
+
+  return `${API_URL}/api/v1/publik`;
+}
 
 export default function PublicTheme({ tenant }) {
   useEffect(() => {
+    if (!tenant) return;
+
+    let cancelled = false;
+
     async function loadTheme() {
-      if (!tenant) return;
+      const url = `${getPublicApiBase()}/${encodeURIComponent(tenant)}/tema`;
 
       try {
-        const apiBase = API_URL.endsWith("/api")
-          ? `${API_URL}/v1/publik`
-          : `${API_URL}/api/publik`;
-
-        const response = await fetch(
-          `${apiBase}/${encodeURIComponent(tenant)}/tema`,
-          {
-            method: "GET",
-            cache: "no-store",
-          }
-        );
+        const response = await fetch(url, {
+          method: "GET",
+          cache: "no-store",
+        });
 
         if (!response.ok) {
-          throw new Error("Gagal mengambil tema sekolah.");
+          const detail = await response.text().catch(() => "");
+          console.warn("Tema sekolah tidak berhasil dimuat:", {
+            url,
+            status: response.status,
+            detail: detail.slice(0, 300),
+          });
+          return;
         }
 
         const result = await response.json();
+        if (cancelled) return;
 
-        const tema = result?.data;
-
-        if (!tema) return;
+        const tema = result?.data?.tema;
+        if (!tema) {
+          console.warn("Respons tema tidak memiliki data.tema:", result);
+          return;
+        }
 
         const root = document.documentElement;
+        const keys = [
+          "primary",
+          "secondary",
+          "accent",
+          "background",
+          "surface",
+          "text",
+          "border",
+        ];
 
-        /*
-         * WARNA UTAMA
-         */
-        if (tema?.tema?.primary?.hex) {
-          root.style.setProperty(
-            "--school-primary",
-            tema.tema.primary.hex
-          );
-        }
+        for (const key of keys) {
+          const hex = tema?.[key]?.hex;
 
-        if (tema?.tema?.secondary?.hex) {
-          root.style.setProperty(
-            "--school-secondary",
-            tema.tema.secondary.hex
-          );
-        }
-
-        if (tema?.tema?.accent?.hex) {
-          root.style.setProperty(
-            "--school-accent",
-            tema.tema.accent.hex
-          );
-        }
-
-        if (tema?.tema?.background?.hex) {
-          root.style.setProperty(
-            "--school-background",
-            tema.tema.background.hex
-          );
-        }
-
-        if (tema?.tema?.surface?.hex) {
-          root.style.setProperty(
-            "--school-surface",
-            tema.tema.surface.hex
-          );
-        }
-
-        if (tema?.tema?.text?.hex) {
-          root.style.setProperty(
-            "--school-text",
-            tema.tema.text.hex
-          );
-        }
-
-        if (tema?.tema?.border?.hex) {
-          root.style.setProperty(
-            "--school-border",
-            tema.tema.border.hex
-          );
+          if (typeof hex === "string" && /^#[0-9a-fA-F]{6}$/.test(hex)) {
+            root.style.setProperty(`--school-${key}`, hex);
+          }
         }
       } catch (error) {
-        console.error(
-          "Gagal memuat tema sekolah:",
-          error
-        );
+        if (!cancelled) {
+          console.warn("Tidak dapat menghubungi API tema sekolah:", {
+            url,
+            message: error?.message,
+          });
+        }
       }
     }
 
     loadTheme();
+
+    return () => {
+      cancelled = true;
+    };
   }, [tenant]);
 
   return null;

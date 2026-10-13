@@ -25,22 +25,13 @@ import {
   markAllNotifikasiAsRead,
 } from "@/services/notifikasi.service";
 
-export default function Header({
-  notifications = [],
-  user = {
-    name: "Super Admin",
-    email: "admin@smartschool.com",
-    avatar: "SA",
-  },
-}) {
+export default function Header({ notifications = [], user: userProp = null }) {
   const router = useRouter();
   const pathname = usePathname();
-
   const { theme, setTheme } = useTheme();
 
   /* ============================================================
-     THEME MOUNT
-     Mencegah hydration mismatch antara server dan browser.
+     MOUNT & THEME
   ============================================================ */
 
   const [mounted, setMounted] = useState(false);
@@ -50,22 +41,61 @@ export default function Header({
   }, []);
 
   /* ============================================================
-     STATE
+     STATE PROFIL PENGGUNA
   ============================================================ */
 
-  const [isProfileOpen, setIsProfileOpen] = useState(false);
-  const [isNotifOpen, setIsNotifOpen] = useState(false);
+ 
+const [currentUser, setCurrentUser] = useState(null);
+const [isProfileOpen, setIsProfileOpen] = useState(false);
+const [isNotifOpen, setIsNotifOpen] = useState(false);
 
-  const [notifList, setNotifList] = useState(
-    Array.isArray(notifications) ? notifications : []
-  );
+useEffect(() => {
+  const loadCurrentUser = () => {
+    try {
+      const savedUser = localStorage.getItem("user");
+      const parsedUser = savedUser ? JSON.parse(savedUser) : null;
 
-  const [unreadCount, setUnreadCount] = useState(0);
-  const [loadingNotif, setLoadingNotif] = useState(false);
-  const [notifError, setNotifError] = useState("");
+      setCurrentUser(parsedUser);
+    } catch (error) {
+      console.error("Gagal membaca data pengguna:", error);
+      setCurrentUser(null);
+    }
+  };
+
+  loadCurrentUser();
+
+  window.addEventListener("storage", loadCurrentUser);
+  window.addEventListener("user-updated", loadCurrentUser);
+
+  return () => {
+    window.removeEventListener("storage", loadCurrentUser);
+    window.removeEventListener("user-updated", loadCurrentUser);
+  };
+}, []);
+
+const profileUser = currentUser || userProp || {};
+
+// Ambil nama dari akun yang sedang login.
+const displayName =
+  profileUser.namaLengkap ||
+  profileUser.name ||
+  profileUser.nama ||
+  profileUser.fullName ||
+  "Pengguna";
+
+// Email hanya ditampilkan di baris kedua.
+const displayEmail = profileUser.email || "";
+
+// Avatar menggunakan huruf pertama nama pengguna.
+const displayAvatar =
+  typeof profileUser.avatar === "string" &&
+  profileUser.avatar.length === 1
+    ? profileUser.avatar.toUpperCase()
+    : displayName.charAt(0).toUpperCase();
+
 
   /* ============================================================
-     DETEKSI ROLE DARI PATHNAME
+     ROLE DARI PATHNAME
   ============================================================ */
 
   const resolveRole = (currentPathname) => {
@@ -99,7 +129,7 @@ export default function Header({
   const role = resolveRole(pathname);
 
   /* ============================================================
-     MAPPING PATH PER ROLE
+     PATH PER ROLE
   ============================================================ */
 
   const pathMap = {
@@ -108,41 +138,34 @@ export default function Header({
       pengaturan: "/super-admin/pengaturanSistem",
       bantuan: "/super-admin/bantuan",
     },
-
     "cms-admin": {
       profile: "/cmsAdmin/profile",
       pengaturan: "/cmsAdmin/pengaturan",
       bantuan: "/cmsAdmin/bantuan",
     },
-
     "admin-sekolah": {
-      profile: "/admin/profil",
-      pengaturan: "/admin/pengaturan",
+      profile: "/admin/profile",
+      pengaturan: "/admin/settings",
       bantuan: "/admin/bantuan",
     },
-
     yayasan: {
       profile: "/yayasan/profil",
       pengaturan: "/yayasan/pengaturan",
       bantuan: "/yayasan/help",
     },
-
     guru: {
-      profile: "/guru/profile-saya",
+      profile: "/guru/profile",
       pengaturan: "/guru/pengaturan",
       bantuan: "/guru/bantuan",
     },
-
     siswa: {
-      profile: "/siswa/profil-saya",
+      profile: "/siswa/profile",
       pengaturan: "/siswa/pengaturan",
       bantuan: "/siswa/bantuan",
     },
   };
 
-  /* ============================================================
-     ROLE LABEL
-  ============================================================ */
+  const currentPathMap = pathMap[role] || pathMap["super-admin"];
 
   const roleLabel =
     {
@@ -165,100 +188,75 @@ export default function Header({
     }[role] || "text-slate-600 bg-slate-100";
 
   /* ============================================================
+     STATE NOTIFIKASI
+  ============================================================ */
+
+  const [notifList, setNotifList] = useState(
+    Array.isArray(notifications) ? notifications : []
+  );
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [loadingNotif, setLoadingNotif] = useState(false);
+  const [notifError, setNotifError] = useState("");
+
+  /* ============================================================
      LOAD NOTIFIKASI
   ============================================================ */
 
-  const loadNotifications = useCallback(
-    async (showLoading = false) => {
-      try {
-        if (showLoading) {
-          setLoadingNotif(true);
-        }
-
-        setNotifError("");
-
-        const result = await getNotifikasi();
-
-        console.log("📢 RESPONSE NOTIFIKASI:", result);
-
-        const notificationData =
-          result?.data?.data ??
-          result?.data ??
-          result ??
-          {};
-
-        const list = Array.isArray(notificationData?.list)
-          ? notificationData.list
-          : Array.isArray(result?.list)
-            ? result.list
-            : Array.isArray(notificationData)
-              ? notificationData
-              : [];
-
-        const unreadFromBackend =
-          notificationData?.unreadCount ??
-          result?.unreadCount;
-
-        const unread =
-          unreadFromBackend !== undefined &&
-          unreadFromBackend !== null
-            ? Number(unreadFromBackend)
-            : list.filter(
-                (item) => !item?.dibaca
-              ).length;
-
-        setNotifList(list);
-
-        setUnreadCount(
-          Number.isFinite(unread)
-            ? unread
-            : 0
-        );
-      } catch (error) {
-        console.error(
-          "❌ Gagal mengambil notifikasi:",
-          error
-        );
-
-        setNotifError(
-          error?.message ||
-            "Gagal mengambil notifikasi."
-        );
-      } finally {
-        if (showLoading) {
-          setLoadingNotif(false);
-        }
+  const loadNotifications = useCallback(async (showLoading = false) => {
+    try {
+      if (showLoading) {
+        setLoadingNotif(true);
       }
-    },
-    []
-  );
 
-  /* ============================================================
-     LOAD PERTAMA KALI
-  ============================================================ */
+      setNotifError("");
+
+      const result = await getNotifikasi();
+
+      const notificationData =
+        result?.data?.data ??
+        result?.data ??
+        result ??
+        {};
+
+      const list = Array.isArray(notificationData?.list)
+        ? notificationData.list
+        : Array.isArray(result?.list)
+          ? result.list
+          : Array.isArray(notificationData)
+            ? notificationData
+            : [];
+
+      const unreadFromBackend =
+        notificationData?.unreadCount ?? result?.unreadCount;
+
+      const unread =
+        unreadFromBackend !== undefined && unreadFromBackend !== null
+          ? Number(unreadFromBackend)
+          : list.filter((item) => !item?.dibaca).length;
+
+      setNotifList(list);
+      setUnreadCount(Number.isFinite(unread) ? unread : 0);
+    } catch (error) {
+      console.error("Gagal mengambil notifikasi:", error);
+      setNotifError(error?.message || "Gagal mengambil notifikasi.");
+    } finally {
+      if (showLoading) {
+        setLoadingNotif(false);
+      }
+    }
+  }, []);
 
   useEffect(() => {
     loadNotifications(true);
   }, [loadNotifications]);
-
-  /* ============================================================
-     AUTO REFRESH NOTIFIKASI
-     Setiap 10 detik.
-  ============================================================ */
 
   useEffect(() => {
     const interval = setInterval(() => {
       loadNotifications(false);
     }, 10000);
 
-    return () => {
-      clearInterval(interval);
-    };
+    return () => clearInterval(interval);
   }, [loadNotifications]);
-
-  /* ============================================================
-     REFRESH SAAT DROPDOWN NOTIFIKASI DIBUKA
-  ============================================================ */
 
   useEffect(() => {
     if (isNotifOpen) {
@@ -271,65 +269,30 @@ export default function Header({
   ============================================================ */
 
   const formatNotificationTime = (dateString) => {
-    if (!dateString) {
-      return "";
-    }
+    if (!dateString) return "";
 
     const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) return "";
 
-    if (Number.isNaN(date.getTime())) {
-      return "";
-    }
+    const diff = new Date().getTime() - date.getTime();
 
-    const now = new Date();
+    if (diff < 0) return "Baru saja";
 
-    const diff =
-      now.getTime() - date.getTime();
+    const seconds = Math.floor(diff / 1000);
+    const minutes = Math.floor(seconds / 60);
+    const hours = Math.floor(minutes / 60);
+    const days = Math.floor(hours / 24);
 
-    if (diff < 0) {
-      return "Baru saja";
-    }
+    if (seconds < 60) return "Baru saja";
+    if (minutes < 60) return `${minutes} menit lalu`;
+    if (hours < 24) return `${hours} jam lalu`;
+    if (days < 7) return `${days} hari lalu`;
 
-    const seconds = Math.floor(
-      diff / 1000
-    );
-
-    const minutes = Math.floor(
-      seconds / 60
-    );
-
-    const hours = Math.floor(
-      minutes / 60
-    );
-
-    const days = Math.floor(
-      hours / 24
-    );
-
-    if (seconds < 60) {
-      return "Baru saja";
-    }
-
-    if (minutes < 60) {
-      return `${minutes} menit lalu`;
-    }
-
-    if (hours < 24) {
-      return `${hours} jam lalu`;
-    }
-
-    if (days < 7) {
-      return `${days} hari lalu`;
-    }
-
-    return date.toLocaleDateString(
-      "id-ID",
-      {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      }
-    );
+    return date.toLocaleDateString("id-ID", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
   };
 
   /* ============================================================
@@ -338,14 +301,10 @@ export default function Header({
 
   const handleNotificationClick = async (notif) => {
     try {
-      if (!notif?.id) {
-        return;
-      }
+      if (!notif?.id) return;
 
       if (!notif.dibaca) {
-        await markNotifikasiAsRead(
-          notif.id
-        );
+        await markNotifikasiAsRead(notif.id);
 
         setNotifList((current) =>
           current.map((item) =>
@@ -353,16 +312,13 @@ export default function Header({
               ? {
                   ...item,
                   dibaca: true,
-                  dibacaPada:
-                    new Date().toISOString(),
+                  dibacaPada: new Date().toISOString(),
                 }
               : item
           )
         );
 
-        setUnreadCount((current) =>
-          Math.max(0, current - 1)
-        );
+        setUnreadCount((current) => Math.max(0, current - 1));
       }
 
       setIsNotifOpen(false);
@@ -371,10 +327,7 @@ export default function Header({
         router.push(notif.targetUrl);
       }
     } catch (error) {
-      console.error(
-        "Gagal menandai notifikasi:",
-        error
-      );
+      console.error("Gagal menandai notifikasi:", error);
     }
   };
 
@@ -383,9 +336,7 @@ export default function Header({
   ============================================================ */
 
   const handleMarkAllAsRead = async () => {
-    if (unreadCount === 0) {
-      return;
-    }
+    if (unreadCount === 0) return;
 
     try {
       await markAllNotifikasiAsRead();
@@ -394,31 +345,19 @@ export default function Header({
         current.map((item) => ({
           ...item,
           dibaca: true,
-          dibacaPada:
-            item.dibacaPada ||
-            new Date().toISOString(),
+          dibacaPada: item.dibacaPada || new Date().toISOString(),
         }))
       );
 
       setUnreadCount(0);
     } catch (error) {
-      console.error(
-        "Gagal menandai semua notifikasi:",
-        error
-      );
+      console.error("Gagal menandai semua notifikasi:", error);
     }
   };
 
-  /* ============================================================
-     NAVIGASI PROFILE
-  ============================================================ */
-
   const navigateTo = (path) => {
     setIsProfileOpen(false);
-
-    if (path) {
-      router.push(path);
-    }
+    if (path) router.push(path);
   };
 
   /* ============================================================
@@ -434,14 +373,6 @@ export default function Header({
 
     router.push("/login");
   };
-
-  /* ============================================================
-     MENU PROFILE
-  ============================================================ */
-
-  const currentPathMap =
-    pathMap[role] ||
-    pathMap["super-admin"];
 
   const menuItems = [
     {
@@ -472,78 +403,24 @@ export default function Header({
   ============================================================ */
 
   return (
-    <header
-      className="
-        h-16 sticky top-0 z-30
-        bg-white/95 dark:bg-slate-900/95
-        backdrop-blur-xl
-        border-b border-slate-200/70
-        dark:border-slate-700/70
-      "
-    >
-      <div
-        className="
-          h-full flex items-center justify-between
-          px-4 md:px-6 lg:px-8
-        "
-      >
-
-        {/* ======================================================
-            LEFT
-        ====================================================== */}
-
+    <header className="h-16 sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-b border-slate-200/70 dark:border-slate-700/70">
+      <div className="h-full flex items-center justify-between px-4 md:px-6 lg:px-8">
+        {/* KIRI: PENCARIAN */}
         <div className="flex items-center gap-3 md:gap-5 min-w-0">
           <div className="relative hidden lg:block">
             <Search
               size={16}
-              className="
-                absolute left-3.5 top-1/2
-                -translate-y-1/2
-                text-slate-400
-              "
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
             />
 
             <input
               type="text"
               placeholder="Cari menu, fitur, atau halaman..."
-              className="
-                pl-10 pr-16 py-2
-                bg-slate-50/80 dark:bg-slate-800/80
-                border border-slate-200/60
-                dark:border-slate-700
-                rounded-xl
-                text-sm
-                text-slate-900 dark:text-white
-                placeholder:text-slate-400
-                focus:outline-none
-                focus:ring-2 focus:ring-blue-500/20
-                focus:border-blue-500
-                w-64 xl:w-80
-                transition-all duration-200
-                hover:bg-slate-50
-                dark:hover:bg-slate-800
-              "
+              className="pl-10 pr-16 py-2 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 w-64 xl:w-80 transition-all duration-200 hover:bg-slate-50 dark:hover:bg-slate-800"
             />
 
-            <div
-              className="
-                absolute right-3 top-1/2
-                -translate-y-1/2
-                flex items-center gap-1
-                text-[10px] font-mono
-                text-slate-400
-              "
-            >
-              <kbd
-                className="
-                  bg-slate-100 dark:bg-slate-700
-                  px-1.5 py-0.5
-                  rounded
-                  border border-slate-200
-                  dark:border-slate-600
-                  flex items-center gap-0.5
-                "
-              >
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[10px] font-mono text-slate-400">
+              <kbd className="bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-600 flex items-center gap-0.5">
                 <Command size={10} />
                 K
               </kbd>
@@ -552,229 +429,74 @@ export default function Header({
 
           <button
             type="button"
-            className="
-              lg:hidden
-              p-2 rounded-xl
-              hover:bg-slate-100
-              dark:hover:bg-slate-800
-              text-slate-400
-              hover:text-slate-600
-              dark:hover:text-slate-200
-              transition-all
-            "
+            className="lg:hidden p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-all"
             aria-label="Cari"
           >
             <Search size={19} />
           </button>
         </div>
 
-        {/* ======================================================
-            RIGHT
-        ====================================================== */}
-
+        {/* KANAN */}
         <div className="flex items-center gap-1 md:gap-2">
-
-          {/* ====================================================
-              DARK / LIGHT MODE
-
-              mounted digunakan agar theme tidak dibaca
-              sebelum client selesai hydration.
-          ==================================================== */}
-
+          {/* DARK / LIGHT MODE */}
           {mounted ? (
             <button
               type="button"
-              onClick={() =>
-                setTheme(
-                  theme === "dark"
-                    ? "light"
-                    : "dark"
-                )
-              }
-              className="
-                p-2 rounded-xl
-                hover:bg-slate-100
-                dark:hover:bg-slate-800
-                transition-all duration-200
-                text-slate-400
-                hover:text-slate-600
-                dark:hover:text-slate-200
-                hover:scale-105
-                relative group
-              "
-              aria-label={
-                theme === "dark"
-                  ? "Mode terang"
-                  : "Mode gelap"
-              }
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:scale-105 relative group"
+              aria-label={theme === "dark" ? "Mode terang" : "Mode gelap"}
             >
               {theme === "dark" ? (
-                <Sun
-                  size={18}
-                  className="text-yellow-500"
-                />
+                <Sun size={18} className="text-yellow-500" />
               ) : (
                 <Moon size={18} />
               )}
 
-              <span
-                className="
-                  absolute -bottom-8
-                  left-1/2
-                  -translate-x-1/2
-                  px-2 py-0.5
-                  bg-slate-800
-                  text-white
-                  text-[10px]
-                  rounded
-                  opacity-0
-                  group-hover:opacity-100
-                  transition-opacity duration-200
-                  whitespace-nowrap
-                  pointer-events-none
-                  z-50
-                "
-              >
-                {theme === "dark"
-                  ? "Mode Terang"
-                  : "Mode Gelap"}
+              <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-slate-800 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-50">
+                {theme === "dark" ? "Mode Terang" : "Mode Gelap"}
               </span>
             </button>
           ) : (
-            <div
-              className="
-                p-2 rounded-xl
-                w-9 h-9
-              "
-              aria-hidden="true"
-            />
+            <div className="p-2 rounded-xl w-9 h-9" aria-hidden="true" />
           )}
 
-          {/* ====================================================
-              NOTIFIKASI
-          ==================================================== */}
-
+          {/* NOTIFIKASI */}
           <div className="relative">
             <button
               type="button"
-              onClick={() =>
-                setIsNotifOpen(
-                  (current) => !current
-                )
-              }
-              className="
-                p-2 rounded-xl
-                hover:bg-slate-100
-                dark:hover:bg-slate-800
-                transition-all duration-200
-                text-slate-400
-                hover:text-slate-600
-                dark:hover:text-slate-200
-                hover:scale-105
-                relative group
-              "
+              onClick={() => setIsNotifOpen((current) => !current)}
+              className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:scale-105 relative group"
               aria-label="Notifikasi"
             >
               <Bell size={19} />
 
               {unreadCount > 0 && (
                 <>
-                  <span
-                    className="
-                      absolute -top-0.5 -right-0.5
-                      min-w-5 h-5 px-1
-                      bg-gradient-to-r
-                      from-red-500 to-rose-500
-                      text-white text-[10px]
-                      rounded-full
-                      flex items-center justify-center
-                      font-bold
-                      shadow-lg
-                      shadow-red-500/30
-                    "
-                  >
-                    {unreadCount > 99
-                      ? "99+"
-                      : unreadCount}
+                  <span className="absolute -top-0.5 -right-0.5 min-w-5 h-5 px-1 bg-gradient-to-r from-red-500 to-rose-500 text-white text-[10px] rounded-full flex items-center justify-center font-bold shadow-lg shadow-red-500/30">
+                    {unreadCount > 99 ? "99+" : unreadCount}
                   </span>
 
-                  <span
-                    className="
-                      absolute -top-0.5 -right-0.5
-                      w-5 h-5 rounded-full
-                      animate-ping
-                      bg-red-400/30
-                    "
-                  />
+                  <span className="absolute -top-0.5 -right-0.5 w-5 h-5 rounded-full animate-ping bg-red-400/30" />
                 </>
               )}
 
-              <span
-                className="
-                  absolute -bottom-8
-                  left-1/2
-                  -translate-x-1/2
-                  px-2 py-0.5
-                  bg-slate-800
-                  text-white text-[10px]
-                  rounded
-                  opacity-0
-                  group-hover:opacity-100
-                  transition-opacity duration-200
-                  whitespace-nowrap
-                  pointer-events-none
-                "
-              >
+              <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-slate-800 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
                 Notifikasi
               </span>
             </button>
 
             {isNotifOpen && (
-              <div
-                className="
-                  absolute right-0 mt-2
-                  w-[360px]
-                  max-w-[calc(100vw-24px)]
-                  bg-white dark:bg-slate-900
-                  rounded-2xl
-                  shadow-2xl
-                  border border-slate-200/60
-                  dark:border-slate-700
-                  py-1
-                  z-40
-                  overflow-hidden
-                "
-              >
-                {/* HEADER */}
-
-                <div
-                  className="
-                    px-4 py-3
-                    border-b border-slate-100
-                    dark:border-slate-700
-                    flex items-center justify-between
-                  "
-                >
+              <div className="absolute right-0 mt-2 w-[360px] max-w-[calc(100vw-24px)] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200/60 dark:border-slate-700 py-1 z-40 overflow-hidden">
+                <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div
-                      className="
-                        w-8 h-8 rounded-lg
-                        bg-blue-50
-                        dark:bg-blue-950/40
-                        flex items-center justify-center
-                      "
-                    >
-                      <Bell
-                        size={15}
-                        className="text-blue-500"
-                      />
+                    <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/40 flex items-center justify-center">
+                      <Bell size={15} className="text-blue-500" />
                     </div>
 
                     <div>
                       <p className="text-sm font-semibold text-slate-700 dark:text-slate-100">
                         Notifikasi
                       </p>
-
                       <p className="text-[10px] text-slate-400">
                         {unreadCount > 0
                           ? `${unreadCount} belum dibaca`
@@ -786,17 +508,8 @@ export default function Header({
                   {unreadCount > 0 && (
                     <button
                       type="button"
-                      onClick={
-                        handleMarkAllAsRead
-                      }
-                      className="
-                        flex items-center gap-1.5
-                        text-[10px]
-                        text-blue-600
-                        font-medium
-                        hover:text-blue-700
-                        hover:underline
-                      "
+                      onClick={handleMarkAllAsRead}
+                      className="flex items-center gap-1.5 text-[10px] text-blue-600 font-medium hover:text-blue-700 hover:underline"
                     >
                       <CheckCheck size={13} />
                       Tandai semua
@@ -804,218 +517,96 @@ export default function Header({
                   )}
                 </div>
 
-                {/* ISI */}
-
                 <div className="max-h-[360px] overflow-y-auto">
                   {loadingNotif ? (
                     <div className="px-4 py-10 text-center">
-                      <Loader2
-                        size={25}
-                        className="
-                          text-blue-500
-                          animate-spin
-                          mx-auto mb-2
-                        "
-                      />
-
-                      <p className="text-xs text-slate-400">
-                        Memuat notifikasi...
-                      </p>
+                      <Loader2 size={25} className="text-blue-500 animate-spin mx-auto mb-2" />
+                      <p className="text-xs text-slate-400">Memuat notifikasi...</p>
                     </div>
                   ) : notifError ? (
                     <div className="px-4 py-8 text-center">
-                      <div
-                        className="
-                          w-10 h-10
-                          rounded-full
-                          bg-red-50
-                          dark:bg-red-950/30
-                          flex items-center
-                          justify-center
-                          mx-auto mb-2
-                        "
-                      >
-                        <Bell
-                          size={18}
-                          className="text-red-400"
-                        />
+                      <div className="w-10 h-10 rounded-full bg-red-50 dark:bg-red-950/30 flex items-center justify-center mx-auto mb-2">
+                        <Bell size={18} className="text-red-400" />
                       </div>
-
-                      <p className="text-xs text-red-500 font-medium">
-                        Gagal memuat notifikasi
-                      </p>
-
+                      <p className="text-xs text-red-500 font-medium">Gagal memuat notifikasi</p>
                       <p className="text-[10px] text-slate-400 mt-1 px-4 line-clamp-2">
                         {notifError}
                       </p>
-
                       <button
                         type="button"
-                        onClick={() =>
-                          loadNotifications(true)
-                        }
-                        className="
-                          mt-2
-                          text-[11px]
-                          text-blue-600
-                          hover:underline
-                        "
+                        onClick={() => loadNotifications(true)}
+                        className="mt-2 text-[11px] text-blue-600 hover:underline"
                       >
                         Coba lagi
                       </button>
                     </div>
                   ) : notifList.length > 0 ? (
-                    notifList
-                      .slice(0, 10)
-                      .map((notif) => (
-                        <button
-                          type="button"
-                          key={notif.id}
-                          onClick={() =>
-                            handleNotificationClick(
-                              notif
-                            )
-                          }
-                          className={`
-                            w-full text-left
-                            px-4 py-3
-                            hover:bg-slate-50
-                            dark:hover:bg-slate-800
-                            transition-all duration-150
-                            border-l-4
-                            ${
+                    notifList.slice(0, 10).map((notif) => (
+                      <button
+                        type="button"
+                        key={notif.id}
+                        onClick={() => handleNotificationClick(notif)}
+                        className={`w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-150 border-l-4 ${
+                          !notif.dibaca
+                            ? "border-l-blue-500 bg-blue-50/30 dark:bg-blue-950/20"
+                            : "border-l-transparent"
+                        }`}
+                      >
+                        <div className="flex gap-3">
+                          <div
+                            className={`mt-0.5 w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
                               !notif.dibaca
-                                ? "border-l-blue-500 bg-blue-50/30 dark:bg-blue-950/20"
-                                : "border-l-transparent"
-                            }
-                          `}
-                        >
-                          <div className="flex gap-3">
-                            <div
-                              className={`
-                                mt-0.5
-                                w-8 h-8
-                                rounded-lg
-                                flex items-center
-                                justify-center
-                                flex-shrink-0
-                                ${
-                                  !notif.dibaca
-                                    ? "bg-blue-100 dark:bg-blue-950/50 text-blue-600"
-                                    : "bg-slate-100 dark:bg-slate-800 text-slate-400"
-                                }
-                              `}
-                            >
-                              <Bell size={14} />
-                            </div>
+                                ? "bg-blue-100 dark:bg-blue-950/50 text-blue-600"
+                                : "bg-slate-100 dark:bg-slate-800 text-slate-400"
+                            }`}
+                          >
+                            <Bell size={14} />
+                          </div>
 
-                            <div className="min-w-0 flex-1">
-                              <div className="flex items-start justify-between gap-2">
-                                <p
-                                  className={`
-                                    text-sm leading-tight
-                                    ${
-                                      !notif.dibaca
-                                        ? "font-semibold text-slate-700 dark:text-slate-100"
-                                        : "font-medium text-slate-600 dark:text-slate-300"
-                                    }
-                                  `}
-                                >
-                                  {notif.judul ||
-                                    "Notifikasi"}
-                                </p>
-
-                                {!notif.dibaca && (
-                                  <span
-                                    className="
-                                      w-2 h-2
-                                      rounded-full
-                                      bg-blue-500
-                                      flex-shrink-0
-                                      mt-1.5
-                                    "
-                                  />
-                                )}
-                              </div>
-
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-start justify-between gap-2">
                               <p
-                                className="
-                                  text-xs
-                                  text-slate-400
-                                  mt-1
-                                  line-clamp-2
-                                "
+                                className={`text-sm leading-tight ${
+                                  !notif.dibaca
+                                    ? "font-semibold text-slate-700 dark:text-slate-100"
+                                    : "font-medium text-slate-600 dark:text-slate-300"
+                                }`}
                               >
-                                {notif.isi || "-"}
+                                {notif.judul || "Notifikasi"}
                               </p>
 
-                              <div
-                                className="
-                                  flex items-center
-                                  gap-2 mt-1.5
-                                "
-                              >
-                                {notif.kategori && (
-                                  <span
-                                    className="
-                                      text-[9px]
-                                      px-1.5 py-0.5
-                                      rounded-full
-                                      bg-slate-100
-                                      dark:bg-slate-800
-                                      text-slate-500
-                                      dark:text-slate-400
-                                    "
-                                  >
-                                    {notif.kategori}
-                                  </span>
-                                )}
+                              {!notif.dibaca && (
+                                <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0 mt-1.5" />
+                              )}
+                            </div>
 
-                                <span
-                                  className="
-                                    text-[10px]
-                                    text-slate-300
-                                    dark:text-slate-500
-                                  "
-                                >
-                                  {formatNotificationTime(
-                                    notif.dibuatPada
-                                  )}
+                            <p className="text-xs text-slate-400 mt-1 line-clamp-2">
+                              {notif.isi || "-"}
+                            </p>
+
+                            <div className="flex items-center gap-2 mt-1.5">
+                              {notif.kategori && (
+                                <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400">
+                                  {notif.kategori}
                                 </span>
-                              </div>
+                              )}
+
+                              <span className="text-[10px] text-slate-300 dark:text-slate-500">
+                                {formatNotificationTime(notif.dibuatPada)}
+                              </span>
                             </div>
                           </div>
-                        </button>
-                      ))
+                        </div>
+                      </button>
+                    ))
                   ) : (
                     <div className="px-4 py-10 text-center">
-                      <div
-                        className="
-                          w-12 h-12
-                          rounded-full
-                          bg-slate-100
-                          dark:bg-slate-800
-                          flex items-center
-                          justify-center
-                          mx-auto mb-3
-                        "
-                      >
-                        <Bell
-                          size={22}
-                          className="text-slate-300"
-                        />
+                      <div className="w-12 h-12 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center mx-auto mb-3">
+                        <Bell size={22} className="text-slate-300" />
                       </div>
-
-                      <p
-                        className="
-                          text-sm font-medium
-                          text-slate-500
-                          dark:text-slate-300
-                        "
-                      >
+                      <p className="text-sm font-medium text-slate-500 dark:text-slate-300">
                         Tidak ada notifikasi
                       </p>
-
                       <p className="text-xs text-slate-400 mt-1">
                         Notifikasi baru akan muncul di sini.
                       </p>
@@ -1023,37 +614,16 @@ export default function Header({
                   )}
                 </div>
 
-                {/* FOOTER */}
-
-                <div
-                  className="
-                    px-4 py-2.5
-                    border-t
-                    border-slate-100
-                    dark:border-slate-700
-                    bg-slate-50/50
-                    dark:bg-slate-800/50
-                  "
-                >
+                <div className="px-4 py-2.5 border-t border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
                   <button
                     type="button"
                     onClick={() => {
                       setIsNotifOpen(false);
-
                       if (currentPathMap.profile) {
-                        router.push(
-                          currentPathMap.profile
-                        );
+                        router.push(currentPathMap.profile);
                       }
                     }}
-                    className="
-                      text-xs
-                      text-blue-600
-                      font-medium
-                      hover:text-blue-700
-                      transition-colors
-                      w-full text-center
-                    "
+                    className="text-xs text-blue-600 font-medium hover:text-blue-700 transition-colors w-full text-center"
                   >
                     Lihat semua notifikasi →
                   </button>
@@ -1062,154 +632,54 @@ export default function Header({
             )}
           </div>
 
-          {/* ====================================================
-              PROFILE
-          ==================================================== */}
-
+          {/* PROFIL PENGGUNA */}
           <div className="relative">
-            <button
-              type="button"
-              onClick={() =>
-                setIsProfileOpen(
-                  (current) => !current
-                )
-              }
-              className="
-                flex items-center gap-2.5
-                px-2.5 py-1.5
-                rounded-xl
-                hover:bg-slate-100
-                dark:hover:bg-slate-800
-                transition-all duration-200
-                group
-              "
-              aria-label="Menu profil"
-            >
-              <div className="relative">
-                <div
-                  className="
-                    w-8 h-8
-                    rounded-full
-                    bg-gradient-to-br
-                    from-blue-500 to-indigo-500
-                    flex items-center
-                    justify-center
-                    text-white text-xs
-                    font-bold
-                    shadow-md
-                    shadow-blue-500/20
-                    group-hover:shadow-blue-500/30
-                    transition-shadow
-                  "
-                >
-                  {user?.avatar ||
-                    user?.name?.charAt(0) ||
-                    "U"}
-                </div>
+           
+<button
+  type="button"
+  onClick={() => setIsProfileOpen((current) => !current)}
+  className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 group"
+  aria-label="Menu profil"
+>
+  <div className="relative flex-shrink-0">
+    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white text-xs font-bold shadow-md">
+      {displayAvatar}
+    </div>
 
-                <div
-                  className="
-                    absolute -bottom-0.5 -right-0.5
-                    w-3 h-3
-                    bg-emerald-400
-                    rounded-full
-                    border-2
-                    border-white
-                    dark:border-slate-900
-                    shadow-sm
-                  "
-                />
-              </div>
+    <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-white dark:border-slate-900" />
+  </div>
 
-              <div className="hidden md:block text-left">
-                <p
-                  className="
-                    text-sm font-semibold
-                    text-slate-700
-                    dark:text-slate-100
-                    leading-tight
-                  "
-                >
-                  {user?.name || "User"}
-                </p>
+  <div className="hidden md:block text-left min-w-0">
+    <p className="text-sm font-semibold text-slate-700 dark:text-slate-100 leading-tight truncate max-w-[180px]">
+      {displayName}
+    </p>
 
-                <p
-                  className="
-                    text-[10px]
-                    text-slate-400
-                    leading-tight
-                  "
-                >
-                  {user?.email || "-"}
-                </p>
-              </div>
+    <p className="text-[10px] text-slate-400 leading-tight truncate max-w-[180px]">
+      {displayEmail}
+    </p>
+  </div>
 
-              <ChevronDown
-                size={16}
-                className={`
-                  text-slate-400
-                  transition-all duration-200
-                  group-hover:text-slate-600
-                  dark:group-hover:text-slate-200
-                  ${
-                    isProfileOpen
-                      ? "rotate-180"
-                      : ""
-                  }
-                `}
-              />
-            </button>
+  <ChevronDown
+    size={16}
+    className={`text-slate-400 transition-transform ${
+      isProfileOpen ? "rotate-180" : ""
+    }`}
+  />
+</button>
+
 
             {isProfileOpen && (
-              <div
-                className="
-                  absolute right-0 mt-2
-                  w-56
-                  bg-white dark:bg-slate-900
-                  rounded-2xl
-                  shadow-2xl
-                  border border-slate-200/60
-                  dark:border-slate-700
-                  py-1
-                  z-40
-                  overflow-hidden
-                "
-              >
+              <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200/60 dark:border-slate-700 py-1 z-40 overflow-hidden">
                 {/* ROLE */}
-
-                <div
-                  className="
-                    px-4 py-2
-                    border-b
-                    border-slate-100
-                    dark:border-slate-700
-                    flex items-center gap-1.5
-                    text-[10px]
-                    font-medium
-                    text-slate-500
-                    dark:text-slate-400
-                  "
-                >
-                  <Crown
-                    size={11}
-                    className="text-yellow-500"
-                  />
-
+                <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-700 flex items-center gap-1.5 text-[10px] font-medium text-slate-500 dark:text-slate-400">
+                  <Crown size={11} className="text-yellow-500" />
                   <span>Role:</span>
-
-                  <span
-                    className={`
-                      px-2 py-0.5
-                      rounded-full
-                      ${roleBadgeColor}
-                    `}
-                  >
+                  <span className={`px-2 py-0.5 rounded-full ${roleBadgeColor}`}>
                     {roleLabel}
                   </span>
                 </div>
 
                 {/* MENU */}
-
                 <div className="py-1">
                   {menuItems.map((item) => {
                     const Icon = item.icon;
@@ -1218,111 +688,35 @@ export default function Header({
                       <button
                         type="button"
                         key={item.path}
-                        onClick={() =>
-                          navigateTo(item.path)
-                        }
-                        className="
-                          flex items-center gap-3
-                          w-full px-4 py-2.5
-                          text-sm
-                          text-slate-600
-                          dark:text-slate-300
-                          hover:bg-slate-50
-                          dark:hover:bg-slate-800
-                          transition-all duration-150
-                          group
-                        "
+                        onClick={() => navigateTo(item.path)}
+                        className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-150 group"
                       >
-                        <div
-                          className={`
-                            w-8 h-8
-                            rounded-lg
-                            ${item.iconBg}
-                            flex items-center
-                            justify-center
-                            ${item.iconColor}
-                            group-hover:scale-110
-                            transition-transform
-                          `}
-                        >
+                        <div className={`w-8 h-8 rounded-lg ${item.iconBg} flex items-center justify-center ${item.iconColor} group-hover:scale-110 transition-transform`}>
                           <Icon size={16} />
                         </div>
-
-                        <span>
-                          {item.label}
-                        </span>
+                        <span>{item.label}</span>
                       </button>
                     );
                   })}
                 </div>
 
                 {/* LOGOUT */}
-
-                <div
-                  className="
-                    border-t
-                    border-slate-100
-                    dark:border-slate-700
-                    pt-1
-                  "
-                >
+                <div className="border-t border-slate-100 dark:border-slate-700 pt-1">
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className="
-                      flex items-center gap-3
-                      w-full px-4 py-2.5
-                      text-sm text-red-600
-                      hover:bg-red-50
-                      dark:hover:bg-red-950/30
-                      transition-all duration-150
-                      group
-                    "
+                    className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all duration-150 group"
                   >
-                    <div
-                      className="
-                        w-8 h-8
-                        rounded-lg
-                        bg-red-50
-                        dark:bg-red-950/30
-                        flex items-center
-                        justify-center
-                        text-red-400
-                        group-hover:bg-red-100
-                        dark:group-hover:bg-red-950/50
-                        group-hover:scale-110
-                        transition-all
-                      "
-                    >
+                    <div className="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-950/30 flex items-center justify-center text-red-400 group-hover:bg-red-100 dark:group-hover:bg-red-950/50 group-hover:scale-110 transition-all">
                       <LogOut size={16} />
                     </div>
-
-                    <span className="font-medium">
-                      Logout
-                    </span>
+                    <span className="font-medium">Logout</span>
                   </button>
                 </div>
 
                 {/* VERSION */}
-
-                <div
-                  className="
-                    px-4 py-2
-                    border-t
-                    border-slate-100
-                    dark:border-slate-700
-                    bg-slate-50/50
-                    dark:bg-slate-800/50
-                  "
-                >
-                  <p
-                    className="
-                      text-[10px]
-                      text-slate-400
-                      text-center
-                      tracking-widest
-                    "
-                  >
+                <div className="px-4 py-2 border-t border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50">
+                  <p className="text-[10px] text-slate-400 text-center tracking-widest">
                     v2.0.0 • 2026
                   </p>
                 </div>

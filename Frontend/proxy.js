@@ -1,58 +1,85 @@
 import { NextResponse } from "next/server";
 
+const SYSTEM_ROUTES = [
+"/admin",
+"/guru",
+"/siswa",
+"/yayasan",
+"/super-admin",
+];
+
+function isExcludedPath(pathname) {
+return (
+pathname.startsWith("/_next") ||
+pathname.startsWith("/api") ||
+pathname === "/favicon.ico" ||
+pathname === "/robots.txt" ||
+pathname === "/sitemap.xml"
+);
+}
+
 export function proxy(request) {
-  const host = request.headers.get("host") || "";
-  const hostname = host.split(":")[0];
+const host = request.headers.get("host") || "";
+const hostname = host.split(":")[0].toLowerCase();
+const pathname = request.nextUrl.pathname;
 
-  // Hanya proses subdomain *.localhost
-  if (!hostname.endsWith(".localhost")) {
-    return NextResponse.next();
-  }
+// Abaikan aset dan API.
+if (isExcludedPath(pathname)) {
+return NextResponse.next();
+}
 
-  // Ambil nama tenant dari subdomain
-  // contoh:
-  // sma-smart.localhost
-  //          ↓
-  // sma-smart
-  const tenant = hostname.replace(".localhost", "");
+// Domain utama, misalnya localhost:3000.
+if (!hostname.endsWith(".localhost")) {
+return NextResponse.next();
+}
 
-  const pathname = request.nextUrl.pathname;
+const tenant = hostname.slice(0, -".localhost".length);
 
-  // Jangan rewrite file/system route
-  if (
-    pathname.startsWith("/_next") ||
-    pathname.startsWith("/api") ||
-    pathname === "/favicon.ico" ||
-    pathname === "/robots.txt" ||
-    pathname === "/sitemap.xml"
-  ) {
-    return NextResponse.next();
-  }
+if (!tenant || tenant === "www") {
+return NextResponse.next();
+}
 
-  // Buat URL baru
-  const url = request.nextUrl.clone();
+// Teruskan identitas subdomain untuk kebutuhan FE.
+const requestHeaders = new Headers(request.headers);
+requestHeaders.set("x-school-subdomain", tenant);
 
-  /*
-   * Subdomain:
-   *
-   * sma-smart.localhost
-   *
-   * akan diarahkan secara internal menjadi:
-   *
-   * /sma-smart
-   *
-   * sehingga Next.js mencocokkannya dengan:
-   *
-   * app/[tenant]/page.jsx
-   */
+// Halaman autentikasi tetap menggunakan route (auth).
+if (
+pathname === "/login" ||
+pathname.startsWith("/login/") ||
+pathname === "/register" ||
+pathname.startsWith("/register/") ||
+pathname.startsWith("/forgot-password") ||
+pathname.startsWith("/onboarding")
+) {
+return NextResponse.next({
+request: { headers: requestHeaders },
+});
+}
 
-  url.pathname = `/${tenant}${pathname}`;
+// Halaman sistem tetap menggunakan route (system).
+const isSystemRoute = SYSTEM_ROUTES.some(
+(route) =>
+pathname === route || pathname.startsWith(`${route}/`)
+);
 
-  return NextResponse.rewrite(url);
+if (isSystemRoute) {
+return NextResponse.next({
+request: { headers: requestHeaders },
+});
+}
+
+// Halaman publik diarahkan ke app/[tenant]/...
+const url = request.nextUrl.clone();
+url.pathname = `/${tenant}${pathname}`;
+
+return NextResponse.rewrite(url, {
+request: { headers: requestHeaders },
+});
 }
 
 export const config = {
-  matcher: [
-    "/((?!_next|api|favicon.ico|robots.txt|sitemap.xml).*)",
-  ],
+matcher: [
+"/((?!_next/static|_next/image|favicon.ico|robots.txt|sitemap.xml).*)",
+],
 };

@@ -289,6 +289,21 @@ function getArrayData(response) {
   return [];
 }
 
+
+
+
+function getNamaMapel(data) {
+  return (
+    data?.kelasMapel?.mataPelajaran?.nama ||
+    data?.mataPelajaran?.nama ||
+    data?.mapel?.nama ||
+    data?.namaMapel ||
+    "Mata pelajaran belum tersedia"
+  );
+}
+
+
+
 /* =========================================================
    GET KELAS ID SISWA
 ========================================================= */
@@ -617,170 +632,152 @@ function TugasSiswaPageContent() {
      GET DAFTAR TUGAS
   ======================================================= */
 
-  const loadTugas = useCallback(
-    async () => {
-      try {
-        setLoadingList(true);
-        setError("");
-        setSuccessMessage("");
+  
+const loadTugas = useCallback(async () => {
+  try {
+    setLoadingList(true);
+    setError("");
+    setSuccessMessage("");
 
-        const kelasMapelIds =
-          kelasMapelId
-            ? [kelasMapelId]
-            : await getKelasMapelSiswa();
+    const kelasMapelIds = kelasMapelId
+      ? [kelasMapelId]
+      : await getKelasMapelSiswa();
 
-        if (
-          !kelasMapelIds ||
-          kelasMapelIds.length === 0
-        ) {
-          setTugasList([]);
-          setSubmissionMap({});
-          setSelectedTugas(null);
-          return;
+    if (!kelasMapelIds || kelasMapelIds.length === 0) {
+      setTugasList([]);
+      setSubmissionMap({});
+      setSelectedTugas(null);
+      return;
+    }
+
+    // Ambil daftar tugas dari setiap kelas mapel
+    const taskResponses = await Promise.all(
+      kelasMapelIds.map(async (id) => {
+        try {
+          const response = await apiRequest(
+            `${TASK_BASE_URL}/kelas-mapel/${id}`
+          );
+
+          const data = getData(response);
+
+          return Array.isArray(data) ? data : [];
+        } catch (err) {
+          console.error(
+            `Gagal mengambil tugas kelas-mapel ${id}:`,
+            err
+          );
+
+          return [];
         }
+      })
+    );
 
-        const taskResponses =
-          await Promise.all(
-            kelasMapelIds.map(
-              async (id) => {
-                try {
-                  const response =
-                    await apiRequest(
-                      `${TASK_BASE_URL}/kelas-mapel/${id}`
-                    );
+    // Gabungkan tugas dan hilangkan duplikasi
+    const allTasks = taskResponses.flat();
 
-                  const data =
-                    getData(response);
+    const uniqueTasks = Array.from(
+      new Map(
+        allTasks
+          .filter((task) => task?.id)
+          .map((task) => [task.id, task])
+      ).values()
+    );
 
-                  return Array.isArray(data)
-                    ? data
-                    : [];
-                } catch (err) {
-                  console.error(
-                    `Gagal mengambil tugas kelas-mapel ${id}:`,
-                    err
-                  );
+    // Urutkan berdasarkan tanggal dibuat terbaru
+    uniqueTasks.sort((a, b) => {
+      const dateA = a?.dibuatPada
+        ? new Date(a.dibuatPada).getTime()
+        : 0;
 
-                  return [];
-                }
-              }
-            )
+      const dateB = b?.dibuatPada
+        ? new Date(b.dibuatPada).getTime()
+        : 0;
+
+      return dateB - dateA;
+    });
+
+    if (uniqueTasks.length === 0) {
+      setTugasList([]);
+      setSubmissionMap({});
+      setSelectedTugas(null);
+      return;
+    }
+
+    // Ambil detail tugas agar nama mapel dan status
+    // pengumpulan tersedia pada daftar tugas.
+    const detailResults = await Promise.all(
+      uniqueTasks.map(async (task) => {
+        try {
+          const detailResponse = await apiRequest(
+            `${TASK_BASE_URL}/${task.id}`
           );
 
-        const allTasks =
-          taskResponses.flat();
+          const detailData = getData(detailResponse);
 
-        const uniqueTasks =
-          Array.from(
-            new Map(
-              allTasks
-                .filter(
-                  (task) => task?.id
-                )
-                .map((task) => [
-                  task.id,
-                  task,
-                ])
-            ).values()
+          const submission =
+            detailData?.pengumpulanTugasSiswa?.[0] ||
+            null;
+
+          // Data detail melengkapi data dari daftar tugas.
+          // Data daftar tetap dipertahankan jika detail
+          // tidak menyediakan suatu properti.
+          const mergedTask = {
+            ...task,
+            ...detailData,
+            kelasMapel:
+              detailData?.kelasMapel ||
+              task?.kelasMapel ||
+              null,
+          };
+
+          return {
+            task: mergedTask,
+            tugasId: task.id,
+            submission,
+          };
+        } catch (err) {
+          console.error(
+            `Gagal mengambil detail tugas ${task.id}:`,
+            err
           );
 
-        uniqueTasks.sort(
-          (a, b) => {
-            const dateA =
-              a?.dibuatPada
-                ? new Date(
-                    a.dibuatPada
-                  ).getTime()
-                : 0;
-
-            const dateB =
-              b?.dibuatPada
-                ? new Date(
-                    b.dibuatPada
-                  ).getTime()
-                : 0;
-
-            return dateB - dateA;
-          }
-        );
-
-        setTugasList(uniqueTasks);
-
-        if (uniqueTasks.length === 0) {
-          setSubmissionMap({});
-          setSelectedTugas(null);
-          return;
+          return {
+            task,
+            tugasId: task.id,
+            submission: null,
+          };
         }
+      })
+    );
 
-        const detailResults =
-          await Promise.all(
-            uniqueTasks.map(
-              async (task) => {
-                try {
-                  const detailResponse =
-                    await apiRequest(
-                      `${TASK_BASE_URL}/${task.id}`
-                    );
+    const mergedTasks = detailResults.map(
+      (item) => item.task
+    );
 
-                  const detailData =
-                    getData(
-                      detailResponse
-                    );
+    const newSubmissionMap = {};
 
-                  const submission =
-                    detailData
-                      ?.pengumpulanTugasSiswa?.[0] ||
-                    null;
+    detailResults.forEach((item) => {
+      newSubmissionMap[item.tugasId] =
+        item.submission;
+    });
 
-                  return {
-                    tugasId: task.id,
-                    submission,
-                  };
-                } catch (err) {
-                  console.error(
-                    `Gagal mengambil status tugas ${task.id}:`,
-                    err
-                  );
+    setTugasList(mergedTasks);
+    setSubmissionMap(newSubmissionMap);
+  } catch (err) {
+    console.error(
+      "Gagal mengambil daftar tugas:",
+      err
+    );
 
-                  return {
-                    tugasId: task.id,
-                    submission: null,
-                  };
-                }
-              }
-            )
-          );
+    setError(
+      err?.message ||
+        "Gagal mengambil daftar tugas dari backend."
+    );
+  } finally {
+    setLoadingList(false);
+  }
+}, [kelasMapelId]);
 
-        const newSubmissionMap =
-          {};
-
-        detailResults.forEach(
-          (item) => {
-            newSubmissionMap[
-              item.tugasId
-            ] = item.submission;
-          }
-        );
-
-        setSubmissionMap(
-          newSubmissionMap
-        );
-      } catch (err) {
-        console.error(
-          "Gagal mengambil daftar tugas:",
-          err
-        );
-
-        setError(
-          err?.message ||
-            "Gagal mengambil daftar tugas dari backend."
-        );
-      } finally {
-        setLoadingList(false);
-      }
-    },
-    [kelasMapelId]
-  );
 
   /* =======================================================
      INITIAL LOAD
@@ -1303,6 +1300,12 @@ function TugasSiswaPageContent() {
                                   "Tugas Tanpa Judul"}
                               </h3>
 
+                              
+<p className={`mt-1 text-xs font-medium ${themePrimaryText}`}>
+  {getNamaMapel(tugas)}
+</p>
+
+
                               <div className="mt-2 flex items-center gap-1.5 text-xs theme-text-muted">
                                 <Clock3
                                   size={14}
@@ -1405,6 +1408,11 @@ function TugasSiswaPageContent() {
                           {selectedTugas.judul ||
                             "Tugas Tanpa Judul"}
                         </h2>
+                        
+<p className={`mt-2 text-sm font-medium ${themePrimaryText}`}>
+  Mata Pelajaran: {getNamaMapel(selectedTugas)}
+</p>
+
                       </div>
 
                       <span

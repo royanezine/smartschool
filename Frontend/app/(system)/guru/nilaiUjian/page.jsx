@@ -30,7 +30,6 @@ import {
   Loader2,
   Search,
   Users,
-  X,
 } from "lucide-react";
 
 // ============================================================
@@ -46,8 +45,7 @@ const themePrimarySoft =
 const themePrimarySoftBorder =
   "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
 
-const themePrimaryText =
-  "text-[var(--color-primary)]";
+const themePrimaryText = "text-[var(--color-primary)]";
 
 const themePrimaryShadow =
   "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
@@ -159,11 +157,7 @@ function getCurrentUserId() {
   if (!user) return null;
 
   return (
-    user.id ||
-    user.userId ||
-    user.penggunaId ||
-    user.guruId ||
-    null
+    user.id || user.userId || user.penggunaId || user.guruId || null
   );
 }
 
@@ -214,11 +208,7 @@ function formatDateTime(date) {
 }
 
 function formatDuration(minutes) {
-  if (
-    minutes === null ||
-    minutes === undefined ||
-    minutes === ""
-  ) {
+  if (minutes === null || minutes === undefined || minutes === "") {
     return "-";
   }
 
@@ -259,11 +249,7 @@ function getStudentId(item) {
   if (!item) return null;
 
   const siswa =
-    item.siswa ||
-    item.pengguna ||
-    item.student ||
-    item.user ||
-    null;
+    item.siswa || item.pengguna || item.student || item.user || null;
 
   return normalizeId(
     item.siswaId ||
@@ -280,11 +266,7 @@ function getStudentName(item) {
   if (!item) return "Nama siswa belum tersedia";
 
   const siswa =
-    item.siswa ||
-    item.pengguna ||
-    item.student ||
-    item.user ||
-    null;
+    item.siswa || item.pengguna || item.student || item.user || null;
 
   return (
     siswa?.namaLengkap ||
@@ -300,11 +282,7 @@ function getStudentNis(item) {
   if (!item) return "-";
 
   const siswa =
-    item.siswa ||
-    item.pengguna ||
-    item.student ||
-    item.user ||
-    null;
+    item.siswa || item.pengguna || item.student || item.user || null;
 
   return siswa?.nis || item.nis || item.nomorInduk || "-";
 }
@@ -313,11 +291,7 @@ function getStudentNisn(item) {
   if (!item) return "-";
 
   const siswa =
-    item.siswa ||
-    item.pengguna ||
-    item.student ||
-    item.user ||
-    null;
+    item.siswa || item.pengguna || item.student || item.user || null;
 
   return siswa?.nisn || item.nisn || "-";
 }
@@ -370,10 +344,7 @@ function getBenar(item) {
   const hasil = getHasil(item);
 
   return Number(
-    hasil?.jumlahBenar ??
-      item?.jumlahBenar ??
-      item?.benar ??
-      0
+    hasil?.jumlahBenar ?? item?.jumlahBenar ?? item?.benar ?? 0
   );
 }
 
@@ -381,10 +352,7 @@ function getSalah(item) {
   const hasil = getHasil(item);
 
   return Number(
-    hasil?.jumlahSalah ??
-      item?.jumlahSalah ??
-      item?.salah ??
-      0
+    hasil?.jumlahSalah ?? item?.jumlahSalah ?? item?.salah ?? 0
   );
 }
 
@@ -392,10 +360,7 @@ function getLewati(item) {
   const hasil = getHasil(item);
 
   return Number(
-    hasil?.jumlahLewati ??
-      item?.jumlahLewati ??
-      item?.lewati ??
-      0
+    hasil?.jumlahLewati ?? item?.jumlahLewati ?? item?.lewati ?? 0
   );
 }
 
@@ -441,9 +406,7 @@ function getStatus(item) {
     return "berlangsung";
   }
 
-  if (
-    ["dibatalkan", "cancelled", "canceled"].includes(value)
-  ) {
+  if (["dibatalkan", "cancelled", "canceled"].includes(value)) {
     return "dibatalkan";
   }
 
@@ -586,8 +549,7 @@ export default function NilaiUjianGuruPage() {
   const [selectedUjianId, setSelectedUjianId] = useState("");
   const [detailUjian, setDetailUjian] = useState(null);
 
-  const [loadingKelasMapel, setLoadingKelasMapel] =
-    useState(true);
+  const [loadingKelasMapel, setLoadingKelasMapel] = useState(true);
   const [loadingUjian, setLoadingUjian] = useState(false);
   const [loadingDetail, setLoadingDetail] = useState(false);
 
@@ -595,10 +557,6 @@ export default function NilaiUjianGuruPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("semua");
   const [sortBy, setSortBy] = useState("nama");
-
-  const [selectedSiswa, setSelectedSiswa] = useState(null);
-  const [showDetailModal, setShowDetailModal] =
-    useState(false);
 
   const loadKelasMapel = useCallback(async () => {
     try {
@@ -618,8 +576,7 @@ export default function NilaiUjianGuruPage() {
               item.penggunaId;
 
             return (
-              normalizeId(guruId) ===
-              normalizeId(currentUserId)
+              normalizeId(guruId) === normalizeId(currentUserId)
             );
           })
         : list;
@@ -636,10 +593,7 @@ export default function NilaiUjianGuruPage() {
         setDetailUjian(null);
       }
     } catch (err) {
-      console.error(
-        "Gagal memuat kelas mapel:",
-        err
-      );
+      console.error("Gagal memuat kelas mapel:", err);
 
       setError(
         err?.message ||
@@ -650,33 +604,27 @@ export default function NilaiUjianGuruPage() {
     }
   }, []);
 
-  const loadDetailKelas = useCallback(
-    async (kelasId) => {
-      if (!kelasId) {
-        setKelas(null);
-        return null;
-      }
+  const loadDetailKelas = useCallback(async (kelasId) => {
+    if (!kelasId) {
+      setKelas(null);
+      return null;
+    }
 
-      try {
-        const response = await getKelasById(kelasId);
-        const data = parseObject(response);
+    try {
+      const response = await getKelasById(kelasId);
+      const data = parseObject(response);
 
-        setKelas(data);
+      setKelas(data);
 
-        return data;
-      } catch (err) {
-        console.error(
-          "Gagal memuat detail kelas:",
-          err
-        );
+      return data;
+    } catch (err) {
+      console.error("Gagal memuat detail kelas:", err);
 
-        setKelas(null);
+      setKelas(null);
 
-        return null;
-      }
-    },
-    []
-  );
+      return null;
+    }
+  }, []);
 
   const loadUjian = useCallback(async () => {
     if (!selectedKelasMapel?.id) {
@@ -702,25 +650,17 @@ export default function NilaiUjianGuruPage() {
       if (list.length > 0) {
         const first = list[0];
 
-        setSelectedUjianId(
-          first.id || first.asesmenId || ""
-        );
+        setSelectedUjianId(first.id || first.asesmenId || "");
       } else {
         setSelectedUjianId("");
         setDetailUjian(null);
       }
     } catch (err) {
-      console.error(
-        "Gagal memuat ujian:",
-        err
-      );
+      console.error("Gagal memuat ujian:", err);
 
       setUjian([]);
 
-      setError(
-        err?.message ||
-          "Gagal memuat daftar ujian."
-      );
+      setError(err?.message || "Gagal memuat daftar ujian.");
     } finally {
       setLoadingUjian(false);
     }
@@ -736,8 +676,7 @@ export default function NilaiUjianGuruPage() {
       setLoadingDetail(true);
       setError("");
 
-      const response =
-        await getDetailUjian(selectedUjianId);
+      const response = await getDetailUjian(selectedUjianId);
 
       const data = parseObject(response);
 
@@ -756,25 +695,17 @@ export default function NilaiUjianGuruPage() {
         setKelas(null);
       }
     } catch (err) {
-      console.error(
-        "Gagal memuat detail ujian:",
-        err
-      );
+      console.error("Gagal memuat detail ujian:", err);
 
       setDetailUjian(null);
 
       setError(
-        err?.message ||
-          "Gagal memuat detail nilai ujian."
+        err?.message || "Gagal memuat detail nilai ujian."
       );
     } finally {
       setLoadingDetail(false);
     }
-  }, [
-    selectedUjianId,
-    selectedKelasMapel,
-    loadDetailKelas,
-  ]);
+  }, [selectedUjianId, selectedKelasMapel, loadDetailKelas]);
 
   useEffect(() => {
     loadKelasMapel();
@@ -790,8 +721,7 @@ export default function NilaiUjianGuruPage() {
 
   const handleChangeKelasMapel = (id) => {
     const selected = kelasMapel.find(
-      (item) =>
-        normalizeId(item.id) === normalizeId(id)
+      (item) => normalizeId(item.id) === normalizeId(id)
     );
 
     setSelectedKelasMapel(selected || null);
@@ -804,29 +734,15 @@ export default function NilaiUjianGuruPage() {
   };
 
   const nilaiSource = useMemo(() => {
-    if (!detailUjian) return [];
-
-    if (Array.isArray(detailUjian.nilaiSiswa)) {
-      return detailUjian.nilaiSiswa;
-    }
-
-    if (Array.isArray(detailUjian.percobaanUjian)) {
-      return detailUjian.percobaanUjian;
-    }
-
-    if (Array.isArray(detailUjian.data?.nilaiSiswa)) {
-      return detailUjian.data.nilaiSiswa;
-    }
-
-    if (
-      Array.isArray(
-        detailUjian.data?.percobaanUjian
-      )
-    ) {
-      return detailUjian.data.percobaanUjian;
-    }
-
-    return [];
+    return (
+      detailUjian?.nilaiSiswa ??
+      detailUjian?.percobaanUjian ??
+      detailUjian?.percobaanAsesmen ??
+      detailUjian?.data?.nilaiSiswa ??
+      detailUjian?.data?.percobaanUjian ??
+      detailUjian?.data?.percobaanAsesmen ??
+      []
+    );
   }, [detailUjian]);
 
   const anggotaKelas = useMemo(() => {
@@ -933,15 +849,11 @@ export default function NilaiUjianGuruPage() {
       }
 
       const existingTime = new Date(
-        existing.waktuSelesai ||
-          existing.waktuMulai ||
-          0
+        existing.waktuSelesai || existing.waktuMulai || 0
       ).getTime();
 
       const currentTime = new Date(
-        item.waktuSelesai ||
-          item.waktuMulai ||
-          0
+        item.waktuSelesai || item.waktuMulai || 0
       ).getTime();
 
       if (currentTime >= existingTime) {
@@ -970,9 +882,7 @@ export default function NilaiUjianGuruPage() {
             anggota?.userId
         );
 
-        let attempt = siswaId
-          ? nilaiBySiswaId.get(siswaId)
-          : null;
+        let attempt = siswaId ? nilaiBySiswaId.get(siswaId) : null;
 
         if (!attempt) {
           const nama = String(
@@ -989,9 +899,7 @@ export default function NilaiUjianGuruPage() {
             attempt =
               normalizedNilaiSource.find(
                 (item) =>
-                  String(
-                    item.namaLengkap || ""
-                  )
+                  String(item.namaLengkap || "")
                     .trim()
                     .toLowerCase() === nama
               ) || null;
@@ -1007,25 +915,17 @@ export default function NilaiUjianGuruPage() {
           "Nama siswa belum tersedia";
 
         const nis =
-          siswa?.nis ||
-          anggota?.nis ||
-          attempt?.nis ||
-          "-";
+          siswa?.nis || anggota?.nis || attempt?.nis || "-";
 
         const nisn =
-          siswa?.nisn ||
-          anggota?.nisn ||
-          attempt?.nisn ||
-          "-";
+          siswa?.nisn || anggota?.nisn || attempt?.nisn || "-";
 
         if (attempt) {
           return {
             ...attempt,
             id:
-              attempt.id ||
-              `attempt-${siswaId || index}`,
-            siswaId:
-              siswaId || attempt.siswaId,
+              attempt.id || `attempt-${siswaId || index}`,
+            siswaId: siswaId || attempt.siswaId,
             siswa: attempt.siswa || siswa,
             namaLengkap,
             nis,
@@ -1039,9 +939,7 @@ export default function NilaiUjianGuruPage() {
         }
 
         return {
-          id: `kelas-member-${
-            siswaId || index
-          }`,
+          id: `kelas-member-${siswaId || index}`,
           siswaId,
           siswa,
           namaLengkap,
@@ -1058,11 +956,7 @@ export default function NilaiUjianGuruPage() {
     }
 
     return normalizedNilaiSource;
-  }, [
-    anggotaKelas,
-    nilaiBySiswaId,
-    normalizedNilaiSource,
-  ]);
+  }, [anggotaKelas, nilaiBySiswaId, normalizedNilaiSource]);
 
   const filteredNilaiSiswa = useMemo(() => {
     let result = [...nilaiSiswa];
@@ -1071,17 +965,9 @@ export default function NilaiUjianGuruPage() {
 
     if (keyword) {
       result = result.filter((item) => {
-        const nama = String(
-          item.namaLengkap || ""
-        ).toLowerCase();
-
-        const nis = String(
-          item.nis || ""
-        ).toLowerCase();
-
-        const nisn = String(
-          item.nisn || ""
-        ).toLowerCase();
+        const nama = String(item.namaLengkap || "").toLowerCase();
+        const nis = String(item.nis || "").toLowerCase();
+        const nisn = String(item.nisn || "").toLowerCase();
 
         return (
           nama.includes(keyword) ||
@@ -1093,8 +979,7 @@ export default function NilaiUjianGuruPage() {
 
     if (statusFilter !== "semua") {
       result = result.filter(
-        (item) =>
-          getStatus(item) === statusFilter
+        (item) => getStatus(item) === statusFilter
       );
     }
 
@@ -1108,84 +993,55 @@ export default function NilaiUjianGuruPage() {
       }
 
       if (sortBy === "status") {
-        return getStatus(a).localeCompare(
-          getStatus(b)
-        );
+        return getStatus(a).localeCompare(getStatus(b));
       }
 
-      return String(
-        a.namaLengkap || ""
-      ).localeCompare(
+      return String(a.namaLengkap || "").localeCompare(
         String(b.namaLengkap || ""),
         "id"
       );
     });
 
     return result;
-  }, [
-    nilaiSiswa,
-    search,
-    statusFilter,
-    sortBy,
-  ]);
+  }, [nilaiSiswa, search, statusFilter, sortBy]);
 
   const statistics = useMemo(() => {
     const total = nilaiSiswa.length;
 
     const selesai = nilaiSiswa.filter(
-      (item) =>
-        getStatus(item) === "selesai"
+      (item) => getStatus(item) === "selesai"
     ).length;
 
     const berlangsung = nilaiSiswa.filter(
-      (item) =>
-        getStatus(item) === "berlangsung"
+      (item) => getStatus(item) === "berlangsung"
     ).length;
 
     const belum = nilaiSiswa.filter(
-      (item) =>
-        getStatus(item) ===
-        "belum_mengerjakan"
+      (item) => getStatus(item) === "belum_mengerjakan"
     ).length;
 
-    const dikerjakan = nilaiSiswa.filter(
-      (item) => {
-        const status = getStatus(item);
-
-        return (
-          status === "selesai" ||
-          status === "berlangsung"
-        );
-      }
-    );
+    const dikerjakan = nilaiSiswa.filter((item) => {
+      const status = getStatus(item);
+      return status === "selesai" || status === "berlangsung";
+    });
 
     const scores = dikerjakan
       .map((item) => getNilai(item))
-      .filter(
-        (score) =>
-          !Number.isNaN(Number(score))
-      );
+      .filter((score) => !Number.isNaN(Number(score)));
 
     const totalNilai = scores.reduce(
-      (sum, value) =>
-        sum + Number(value),
+      (sum, value) => sum + Number(value),
       0
     );
 
     const rataRata =
-      scores.length > 0
-        ? totalNilai / scores.length
-        : 0;
+      scores.length > 0 ? totalNilai / scores.length : 0;
 
     const nilaiTertinggi =
-      scores.length > 0
-        ? Math.max(...scores)
-        : 0;
+      scores.length > 0 ? Math.max(...scores) : 0;
 
     const nilaiTerendah =
-      scores.length > 0
-        ? Math.min(...scores)
-        : 0;
+      scores.length > 0 ? Math.min(...scores) : 0;
 
     return {
       total,
@@ -1202,19 +1058,13 @@ export default function NilaiUjianGuruPage() {
     return (
       ujian.find(
         (item) =>
-          normalizeId(
-            item.id || item.asesmenId
-          ) ===
+          normalizeId(item.id || item.asesmenId) ===
           normalizeId(selectedUjianId)
       ) ||
       detailUjian ||
       null
     );
-  }, [
-    ujian,
-    selectedUjianId,
-    detailUjian,
-  ]);
+  }, [ujian, selectedUjianId, detailUjian]);
 
   const namaUjian =
     detailUjian?.judul ||
@@ -1239,9 +1089,7 @@ export default function NilaiUjianGuruPage() {
   );
 
   const durasi =
-    detailUjian?.durasi ??
-    currentUjian?.durasi ??
-    null;
+    detailUjian?.durasi ?? currentUjian?.durasi ?? null;
 
   const tanggalMulai =
     detailUjian?.waktuMulai ||
@@ -1252,10 +1100,8 @@ export default function NilaiUjianGuruPage() {
     null;
 
   const mataPelajaran =
-    detailUjian?.kelasMapel?.mataPelajaran
-      ?.nama ||
-    selectedKelasMapel?.mataPelajaran
-      ?.nama ||
+    detailUjian?.kelasMapel?.mataPelajaran?.nama ||
+    selectedKelasMapel?.mataPelajaran?.nama ||
     detailUjian?.mataPelajaran?.nama ||
     "-";
 
@@ -1265,15 +1111,52 @@ export default function NilaiUjianGuruPage() {
     kelas?.nama ||
     "-";
 
-  const openDetail = (item) => {
-    setSelectedSiswa(item);
-    setShowDetailModal(true);
-  };
+  // ==========================================================
+  // NAVIGASI KE HALAMAN DETAIL
+  // ==========================================================
 
-  const closeDetail = () => {
-    setSelectedSiswa(null);
-    setShowDetailModal(false);
-  };
+  const openDetail = useCallback(
+    (item) => {
+      if (typeof window !== "undefined") {
+        sessionStorage.setItem(
+          "selectedNilaiDetail",
+          JSON.stringify({
+            siswa: item,
+            ujian: {
+              id: selectedUjianId,
+              nama: namaUjian,
+              jenis: jenisUjian,
+              mataPelajaran,
+              namaKelas,
+              jumlahSoal,
+              durasi,
+              tanggalMulai,
+            },
+          })
+        );
+      }
+
+      const sid = item?.siswaId || item?.id || "";
+      const uid = selectedUjianId || "";
+
+      router.push(
+        `/guru/nilai-ujian/detail?siswaId=${encodeURIComponent(
+          sid
+        )}&ujianId=${encodeURIComponent(uid)}`
+      );
+    },
+    [
+      router,
+      selectedUjianId,
+      namaUjian,
+      jenisUjian,
+      mataPelajaran,
+      namaKelas,
+      jumlahSoal,
+      durasi,
+      tanggalMulai,
+    ]
+  );
 
   // ==========================================================
   // LOADING
@@ -1313,8 +1196,8 @@ export default function NilaiUjianGuruPage() {
               </h2>
 
               <p className="theme-text-secondary mt-2 text-sm leading-6">
-                Sedang menyiapkan kelas, mata pelajaran,
-                dan data ujian Anda.
+                Sedang menyiapkan kelas, mata pelajaran, dan data
+                ujian Anda.
               </p>
             </div>
           </main>
@@ -1343,7 +1226,6 @@ export default function NilaiUjianGuruPage() {
 
         <main className="flex-1 overflow-y-auto p-4 md:p-6 lg:p-8">
           <div className="mx-auto w-full max-w-[1500px]">
-
             {/* =====================================================
                 HERO
             ====================================================== */}
@@ -1388,9 +1270,8 @@ export default function NilaiUjianGuruPage() {
                     </h1>
 
                     <p className="mt-3 max-w-2xl text-sm leading-6 text-white/80 md:text-base">
-                      Pantau hasil pengerjaan, perkembangan
-                      nilai, dan status siswa pada setiap
-                      ujian yang Anda kelola.
+                      Pantau hasil pengerjaan, perkembangan nilai, dan
+                      status siswa pada setiap ujian yang Anda kelola.
                     </p>
 
                     <div className="mt-5 flex flex-wrap gap-2">
@@ -1517,8 +1398,8 @@ export default function NilaiUjianGuruPage() {
                     </h2>
 
                     <p className="theme-text-secondary mt-1 text-xs leading-5">
-                      Pilih kelas dan mata pelajaran yang
-                      ingin Anda pantau.
+                      Pilih kelas dan mata pelajaran yang ingin Anda
+                      pantau.
                     </p>
                   </div>
                 </div>
@@ -1527,9 +1408,7 @@ export default function NilaiUjianGuruPage() {
                   <select
                     value={selectedKelasMapel?.id || ""}
                     onChange={(e) =>
-                      handleChangeKelasMapel(
-                        e.target.value
-                      )
+                      handleChangeKelasMapel(e.target.value)
                     }
                     className={`theme-input w-full appearance-none rounded-xl border px-4 py-3.5 pr-11 text-sm font-semibold outline-none transition ${themeFocus}`}
                   >
@@ -1539,10 +1418,7 @@ export default function NilaiUjianGuruPage() {
                       </option>
                     ) : (
                       kelasMapel.map((item) => (
-                        <option
-                          key={item.id}
-                          value={item.id}
-                        >
+                        <option key={item.id} value={item.id}>
                           {item.kelas?.nama ||
                             item.namaKelas ||
                             "Kelas"}{" "}
@@ -1575,8 +1451,7 @@ export default function NilaiUjianGuruPage() {
                     </h2>
 
                     <p className="theme-text-secondary mt-1 text-xs leading-5">
-                      Pilih ujian untuk melihat hasil nilai
-                      siswa.
+                      Pilih ujian untuk melihat hasil nilai siswa.
                     </p>
                   </div>
                 </div>
@@ -1585,35 +1460,21 @@ export default function NilaiUjianGuruPage() {
                   <select
                     value={selectedUjianId}
                     onChange={(e) =>
-                      setSelectedUjianId(
-                        e.target.value
-                      )
+                      setSelectedUjianId(e.target.value)
                     }
-                    disabled={
-                      loadingUjian ||
-                      ujian.length === 0
-                    }
+                    disabled={loadingUjian || ujian.length === 0}
                     className={`theme-input w-full appearance-none rounded-xl border px-4 py-3.5 pr-11 text-sm font-semibold outline-none transition ${themeFocus} disabled:cursor-not-allowed disabled:opacity-60`}
                   >
                     {loadingUjian ? (
-                      <option value="">
-                        Memuat ujian...
-                      </option>
+                      <option value="">Memuat ujian...</option>
                     ) : ujian.length === 0 ? (
-                      <option value="">
-                        Belum ada ujian
-                      </option>
+                      <option value="">Belum ada ujian</option>
                     ) : (
                       ujian.map((item) => {
-                        const id =
-                          item.id ||
-                          item.asesmenId;
+                        const id = item.id || item.asesmenId;
 
                         return (
-                          <option
-                            key={id}
-                            value={id}
-                          >
+                          <option key={id} value={id}>
                             {item.judul ||
                               item.nama ||
                               item.namaUjian ||
@@ -1633,27 +1494,26 @@ export default function NilaiUjianGuruPage() {
                 EMPTY EXAM
             ====================================================== */}
 
-            {!loadingUjian &&
-              ujian.length === 0 && (
+            {!loadingUjian && ujian.length === 0 && (
+              <div
+                className={`theme-card rounded-3xl border border-dashed ${themeNeutralBorder} p-12 text-center ${themeCardShadow}`}
+              >
                 <div
-                  className={`theme-card rounded-3xl border border-dashed ${themeNeutralBorder} p-12 text-center ${themeCardShadow}`}
+                  className={`theme-text-muted mx-auto flex h-16 w-16 items-center justify-center rounded-2xl ${themeNeutralSurface}`}
                 >
-                  <div
-                    className={`theme-text-muted mx-auto flex h-16 w-16 items-center justify-center rounded-2xl ${themeNeutralSurface}`}
-                  >
-                    <FileText className="h-7 w-7" />
-                  </div>
-
-                  <h3 className="theme-text mt-5 text-lg font-bold">
-                    Belum ada ujian
-                  </h3>
-
-                  <p className="theme-text-secondary mx-auto mt-2 max-w-md text-sm leading-6">
-                    Belum terdapat ujian pada kelas dan mata
-                    pelajaran yang dipilih.
-                  </p>
+                  <FileText className="h-7 w-7" />
                 </div>
-              )}
+
+                <h3 className="theme-text mt-5 text-lg font-bold">
+                  Belum ada ujian
+                </h3>
+
+                <p className="theme-text-secondary mx-auto mt-2 max-w-md text-sm leading-6">
+                  Belum terdapat ujian pada kelas dan mata pelajaran
+                  yang dipilih.
+                </p>
+              </div>
+            )}
 
             {selectedUjianId && currentUjian && (
               <>
@@ -1671,9 +1531,7 @@ export default function NilaiUjianGuruPage() {
                           <span
                             className={`inline-flex items-center rounded-full border ${themePrimarySoftBorder} ${themePrimarySoft} px-3 py-1 text-xs font-bold ${themePrimaryText}`}
                           >
-                            {getJenisLabel(
-                              jenisUjian
-                            )}
+                            {getJenisLabel(jenisUjian)}
                           </span>
 
                           {detailUjian?.dipublikasikan && (
@@ -1717,9 +1575,7 @@ export default function NilaiUjianGuruPage() {
                         >
                           <div className="theme-text-secondary flex items-center gap-2">
                             <BookOpen className="h-4 w-4" />
-                            <span className="text-xs">
-                              Soal
-                            </span>
+                            <span className="text-xs">Soal</span>
                           </div>
 
                           <p className="theme-text mt-1.5 text-lg font-bold">
@@ -1732,15 +1588,11 @@ export default function NilaiUjianGuruPage() {
                         >
                           <div className="theme-text-secondary flex items-center gap-2">
                             <Clock3 className="h-4 w-4" />
-                            <span className="text-xs">
-                              Durasi
-                            </span>
+                            <span className="text-xs">Durasi</span>
                           </div>
 
                           <p className="theme-text mt-1.5 text-sm font-bold">
-                            {formatDuration(
-                              durasi
-                            )}
+                            {formatDuration(durasi)}
                           </p>
                         </div>
 
@@ -1749,16 +1601,12 @@ export default function NilaiUjianGuruPage() {
                         >
                           <div className="theme-text-secondary flex items-center gap-2">
                             <CalendarDays className="h-4 w-4" />
-                            <span className="text-xs">
-                              Mulai
-                            </span>
+                            <span className="text-xs">Mulai</span>
                           </div>
 
                           <p className="theme-text mt-1.5 text-xs font-bold">
                             {tanggalMulai
-                              ? formatDate(
-                                  tanggalMulai
-                                )
+                              ? formatDate(tanggalMulai)
                               : "-"}
                           </p>
                         </div>
@@ -1770,9 +1618,7 @@ export default function NilaiUjianGuruPage() {
                             className={`flex items-center gap-2 ${themePrimaryText}`}
                           >
                             <Users className="h-4 w-4" />
-                            <span className="text-xs">
-                              Siswa
-                            </span>
+                            <span className="text-xs">Siswa</span>
                           </div>
 
                           <p
@@ -1835,9 +1681,7 @@ export default function NilaiUjianGuruPage() {
                     description="Dari siswa yang mengerjakan"
                     icon={BarChart3}
                     iconClass={`${themeInfoSurface} text-[var(--color-info)]`}
-                    valueClass={getScoreClasses(
-                      statistics.rataRata
-                    )}
+                    valueClass={getScoreClasses(statistics.rataRata)}
                   />
                 </section>
 
@@ -1860,9 +1704,7 @@ export default function NilaiUjianGuruPage() {
                             statistics.nilaiTertinggi
                           )}`}
                         >
-                          {statistics.nilaiTertinggi.toFixed(
-                            0
-                          )}
+                          {statistics.nilaiTertinggi.toFixed(0)}
                         </p>
                       </div>
 
@@ -1888,9 +1730,7 @@ export default function NilaiUjianGuruPage() {
                             statistics.nilaiTerendah
                           )}`}
                         >
-                          {statistics.nilaiTerendah.toFixed(
-                            0
-                          )}
+                          {statistics.nilaiTerendah.toFixed(0)}
                         </p>
                       </div>
 
@@ -1980,9 +1820,7 @@ export default function NilaiUjianGuruPage() {
                           <p className="theme-text-secondary mt-0.5 text-xs">
                             Menampilkan{" "}
                             <span className="theme-text font-semibold">
-                              {
-                                filteredNilaiSiswa.length
-                              }
+                              {filteredNilaiSiswa.length}
                             </span>{" "}
                             dari{" "}
                             <span className="theme-text font-semibold">
@@ -2001,11 +1839,7 @@ export default function NilaiUjianGuruPage() {
                         <input
                           type="text"
                           value={search}
-                          onChange={(e) =>
-                            setSearch(
-                              e.target.value
-                            )
-                          }
+                          onChange={(e) => setSearch(e.target.value)}
                           placeholder="Cari nama, NIS, NISN..."
                           className={`theme-input w-full rounded-xl border py-2.5 pl-10 pr-4 text-sm outline-none transition placeholder:text-[var(--color-text-placeholder)] ${themeFocus}`}
                         />
@@ -2017,18 +1851,12 @@ export default function NilaiUjianGuruPage() {
                         <select
                           value={statusFilter}
                           onChange={(e) =>
-                            setStatusFilter(
-                              e.target.value
-                            )
+                            setStatusFilter(e.target.value)
                           }
                           className={`theme-input w-full appearance-none rounded-xl border py-2.5 pl-10 pr-10 text-sm font-medium outline-none transition ${themeFocus}`}
                         >
-                          <option value="semua">
-                            Semua Status
-                          </option>
-                          <option value="selesai">
-                            Selesai
-                          </option>
+                          <option value="semua">Semua Status</option>
+                          <option value="selesai">Selesai</option>
                           <option value="berlangsung">
                             Berlangsung
                           </option>
@@ -2046,16 +1874,10 @@ export default function NilaiUjianGuruPage() {
                       <div className="relative">
                         <select
                           value={sortBy}
-                          onChange={(e) =>
-                            setSortBy(
-                              e.target.value
-                            )
-                          }
+                          onChange={(e) => setSortBy(e.target.value)}
                           className={`theme-input w-full appearance-none rounded-xl border px-4 py-2.5 pr-10 text-sm font-medium outline-none transition ${themeFocus}`}
                         >
-                          <option value="nama">
-                            Nama A-Z
-                          </option>
+                          <option value="nama">Nama A-Z</option>
 
                           <option value="nilai_tertinggi">
                             Nilai Tertinggi
@@ -2065,9 +1887,7 @@ export default function NilaiUjianGuruPage() {
                             Nilai Terendah
                           </option>
 
-                          <option value="status">
-                            Status
-                          </option>
+                          <option value="status">Status</option>
                         </select>
 
                         <ChevronDown className="theme-text-muted pointer-events-none absolute right-3.5 top-1/2 h-4 w-4 -translate-y-1/2" />
@@ -2095,8 +1915,7 @@ export default function NilaiUjianGuruPage() {
                     </h3>
 
                     <p className="theme-text-secondary mt-2 text-sm">
-                      Sedang mengambil hasil pengerjaan
-                      siswa...
+                      Sedang mengambil hasil pengerjaan siswa...
                     </p>
                   </div>
                 ) : filteredNilaiSiswa.length === 0 ? (
@@ -2114,9 +1933,8 @@ export default function NilaiUjianGuruPage() {
                     </h3>
 
                     <p className="theme-text-secondary mx-auto mt-2 max-w-lg text-sm leading-6">
-                      Tidak ada data siswa yang sesuai
-                      dengan pencarian atau filter yang
-                      dipilih.
+                      Tidak ada data siswa yang sesuai dengan
+                      pencarian atau filter yang dipilih.
                     </p>
                   </div>
                 ) : (
@@ -2141,211 +1959,171 @@ export default function NilaiUjianGuruPage() {
                                 "Status",
                                 "Waktu Pengerjaan",
                                 "Aksi",
-                              ].map(
-                                (
-                                  label,
-                                  index
-                                ) => (
-                                  <th
-                                    key={label}
-                                    className={`theme-text-secondary px-6 py-4 text-[11px] font-bold uppercase tracking-wider ${
-                                      index ===
-                                        2 ||
-                                      index ===
-                                        3 ||
-                                      index ===
-                                        5
-                                        ? "text-center"
-                                        : "text-left"
-                                    }`}
-                                  >
-                                    {label}
-                                  </th>
-                                )
-                              )}
+                              ].map((label, index) => (
+                                <th
+                                  key={label}
+                                  className={`theme-text-secondary px-6 py-4 text-[11px] font-bold uppercase tracking-wider ${
+                                    index === 2 ||
+                                    index === 3 ||
+                                    index === 5
+                                      ? "text-center"
+                                      : "text-left"
+                                  }`}
+                                >
+                                  {label}
+                                </th>
+                              ))}
                             </tr>
                           </thead>
 
                           <tbody>
-                            {filteredNilaiSiswa.map(
-                              (
-                                item,
-                                index
-                              ) => {
-                                const score =
-                                  getNilai(item);
+                            {filteredNilaiSiswa.map((item, index) => {
+                              const score = getNilai(item);
+                              const status = getStatus(item);
 
-                                const status =
-                                  getStatus(item);
-
-                                return (
-                                  <tr
-                                    key={
-                                      item.id ||
-                                      item.siswaId ||
-                                      `row-${index}`
-                                    }
-                                    className={`group border-b ${themeDivider} transition ${themeNeutralHover}`}
-                                  >
-                                    <td className="px-6 py-4">
-                                      <div className="flex items-center gap-3">
-                                        <div
-                                          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} text-sm font-bold ${themePrimaryText}`}
-                                        >
-                                          {String(
-                                            item.namaLengkap ||
-                                              "S"
-                                          )
-                                            .charAt(
-                                              0
-                                            )
-                                            .toUpperCase()}
-                                        </div>
-
-                                        <div className="min-w-0">
-                                          <p className="theme-text max-w-[230px] truncate text-sm font-bold">
-                                            {item.namaLengkap ||
-                                              "Nama siswa belum tersedia"}
-                                          </p>
-
-                                          <p className="theme-text-muted mt-1 text-xs">
-                                            {item.siswaId
-                                              ? `ID: ${item.siswaId}`
-                                              : "ID tidak tersedia"}
-                                          </p>
-                                        </div>
-                                      </div>
-                                    </td>
-
-                                    <td className="px-6 py-4">
-                                      <div className="space-y-1">
-                                        <p className="theme-text-secondary text-sm font-medium">
-                                          NIS:{" "}
-                                          <span className="theme-text font-semibold">
-                                            {item.nis ||
-                                              "-"}
-                                          </span>
-                                        </p>
-
-                                        <p className="theme-text-secondary text-xs">
-                                          NISN:{" "}
-                                          {item.nisn ||
-                                            "-"}
-                                        </p>
-                                      </div>
-                                    </td>
-
-                                    <td className="px-6 py-4 text-center">
-                                      {status ===
-                                      "belum_mengerjakan" ? (
-                                        <span className="theme-text-muted text-lg font-semibold">
-                                          —
-                                        </span>
-                                      ) : (
-                                        <div>
-                                          <span
-                                            className={`text-2xl font-bold ${getScoreClasses(
-                                              score
-                                            )}`}
-                                          >
-                                            {score.toFixed(
-                                              0
-                                            )}
-                                          </span>
-
-                                          <p className="theme-text-muted mt-0.5 text-[10px] font-medium uppercase tracking-wide">
-                                            nilai
-                                          </p>
-                                        </div>
-                                      )}
-                                    </td>
-
-                                    <td className="px-6 py-4 text-center">
-                                      <span
-                                        className={`inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-semibold ${getStatusClasses(
-                                          status
-                                        )}`}
+                              return (
+                                <tr
+                                  key={
+                                    item.id ||
+                                    item.siswaId ||
+                                    `row-${index}`
+                                  }
+                                  className={`group border-b ${themeDivider} transition ${themeNeutralHover}`}
+                                >
+                                  <td className="px-6 py-4">
+                                    <div className="flex items-center gap-3">
+                                      <div
+                                        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} text-sm font-bold ${themePrimaryText}`}
                                       >
-                                        {getStatusLabel(
-                                          status
-                                        )}
-                                      </span>
-                                    </td>
+                                        {String(
+                                          item.namaLengkap || "S"
+                                        )
+                                          .charAt(0)
+                                          .toUpperCase()}
+                                      </div>
 
-                                    <td className="px-6 py-4">
-                                      {getStartTime(
-                                        item
-                                      ) ? (
-                                        <div className="space-y-2">
+                                      <div className="min-w-0">
+                                        <p className="theme-text max-w-[230px] truncate text-sm font-bold">
+                                          {item.namaLengkap ||
+                                            "Nama siswa belum tersedia"}
+                                        </p>
+
+                                        <p className="theme-text-muted mt-1 text-xs">
+                                          {item.siswaId
+                                            ? `ID: ${item.siswaId}`
+                                            : "ID tidak tersedia"}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  </td>
+
+                                  <td className="px-6 py-4">
+                                    <div className="space-y-1">
+                                      <p className="theme-text-secondary text-sm font-medium">
+                                        NIS:{" "}
+                                        <span className="theme-text font-semibold">
+                                          {item.nis || "-"}
+                                        </span>
+                                      </p>
+
+                                      <p className="theme-text-secondary text-xs">
+                                        NISN: {item.nisn || "-"}
+                                      </p>
+                                    </div>
+                                  </td>
+
+                                  <td className="px-6 py-4 text-center">
+                                    {status ===
+                                    "belum_mengerjakan" ? (
+                                      <span className="theme-text-muted text-lg font-semibold">
+                                        —
+                                      </span>
+                                    ) : (
+                                      <div>
+                                        <span
+                                          className={`text-2xl font-bold ${getScoreClasses(
+                                            score
+                                          )}`}
+                                        >
+                                          {score.toFixed(0)}
+                                        </span>
+
+                                        <p className="theme-text-muted mt-0.5 text-[10px] font-medium uppercase tracking-wide">
+                                          nilai
+                                        </p>
+                                      </div>
+                                    )}
+                                  </td>
+
+                                  <td className="px-6 py-4 text-center">
+                                    <span
+                                      className={`inline-flex items-center rounded-full border px-3 py-1.5 text-xs font-semibold ${getStatusClasses(
+                                        status
+                                      )}`}
+                                    >
+                                      {getStatusLabel(status)}
+                                    </span>
+                                  </td>
+
+                                  <td className="px-6 py-4">
+                                    {getStartTime(item) ? (
+                                      <div className="space-y-2">
+                                        <div className="flex items-start gap-2">
+                                          <Clock3
+                                            className={`mt-0.5 h-3.5 w-3.5 shrink-0 ${themePrimaryText}`}
+                                          />
+
+                                          <div>
+                                            <p className="theme-text-muted text-[10px] font-bold uppercase tracking-wide">
+                                              Mulai
+                                            </p>
+
+                                            <p className="theme-text-secondary mt-0.5 text-xs font-medium">
+                                              {formatDateTime(
+                                                getStartTime(item)
+                                              )}
+                                            </p>
+                                          </div>
+                                        </div>
+
+                                        {getEndTime(item) && (
                                           <div className="flex items-start gap-2">
-                                            <Clock3
-                                              className={`mt-0.5 h-3.5 w-3.5 shrink-0 ${themePrimaryText}`}
-                                            />
+                                            <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--color-success)]" />
 
                                             <div>
                                               <p className="theme-text-muted text-[10px] font-bold uppercase tracking-wide">
-                                                Mulai
+                                                Selesai
                                               </p>
 
                                               <p className="theme-text-secondary mt-0.5 text-xs font-medium">
                                                 {formatDateTime(
-                                                  getStartTime(
-                                                    item
-                                                  )
+                                                  getEndTime(item)
                                                 )}
                                               </p>
                                             </div>
                                           </div>
+                                        )}
+                                      </div>
+                                    ) : (
+                                      <span className="theme-text-muted text-xs">
+                                        Belum ada percobaan
+                                      </span>
+                                    )}
+                                  </td>
 
-                                          {getEndTime(
-                                            item
-                                          ) && (
-                                            <div className="flex items-start gap-2">
-                                              <CheckCircle2
-                                                className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[var(--color-success)]"
-                                              />
-
-                                              <div>
-                                                <p className="theme-text-muted text-[10px] font-bold uppercase tracking-wide">
-                                                  Selesai
-                                                </p>
-
-                                                <p className="theme-text-secondary mt-0.5 text-xs font-medium">
-                                                  {formatDateTime(
-                                                    getEndTime(
-                                                      item
-                                                    )
-                                                  )}
-                                                </p>
-                                              </div>
-                                            </div>
-                                          )}
-                                        </div>
-                                      ) : (
-                                        <span className="theme-text-muted text-xs">
-                                          Belum ada percobaan
-                                        </span>
-                                      )}
-                                    </td>
-
-                                    <td className="px-6 py-4 text-center">
-                                      <button
-                                        type="button"
-                                        onClick={() =>
-                                          openDetail(
-                                            item
-                                          )
-                                        }
-                                        className={`theme-card inline-flex items-center gap-2 rounded-xl border ${themeNeutralBorder} px-3.5 py-2 text-xs font-bold theme-text-secondary ${themeSmallShadow} transition hover:${themePrimaryText} ${themePrimarySoft}`}
-                                      >
-                                        <Eye className="h-4 w-4" />
-                                        Detail
-                                      </button>
-                                    </td>
-                                  </tr>
-                                );
-                              }
-                            )}
+                                  <td className="px-6 py-4 text-center">
+                                    <button
+                                      type="button"
+                                      onClick={() => openDetail(item)}
+                                      className={`theme-card inline-flex items-center gap-2 rounded-xl border ${themeNeutralBorder} px-3.5 py-2 text-xs font-bold theme-text-secondary ${themeSmallShadow} transition hover:${themePrimaryText} ${themePrimarySoft}`}
+                                    >
+                                      <Eye className="h-4 w-4" />
+                                      Detail
+                                    </button>
+                                  </td>
+                                </tr>
+                              );
+                            })}
                           </tbody>
                         </table>
                       </div>
@@ -2356,16 +2134,14 @@ export default function NilaiUjianGuruPage() {
                         <p className="theme-text-secondary text-xs">
                           Menampilkan{" "}
                           <span className="theme-text font-semibold">
-                            {
-                              filteredNilaiSiswa.length
-                            }
+                            {filteredNilaiSiswa.length}
                           </span>{" "}
                           siswa
                         </p>
 
                         <p className="theme-text-muted text-xs">
-                          Data nilai berasal dari hasil
-                          pengerjaan ujian
+                          Data nilai berasal dari hasil pengerjaan
+                          ujian
                         </p>
                       </div>
                     </div>
@@ -2375,173 +2151,145 @@ export default function NilaiUjianGuruPage() {
                     ================================================== */}
 
                     <div className="space-y-4 md:hidden">
-                      {filteredNilaiSiswa.map(
-                        (item, index) => {
-                          const score =
-                            getNilai(item);
+                      {filteredNilaiSiswa.map((item, index) => {
+                        const score = getNilai(item);
+                        const status = getStatus(item);
 
-                          const status =
-                            getStatus(item);
-
-                          return (
-                            <div
-                              key={
-                                item.id ||
-                                item.siswaId ||
-                                `mobile-${index}`
-                              }
-                              className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
-                            >
-                              <div className="p-5">
-                                <div className="flex items-start justify-between gap-3">
-                                  <div className="flex min-w-0 items-center gap-3">
-                                    <div
-                                      className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} font-bold ${themePrimaryText}`}
-                                    >
-                                      {String(
-                                        item.namaLengkap ||
-                                          "S"
-                                      )
-                                        .charAt(
-                                          0
-                                        )
-                                        .toUpperCase()}
-                                    </div>
-
-                                    <div className="min-w-0">
-                                      <h3 className="theme-text truncate text-sm font-bold">
-                                        {item.namaLengkap ||
-                                          "Nama siswa belum tersedia"}
-                                      </h3>
-
-                                      <p className="theme-text-secondary mt-1 text-xs">
-                                        NIS:{" "}
-                                        {item.nis ||
-                                          "-"}
-                                      </p>
-                                    </div>
+                        return (
+                          <div
+                            key={
+                              item.id ||
+                              item.siswaId ||
+                              `mobile-${index}`
+                            }
+                            className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
+                          >
+                            <div className="p-5">
+                              <div className="flex items-start justify-between gap-3">
+                                <div className="flex min-w-0 items-center gap-3">
+                                  <div
+                                    className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} font-bold ${themePrimaryText}`}
+                                  >
+                                    {String(
+                                      item.namaLengkap || "S"
+                                    )
+                                      .charAt(0)
+                                      .toUpperCase()}
                                   </div>
 
-                                  <span
-                                    className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-bold ${getStatusClasses(
-                                      status
-                                    )}`}
-                                  >
-                                    {getStatusLabel(
-                                      status
-                                    )}
-                                  </span>
+                                  <div className="min-w-0">
+                                    <h3 className="theme-text truncate text-sm font-bold">
+                                      {item.namaLengkap ||
+                                        "Nama siswa belum tersedia"}
+                                    </h3>
+
+                                    <p className="theme-text-secondary mt-1 text-xs">
+                                      NIS: {item.nis || "-"}
+                                    </p>
+                                  </div>
                                 </div>
 
-                                <div className="mt-5 grid grid-cols-2 gap-3">
-                                  <div
-                                    className={`rounded-xl ${themeNeutralSurface} p-4 text-center`}
+                                <span
+                                  className={`shrink-0 rounded-full border px-2.5 py-1 text-[10px] font-bold ${getStatusClasses(
+                                    status
+                                  )}`}
+                                >
+                                  {getStatusLabel(status)}
+                                </span>
+                              </div>
+
+                              <div className="mt-5 grid grid-cols-2 gap-3">
+                                <div
+                                  className={`rounded-xl ${themeNeutralSurface} p-4 text-center`}
+                                >
+                                  <p className="theme-text-muted text-[11px] font-medium uppercase tracking-wide">
+                                    Nilai
+                                  </p>
+
+                                  <p
+                                    className={`mt-1 text-3xl font-bold ${getScoreClasses(
+                                      score
+                                    )}`}
                                   >
-                                    <p className="theme-text-muted text-[11px] font-medium uppercase tracking-wide">
-                                      Nilai
-                                    </p>
-
-                                    <p
-                                      className={`mt-1 text-3xl font-bold ${getScoreClasses(
-                                        score
-                                      )}`}
-                                    >
-                                      {status ===
-                                      "belum_mengerjakan"
-                                        ? "-"
-                                        : score.toFixed(
-                                            0
-                                          )}
-                                    </p>
-                                  </div>
-
-                                  <div
-                                    className={`rounded-xl ${themeNeutralSurface} p-4`}
-                                  >
-                                    <p className="theme-text-muted text-[11px] font-medium uppercase tracking-wide">
-                                      NISN
-                                    </p>
-
-                                    <p className="theme-text mt-2 truncate text-sm font-bold">
-                                      {item.nisn ||
-                                        "-"}
-                                    </p>
-                                  </div>
+                                    {status === "belum_mengerjakan"
+                                      ? "-"
+                                      : score.toFixed(0)}
+                                  </p>
                                 </div>
 
                                 <div
-                                  className={`mt-3 rounded-xl border ${themeNeutralBorder} p-4`}
+                                  className={`rounded-xl ${themeNeutralSurface} p-4`}
                                 >
-                                  <div className="theme-text-secondary flex items-center gap-2">
-                                    <Clock3
-                                      className={`h-4 w-4 ${themePrimaryText}`}
-                                    />
+                                  <p className="theme-text-muted text-[11px] font-medium uppercase tracking-wide">
+                                    NISN
+                                  </p>
 
-                                    <span className="text-xs font-semibold">
-                                      Waktu Pengerjaan
-                                    </span>
-                                  </div>
+                                  <p className="theme-text mt-2 truncate text-sm font-bold">
+                                    {item.nisn || "-"}
+                                  </p>
+                                </div>
+                              </div>
 
-                                  {getStartTime(
-                                    item
-                                  ) ? (
-                                    <div className="mt-3 space-y-2">
-                                      <div className="flex justify-between gap-3">
-                                        <span className="theme-text-muted text-xs">
-                                          Mulai
-                                        </span>
+                              <div
+                                className={`mt-3 rounded-xl border ${themeNeutralBorder} p-4`}
+                              >
+                                <div className="theme-text-secondary flex items-center gap-2">
+                                  <Clock3
+                                    className={`h-4 w-4 ${themePrimaryText}`}
+                                  />
 
-                                        <span className="theme-text-secondary text-right text-xs font-medium">
-                                          {formatDateTime(
-                                            getStartTime(
-                                              item
-                                            )
-                                          )}
-                                        </span>
-                                      </div>
-
-                                      <div className="flex justify-between gap-3">
-                                        <span className="theme-text-muted text-xs">
-                                          Selesai
-                                        </span>
-
-                                        <span className="theme-text-secondary text-right text-xs font-medium">
-                                          {getEndTime(
-                                            item
-                                          )
-                                            ? formatDateTime(
-                                                getEndTime(
-                                                  item
-                                                )
-                                              )
-                                            : "Belum selesai"}
-                                        </span>
-                                      </div>
-                                    </div>
-                                  ) : (
-                                    <p className="theme-text-muted mt-2 text-xs">
-                                      Belum ada percobaan
-                                    </p>
-                                  )}
+                                  <span className="text-xs font-semibold">
+                                    Waktu Pengerjaan
+                                  </span>
                                 </div>
 
-                                <button
-                                  type="button"
-                                  onClick={() =>
-                                    openDetail(
-                                      item
-                                    )
-                                  }
-                                  className={`theme-card mt-4 flex w-full items-center justify-center gap-2 rounded-xl border ${themeNeutralBorder} px-4 py-3 text-sm font-bold theme-text-secondary transition hover:${themePrimaryText} ${themePrimarySoft}`}
-                                >
-                                  <Eye className="h-4 w-4" />
-                                  Lihat Detail
-                                </button>
+                                {getStartTime(item) ? (
+                                  <div className="mt-3 space-y-2">
+                                    <div className="flex justify-between gap-3">
+                                      <span className="theme-text-muted text-xs">
+                                        Mulai
+                                      </span>
+
+                                      <span className="theme-text-secondary text-right text-xs font-medium">
+                                        {formatDateTime(
+                                          getStartTime(item)
+                                        )}
+                                      </span>
+                                    </div>
+
+                                    <div className="flex justify-between gap-3">
+                                      <span className="theme-text-muted text-xs">
+                                        Selesai
+                                      </span>
+
+                                      <span className="theme-text-secondary text-right text-xs font-medium">
+                                        {getEndTime(item)
+                                          ? formatDateTime(
+                                              getEndTime(item)
+                                            )
+                                          : "Belum selesai"}
+                                      </span>
+                                    </div>
+                                  </div>
+                                ) : (
+                                  <p className="theme-text-muted mt-2 text-xs">
+                                    Belum ada percobaan
+                                  </p>
+                                )}
                               </div>
+
+                              <button
+                                type="button"
+                                onClick={() => openDetail(item)}
+                                className={`theme-card mt-4 flex w-full items-center justify-center gap-2 rounded-xl border ${themeNeutralBorder} px-4 py-3 text-sm font-bold theme-text-secondary transition hover:${themePrimaryText} ${themePrimarySoft}`}
+                              >
+                                <Eye className="h-4 w-4" />
+                                Lihat Detail
+                              </button>
                             </div>
-                          );
-                        }
-                      )}
+                          </div>
+                        );
+                      })}
                     </div>
                   </>
                 )}
@@ -2550,318 +2298,6 @@ export default function NilaiUjianGuruPage() {
           </div>
         </main>
       </div>
-
-      {/* ==========================================================
-          DETAIL MODAL
-      =========================================================== */}
-
-      {showDetailModal && selectedSiswa && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-[color-mix(in_srgb,var(--color-text)_55%,transparent)] p-4 backdrop-blur-sm"
-          onClick={closeDetail}
-        >
-          <div
-            className={`theme-card max-h-[92vh] w-full max-w-2xl overflow-hidden rounded-3xl ${themeCardShadow}`}
-            onClick={(e) =>
-              e.stopPropagation()
-            }
-          >
-            <div
-              className={`flex items-start justify-between border-b ${themeDivider} ${themeNeutralSurface} p-5 md:p-6`}
-            >
-              <div className="flex min-w-0 items-center gap-3">
-                <div
-                  className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft} ${themePrimaryText}`}
-                >
-                  <Award className="h-5 w-5" />
-                </div>
-
-                <div className="min-w-0">
-                  <h2 className="theme-text text-lg font-bold">
-                    Detail Nilai
-                  </h2>
-
-                  <p className="theme-text-secondary mt-0.5 text-xs">
-                    Hasil pengerjaan siswa
-                  </p>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                onClick={closeDetail}
-                className={`theme-text-muted flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition ${themeNeutralHover} hover:${themePrimaryText}`}
-              >
-                <X className="h-5 w-5" />
-              </button>
-            </div>
-
-            <div className="max-h-[calc(92vh-140px)] overflow-y-auto p-5 md:p-6">
-              <div
-                className={`theme-card rounded-2xl border ${themeNeutralBorder} p-4 ${themeSmallShadow}`}
-              >
-                <div className="flex items-center gap-4">
-                  <div
-                    className={`flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl ${themePrimarySoft} text-lg font-bold ${themePrimaryText}`}
-                  >
-                    {String(
-                      selectedSiswa.namaLengkap ||
-                        "S"
-                    )
-                      .charAt(0)
-                      .toUpperCase()}
-                  </div>
-
-                  <div className="min-w-0">
-                    <h3 className="theme-text truncate text-lg font-bold">
-                      {selectedSiswa.namaLengkap ||
-                        "Nama siswa belum tersedia"}
-                    </h3>
-
-                    <div className="theme-text-secondary mt-1 flex flex-wrap gap-x-4 gap-y-1 text-xs">
-                      <span>
-                        NIS:{" "}
-                        {selectedSiswa.nis || "-"}
-                      </span>
-
-                      <span>
-                        NISN:{" "}
-                        {selectedSiswa.nisn || "-"}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <div
-                  className={`rounded-2xl border ${themeNeutralBorder} ${themeNeutralSurface} p-5 text-center`}
-                >
-                  <p className="theme-text-muted text-xs font-bold uppercase tracking-wider">
-                    Nilai Akhir
-                  </p>
-
-                  <p
-                    className={`mt-3 text-5xl font-bold ${getScoreClasses(
-                      getNilai(
-                        selectedSiswa
-                      )
-                    )}`}
-                  >
-                    {getStatus(
-                      selectedSiswa
-                    ) === "belum_mengerjakan"
-                      ? "-"
-                      : getNilai(
-                          selectedSiswa
-                        ).toFixed(0)}
-                  </p>
-
-                  <span
-                    className={`mt-3 inline-flex rounded-full border px-3 py-1.5 text-xs font-semibold ${getStatusClasses(
-                      getStatus(
-                        selectedSiswa
-                      )
-                    )}`}
-                  >
-                    {getStatusLabel(
-                      getStatus(
-                        selectedSiswa
-                      )
-                    )}
-                  </span>
-                </div>
-
-                <div
-                  className={`theme-card rounded-2xl border ${themeNeutralBorder} p-5`}
-                >
-                  <p className="theme-text text-sm font-bold">
-                    Ringkasan Jawaban
-                  </p>
-
-                  <div className="mt-5 space-y-4">
-                    <div className="flex items-center justify-between">
-                      <span className="theme-text-secondary text-sm">
-                        Benar
-                      </span>
-
-                      <span
-                        className={`rounded-lg ${themeSuccessSurface} px-2.5 py-1 text-sm font-bold text-[var(--color-success)]`}
-                      >
-                        {getBenar(
-                          selectedSiswa
-                        )}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <span className="theme-text-secondary text-sm">
-                        Salah
-                      </span>
-
-                      <span
-                        className={`rounded-lg ${themeDangerSurface} px-2.5 py-1 text-sm font-bold theme-danger`}
-                      >
-                        {getSalah(
-                          selectedSiswa
-                        )}
-                      </span>
-                    </div>
-
-                    <div className="flex items-center justify-between">
-                      <span className="theme-text-secondary text-sm">
-                        Dilewati
-                      </span>
-
-                      <span
-                        className={`rounded-lg ${themeNeutralSurface} px-2.5 py-1 text-sm font-bold theme-text-secondary`}
-                      >
-                        {getLewati(
-                          selectedSiswa
-                        )}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              {/* INFORMASI UJIAN */}
-
-              <div
-                className={`theme-card mt-4 rounded-2xl border ${themeNeutralBorder} p-5`}
-              >
-                <p className="theme-text text-sm font-bold">
-                  Informasi Ujian
-                </p>
-
-                <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  {[
-                    ["Ujian", namaUjian],
-                    [
-                      "Mata Pelajaran",
-                      mataPelajaran,
-                    ],
-                    ["Kelas", namaKelas],
-                    [
-                      "Jenis",
-                      getJenisLabel(
-                        jenisUjian
-                      ),
-                    ],
-                  ].map(
-                    ([label, value]) => (
-                      <div key={label}>
-                        <p className="theme-text-muted text-[11px] font-medium uppercase tracking-wide">
-                          {label}
-                        </p>
-
-                        <p className="theme-text mt-1 text-sm font-semibold">
-                          {value}
-                        </p>
-                      </div>
-                    )
-                  )}
-                </div>
-              </div>
-
-              {/* WAKTU */}
-
-              <div
-                className={`theme-card mt-4 rounded-2xl border ${themeNeutralBorder} p-5`}
-              >
-                <h3 className="theme-text flex items-center gap-2 text-sm font-bold">
-                  <Clock3
-                    className={`h-4 w-4 ${themePrimaryText}`}
-                  />
-                  Waktu Pengerjaan
-                </h3>
-
-                <div className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2">
-                  <div
-                    className={`rounded-xl ${themeNeutralSurface} p-4`}
-                  >
-                    <p className="theme-text-muted text-[11px] font-medium uppercase tracking-wide">
-                      Waktu Mulai
-                    </p>
-
-                    <p className="theme-text mt-2 text-sm font-semibold">
-                      {getStartTime(
-                        selectedSiswa
-                      )
-                        ? formatDateTime(
-                            getStartTime(
-                              selectedSiswa
-                            )
-                          )
-                        : "Belum mulai"}
-                    </p>
-                  </div>
-
-                  <div
-                    className={`rounded-xl ${themeNeutralSurface} p-4`}
-                  >
-                    <p className="theme-text-muted text-[11px] font-medium uppercase tracking-wide">
-                      Waktu Selesai
-                    </p>
-
-                    <p className="theme-text mt-2 text-sm font-semibold">
-                      {getEndTime(
-                        selectedSiswa
-                      )
-                        ? formatDateTime(
-                            getEndTime(
-                              selectedSiswa
-                            )
-                          )
-                        : "Belum selesai"}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* HASIL */}
-
-              {getHasil(selectedSiswa) && (
-                <div
-                  className={`mt-4 rounded-2xl border ${themeInfoBorder} ${themeInfoSurface} p-4`}
-                >
-                  <div className="flex items-start gap-3">
-                    <div
-                      className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${theme-card} ${themeInfoBorder} text-[var(--color-info)]`}
-                    >
-                      <CheckCircle2 className="h-4 w-4" />
-                    </div>
-
-                    <div>
-                      <p className="text-[var(--color-info)] text-sm font-bold">
-                        Hasil ujian tersimpan
-                      </p>
-
-                      <p className="theme-text-secondary mt-1 text-xs leading-5">
-                        Nilai yang ditampilkan menggunakan
-                        hasil yang dihitung dan dikirim oleh
-                        backend.
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div
-              className={`flex justify-end border-t ${themeDivider} ${themeNeutralSurface} p-4 md:p-5`}
-            >
-              <button
-                type="button"
-                onClick={closeDetail}
-                className={`rounded-xl ${themePrimaryGradient} px-5 py-2.5 text-sm font-bold text-[var(--color-card)] ${themePrimaryShadow} transition hover:opacity-90`}
-              >
-                Tutup
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

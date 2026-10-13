@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState, useEffect } from "react";
@@ -26,16 +27,15 @@ import {
 } from "lucide-react";
 
 import { getUsers } from "@/services/user.service";
+import { getKelasMapel } from "@/services/kelasMapel.service";
+import { apiFetch } from "@/lib/api";
 
 // =========================================================
-// INITIALS
+// HELPERS
 // =========================================================
 
 const getInitials = (nama = "") => {
-  const parts = String(nama)
-    .trim()
-    .split(/\s+/)
-    .filter(Boolean);
+  const parts = String(nama).trim().split(/\s+/).filter(Boolean);
 
   if (parts.length >= 2) {
     return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
@@ -43,10 +43,6 @@ const getInitials = (nama = "") => {
 
   return String(nama).substring(0, 2).toUpperCase();
 };
-
-// =========================================================
-// AVATAR COLOR
-// =========================================================
 
 const getAvatarColor = (nama = "") => {
   const colors = [
@@ -63,21 +59,13 @@ const getAvatarColor = (nama = "") => {
   return colors[String(nama).length % colors.length];
 };
 
-// =========================================================
-// FORMAT DATE
-// =========================================================
-
 const formatDate = (value) => {
-  if (!value || value === "-") {
-    return "-";
-  }
+  if (!value || value === "-") return "-";
 
   try {
     const date = new Date(value);
 
-    if (Number.isNaN(date.getTime())) {
-      return value;
-    }
+    if (Number.isNaN(date.getTime())) return value;
 
     return date.toLocaleDateString("id-ID", {
       day: "2-digit",
@@ -154,15 +142,68 @@ function StatCard({
         </div>
 
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border theme-card-soft">
-          <Icon
-            size={19}
-            className={iconClass}
-            strokeWidth={1.8}
-          />
+          <Icon size={19} className={iconClass} strokeWidth={1.8} />
         </div>
       </div>
     </div>
   );
+}
+
+// =========================================================
+// NORMALIZE RESPONSE
+// =========================================================
+
+function extractList(response) {
+  const candidates = [
+    response?.data?.data,
+    response?.data?.users,
+    response?.data?.items,
+    response?.data,
+    response?.users,
+    response?.items,
+  ];
+
+  return candidates.find(Array.isArray) || [];
+}
+
+function extractObject(response) {
+  const candidates = [
+    response?.data?.data,
+    response?.data?.kelas,
+    response?.data,
+  ];
+
+  return (
+    candidates.find(
+      (item) =>
+        item &&
+        typeof item === "object" &&
+        !Array.isArray(item)
+    ) || null
+  );
+}
+
+function hitungRataKehadiran(dataAbsensi) {
+  if (!Array.isArray(dataAbsensi) || dataAbsensi.length === 0) {
+    return "-";
+  }
+
+  const statusValid = ["hadir", "izin", "sakit", "alpha"];
+
+  const dataValid = dataAbsensi.filter((item) =>
+    statusValid.includes(
+      String(item.status || "").toLowerCase()
+    )
+  );
+
+  if (dataValid.length === 0) return "-";
+
+  const jumlahHadir = dataValid.filter(
+    (item) =>
+      String(item.status || "").toLowerCase() === "hadir"
+  ).length;
+
+  return `${((jumlahHadir / dataValid.length) * 100).toFixed(1)}%`;
 }
 
 // =========================================================
@@ -180,14 +221,26 @@ export default function DetailGuruPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
+  const [mapelGuru, setMapelGuru] = useState([]);
+  const [kelasDiampu, setKelasDiampu] = useState("-");
+  const [totalSiswa, setTotalSiswa] = useState("-");
+  const [loadingStatistik, setLoadingStatistik] = useState(true);
+  const [rataKehadiran, setRataKehadiran] = useState("-");
+
   // =======================================================
-  // GET DATA FROM BACKEND
+  // FETCH GURU
   // =======================================================
 
   useEffect(() => {
     let mounted = true;
 
-    const fetchGuru = async () => {
+    async function fetchGuru() {
+      if (!id) {
+        setLoading(false);
+        setError("ID guru tidak ditemukan.");
+        return;
+      }
+
       try {
         setLoading(true);
         setError("");
@@ -198,65 +251,131 @@ export default function DetailGuruPage() {
           role: "guru",
         });
 
-        if (!mounted) {
-          return;
-        }
+        if (!mounted) return;
 
-        console.log("Response data guru:", response);
+        const users = extractList(response);
 
-        const users =
-          response?.data?.data ||
-          response?.data?.users ||
-          response?.data?.items ||
-          response?.data ||
-          response?.users ||
-          response?.items ||
-          [];
-
-        const list = Array.isArray(users)
-          ? users
-          : [];
-
-        const found = list.find(
-          (item) =>
-            String(item.id) === String(id)
+        const found = users.find(
+          (item) => String(item.id) === String(id)
         );
 
         if (!found) {
+          setGuru(null);
           setError("Data guru tidak ditemukan.");
           return;
         }
 
         setGuru(found);
       } catch (err) {
-        console.error(
-          "Gagal mengambil detail guru:",
-          err
-        );
+        console.error("Gagal mengambil detail guru:", err);
 
-        if (!mounted) {
-          return;
-        }
-
-        setError(
-          err?.message ||
-            "Gagal mengambil data guru dari backend."
-        );
-      } finally {
         if (mounted) {
-          setLoading(false);
+          setError(
+            err?.message || "Gagal mengambil data guru dari backend."
+          );
         }
+      } finally {
+        if (mounted) setLoading(false);
       }
-    };
-
-    if (id) {
-      fetchGuru();
     }
+
+    fetchGuru();
 
     return () => {
       mounted = false;
     };
   }, [id]);
+
+  // =======================================================
+  // FETCH TEACHING STATISTICS
+  // =======================================================
+
+ 
+ 
+useEffect(() => {
+  if (!id) return;
+
+  let mounted = true;
+
+  async function fetchStatistikGuru() {
+    setLoadingStatistik(true);
+    setMapelGuru([]);
+    setKelasDiampu("-");
+    setTotalSiswa("-");
+
+    try {
+      const semuaKelasMapel = await getKelasMapel();
+
+      if (!mounted) return;
+
+      const penugasanGuru = (
+        Array.isArray(semuaKelasMapel) ? semuaKelasMapel : []
+      ).filter((item) => {
+        const guruId =
+          item.guruPengajarId ?? item.guruPengajar?.id;
+
+        return (
+          String(guruId) === String(id) &&
+          !item.dihapusPada
+        );
+      });
+
+      // Kumpulkan mata pelajaran unik.
+      const mapelUnik = new Map();
+
+      // Kumpulkan kelas unik berdasarkan relasi BE.
+      const kelasUnik = new Map();
+
+      penugasanGuru.forEach((item) => {
+        const mapelId =
+          item.mataPelajaranId ?? item.mataPelajaran?.id;
+
+        const namaMapel = item.mataPelajaran?.nama;
+
+        if (mapelId && namaMapel) {
+          mapelUnik.set(String(mapelId), namaMapel);
+        }
+
+        const kelasId =
+          item.kelasId ?? item.kelas?.id;
+
+        if (kelasId) {
+          kelasUnik.set(
+            String(kelasId),
+            item.kelas?.nama ?? "-"
+          );
+        }
+      });
+
+      if (!mounted) return;
+
+      setMapelGuru([...mapelUnik.values()]);
+      setKelasDiampu(kelasUnik.size);
+
+      // Endpoint kelas-mapel tidak mengirim data anggota siswa.
+      // Jangan menampilkan angka siswa yang belum berhasil dihitung.
+      setTotalSiswa("-");
+    } catch (err) {
+      console.error("Gagal mengambil statistik guru:", err);
+
+      if (mounted) {
+        setMapelGuru([]);
+        setKelasDiampu("-");
+        setTotalSiswa("-");
+      }
+    } finally {
+      if (mounted) {
+        setLoadingStatistik(false);
+      }
+    }
+  }
+
+  fetchStatistikGuru();
+
+  return () => {
+    mounted = false;
+  };
+}, [id]);
 
   // =======================================================
   // LOADING
@@ -274,9 +393,7 @@ export default function DetailGuruPage() {
 
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
           <Header
-            toggleSidebar={() =>
-              setIsCollapsed((prev) => !prev)
-            }
+            toggleSidebar={() => setIsCollapsed((prev) => !prev)}
             notifications={[]}
             user={{
               name: "Admin Sekolah",
@@ -317,9 +434,7 @@ export default function DetailGuruPage() {
 
         <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
           <Header
-            toggleSidebar={() =>
-              setIsCollapsed((prev) => !prev)
-            }
+            toggleSidebar={() => setIsCollapsed((prev) => !prev)}
             notifications={[]}
             user={{
               name: "Admin Sekolah",
@@ -339,15 +454,12 @@ export default function DetailGuruPage() {
               </h1>
 
               <p className="mt-2 text-sm leading-6 theme-text-muted">
-                {error ||
-                  "Data guru tidak tersedia."}
+                {error || "Data guru tidak tersedia."}
               </p>
 
               <button
                 type="button"
-                onClick={() =>
-                  router.push("/admin/guru")
-                }
+                onClick={() => router.push("/admin/guru")}
                 className="mt-5 inline-flex items-center gap-2 rounded-lg theme-primary px-4 py-2.5 text-sm font-semibold transition"
               >
                 <ArrowLeft size={16} />
@@ -361,7 +473,7 @@ export default function DetailGuruPage() {
   }
 
   // =======================================================
-  // NORMALIZE DATA BACKEND
+  // NORMALIZE USER DATA
   // =======================================================
 
   const nama =
@@ -370,9 +482,7 @@ export default function DetailGuruPage() {
     guru.name ||
     "-";
 
-  const email =
-    guru.email ||
-    "-";
+  const email = guru.email || "-";
 
   const phone =
     guru.phone ||
@@ -393,17 +503,12 @@ export default function DetailGuruPage() {
     guru.tanggal_lahir ||
     "-";
 
-  const nip =
-    guru.nip ||
-    guru.NIP ||
-    "-";
+  const nip = guru.nip || guru.NIP || "-";
 
   const mapel =
-    guru.mapel?.nama ||
-    guru.mapel ||
-    guru.mataPelajaran?.nama ||
-    guru.mataPelajaran ||
-    "Mata pelajaran belum diatur";
+    mapelGuru.length > 0
+      ? mapelGuru.join(", ")
+      : "Mata pelajaran belum diatur";
 
   const status =
     guru.status ||
@@ -422,24 +527,16 @@ export default function DetailGuruPage() {
     guru.createdAt ||
     "-";
 
-  const kelasDiampu =
-    guru.kelasDiampu ??
-    guru.totalKelas ??
-    guru.jumlahKelas ??
-    "-";
+  
 
-  const totalSiswa =
-    guru.totalSiswa ??
-    guru.jumlahSiswa ??
-    "-";
+  const isActive = String(status).toLowerCase() === "aktif";
 
-  const rataKehadiran =
-    guru.rataRataKehadiran ??
-    guru.persentaseKehadiran ??
-    "-";
-
-  const isActive =
-    String(status).toLowerCase() === "aktif";
+  const genderLabel =
+    gender === "L"
+      ? "Laki-laki"
+      : gender === "P"
+      ? "Perempuan"
+      : gender || "-";
 
   // =======================================================
   // RENDER
@@ -447,8 +544,6 @@ export default function DetailGuruPage() {
 
   return (
     <div className="flex min-h-screen w-full min-w-0 theme-page">
-
-      {/* SIDEBAR */}
       <div className="shrink-0">
         <Sidebar
           active="guru"
@@ -458,14 +553,9 @@ export default function DetailGuruPage() {
         />
       </div>
 
-      {/* MAIN WRAPPER */}
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-
-        {/* HEADER */}
         <Header
-          toggleSidebar={() =>
-            setIsCollapsed((prev) => !prev)
-          }
+          toggleSidebar={() => setIsCollapsed((prev) => !prev)}
           notifications={[]}
           user={{
             name: "Admin Sekolah",
@@ -474,27 +564,18 @@ export default function DetailGuruPage() {
           }}
         />
 
-        {/* CONTENT */}
         <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
           <div className="w-full px-3 py-4 sm:px-5 sm:py-5 md:px-6 lg:px-8 xl:px-10 2xl:px-12">
             <div className="w-full space-y-5">
 
               {/* PAGE HEADER */}
               <div className="flex min-w-0 flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-
                 <div className="min-w-0">
                   <button
-                    onClick={() =>
-                      router.back()
-                    }
+                    onClick={() => router.back()}
                     className="inline-flex max-w-full items-center gap-2 text-sm font-medium theme-text-muted transition hover:text-[var(--color-primary)]"
                   >
-                    <ArrowLeft
-                      size={17}
-                      strokeWidth={1.8}
-                      className="shrink-0"
-                    />
-
+                    <ArrowLeft size={17} className="shrink-0" />
                     <span className="truncate">
                       Kembali ke Daftar Guru
                     </span>
@@ -504,7 +585,6 @@ export default function DetailGuruPage() {
                     <p className="text-xs font-semibold uppercase tracking-[0.12em] text-[var(--color-primary)]">
                       Data Guru
                     </p>
-
                     <h1 className="mt-1 text-xl font-bold tracking-tight theme-text sm:text-2xl">
                       Detail Profil Guru
                     </h1>
@@ -512,18 +592,10 @@ export default function DetailGuruPage() {
                 </div>
 
                 <button
-                  onClick={() =>
-                    router.push(
-                      `/admin/guru/edit/${guru.id}`
-                    )
-                  }
+                  onClick={() => router.push(`/admin/guru/edit/${guru.id}`)}
                   className="inline-flex w-full shrink-0 items-center justify-center gap-2 rounded-lg border theme-card px-4 py-2.5 text-sm font-semibold theme-text-secondary shadow-sm transition theme-sidebar-hover hover:text-[var(--color-primary)] sm:w-auto"
                 >
-                  <Edit
-                    size={16}
-                    strokeWidth={1.9}
-                  />
-
+                  <Edit size={16} />
                   Edit Profil
                 </button>
               </div>
@@ -534,20 +606,13 @@ export default function DetailGuruPage() {
 
                 <div className="p-4 sm:p-6 lg:p-7 xl:p-8">
                   <div className="flex min-w-0 flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-
-                    {/* IDENTITY */}
                     <div className="flex min-w-0 flex-col gap-5 sm:flex-row sm:items-center">
-
-                      {/* AVATAR */}
                       <div
-                        className={`flex h-20 w-20 shrink-0 items-center justify-center rounded-xl ${getAvatarColor(
-                          nama
-                        )} text-2xl font-bold text-white shadow-sm sm:h-24 sm:w-24 sm:text-3xl`}
+                        className={`flex h-20 w-20 shrink-0 items-center justify-center rounded-xl ${getAvatarColor(nama)} text-2xl font-bold text-white shadow-sm sm:h-24 sm:w-24 sm:text-3xl`}
                       >
                         {getInitials(nama)}
                       </div>
 
-                      {/* IDENTITY */}
                       <div className="min-w-0">
                         <div className="flex flex-wrap items-center gap-2">
                           <span className="inline-flex items-center rounded-md theme-card-soft px-2.5 py-1 text-[11px] font-semibold uppercase tracking-wide theme-text-secondary">
@@ -556,19 +621,16 @@ export default function DetailGuruPage() {
 
                           <span
                             className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-semibold ${
-                              isActive
-                                ? "theme-success"
-                                : "theme-danger"
+                              isActive ? "theme-success" : "theme-danger"
                             }`}
                           >
                             <span
-                              className={`h-1.5 w-1.5 shrink-0 rounded-full ${
+                              className={`h-1.5 w-1.5 rounded-full ${
                                 isActive
                                   ? "bg-[var(--color-success)]"
                                   : "bg-[var(--color-danger)]"
                               }`}
                             />
-
                             {status}
                           </span>
                         </div>
@@ -578,96 +640,42 @@ export default function DetailGuruPage() {
                         </h2>
 
                         <div className="mt-2 flex min-w-0 flex-wrap items-center gap-x-4 gap-y-2 text-sm theme-text-muted">
-
                           <span className="inline-flex min-w-0 max-w-full items-center gap-1.5">
-                            <Hash
-                              size={15}
-                              className="shrink-0 theme-text-placeholder"
-                            />
-
-                            <span className="break-all">
-                              {nip}
-                            </span>
+                            <Hash size={15} className="shrink-0 theme-text-placeholder" />
+                            <span className="break-all">{nip}</span>
                           </span>
 
                           <span className="hidden h-4 w-px bg-[var(--color-border)] sm:block" />
 
                           <span className="inline-flex min-w-0 max-w-full items-center gap-1.5">
-                            <BookOpen
-                              size={15}
-                              className="shrink-0 theme-text-placeholder"
-                            />
-
-                            <span className="break-words">
-                              {mapel}
-                            </span>
+                            <BookOpen size={15} className="shrink-0 theme-text-placeholder" />
+                            <span className="break-words">{mapel}</span>
                           </span>
-
                         </div>
                       </div>
                     </div>
 
-                    {/* JOIN DATE */}
                     <div className="shrink-0 border-t theme-border pt-4 lg:border-l lg:border-t-0 lg:pl-8 lg:pt-0">
                       <p className="text-xs font-medium uppercase tracking-wide theme-text-muted">
                         Bergabung Sejak
                       </p>
 
                       <div className="mt-1.5 flex items-center gap-2">
-                        <Calendar
-                          size={17}
-                          className="shrink-0 text-[var(--color-primary)]"
-                          strokeWidth={1.8}
-                        />
-
+                        <Calendar size={17} className="shrink-0 text-[var(--color-primary)]" />
                         <span className="text-sm font-semibold theme-text">
                           {formatDate(joinDate)}
                         </span>
                       </div>
                     </div>
-
                   </div>
 
-                  {/* DIVIDER */}
                   <div className="my-6 border-t theme-border" />
 
-                  {/* BASIC INFORMATION */}
                   <div className="grid min-w-0 grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4">
-
-                    <InfoItem
-                      icon={Mail}
-                      label="Email"
-                      value={email}
-                      iconClass="text-[var(--color-primary)]"
-                    />
-
-                    <InfoItem
-                      icon={Phone}
-                      label="Nomor Telepon"
-                      value={phone}
-                      iconClass="text-[var(--color-primary)]"
-                    />
-
-                    <InfoItem
-                      icon={UserRound}
-                      label="Jenis Kelamin"
-                      value={
-                        gender === "L"
-                          ? "Laki-laki"
-                          : gender === "P"
-                          ? "Perempuan"
-                          : gender || "-"
-                      }
-                      iconClass="text-[var(--color-primary)]"
-                    />
-
-                    <InfoItem
-                      icon={Calendar}
-                      label="Tanggal Lahir"
-                      value={formatDate(tglLahir)}
-                      iconClass="text-[var(--color-primary)]"
-                    />
-
+                    <InfoItem icon={Mail} label="Email" value={email} iconClass="text-[var(--color-primary)]" />
+                    <InfoItem icon={Phone} label="Nomor Telepon" value={phone} iconClass="text-[var(--color-primary)]" />
+                    <InfoItem icon={UserRound} label="Jenis Kelamin" value={genderLabel} iconClass="text-[var(--color-primary)]" />
+                    <InfoItem icon={Calendar} label="Tanggal Lahir" value={formatDate(tglLahir)} iconClass="text-[var(--color-primary)]" />
                   </div>
                 </div>
               </section>
@@ -677,85 +685,41 @@ export default function DetailGuruPage() {
 
                 {/* LEFT COLUMN */}
                 <div className="min-w-0 space-y-5">
-
-                  {/* DATA KEPEGAWAIAN */}
                   <section className="w-full rounded-xl border theme-card shadow-sm">
                     <div className="border-b theme-border px-4 py-4 sm:px-6">
                       <div className="flex min-w-0 items-center gap-3">
-
                         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg theme-info">
-                          <BriefcaseBusiness
-                            size={18}
-                            className="text-[var(--color-info)]"
-                            strokeWidth={1.8}
-                          />
+                          <BriefcaseBusiness size={18} className="text-[var(--color-info)]" />
                         </div>
-
                         <div className="min-w-0">
-                          <h3 className="text-sm font-bold theme-text">
-                            Informasi Kepegawaian
-                          </h3>
-
+                          <h3 className="text-sm font-bold theme-text">Informasi Kepegawaian</h3>
                           <p className="mt-0.5 text-xs theme-text-muted">
                             Informasi penugasan dan status guru
                           </p>
                         </div>
-
                       </div>
                     </div>
 
                     <div className="grid min-w-0 grid-cols-1 gap-x-8 gap-y-5 p-4 sm:grid-cols-2 sm:p-6">
-
-                      <InfoItem
-                        icon={Hash}
-                        label="NIP"
-                        value={nip}
-                      />
-
-                      <InfoItem
-                        icon={BookOpen}
-                        label="Mata Pelajaran"
-                        value={mapel}
-                      />
-
-                      <InfoItem
-                        icon={UserCheck}
-                        label="Status Kepegawaian"
-                        value={status}
-                      />
-
-                      <InfoItem
-                        icon={Clock}
-                        label="Tanggal Bergabung"
-                        value={formatDate(joinDate)}
-                      />
-
+                      <InfoItem icon={Hash} label="NIP" value={nip} />
+                      <InfoItem icon={BookOpen} label="Mata Pelajaran" value={mapel} />
+                      <InfoItem icon={UserCheck} label="Status Kepegawaian" value={status} />
+                      <InfoItem icon={Clock} label="Tanggal Bergabung" value={formatDate(joinDate)} />
                     </div>
                   </section>
 
-                  {/* ALAMAT */}
                   <section className="w-full rounded-xl border theme-card shadow-sm">
                     <div className="border-b theme-border px-4 py-4 sm:px-6">
                       <div className="flex min-w-0 items-center gap-3">
-
                         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg theme-info">
-                          <MapPin
-                            size={18}
-                            className="text-[var(--color-info)]"
-                            strokeWidth={1.8}
-                          />
+                          <MapPin size={18} className="text-[var(--color-info)]" />
                         </div>
-
-                        <div className="min-w-0">
-                          <h3 className="text-sm font-bold theme-text">
-                            Alamat
-                          </h3>
-
+                        <div>
+                          <h3 className="text-sm font-bold theme-text">Alamat</h3>
                           <p className="mt-0.5 text-xs theme-text-muted">
                             Informasi alamat tempat tinggal guru
                           </p>
                         </div>
-
                       </div>
                     </div>
 
@@ -764,7 +728,6 @@ export default function DetailGuruPage() {
                         <p className="text-xs font-medium theme-text-muted">
                           Alamat Lengkap
                         </p>
-
                         <p className="mt-2 break-words text-sm font-semibold leading-6 theme-text sm:text-[15px]">
                           {alamat}
                         </p>
@@ -772,182 +735,94 @@ export default function DetailGuruPage() {
                     </div>
                   </section>
 
-                  {/* INFORMASI PRIBADI */}
                   <section className="w-full rounded-xl border theme-card shadow-sm">
                     <div className="border-b theme-border px-4 py-4 sm:px-6">
                       <div className="flex min-w-0 items-center gap-3">
-
                         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg theme-info">
-                          <Users
-                            size={18}
-                            className="text-[var(--color-info)]"
-                            strokeWidth={1.8}
-                          />
+                          <Users size={18} className="text-[var(--color-info)]" />
                         </div>
-
-                        <div className="min-w-0">
-                          <h3 className="text-sm font-bold theme-text">
-                            Informasi Pribadi
-                          </h3>
-
+                        <div>
+                          <h3 className="text-sm font-bold theme-text">Informasi Pribadi</h3>
                           <p className="mt-0.5 text-xs theme-text-muted">
                             Informasi dasar profil guru
                           </p>
                         </div>
-
                       </div>
                     </div>
 
                     <div className="grid min-w-0 grid-cols-1 gap-5 p-4 sm:grid-cols-2 sm:p-6">
-
-                      <InfoItem
-                        icon={UserRound}
-                        label="Nama Lengkap"
-                        value={nama}
-                      />
-
-                      <InfoItem
-                        icon={UserRound}
-                        label="Jenis Kelamin"
-                        value={
-                          gender === "L"
-                            ? "Laki-laki"
-                            : gender === "P"
-                            ? "Perempuan"
-                            : gender || "-"
-                        }
-                      />
-
-                      <InfoItem
-                        icon={Calendar}
-                        label="Tanggal Lahir"
-                        value={formatDate(tglLahir)}
-                      />
-
-                      <InfoItem
-                        icon={Phone}
-                        label="Nomor Telepon"
-                        value={phone}
-                      />
-
+                      <InfoItem icon={UserRound} label="Nama Lengkap" value={nama} />
+                      <InfoItem icon={UserRound} label="Jenis Kelamin" value={genderLabel} />
+                      <InfoItem icon={Calendar} label="Tanggal Lahir" value={formatDate(tglLahir)} />
+                      <InfoItem icon={Phone} label="Nomor Telepon" value={phone} />
                     </div>
                   </section>
-
                 </div>
 
                 {/* RIGHT COLUMN */}
                 <aside className="min-w-0 space-y-5">
-
-                  {/* STATISTIK */}
                   <section className="w-full rounded-xl border theme-card shadow-sm">
                     <div className="border-b theme-border px-4 py-4 sm:px-5">
                       <div className="flex min-w-0 items-center gap-3">
-
                         <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg theme-info">
-                          <GraduationCap
-                            size={18}
-                            className="text-[var(--color-info)]"
-                            strokeWidth={1.8}
-                          />
+                          <GraduationCap size={18} className="text-[var(--color-info)]" />
                         </div>
-
-                        <div className="min-w-0">
-                          <h3 className="text-sm font-bold theme-text">
-                            Statistik Mengajar
-                          </h3>
-
+                        <div>
+                          <h3 className="text-sm font-bold theme-text">Statistik Mengajar</h3>
                           <p className="mt-0.5 text-xs theme-text-muted">
                             Ringkasan aktivitas mengajar
                           </p>
                         </div>
-
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 gap-3 p-4">
-
                       <StatCard
                         icon={School}
-                        value={kelasDiampu}
+                        value={loadingStatistik ? "..." : kelasDiampu}
                         label="Kelas Diampu"
-                        description="Kelas yang ditangani"
+                        description="Jumlah kelas unik yang ditugaskan"
                         iconClass="text-[var(--color-primary)]"
                       />
 
                       <StatCard
                         icon={Users}
-                        value={totalSiswa}
+                        value={loadingStatistik ? "..." : totalSiswa}
                         label="Total Siswa"
-                        description="Siswa yang diajar"
+                        description="Jumlah siswa unik di kelas yang diampu"
                         iconClass="text-[var(--color-info)]"
                       />
 
                       <StatCard
-                        icon={CheckCircle2}
-                        value={rataKehadiran}
-                        label="Rata-rata Kehadiran"
-                        description="Kehadiran mengajar"
-                        iconClass="text-[var(--color-success)]"
-                        valueClass="text-[var(--color-success)]"
-                      />
-
+  icon={CheckCircle2}
+  value={loadingStatistik ? "..." : rataKehadiran}
+  label="Rata-rata Kehadiran"
+  description="Persentase catatan absensi berstatus hadir"
+  iconClass="text-[var(--color-success)]"
+  valueClass="text-[var(--color-success)]"
+/>
                     </div>
                   </section>
 
-                  {/* STATUS */}
                   <section className="w-full rounded-xl border theme-card shadow-sm">
                     <div className="border-b theme-border px-4 py-4 sm:px-5">
-                      <h3 className="text-sm font-bold theme-text">
-                        Status Profil
-                      </h3>
-
+                      <h3 className="text-sm font-bold theme-text">Status Profil</h3>
                       <p className="mt-0.5 text-xs theme-text-muted">
                         Status data guru saat ini
                       </p>
                     </div>
 
                     <div className="p-4 sm:p-5">
-                      <div
-                        className={`flex min-w-0 items-start gap-3 rounded-lg border p-4 ${
-                          isActive
-                            ? "theme-success"
-                            : "theme-danger"
-                        }`}
-                      >
-                        <div
-                          className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg theme-card ${
-                            isActive
-                              ? "text-[var(--color-success)]"
-                              : "text-[var(--color-danger)]"
-                          }`}
-                        >
-                          {isActive ? (
-                            <CheckCircle2 size={17} />
-                          ) : (
-                            <Clock size={17} />
-                          )}
+                      <div className={`flex min-w-0 items-start gap-3 rounded-lg border p-4 ${isActive ? "theme-success" : "theme-danger"}`}>
+                        <div className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg theme-card ${isActive ? "text-[var(--color-success)]" : "text-[var(--color-danger)]"}`}>
+                          {isActive ? <CheckCircle2 size={17} /> : <Clock size={17} />}
                         </div>
 
                         <div className="min-w-0">
-                          <p
-                            className={`text-sm font-bold ${
-                              isActive
-                                ? "text-[var(--color-success)]"
-                                : "text-[var(--color-danger)]"
-                            }`}
-                          >
-                            {isActive
-                              ? "Profil Aktif"
-                              : "Profil Nonaktif"}
+                          <p className={`text-sm font-bold ${isActive ? "text-[var(--color-success)]" : "text-[var(--color-danger)]"}`}>
+                            {isActive ? "Profil Aktif" : "Profil Nonaktif"}
                           </p>
-
-                          <p
-                            className={`mt-1 break-words text-xs leading-5 ${
-                              isActive
-                                ? "text-[var(--color-success)]"
-                                : "text-[var(--color-danger)]"
-                            }`}
-                          >
+                          <p className={`mt-1 break-words text-xs leading-5 ${isActive ? "text-[var(--color-success)]" : "text-[var(--color-danger)]"}`}>
                             {isActive
                               ? "Guru terdaftar sebagai tenaga pendidik aktif."
                               : "Guru saat ini berstatus nonaktif."}
@@ -957,81 +832,74 @@ export default function DetailGuruPage() {
                     </div>
                   </section>
 
-                  {/* SUBJECT */}
                   <section className="w-full rounded-xl border theme-card shadow-sm">
                     <div className="border-b theme-border px-4 py-4 sm:px-5">
-                      <h3 className="text-sm font-bold theme-text">
-                        Mata Pelajaran
-                      </h3>
-
+                      <h3 className="text-sm font-bold theme-text">Mata Pelajaran</h3>
                       <p className="mt-0.5 text-xs theme-text-muted">
                         Bidang pengajaran utama
                       </p>
                     </div>
 
-                    <div className="p-4 sm:p-5">
-                      <div className="flex min-w-0 items-center gap-3 rounded-lg border theme-info p-4">
-
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border theme-card">
-                          <BookOpen
-                            size={18}
-                            className="text-[var(--color-info)]"
-                          />
-                        </div>
-
-                        <div className="min-w-0">
-                          <p className="text-xs font-medium theme-text-muted">
-                            Mengajar
-                          </p>
-
-                          <p className="mt-0.5 break-words text-sm font-bold theme-text">
-                            {mapel}
-                          </p>
-                        </div>
-
-                      </div>
+                    <div className="space-y-3 p-4 sm:p-5">
+                      {loadingStatistik ? (
+                        <p className="text-sm theme-text-muted">
+                          Memuat mata pelajaran...
+                        </p>
+                      ) : mapelGuru.length > 0 ? (
+                        mapelGuru.map((namaMapel) => (
+                          <div
+                            key={namaMapel}
+                            className="flex min-w-0 items-center gap-3 rounded-lg border theme-info p-4"
+                          >
+                            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border theme-card">
+                              <BookOpen size={18} className="text-[var(--color-info)]" />
+                            </div>
+                            <div className="min-w-0">
+                              <p className="text-xs font-medium theme-text-muted">
+                                Mengajar
+                              </p>
+                              <p className="mt-0.5 break-words text-sm font-bold theme-text">
+                                {namaMapel}
+                              </p>
+                            </div>
+                          </div>
+                        ))
+                      ) : (
+                        <p className="text-sm theme-text-muted">
+                          Belum ada mata pelajaran yang ditugaskan.
+                        </p>
+                      )}
                     </div>
                   </section>
-
                 </aside>
               </div>
 
               {/* BOTTOM ACTION */}
               <div className="flex min-w-0 flex-col gap-3 border-t theme-border pb-4 pt-5 sm:flex-row sm:items-center sm:justify-between">
-
                 <div className="min-w-0">
                   <p className="text-sm font-semibold theme-text-secondary">
                     Perlu mengubah data guru?
                   </p>
-
                   <p className="mt-0.5 text-xs theme-text-muted">
                     Pastikan data yang diperbarui sudah sesuai.
                   </p>
                 </div>
 
                 <div className="flex w-full gap-2 sm:w-auto">
-
                   <button
-                    onClick={() =>
-                      router.back()
-                    }
+                    onClick={() => router.back()}
                     className="flex-1 rounded-lg border theme-card px-4 py-2.5 text-sm font-semibold theme-text-secondary transition theme-sidebar-hover sm:flex-none"
                   >
                     Kembali
                   </button>
 
                   <button
-                    onClick={() =>
-                      router.push(
-                        `/admin/guru/edit/${guru.id}`
-                      )
-                    }
+                    onClick={() => router.push(`/admin/guru/edit/${guru.id}`)}
                     className="flex flex-1 items-center justify-center gap-2 rounded-lg theme-primary px-4 py-2.5 text-sm font-semibold shadow-sm transition sm:flex-none"
                   >
                     <Edit size={16} />
                     Edit Profil
                   </button>
-
                 </div>
               </div>
 
