@@ -34,6 +34,13 @@ export const registerTenant = async (
     const hashedPassword = await bcrypt.hash(validatedData.kataSandi, 10);
     const otp = generateOtp();
 
+    await prisma.pendaftaranTenant.deleteMany({
+      where: {
+        emailPendaftar: validatedData.email,
+        status: "menunggu_verifikasi",
+      },
+    });
+
     await prisma.pendaftaranTenant.create({
       data: {
         namaPendaftar: validatedData.nama,
@@ -44,7 +51,7 @@ export const registerTenant = async (
         subdomain: validatedData.subdomain,
         alamatSekolah: validatedData.alamatSekolah,
         teleponSekolah: validatedData.teleponSekolah,
-        emailSekolah: validatedData.email, // Fallback ke email pendaftar
+        emailSekolah: validatedData.email,
         logoSekolah: validatedData.logo ?? null,
         paketId: validatedData.paketId,
         kodeOtp: otp,
@@ -53,11 +60,24 @@ export const registerTenant = async (
       },
     });
 
-    await sendOtpEmail({
-      email: validatedData.email,
-      namaLengkap: validatedData.nama,
-      kodeOtp: otp,
-    });
+    try {
+      await sendOtpEmail({
+        email: validatedData.email,
+        namaLengkap: validatedData.nama,
+        kodeOtp: otp,
+      });
+    } catch (error: any) {
+      console.error("[TENANT] Pengiriman OTP gagal", {
+        message: error?.message,
+        code: error?.code,
+        command: error?.command,
+        responseCode: error?.responseCode,
+      });
+      throw new AppError(
+        "Pendaftaran tersimpan, tetapi email OTP gagal dikirim. Silakan coba lagi.",
+        502,
+      );
+    }
 
     return successResponse(
       res,
@@ -76,14 +96,15 @@ export const verifyAndPay = async (
   next: NextFunction,
 ) => {
   try {
-    // 1. Tambahkan parameter 'bank' yang harus dikirim oleh Frontend
     const { email, kodeOtp, bank } = req.body;
     if (!email || !kodeOtp)
       throw new AppError("Email dan OTP wajib diisi", 400);
 
-    // Validasi input bank (sementara batasi ke bank yang umum untuk bank_transfer)
+    const emailInput = String(email).trim();
+    const otpInput = String(kodeOtp).replace(/\s+/g, "");
+
     const allowedBanks = ["bca", "bni", "bri"];
-    if (bank && !allowedBanks.includes(bank.toLowerCase())) {
+    if (bank && !allowedBanks.includes(String(bank).toLowerCase())) {
       throw new AppError(
         "Pilihan bank saat ini hanya mendukung: bca, bni, bri",
         400,
@@ -91,12 +112,16 @@ export const verifyAndPay = async (
     }
 
     const pendaftaran = await prisma.pendaftaranTenant.findFirst({
-      where: { emailPendaftar: email, status: "menunggu_verifikasi" },
+      where: {
+        emailPendaftar: { equals: emailInput, mode: "insensitive" },
+        status: "menunggu_verifikasi",
+      },
+      orderBy: { otpTimeout: "desc" },
     });
 
     if (!pendaftaran)
       throw new AppError("Data pendaftaran tidak ditemukan", 404);
-    if (pendaftaran.kodeOtp !== kodeOtp)
+    if (String(pendaftaran.kodeOtp ?? "") !== otpInput)
       throw new AppError("Kode OTP salah", 400);
     if (pendaftaran.otpTimeout && new Date() > pendaftaran.otpTimeout) {
       throw new AppError("Kode OTP sudah kadaluarsa", 400);
@@ -107,7 +132,6 @@ export const verifyAndPay = async (
     });
     if (!paket) throw new AppError("Paket tidak ditemukan", 404);
 
-    // LOGIKA JIKA PAKET BERBAYAR
     if (Number(paket.harga) > 0) {
       if (!bank)
         throw new AppError(
@@ -115,12 +139,12 @@ export const verifyAndPay = async (
           400,
         );
 
+      const bankName = String(bank).toLowerCase();
       const orderId = `REG-${pendaftaran.id.substring(0, 8)}-${Date.now()}`;
       const midtransAuth = Buffer.from(
         process.env.MIDTRANS_SERVER_KEY + ":",
       ).toString("base64");
 
-      // 2. Tembak endpoint Core API Midtrans
       const midtransResponse = await fetch(
         "https://api.sandbox.midtrans.com/v2/charge",
         {
@@ -137,7 +161,7 @@ export const verifyAndPay = async (
               gross_amount: Number(paket.harga),
             },
             bank_transfer: {
-              bank: bank.toLowerCase(),
+              bank: bankName,
             },
             customer_details: {
               first_name: pendaftaran.namaPendaftar,
@@ -164,16 +188,14 @@ export const verifyAndPay = async (
         },
       });
 
-      // 3. Kembalikan Nomor VA ke Frontend agar mereka bisa menampilkannya di UI
       return successResponse(res, "Verifikasi sukses. Silakan bayar.", {
         order_id: orderId,
-        bank: bank.toUpperCase(),
-        va_number: charge.va_numbers[0].va_number, // Ini yang dibutuhkan FE
+        bank: bankName.toUpperCase(),
+        va_number: charge.va_numbers[0].va_number,
         gross_amount: Number(paket.harga),
         is_trial: false,
       });
     } else {
-      // LOGIKA JIKA PAKET GRATIS / TRIAL (Tidak ada perubahan)
       const peranAdmin = await prisma.peran.findFirst({
         where: { nama: "admin_sekolah" },
       });
