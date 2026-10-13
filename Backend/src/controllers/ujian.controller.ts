@@ -10,6 +10,8 @@ import {
   submitUjianSchema,
 } from "../validations/ujian.validation";
 
+import { isSuperAdmin } from "../utils/rbac";
+
 export const createUjian = async (
   req: Request,
   res: Response,
@@ -113,6 +115,15 @@ export const getDetailUjian = async (
     });
 
     if (!asesmen) throw new AppError("Ujian tidak ditemukan", 404);
+
+    const isSuper = isSuperAdmin((req as AuthRequest).user?.role);
+    if (
+      !isSuper &&
+      asesmen.kelasMapel.kelas.sekolahId !== (req as AuthRequest).user?.sekolahId
+    ) {
+      throw new AppError("Akses ditolak: Ujian milik sekolah lain", 403);
+    }
+
     return successResponse(res, "Berhasil mengambil detail ujian", asesmen);
   } catch (error) {
     next(error);
@@ -130,8 +141,23 @@ export const updateUjian = async (
 
     const existing = await prisma.asesmen.findFirst({
       where: { id, dihapusPada: null },
+      include: {
+        kelasMapel: {
+          include: {
+            kelas: { select: { sekolahId: true } },
+          },
+        },
+      },
     });
     if (!existing) throw new AppError("Ujian tidak ditemukan", 404);
+
+    const isSuper = isSuperAdmin((req as AuthRequest).user?.role);
+    if (
+      !isSuper &&
+      existing.kelasMapel.kelas.sekolahId !== (req as AuthRequest).user?.sekolahId
+    ) {
+      throw new AppError("Akses ditolak: Ujian milik sekolah lain", 403);
+    }
 
     const asesmen = await prisma.asesmen.update({
       where: { id },
@@ -176,8 +202,23 @@ export const deleteUjian = async (
     const id = req.params.id as string;
     const existing = await prisma.asesmen.findFirst({
       where: { id, dihapusPada: null },
+      include: {
+        kelasMapel: {
+          include: {
+            kelas: { select: { sekolahId: true } },
+          },
+        },
+      },
     });
     if (!existing) throw new AppError("Ujian tidak ditemukan", 404);
+
+    const isSuper = isSuperAdmin((req as AuthRequest).user?.role);
+    if (
+      !isSuper &&
+      existing.kelasMapel.kelas.sekolahId !== (req as AuthRequest).user?.sekolahId
+    ) {
+      throw new AppError("Akses ditolak: Ujian milik sekolah lain", 403);
+    }
 
     await prisma.asesmen.update({
       where: { id },

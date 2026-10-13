@@ -6,16 +6,29 @@ import {
 } from "../validations/soalUjian.validation";
 import { AppError } from "../utils/appError";
 import { AuthRequest } from "../middlewares/auth.middleware";
+import { isSuperAdmin } from "../utils/rbac";
 
 export const createSoal = async (req: AuthRequest, res: Response) => {
   const data = createSoalSchema.parse(req.body);
 
   const asesmen = await prisma.asesmen.findUnique({
     where: { id: data.ujianId },
+    include: {
+      kelasMapel: {
+        include: {
+          kelas: { select: { sekolahId: true } },
+        },
+      },
+    },
   });
 
   if (!asesmen) {
     throw new AppError("Ujian tidak ditemukan", 404);
+  }
+
+  const isSuper = isSuperAdmin(req.user?.role);
+  if (!isSuper && asesmen.kelasMapel.kelas.sekolahId !== req.user?.sekolahId) {
+    throw new AppError("Akses ditolak: Ujian milik sekolah lain", 403);
   }
 
   if (
@@ -65,8 +78,27 @@ export const createSoal = async (req: AuthRequest, res: Response) => {
 export const getSoalByUjian = async (req: AuthRequest, res: Response) => {
   const ujianId = req.params.ujianId as string;
   const role = req.user?.role ?? "";
-  // Normalise: semua role selain guru tidak boleh melihat kunciJawaban
   const showKunci = ["guru", "super_admin", "admin_sekolah"].includes(role);
+
+  const asesmen = await prisma.asesmen.findUnique({
+    where: { id: ujianId },
+    include: {
+      kelasMapel: {
+        include: {
+          kelas: { select: { sekolahId: true } },
+        },
+      },
+    },
+  });
+
+  if (!asesmen) {
+    throw new AppError("Ujian tidak ditemukan", 404);
+  }
+
+  const isSuper = isSuperAdmin(req.user?.role);
+  if (!isSuper && asesmen.kelasMapel.kelas.sekolahId !== req.user?.sekolahId) {
+    throw new AppError("Akses ditolak: Ujian milik sekolah lain", 403);
+  }
 
   const soal = await prisma.soalAsesmen.findMany({
     where: { asesmenId: ujianId },
@@ -99,17 +131,16 @@ export const getSoalById = async (req: AuthRequest, res: Response) => {
 
   const soal = await prisma.soalAsesmen.findUnique({
     where: { id },
-    select: {
-      id: true,
-      asesmenId: true,
-      teksSoal: true,
-      jenisSoal: true,
-      pilihan: true,
-      poin: true,
-      nomorUrut: true,
-      dibuatPada: true,
-      diperbaruiPada: true,
-      ...(showKunci && { kunciJawaban: true }),
+    include: {
+      asesmen: {
+        include: {
+          kelasMapel: {
+            include: {
+              kelas: { select: { sekolahId: true } },
+            },
+          },
+        },
+      },
     },
   });
 
@@ -117,10 +148,28 @@ export const getSoalById = async (req: AuthRequest, res: Response) => {
     throw new AppError("Soal ujian tidak ditemukan", 404);
   }
 
+  const isSuper = isSuperAdmin(req.user?.role);
+  if (!isSuper && soal.asesmen.kelasMapel.kelas.sekolahId !== req.user?.sekolahId) {
+    throw new AppError("Akses ditolak: Soal milik sekolah lain", 403);
+  }
+
+  const soalData: any = {
+    id: soal.id,
+    asesmenId: soal.asesmenId,
+    teksSoal: soal.teksSoal,
+    jenisSoal: soal.jenisSoal,
+    pilihan: soal.pilihan,
+    poin: soal.poin,
+    nomorUrut: soal.nomorUrut,
+    dibuatPada: soal.dibuatPada,
+    diperbaruiPada: soal.diperbaruiPada,
+    ...(showKunci && { kunciJawaban: soal.kunciJawaban }),
+  };
+
   res.status(200).json({
     success: true,
     message: "Soal ujian berhasil diambil",
-    data: soal,
+    data: soalData,
   });
 };
 
@@ -128,10 +177,28 @@ export const updateSoal = async (req: AuthRequest, res: Response) => {
   const id = req.params.id as string;
   const data = updateSoalSchema.parse(req.body);
 
-  const existing = await prisma.soalAsesmen.findUnique({ where: { id } });
+  const existing = await prisma.soalAsesmen.findUnique({
+    where: { id },
+    include: {
+      asesmen: {
+        include: {
+          kelasMapel: {
+            include: {
+              kelas: { select: { sekolahId: true } },
+            },
+          },
+        },
+      },
+    },
+  });
 
   if (!existing) {
     throw new AppError("Soal ujian tidak ditemukan", 404);
+  }
+
+  const isSuper = isSuperAdmin(req.user?.role);
+  if (!isSuper && existing.asesmen.kelasMapel.kelas.sekolahId !== req.user?.sekolahId) {
+    throw new AppError("Akses ditolak: Soal milik sekolah lain", 403);
   }
 
   const { jawabanBenar, ...restData } = data;
@@ -155,10 +222,28 @@ export const updateSoal = async (req: AuthRequest, res: Response) => {
 export const deleteSoal = async (req: AuthRequest, res: Response) => {
   const id = req.params.id as string;
 
-  const existing = await prisma.soalAsesmen.findUnique({ where: { id } });
+  const existing = await prisma.soalAsesmen.findUnique({
+    where: { id },
+    include: {
+      asesmen: {
+        include: {
+          kelasMapel: {
+            include: {
+              kelas: { select: { sekolahId: true } },
+            },
+          },
+        },
+      },
+    },
+  });
 
   if (!existing) {
     throw new AppError("Soal ujian tidak ditemukan", 404);
+  }
+
+  const isSuper = isSuperAdmin(req.user?.role);
+  if (!isSuper && existing.asesmen.kelasMapel.kelas.sekolahId !== req.user?.sekolahId) {
+    throw new AppError("Akses ditolak: Soal milik sekolah lain", 403);
   }
 
   await prisma.soalAsesmen.delete({ where: { id } });

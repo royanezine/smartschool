@@ -11,6 +11,7 @@ import { AuthRequest } from "../middlewares/auth.middleware";
 import { hitungJarakMeter } from "../utils/geo";
 import { successResponse } from "../utils/responseFormatter";
 import { NextFunction } from "express";
+import { normalizeRole, canManageRole } from "../utils/rbac";
 
 export const registerFaceIdByAdmin = async (
   req: AuthRequest,
@@ -27,10 +28,35 @@ export const registerFaceIdByAdmin = async (
 
     const targetUser = await prisma.pengguna.findUnique({
       where: { id: targetUserId },
+      include: {
+        peran: { select: { nama: true } },
+      },
     });
     if (!targetUser) {
-      fs.unlinkSync(file.path);
+      if (file && fs.existsSync(file.path)) fs.unlinkSync(file.path);
       throw new AppError("Pengguna tidak ditemukan", 404);
+    }
+
+    const actorRole = normalizeRole(req.user?.role);
+    const targetRole = normalizeRole(targetUser.peran?.nama);
+
+    if (actorRole !== "super_admin") {
+      if (!targetUser.sekolahId || targetUser.sekolahId !== req.user?.sekolahId) {
+        if (file && fs.existsSync(file.path)) fs.unlinkSync(file.path);
+        throw new AppError(
+          "Akses ditolak: Pengguna berada di luar sekolah Anda",
+          403,
+          "FORBIDDEN",
+        );
+      }
+      if (!canManageRole(actorRole, targetRole)) {
+        if (file && fs.existsSync(file.path)) fs.unlinkSync(file.path);
+        throw new AppError(
+          "Akses ditolak: Anda tidak dapat mengelola biometrik pengguna dengan level peran tersebut",
+          403,
+          "FORBIDDEN",
+        );
+      }
     }
 
     const formData = new FormData();

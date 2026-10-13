@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { prisma } from "../config/db";
 import { AuthRequest } from "../middlewares/auth.middleware";
+import { normalizeRole } from "../utils/rbac";
 
 export const getSesiKonseling = async (req: AuthRequest, res: Response) => {
   try {
@@ -13,11 +14,18 @@ export const getSesiKonseling = async (req: AuthRequest, res: Response) => {
       });
     }
 
+    const actorRole = normalizeRole(req.user?.role);
+    const where: any = {
+      sekolahId,
+      dihapusPada: null,
+    };
+
+    if (actorRole === "siswa") {
+      where.siswaId = req.user?.userId;
+    }
+
     const data = await prisma.sesiKonseling.findMany({
-      where: {
-        sekolahId,
-        dihapusPada: null,
-      },
+      where,
       include: {
         siswa: {
           select: {
@@ -83,6 +91,14 @@ export const getSesiKonselingById = async (
       return res.status(404).json({
         success: false,
         message: "Sesi konseling tidak ditemukan",
+      });
+    }
+
+    const actorRole = normalizeRole(req.user?.role);
+    if (actorRole === "siswa" && data.siswaId !== req.user?.userId) {
+      return res.status(403).json({
+        success: false,
+        message: "Akses ditolak: Anda hanya dapat melihat sesi konseling Anda sendiri",
       });
     }
 
@@ -507,11 +523,18 @@ export const getPelanggaranSiswa = async (
       });
     }
 
+    const actorRole = normalizeRole(req.user?.role);
+    const where: any = {
+      sekolahId,
+      dihapusPada: null,
+    };
+
+    if (actorRole === "siswa") {
+      where.siswaId = req.user?.userId;
+    }
+
     const data = await prisma.pelanggaranSiswa.findMany({
-      where: {
-        sekolahId,
-        dihapusPada: null,
-      },
+      where,
       include: {
         siswa: {
           select: {
@@ -771,11 +794,18 @@ export const getAsesmenMinatBakat = async (
       });
     }
 
+    const actorRole = normalizeRole(req.user?.role);
+    const where: any = {
+      sekolahId,
+      dihapusPada: null,
+    };
+
+    if (actorRole === "siswa") {
+      where.siswaId = req.user?.userId;
+    }
+
     const data = await prisma.asesmenMinatBakat.findMany({
-      where: {
-        sekolahId,
-        dihapusPada: null,
-      },
+      where,
       include: {
         siswa: {
           select: {

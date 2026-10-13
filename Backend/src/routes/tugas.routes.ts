@@ -2,6 +2,7 @@ import { Router } from "express";
 import { authenticate } from "../middlewares/auth.middleware";
 import { requireTenant } from "../middlewares/tenant.middleware";
 import { requireIzin } from "../middlewares/izin.middleware";
+import { authorizeRoles } from "../middlewares/role.middleware";
 import {
   createTugas,
   getTugasByKelasMapel,
@@ -22,11 +23,13 @@ router.put("/:id", requireIzin("tugas.update"), updateTugas);
 router.delete("/:id", requireIzin("tugas.delete"), deleteTugas);
 router.get(
   "/:id/pengumpulan",
+  authorizeRoles("guru", "admin_sekolah"),
   requireIzin("tugas.view"),
   getPengumpulanByTugas,
 );
 router.patch(
   "/pengumpulan/:pengumpulanId/nilai",
+  authorizeRoles("guru", "admin_sekolah"),
   requireIzin("tugas.update"),
   beriNilaiTugas,
 );

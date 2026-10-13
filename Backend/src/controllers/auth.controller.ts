@@ -86,6 +86,22 @@ export const register = async (req: Request, res: Response) => {
   });
 };
 
+interface AuthUserPayload {
+  id: string;
+  namaLengkap: string;
+  email: string;
+  namaPengguna: string;
+  peran?: { nama?: string | null } | null;
+}
+
+export const formatAuthUser = (user: AuthUserPayload) => ({
+  id: user.id,
+  namaLengkap: user.namaLengkap,
+  email: user.email,
+  namaPengguna: user.namaPengguna,
+  role: user.peran?.nama ?? null,
+});
+
 export const verifyRegister = async (req: Request, res: Response) => {
   const data = verifySchema.parse(req.body);
 
@@ -154,6 +170,7 @@ export const verifyRegister = async (req: Request, res: Response) => {
     success: true,
     message: "Verifikasi berhasil. Anda sekarang telah login.",
     token,
+    user: formatAuthUser(userWithRole),
   });
 };
 
@@ -212,6 +229,7 @@ export const login = async (req: Request, res: Response) => {
     success: true,
     message: "Login berhasil",
     token,
+    user: formatAuthUser(user),
   });
 };
 

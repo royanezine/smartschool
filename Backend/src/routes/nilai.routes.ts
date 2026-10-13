@@ -15,7 +15,7 @@ const router = Router();
 
 router.use(authenticate);
 
-router.get("/export", exportRekapNilai);
+router.get("/export", authorizeRoles("admin_sekolah", "guru"), exportRekapNilai);
 
 router.get("/kelas-saya", authorizeRoles("guru"), getKelasSaya);
 

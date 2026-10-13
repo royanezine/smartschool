@@ -14,6 +14,8 @@ import { requireIzin } from "../middlewares/izin.middleware";
 import { uploadBiometrik } from "../middlewares/upload.middleware";
 import { registerFaceIdByAdmin } from "../controllers/absensi.controller";
 
+import { authorizeRoles } from "../middlewares/role.middleware";
+
 const router = Router();
 
 const uploadDir = path.join(process.cwd(), "uploads", "absensi");
@@ -43,7 +45,7 @@ router.get("/kelas/:kelasId", requireIzin("lms.view"), getAbsensiKelas);
 router.get("/export", requireIzin("laporan.view"), exportRekapAbsensi);
 router.post(
   "/register-face",
-  authenticate,
+  authorizeRoles("super_admin", "admin_sekolah"),
   uploadBiometrik.single("foto"),
   registerFaceIdByAdmin,
 );

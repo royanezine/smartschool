@@ -127,8 +127,6 @@ app.use("/api/permohonan-izin", permohonanIzinRoutes);
 app.use("/api/audit-log", auditLogRoutes);
 app.use("/api/pengaturan", pengaturanSistemRoutes);
 app.use("/api/pengaturan/kkm", kkmRoutes);
-app.use("/api/pengaturan", pengaturanSistemRoutes);
-
 
 app.use(globalErrorHandler);
 

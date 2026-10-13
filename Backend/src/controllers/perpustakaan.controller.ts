@@ -810,8 +810,17 @@ export const kembalikanBuku = async (req: Request, res: Response) => {
 export const getPeminjaman = async (req: Request, res: Response) => {
   try {
     const sekolahId = (req as any).user.sekolahId;
+    const userRole = (req as any).user?.role ? String((req as any).user.role).trim().toLowerCase().replace(/[\s-]+/g, "_") : "";
+    const currentUserId = (req as any).user?.userId;
 
     const { status, penggunaId } = req.query;
+
+    const targetPenggunaId =
+      userRole === "siswa"
+        ? currentUserId
+        : penggunaId
+          ? String(penggunaId)
+          : undefined;
 
     const data = await prisma.peminjamanBuku.findMany({
       where: {
@@ -819,7 +828,7 @@ export const getPeminjaman = async (req: Request, res: Response) => {
         dihapusPada: null,
 
         ...(status ? { status: String(status) } : {}),
-        ...(penggunaId ? { penggunaId: String(penggunaId) } : {}),
+        ...(targetPenggunaId ? { penggunaId: targetPenggunaId } : {}),
       },
 
       include: {
