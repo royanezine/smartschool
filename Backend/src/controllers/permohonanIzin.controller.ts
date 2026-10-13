@@ -1,9 +1,10 @@
-import { Request, Response, NextFunction } from "express";
+import { Response, NextFunction } from "express";
 import { prisma } from "../config/db";
 import { AuthRequest } from "../middlewares/auth.middleware";
 import { AppError } from "../utils/appError";
 import { paginatedResponse, successResponse } from "../utils/responseFormatter";
 import { ajukanIzinSchema } from "../validations/permohonanIzin.validation";
+import { normalizeRole } from "../utils/rbac";
 
 export const ajukanIzin = async (
   req: AuthRequest,
@@ -52,12 +53,24 @@ export const getDaftarIzin = async (
   next: NextFunction,
 ) => {
   try {
+    const actorRole = normalizeRole(req.user?.role);
     const sekolahId = req.user?.sekolahId;
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 10;
     const status = req.query.status as string;
 
-    const where: any = { sekolahId };
+    const where: any = {};
+    if (actorRole !== "super_admin") {
+      if (!sekolahId) throw new AppError("Akses ditolak: sekolah tidak valid", 403);
+      where.sekolahId = sekolahId;
+    } else if (req.query.sekolahId) {
+      where.sekolahId = req.query.sekolahId as string;
+    }
+
+    if (actorRole === "siswa") {
+      where.penggunaId = req.user?.userId;
+    }
+
     if (status) where.status = status;
 
     const skip = (page - 1) * limit;
@@ -103,6 +116,7 @@ export const verifikasiIzin = async (
     if (!id) throw new AppError("ID izin tidak valid", 400);
 
     const penyetujuId = req.user?.userId;
+    const actorRole = normalizeRole(req.user?.role);
     const { status, catatan } = req.body; // status harus "disetujui" atau "ditolak"
 
     if (!["disetujui", "ditolak"].includes(status)) {
@@ -111,6 +125,11 @@ export const verifikasiIzin = async (
 
     const existing = await prisma.permohonanIzin.findUnique({ where: { id } });
     if (!existing) throw new AppError("Permohonan izin tidak ditemukan", 404);
+
+    if (actorRole !== "super_admin" && existing.sekolahId !== req.user?.sekolahId) {
+      throw new AppError("Akses ditolak: permohonan izin milik sekolah lain", 403);
+    }
+
     if (existing.status !== "menunggu")
       throw new AppError(`Permohonan sudah berstatus ${existing.status}`, 400);
 
@@ -129,66 +148,4 @@ export const verifikasiIzin = async (
   }
 };
 
-export const verifikasiPengajuan = async (req: Request, res: Response) => {
-  try {
-    const rawId = req.params.id;
-    const id = Array.isArray(rawId) ? rawId[0] : rawId;
-    const { status, catatan, guruPenggantiId } = req.body; // status: "disetujui" | "ditolak"
 
-    if (!id) {
-      return res.status(400).json({
-        success: false,
-        message: "ID permohonan izin tidak valid",
-      });
-    }
-
-    const izin = await prisma.permohonanIzin.findUnique({
-      where: { id },
-      include: {
-        pengguna: {
-          select: { namaLengkap: true },
-        },
-      },
-    });
-
-    if (!izin) {
-      return res.status(404).json({
-        success: false,
-        message: "Data permohonan izin tidak ditemukan",
-      });
-    }
-
-    const updatedIzin = await prisma.permohonanIzin.update({
-      where: { id },
-      data: {
-        status,
-        catatan,
-        guruPenggantiId:
-          status === "disetujui" && guruPenggantiId ? guruPenggantiId : null,
-      },
-    });
-
-    if (status === "disetujui" && guruPenggantiId) {
-      const guruIzinNama = izin.pengguna.namaLengkap;
-      const rentangTanggal = `${new Date(izin.tanggalMulai).toLocaleDateString("id-ID")} s/d ${new Date(izin.tanggalSelesai).toLocaleDateString("id-ID")}`;
-
-      await prisma.notifikasi.create({
-        data: {
-          penggunaId: guruPenggantiId,
-          judul: "Penugasan Guru Pengganti",
-          isi: `Anda ditugaskan sebagai guru pengganti untuk ${guruIzinNama} pada tanggal ${rentangTanggal}. Alasan: ${izin.alasan}`,
-          tipe: "PENUGASAN",  
-          targetUrl: "/jadwal-mengajar", 
-        },
-      });
-    }
-
-    return res.status(200).json({
-      success: true,
-      message: `Permohonan izin berhasil di-${status}`,
-      data: updatedIzin,
-    });
-  } catch (error: any) {
-    return res.status(500).json({ success: false, message: error.message });
-  }
-};

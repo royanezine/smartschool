@@ -13,6 +13,7 @@ export const requireTenant = async (
       return res.status(401).json({
         success: false,
         message: "Unauthorized",
+        errorCode: "UNAUTHORIZED",
       });
     }
 
@@ -26,6 +27,7 @@ export const requireTenant = async (
       return res.status(403).json({
         success: false,
         message: "Akses Ditolak: Anda tidak terhubung dengan sekolah manapun",
+        errorCode: "NO_TENANT_LINKED",
       });
     }
 
@@ -33,12 +35,18 @@ export const requireTenant = async (
       where: {
         id: sekolahId,
       },
+      select: {
+        id: true,
+        status: true,
+        dihapusPada: true,
+      },
     });
 
-    if (!sekolah) {
+    if (!sekolah || sekolah.dihapusPada !== null) {
       return res.status(404).json({
         success: false,
         message: "Sekolah tidak ditemukan",
+        errorCode: "TENANT_NOT_FOUND",
       });
     }
 
@@ -46,17 +54,13 @@ export const requireTenant = async (
       return res.status(403).json({
         success: false,
         message: "Akses Ditolak: Sekolah tidak aktif",
+        errorCode: "TENANT_INACTIVE",
       });
     }
 
     next();
   } catch (error) {
-    console.error("Tenant Middleware Error:", error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
+    next(error);
   }
 };
 
@@ -70,6 +74,7 @@ export const requireSubscription = async (
       return res.status(401).json({
         success: false,
         message: "Unauthorized",
+        errorCode: "UNAUTHORIZED",
       });
     }
 
@@ -83,6 +88,7 @@ export const requireSubscription = async (
       return res.status(403).json({
         success: false,
         message: "Pengguna tidak memiliki sekolah",
+        errorCode: "NO_TENANT_LINKED",
       });
     }
 
@@ -99,6 +105,7 @@ export const requireSubscription = async (
       return res.status(403).json({
         success: false,
         message: "Sekolah belum memiliki langganan",
+        errorCode: "SUBSCRIPTION_REQUIRED",
       });
     }
 
@@ -110,6 +117,7 @@ export const requireSubscription = async (
       return res.status(403).json({
         success: false,
         message: "Langganan sekolah tidak aktif",
+        errorCode: "SUBSCRIPTION_INACTIVE",
       });
     }
 
@@ -129,16 +137,12 @@ export const requireSubscription = async (
       return res.status(403).json({
         success: false,
         message: "Masa langganan telah kadaluarsa",
+        errorCode: "SUBSCRIPTION_EXPIRED",
       });
     }
 
     next();
   } catch (error) {
-    console.error("Subscription Middleware Error:", error);
-
-    return res.status(500).json({
-      success: false,
-      message: "Internal server error",
-    });
+    next(error);
   }
 };

@@ -3,6 +3,7 @@ import { prisma } from "../config/db";
 import { AppError } from "../utils/appError";
 import { successResponse } from "../utils/responseFormatter";
 import { AuthRequest } from "../middlewares/auth.middleware";
+import { normalizeRole } from "../utils/rbac";
 
 export const getPengaturanSekolah = async (
   req: AuthRequest,
@@ -10,7 +11,11 @@ export const getPengaturanSekolah = async (
   next: NextFunction,
 ) => {
   try {
-    const sekolahId = req.user?.sekolahId;
+    const actorRole = normalizeRole(req.user?.role);
+    let sekolahId = req.user?.sekolahId;
+    if (actorRole === "super_admin" && req.query.sekolahId) {
+      sekolahId = req.query.sekolahId as string;
+    }
     if (!sekolahId) throw new AppError("Akses ditolak", 403);
 
     const pengaturan = await prisma.pengaturanSistem.findMany({
@@ -36,7 +41,11 @@ export const upsertPengaturanSekolah = async (
   next: NextFunction,
 ) => {
   try {
-    const sekolahId = req.user?.sekolahId;
+    const actorRole = normalizeRole(req.user?.role);
+    let sekolahId = req.user?.sekolahId;
+    if (actorRole === "super_admin" && (req.body.sekolahId || req.query.sekolahId)) {
+      sekolahId = (req.body.sekolahId || req.query.sekolahId) as string;
+    }
     const userId = req.user?.userId;
     const { kunci, nilai, tipeData, kelompok, keterangan } = req.body;
 

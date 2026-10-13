@@ -2,21 +2,30 @@ import { Response } from "express";
 import { prisma } from "../config/db";
 import { AuthRequest } from "../middlewares/auth.middleware";
 import { successResponse } from "../utils/responseFormatter";
+import { normalizeRole } from "../utils/rbac";
 
 export const getDashboardSekolah = async (
   req: AuthRequest,
   res: Response
 ) => {
   try {
-    const sekolahId = req.user?.sekolahId;
+    const actorRole = normalizeRole(req.user?.role);
+    const sekolahId =
+      req.user?.sekolahId ||
+      (actorRole === "super_admin" ? (req.query.sekolahId as string | undefined) : undefined);
     const yayasanId = req.user?.yayasanId;
 
-    if (!sekolahId) {
+    if (!sekolahId && actorRole !== "super_admin" && !yayasanId) {
       return res.status(403).json({
         success: false,
-        message: "Akses ditolak",
+        message: "Akses ditolak: Anda tidak terhubung dengan sekolah manapun",
+        errorCode: "NO_TENANT_LINKED",
       });
     }
+
+    const today = new Date();
+    const startOfDay = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate()));
+    const endOfDay = new Date(Date.UTC(today.getUTCFullYear(), today.getUTCMonth(), today.getUTCDate(), 23, 59, 59, 999));
 
     const [
       totalSiswa,
@@ -24,42 +33,53 @@ export const getDashboardSekolah = async (
       totalKelas,
       absensiHariIni,
     ] = await Promise.all([
-      prisma.pengguna.count({
-        where: {
-          sekolahId,
-          peran: {
-            nama: "siswa",
-          },
-          dihapusPada: null,
-          status: "aktif",
-        },
-      }),
-      prisma.pengguna.count({
-        where: {
-          sekolahId,
-          peran: {
-            nama: "guru",
-          },
-          dihapusPada: null,
-          status: "aktif",
-        },
-      }),
-      prisma.kelas.count({
-        where: {
-          sekolahId,
-          dihapusPada: null,
-        },
-      }),
-      prisma.absensi.groupBy({
-        by: ["status"],
-        where: {
-          kelas: {
-            sekolahId,
-          },
-          tanggal: new Date(),
-        },
-        _count: true,
-      }),
+      sekolahId
+        ? prisma.pengguna.count({
+            where: {
+              sekolahId,
+              peran: {
+                nama: "siswa",
+              },
+              dihapusPada: null,
+              status: "aktif",
+            },
+          })
+        : 0,
+      sekolahId
+        ? prisma.pengguna.count({
+            where: {
+              sekolahId,
+              peran: {
+                nama: "guru",
+              },
+              dihapusPada: null,
+              status: "aktif",
+            },
+          })
+        : 0,
+      sekolahId
+        ? prisma.kelas.count({
+            where: {
+              sekolahId,
+              dihapusPada: null,
+            },
+          })
+        : 0,
+      sekolahId
+        ? prisma.absensi.groupBy({
+            by: ["status"],
+            where: {
+              kelas: {
+                sekolahId,
+              },
+              tanggal: {
+                gte: startOfDay,
+                lte: endOfDay,
+              },
+            },
+            _count: true,
+          })
+        : [],
     ]);
 
     const rekapKehadiran = {

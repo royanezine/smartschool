@@ -12,6 +12,7 @@ import {
 import { successResponse } from "../utils/responseFormatter";
 
 import { AppError } from "../utils/appError";
+import { isSuperAdmin } from "../utils/rbac";
 
 export const createPayment = async (
   req: AuthRequest,
@@ -382,7 +383,19 @@ export const getAllLanggananSekolah = async (
   next: NextFunction
 ) => {
   try {
+    const isSuper = isSuperAdmin(req.user?.role);
+    const sekolahId = req.user?.sekolahId;
+
+    const where: any = {};
+    if (!isSuper) {
+      if (!sekolahId) {
+        throw new AppError("Akses ditolak: Anda tidak terhubung dengan sekolah", 403, "NO_TENANT_LINKED");
+      }
+      where.sekolahId = sekolahId;
+    }
+
     const langganan = await prisma.langgananSekolah.findMany({
+      where,
       include: {
         sekolah: true,
         paket: true,

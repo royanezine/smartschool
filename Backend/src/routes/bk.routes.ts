@@ -19,10 +19,11 @@ import {
   deleteAsesmenMinatBakat,
 } from "../controllers/bk.controller";
 import { authenticate } from "../middlewares/auth.middleware";
+import { requireTenant } from "../middlewares/tenant.middleware";
 
 const router = Router();
 
-router.use(authenticate);
+router.use(authenticate, requireTenant);
 
 router.get("/konseling", getSesiKonseling);
 router.get("/konseling/:id", getSesiKonselingById);

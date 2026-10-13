@@ -29,6 +29,19 @@ export const createSoal = async (req: AuthRequest, res: Response) => {
     throw new AppError("Soal pilihan ganda membutuhkan jawaban benar", 400);
   }
 
+  if (data.jenisSoal === "benar_salah") {
+    if (!data.jawabanBenar) {
+      throw new AppError("Soal benar/salah membutuhkan kunci jawaban", 400);
+    }
+    const kunciNorm = data.jawabanBenar.trim().toLowerCase();
+    if (kunciNorm !== "benar" && kunciNorm !== "salah") {
+      throw new AppError(
+        "Kunci jawaban soal benar/salah harus berupa 'benar' atau 'salah'",
+        400,
+      );
+    }
+  }
+
   const soal = await prisma.soalAsesmen.create({
     data: {
       asesmenId: data.ujianId,
@@ -51,9 +64,24 @@ export const createSoal = async (req: AuthRequest, res: Response) => {
 
 export const getSoalByUjian = async (req: AuthRequest, res: Response) => {
   const ujianId = req.params.ujianId as string;
+  const role = req.user?.role ?? "";
+  // Normalise: semua role selain guru tidak boleh melihat kunciJawaban
+  const showKunci = ["guru", "super_admin", "admin_sekolah"].includes(role);
 
   const soal = await prisma.soalAsesmen.findMany({
     where: { asesmenId: ujianId },
+    select: {
+      id: true,
+      asesmenId: true,
+      teksSoal: true,
+      jenisSoal: true,
+      pilihan: true,
+      poin: true,
+      nomorUrut: true,
+      dibuatPada: true,
+      diperbaruiPada: true,
+      ...(showKunci && { kunciJawaban: true }),
+    },
     orderBy: { nomorUrut: "asc" },
   });
 
@@ -66,8 +94,24 @@ export const getSoalByUjian = async (req: AuthRequest, res: Response) => {
 
 export const getSoalById = async (req: AuthRequest, res: Response) => {
   const id = req.params.id as string;
+  const role = req.user?.role ?? "";
+  const showKunci = ["guru", "super_admin", "admin_sekolah"].includes(role);
 
-  const soal = await prisma.soalAsesmen.findUnique({ where: { id } });
+  const soal = await prisma.soalAsesmen.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      asesmenId: true,
+      teksSoal: true,
+      jenisSoal: true,
+      pilihan: true,
+      poin: true,
+      nomorUrut: true,
+      dibuatPada: true,
+      diperbaruiPada: true,
+      ...(showKunci && { kunciJawaban: true }),
+    },
+  });
 
   if (!soal) {
     throw new AppError("Soal ujian tidak ditemukan", 404);

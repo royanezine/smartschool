@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
+    "test": "tsx --test test/*.test.ts",
     "postinstall": "prisma generate",
     "start": "node dist/server.js"
   },
@@ -39,12 +40,12 @@
     "@types/express": "^5.0.6",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.2.0",
-    "@types/node": "^26.1.2",
+    "@types/node": "^26.6.5",
     "@types/nodemailer": "^8.0.1",
     "bcryptjs": "^3.0.3",
     "install": "^0.13.0",
     "npm": "^11.19.0",
-    "tsx": "^4.23.13",
+    "tsx": "^4.23.15",
     "typescript": "^7.0.2"
   },
   "prisma": {

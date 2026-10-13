@@ -50,6 +50,16 @@ export const getUsers = async (req: AuthRequest, res: Response) => {
       AND.push({
         sekolahId,
       });
+
+      AND.push({
+        peran: {
+          is: {
+            nama: {
+              notIn: ["super_admin", "superadmin", "Super Admin", "SUPER_ADMIN", "super-admin"],
+            },
+          },
+        },
+      });
     }
 
     if (status) {
@@ -70,10 +80,18 @@ export const getUsers = async (req: AuthRequest, res: Response) => {
     }
 
     if (requestedRole) {
+      const normRequested = normalizeRole(requestedRole);
+      if (actorRole !== "super_admin" && (normRequested === "super_admin" || normRequested === "admin_yayasan")) {
+        return res.status(403).json({
+          success: false,
+          message: "Anda tidak memiliki izin untuk memfilter peran tersebut",
+          errorCode: "FORBIDDEN_ROLE_FILTER",
+        });
+      }
       AND.push({
         peran: {
           is: {
-            nama: normalizeRole(requestedRole),
+            nama: normRequested,
           },
         },
       });
@@ -84,7 +102,11 @@ export const getUsers = async (req: AuthRequest, res: Response) => {
         peran: {
           is: {
             nama: {
-              notIn: ["super_admin", "admin_yayasan", "admin_sekolah"],
+              notIn: [
+                "super_admin", "superadmin", "Super Admin", "SUPER_ADMIN", "super-admin",
+                "admin_yayasan", "adminyayasan", "Admin Yayasan", "ADMIN_YAYASAN",
+                "admin_sekolah", "adminsekolah", "Admin Sekolah", "ADMIN_SEKOLAH",
+              ],
             },
           },
         },
@@ -155,6 +177,7 @@ export const getUsers = async (req: AuthRequest, res: Response) => {
           jabatan: true,
           golongan: true,
           shiftKerja: true,
+          sekolahId: true,
 
           sekolah: {
             select: {
@@ -263,6 +286,38 @@ export const createUser = async (req: AuthRequest, res: Response) => {
       });
     }
 
+    const actorRole = normalizeRole(req.user?.role);
+    const targetRoleName = normalizeRole(role.nama);
+
+    if (actorRole !== "super_admin") {
+      if (role.sekolahId !== null && role.sekolahId !== req.user?.sekolahId) {
+        return res.status(403).json({
+          success: false,
+          message: "Anda tidak dapat menggunakan peran dari sekolah lain",
+          errorCode: "FORBIDDEN_ROLE_TENANT",
+        });
+      }
+
+      if (!canManageRole(actorRole, targetRoleName)) {
+        return res.status(403).json({
+          success: false,
+          message: "Anda tidak dapat membuat pengguna dengan level peran tersebut",
+          errorCode: "FORBIDDEN",
+        });
+      }
+
+      if (!req.user?.sekolahId) {
+        return res.status(403).json({
+          success: false,
+          message: "Anda tidak terhubung dengan sekolah",
+          errorCode: "NO_TENANT_LINKED",
+        });
+      }
+    }
+
+    const assignedSekolahId =
+      actorRole === "super_admin" ? sekolahId || null : req.user?.sekolahId || null;
+
     // Shift kerja hanya berlaku untuk Guru dan wajib diisi (pagi / siang)
     let shiftValue: string | null = null;
     if (isGuru(role.nama)) {
@@ -284,7 +339,7 @@ export const createUser = async (req: AuthRequest, res: Response) => {
         kataSandi: passwordHash,
         namaLengkap,
         peranId,
-        sekolahId: sekolahId || null,
+        sekolahId: assignedSekolahId,
 
         nipd: nipd || null,
         nip: nip || null,
@@ -434,7 +489,60 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
           message: "Role tidak ditemukan",
         });
       }
+      if (actorRole !== "super_admin") {
+        if (newRole.sekolahId !== null && newRole.sekolahId !== req.user?.sekolahId) {
+          return res.status(403).json({
+            success: false,
+            message: "Anda tidak dapat menggunakan peran dari sekolah lain",
+            errorCode: "FORBIDDEN_ROLE_TENANT",
+          });
+        }
+        if (!canManageRole(actorRole, newRole.nama)) {
+          return res.status(403).json({
+            success: false,
+            message: "Anda tidak dapat memberikan peran dengan level tersebut",
+            errorCode: "FORBIDDEN",
+          });
+        }
+      }
       finalRoleName = newRole.nama;
+    }
+
+    // Self-demotion protection
+    if (
+      target.id === req.user?.userId &&
+      (status === "nonaktif" ||
+        (peranId && normalizeRole(finalRoleName) !== "super_admin" && targetRole === "super_admin"))
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Anda tidak dapat menonaktifkan atau menurunkan peran akun Anda sendiri",
+        errorCode: "SELF_DEMOTION_FORBIDDEN",
+      });
+    }
+
+    // Last superadmin protection
+    if (
+      targetRole === "super_admin" &&
+      (status === "nonaktif" ||
+        (peranId && normalizeRole(finalRoleName) !== "super_admin"))
+    ) {
+      const activeSuperAdminCount = await prisma.pengguna.count({
+        where: {
+          peran: { nama: "super_admin" },
+          status: "aktif",
+          dihapusPada: null,
+          id: { not: target.id },
+        },
+      });
+
+      if (activeSuperAdminCount === 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Tidak dapat menonaktifkan atau menurunkan peran super admin terakhir dalam sistem",
+          errorCode: "LAST_SUPERADMIN_PROTECTION",
+        });
+      }
     }
 
     const willBeGuru = isGuru(finalRoleName);
@@ -444,7 +552,7 @@ export const updateUser = async (req: AuthRequest, res: Response) => {
       ...(email !== undefined && { email }),
       ...(namaLengkap !== undefined && { namaLengkap }),
       ...(peranId !== undefined && { peranId }),
-      ...(sekolahId !== undefined && { sekolahId }),
+      ...(sekolahId !== undefined && actorRole === "super_admin" && { sekolahId }),
       ...(nipd !== undefined && { nipd }),
       ...(nip !== undefined && { nip }),
       ...(nuptk !== undefined && { nuptk }),
@@ -558,10 +666,19 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
     const targetRole = normalizeRole(user.peran?.nama);
 
     if (actorRole !== "super_admin") {
+      if (targetRole === "super_admin" || targetRole === "admin_yayasan") {
+        return res.status(403).json({
+          success: false,
+          message: "Anda tidak dapat mengelola role dengan level tersebut",
+          errorCode: "FORBIDDEN",
+        });
+      }
+
       if (user.sekolahId !== req.user?.sekolahId) {
         return res.status(403).json({
           success: false,
           message: "Anda tidak dapat mengakses pengguna dari sekolah lain",
+          errorCode: "FORBIDDEN",
         });
       }
 
@@ -569,6 +686,36 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
         return res.status(403).json({
           success: false,
           message: "Anda tidak dapat mengelola role dengan level tersebut",
+          errorCode: "FORBIDDEN",
+        });
+      }
+    }
+
+    // Self-deletion protection
+    if (user.id === req.user?.userId) {
+      return res.status(400).json({
+        success: false,
+        message: "Anda tidak dapat menghapus atau menonaktifkan akun Anda sendiri",
+        errorCode: "SELF_DELETION_FORBIDDEN",
+      });
+    }
+
+    // Last superadmin protection
+    if (targetRole === "super_admin") {
+      const activeSuperAdminCount = await prisma.pengguna.count({
+        where: {
+          peran: { nama: "super_admin" },
+          status: "aktif",
+          dihapusPada: null,
+          id: { not: user.id },
+        },
+      });
+
+      if (activeSuperAdminCount === 0) {
+        return res.status(400).json({
+          success: false,
+          message: "Tidak dapat menghapus super admin terakhir dalam sistem",
+          errorCode: "LAST_SUPERADMIN_PROTECTION",
         });
       }
     }
@@ -576,6 +723,14 @@ export const deleteUser = async (req: AuthRequest, res: Response) => {
     const updatedUser = await prisma.pengguna.update({
       where: { id },
       data: { status: "nonaktif", dihapusPada: new Date() },
+      select: {
+        id: true,
+        namaPengguna: true,
+        email: true,
+        namaLengkap: true,
+        status: true,
+        dihapusPada: true,
+      },
     });
 
     return res.status(200).json({
@@ -792,16 +947,33 @@ export const getUserById = async (req: AuthRequest, res: Response) => {
         .json({ success: false, message: "Pengguna tidak ditemukan" });
     }
 
-    const userRole = await prisma.peran.findUnique({ where: { id: roleId } });
-    if (
-      userRole?.nama !== "super_admin" &&
-      userRole?.nama !== "admin_yayasan" &&
-      user.sekolah?.id !== sekolahId
-    ) {
-      return res.status(403).json({
-        success: false,
-        message: "Akses ditolak: Pengguna berada di luar sekolah Anda",
-      });
+    const actorRole = normalizeRole(req.user?.role);
+    const targetRole = normalizeRole(user.peran?.nama);
+
+    if (actorRole !== "super_admin") {
+      if (targetRole === "super_admin" || targetRole === "admin_yayasan") {
+        return res.status(403).json({
+          success: false,
+          message: "Akses ditolak: Anda tidak memiliki izin untuk melihat pengguna ini",
+          errorCode: "FORBIDDEN",
+        });
+      }
+
+      if (!user.sekolah?.id || user.sekolah.id !== sekolahId) {
+        return res.status(403).json({
+          success: false,
+          message: "Akses ditolak: Pengguna berada di luar sekolah Anda",
+          errorCode: "FORBIDDEN",
+        });
+      }
+
+      if (!canManageRole(actorRole, targetRole)) {
+        return res.status(403).json({
+          success: false,
+          message: "Akses ditolak: Anda tidak memiliki izin untuk melihat pengguna ini",
+          errorCode: "FORBIDDEN",
+        });
+      }
     }
 
     return res.status(200).json({
@@ -813,7 +985,7 @@ export const getUserById = async (req: AuthRequest, res: Response) => {
     console.error("Error getUserById:", error);
     return res
       .status(500)
-      .json({ success: false, message: "Terjadi kesalahan server" });
+      .json({ success: false, message: "Terjadi kesalahan server", errorCode: "INTERNAL_SERVER_ERROR" });
   }
 };
 
@@ -828,22 +1000,39 @@ export const quickResetPassword = async (req: AuthRequest, res: Response) => {
     }
 
     const adminSekolahId = req.user?.sekolahId;
-    const actorRole = req.user?.role;
+    const actorRole = normalizeRole(req.user?.role);
 
     const targetUser = await prisma.pengguna.findUnique({
       where: { id: targetUserId },
+      include: {
+        peran: {
+          select: { nama: true },
+        },
+      },
     });
 
     if (!targetUser) throw new AppError("Pengguna tidak ditemukan", 404);
 
-    if (
-      actorRole !== "super_admin" &&
-      targetUser.sekolahId !== adminSekolahId
-    ) {
-      throw new AppError("Akses ditolak untuk mereset pengguna ini", 403);
+    const targetRole = normalizeRole(targetUser.peran?.nama);
+
+    if (actorRole !== "super_admin") {
+      if (targetRole === "super_admin" || targetRole === "admin_yayasan") {
+        throw new AppError("Akses ditolak untuk mereset pengguna ini", 403, "FORBIDDEN");
+      }
+      if (!targetUser.sekolahId || targetUser.sekolahId !== adminSekolahId) {
+        throw new AppError("Akses ditolak untuk mereset pengguna ini", 403, "FORBIDDEN");
+      }
+      if (!canManageRole(actorRole, targetRole)) {
+        throw new AppError("Anda tidak dapat mereset kata sandi pengguna dengan level peran tersebut", 403, "FORBIDDEN");
+      }
     }
 
-    const defaultPassword = await bcrypt.hash("12345678", 10);
+    const requestedPassword = req.body?.kataSandi || req.body?.password;
+    if (requestedPassword && requestedPassword.length < 8) {
+      throw new AppError("Kata sandi baru minimal 8 karakter", 400, "VALIDATION_ERROR");
+    }
+    const newPassword = requestedPassword || "12345678";
+    const defaultPassword = await bcrypt.hash(newPassword, 10);
 
     await prisma.pengguna.update({
       where: { id: targetUserId },
@@ -852,12 +1041,21 @@ export const quickResetPassword = async (req: AuthRequest, res: Response) => {
 
     return successResponse(
       res,
-      "Kata sandi berhasil direset menjadi: 12345678",
+      requestedPassword
+        ? "Kata sandi berhasil direset"
+        : "Kata sandi berhasil direset menjadi: 12345678",
     );
-  } catch (error) {
+  } catch (error: any) {
+    if (error instanceof AppError) {
+      return res.status(error.statusCode).json({
+        success: false,
+        message: error.message,
+        errorCode: error.errorCode || (error.statusCode === 403 ? "FORBIDDEN" : "BUSINESS_ERROR"),
+      });
+    }
     console.error("Error quickResetPassword:", error);
     return res
       .status(500)
-      .json({ success: false, message: "Terjadi kesalahan server" });
+      .json({ success: false, message: "Terjadi kesalahan server", errorCode: "INTERNAL_SERVER_ERROR" });
   }
 };

@@ -7,11 +7,17 @@ export const ROLE_LEVEL: Record<string, number> = {
 };
 
 export const normalizeRole = (role?: string | null): string => {
-  return role?.trim().toLowerCase() ?? "";
+  if (!role) return "";
+  const cleaned = role.trim().toLowerCase().replace(/[\s-]+/g, "_");
+  if (cleaned === "superadmin") return "super_admin";
+  if (cleaned === "adminyayasan") return "admin_yayasan";
+  if (cleaned === "adminsekolah") return "admin_sekolah";
+  return cleaned;
 };
 
 export const isSuperAdmin = (role?: string | null): boolean => {
-  return normalizeRole(role) === "super_admin";
+  const norm = normalizeRole(role);
+  return norm === "super_admin";
 };
 
 export const canManageRole = (
@@ -23,6 +29,11 @@ export const canManageRole = (
 
   if (actor === "super_admin") {
     return true;
+  }
+
+  // Non-superadmin cannot manage or escalate to super_admin under any circumstances
+  if (target === "super_admin") {
+    return false;
   }
 
   const actorLevel = ROLE_LEVEL[actor] ?? 0;
