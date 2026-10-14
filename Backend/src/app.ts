@@ -40,6 +40,7 @@ import permohonanIzinRoutes from "./routes/permohonanIzin.routes";
 import peminjamanAsetRoutes from "./routes/peminjamanAset.routes";
 import raportRoutes from "./routes/raport.routes";
 import kkmRoutes from "./routes/kkm.routes";
+import keuanganRoutes from "./routes/keuangan.routes";
 
 // IMPORT ROUTES BARU (YANG SEBELUMNYA HILANG)
 import auditLogRoutes from "./routes/auditLog.routes";
@@ -135,6 +136,7 @@ app.use("/api/pengaturan/kkm", kkmRoutes);
 app.use("/api/kategori-jabatan", kategoriJabatanRoutes);
 app.use("/api/shift-kerja", shiftKerjaRoutes);
 app.use("/api/penggajian", penggajianRoutes);
+app.use("/api/keuangan", keuanganRoutes);
 
 app.use(globalErrorHandler);
 

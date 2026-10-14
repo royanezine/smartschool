@@ -110,6 +110,12 @@ pinLockedUntil     DateTime? @map("pin_locked_until") @db.Timestamp()
   shiftKerjaMaster ShiftKerja?      @relation(fields: [shiftKerjaId], references: [id])
   penggajian       Penggajian[]
 
+  tagihanSiswa              Tagihan[]           @relation("SiswaTagihan")
+  pembayaranSiswa           PembayaranTagihan[] @relation("SiswaPembayaran")
+  pembayaranDiterima        PembayaranTagihan[] @relation("PenerimaPembayaran")
+  tabunganSiswa             TabunganSiswa[]     @relation("SiswaTabungan")
+  transaksiTabunganPetugas  TransaksiTabungan[] @relation("PetugasTabungan")
+
   @@map("pengguna")
   permohonanIzins PermohonanIzin[] @relation("GuruPenggantiIzin")
 }
@@ -232,8 +238,16 @@ model Sekolah {
   peminjamanBuku PeminjamanBuku[]
   permohonanIzin PermohonanIzin[]
 
-  nilaiAkhirMapel NilaiAkhirMapel[]
-  rapot           Rapot[]
+  nilaiAkhirMapel   NilaiAkhirMapel[]
+  rapot             Rapot[]
+  kategoriTagihan   KategoriTagihan[]
+  tarifTagihan      TarifTagihan[]
+  tagihan           Tagihan[]
+  pembayaranTagihan PembayaranTagihan[]
+  tabunganSiswa     TabunganSiswa[]
+  transaksiTabungan TransaksiTabungan[]
+  akunKas           AkunKas[]
+  jurnalKas         JurnalKas[]
 
   kategoriJabatan KategoriJabatan[]
   tarifJabatan    TarifJabatan[]
@@ -544,6 +558,9 @@ model TahunAjaran {
   kelas   Kelas[]
   rapot   Rapot[]
   
+  tarifTagihan TarifTagihan[]
+  tagihan      Tagihan[]
+
   @@map("tahun_ajaran")
 }
 
@@ -579,6 +596,8 @@ model Kelas {
   kelasMapel KelasMapel[]
   absensi    Absensi[]
   rapot      Rapot[]
+
+  tarifTagihan TarifTagihan[]
 
   @@map("kelas")
 }
@@ -1598,9 +1617,8 @@ model PeminjamanBuku {
   @@map("peminjaman_buku")
 }
 
-// ==========================================
+
 // 3. SISTEM SHIFT & PENGGAJIAN PER JAM
-// ==========================================
 
 model KategoriJabatan {
   id             String    @id @default(uuid())
@@ -1618,12 +1636,38 @@ model KategoriJabatan {
   diperbaruiPada DateTime  @updatedAt @map("diperbarui_pada") @db.Timestamp()
   dihapusPada    DateTime? @map("dihapus_pada") @db.Timestamp()
 
-  sekolah        Sekolah        @relation(fields: [sekolahId], references: [id])
-  tarifRiwayat   TarifJabatan[]
-  pengguna       Pengguna[]
+  sekolah      Sekolah        @relation(fields: [sekolahId], references: [id])
+  pengguna     Pengguna[]
+  tarifJabatan TarifJabatan[]
 
-  @@map("kategori_jabatan")
   @@index([sekolahId])
+  @@map("kategori_jabatan")
+}
+
+model KategoriTagihan {
+  id             String  @id @default(uuid())
+  sekolahId      String  @map("sekolah_id")
+  dibuatOleh     String? @map("dibuat_oleh")
+  diperbaruiOleh String? @map("diperbarui_oleh")
+  dihapusOleh    String? @map("dihapus_oleh")
+
+  kode      String  @db.VarChar(20)
+  nama      String  @db.VarChar(100)
+  siklus    String  @default("bulanan") @db.VarChar(20)
+  deskripsi String? @db.Text
+  status    String? @default("aktif") @db.VarChar(20)
+
+  dibuatPada     DateTime  @default(now()) @map("dibuat_pada") @db.Timestamp()
+  diperbaruiPada DateTime  @updatedAt @map("diperbarui_pada") @db.Timestamp()
+  dihapusPada    DateTime? @map("dihapus_pada") @db.Timestamp()
+
+  sekolah         Sekolah         @relation(fields: [sekolahId], references: [id])
+  tarif           TarifTagihan[]
+  tagihan         Tagihan[]
+
+  @@unique([sekolahId, kode])
+  @@index([sekolahId])
+  @@map("kategori_tagihan")
 }
 
 model TarifJabatan {
@@ -1704,7 +1748,227 @@ model Penggajian {
   pengguna        Pengguna  @relation(fields: [penggunaId], references: [id])
 
   @@unique([sekolahId, penggunaId, bulan, tahun])
-  @@map("penggajian")
   @@index([sekolahId, bulan, tahun])
   @@index([penggunaId])
+  @@map("penggajian")
+}
+
+model TarifTagihan {
+  id               String  @id @default(uuid())
+  sekolahId        String  @map("sekolah_id")
+  kategoriTagihanId String @map("kategori_tagihan_id")
+  tahunAjaranId    String  @map("tahun_ajaran_id")
+  kelasId          String? @map("kelas_id")
+  dibuatOleh       String? @map("dibuat_oleh")
+  diperbaruiOleh   String? @map("diperbarui_oleh")
+  dihapusOleh      String? @map("dihapus_oleh")
+
+  tingkat    String? @db.VarChar(20)
+  nominal    Decimal @db.Decimal(15, 2)
+  keterangan String? @db.Text
+  status     String? @default("aktif") @db.VarChar(20)
+
+  dibuatPada     DateTime  @default(now()) @map("dibuat_pada") @db.Timestamp()
+  diperbaruiPada DateTime  @updatedAt @map("diperbarui_pada") @db.Timestamp()
+  dihapusPada    DateTime? @map("dihapus_pada") @db.Timestamp()
+
+  sekolah         Sekolah         @relation(fields: [sekolahId], references: [id])
+  kategoriTagihan KategoriTagihan @relation(fields: [kategoriTagihanId], references: [id])
+  tahunAjaran     TahunAjaran     @relation(fields: [tahunAjaranId], references: [id])
+  kelas           Kelas?          @relation(fields: [kelasId], references: [id])
+  tagihan         Tagihan[]
+
+  @@index([sekolahId, kategoriTagihanId, tahunAjaranId])
+  @@map("tarif_tagihan")
+}
+
+model Tagihan {
+  id                String  @id @default(uuid())
+  sekolahId         String  @map("sekolah_id")
+  siswaId           String  @map("siswa_id")
+  kategoriTagihanId String  @map("kategori_tagihan_id")
+  tarifTagihanId    String? @map("tarif_tagihan_id")
+  tahunAjaranId     String  @map("tahun_ajaran_id")
+  dibuatOleh        String? @map("dibuat_oleh")
+  diperbaruiOleh    String? @map("diperbarui_oleh")
+  dihapusOleh       String? @map("dihapus_oleh")
+
+  nomorTagihan String    @unique @map("nomor_tagihan") @db.VarChar(50)
+  periodeBulan Int?      @map("periode_bulan")
+  periodeTahun Int?      @map("periode_tahun")
+  nominal      Decimal   @db.Decimal(15, 2)
+  diskon       Decimal   @default(0) @db.Decimal(15, 2)
+  totalTagihan Decimal   @map("total_tagihan") @db.Decimal(15, 2)
+  totalDibayar Decimal   @default(0) @map("total_dibayar") @db.Decimal(15, 2)
+  sisa         Decimal   @db.Decimal(15, 2)
+  jatuhTempo   DateTime  @map("jatuh_tempo") @db.Date
+  status       String    @default("belum_bayar") @db.VarChar(20)
+  keterangan   String?   @db.Text
+
+  dibuatPada     DateTime  @default(now()) @map("dibuat_pada") @db.Timestamp()
+  diperbaruiPada DateTime  @updatedAt @map("diperbarui_pada") @db.Timestamp()
+  dihapusPada    DateTime? @map("dihapus_pada") @db.Timestamp()
+
+  sekolah         Sekolah             @relation(fields: [sekolahId], references: [id])
+  siswa           Pengguna            @relation("SiswaTagihan", fields: [siswaId], references: [id])
+  kategoriTagihan KategoriTagihan     @relation(fields: [kategoriTagihanId], references: [id])
+  tarifTagihan    TarifTagihan?       @relation(fields: [tarifTagihanId], references: [id])
+  tahunAjaran     TahunAjaran         @relation(fields: [tahunAjaranId], references: [id])
+  pembayaran      PembayaranTagihan[]
+
+  @@index([sekolahId, status, jatuhTempo])
+  @@index([siswaId])
+  @@index([sekolahId, kategoriTagihanId, tahunAjaranId])
+  @@map("tagihan")
+}
+
+model PembayaranTagihan {
+  id             String  @id @default(uuid())
+  sekolahId      String  @map("sekolah_id")
+  tagihanId      String  @map("tagihan_id")
+  siswaId        String  @map("siswa_id")
+  akunKasId      String  @map("akun_kas_id")
+  penerimaId     String? @map("penerima_id")
+  dibuatOleh     String? @map("dibuat_oleh")
+  diperbaruiOleh String? @map("diperbarui_oleh")
+  dihapusOleh    String? @map("dihapus_oleh")
+
+  nomorPembayaran  String    @unique @map("nomor_pembayaran") @db.VarChar(50)
+  jumlah           Decimal   @db.Decimal(15, 2)
+  metode           String    @db.VarChar(30)
+  tanggalBayar     DateTime  @map("tanggal_bayar") @db.Date
+  referensi        String?   @db.VarChar(100)
+  catatan          String?   @db.Text
+  status           String    @default("berhasil") @db.VarChar(20)
+  dibatalkanPada   DateTime? @map("dibatalkan_pada") @db.Timestamp()
+  dibatalkanOleh   String?   @map("dibatalkan_oleh")
+  alasanPembatalan String?   @map("alasan_pembatalan") @db.Text
+
+  dibuatPada     DateTime  @default(now()) @map("dibuat_pada") @db.Timestamp()
+  diperbaruiPada DateTime  @updatedAt @map("diperbarui_pada") @db.Timestamp()
+  dihapusPada    DateTime? @map("dihapus_pada") @db.Timestamp()
+
+  sekolah Sekolah   @relation(fields: [sekolahId], references: [id])
+  tagihan Tagihan   @relation(fields: [tagihanId], references: [id])
+  siswa   Pengguna  @relation("SiswaPembayaran", fields: [siswaId], references: [id])
+  penerima Pengguna? @relation("PenerimaPembayaran", fields: [penerimaId], references: [id])
+  akunKas AkunKas   @relation(fields: [akunKasId], references: [id])
+
+  @@index([sekolahId, tanggalBayar])
+  @@index([tagihanId])
+  @@index([siswaId])
+  @@map("pembayaran_tagihan")
+}
+
+model TabunganSiswa {
+  id             String  @id @default(uuid())
+  sekolahId      String  @map("sekolah_id")
+  siswaId        String  @map("siswa_id")
+  dibuatOleh     String? @map("dibuat_oleh")
+  diperbaruiOleh String? @map("diperbarui_oleh")
+  dihapusOleh    String? @map("dihapus_oleh")
+
+  saldo  Decimal @default(0) @db.Decimal(15, 2)
+  status String? @default("aktif") @db.VarChar(20)
+
+  dibuatPada     DateTime  @default(now()) @map("dibuat_pada") @db.Timestamp()
+  diperbaruiPada DateTime  @updatedAt @map("diperbarui_pada") @db.Timestamp()
+  dihapusPada    DateTime? @map("dihapus_pada") @db.Timestamp()
+
+  sekolah   Sekolah            @relation(fields: [sekolahId], references: [id])
+  siswa     Pengguna           @relation("SiswaTabungan", fields: [siswaId], references: [id])
+  transaksi TransaksiTabungan[]
+
+  @@unique([sekolahId, siswaId])
+  @@map("tabungan_siswa")
+}
+
+model TransaksiTabungan {
+  id              String  @id @default(uuid())
+  sekolahId       String  @map("sekolah_id")
+  tabunganSiswaId String  @map("tabungan_siswa_id")
+  akunKasId       String  @map("akun_kas_id")
+  petugasId       String? @map("petugas_id")
+  dibuatOleh      String? @map("dibuat_oleh")
+  diperbaruiOleh  String? @map("diperbarui_oleh")
+  dihapusOleh     String? @map("dihapus_oleh")
+
+  nomorTransaksi String   @unique @map("nomor_transaksi") @db.VarChar(50)
+  jenis          String   @db.VarChar(10)
+  jumlah         Decimal  @db.Decimal(15, 2)
+  saldoSebelum   Decimal  @map("saldo_sebelum") @db.Decimal(15, 2)
+  saldoSesudah   Decimal  @map("saldo_sesudah") @db.Decimal(15, 2)
+  tanggal        DateTime @db.Date
+  keterangan     String?  @db.Text
+  status         String   @default("berhasil") @db.VarChar(20)
+
+  dibuatPada     DateTime  @default(now()) @map("dibuat_pada") @db.Timestamp()
+  diperbaruiPada DateTime  @updatedAt @map("diperbarui_pada") @db.Timestamp()
+  dihapusPada    DateTime? @map("dihapus_pada") @db.Timestamp()
+
+  sekolah       Sekolah       @relation(fields: [sekolahId], references: [id])
+  tabunganSiswa TabunganSiswa @relation(fields: [tabunganSiswaId], references: [id])
+  akunKas       AkunKas       @relation(fields: [akunKasId], references: [id])
+  petugas       Pengguna?     @relation("PetugasTabungan", fields: [petugasId], references: [id])
+
+  @@index([sekolahId, tanggal])
+  @@index([tabunganSiswaId])
+  @@map("transaksi_tabungan")
+}
+
+model AkunKas {
+  id             String  @id @default(uuid())
+  sekolahId      String  @map("sekolah_id")
+  dibuatOleh     String? @map("dibuat_oleh")
+  diperbaruiOleh String? @map("diperbarui_oleh")
+  dihapusOleh    String? @map("dihapus_oleh")
+
+  kode      String  @db.VarChar(20)
+  nama      String  @db.VarChar(100)
+  tipe      String  @default("kas") @db.VarChar(20)
+  saldoAwal Decimal @default(0) @map("saldo_awal") @db.Decimal(15, 2)
+  status    String? @default("aktif") @db.VarChar(20)
+
+  dibuatPada     DateTime  @default(now()) @map("dibuat_pada") @db.Timestamp()
+  diperbaruiPada DateTime  @updatedAt @map("diperbarui_pada") @db.Timestamp()
+  dihapusPada    DateTime? @map("dihapus_pada") @db.Timestamp()
+
+  sekolah           Sekolah             @relation(fields: [sekolahId], references: [id])
+  jurnal            JurnalKas[]
+  pembayaranTagihan PembayaranTagihan[]
+  transaksiTabungan TransaksiTabungan[]
+
+  @@unique([sekolahId, kode])
+  @@map("akun_kas")
+}
+
+model JurnalKas {
+  id             String  @id @default(uuid())
+  sekolahId      String  @map("sekolah_id")
+  akunKasId      String  @map("akun_kas_id")
+  dibuatOleh     String? @map("dibuat_oleh")
+  diperbaruiOleh String? @map("diperbarui_oleh")
+  dihapusOleh    String? @map("dihapus_oleh")
+
+  nomorJurnal String   @unique @map("nomor_jurnal") @db.VarChar(50)
+  tanggal     DateTime @db.Date
+  jenis       String   @db.VarChar(10)
+  kategori    String   @db.VarChar(50)
+  jumlah      Decimal  @db.Decimal(15, 2)
+  keterangan  String?  @db.Text
+  sumber      String   @default("manual") @db.VarChar(30)
+  sumberId    String?  @map("sumber_id")
+  status      String   @default("aktif") @db.VarChar(20)
+
+  dibuatPada     DateTime  @default(now()) @map("dibuat_pada") @db.Timestamp()
+  diperbaruiPada DateTime  @updatedAt @map("diperbarui_pada") @db.Timestamp()
+  dihapusPada    DateTime? @map("dihapus_pada") @db.Timestamp()
+
+  sekolah Sekolah @relation(fields: [sekolahId], references: [id])
+  akunKas AkunKas @relation(fields: [akunKasId], references: [id])
+
+  @@index([sekolahId, tanggal])
+  @@index([akunKasId, status])
+  @@index([sumber, sumberId])
+  @@map("jurnal_kas")
 }
