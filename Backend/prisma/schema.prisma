@@ -22,6 +22,10 @@ model Pengguna {
   namaLengkap  String  @map("nama_lengkap") @db.VarChar(100)
   avatar       String? @db.VarChar(255)
 
+  pinHash            String?   @map("pin_hash") @db.VarChar(255)
+pinFailedAttempts  Int       @default(0) @map("pin_failed_attempts")
+pinLockedUntil     DateTime? @map("pin_locked_until") @db.Timestamp()
+
   nipd     String? @db.VarChar(20)
   nip      String? @db.VarChar(20)
   nuptk    String? @db.VarChar(20)
@@ -30,6 +34,8 @@ model Pengguna {
   jabatan  String? @db.VarChar(100)
   golongan String? @db.VarChar(50)
   shiftKerja  String? @map("shift_kerja") @db.VarChar(20)
+  kategoriJabatanId String? @map("kategori_jabatan_id")
+  shiftKerjaId      String? @map("shift_kerja_id")
 
   nik           String?   @unique @db.VarChar(20)
   alamatKtp     String?   @map("alamat_ktp") @db.Text
@@ -99,6 +105,10 @@ model Pengguna {
 
   nilaiAkhirMapel NilaiAkhirMapel[]
   rapot           Rapot[]
+
+  kategoriJabatan  KategoriJabatan? @relation(fields: [kategoriJabatanId], references: [id])
+  shiftKerjaMaster ShiftKerja?      @relation(fields: [shiftKerjaId], references: [id])
+  penggajian       Penggajian[]
 
   @@map("pengguna")
   permohonanIzins PermohonanIzin[] @relation("GuruPenggantiIzin")
@@ -224,6 +234,12 @@ model Sekolah {
 
   nilaiAkhirMapel NilaiAkhirMapel[]
   rapot           Rapot[]
+
+  kategoriJabatan KategoriJabatan[]
+  tarifJabatan    TarifJabatan[]
+  shiftKerja      ShiftKerja[]
+  penggajian      Penggajian[]
+  absensi         Absensi[]
 
   @@map("sekolah")
 }
@@ -753,29 +769,42 @@ model Rapot {
 }
 
 model Absensi {
-  id               String   @id @default(uuid())
-  penggunaId       String   @map("pengguna_id")
-  biometrikWajahId String?  @map("biometrik_wajah_id")
-  kelasId          String   @map("kelas_id")
-  dibuatOleh       String?  @map("dibuat_oleh")
-  diperbaruiOleh   String?  @map("diperbarui_oleh")
-  dihapusOleh      String?  @map("dihapus_oleh")
-  tanggal          DateTime @db.Date
-  status           String   @db.VarChar(10)
-  keterangan       String?  @db.Text
-  metode           String?  @db.VarChar(20)
-  lintang          Decimal? @db.Decimal(10, 8)
-  bujur            Decimal? @db.Decimal(11, 8)
-  urlFoto          String?  @map("url_foto") @db.VarChar(255)
-  skorKemiripan    Decimal? @map("skor_kemiripan") @db.Decimal(5, 4)
-  dibuatPada       DateTime @default(now()) @map("dibuat_pada") @db.Timestamp()
-  diperbaruiPada   DateTime @updatedAt @map("diperbarui_pada") @db.Timestamp()
+  id               String    @id @default(uuid())
+  sekolahId        String?   @map("sekolah_id")
+  penggunaId       String    @map("pengguna_id")
+  shiftKerjaId     String?   @map("shift_kerja_id")
+  biometrikWajahId String?   @map("biometrik_wajah_id")
+  kelasId          String?   @map("kelas_id")
+  dibuatOleh       String?   @map("dibuat_oleh")
+  diperbaruiOleh   String?   @map("diperbarui_oleh")
+  dihapusOleh      String?   @map("dihapus_oleh")
+  tanggal          DateTime  @db.Date
+  status           String    @db.VarChar(10)
+  waktuMasuk       DateTime? @map("waktu_masuk") @db.Timestamp()
+  waktuKeluar      DateTime? @map("waktu_keluar") @db.Timestamp()
+  durasiKerjaMenit Int?      @map("durasi_kerja_menit")
+  durasiJamKerja   Decimal?  @map("durasi_jam_kerja") @db.Decimal(5, 2)
+  terlambatMenit   Int?      @default(0) @map("terlambat_menit")
+  statusShift      String?   @default("tepat_waktu") @map("status_shift") @db.VarChar(30)
+  keterangan       String?   @db.Text
+  metode           String?   @db.VarChar(20)
+  lintang          Decimal?  @db.Decimal(10, 8)
+  bujur            Decimal?  @db.Decimal(11, 8)
+  urlFoto          String?   @map("url_foto") @db.VarChar(255)
+  skorKemiripan    Decimal?  @map("skor_kemiripan") @db.Decimal(5, 4)
+  dibuatPada       DateTime  @default(now()) @map("dibuat_pada") @db.Timestamp()
+  diperbaruiPada   DateTime  @updatedAt @map("diperbarui_pada") @db.Timestamp()
 
+  sekolah        Sekolah?        @relation(fields: [sekolahId], references: [id])
   pengguna       Pengguna        @relation(fields: [penggunaId], references: [id])
-  kelas          Kelas           @relation(fields: [kelasId], references: [id])
+  shiftKerja     ShiftKerja?     @relation(fields: [shiftKerjaId], references: [id])
+  kelas          Kelas?          @relation(fields: [kelasId], references: [id])
   biometrikWajah BiometrikWajah? @relation(fields: [biometrikWajahId], references: [id])
 
   @@map("absensi")
+  @@index([penggunaId, tanggal])
+  @@index([sekolahId, tanggal])
+  @@index([shiftKerjaId])
 }
 
 model PermohonanIzin {
@@ -1567,4 +1596,115 @@ model PeminjamanBuku {
   pengguna Pengguna @relation(fields: [penggunaId], references: [id])
 
   @@map("peminjaman_buku")
+}
+
+// ==========================================
+// 3. SISTEM SHIFT & PENGGAJIAN PER JAM
+// ==========================================
+
+model KategoriJabatan {
+  id             String    @id @default(uuid())
+  sekolahId      String    @map("sekolah_id")
+  dibuatOleh     String?   @map("dibuat_oleh")
+  diperbaruiOleh String?   @map("diperbarui_oleh")
+  dihapusOleh    String?   @map("dihapus_oleh")
+
+  nama           String    @db.VarChar(100)
+  kode           String?   @db.VarChar(50)
+  keterangan     String?   @db.Text
+  status         String    @default("aktif") @db.VarChar(20)
+
+  dibuatPada     DateTime  @default(now()) @map("dibuat_pada") @db.Timestamp()
+  diperbaruiPada DateTime  @updatedAt @map("diperbarui_pada") @db.Timestamp()
+  dihapusPada    DateTime? @map("dihapus_pada") @db.Timestamp()
+
+  sekolah        Sekolah        @relation(fields: [sekolahId], references: [id])
+  tarifRiwayat   TarifJabatan[]
+  pengguna       Pengguna[]
+
+  @@map("kategori_jabatan")
+  @@index([sekolahId])
+}
+
+model TarifJabatan {
+  id                String    @id @default(uuid())
+  sekolahId         String    @map("sekolah_id")
+  kategoriJabatanId String    @map("kategori_jabatan_id")
+  dibuatOleh        String?   @map("dibuat_oleh")
+  diperbaruiOleh    String?   @map("diperbarui_oleh")
+
+  tarifPerJam       Decimal   @map("tarif_per_jam") @db.Decimal(12, 2)
+  berlakuMulai      DateTime  @map("berlaku_mulai") @db.Date
+  berakhirPada      DateTime? @map("berakhir_pada") @db.Date
+  catatan           String?   @db.Text
+
+  dibuatPada        DateTime  @default(now()) @map("dibuat_pada") @db.Timestamp()
+  diperbaruiPada    DateTime  @updatedAt @map("diperbarui_pada") @db.Timestamp()
+
+  sekolah         Sekolah         @relation(fields: [sekolahId], references: [id])
+  kategoriJabatan KategoriJabatan @relation(fields: [kategoriJabatanId], references: [id], onDelete: Cascade)
+
+  @@map("tarif_jabatan")
+  @@index([sekolahId, kategoriJabatanId])
+  @@index([berlakuMulai, berakhirPada])
+}
+
+model ShiftKerja {
+  id                      String    @id @default(uuid())
+  sekolahId               String    @map("sekolah_id")
+  dibuatOleh              String?   @map("dibuat_oleh")
+  diperbaruiOleh          String?   @map("diperbarui_oleh")
+  dihapusOleh             String?   @map("dihapus_oleh")
+
+  nama                    String    @db.VarChar(50)
+  kode                    String?   @db.VarChar(20)
+  jamMasuk                String    @map("jam_masuk") @db.VarChar(5)
+  jamKeluar               String    @map("jam_keluar") @db.VarChar(5)
+  toleransiTerlambatMenit Int       @default(15) @map("toleransi_terlambat_menit")
+  status                  String    @default("aktif") @db.VarChar(20)
+
+  dibuatPada              DateTime  @default(now()) @map("dibuat_pada") @db.Timestamp()
+  diperbaruiPada          DateTime  @updatedAt @map("diperbarui_pada") @db.Timestamp()
+  dihapusPada             DateTime? @map("dihapus_pada") @db.Timestamp()
+
+  sekolah                 Sekolah    @relation(fields: [sekolahId], references: [id])
+  pengguna                Pengguna[]
+  absensi                 Absensi[]
+
+  @@map("shift_kerja")
+  @@index([sekolahId])
+}
+
+model Penggajian {
+  id              String    @id @default(uuid())
+  sekolahId       String    @map("sekolah_id")
+  penggunaId      String    @map("pengguna_id")
+  dibuatOleh      String?   @map("dibuat_oleh")
+  diperbaruiOleh  String?   @map("diperbarui_oleh")
+
+  bulan           Int       @db.SmallInt
+  tahun           Int       @db.SmallInt
+  tanggalMulai    DateTime  @map("tanggal_mulai") @db.Date
+  tanggalSelesai  DateTime  @map("tanggal_selesai") @db.Date
+
+  totalHariKerja  Int       @default(0) @map("total_hari_kerja")
+  totalJamKerja   Decimal   @default(0) @map("total_jam_kerja") @db.Decimal(8, 2)
+  tarifPerJam     Decimal   @default(0) @map("tarif_per_jam") @db.Decimal(12, 2)
+  totalGaji       Decimal   @default(0) @map("total_gaji") @db.Decimal(14, 2)
+
+  status          String    @default("draft") @db.VarChar(20)
+  dibekukanPada   DateTime? @map("dibekukan_pada") @db.Timestamp()
+  dibekukanOleh   String?   @map("dibekukan_oleh")
+  catatan         String?   @db.Text
+
+  dibuatPada      DateTime  @default(now()) @map("dibuat_pada") @db.Timestamp()
+  diperbaruiPada  DateTime  @updatedAt @map("diperbarui_pada") @db.Timestamp()
+
+  sekolah         Sekolah   @relation(fields: [sekolahId], references: [id])
+  pengguna        Pengguna  @relation(fields: [penggunaId], references: [id])
+
+  @@unique([sekolahId, penggunaId, bulan, tahun])
+  @@map("penggajian")
+  @@index([sekolahId, bulan, tahun])
+  @@index([penggunaId])
 }

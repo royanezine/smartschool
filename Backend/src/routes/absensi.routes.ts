@@ -7,6 +7,9 @@ import {
   getAbsensiSaya,
   getAbsensiKelas,
   exportRekapAbsensi,
+  checkInShift,
+  checkOutShift,
+  getRiwayatShiftSaya,
 } from "../controllers/absensi.controller";
 import { authenticate } from "../middlewares/auth.middleware";
 import { requireTenant } from "../middlewares/tenant.middleware";
@@ -49,5 +52,10 @@ router.post(
   uploadBiometrik.single("foto"),
   registerFaceIdByAdmin,
 );
+
+// Rute Absensi Shift Kerja (Pegawai / Guru)
+router.post("/check-in", checkInShift);
+router.post("/check-out", checkOutShift);
+router.get("/shift-saya", getRiwayatShiftSaya);
 
 export default router;

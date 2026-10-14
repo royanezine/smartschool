@@ -5,11 +5,15 @@ import fs from "fs";
 import ExcelJS from "exceljs";
 
 import { prisma } from "../config/db";
-import { createAbsensiSchema } from "../validations/absensi.validation";
+import {
+  createAbsensiSchema,
+  checkInShiftSchema,
+  checkOutShiftSchema,
+} from "../validations/absensi.validation";
 import { AppError } from "../utils/appError";
 import { AuthRequest } from "../middlewares/auth.middleware";
 import { hitungJarakMeter } from "../utils/geo";
-import { successResponse } from "../utils/responseFormatter";
+import { successResponse, paginatedResponse } from "../utils/responseFormatter";
 import { NextFunction } from "express";
 import { normalizeRole, canManageRole } from "../utils/rbac";
 
@@ -493,7 +497,7 @@ export const exportRekapAbsensi = async (
         nama: item.pengguna.namaLengkap,
         nisn: item.pengguna.nisn ?? "",
         nis: item.pengguna.nis ?? "",
-        kelas: item.kelas.nama,
+        kelas: item.kelas?.nama ?? "-",
         status: item.status,
         metode: item.metode ?? "",
         keterangan: item.keterangan ?? "",
@@ -532,3 +536,223 @@ export const exportRekapAbsensi = async (
     });
   }
 };
+
+export const checkInShift = async (req: AuthRequest, res: Response) => {
+  const userId = req.user!.userId;
+  const sekolahId = req.user!.sekolahId;
+  const userRole = normalizeRole(req.user?.role);
+
+  if (userRole === "siswa") {
+    throw new AppError("Absensi shift kerja hanya diperuntukkan bagi guru dan staf/pegawai", 403);
+  }
+
+  if (!sekolahId) {
+    throw new AppError("Akses ditolak: Anda tidak terhubung dengan sekolah manapun", 403);
+  }
+
+  const data = checkInShiftSchema.parse(req.body);
+
+  const pegawai = await prisma.pengguna.findUnique({
+    where: { id: userId },
+    include: { shiftKerjaMaster: true },
+  });
+
+  if (!pegawai) {
+    throw new AppError("Data pegawai tidak ditemukan", 404);
+  }
+
+  const targetShiftId = data.shiftKerjaId || pegawai.shiftKerjaId;
+  if (!targetShiftId) {
+    throw new AppError("Shift kerja belum ditentukan. Silakan pilih shift kerja atau hubungi admin.", 400);
+  }
+
+  const shift = await prisma.shiftKerja.findFirst({
+    where: { id: targetShiftId, sekolahId, dihapusPada: null, status: "aktif" },
+  });
+
+  if (!shift) {
+    throw new AppError("Shift kerja tidak ditemukan atau tidak aktif di sekolah Anda", 404);
+  }
+
+  if (data.metode === "lokasi" || data.metode === "face") {
+    if (!data.lintang || !data.bujur) {
+      throw new AppError("Akses lokasi (GPS) wajib diaktifkan untuk metode ini", 400);
+    }
+
+    const sekolah = await prisma.sekolah.findUnique({
+      where: { id: sekolahId },
+    });
+
+    if (sekolah?.lintang && sekolah?.bujur) {
+      const jarak = hitungJarakMeter(
+        data.lintang,
+        data.bujur,
+        Number(sekolah.lintang),
+        Number(sekolah.bujur),
+      );
+      const radiusMaks = sekolah.radiusAbsensi || 100;
+      if (jarak > radiusMaks) {
+        throw new AppError(
+          `Anda berada ${Math.round(jarak)} meter dari sekolah. Anda harus berada di dalam radius ${radiusMaks} meter untuk check-in.`,
+          403,
+        );
+      }
+    }
+  }
+
+  const hariIni = new Date();
+  hariIni.setHours(0, 0, 0, 0);
+
+  const sudahAda = await prisma.absensi.findFirst({
+    where: {
+      penggunaId: userId,
+      shiftKerjaId: shift.id,
+      tanggal: hariIni,
+    },
+  });
+
+  if (sudahAda) {
+    throw new AppError("Anda sudah melakukan check-in untuk shift ini hari ini", 400);
+  }
+
+  const waktuMasuk = new Date();
+
+  const partsMasuk = shift.jamMasuk.split(":");
+  const jamJadwal = Number(partsMasuk[0] || 0);
+  const menitJadwal = Number(partsMasuk[1] || 0);
+  const totalMenitJadwal = jamJadwal * 60 + menitJadwal;
+  const totalMenitAktual = waktuMasuk.getHours() * 60 + waktuMasuk.getMinutes();
+  const selisihMenit = totalMenitAktual - totalMenitJadwal;
+
+  let terlambatMenit = 0;
+  let statusShift = "tepat_waktu";
+
+  if (selisihMenit > shift.toleransiTerlambatMenit) {
+    terlambatMenit = selisihMenit;
+    statusShift = "terlambat";
+  }
+
+  const absensi = await prisma.absensi.create({
+    data: {
+      sekolahId,
+      penggunaId: userId,
+      shiftKerjaId: shift.id,
+      tanggal: hariIni,
+      waktuMasuk,
+      status: data.status,
+      statusShift,
+      terlambatMenit,
+      keterangan: data.keterangan || null,
+      metode: data.metode,
+      lintang: data.lintang !== undefined ? data.lintang : null,
+      bujur: data.bujur !== undefined ? data.bujur : null,
+      dibuatOleh: userId,
+    },
+    include: {
+      shiftKerja: true,
+    },
+  });
+
+  return successResponse(res, "Check-in shift berhasil dicatat", absensi, 201);
+};
+
+export const checkOutShift = async (req: AuthRequest, res: Response) => {
+  const userId = req.user!.userId;
+
+  const data = checkOutShiftSchema.parse(req.body);
+
+  const hariIni = new Date();
+  hariIni.setHours(0, 0, 0, 0);
+
+  const absensiAktif = await prisma.absensi.findFirst({
+    where: {
+      penggunaId: userId,
+      tanggal: hariIni,
+      shiftKerjaId: { not: null },
+      waktuKeluar: null,
+    },
+    include: {
+      shiftKerja: true,
+    },
+    orderBy: { dibuatPada: "desc" },
+  });
+
+  if (!absensiAktif || !absensiAktif.waktuMasuk) {
+    throw new AppError("Tidak ditemukan absensi check-in aktif untuk di-check-out hari ini", 400);
+  }
+
+  const waktuKeluar = new Date();
+  const waktuMasuk = absensiAktif.waktuMasuk;
+
+  const durasiMenitKotor = Math.max(
+    0,
+    Math.floor((waktuKeluar.getTime() - waktuMasuk.getTime()) / 60000),
+  );
+
+  const shift = absensiAktif.shiftKerja;
+  let statusShift = absensiAktif.statusShift || "tepat_waktu";
+
+  if (shift) {
+    const partsPulang = shift.jamKeluar.split(":");
+    const jamPulang = Number(partsPulang[0] || 0);
+    const menitPulang = Number(partsPulang[1] || 0);
+    const jadwalPulangMenit = jamPulang * 60 + menitPulang;
+    const waktuKeluarMenit = waktuKeluar.getHours() * 60 + waktuKeluar.getMinutes();
+
+    if (waktuKeluarMenit < jadwalPulangMenit) {
+      statusShift =
+        statusShift === "terlambat"
+          ? "terlambat_dan_pulang_cepat"
+          : "pulang_cepat";
+    }
+  }
+
+  const durasiJamKerja = parseFloat((durasiMenitKotor / 60).toFixed(2));
+
+  const updatedAbsensi = await prisma.absensi.update({
+    where: { id: absensiAktif.id },
+    data: {
+      waktuKeluar,
+      durasiKerjaMenit: durasiMenitKotor,
+      durasiJamKerja,
+      statusShift,
+      keterangan: data.keterangan
+        ? (absensiAktif.keterangan ? `${absensiAktif.keterangan} | Pulang: ${data.keterangan}` : data.keterangan)
+        : absensiAktif.keterangan,
+      diperbaruiOleh: userId,
+    },
+    include: {
+      shiftKerja: true,
+    },
+  });
+
+  return successResponse(res, "Check-out shift berhasil dicatat. Durasi jam kerja valid telah dihitung.", updatedAbsensi);
+};
+
+export const getRiwayatShiftSaya = async (req: AuthRequest, res: Response) => {
+  const userId = req.user!.userId;
+  const page = parseInt(req.query.page as string) || 1;
+  const limit = parseInt(req.query.limit as string) || 20;
+  const skip = (page - 1) * limit;
+
+  const where = {
+    penggunaId: userId,
+    shiftKerjaId: { not: null },
+  };
+
+  const [total, data] = await Promise.all([
+    prisma.absensi.count({ where }),
+    prisma.absensi.findMany({
+      where,
+      skip,
+      take: limit,
+      include: {
+        shiftKerja: true,
+      },
+      orderBy: { dibuatPada: "desc" },
+    }),
+  ]);
+
+  return paginatedResponse(res, "Riwayat absensi shift berhasil diambil", data, page, limit, total);
+};
+

@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const createAbsensiSchema = z.object({
-  kelasId: z.string().uuid("ID Kelas tidak valid"),
+  kelasId: z.string().uuid("ID Kelas tidak valid").optional(),
   status: z.enum(["hadir", "izin", "sakit", "alpha"]),
   keterangan: z.string().optional(),
 
@@ -14,4 +14,21 @@ export const createAbsensiSchema = z.object({
 
   // Jika Barcode
   barcodeData: z.string().optional(),
+});
+
+export const checkInShiftSchema = z.object({
+  shiftKerjaId: z.string().uuid("ID shift kerja tidak valid").optional(),
+  status: z.enum(["hadir", "izin", "sakit"]).default("hadir"),
+  keterangan: z.string().optional(),
+  metode: z.enum(["lokasi", "barcode", "face", "manual"]).default("lokasi"),
+  lintang: z.coerce.number().optional(),
+  bujur: z.coerce.number().optional(),
+  barcodeData: z.string().optional(),
+});
+
+export const checkOutShiftSchema = z.object({
+  keterangan: z.string().optional(),
+  metode: z.enum(["lokasi", "barcode", "face", "manual"]).default("lokasi"),
+  lintang: z.coerce.number().optional(),
+  bujur: z.coerce.number().optional(),
 });

@@ -45,6 +45,11 @@ import kkmRoutes from "./routes/kkm.routes";
 import auditLogRoutes from "./routes/auditLog.routes";
 import pengaturanSistemRoutes from "./routes/pengaturanSistem.routes";
 
+// IMPORT ROUTES SISTEM SHIFT & PENGGAJIAN
+import kategoriJabatanRoutes from "./routes/kategoriJabatan.routes";
+import shiftKerjaRoutes from "./routes/shiftKerja.routes";
+import penggajianRoutes from "./routes/penggajian.routes";
+
 dotenv.config();
 
 const app: Application = express();
@@ -127,6 +132,9 @@ app.use("/api/permohonan-izin", permohonanIzinRoutes);
 app.use("/api/audit-log", auditLogRoutes);
 app.use("/api/pengaturan", pengaturanSistemRoutes);
 app.use("/api/pengaturan/kkm", kkmRoutes);
+app.use("/api/kategori-jabatan", kategoriJabatanRoutes);
+app.use("/api/shift-kerja", shiftKerjaRoutes);
+app.use("/api/penggajian", penggajianRoutes);
 
 app.use(globalErrorHandler);
 

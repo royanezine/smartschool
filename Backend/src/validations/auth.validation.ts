@@ -46,4 +46,24 @@ export const resetPasswordSchema = z.object({
     .min(8, "Kata sandi minimal 8 karakter")
     .regex(/[A-Z]/, "Kata sandi harus mengandung minimal 1 huruf kapital")
     .regex(/[0-9]/, "Kata sandi harus mengandung minimal 1 angka"),
-})
+});
+
+export const setupPinSchema = z.object({
+  pin: z.string().regex(/^\d{6}$/, "PIN harus terdiri dari 6 digit angka numerik"),
+  setupToken: z.string().optional(),
+});
+
+export const verifyPinSchema = z.object({
+  pin: z.string().regex(/^\d{6}$/, "PIN harus terdiri dari 6 digit angka numerik"),
+  pinToken: z.string().optional(),
+});
+
+export const forgotPinSchema = z.object({
+  identifier: z.string().min(1, "Email atau username harus diisi"),
+});
+
+export const resetPinSchema = z.object({
+  identifier: z.string().min(1, "Email atau username harus diisi"),
+  kodeOtp: z.string().length(6, "Kode OTP harus terdiri dari 6 digit"),
+  pinBaru: z.string().regex(/^\d{6}$/, "PIN baru harus terdiri dari 6 digit angka numerik"),
+});
