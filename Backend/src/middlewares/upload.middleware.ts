@@ -93,3 +93,36 @@ export const uploadSiswa = multer({
     }
   },
 });
+
+const storageNilaiExcel = multer.diskStorage({
+  destination: (_req, _file, cb) => {
+    const dir = path.join(process.cwd(), "uploads/nilai-temp");
+
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+
+    cb(null, dir);
+  },
+  filename: (_req, _file, cb) => {
+    const uniqueSuffix = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
+    cb(null, `nilai-${uniqueSuffix}.xlsx`);
+  },
+});
+
+export const uploadNilaiExcel = multer({
+  storage: storageNilaiExcel,
+  limits: {
+    fileSize: 5 * 1024 * 1024,
+    files: 1,
+  },
+  fileFilter: (_req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+
+    if (ext !== ".xlsx") {
+      return cb(null, false);
+    }
+
+    cb(null, true);
+  },
+});

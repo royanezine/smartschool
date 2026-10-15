@@ -7,13 +7,33 @@ import {
   getGridNilai,
   inputNilaiBulk,
   finalisasiNilai,
+  tarikSumberNilai,
+  importNilaiExcel,
 } from "../controllers/nilai.controller";
 import { authenticate } from "../middlewares/auth.middleware";
 import { authorizeRoles } from "../middlewares/role.middleware";
+import { uploadNilaiExcel } from "../middlewares/upload.middleware";
+import { tarikSumberNilaiSchema, validateImportNilaiExcel } from "../validations/nilai.validation";
+import { validate } from "../middlewares/validation.middleware";
 
 const router = Router();
 
 router.use(authenticate);
+
+router.post(
+  "/tarik-sumber",
+  authorizeRoles("guru"),
+  validate(tarikSumberNilaiSchema),
+  tarikSumberNilai,
+);
+
+router.post(
+  "/import-excel",
+  authorizeRoles("guru"),
+  uploadNilaiExcel.single("file"),
+  validateImportNilaiExcel,
+  importNilaiExcel,
+);
 
 router.get("/export", authorizeRoles("admin_sekolah", "guru"), exportRekapNilai);
 

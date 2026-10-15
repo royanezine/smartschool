@@ -1,3 +1,4 @@
+import fs from "fs";
 import { NextFunction, Response } from "express";
 import ExcelJS from "exceljs";
 
@@ -5,12 +6,7 @@ import { prisma } from "../config/db";
 import { AuthRequest } from "../middlewares/auth.middleware";
 import { AppError } from "../utils/appError";
 import { successResponse } from "../utils/responseFormatter";
-import {
-  getKkmConfig,
-  hitungPredikat,
-  resolveKkm,
-  round2,
-} from "../utils/kkm";
+import { getKkmConfig, hitungPredikat, resolveKkm, round2 } from "../utils/kkm";
 
 const getAuth = (req: AuthRequest) => {
   const userId = req.user?.userId;
@@ -307,7 +303,11 @@ export const getKelasSaya = async (
       status: finalSet.has(k.id) ? "final" : "draft",
     }));
 
-    return successResponse(res, "Daftar kelas yang diampu berhasil diambil", data);
+    return successResponse(
+      res,
+      "Daftar kelas yang diampu berhasil diambil",
+      data,
+    );
   } catch (error) {
     next(error);
   }
@@ -394,7 +394,8 @@ export const createKomponenNilai = async (
       data: {
         kelasMapelId,
         nama: namaBersih,
-        jenis: typeof jenis === "string" && jenis.trim() ? jenis.trim() : "lainnya",
+        jenis:
+          typeof jenis === "string" && jenis.trim() ? jenis.trim() : "lainnya",
         bobot: bobotNum,
         nilaiMaksimum: maks,
         kelompok:
@@ -405,7 +406,12 @@ export const createKomponenNilai = async (
       },
     });
 
-    return successResponse(res, "Komponen nilai berhasil dibuat", komponen, 201);
+    return successResponse(
+      res,
+      "Komponen nilai berhasil dibuat",
+      komponen,
+      201,
+    );
   } catch (error) {
     next(error);
   }
@@ -457,10 +463,7 @@ export const getGridNilai = async (
         nis: s.nis,
         nisn: s.nisn,
         nilai: Object.fromEntries(
-          komponen.map((k) => [
-            k.id,
-            nilaiMap.get(`${s.id}:${k.id}`) ?? null,
-          ]),
+          komponen.map((k) => [k.id, nilaiMap.get(`${s.id}:${k.id}`) ?? null]),
         ),
       })),
     });
@@ -506,7 +509,12 @@ export const inputNilaiBulk = async (
     const errors: { index: number; pesan: string }[] = [];
     const bersih = new Map<
       string,
-      { penggunaId: string; komponenNilaiId: string; nilai: number; catatan?: string }
+      {
+        penggunaId: string;
+        komponenNilaiId: string;
+        nilai: number;
+        catatan?: string;
+      }
     >();
 
     nilai.forEach((item: any, index: number) => {
@@ -515,11 +523,20 @@ export const inputNilaiBulk = async (
       const angka = parseAngka(item?.nilai);
 
       if (typeof penggunaId !== "string" || !siswaIds.has(penggunaId)) {
-        errors.push({ index, pesan: "Siswa tidak terdaftar di kelas mapel ini" });
+        errors.push({
+          index,
+          pesan: "Siswa tidak terdaftar di kelas mapel ini",
+        });
         return;
       }
-      if (typeof komponenNilaiId !== "string" || !komponenIds.has(komponenNilaiId)) {
-        errors.push({ index, pesan: "Komponen tidak ditemukan di kelas mapel ini" });
+      if (
+        typeof komponenNilaiId !== "string" ||
+        !komponenIds.has(komponenNilaiId)
+      ) {
+        errors.push({
+          index,
+          pesan: "Komponen tidak ditemukan di kelas mapel ini",
+        });
         return;
       }
       if (angka === null || angka < 0 || angka > 100) {
@@ -538,7 +555,8 @@ export const inputNilaiBulk = async (
     if (errors.length > 0) {
       return res.status(400).json({
         success: false,
-        message: "Terdapat data nilai yang tidak valid, tidak ada yang disimpan",
+        message:
+          "Terdapat data nilai yang tidak valid, tidak ada yang disimpan",
         data: errors,
       });
     }
@@ -702,5 +720,483 @@ export const finalisasiNilai = async (
     });
   } catch (error) {
     next(error);
+  }
+};
+
+export const tarikSumberNilai = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const { userId, sekolahId } = getAuth(req);
+    const { kelasMapelId, komponenNilaiId, jenisSumber, sumberId } = req.body;
+
+    const km = await loadKelasMapelGuru(kelasMapelId, userId, sekolahId);
+
+    if (await isFinalized(kelasMapelId)) {
+      throw new AppError(
+        "Nilai sudah difinalisasi dan tidak dapat diubah",
+        400,
+      );
+    }
+
+    const komponen = await prisma.komponenNilai.findFirst({
+      where: {
+        id: komponenNilaiId,
+        kelasMapelId,
+        dihapusOleh: null,
+      },
+      select: { id: true },
+    });
+
+    if (!komponen) {
+      throw new AppError(
+        "Komponen nilai tidak ditemukan pada kelas mapel ini",
+        404,
+      );
+    }
+
+    const siswa = await getSiswaKelas(km.kelas.id);
+    const anggotaIds = new Set(siswa.map((s) => s.id));
+
+    const nilaiPerSiswa = new Map<string, { nilai: number; waktu: number }>();
+
+    if (jenisSumber === "asesmen") {
+      const asesmen = await prisma.asesmen.findFirst({
+        where: {
+          id: sumberId,
+          kelasMapelId,
+          dihapusOleh: null,
+        },
+        select: { id: true },
+      });
+
+      if (!asesmen) {
+        throw new AppError("Asesmen tidak ditemukan pada kelas mapel ini", 404);
+      }
+
+      const hasil = await prisma.hasilAsesmen.findMany({
+        where: {
+          dihapusOleh: null,
+          percobaanAsesmen: {
+            asesmenId: sumberId,
+            dihapusOleh: null,
+          },
+        },
+        select: {
+          totalNilai: true,
+          percobaanAsesmen: {
+            select: {
+              siswaId: true,
+              selesaiPada: true,
+              dibuatPada: true,
+            },
+          },
+        },
+      });
+
+      for (const item of hasil) {
+        const siswaId = item.percobaanAsesmen.siswaId;
+
+        if (!anggotaIds.has(siswaId)) continue;
+
+        const angka = Number(item.totalNilai);
+        if (!Number.isFinite(angka) || angka < 0 || angka > 100) {
+          continue;
+        }
+
+        const waktu =
+          item.percobaanAsesmen.selesaiPada?.getTime() ??
+          item.percobaanAsesmen.dibuatPada.getTime();
+
+        const existing = nilaiPerSiswa.get(siswaId);
+
+        if (
+          !existing ||
+          angka > existing.nilai ||
+          (angka === existing.nilai && waktu > existing.waktu)
+        ) {
+          nilaiPerSiswa.set(siswaId, {
+            nilai: angka,
+            waktu,
+          });
+        }
+      }
+    } else {
+      const tugas = await prisma.tugas.findFirst({
+        where: {
+          id: sumberId,
+          kelasMapelId,
+          dihapusOleh: null,
+        },
+        select: { id: true },
+      });
+
+      if (!tugas) {
+        throw new AppError("Tugas tidak ditemukan pada kelas mapel ini", 404);
+      }
+
+      const pengumpulan = await prisma.pengumpulanTugas.findMany({
+        where: {
+          tugasId: sumberId,
+          dihapusOleh: null,
+        },
+        select: {
+          penggunaId: true,
+          nilai: true,
+          diperbaruiPada: true,
+        },
+        orderBy: {
+          diperbaruiPada: "desc",
+        },
+      });
+
+      for (const item of pengumpulan) {
+        const siswaId = item.penggunaId;
+
+        if (!anggotaIds.has(siswaId) || item.nilai === null) {
+          continue;
+        }
+
+        const angka = Number(item.nilai);
+        if (!Number.isFinite(angka) || angka < 0 || angka > 100) {
+          continue;
+        }
+
+        if (!nilaiPerSiswa.has(siswaId)) {
+          nilaiPerSiswa.set(siswaId, {
+            nilai: angka,
+            waktu: item.diperbaruiPada.getTime(),
+          });
+        }
+      }
+    }
+
+    const dataNilai = Array.from(nilaiPerSiswa.entries());
+
+    if (dataNilai.length === 0) {
+      return successResponse(
+        res,
+        "Tidak ada nilai sumber yang valid untuk disinkronkan",
+        {
+          jumlahDisimpan: 0,
+          jumlahDilewati: siswa.length,
+        },
+      );
+    }
+
+    await prisma.$transaction(async (tx) => {
+      const finalisasi = await tx.nilaiAkhirMapel.count({
+        where: {
+          kelasMapelId,
+          status: "final",
+          dihapusOleh: null,
+        },
+      });
+
+      if (finalisasi > 0) {
+        throw new AppError(
+          "Nilai sudah difinalisasi dan tidak dapat diubah",
+          400,
+        );
+      }
+
+      for (const [penggunaId, data] of dataNilai) {
+        await tx.nilai.upsert({
+          where: {
+            penggunaId_komponenNilaiId: {
+              penggunaId,
+              komponenNilaiId,
+            },
+          },
+          update: {
+            kelasMapelId,
+            nilai: data.nilai,
+            sumber: "otomatis",
+            sumberId,
+            diperbaruiOleh: userId,
+            dihapusOleh: null,
+          },
+          create: {
+            penggunaId,
+            kelasMapelId,
+            komponenNilaiId,
+            nilai: data.nilai,
+            sumber: "otomatis",
+            sumberId,
+            dibuatOleh: userId,
+          },
+        });
+      }
+    });
+
+    return successResponse(res, "Nilai sumber berhasil disinkronkan", {
+      jenisSumber,
+      sumberId,
+      jumlahDisimpan: dataNilai.length,
+      jumlahDilewati: Math.max(0, siswa.length - dataNilai.length),
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const importNilaiExcel = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  const filePath = req.file?.path;
+
+  try {
+    const { userId, sekolahId } = getAuth(req);
+    const { kelasMapelId, komponenNilaiId } = req.body;
+
+    if (!filePath) {
+      throw new AppError("File Excel .xlsx wajib diunggah", 400);
+    }
+
+    const km = await loadKelasMapelGuru(kelasMapelId, userId, sekolahId);
+
+    if (await isFinalized(kelasMapelId)) {
+      throw new AppError(
+        "Nilai sudah difinalisasi dan tidak dapat diubah",
+        400,
+      );
+    }
+
+    const komponen = await prisma.komponenNilai.findFirst({
+      where: {
+        id: komponenNilaiId,
+        kelasMapelId,
+        dihapusOleh: null,
+      },
+      select: { id: true },
+    });
+
+    if (!komponen) {
+      throw new AppError(
+        "Komponen nilai tidak ditemukan pada kelas mapel ini",
+        404,
+      );
+    }
+
+    const workbook = new ExcelJS.Workbook();
+
+    try {
+      await workbook.xlsx.readFile(filePath);
+    } catch {
+      throw new AppError(
+        "File Excel rusak atau formatnya tidak valid",
+        400,
+        "INVALID_EXCEL",
+      );
+    }
+
+    const worksheet = workbook.worksheets[0];
+
+    if (!worksheet || worksheet.rowCount < 1) {
+      throw new AppError("Worksheet Excel kosong", 400);
+    }
+
+    if (worksheet.rowCount > 5001) {
+      throw new AppError("Maksimal 5000 baris data per file Excel", 400);
+    }
+
+    const headerRow = worksheet.getRow(1);
+    const headers = new Map<string, number>();
+
+    headerRow.eachCell((cell, colNumber) => {
+      const header = String(cell.text ?? "")
+        .trim()
+        .toLowerCase();
+
+      if (header) headers.set(header, colNumber);
+    });
+
+    const nisnCol = headers.get("nisn");
+    const nisCol = headers.get("nis");
+    const nilaiCol = headers.get("nilai");
+
+    if ((!nisnCol && !nisCol) || !nilaiCol) {
+      throw new AppError("Header wajib: NISN atau NIS, serta Nilai", 400);
+    }
+
+    const siswa = await getSiswaKelas(km.kelas.id);
+
+    const identifierMap = new Map<string, Set<string>>();
+
+    const addIdentifier = (
+      identifier: string | null | undefined,
+      siswaId: string,
+    ) => {
+      const key = identifier?.trim().toLowerCase();
+      if (!key) return;
+
+      if (!identifierMap.has(key)) {
+        identifierMap.set(key, new Set<string>());
+      }
+
+      identifierMap.get(key)!.add(siswaId);
+    };
+
+    for (const s of siswa) {
+      addIdentifier(s.nisn, s.id);
+      addIdentifier(s.nis, s.id);
+    }
+
+    const errors: { baris: number; pesan: string }[] = [];
+    const nilaiValid = new Map<string, { penggunaId: string; nilai: number }>();
+    const siswaDuplikat = new Set<string>();
+
+    const readSimpleCell = (cell: ExcelJS.Cell): string => {
+      const value = cell.value;
+
+      if (typeof value === "string" || typeof value === "number") {
+        return String(value).trim();
+      }
+
+      return "";
+    };
+
+    for (let rowNumber = 2; rowNumber <= worksheet.rowCount; rowNumber++) {
+      const row = worksheet.getRow(rowNumber);
+
+      const nisn = nisnCol ? readSimpleCell(row.getCell(nisnCol)) : "";
+      const nis = nisCol ? readSimpleCell(row.getCell(nisCol)) : "";
+      const nilaiRaw = readSimpleCell(row.getCell(nilaiCol));
+
+      if (!nisn && !nis && !nilaiRaw) continue;
+
+      if (!nisn && !nis) {
+        errors.push({
+          baris: rowNumber,
+          pesan: "NISN atau NIS wajib diisi",
+        });
+        continue;
+      }
+
+      const candidateIds = new Set<string>();
+
+      for (const identifier of [nisn, nis]) {
+        if (!identifier) continue;
+
+        const matches = identifierMap.get(identifier.toLowerCase());
+        matches?.forEach((id) => candidateIds.add(id));
+      }
+
+      if (candidateIds.size === 0) {
+        errors.push({
+          baris: rowNumber,
+          pesan: "Siswa tidak ditemukan atau bukan anggota kelas ini",
+        });
+        continue;
+      }
+
+      if (candidateIds.size > 1) {
+        errors.push({
+          baris: rowNumber,
+          pesan: "Identitas siswa ambigu",
+        });
+        continue;
+      }
+
+      const penggunaId = Array.from(candidateIds)[0];
+      if (!penggunaId) continue;
+
+      if (nilaiValid.has(penggunaId) || siswaDuplikat.has(penggunaId)) {
+        siswaDuplikat.add(penggunaId);
+        nilaiValid.delete(penggunaId);
+
+        errors.push({
+          baris: rowNumber,
+          pesan: "Siswa muncul lebih dari sekali dalam file",
+        });
+        continue;
+      }
+
+      const angka = parseAngka(nilaiRaw);
+
+      if (angka === null || angka < 0 || angka > 100) {
+        errors.push({
+          baris: rowNumber,
+          pesan: "Nilai harus berupa angka 0–100",
+        });
+        continue;
+      }
+
+      nilaiValid.set(penggunaId, {
+        penggunaId,
+        nilai: angka,
+      });
+    }
+
+    const dataValid = Array.from(nilaiValid.values());
+
+    if (dataValid.length > 0) {
+      await prisma.$transaction(async (tx) => {
+        const finalisasi = await tx.nilaiAkhirMapel.count({
+          where: {
+            kelasMapelId,
+            status: "final",
+            dihapusOleh: null,
+          },
+        });
+
+        if (finalisasi > 0) {
+          throw new AppError(
+            "Nilai sudah difinalisasi dan tidak dapat diubah",
+            400,
+          );
+        }
+
+        for (const item of dataValid) {
+          await tx.nilai.upsert({
+            where: {
+              penggunaId_komponenNilaiId: {
+                penggunaId: item.penggunaId,
+                komponenNilaiId,
+              },
+            },
+            update: {
+              kelasMapelId,
+              nilai: item.nilai,
+              sumber: "excel",
+              sumberId: null,
+              catatan: "Diimpor dari Excel",
+              diperbaruiOleh: userId,
+              dihapusOleh: null,
+            },
+            create: {
+              penggunaId: item.penggunaId,
+              kelasMapelId,
+              komponenNilaiId,
+              nilai: item.nilai,
+              sumber: "excel",
+              catatan: "Diimpor dari Excel",
+              dibuatOleh: userId,
+            },
+          });
+        }
+      });
+    }
+
+    return successResponse(res, "Proses import nilai selesai", {
+      jumlahBarisValid: dataValid.length,
+      jumlahBerhasil: dataValid.length,
+      jumlahDilewati: errors.length,
+      detailDilewati: errors,
+    });
+  } catch (error) {
+    next(error);
+  } finally {
+    if (filePath && fs.existsSync(filePath)) {
+      try {
+        fs.unlinkSync(filePath);
+      } catch (error) {
+        console.error("Gagal menghapus file Excel sementara:", error);
+      }
+    }
   }
 };
