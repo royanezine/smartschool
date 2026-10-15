@@ -8,6 +8,14 @@ import { generateOtp } from "../utils/generateOtp";
 import { sendOtpEmail } from "../utils/email";
 import crypto from "crypto";
 
+const SNAP_URL = "https://app.sandbox.midtrans.com/snap/v1/transactions";
+
+const BANK_TO_CHANNEL: Record<string, string> = {
+  bca: "bca_va",
+  bni: "bni_va",
+  bri: "bri_va",
+};
+
 export const registerTenant = async (
   req: Request,
   res: Response,
@@ -103,8 +111,8 @@ export const verifyAndPay = async (
     const emailInput = String(email).trim();
     const otpInput = String(kodeOtp).replace(/\s+/g, "");
 
-    const allowedBanks = ["bca", "bni", "bri"];
-    if (bank && !allowedBanks.includes(String(bank).toLowerCase())) {
+    const bankName = bank ? String(bank).toLowerCase() : null;
+    if (bankName && !BANK_TO_CHANNEL[bankName]) {
       throw new AppError(
         "Pilihan bank saat ini hanya mendukung: bca, bni, bri",
         400,
@@ -133,49 +141,52 @@ export const verifyAndPay = async (
     if (!paket) throw new AppError("Paket tidak ditemukan", 404);
 
     if (Number(paket.harga) > 0) {
-      if (!bank)
-        throw new AppError(
-          "Pilihan bank wajib dikirim untuk paket berbayar",
-          400,
-        );
+      const serverKey = process.env.MIDTRANS_SERVER_KEY;
+      if (!serverKey)
+        throw new AppError("Konfigurasi pembayaran belum lengkap", 500);
 
-      const bankName = String(bank).toLowerCase();
       const orderId = `REG-${pendaftaran.id.substring(0, 8)}-${Date.now()}`;
-      const midtransAuth = Buffer.from(
-        process.env.MIDTRANS_SERVER_KEY + ":",
-      ).toString("base64");
+      const midtransAuth = Buffer.from(serverKey + ":").toString("base64");
 
-      const midtransResponse = await fetch(
-        "https://api.sandbox.midtrans.com/v2/charge",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Accept: "application/json",
-            Authorization: `Basic ${midtransAuth}`,
-          },
-          body: JSON.stringify({
-            payment_type: "bank_transfer",
-            transaction_details: {
-              order_id: orderId,
-              gross_amount: Number(paket.harga),
-            },
-            bank_transfer: {
-              bank: bankName,
-            },
-            customer_details: {
-              first_name: pendaftaran.namaPendaftar,
-              email: pendaftaran.emailPendaftar,
-            },
-          }),
+      const payload: Record<string, unknown> = {
+        transaction_details: {
+          order_id: orderId,
+          gross_amount: Number(paket.harga),
         },
-      );
+        customer_details: {
+          first_name: pendaftaran.namaPendaftar,
+          email: pendaftaran.emailPendaftar,
+        },
+      };
 
-      const charge = await midtransResponse.json();
+      if (bankName) {
+        payload.enable_payments = [BANK_TO_CHANNEL[bankName]];
+      }
 
-      if (!midtransResponse.ok || charge.status_code !== "201") {
-        console.error("Midtrans Error:", charge);
-        throw new AppError("Gagal membuat Virtual Account Midtrans", 500);
+      const midtransResponse = await fetch(SNAP_URL, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+          Authorization: `Basic ${midtransAuth}`,
+        },
+        body: JSON.stringify(payload),
+      });
+
+      const snap: any = await midtransResponse.json();
+
+      if (!midtransResponse.ok || !snap?.token || !snap?.redirect_url) {
+        console.error("[TENANT] Midtrans Snap gagal", {
+          httpStatus: midtransResponse.status,
+          response: snap,
+          bank: bankName,
+          orderId,
+        });
+
+        throw new AppError(
+          "Gagal membuat transaksi pembayaran. Periksa konfigurasi pembayaran atau coba lagi nanti.",
+          502,
+        );
       }
 
       await prisma.pendaftaranTenant.update({
@@ -190,8 +201,8 @@ export const verifyAndPay = async (
 
       return successResponse(res, "Verifikasi sukses. Silakan bayar.", {
         order_id: orderId,
-        bank: bankName.toUpperCase(),
-        va_number: charge.va_numbers[0].va_number,
+        snap_token: snap.token,
+        redirect_url: snap.redirect_url,
         gross_amount: Number(paket.harga),
         is_trial: false,
       });

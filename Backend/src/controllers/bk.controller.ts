@@ -1,7 +1,23 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import { prisma } from "../config/db";
 import { AuthRequest } from "../middlewares/auth.middleware";
 import { normalizeRole } from "../utils/rbac";
+
+const WAKTU_REGEX = /^([01]\d|2[0-3]):[0-5]\d$/;
+const TANGGAL_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+
+const hariIniWib = () =>
+  new Date(Date.now() + 7 * 60 * 60 * 1000).toISOString().slice(0, 10);
+
+const waktuBertabrakan = (
+  mulaiA: string,
+  selesaiA: string,
+  mulaiB?: string | null,
+  selesaiB?: string | null
+) => {
+  if (!mulaiB || !selesaiB) return false;
+  return mulaiA < selesaiB && mulaiB < selesaiA;
+};
 
 export const getSesiKonseling = async (req: AuthRequest, res: Response) => {
   try {
@@ -22,6 +38,11 @@ export const getSesiKonseling = async (req: AuthRequest, res: Response) => {
 
     if (actorRole === "siswa") {
       where.siswaId = req.user?.userId;
+    }
+
+    const status = req.query.status;
+    if (typeof status === "string" && status) {
+      where.status = status;
     }
 
     const data = await prisma.sesiKonseling.findMany({
@@ -110,6 +131,405 @@ export const getSesiKonselingById = async (
     return res.status(500).json({
       success: false,
       message: "Gagal mengambil sesi konseling",
+    });
+  }
+};
+
+export const ajukanSesiKonseling = async (req: AuthRequest, res: Response) => {
+  try {
+    const sekolahId = req.user?.sekolahId;
+    const siswaId = req.user?.userId;
+
+    if (!sekolahId || !siswaId) {
+      return res.status(401).json({
+        success: false,
+        message: "Sekolah tidak ditemukan",
+      });
+    }
+
+    if (normalizeRole(req.user?.role) !== "siswa") {
+      return res.status(403).json({
+        success: false,
+        message: "Hanya siswa yang dapat mengajukan sesi konseling",
+      });
+    }
+
+    const { tanggal, waktuMulai, waktuSelesai, topik, masalah, konselorId } =
+      req.body;
+
+    if (!tanggal || !waktuMulai || !waktuSelesai || !topik) {
+      return res.status(400).json({
+        success: false,
+        message: "tanggal, waktuMulai, waktuSelesai, dan topik wajib diisi",
+      });
+    }
+
+    const tanggalStr = String(tanggal).slice(0, 10);
+    const mulai = String(waktuMulai);
+    const selesai = String(waktuSelesai);
+    const topikStr = String(topik).trim();
+
+    if (
+      !TANGGAL_REGEX.test(tanggalStr) ||
+      Number.isNaN(new Date(tanggalStr).getTime())
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Format tanggal harus YYYY-MM-DD",
+      });
+    }
+
+    if (tanggalStr < hariIniWib()) {
+      return res.status(400).json({
+        success: false,
+        message: "Tanggal pengajuan tidak boleh di masa lalu",
+      });
+    }
+
+    if (!WAKTU_REGEX.test(mulai) || !WAKTU_REGEX.test(selesai)) {
+      return res.status(400).json({
+        success: false,
+        message: "Format waktu harus HH:MM",
+      });
+    }
+
+    if (mulai >= selesai) {
+      return res.status(400).json({
+        success: false,
+        message: "waktuSelesai harus setelah waktuMulai",
+      });
+    }
+
+    if (!topikStr || topikStr.length > 150) {
+      return res.status(400).json({
+        success: false,
+        message: "Topik wajib diisi dan maksimal 150 karakter",
+      });
+    }
+
+    if (konselorId) {
+      const konselor = await prisma.pengguna.findFirst({
+        where: {
+          id: String(konselorId),
+          sekolahId,
+          dihapusPada: null,
+          status: "aktif",
+        },
+        select: {
+          id: true,
+          peran: { select: { nama: true } },
+        },
+      });
+
+      if (!konselor || normalizeRole(konselor.peran?.nama) === "siswa") {
+        return res.status(404).json({
+          success: false,
+          message: "Konselor tidak ditemukan",
+        });
+      }
+    }
+
+    const sesiSiswa = await prisma.sesiKonseling.findMany({
+      where: {
+        sekolahId,
+        siswaId,
+        tanggal: new Date(tanggalStr),
+        dihapusPada: null,
+        status: { in: ["diajukan", "dijadwalkan"] },
+      },
+      select: {
+        waktuMulai: true,
+        waktuSelesai: true,
+      },
+    });
+
+    if (
+      sesiSiswa.some((s) =>
+        waktuBertabrakan(mulai, selesai, s.waktuMulai, s.waktuSelesai)
+      )
+    ) {
+      return res.status(409).json({
+        success: false,
+        message: "Anda sudah memiliki pengajuan atau sesi pada jam tersebut",
+      });
+    }
+
+    const data = await prisma.sesiKonseling.create({
+      data: {
+        sekolahId,
+        siswaId,
+        konselorId: konselorId ? String(konselorId) : null,
+        tanggal: new Date(tanggalStr),
+        waktuMulai: mulai,
+        waktuSelesai: selesai,
+        topik: topikStr,
+        masalah: masalah ? String(masalah) : null,
+        status: "diajukan",
+        dibuatOleh: siswaId,
+      },
+      include: {
+        konselor: {
+          select: {
+            id: true,
+            namaLengkap: true,
+          },
+        },
+      },
+    });
+
+    return res.status(201).json({
+      success: true,
+      message: "Pengajuan sesi konseling berhasil dikirim",
+      data,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Gagal mengajukan sesi konseling",
+    });
+  }
+};
+
+export const putuskanPengajuanKonseling = async (
+  req: AuthRequest,
+  res: Response
+) => {
+  try {
+    const sekolahId = req.user?.sekolahId;
+    const userId = req.user?.userId;
+    const id = String(req.params.id);
+
+    if (!sekolahId || !userId) {
+      return res.status(401).json({
+        success: false,
+        message: "Sekolah tidak ditemukan",
+      });
+    }
+
+    if (normalizeRole(req.user?.role) === "siswa") {
+      return res.status(403).json({
+        success: false,
+        message: "Siswa tidak dapat memproses pengajuan konseling",
+      });
+    }
+
+    const { keputusan, konselorId, catatan } = req.body;
+
+    if (keputusan !== "setujui" && keputusan !== "tolak") {
+      return res.status(400).json({
+        success: false,
+        message: "keputusan harus berisi setujui atau tolak",
+      });
+    }
+
+    const existing = await prisma.sesiKonseling.findFirst({
+      where: {
+        id,
+        sekolahId,
+        dihapusPada: null,
+      },
+    });
+
+    if (!existing) {
+      return res.status(404).json({
+        success: false,
+        message: "Pengajuan konseling tidak ditemukan",
+      });
+    }
+
+    if (existing.status !== "diajukan") {
+      return res.status(400).json({
+        success: false,
+        message: "Pengajuan ini sudah diproses",
+      });
+    }
+
+    if (keputusan === "tolak") {
+      if (!catatan || !String(catatan).trim()) {
+        return res.status(400).json({
+          success: false,
+          message: "Alasan penolakan wajib diisi pada catatan",
+        });
+      }
+
+      const data = await prisma.sesiKonseling.update({
+        where: { id },
+        data: {
+          status: "ditolak",
+          catatan: String(catatan).trim(),
+          diperbaruiOleh: userId,
+        },
+      });
+
+      return res.json({
+        success: true,
+        message: "Pengajuan konseling ditolak",
+        data,
+      });
+    }
+
+    if (!existing.waktuMulai || !existing.waktuSelesai) {
+      return res.status(400).json({
+        success: false,
+        message: "Pengajuan tidak memiliki jam sesi yang valid",
+      });
+    }
+
+    const konselorFinal = konselorId
+      ? String(konselorId)
+      : existing.konselorId ?? userId;
+
+    const konselor = await prisma.pengguna.findFirst({
+      where: {
+        id: konselorFinal,
+        sekolahId,
+        dihapusPada: null,
+        status: "aktif",
+      },
+      select: {
+        id: true,
+        peran: { select: { nama: true } },
+      },
+    });
+
+    if (!konselor || normalizeRole(konselor.peran?.nama) === "siswa") {
+      return res.status(404).json({
+        success: false,
+        message: "Konselor tidak ditemukan",
+      });
+    }
+
+    const sesiKonselor = await prisma.sesiKonseling.findMany({
+      where: {
+        sekolahId,
+        konselorId: konselorFinal,
+        tanggal: existing.tanggal,
+        dihapusPada: null,
+        status: "dijadwalkan",
+        id: { not: id },
+      },
+      select: {
+        waktuMulai: true,
+        waktuSelesai: true,
+      },
+    });
+
+    if (
+      sesiKonselor.some((s) =>
+        waktuBertabrakan(
+          existing.waktuMulai as string,
+          existing.waktuSelesai as string,
+          s.waktuMulai,
+          s.waktuSelesai
+        )
+      )
+    ) {
+      return res.status(409).json({
+        success: false,
+        message: "Konselor sudah memiliki sesi pada jam tersebut",
+      });
+    }
+
+    const data = await prisma.sesiKonseling.update({
+      where: { id },
+      data: {
+        status: "dijadwalkan",
+        konselorId: konselorFinal,
+        catatan: catatan ? String(catatan).trim() : undefined,
+        diperbaruiOleh: userId,
+      },
+      include: {
+        siswa: {
+          select: {
+            id: true,
+            namaLengkap: true,
+          },
+        },
+        konselor: {
+          select: {
+            id: true,
+            namaLengkap: true,
+          },
+        },
+      },
+    });
+
+    return res.json({
+      success: true,
+      message: "Pengajuan konseling disetujui",
+      data,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Gagal memproses pengajuan konseling",
+    });
+  }
+};
+
+export const batalkanPengajuanKonseling = async (
+  req: AuthRequest,
+  res: Response
+) => {
+  try {
+    const sekolahId = req.user?.sekolahId;
+    const siswaId = req.user?.userId;
+    const id = String(req.params.id);
+
+    if (!sekolahId || !siswaId) {
+      return res.status(401).json({
+        success: false,
+        message: "Sekolah tidak ditemukan",
+      });
+    }
+
+    if (normalizeRole(req.user?.role) !== "siswa") {
+      return res.status(403).json({
+        success: false,
+        message: "Hanya siswa yang dapat membatalkan pengajuannya",
+      });
+    }
+
+    const existing = await prisma.sesiKonseling.findFirst({
+      where: {
+        id,
+        sekolahId,
+        siswaId,
+        dihapusPada: null,
+      },
+    });
+
+    if (!existing) {
+      return res.status(404).json({
+        success: false,
+        message: "Pengajuan konseling tidak ditemukan",
+      });
+    }
+
+    if (existing.status !== "diajukan") {
+      return res.status(400).json({
+        success: false,
+        message: "Hanya pengajuan yang masih menunggu yang dapat dibatalkan",
+      });
+    }
+
+    const data = await prisma.sesiKonseling.update({
+      where: { id },
+      data: {
+        status: "dibatalkan",
+        diperbaruiOleh: siswaId,
+      },
+    });
+
+    return res.json({
+      success: true,
+      message: "Pengajuan konseling dibatalkan",
+      data,
+    });
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Gagal membatalkan pengajuan konseling",
     });
   }
 };
@@ -776,261 +1196,6 @@ export const deletePelanggaranSiswa = async (
     return res.status(500).json({
       success: false,
       message: "Gagal menghapus data pelanggaran",
-    });
-  }
-};
-
-export const getAsesmenMinatBakat = async (
-  req: AuthRequest,
-  res: Response
-) => {
-  try {
-    const sekolahId = req.user?.sekolahId;
-
-    if (!sekolahId) {
-      return res.status(401).json({
-        success: false,
-        message: "Sekolah tidak ditemukan",
-      });
-    }
-
-    const actorRole = normalizeRole(req.user?.role);
-    const where: any = {
-      sekolahId,
-      dihapusPada: null,
-    };
-
-    if (actorRole === "siswa") {
-      where.siswaId = req.user?.userId;
-    }
-
-    const data = await prisma.asesmenMinatBakat.findMany({
-      where,
-      include: {
-        siswa: {
-          select: {
-            id: true,
-            namaLengkap: true,
-            nis: true,
-            nisn: true,
-          },
-        },
-      },
-      orderBy: {
-        tanggal: "desc",
-      },
-    });
-
-    return res.json({
-      success: true,
-      data,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Gagal mengambil data asesmen minat bakat",
-    });
-  }
-};
-
-export const createAsesmenMinatBakat = async (
-  req: AuthRequest,
-  res: Response
-) => {
-  try {
-    const sekolahId = req.user?.sekolahId;
-
-    if (!sekolahId) {
-      return res.status(401).json({
-        success: false,
-        message: "Sekolah tidak ditemukan",
-      });
-    }
-
-    const {
-      siswaId,
-      tanggal,
-      jenis,
-      minat,
-      bakat,
-      hasil,
-      rekomendasi,
-      skor,
-      status,
-      catatan,
-    } = req.body;
-
-    if (!siswaId || !tanggal || !jenis) {
-      return res.status(400).json({
-        success: false,
-        message: "siswaId, tanggal, dan jenis wajib diisi",
-      });
-    }
-
-    const siswa = await prisma.pengguna.findFirst({
-      where: {
-        id: siswaId,
-        sekolahId,
-        dihapusPada: null,
-      },
-    });
-
-    if (!siswa) {
-      return res.status(404).json({
-        success: false,
-        message: "Siswa tidak ditemukan",
-      });
-    }
-
-    const data = await prisma.asesmenMinatBakat.create({
-      data: {
-        sekolahId,
-        siswaId,
-        tanggal: new Date(tanggal),
-        jenis,
-        minat,
-        bakat,
-        hasil,
-        rekomendasi,
-        skor: skor !== undefined ? Number(skor) : undefined,
-        status: status || "selesai",
-        catatan,
-        dibuatOleh: req.user?.userId,
-      },
-    });
-
-    return res.status(201).json({
-      success: true,
-      message: "Asesmen minat bakat berhasil dibuat",
-      data,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Gagal membuat asesmen minat bakat",
-    });
-  }
-};
-
-export const updateAsesmenMinatBakat = async (
-  req: AuthRequest,
-  res: Response
-) => {
-  try {
-    const sekolahId = req.user?.sekolahId;
-    const id = String(req.params.id);
-
-    if (!sekolahId) {
-      return res.status(401).json({
-        success: false,
-        message: "Sekolah tidak ditemukan",
-      });
-    }
-
-    const existing = await prisma.asesmenMinatBakat.findFirst({
-      where: {
-        id,
-        sekolahId,
-        dihapusPada: null,
-      },
-    });
-
-    if (!existing) {
-      return res.status(404).json({
-        success: false,
-        message: "Asesmen minat bakat tidak ditemukan",
-      });
-    }
-
-    const {
-      siswaId,
-      tanggal,
-      jenis,
-      minat,
-      bakat,
-      hasil,
-      rekomendasi,
-      skor,
-      status,
-      catatan,
-    } = req.body;
-
-    const data = await prisma.asesmenMinatBakat.update({
-      where: { id },
-      data: {
-        siswaId,
-        tanggal: tanggal ? new Date(tanggal) : undefined,
-        jenis,
-        minat,
-        bakat,
-        hasil,
-        rekomendasi,
-        skor: skor !== undefined ? Number(skor) : undefined,
-        status,
-        catatan,
-        diperbaruiOleh: req.user?.userId,
-      },
-    });
-
-    return res.json({
-      success: true,
-      message: "Asesmen minat bakat berhasil diperbarui",
-      data,
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Gagal memperbarui asesmen minat bakat",
-    });
-  }
-};
-
-export const deleteAsesmenMinatBakat = async (
-  req: AuthRequest,
-  res: Response
-) => {
-  try {
-    const sekolahId = req.user?.sekolahId;
-    const id = String(req.params.id);
-
-    if (!sekolahId) {
-      return res.status(401).json({
-        success: false,
-        message: "Sekolah tidak ditemukan",
-      });
-    }
-
-    const existing = await prisma.asesmenMinatBakat.findFirst({
-      where: {
-        id,
-        sekolahId,
-        dihapusPada: null,
-      },
-    });
-
-    if (!existing) {
-      return res.status(404).json({
-        success: false,
-        message: "Asesmen minat bakat tidak ditemukan",
-      });
-    }
-
-    await prisma.asesmenMinatBakat.update({
-      where: { id },
-      data: {
-        dihapusPada: new Date(),
-        dihapusOleh: req.user?.userId,
-      },
-    });
-
-    return res.json({
-      success: true,
-      message: "Asesmen minat bakat berhasil dihapus",
-    });
-  } catch (error) {
-    return res.status(500).json({
-      success: false,
-      message: "Gagal menghapus asesmen minat bakat",
     });
   }
 };

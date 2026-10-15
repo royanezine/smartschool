@@ -23,17 +23,17 @@ model Pengguna {
   avatar       String? @db.VarChar(255)
 
   pinHash            String?   @map("pin_hash") @db.VarChar(255)
-pinFailedAttempts  Int       @default(0) @map("pin_failed_attempts")
-pinLockedUntil     DateTime? @map("pin_locked_until") @db.Timestamp()
+  pinFailedAttempts  Int       @default(0) @map("pin_failed_attempts")
+  pinLockedUntil     DateTime? @map("pin_locked_until") @db.Timestamp()
 
-  nipd     String? @db.VarChar(20)
-  nip      String? @db.VarChar(20)
-  nuptk    String? @db.VarChar(20)
-  nisn     String? @unique @db.VarChar(20)
-  nis      String? @db.VarChar(20)
-  jabatan  String? @db.VarChar(100)
-  golongan String? @db.VarChar(50)
-  shiftKerja  String? @map("shift_kerja") @db.VarChar(20)
+  nipd              String? @db.VarChar(20)
+  nip               String? @db.VarChar(20)
+  nuptk             String? @db.VarChar(20)
+  nisn              String? @unique @db.VarChar(20)
+  nis               String? @db.VarChar(20)
+  jabatan           String? @db.VarChar(100)
+  golongan          String? @db.VarChar(50)
+  shiftKerja        String? @map("shift_kerja") @db.VarChar(20)
   kategoriJabatanId String? @map("kategori_jabatan_id")
   shiftKerjaId      String? @map("shift_kerja_id")
 
@@ -92,7 +92,6 @@ pinLockedUntil     DateTime? @map("pin_locked_until") @db.Timestamp()
   sesiKonselingSiswa    SesiKonseling[]     @relation("SiswaKonseling")
   sesiKonselingKonselor SesiKonseling[]     @relation("KonselorKonseling")
   pelanggaranSiswa      PelanggaranSiswa[]  @relation("SiswaPelanggaran")
-  asesmenMinatBakat     AsesmenMinatBakat[] @relation("SiswaAsesmenMinatBakat")
 
   peminjamanDiajukan     PeminjamanAset[] @relation("PeminjamAset")
   peminjamanDiverifikasi PeminjamanAset[] @relation("PetugasSarpras")
@@ -230,7 +229,6 @@ model Sekolah {
   sesiKonseling       SesiKonseling[]
   kategoriPelanggaran KategoriPelanggaran[]
   pelanggaranSiswa    PelanggaranSiswa[]
-  asesmenMinatBakat   AsesmenMinatBakat[]
 
   peminjamanAset PeminjamanAset[]
 
@@ -1451,6 +1449,8 @@ model SesiKonseling {
   siswa    Pengguna  @relation("SiswaKonseling", fields: [siswaId], references: [id])
   konselor Pengguna? @relation("KonselorKonseling", fields: [konselorId], references: [id])
 
+  @@index([sekolahId, tanggal])
+  @@index([konselorId, tanggal])
   @@map("sesi_konseling")
 }
 
@@ -1501,34 +1501,6 @@ model PelanggaranSiswa {
   kategoriPelanggaran KategoriPelanggaran @relation(fields: [kategoriPelanggaranId], references: [id])
 
   @@map("pelanggaran_siswa")
-}
-
-model AsesmenMinatBakat {
-  id             String  @id @default(uuid())
-  sekolahId      String  @map("sekolah_id")
-  siswaId        String  @map("siswa_id")
-  dibuatOleh     String? @map("dibuat_oleh")
-  diperbaruiOleh String? @map("diperbarui_oleh")
-  dihapusOleh    String? @map("dihapus_oleh")
-
-  tanggal     DateTime @db.Date
-  jenis       String   @db.VarChar(50)
-  minat       String?  @db.Text
-  bakat       String?  @db.Text
-  hasil       String?  @db.Text
-  rekomendasi String?  @db.Text
-  skor        Decimal? @db.Decimal(5, 2)
-  status      String?  @default("selesai") @db.VarChar(20)
-  catatan     String?  @db.Text
-
-  dibuatPada     DateTime  @default(now()) @map("dibuat_pada") @db.Timestamp()
-  diperbaruiPada DateTime  @updatedAt @map("diperbarui_pada") @db.Timestamp()
-  dihapusPada    DateTime? @map("dihapus_pada") @db.Timestamp()
-
-  sekolah Sekolah  @relation(fields: [sekolahId], references: [id])
-  siswa   Pengguna @relation("SiswaAsesmenMinatBakat", fields: [siswaId], references: [id])
-
-  @@map("asesmen_minat_bakat")
 }
 
 enum KategoriBuku {
@@ -1638,7 +1610,7 @@ model KategoriJabatan {
 
   sekolah      Sekolah        @relation(fields: [sekolahId], references: [id])
   pengguna     Pengguna[]
-  tarifJabatan TarifJabatan[]
+  tarifRiwayat TarifJabatan[]
 
   @@index([sekolahId])
   @@map("kategori_jabatan")

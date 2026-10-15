@@ -10,7 +10,7 @@ import {
   createTarif,
   updateTarif,
   deleteTarif,
-} from "../controllers/Tarif.controller";
+} from "../controllers/tarif.controller";
 
 const router = Router();
 

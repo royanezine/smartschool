@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import { prisma } from "../config/db";
+import { normalizeRole } from "../utils/rbac";
 
 interface KelasMapelBody {
   kelasId: string;
@@ -14,17 +15,13 @@ export const getKelasMapel = async (req: Request, res: Response) => {
     const data = await prisma.kelasMapel.findMany({
       where: {
         dihapusPada: null,
-
         kelas: {
           sekolahId,
         },
       },
-
       include: {
         kelas: true,
-
         mataPelajaran: true,
-
         guruPengajar: {
           select: {
             id: true,
@@ -35,7 +32,6 @@ export const getKelasMapel = async (req: Request, res: Response) => {
           },
         },
       },
-
       orderBy: {
         dibuatPada: "desc",
       },
@@ -45,6 +41,280 @@ export const getKelasMapel = async (req: Request, res: Response) => {
       success: true,
       message: "Berhasil mengambil data mata pelajaran kelas",
       data,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const getMapelDiampu = async (req: Request, res: Response) => {
+  try {
+    const user = (req as any).user;
+    const sekolahId = user?.sekolahId;
+    const actorRole = normalizeRole(user?.role);
+    const tahunAjaranId = req.query.tahunAjaranId as string | undefined;
+
+    const guruId =
+      actorRole === "guru"
+        ? (user?.userId as string | undefined)
+        : (req.query.guruId as string | undefined);
+
+    if (!sekolahId) {
+      return res.status(401).json({
+        success: false,
+        message: "Sekolah tidak ditemukan",
+      });
+    }
+
+    if (!guruId) {
+      return res.status(400).json({
+        success: false,
+        message: "guruId wajib diisi",
+      });
+    }
+
+    const data = await prisma.kelasMapel.findMany({
+      where: {
+        guruPengajarId: guruId,
+        dihapusPada: null,
+        kelas: {
+          sekolahId,
+          dihapusPada: null,
+          ...(tahunAjaranId && { tahunAjaranId }),
+        },
+      },
+      include: {
+        kelas: {
+          select: {
+            id: true,
+            nama: true,
+            tingkat: true,
+            tahunAjaranId: true,
+            _count: {
+              select: {
+                anggota: true,
+              },
+            },
+          },
+        },
+        mataPelajaran: true,
+        jadwalMengajar: {
+          where: { dihapusPada: null },
+        },
+      },
+      orderBy: {
+        dibuatPada: "desc",
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Berhasil mengambil mata pelajaran yang diampu",
+      data,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const getMapelSiswa = async (req: Request, res: Response) => {
+  try {
+    const user = (req as any).user;
+    const sekolahId = user?.sekolahId;
+    const actorRole = normalizeRole(user?.role);
+    const tahunAjaranId = req.query.tahunAjaranId as string | undefined;
+
+    const siswaId =
+      actorRole === "siswa"
+        ? (user?.userId as string | undefined)
+        : (req.query.siswaId as string | undefined);
+
+    if (!sekolahId) {
+      return res.status(401).json({
+        success: false,
+        message: "Sekolah tidak ditemukan",
+      });
+    }
+
+    if (!siswaId) {
+      return res.status(400).json({
+        success: false,
+        message: "siswaId wajib diisi",
+      });
+    }
+
+    const keanggotaan = await prisma.anggotaKelas.findMany({
+      where: {
+        penggunaId: siswaId,
+        dihapusPada: null,
+        kelas: {
+          sekolahId,
+          dihapusPada: null,
+          ...(tahunAjaranId && { tahunAjaranId }),
+        },
+      },
+      select: {
+        kelasId: true,
+      },
+    });
+
+    const kelasIds = keanggotaan.map((k) => k.kelasId);
+
+    const data = await prisma.kelasMapel.findMany({
+      where: {
+        kelasId: { in: kelasIds },
+        dihapusPada: null,
+      },
+      include: {
+        kelas: {
+          select: {
+            id: true,
+            nama: true,
+            tingkat: true,
+            tahunAjaranId: true,
+          },
+        },
+        mataPelajaran: true,
+        guruPengajar: {
+          select: {
+            id: true,
+            namaLengkap: true,
+            email: true,
+            nip: true,
+          },
+        },
+        jadwalMengajar: {
+          where: { dihapusPada: null },
+        },
+      },
+      orderBy: {
+        dibuatPada: "desc",
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Berhasil mengambil mata pelajaran siswa",
+      data,
+    });
+  } catch (error) {
+    console.error(error);
+
+    return res.status(500).json({
+      success: false,
+      message: "Internal server error",
+    });
+  }
+};
+
+export const getDetailKelasMapel = async (
+  req: Request<{ id: string }>,
+  res: Response,
+) => {
+  try {
+    const user = (req as any).user;
+    const sekolahId = user?.sekolahId;
+    const actorRole = normalizeRole(user?.role);
+    const { id } = req.params;
+
+    if (actorRole === "siswa") {
+      return res.status(403).json({
+        success: false,
+        message: "Akses ditolak",
+      });
+    }
+
+    const kelasMapel = await prisma.kelasMapel.findFirst({
+      where: {
+        id,
+        dihapusPada: null,
+        kelas: {
+          sekolahId,
+        },
+      },
+      include: {
+        kelas: {
+          select: {
+            id: true,
+            nama: true,
+            tingkat: true,
+            tahunAjaranId: true,
+          },
+        },
+        mataPelajaran: true,
+        guruPengajar: {
+          select: {
+            id: true,
+            namaLengkap: true,
+            email: true,
+            nip: true,
+          },
+        },
+        jadwalMengajar: {
+          where: { dihapusPada: null },
+        },
+      },
+    });
+
+    if (!kelasMapel) {
+      return res.status(404).json({
+        success: false,
+        message: "Data kelas mapel tidak ditemukan",
+      });
+    }
+
+    if (actorRole === "guru" && kelasMapel.guruPengajarId !== user?.userId) {
+      return res.status(403).json({
+        success: false,
+        message: "Anda hanya dapat melihat mata pelajaran yang Anda ampu",
+      });
+    }
+
+    const anggota = await prisma.anggotaKelas.findMany({
+      where: {
+        kelasId: kelasMapel.kelasId,
+        dihapusPada: null,
+        siswa: {
+          dihapusPada: null,
+        },
+      },
+      include: {
+        siswa: {
+          select: {
+            id: true,
+            namaLengkap: true,
+            nis: true,
+            nisn: true,
+            jenisKelamin: true,
+            avatar: true,
+          },
+        },
+      },
+      orderBy: {
+        siswa: {
+          namaLengkap: "asc",
+        },
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Berhasil mengambil detail kelas mapel",
+      data: {
+        ...kelasMapel,
+        jumlahSiswa: anggota.length,
+        siswa: anggota.map((a) => a.siswa),
+      },
     });
   } catch (error) {
     console.error(error);
@@ -139,7 +409,6 @@ export const createKelasMapel = async (
         guruPengajarId,
         status: "aktif",
       },
-
       include: {
         kelas: true,
         mataPelajaran: true,
@@ -180,7 +449,6 @@ export const updateKelasMapel = async (
       where: {
         id,
         dihapusPada: null,
-
         kelas: {
           sekolahId,
         },
@@ -253,14 +521,9 @@ export const updateKelasMapel = async (
       },
       data: {
         ...(kelasId && { kelasId }),
-        ...(mataPelajaranId && {
-          mataPelajaranId,
-        }),
-        ...(guruPengajarId && {
-          guruPengajarId,
-        }),
+        ...(mataPelajaranId && { mataPelajaranId }),
+        ...(guruPengajarId && { guruPengajarId }),
       },
-
       include: {
         kelas: true,
         mataPelajaran: true,
@@ -301,7 +564,6 @@ export const deleteKelasMapel = async (
       where: {
         id,
         dihapusPada: null,
-
         kelas: {
           sekolahId,
         },
@@ -342,9 +604,8 @@ export const deleteKelasMapel = async (
 export const createBulkKelasMapel = async (req: Request, res: Response) => {
   try {
     const sekolahId = (req as any).user?.sekolahId;
-    const { kelasIds, mataPelajaranId, guruPengajarId } = req.body; // Divalidasi via middleware
+    const { kelasIds, mataPelajaranId, guruPengajarId } = req.body;
 
-    // 1. Verifikasi Mapel & Guru
     const mapel = await prisma.mataPelajaran.findFirst({
       where: { id: mataPelajaranId, sekolahId, dihapusPada: null },
     });
@@ -361,7 +622,6 @@ export const createBulkKelasMapel = async (req: Request, res: Response) => {
         .status(404)
         .json({ success: false, message: "Guru tidak ditemukan" });
 
-    // 2. Ambil kelas yang valid & cek duplikasi
     const kelasValid = await prisma.kelas.findMany({
       where: { id: { in: kelasIds }, sekolahId, dihapusPada: null },
       select: { id: true, nama: true },
@@ -376,17 +636,13 @@ export const createBulkKelasMapel = async (req: Request, res: Response) => {
     });
     const existingKelasIds = new Set(existingAssigned.map((e) => e.kelasId));
 
-    // 3. Filter kelas yang belum di-assign mapel ini
     const kelasToAssign = kelasValid.filter((k) => !existingKelasIds.has(k.id));
 
     if (kelasToAssign.length === 0) {
-      return res
-        .status(400)
-        .json({
-          success: false,
-          message:
-            "Semua kelas yang dipilih sudah memiliki mata pelajaran ini.",
-        });
+      return res.status(400).json({
+        success: false,
+        message: "Semua kelas yang dipilih sudah memiliki mata pelajaran ini.",
+      });
     }
 
     await prisma.kelasMapel.createMany({
