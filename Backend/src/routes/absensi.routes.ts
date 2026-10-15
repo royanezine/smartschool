@@ -10,6 +10,7 @@ import {
   checkInShift,
   checkOutShift,
   getRiwayatShiftSaya,
+  getMetodeAbsensiAktif,
 } from "../controllers/absensi.controller";
 import { authenticate } from "../middlewares/auth.middleware";
 import { requireTenant } from "../middlewares/tenant.middleware";
@@ -52,6 +53,7 @@ router.post(
   uploadBiometrik.single("foto"),
   registerFaceIdByAdmin,
 );
+router.get("/metode-aktif", getMetodeAbsensiAktif);
 
 // Rute Absensi Shift Kerja (Pegawai / Guru)
 router.post("/check-in", checkInShift);
