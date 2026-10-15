@@ -209,7 +209,6 @@ if (data.metode === "face") {
     throw new AppError("Foto wajah dari kamera wajib disertakan", 400);
   }
 
-  // CEK DATA BIOMETRIK ALIH-ALIH AVATAR
   const biometrik = await prisma.biometrikWajah.findUnique({
     where: { penggunaId: userId },
   });
@@ -224,7 +223,6 @@ if (data.metode === "face") {
   const formData = new FormData();
   const aiServiceUrl = process.env.AI_SERVICE_URL || "http://localhost:8000";
 
-  // Ambil foto referensi dari tabel biometrik_wajah
   const masterPath = process.cwd() + biometrik.urlFotoReferensi;
 
   formData.append("master_image", fs.createReadStream(masterPath));
@@ -582,6 +580,17 @@ export const checkInShift = async (req: AuthRequest, res: Response) => {
     const sekolah = await prisma.sekolah.findUnique({
       where: { id: sekolahId },
     });
+
+    if (
+      sekolah?.metodeAbsensiAktif &&
+      sekolah.metodeAbsensiAktif.length > 0 &&
+      !sekolah.metodeAbsensiAktif.includes(data.metode)
+    ) {
+      throw new AppError(
+        `Metode absensi ${data.metode} sedang dinonaktifkan oleh sekolah. Metode yang diizinkan: ${sekolah.metodeAbsensiAktif.join(", ")}`,
+        400,
+      );
+    }
 
     if (sekolah?.lintang && sekolah?.bujur) {
       const jarak = hitungJarakMeter(
