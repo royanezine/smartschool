@@ -429,6 +429,7 @@ model Notifikasi {
 
 model PendaftaranTenant {
   id                 String @id @default(uuid())
+  jenisPendaftaran   String @default("sekolah") @map("jenis_pendaftaran") @db.VarChar(20)
   namaPendaftar      String @map("nama_pendaftar") @db.VarChar(100)
   emailPendaftar     String @map("email_pendaftar") @db.VarChar(100)
   kataSandiPendaftar String @map("kata_sandi_pendaftar") @db.VarChar(255)
@@ -439,12 +440,12 @@ model PendaftaranTenant {
   emailYayasan   String? @map("email_yayasan") @db.VarChar(100)
   npypYayasan    String? @map("npyp_yayasan") @db.VarChar(50)
 
-  namaSekolah    String  @map("nama_sekolah") @db.VarChar(100)
-  jenjangSekolah String  @map("jenjang_sekolah") @db.VarChar(20)
-  subdomain      String  @db.VarChar(50)
-  alamatSekolah  String  @map("alamat_sekolah") @db.Text
-  teleponSekolah String  @map("telepon_sekolah") @db.VarChar(20)
-  emailSekolah   String  @map("email_sekolah") @db.VarChar(100)
+  namaSekolah    String? @map("nama_sekolah") @db.VarChar(100)
+  jenjangSekolah String? @map("jenjang_sekolah") @db.VarChar(20)
+  subdomain      String? @db.VarChar(50)
+  alamatSekolah  String? @map("alamat_sekolah") @db.Text
+  teleponSekolah String? @map("telepon_sekolah") @db.VarChar(20)
+  emailSekolah   String? @map("email_sekolah") @db.VarChar(100)
   logoSekolah    String? @map("logo_sekolah") @db.VarChar(255)
 
   paketId         String    @map("paket_id")

@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from "express";
 import crypto from "crypto";
 import { prisma } from "../config/db";
+import { konversiPendaftaranTenant } from "./tenant.controller";
 
 export const handleMidtransWebhook = async (
   req: Request,
@@ -39,72 +40,25 @@ export const handleMidtransWebhook = async (
           .status(404)
           .json({ success: false, message: "Pendaftaran not found" });
 
-      if (
-        transaction_status === "capture" ||
-        transaction_status === "settlement"
-      ) {
-        const peranAdmin = await prisma.peran.findFirst({
-          where: { nama: "admin_sekolah" },
-        });
-        const randomChars = crypto.randomBytes(3).toString("hex").toUpperCase();
-        const kodeSekolah = `SCH-${randomChars}`;
-        const baseUsername =
-          pendaftaran.emailPendaftar.split("@")[0] || pendaftaran.emailPendaftar;
+      // Idempotensi: jika tenant sudah aktif, jangan proses ulang
+      if (pendaftaran.status === "aktif") {
+        return res
+          .status(200)
+          .json({ received: true, message: "Tenant already activated" });
+      }
 
+      const fraudStatus = req.body.fraud_status;
+      const isSuccess =
+        transaction_status === "settlement" ||
+        (transaction_status === "capture" &&
+          (!fraudStatus || fraudStatus === "accept"));
+
+      if (isSuccess) {
         await prisma.$transaction(async (tx) => {
-          const sekolah = await tx.sekolah.create({
-            data: {
-              nama: pendaftaran.namaSekolah,
-              subdomain: pendaftaran.subdomain,
-              kode: kodeSekolah,
-              alamat: pendaftaran.alamatSekolah,
-              telepon: pendaftaran.teleponSekolah,
-              email: pendaftaran.emailSekolah,
-              logoBesarUrl: pendaftaran.logoSekolah,
-              status: "aktif",
-              jenjang: pendaftaran.jenjangSekolah,
-              konfigurasi: { jenjang: pendaftaran.jenjangSekolah },
-            },
-          });
-
-          const pengguna = await tx.pengguna.create({
-            data: {
-              namaPengguna: `${baseUsername}_${randomChars.toLowerCase()}`,
-              email: pendaftaran.emailPendaftar,
-              kataSandi: pendaftaran.kataSandiPendaftar,
-              namaLengkap: pendaftaran.namaPendaftar,
-              sekolahId: sekolah.id,
-              peranId: peranAdmin!.id,
-              status: "aktif",
-            },
-          });
-
-          const endDate = new Date();
-          endDate.setFullYear(endDate.getFullYear() + 1);
-
-          await tx.langgananSekolah.create({
-            data: {
-              sekolahId: sekolah.id,
-              paketId: pendaftaran.paketId,
-              dibuatOleh: pengguna.id,
-              statusPembayaran: "success",
-              statusLangganan: "active",
-              hargaSaatBerlangganan: gross_amount,
-              siklusPenagihan: "annual",
-              midtransInvoiceId: order_id,
-              tanggalMulai: new Date(),
-              tanggalBerakhir: endDate,
-            },
-          });
-
-          await tx.pendaftaranTenant.update({
-            where: { id: pendaftaran.id },
-            data: {
-              status: "aktif",
-              sekolahTerbuatId: sekolah.id,
-              penggunaTerbuatId: pengguna.id,
-              dikonversiPada: new Date(),
-            },
+          await konversiPendaftaranTenant(tx, pendaftaran.id, {
+            isTrial: false,
+            grossAmount: Number(gross_amount) || 0,
+            orderId: order_id,
           });
         });
       } else if (
