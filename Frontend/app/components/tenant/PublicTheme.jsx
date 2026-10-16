@@ -9,10 +9,10 @@ const API_URL = (
 
 function getPublicApiBase() {
   if (API_URL.endsWith("/api")) {
-    return `${API_URL}/v1/publik`;
+    return `${API_URL}/publik`;
   }
 
-  return `${API_URL}/api/v1/publik`;
+  return `${API_URL}/api/publik`;
 }
 
 export default function PublicTheme({ tenant }) {

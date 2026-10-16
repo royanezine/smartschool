@@ -1,3 +1,4 @@
+
 import {
   LayoutDashboard,
   Users,
@@ -6,6 +7,9 @@ import {
   ScanFace,
   GraduationCap,
   Split,
+  WalletCards,
+  KeyRound,
+  BriefcaseBusiness,
   Globe2,
   PackageCheck,
   CalendarDays,
@@ -47,7 +51,6 @@ import {
   FileInput,
   PiggyBank,
   DollarSign,
-  WalletCards,
 } from "lucide-react";
 
 export const adminSidebarConfig = {
@@ -68,15 +71,31 @@ export const adminSidebarConfig = {
       path: "/admin/dashboard",
     },
 
+  
     // =====================================================
-    // MASTER SHIFT
+    // SHIFT & PENUGASAN
     // =====================================================
     {
       type: "item",
-      key: "masterShift",
+      key: "manajemenShift",
       icon: Clock3,
-      label: "Master Shift",
+      label: "Manajemen Shift",
       path: "/admin/presensi/master-shift",
+
+      children: [
+        {
+          key: "masterShift",
+          icon: CalendarClock,
+          label: "Master Shift",
+          path: "/admin/presensi/master-shift",
+        },
+        {
+          key: "penugasanShift",
+          icon: UserRoundCog,
+          label: "Penugasan Shift",
+          path: "/admin/presensi/penugasan-shift",
+        },
+      ],
     },
 
     // =====================================================
@@ -119,6 +138,12 @@ export const adminSidebarConfig = {
           icon: Settings,
           label: "Pengaturan Presensi",
           path: "/admin/presensi/pengaturan",
+        },
+        {
+          key: "kategoriJabatan",
+          icon: BriefcaseBusiness,
+          label: "Kategori Jabatan",
+          path: "/admin/presensi/kategori-jabatan",
         },
       ],
     },
@@ -170,6 +195,12 @@ export const adminSidebarConfig = {
           label: "Tracking Tunggakan",
           path: "/admin/keuangan/tunggakan",
         },
+        {
+          key: "penggajian",
+          icon: WalletCards,
+          label: "Penggajian",
+          path: "/admin/keuangan/penggajian",
+        },
       ],
     },
 
@@ -205,6 +236,12 @@ export const adminSidebarConfig = {
           path: "/admin/siswa",
         },
         {
+          key: "pengaturanPinSiswa",
+          icon: KeyRound,
+          label: "Pengaturan PIN Siswa",
+          path: "/admin/pengguna/pin-siswa",
+        },
+        {
           key: "faceId",
           icon: ScanFace,
           label: "Face ID",
@@ -214,7 +251,7 @@ export const adminSidebarConfig = {
           key: "kelolaUserPermission",
           icon: UserRoundCog,
           label: "Kelola User & Izin",
-          path: "/admin/kelola-user",
+          path: "/admin/pengguna/kelola-user",
         },
       ],
     },
@@ -356,7 +393,6 @@ export const adminSidebarConfig = {
           label: "Sesi Konseling Siswa",
           path: "/admin/bk/sesi-konseling",
         },
-        
         {
           key: "pelanggaranSiswa",
           icon: AlertTriangle,
@@ -368,12 +404,6 @@ export const adminSidebarConfig = {
           icon: Tags,
           label: "Kategori & Point Pelanggaran",
           path: "/admin/bk/kategori-point",
-        },
-        {
-          key: "asesmenMinatBakat",
-          icon: Brain,
-          label: "Asesmen & Minat Bakat Siswa",
-          path: "/admin/bk/asesment-minat-bakat",
         },
       ],
     },
@@ -457,7 +487,7 @@ export const adminSidebarConfig = {
           label: "Daftar Aset",
           path: "/admin/sarpras/gudang",
         },
-         {
+        {
           key: "peminjaman",
           icon: PackageCheck,
           label: "Peminjaman",

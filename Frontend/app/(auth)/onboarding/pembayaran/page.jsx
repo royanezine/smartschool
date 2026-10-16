@@ -1,285 +1,515 @@
 "use client";
 
-import { useState } from "react";
-import Image from "next/image";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
-    CheckCircle,
-    Clock,
-    FileText,
-    HelpCircle,
-    Mail,
-    Building2,
-    Calendar,
-    Check as CheckIcon,
-    Copy,
-    LayoutDashboard,
-    Sparkles,
+  ArrowLeft,
+  ArrowRight,
+  Building2,
+  Check,
+  CheckCircle2,
+  Clock3,
+  Copy,
+  CreditCard,
+  ExternalLink,
+  Info,
+  Loader2,
+  LockKeyhole,
+  Mail,
+  ShieldCheck,
+  WalletCards,
 } from "lucide-react";
 
-// ========== Tombol Bantuan ==========
-const HelpButton = () => (
-    <div className="flex flex-col sm:flex-row items-end sm:items-center gap-2 bg-white shadow-sm px-4 py-2 sm:px-5 sm:py-2.5 rounded-full border border-slate-200/80 hover:shadow-md transition-shadow">
-        <div className="flex items-center gap-1.5">
-            <HelpCircle className="w-4 h-4 text-slate-400" />
-            <span className="text-xs sm:text-sm text-slate-600 whitespace-nowrap">Butuh bantuan?</span>
-        </div>
-        <a
-            href="mailto:admin@portalpelanggan.id"
-            className="text-xs sm:text-sm text-slate-800 font-medium hover:text-slate-900 transition-colors"
-        >
-            admin@portalpelanggan.id
-        </a>
-    </div>
-);
+function formatRupiah(value) {
+  if (value === undefined || value === null || value === "") {
+    return "-";
+  }
 
-// ========== Progress Steps ==========
-const ProgressSteps = () => {
-    const steps = [
-        { label: "Pendaftaran terkirim", icon: CheckCircle },
-        { label: "Pembayaran diterima", icon: CheckCircle },
-        { label: "Verifikasi selesai", icon: CheckCircle },
-        { label: "Akun aktif", icon: CheckCircle },
-    ];
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 0,
+  }).format(Number(value) || 0);
+}
 
+export default function PembayaranPage() {
+  const router = useRouter();
+
+  const [payment, setPayment] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [copied, setCopied] = useState("");
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    try {
+      const savedPayment = sessionStorage.getItem("tenant_payment_data");
+
+      if (!savedPayment) {
+        setError(
+          "Informasi pembayaran tidak ditemukan. Silakan lakukan verifikasi terlebih dahulu."
+        );
+        return;
+      }
+
+      const parsedPayment = JSON.parse(savedPayment);
+
+      if (!parsedPayment || typeof parsedPayment !== "object") {
+        setError("Informasi pembayaran tidak valid.");
+        return;
+      }
+
+      if (
+        parsedPayment.is_trial === false &&
+        !parsedPayment.redirect_url
+      ) {
+        setError(
+          "Tautan pembayaran belum tersedia. Silakan ulangi proses verifikasi."
+        );
+        return;
+      }
+
+      setPayment(parsedPayment);
+    } catch (err) {
+      console.error("Gagal membaca informasi pembayaran:", err);
+      setError("Informasi pembayaran gagal dimuat.");
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  const handleCopy = async (value, field = "order") => {
+    if (!value) return;
+
+    try {
+      await navigator.clipboard.writeText(String(value));
+      setCopied(field);
+
+      window.setTimeout(() => {
+        setCopied((current) => (current === field ? "" : current));
+      }, 2000);
+    } catch (err) {
+      console.error("Gagal menyalin informasi:", err);
+      setError(
+        "Informasi tidak berhasil disalin. Silakan salin secara manual."
+      );
+    }
+  };
+
+  const handlePay = () => {
+    const redirectUrl = payment?.redirect_url;
+
+    if (!redirectUrl) {
+      setError(
+        "Tautan pembayaran tidak tersedia. Silakan ulangi proses verifikasi."
+      );
+      return;
+    }
+
+    try {
+      const parsedUrl = new URL(redirectUrl);
+
+      if (
+        parsedUrl.protocol !== "https:" ||
+        parsedUrl.hostname !== "app.sandbox.midtrans.com"
+      ) {
+        setError("Tautan checkout Midtrans tidak valid.");
+        return;
+      }
+
+      window.location.assign(parsedUrl.toString());
+    } catch {
+      setError("Tautan pembayaran tidak valid.");
+    }
+  };
+
+  const bank = payment?.bank || "";
+  const orderId = payment?.order_id || "";
+  const grossAmount = payment?.gross_amount;
+  const email = payment?.email || "";
+  const isTrial = payment?.is_trial === true;
+
+  if (loading) {
     return (
-        <div className="flex items-center justify-between max-w-lg mx-auto w-full px-2 sm:px-0">
-            {steps.map((step, index, arr) => (
-                <div key={index} className="flex items-center flex-1 last:flex-none">
-                    <div className="flex flex-col items-center w-full">
-                        <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center bg-gradient-to-br from-emerald-500 to-teal-500 text-white shadow-lg shadow-emerald-500/20 flex-shrink-0">
-                            <step.icon className="w-5 h-5 sm:w-5 sm:h-5" />
-                        </div>
-                        <span className="text-[9px] sm:text-xs font-medium mt-2 text-center text-slate-700 leading-tight max-w-[60px] sm:max-w-[80px]">
-                            {step.label}
-                        </span>
-                    </div>
-                    {/* Garis penghubung fleksibel, tidak kaku di layar HP */}
-                    {index < arr.length - 1 && (
-                        <div className="flex-1 h-0.5 mx-1 sm:mx-2 bg-gradient-to-r from-emerald-500 to-teal-500" />
-                    )}
-                </div>
-            ))}
+      <main className="flex min-h-screen items-center justify-center bg-slate-50">
+        <div className="flex items-center gap-3 text-sm font-medium text-slate-600">
+          <Loader2 className="h-5 w-5 animate-spin text-blue-600" />
+          Memuat informasi pembayaran...
         </div>
+      </main>
     );
-};
+  }
 
-// ========== Komponen Utama ==========
-export default function CustomerPortalPaid() {
-    const [copied, setCopied] = useState(false);
-
-    const handleCopy = () => {
-        if (navigator.clipboard) {
-            navigator.clipboard.writeText("SCH-2026-08110");
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
-        }
-    };
-
+  if (error && !payment) {
     return (
-        <div className="min-h-screen bg-white">
-            <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-12">
-                {/* ===== HEADER ===== */}
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 sm:mb-10">
-                    <div className="flex items-center gap-4">
-                        <div className="relative w-11 h-11 sm:w-14 sm:h-14 flex-shrink-0">
-                            <Image
-                                src="/logo/logoSS.png"
-                                alt="Logo Portal Pelanggan"
-                                fill
-                                className="object-contain"
-                                priority
-                            />
-                        </div>
-                        <div>
-                            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-slate-800">
-                                Portal Pelanggan
-                            </h1>
-                            <p className="text-xs sm:text-sm text-slate-400 font-medium tracking-wide -mt-0.5">
-                                SAAS SISTEM INFORMASI SEKOLAH
-                            </p>
-                        </div>
-                    </div>
-                    <HelpButton />
-                </div>
+      <main className="flex min-h-screen items-center justify-center bg-slate-50 px-5 py-10">
+        <div className="w-full max-w-md rounded-2xl border border-slate-200 bg-white p-7 text-center shadow-sm">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-amber-50 text-amber-600">
+            <Info className="h-6 w-6" />
+          </div>
 
-                {/* ===== KARTU UTAMA ===== */}
-                <div className="bg-white rounded-2xl shadow-2xl shadow-slate-200/60 border border-slate-200/80 overflow-hidden transition-all hover:shadow-3xl hover:shadow-emerald-200/30">
-                    {/* — Header Status dengan gradien premium — */}
-                    <div className="relative bg-gradient-to-r from-emerald-600 via-teal-600 to-emerald-600 px-6 sm:px-8 py-6 sm:py-8 overflow-hidden">
-                        {/* Efek dekoratif */}
-                        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-2xl -translate-y-1/2 translate-x-1/3" />
-                        <div className="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full blur-2xl translate-y-1/2 -translate-x-1/4" />
+          <h1 className="mt-4 text-xl font-bold text-slate-900">
+            Informasi pembayaran tidak tersedia
+          </h1>
 
-                        <div className="relative flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                            <div>
-                                <div className="flex items-center gap-3">
-                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 bg-white/20 backdrop-blur-sm rounded-full text-white text-[10px] sm:text-xs font-medium border border-white/10">
-                                        <Sparkles className="w-3.5 h-3.5" />
-                                        BERHASIL
-                                    </span>
-                                </div>
-                                <h2 className="text-xl sm:text-3xl font-bold text-white mt-2 flex flex-wrap items-center gap-2">
-                                    Pembayaran Berhasil & Akun Aktif
-                                    <CheckIcon className="w-5 h-5 sm:w-6 sm:h-6 text-white/80" />
-                                </h2>
-                                <p className="text-white/80 text-xs sm:text-sm mt-2 max-w-2xl leading-relaxed">
-                                    Pendaftaran <strong className="text-white">SMA Harapan Bangsa</strong> sudah kami terima.
-                                    Aktivasi akun berjalan otomatis setelah pembayaran terverifikasi oleh admin —
-                                    biasanya <strong className="text-white">1×24 jam kerja</strong> setelah bukti pembayaran diunggah.
-                                </p>
-                            </div>
-                            <div className="flex-shrink-0">
-                                <div className="bg-white/20 backdrop-blur-sm rounded-full px-4 py-2 sm:px-6 sm:py-3 flex items-center gap-2 border border-white/20 shadow-lg">
-                                    <div className="w-2.5 h-2.5 rounded-full bg-white animate-pulse" />
-                                    <span className="text-white text-xs sm:text-sm font-bold tracking-widest">
-                                        AKTIF
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+          <p className="mt-2 text-sm leading-6 text-slate-500">
+            {error}
+          </p>
 
-                    {/* — Progress Steps — */}
-                    <div className="px-4 sm:px-8 pt-8 pb-4 border-b border-slate-200/60">
-                        <ProgressSteps />
-                    </div>
+          <button
+            type="button"
+            onClick={() => router.push("/verifikasi-tenant")}
+            className="mt-6 inline-flex items-center justify-center gap-2 rounded-xl bg-[#155DFC] px-5 py-3 text-sm font-bold text-white transition hover:bg-[#0D47C9]"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Kembali ke verifikasi
+          </button>
+        </div>
+      </main>
+    );
+  }
 
-                    {/* — Body: Tagihan + Aksi — */}
-                    <div className="p-4 sm:p-8">
-                        <div className="flex flex-col lg:flex-row gap-8">
-                            {/* Kiri — Rincian Tagihan */}
-                            <div className="flex-1 min-w-0">
-                                <div className="flex items-center gap-2 mb-5">
-                                    <div className="p-2 bg-emerald-50 rounded-lg flex-shrink-0">
-                                        <FileText className="w-5 h-5 text-emerald-600" />
-                                    </div>
-                                    <h3 className="text-base sm:text-lg font-semibold text-slate-800 tracking-wide">
-                                        RINCIAN TAGIHAN
-                                    </h3>
-                                </div>
-
-                                <div className="bg-slate-50/80 rounded-xl border border-slate-200/60 overflow-hidden">
-                                    <div className="divide-y divide-slate-200/60">
-                                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 sm:px-5 py-3 sm:py-4 hover:bg-white/50 transition-colors gap-1 sm:gap-0">
-                                            <span className="text-[11px] sm:text-sm text-slate-500 font-medium">
-                                                Kode Tagihan
-                                            </span>
-                                            <div className="flex items-center gap-2 w-full sm:w-auto justify-between sm:justify-end">
-                                                <span className="text-[11px] sm:text-sm font-mono font-bold text-slate-800 bg-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg border border-slate-200/60 break-all">
-                                                    SCH-2026-08110
-                                                </span>
-                                                <button
-                                                    onClick={handleCopy}
-                                                    className="p-1.5 rounded-lg hover:bg-slate-100 transition-colors text-slate-400 hover:text-slate-600 flex-shrink-0"
-                                                    title="Salin kode"
-                                                >
-                                                    {copied ? (
-                                                        <CheckIcon className="w-4 h-4 text-emerald-600" />
-                                                    ) : (
-                                                        <Copy className="w-4 h-4" />
-                                                    )}
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 sm:px-5 py-3 sm:py-4 hover:bg-white/50 transition-colors gap-1 sm:gap-0">
-                                            <span className="text-[11px] sm:text-sm text-slate-500 font-medium">
-                                                Nama Sekolah
-                                            </span>
-                                            <span className="text-[11px] sm:text-sm font-semibold text-slate-800 flex items-center gap-1.5">
-                                                <Building2 className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400" />
-                                                SMA Harapan Bangsa
-                                            </span>
-                                        </div>
-                                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 sm:px-5 py-3 sm:py-4 hover:bg-white/50 transition-colors gap-1 sm:gap-0">
-                                            <span className="text-[11px] sm:text-sm text-slate-500 font-medium">
-                                                Jumlah Tagihan
-                                            </span>
-                                            <span className="text-base sm:text-lg font-bold text-emerald-600">
-                                                Rp 2.500.000
-                                            </span>
-                                        </div>
-                                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 sm:px-5 py-3 sm:py-4 hover:bg-white/50 transition-colors gap-1 sm:gap-0">
-                                            <span className="text-[11px] sm:text-sm text-slate-500 font-medium">
-                                                Batas Waktu
-                                            </span>
-                                            <span className="text-[11px] sm:text-sm font-semibold text-slate-800 flex items-center gap-1.5">
-                                                <Calendar className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-400" />
-                                                17 Agustus 2026
-                                            </span>
-                                        </div>
-                                        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between px-4 sm:px-5 py-3 sm:py-4 bg-emerald-50/50 hover:bg-emerald-50/70 transition-colors gap-1 sm:gap-0">
-                                            <span className="text-[11px] sm:text-sm text-slate-500 font-medium">
-                                                Status
-                                            </span>
-                                            <span className="inline-flex items-center gap-1.5 px-3 py-1 sm:px-4 sm:py-1.5 rounded-full text-[11px] sm:text-sm font-bold bg-emerald-100 text-emerald-700 border border-emerald-200/80 shadow-sm">
-                                                <CheckIcon className="w-3.5 h-3.5" />
-                                                LUNAS
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* Kanan — Aksi Cepat */}
-                            <div className="w-full lg:w-80 flex-shrink-0">
-                                <div className="bg-gradient-to-br from-emerald-50/80 to-teal-50/80 rounded-xl border border-emerald-200/60 p-6 h-full flex flex-col shadow-sm">
-                                    <div className="flex items-center gap-2 mb-4">
-                                        <div className="p-1.5 bg-white rounded-lg shadow-sm">
-                                            <LayoutDashboard className="w-4 h-4 text-emerald-600" />
-                                        </div>
-                                        <h4 className="text-sm font-semibold text-slate-700">
-                                            AKSI CEPAT
-                                        </h4>
-                                    </div>
-
-                                    <div className="space-y-3 flex-1 flex flex-col">
-                                        <a
-                                            href="/dashboard"
-                                            className="w-full flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-medium bg-emerald-600 text-white hover:bg-emerald-700 hover:shadow-lg hover:shadow-emerald-500/30 transition-all duration-300"
-                                        >
-                                            <LayoutDashboard className="w-5 h-5" />
-                                            Masuk ke Dashboard
-                                        </a>
-
-                                        <a
-                                            href="mailto:admin@portalpelanggan.id"
-                                            className="w-full flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl font-medium bg-white border border-slate-200/60 text-slate-700 hover:bg-slate-50 hover:border-slate-300 hover:shadow-sm transition-all duration-200"
-                                        >
-                                            <Mail className="w-5 h-5" />
-                                            Hubungi Admin Sekolah
-                                        </a>
-                                    </div>
-
-                                    <div className="mt-6 pt-5 border-t border-emerald-200/40">
-                                        <div className="flex items-start gap-2.5">
-                                            <div className="p-1.5 bg-emerald-50 rounded-full flex-shrink-0">
-                                                <Sparkles className="w-3.5 h-3.5 text-emerald-500" />
-                                            </div>
-                                            <p className="text-[10px] sm:text-xs text-slate-500 leading-relaxed">
-                                                <span className="font-medium text-slate-600 block mb-0.5">
-                                                    Akun aktif
-                                                </span>
-                                                Anda dapat mengakses dashboard untuk mengelola data sekolah.
-                                            </p>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* — Footer Card — */}
-                    <div className="px-4 sm:px-8 py-4 bg-slate-50/50 border-t border-slate-200/60">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-[10px] sm:text-xs text-slate-400">
-                            <span>© 2025 Portal Pelanggan — SAAS Sistem Informasi Sekolah</span>
-                            <span className="flex items-center gap-1.5">
-                                <CheckIcon className="w-3 h-3 text-emerald-500" />
-                                Verifikasi selesai
-                            </span>
-                        </div>
-                    </div>
-                </div>
+  return (
+    <main className="min-h-screen bg-slate-50 text-slate-900">
+      <header className="border-b border-slate-200/80 bg-white">
+        <div className="mx-auto flex h-[76px] max-w-7xl items-center justify-between px-5 sm:px-6 lg:px-8">
+          <a href="/" className="flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#0D47C9] shadow-sm">
+              <span className="text-lg font-extrabold tracking-tight text-white">
+                S
+              </span>
             </div>
+
+            <div>
+              <p className="text-[17px] font-extrabold tracking-tight text-slate-950">
+                SmartSchool
+              </p>
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+                School Management System
+              </p>
+            </div>
+          </a>
+
+          <div className="hidden items-center gap-2 text-xs font-semibold text-emerald-700 sm:flex">
+            <ShieldCheck className="h-4 w-4" />
+            Verifikasi berhasil
+          </div>
         </div>
-    );
+      </header>
+
+      <section className="relative overflow-hidden border-b border-slate-200/80 bg-[#0D1B38]">
+        <div className="absolute -right-24 -top-32 h-80 w-80 rounded-full bg-blue-600/20 blur-3xl" />
+        <div className="absolute -bottom-40 left-1/4 h-80 w-80 rounded-full bg-blue-500/10 blur-3xl" />
+
+        <div className="relative mx-auto max-w-7xl px-5 py-10 sm:px-6 lg:px-8">
+          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-400/10 px-3.5 py-2 text-xs font-semibold text-emerald-200">
+            <CheckCircle2 className="h-4 w-4" />
+            Verifikasi berhasil
+          </div>
+
+          <h1 className="mt-5 text-3xl font-bold tracking-tight text-white sm:text-4xl">
+            {isTrial ? (
+              "Pendaftaran Berhasil"
+            ) : (
+              <>
+                Selesaikan Pembayaran
+                <span className="text-blue-400"> SmartSchool</span>
+              </>
+            )}
+          </h1>
+
+          <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
+            {isTrial
+              ? "Pendaftaran paket uji coba telah diproses. Silakan lanjutkan ke halaman login."
+              : "Periksa ringkasan transaksi, kemudian lanjutkan pembayaran melalui halaman checkout Midtrans."}
+          </p>
+        </div>
+      </section>
+
+      <section className="px-5 py-8 sm:px-6 sm:py-10 lg:px-8">
+        <div className="mx-auto grid max-w-6xl gap-7 lg:grid-cols-[minmax(0,1fr)_330px]">
+          <div className="space-y-6">
+            <div className="flex items-start gap-4 rounded-2xl border border-emerald-200 bg-emerald-50 p-5">
+              <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-emerald-100 text-emerald-700">
+                <CheckCircle2 className="h-6 w-6" />
+              </div>
+
+              <div>
+                <h2 className="text-base font-bold text-emerald-900">
+                  Verifikasi berhasil
+                </h2>
+
+                <p className="mt-1 text-sm leading-6 text-emerald-800">
+                  {isTrial
+                    ? "Data pendaftaran berhasil diproses untuk paket uji coba."
+                    : "Data pendaftaran berhasil diverifikasi. Pembayaran belum dianggap berhasil sampai backend menerima dan memvalidasi konfirmasi dari Midtrans."}
+                </p>
+              </div>
+            </div>
+
+            <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-[0_10px_40px_rgba(15,23,42,0.05)]">
+              <div className="border-b border-slate-100 px-6 py-5 sm:px-7">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                    <WalletCards className="h-5 w-5" />
+                  </div>
+
+                  <div>
+                    <h2 className="text-lg font-bold text-slate-900">
+                      Informasi Pembayaran
+                    </h2>
+                    <p className="mt-1 text-xs text-slate-500">
+                      Ringkasan transaksi pendaftaran sekolah.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-6 p-6 sm:p-7">
+                <div className="rounded-2xl bg-[#0D1B38] p-5 text-white sm:p-6">
+                  <p className="text-xs font-semibold uppercase tracking-wider text-blue-200">
+                    Total Pembayaran
+                  </p>
+
+                  <p className="mt-2 break-words text-2xl font-extrabold sm:text-3xl">
+                    {formatRupiah(grossAmount)}
+                  </p>
+
+                  <div className="mt-5 flex items-center gap-2 text-xs text-slate-300">
+                    <LockKeyhole className="h-4 w-4" />
+                    Pastikan nominal sesuai dengan checkout Midtrans.
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                    Metode Pembayaran
+                  </p>
+
+                  <div className="mt-2 flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-4">
+                    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-white text-blue-600 shadow-sm">
+                      <Building2 className="h-5 w-5" />
+                    </div>
+
+                    <div>
+                      <p className="text-sm font-bold uppercase text-slate-900">
+                        {bank || "Pembayaran melalui Midtrans"}
+                      </p>
+                      <p className="mt-0.5 text-xs text-slate-500">
+                        {bank
+                          ? "Pilihan bank yang dikirim saat verifikasi"
+                          : "Ikuti pilihan pembayaran yang tersedia saat checkout"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {orderId && (
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
+                      Order ID
+                    </p>
+
+                    <div className="mt-2 flex items-center justify-between gap-3 rounded-xl border border-slate-200 px-4 py-3">
+                      <p className="break-all text-sm font-semibold text-slate-700">
+                        {orderId}
+                      </p>
+
+                      <button
+                        type="button"
+                        onClick={() => handleCopy(orderId, "order")}
+                        className="shrink-0 text-blue-600 hover:text-blue-700"
+                        aria-label="Salin Order ID"
+                      >
+                        {copied === "order" ? (
+                          <Check className="h-4 w-4" />
+                        ) : (
+                          <Copy className="h-4 w-4" />
+                        )}
+                      </button>
+                    </div>
+                    {copied === "order" && (
+                      <p className="mt-1 text-xs text-emerald-600">
+                        Order ID berhasil disalin.
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {email && (
+                  <div className="flex items-start gap-3 rounded-xl bg-slate-50 p-4">
+                    <Mail className="mt-0.5 h-4 w-4 shrink-0 text-slate-500" />
+                    <div>
+                      <p className="text-xs font-semibold text-slate-500">
+                        Email pendaftaran
+                      </p>
+                      <p className="mt-1 break-all text-sm font-semibold text-slate-800">
+                        {email}
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {error && (
+                  <div className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-900">
+                    {error}
+                  </div>
+                )}
+
+                {!isTrial ? (
+                  <>
+                    <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
+                      <div className="flex items-start gap-3">
+                        <Info className="mt-0.5 h-5 w-5 shrink-0 text-blue-700" />
+                        <div>
+                          <p className="text-sm font-bold text-blue-900">
+                            Lanjutkan melalui checkout Midtrans
+                          </p>
+                          <p className="mt-1 text-xs leading-5 text-blue-800">
+                            Nomor Virtual Account, jika diperlukan, akan
+                            ditampilkan sesuai instruksi pada halaman checkout.
+                            Kamu tidak perlu memasukkan nomor VA secara manual
+                            di halaman ini.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={handlePay}
+                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#155DFC] px-5 py-4 text-sm font-bold text-white transition hover:bg-[#0D47C9]"
+                    >
+                      <CreditCard className="h-5 w-5" />
+                      Bayar Sekarang
+                      <ExternalLink className="h-4 w-4" />
+                    </button>
+
+                    <p className="text-center text-xs leading-5 text-slate-500">
+                      Kamu akan diarahkan ke halaman pembayaran Midtrans
+                      untuk menyelesaikan transaksi.
+                    </p>
+                  </>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => router.push("/login")}
+                    className="flex w-full items-center justify-center gap-2 rounded-xl bg-[#155DFC] px-5 py-4 text-sm font-bold text-white transition hover:bg-[#0D47C9]"
+                  >
+                    Lanjut ke Login
+                    <ArrowRight className="h-4 w-4" />
+                  </button>
+                )}
+
+                <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4">
+                  <Clock3 className="mt-0.5 h-5 w-5 shrink-0 text-amber-700" />
+                  <p className="text-xs leading-5 text-amber-900">
+                    {isTrial
+                      ? "Pendaftaran uji coba telah diproses. Gunakan halaman login untuk melanjutkan."
+                      : "Status pembayaran tidak ditentukan dari tombol ini. Aktivasi sekolah dilakukan oleh backend setelah notifikasi pembayaran Midtrans berhasil divalidasi."}
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <button
+              type="button"
+              onClick={() => router.push("/login")}
+              className="inline-flex items-center gap-2 text-sm font-semibold text-slate-500 transition hover:text-blue-600"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Kembali ke halaman login
+            </button>
+          </div>
+
+          <aside className="space-y-5">
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                <CreditCard className="h-5 w-5" />
+              </div>
+
+              <h3 className="mt-4 text-base font-bold text-slate-900">
+                Langkah Aktivasi
+              </h3>
+
+              <div className="mt-5 space-y-5">
+                <div className="flex gap-3">
+                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-emerald-600" />
+                  <div>
+                    <p className="text-sm font-bold text-slate-800">
+                      Verifikasi email
+                    </p>
+                    <p className="mt-1 text-xs leading-5 text-slate-500">
+                      Pendaftaran berhasil diverifikasi.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-600 text-[10px] font-bold text-white">
+                    2
+                  </div>
+                  <div>
+                    <p className="text-sm font-bold text-slate-800">
+                      Pembayaran paket
+                    </p>
+                    <p className="mt-1 text-xs leading-5 text-slate-500">
+                      Selesaikan transaksi di halaman checkout Midtrans.
+                    </p>
+                  </div>
+                </div>
+
+                <div className="flex gap-3">
+                  <div className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full border border-slate-300 text-[10px] font-bold text-slate-400">
+                    3
+                  </div>
+                  <div>
+                    <p className="text-sm font-semibold text-slate-500">
+                      Konfirmasi pembayaran
+                    </p>
+                    <p className="mt-1 text-xs leading-5 text-slate-400">
+                      Backend memproses notifikasi pembayaran sebelum
+                      mengaktifkan sekolah.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="rounded-2xl bg-[#0D1B38] p-6 text-white">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white/10">
+                <ShieldCheck className="h-5 w-5 text-blue-300" />
+              </div>
+
+              <h3 className="mt-4 text-sm font-bold">
+                Pembayaran Aman
+              </h3>
+
+              <p className="mt-2 text-xs leading-6 text-slate-300">
+                Periksa Order ID dan nominal transaksi. Ikuti instruksi
+                pembayaran yang ditampilkan langsung oleh Midtrans.
+              </p>
+            </div>
+
+            <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <h3 className="text-sm font-bold text-slate-900">
+                Butuh bantuan?
+              </h3>
+
+              <p className="mt-2 text-sm leading-6 text-slate-500">
+                Jika tautan checkout tidak tersedia atau transaksi mengalami
+                kendala, hubungi tim SmartSchool melalui kontak resmi yang
+                diberikan oleh pengelola sistem.
+              </p>
+            </div>
+          </aside>
+        </div>
+
+        <footer className="mx-auto mt-10 max-w-6xl border-t border-slate-200 pt-6 text-center">
+          <p className="text-xs text-slate-400">
+            © {new Date().getFullYear()} SmartSchool. School Management System.
+          </p>
+        </footer>
+      </section>
+    </main>
+  );
 }

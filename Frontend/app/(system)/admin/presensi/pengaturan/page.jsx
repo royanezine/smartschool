@@ -1,790 +1,688 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 
-import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
+import { apiFetch } from "@/lib/api";
 
 import {
-  ArrowLeft,
-  CalendarDays,
-  Check,
+  Settings2,
   Clock3,
-  Info,
+  CalendarDays,
   MapPin,
+  ShieldCheck,
   RefreshCw,
   Save,
-  Settings2,
-  ShieldCheck,
-  Users,
+  AlertCircle,
+  CheckCircle2,
+  Info,
+  Fingerprint,
+  Loader2,
+  ClipboardCheck,
+  ChevronRight,
+  SlidersHorizontal,
 } from "lucide-react";
 
-export default function PengaturanPresensiPage() {
-  const router = useRouter();
+const KEYS = {
+  radius: "radiusAbsensi",
+};
 
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+const ENDPOINTS = {
+  metodeAktif: "/api/absensi/metode-aktif",
+  pengaturan: "/api/pengaturan",
+};
 
-  // ============================================================
-  // DUMMY NOTIFICATIONS
-  // ============================================================
-  const notifications = [
-    {
-      id: 1,
-      title: "Rekap presensi hari ini",
-      desc: "Data presensi siswa telah diperbarui",
-      read: false,
-    },
-    {
-      id: 2,
-      title: "Pengaturan presensi",
-      desc: "Pengaturan presensi sekolah aktif",
-      read: true,
-    },
-  ];
+function getData(response) {
+  let result = response;
 
-  // ============================================================
-  // DUMMY DATA
-  // ============================================================
-  const [jamMasuk, setJamMasuk] = useState("07:00");
-  const [jamPulang, setJamPulang] = useState("14:00");
-  const [batasTerlambat, setBatasTerlambat] = useState("07:15");
+  for (let i = 0; i < 3; i += 1) {
+    if (
+      result &&
+      typeof result === "object" &&
+      !Array.isArray(result) &&
+      Object.prototype.hasOwnProperty.call(result, "data")
+    ) {
+      result = result.data;
+    } else {
+      break;
+    }
+  }
 
-  const [presensiMasuk, setPresensiMasuk] = useState(true);
-  const [presensiPulang, setPresensiPulang] = useState(true);
-  const [izinSakit, setIzinSakit] = useState(true);
-  const [izinKeperluan, setIzinKeperluan] = useState(true);
+  return result;
+}
 
-  const [senin, setSenin] = useState(true);
-  const [selasa, setSelasa] = useState(true);
-  const [rabu, setRabu] = useState(true);
-  const [kamis, setKamis] = useState(true);
-  const [jumat, setJumat] = useState(true);
-  const [sabtu, setSabtu] = useState(false);
+function formatMetode(value) {
+  if (value == null || value === "") {
+    return "Belum dikonfigurasi";
+  }
 
-  const [lokasiPresensi, setLokasiPresensi] = useState(true);
-  const [radius, setRadius] = useState("100");
+  const methods = Array.isArray(value)
+    ? value
+    : typeof value === "string"
+      ? value.split(",").map((item) => item.trim()).filter(Boolean)
+      : [];
 
-  const [saved, setSaved] = useState(false);
+  if (!methods.length) {
+    return String(value);
+  }
 
-  // ============================================================
-  // SAVE
-  // ============================================================
-  const handleSave = () => {
-    setSaved(true);
+  return methods
+    .map((item) =>
+      String(item)
+        .replaceAll("_", " ")
+        .replace(/\b\w/g, (char) => char.toUpperCase()),
+    )
+    .join(", ");
+}
 
-    setTimeout(() => {
-      setSaved(false);
-    }, 2500);
-  };
+function getSettingValue(settings, key) {
+  const item = settings.find((setting) => setting?.kunci === key);
+  return item?.nilai == null ? "" : String(item.nilai);
+}
+
+function SectionCard({ icon: Icon, title, description, children }) {
+  return (
+    <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="flex items-start gap-3 border-b border-slate-100 px-5 py-4 sm:px-6">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
+          <Icon size={20} />
+        </div>
+
+        <div className="min-w-0">
+          <h2 className="text-base font-semibold text-slate-900">{title}</h2>
+          <p className="mt-1 text-sm leading-5 text-slate-500">
+            {description}
+          </p>
+        </div>
+      </div>
+
+      <div className="p-5 sm:p-6">{children}</div>
+    </section>
+  );
+}
+
+function StatusMessage({ status }) {
+  if (!status) return null;
+
+  const success = status.type === "success";
 
   return (
-    <div className="flex h-screen overflow-hidden theme-page">
-      {/* ========================================================
-          SIDEBAR
-      ======================================================== */}
-      <Sidebar
-        role="admin"
-        active="pengaturanPresensi"
-        setActive={() => {}}
-        collapsed={!sidebarOpen}
-        setCollapsed={() => setSidebarOpen(!sidebarOpen)}
-      />
+    <div
+      role="status"
+      className={`flex items-start gap-3 rounded-xl border px-4 py-3 text-sm ${
+        success
+          ? "border-emerald-200 bg-emerald-50 text-emerald-800"
+          : "border-red-200 bg-red-50 text-red-700"
+      }`}
+    >
+      {success ? (
+        <CheckCircle2 size={18} className="mt-0.5 shrink-0" />
+      ) : (
+        <AlertCircle size={18} className="mt-0.5 shrink-0" />
+      )}
 
-      {/* ========================================================
-          MAIN AREA
-      ======================================================== */}
-      <div className="flex-1 flex flex-col min-w-0">
-        <Header
-          toggleSidebar={() => setSidebarOpen(!sidebarOpen)}
-          notifications={notifications}
-          user={{
-            name: "Admin Sekolah",
-            email: "admin@smartschool.com",
-            avatar: "AS",
-          }}
-        />
+      <span>{status.message}</span>
+    </div>
+  );
+}
 
-        <main className="flex-1 overflow-y-auto">
-          <div className="w-full max-w-[1500px] mx-auto p-4 sm:p-6 lg:p-8">
-            {/* ==================================================
-                HEADER PAGE
-            ================================================== */}
-            <div className="flex flex-col gap-5 mb-7">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex items-start gap-3 min-w-0">
-                  <button
-                    type="button"
-                    onClick={() => router.push("/admin/presensi")}
-                    className="
-                      w-10 h-10 rounded-xl
-                      theme-card theme-border
-                      flex items-center justify-center
-                      theme-text-secondary
-                      hover:theme-sidebar-hover
-                      transition-colors
-                      flex-shrink-0
-                      shadow-sm
-                    "
-                  >
-                    <ArrowLeft size={18} />
-                  </button>
+export default function PengaturanPresensiPage() {
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2 mb-1">
-                      <span className="w-2 h-2 rounded-full bg-[var(--color-primary)]" />
+  const [metodeAktif, setMetodeAktif] = useState(null);
+  const [settings, setSettings] = useState([]);
+  const [radius, setRadius] = useState("");
+  const [originalRadius, setOriginalRadius] = useState("");
+  const [status, setStatus] = useState(null);
 
-                      <p className="text-xs font-semibold text-[var(--color-primary)] uppercase tracking-wider">
-                        Presensi & Kehadiran
-                      </p>
-                    </div>
+  const loadSettings = useCallback(async () => {
+    setLoading(true);
+    setStatus(null);
 
-                    <h1 className="text-2xl sm:text-3xl font-bold theme-text tracking-tight">
-                      Pengaturan Presensi
-                    </h1>
+    try {
+      const [metodeResponse, settingsResponse] = await Promise.all([
+        apiFetch(ENDPOINTS.metodeAktif),
+        apiFetch(ENDPOINTS.pengaturan),
+      ]);
 
-                    <p className="text-sm theme-text-muted mt-1.5 max-w-2xl">
-                      Atur jadwal, metode, dan ketentuan presensi yang
-                      digunakan oleh sekolah.
-                    </p>
-                  </div>
-                </div>
+      const metodeData = getData(metodeResponse);
+      const settingsData = getData(settingsResponse);
 
-                <button
-                  type="button"
-                  onClick={handleSave}
-                  className={`
-                    hidden sm:inline-flex items-center gap-2
-                    px-4 py-2.5 rounded-xl
-                    text-sm font-semibold
-                    transition-all shadow-sm
-                    ${
-                      saved
-                        ? "theme-success"
-                        : "theme-primary"
-                    }
-                  `}
-                >
-                  {saved ? (
-                    <>
-                      <Check size={17} />
-                      Tersimpan
-                    </>
-                  ) : (
-                    <>
-                      <Save size={17} />
-                      Simpan Perubahan
-                    </>
-                  )}
-                </button>
-              </div>
+      const metode =
+        metodeData?.metodeAktif ?? metodeData?.data?.metodeAktif ?? null;
+
+      const list = Array.isArray(settingsData)
+        ? settingsData
+        : Array.isArray(settingsData?.data)
+          ? settingsData.data
+          : Array.isArray(settingsData?.items)
+            ? settingsData.items
+            : [];
+
+      setMetodeAktif(metode);
+      setSettings(list);
+
+      const savedRadius = getSettingValue(list, KEYS.radius);
+
+      setRadius(savedRadius);
+      setOriginalRadius(savedRadius);
+    } catch (error) {
+      console.error("Gagal mengambil pengaturan presensi:", error);
+
+      setStatus({
+        type: "error",
+        message:
+          error?.message ||
+          "Pengaturan gagal dimuat. Periksa URL API, koneksi Backend, dan izin akun.",
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadSettings();
+  }, [loadSettings]);
+
+  const handleSaveRadius = async (event) => {
+    event.preventDefault();
+    setStatus(null);
+
+    const parsedRadius = Number(radius);
+
+    if (
+      !radius.trim() ||
+      !Number.isFinite(parsedRadius) ||
+      parsedRadius <= 0
+    ) {
+      setStatus({
+        type: "error",
+        message: "Masukkan radius berupa angka yang lebih besar dari 0.",
+      });
+      return;
+    }
+
+    if (!Number.isInteger(parsedRadius)) {
+      setStatus({
+        type: "error",
+        message: "Radius harus berupa bilangan bulat dalam satuan meter.",
+      });
+      return;
+    }
+
+    setSaving(true);
+
+    try {
+      await apiFetch(ENDPOINTS.pengaturan, {
+        method: "POST",
+        body: JSON.stringify({
+          kunci: KEYS.radius,
+          nilai: String(parsedRadius),
+          tipeData: "number",
+          kelompok: "presensi",
+          keterangan: "Radius lokasi presensi dalam meter",
+        }),
+      });
+
+      const savedValue = String(parsedRadius);
+
+      setOriginalRadius(savedValue);
+      setRadius(savedValue);
+
+      setSettings((previous) => {
+        const exists = previous.some((item) => item.kunci === KEYS.radius);
+
+        if (exists) {
+          return previous.map((item) =>
+            item.kunci === KEYS.radius
+              ? { ...item, nilai: savedValue }
+              : item,
+          );
+        }
+
+        return [
+          ...previous,
+          {
+            kunci: KEYS.radius,
+            nilai: savedValue,
+            tipeData: "number",
+            kelompok: "presensi",
+            keterangan: "Radius lokasi presensi dalam meter",
+          },
+        ];
+      });
+
+      setStatus({
+        type: "success",
+        message:
+          "Nilai berhasil disimpan ke pengaturan sistem. Perubahan ini belum tentu memengaruhi validasi check-in karena Backend yang kamu kirim membaca radius dari data sekolah.",
+      });
+    } catch (error) {
+      console.error("Gagal menyimpan radius presensi:", error);
+
+      setStatus({
+        type: "error",
+        message:
+          error?.message || "Pengaturan gagal disimpan. Silakan coba lagi.",
+      });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const hasRadiusChanged = radius !== originalRadius;
+
+  // ============================================================
+  // LAYOUT: sidebar full-height kiri, header + main di kanan
+  // ============================================================
+  return (
+    <div className="flex h-screen overflow-hidden bg-slate-50">
+      {/* SIDEBAR — full-height kiri */}
+      <Sidebar />
+
+      {/* KOLOM KANAN — header + main */}
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        {/* HEADER — cuma di area kanan sidebar */}
+        <Header />
+
+        {/* MAIN — hanya ini yang scroll */}
+        <main className="min-h-0 flex-1 overflow-y-auto">
+          <div className="mx-auto w-full max-w-[1500px] px-4 py-6 sm:px-6 lg:px-8">
+            <div className="mb-5 flex items-center gap-2 text-sm text-slate-500">
+              <span>Pengaturan</span>
+              <ChevronRight size={15} />
+              <span className="font-medium text-slate-800">Presensi</span>
             </div>
 
-            {/* ==================================================
-                CONTENT
-            ================================================== */}
-            <div className="grid grid-cols-1 xl:grid-cols-[minmax(0,1fr)_360px] gap-6 items-start">
-              {/* ==================================================
-                  LEFT CONTENT
-              ================================================== */}
-              <div className="space-y-6">
-                {/* ================================================
-                    JAM PRESENSI
-                ================================================= */}
-                <section className="theme-card theme-border rounded-2xl shadow-sm overflow-hidden">
-                  <SectionHeader
-                    icon={Clock3}
-                    title="Jam Presensi"
-                    description="Tentukan waktu masuk dan pulang sekolah."
-                  />
+            <div className="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+              <div>
+                <div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-100 text-blue-700">
+                  <Settings2 size={25} />
+                </div>
 
-                  <div className="p-5 sm:p-6">
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                      <TimeInput
-                        label="Jam Masuk"
-                        value={jamMasuk}
-                        onChange={setJamMasuk}
-                      />
+                <h1 className="text-2xl font-bold tracking-tight text-slate-900 sm:text-3xl">
+                  Pengaturan Presensi
+                </h1>
 
-                      <TimeInput
-                        label="Batas Keterlambatan"
-                        value={batasTerlambat}
-                        onChange={setBatasTerlambat}
-                      />
-
-                      <TimeInput
-                        label="Jam Pulang"
-                        value={jamPulang}
-                        onChange={setJamPulang}
-                      />
-                    </div>
-
-                    <div className="mt-5 p-4 rounded-xl theme-info flex gap-3">
-                      <div className="w-8 h-8 rounded-lg theme-card flex items-center justify-center flex-shrink-0 shadow-sm">
-                        <Info
-                          size={16}
-                          className="text-[var(--color-info)]"
-                        />
-                      </div>
-
-                      <div>
-                        <p className="text-sm font-semibold text-[var(--color-info)]">
-                          Ketentuan waktu
-                        </p>
-
-                        <p className="text-xs theme-text-secondary mt-1 leading-relaxed">
-                          Siswa yang melakukan presensi setelah pukul{" "}
-                          <strong>{batasTerlambat}</strong> akan otomatis
-                          tercatat sebagai terlambat.
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                </section>
-
-                {/* ================================================
-                    HARI AKTIF
-                ================================================= */}
-                <section className="theme-card theme-border rounded-2xl shadow-sm overflow-hidden">
-                  <SectionHeader
-                    icon={CalendarDays}
-                    title="Hari Aktif"
-                    description="Pilih hari sekolah yang menggunakan presensi."
-                  />
-
-                  <div className="p-5 sm:p-6">
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
-                      <DayCard
-                        label="Senin"
-                        checked={senin}
-                        onChange={setSenin}
-                      />
-
-                      <DayCard
-                        label="Selasa"
-                        checked={selasa}
-                        onChange={setSelasa}
-                      />
-
-                      <DayCard
-                        label="Rabu"
-                        checked={rabu}
-                        onChange={setRabu}
-                      />
-
-                      <DayCard
-                        label="Kamis"
-                        checked={kamis}
-                        onChange={setKamis}
-                      />
-
-                      <DayCard
-                        label="Jumat"
-                        checked={jumat}
-                        onChange={setJumat}
-                      />
-
-                      <DayCard
-                        label="Sabtu"
-                        checked={sabtu}
-                        onChange={setSabtu}
-                      />
-                    </div>
-                  </div>
-                </section>
-
-                {/* ================================================
-                    JENIS PRESENSI
-                ================================================= */}
-                <section className="theme-card theme-border rounded-2xl shadow-sm overflow-hidden">
-                  <SectionHeader
-                    icon={Settings2}
-                    title="Jenis Presensi"
-                    description="Atur jenis aktivitas presensi yang tersedia."
-                  />
-
-                  <div className="p-5 sm:p-6">
-                    <div className="divide-y theme-border-soft">
-                      <ToggleRow
-                        title="Presensi Masuk"
-                        description="Siswa melakukan presensi saat datang ke sekolah."
-                        checked={presensiMasuk}
-                        onChange={setPresensiMasuk}
-                      />
-
-                      <ToggleRow
-                        title="Presensi Pulang"
-                        description="Siswa melakukan presensi saat selesai kegiatan sekolah."
-                        checked={presensiPulang}
-                        onChange={setPresensiPulang}
-                      />
-
-                      <ToggleRow
-                        title="Pengajuan Sakit"
-                        description="Siswa dapat mengajukan status sakit."
-                        checked={izinSakit}
-                        onChange={setIzinSakit}
-                      />
-
-                      <ToggleRow
-                        title="Pengajuan Izin"
-                        description="Siswa dapat mengajukan izin ke sekolah."
-                        checked={izinKeperluan}
-                        onChange={setIzinKeperluan}
-                      />
-                    </div>
-                  </div>
-                </section>
-
-                {/* ================================================
-                    LOKASI PRESENSI
-                ================================================= */}
-                <section className="theme-card theme-border rounded-2xl shadow-sm overflow-hidden">
-                  <SectionHeader
-                    icon={MapPin}
-                    title="Lokasi Presensi"
-                    description="Atur pembatasan lokasi ketika melakukan presensi."
-                  />
-
-                  <div className="p-5 sm:p-6">
-                    <ToggleRow
-                      title="Validasi Lokasi"
-                      description="Presensi hanya dapat dilakukan dalam radius lokasi sekolah."
-                      checked={lokasiPresensi}
-                      onChange={setLokasiPresensi}
-                    />
-
-                    {lokasiPresensi && (
-                      <div className="mt-5 pt-5 theme-border-soft border-t">
-                        <label className="text-sm font-semibold theme-text-secondary">
-                          Radius Presensi
-                        </label>
-
-                        <div className="relative mt-2 max-w-sm">
-                          <input
-                            type="number"
-                            min="10"
-                            value={radius}
-                            onChange={(e) => setRadius(e.target.value)}
-                            className="
-                              w-full rounded-xl
-                              theme-input
-                              px-4 py-3 pr-16
-                              text-sm
-                              outline-none
-                              transition-all
-                              focus:border-[var(--color-primary)]
-                              focus:ring-4
-                              focus:ring-[color:var(--color-primary)/.10]
-                            "
-                          />
-
-                          <span className="absolute right-4 top-1/2 -translate-y-1/2 theme-text-placeholder text-sm font-medium">
-                            meter
-                          </span>
-                        </div>
-
-                        <p className="text-xs theme-text-muted mt-2">
-                          Contoh: siswa harus berada maksimal{" "}
-                          <strong>{radius} meter</strong> dari lokasi sekolah.
-                        </p>
-                      </div>
-                    )}
-                  </div>
-                </section>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">
+                  Lihat metode presensi aktif dan kelola konfigurasi
+                  tambahan yang tersimpan pada sistem sekolah.
+                </p>
               </div>
 
-              {/* ==================================================
-                  RIGHT SIDEBAR / INFO CARD
-              ================================================== */}
-              <aside className="space-y-5 xl:sticky xl:top-6">
-                {/* SCHOOL CARD */}
-                <div className="relative overflow-hidden rounded-2xl theme-primary p-6 shadow-lg">
-                  <div className="absolute -right-12 -top-12 w-36 h-36 rounded-full bg-white/10" />
-                  <div className="absolute -right-8 -bottom-16 w-32 h-32 rounded-full bg-white/10" />
-
-                  <div className="relative">
-                    <div className="w-11 h-11 rounded-xl bg-white/15 border border-white/20 flex items-center justify-center mb-5">
-                      <ShieldCheck size={21} />
-                    </div>
-
-                    <p className="text-xs font-semibold text-white/80 uppercase tracking-wider">
-                      Sistem Presensi
-                    </p>
-
-                    <h2 className="text-xl font-bold mt-1.5">
-                      SMP SmartSchool
-                    </h2>
-
-                    <p className="text-sm text-white/80 mt-2 leading-relaxed">
-                      Pengaturan presensi sekolah saat ini menggunakan
-                      konfigurasi aktif.
-                    </p>
-
-                    <div className="mt-5 flex items-center gap-2">
-                      <span className="w-2 h-2 rounded-full bg-emerald-300" />
-
-                      <span className="text-xs font-medium text-white/90">
-                        Sistem aktif
-                      </span>
-                    </div>
-                  </div>
-                </div>
-
-                {/* SUMMARY CARD */}
-                <div className="theme-card theme-border rounded-2xl shadow-sm overflow-hidden">
-                  <div className="px-5 py-4 border-b theme-border-soft">
-                    <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl theme-info flex items-center justify-center">
-                        <Users
-                          size={17}
-                          className="text-[var(--color-info)]"
-                        />
-                      </div>
-
-                      <div>
-                        <h3 className="text-sm font-bold theme-text">
-                          Ringkasan Pengaturan
-                        </h3>
-
-                        <p className="text-xs theme-text-muted mt-0.5">
-                          Konfigurasi saat ini
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="p-5 space-y-1">
-                    <SummaryRow
-                      label="Jam masuk"
-                      value={jamMasuk}
-                    />
-
-                    <SummaryRow
-                      label="Batas terlambat"
-                      value={batasTerlambat}
-                    />
-
-                    <SummaryRow
-                      label="Jam pulang"
-                      value={jamPulang}
-                    />
-
-                    <SummaryRow
-                      label="Hari aktif"
-                      value={
-                        [
-                          senin,
-                          selasa,
-                          rabu,
-                          kamis,
-                          jumat,
-                          sabtu,
-                        ].filter(Boolean).length + " hari"
-                      }
-                    />
-
-                    <SummaryRow
-                      label="Validasi lokasi"
-                      value={lokasiPresensi ? "Aktif" : "Nonaktif"}
-                    />
-
-                    {lokasiPresensi && (
-                      <SummaryRow
-                        label="Radius"
-                        value={`${radius} m`}
-                      />
-                    )}
-                  </div>
-                </div>
-
-                {/* TIPS CARD */}
-                <div className="theme-card-soft theme-border rounded-2xl p-5 shadow-sm">
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-9 h-9 rounded-xl theme-card flex items-center justify-center">
-                      <RefreshCw
-                        size={17}
-                        className="text-[var(--color-primary)]"
-                      />
-                    </div>
-
-                    <div>
-                      <h3 className="text-sm font-semibold theme-text">
-                        Tips Pengaturan
-                      </h3>
-                    </div>
-                  </div>
-
-                  <div className="space-y-3">
-                    <TipItem text="Pastikan jam masuk sesuai jadwal sekolah." />
-                    <TipItem text="Gunakan radius lokasi yang sesuai dengan area sekolah." />
-                    <TipItem text="Periksa kembali pengaturan sebelum disimpan." />
-                  </div>
-                </div>
-              </aside>
-            </div>
-
-            {/* ==================================================
-                MOBILE SAVE BUTTON
-            ================================================== */}
-            <div className="sm:hidden mt-6">
               <button
                 type="button"
-                onClick={handleSave}
-                className={`
-                  w-full inline-flex items-center justify-center
-                  gap-2 px-4 py-3 rounded-xl
-                  text-sm font-semibold
-                  transition-all
-                  ${
-                    saved
-                      ? "theme-success"
-                      : "theme-primary"
-                  }
-                `}
+                onClick={loadSettings}
+                disabled={loading || saving}
+                className="inline-flex min-h-10 items-center justify-center gap-2 self-start rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {saved ? (
-                  <>
-                    <Check size={17} />
-                    Tersimpan
-                  </>
-                ) : (
-                  <>
-                    <Save size={17} />
-                    Simpan Perubahan
-                  </>
-                )}
+                <RefreshCw
+                  size={16}
+                  className={loading ? "animate-spin" : ""}
+                />
+                Muat Ulang
               </button>
             </div>
 
-            {/* ==================================================
-                FOOTER
-            ================================================== */}
-            <div className="py-7 text-center">
-              <p className="text-xs theme-text-placeholder">
-                SmartSchool Admin • Pengaturan Presensi
-              </p>
-            </div>
+            {status && (
+              <div className="mb-6">
+                <StatusMessage status={status} />
+              </div>
+            )}
+
+            {loading ? (
+              <div className="flex min-h-64 flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white">
+                <Loader2 size={30} className="animate-spin text-blue-600" />
+                <p className="mt-3 text-sm text-slate-500">
+                  Mengambil konfigurasi dari Backend...
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="mb-6 grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2">
+                  <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-medium text-slate-500">
+                          Metode Presensi
+                        </p>
+                        <p className="mt-2 text-lg font-semibold text-slate-900">
+                          {metodeAktif != null &&
+                          metodeAktif !== "" &&
+                          (!Array.isArray(metodeAktif) ||
+                            metodeAktif.length > 0)
+                            ? "Data tersedia"
+                            : "Belum tersedia"}
+                        </p>
+                        <p className="mt-1 text-xs text-slate-500">
+                          Konfigurasi sekolah dari Backend
+                        </p>
+                      </div>
+
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-blue-50 text-blue-700">
+                        <Fingerprint size={23} />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                    <div className="flex items-center justify-between gap-3">
+                      <div>
+                        <p className="text-sm font-medium text-slate-500">
+                          Konfigurasi Tambahan
+                        </p>
+                        <p className="mt-2 text-lg font-semibold text-slate-900">
+                          {settings.length} pengaturan
+                        </p>
+                        <p className="mt-1 text-xs text-slate-500">
+                          Data pengaturan sistem
+                        </p>
+                      </div>
+
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-50 text-indigo-700">
+                        <SlidersHorizontal size={23} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-3">
+                  <div className="space-y-6 xl:col-span-2">
+                    <SectionCard
+                      icon={ClipboardCheck}
+                      title="Metode Presensi Aktif"
+                      description="Metode yang dikembalikan Backend melalui endpoint absensi."
+                    >
+                      <div className="rounded-xl border border-slate-200 bg-slate-50 p-4">
+                        <div className="flex items-start gap-3">
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white text-blue-700 shadow-sm">
+                            <Fingerprint size={20} />
+                          </div>
+
+                          <div className="min-w-0 flex-1">
+                            <p className="text-sm font-semibold text-slate-900">
+                              Konfigurasi metode sekolah
+                            </p>
+                            <p className="mt-1 break-words text-sm leading-6 text-slate-600">
+                              {formatMetode(metodeAktif)}
+                            </p>
+                          </div>
+
+                          <span className="shrink-0 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-600">
+                            {metodeAktif != null &&
+                            metodeAktif !== "" &&
+                            (!Array.isArray(metodeAktif) ||
+                              metodeAktif.length > 0)
+                              ? "Tersedia"
+                              : "Kosong"}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="mt-4 flex items-start gap-2.5 text-sm leading-6 text-slate-500">
+                        <Info
+                          size={17}
+                          className="mt-0.5 shrink-0 text-blue-600"
+                        />
+                        <p>
+                          Endpoint{" "}
+                          <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs">
+                            GET /api/absensi/metode-aktif
+                          </code>{" "}
+                          hanya membaca konfigurasi sekolah. Route penyimpanan
+                          metode belum terlihat pada kode Backend yang
+                          diberikan.
+                        </p>
+                      </div>
+                    </SectionCard>
+
+                    <SectionCard
+                      icon={MapPin}
+                      title="Konfigurasi Radius Presensi"
+                      description="Menyimpan nilai radius ke pengaturan sistem sekolah."
+                    >
+                      <form onSubmit={handleSaveRadius} className="space-y-5">
+                        <div>
+                          <label
+                            htmlFor="radius"
+                            className="mb-2 block text-sm font-semibold text-slate-800"
+                          >
+                            Radius lokasi (meter)
+                          </label>
+
+                          <div className="relative">
+                            <input
+                              id="radius"
+                              name="radius"
+                              type="number"
+                              min="1"
+                              step="1"
+                              value={radius}
+                              onChange={(event) =>
+                                setRadius(event.target.value)
+                              }
+                              placeholder="Contoh: 100"
+                              disabled={saving}
+                              className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3 pr-16 text-sm text-slate-900 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-100 disabled:bg-slate-100"
+                            />
+
+                            <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-slate-500">
+                              meter
+                            </span>
+                          </div>
+
+                          <p className="mt-2 text-xs leading-5 text-slate-500">
+                            Kunci konfigurasi:{" "}
+                            <code className="rounded bg-slate-100 px-1">
+                              radiusAbsensi
+                            </code>
+                          </p>
+                        </div>
+
+                        <div className="flex items-start gap-2.5 rounded-xl border border-amber-200 bg-amber-50 p-3.5 text-sm leading-6 text-amber-900">
+                          <AlertCircle size={18} className="mt-0.5 shrink-0" />
+                          <p>
+                            Nilai ini disimpan pada tabel{" "}
+                            <code>pengaturanSistem</code>. Controller check-in
+                            yang kamu kirim membaca{" "}
+                            <code>sekolah.radiusAbsensi</code>, sehingga
+                            penyimpanan di sini belum tentu mengubah validasi
+                            GPS.
+                          </p>
+                        </div>
+
+                        <div className="flex flex-col-reverse gap-3 border-t border-slate-100 pt-4 sm:flex-row sm:items-center sm:justify-between">
+                          <button
+                            type="button"
+                            onClick={() => setRadius(originalRadius)}
+                            disabled={saving || !hasRadiusChanged}
+                            className="rounded-xl border border-slate-200 px-4 py-2.5 text-sm font-semibold text-slate-600 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40"
+                          >
+                            Batalkan Perubahan
+                          </button>
+
+                          <button
+                            type="submit"
+                            disabled={saving || !hasRadiusChanged}
+                            className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-700 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50"
+                          >
+                            {saving ? (
+                              <Loader2 size={17} className="animate-spin" />
+                            ) : (
+                              <Save size={17} />
+                            )}
+                            {saving ? "Menyimpan..." : "Simpan Pengaturan"}
+                          </button>
+                        </div>
+                      </form>
+                    </SectionCard>
+
+                    <SectionCard
+                      icon={Settings2}
+                      title="Pengaturan Sistem Tersimpan"
+                      description="Daftar konfigurasi yang dikembalikan Backend."
+                    >
+                      {settings.length === 0 ? (
+                        <div className="rounded-xl border border-dashed border-slate-300 px-4 py-8 text-center">
+                          <Settings2
+                            size={25}
+                            className="mx-auto text-slate-400"
+                          />
+                          <p className="mt-3 text-sm font-medium text-slate-700">
+                            Belum ada pengaturan yang ditemukan
+                          </p>
+                          <p className="mt-1 text-xs leading-5 text-slate-500">
+                            Tidak ada data yang dikembalikan untuk akun sekolah
+                            ini.
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="overflow-x-auto">
+                          <table className="w-full min-w-[420px] text-left text-sm">
+                            <thead>
+                              <tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
+                                <th className="pb-3 pr-4 font-semibold">Kunci</th>
+                                <th className="pb-3 pr-4 font-semibold">Nilai</th>
+                                <th className="pb-3 font-semibold">Kelompok</th>
+                              </tr>
+                            </thead>
+
+                            <tbody>
+                              {settings.map((item) => (
+                                <tr
+                                  key={item.id || item.kunci}
+                                  className="border-b border-slate-100 last:border-0"
+                                >
+                                  <td className="py-3 pr-4 font-medium text-slate-800">
+                                    <span className="break-all">
+                                      {item.kunci || "-"}
+                                    </span>
+                                    {item.keterangan && (
+                                      <p className="mt-1 max-w-xs text-xs font-normal leading-5 text-slate-500">
+                                        {item.keterangan}
+                                      </p>
+                                    )}
+                                  </td>
+                                  <td className="max-w-56 break-words py-3 pr-4 text-slate-600">
+                                    {item.kunci === KEYS.radius
+                                      ? `${item.nilai ?? "-"} meter`
+                                      : String(item.nilai ?? "-")}
+                                  </td>
+                                  <td className="py-3 text-slate-500">
+                                    {item.kelompok || "-"}
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+                      )}
+                    </SectionCard>
+                  </div>
+
+                  <aside className="space-y-6">
+                    <div className="rounded-2xl border border-blue-100 bg-blue-50 p-5">
+                      <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-white text-blue-700">
+                        <ShieldCheck size={21} />
+                      </div>
+
+                      <h2 className="mt-4 text-base font-semibold text-slate-900">
+                        Integrasi Backend
+                      </h2>
+
+                      <p className="mt-2 text-sm leading-6 text-slate-600">
+                        Halaman membaca metode presensi dan konfigurasi sistem
+                        melalui endpoint yang terdaftar di aplikasi Express.
+                      </p>
+
+                      <div className="mt-4 space-y-3">
+                        <div className="flex items-start gap-2 text-sm text-slate-700">
+                          <CheckCircle2
+                            size={17}
+                            className="mt-0.5 shrink-0 text-emerald-600"
+                          />
+                          <span>Metode presensi dibaca dari API absensi.</span>
+                        </div>
+
+                        <div className="flex items-start gap-2 text-sm text-slate-700">
+                          <CheckCircle2
+                            size={17}
+                            className="mt-0.5 shrink-0 text-emerald-600"
+                          />
+                          <span>
+                            Pengaturan sistem dibaca dan disimpan melalui API
+                            pengaturan.
+                          </span>
+                        </div>
+
+                        <div className="flex items-start gap-2 text-sm text-slate-700">
+                          <Info
+                            size={17}
+                            className="mt-0.5 shrink-0 text-blue-600"
+                          />
+                          <span>
+                            Jam masuk, jam keluar, dan toleransi keterlambatan
+                            mengikuti konfigurasi Shift Kerja.
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-700">
+                          <Clock3 size={20} />
+                        </div>
+                        <div>
+                          <h2 className="text-sm font-semibold text-slate-900">
+                            Shift Kerja
+                          </h2>
+                          <p className="text-xs text-slate-500">
+                            Konfigurasi jam kerja
+                          </p>
+                        </div>
+                      </div>
+
+                      <p className="mt-3 text-sm leading-6 text-slate-500">
+                        Ubah jam masuk, jam keluar, dan toleransi keterlambatan
+                        melalui halaman Shift Kerja.
+                      </p>
+                    </div>
+
+                    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-700">
+                          <CalendarDays size={20} />
+                        </div>
+                        <div>
+                          <h2 className="text-sm font-semibold text-slate-900">
+                            Hari Aktif
+                          </h2>
+                          <p className="text-xs text-slate-500">
+                            Jadwal presensi
+                          </p>
+                        </div>
+                      </div>
+
+                      <p className="mt-3 text-sm leading-6 text-slate-500">
+                        Pengaturan hari aktif belum dibuat karena route dan
+                        controller penyimpanannya belum terlihat pada kode BE
+                        yang diberikan.
+                      </p>
+                    </div>
+                  </aside>
+                </div>
+              </>
+            )}
+
+            <footer className="mt-8 border-t border-slate-200 py-5 text-center text-xs text-slate-400">
+              SmartSchool · Pengaturan Presensi
+            </footer>
           </div>
         </main>
       </div>
-    </div>
-  );
-}
-
-/* ================================================================
-   SECTION HEADER
-================================================================ */
-
-function SectionHeader({
-  icon: Icon,
-  title,
-  description,
-}) {
-  return (
-    <div className="flex items-center gap-3 px-5 sm:px-6 py-4 border-b theme-border-soft">
-      <div className="w-10 h-10 rounded-xl theme-info flex items-center justify-center flex-shrink-0">
-        <Icon
-          size={18}
-          className="text-[var(--color-info)]"
-        />
-      </div>
-
-      <div className="min-w-0">
-        <h2 className="text-sm sm:text-base font-bold theme-text">
-          {title}
-        </h2>
-
-        <p className="text-xs theme-text-muted mt-0.5">
-          {description}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-/* ================================================================
-   TIME INPUT
-================================================================ */
-
-function TimeInput({
-  label,
-  value,
-  onChange,
-}) {
-  return (
-    <div>
-      <label className="text-xs font-semibold theme-text-secondary">
-        {label}
-      </label>
-
-      <div className="relative mt-2">
-        <Clock3
-          size={16}
-          className="absolute left-3.5 top-1/2 -translate-y-1/2 theme-text-placeholder pointer-events-none"
-        />
-
-        <input
-          type="time"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          className="
-            w-full rounded-xl
-            theme-input
-            pl-10 pr-3.5 py-3
-            text-sm font-medium
-            outline-none
-            transition-all
-            focus:border-[var(--color-primary)]
-            focus:ring-4
-            focus:ring-[color:var(--color-primary)/.10]
-          "
-        />
-      </div>
-    </div>
-  );
-}
-
-/* ================================================================
-   DAY CARD
-================================================================ */
-
-function DayCard({
-  label,
-  checked,
-  onChange,
-}) {
-  return (
-    <button
-      type="button"
-      onClick={() => onChange(!checked)}
-      className={`
-        relative rounded-xl border p-3 text-left
-        transition-all
-        ${
-          checked
-            ? "border-[var(--color-primary)] theme-info"
-            : "theme-border theme-card theme-sidebar-hover"
-        }
-      `}
-    >
-      <div className="flex items-center justify-between gap-2">
-        <span
-          className={`
-            text-sm font-semibold
-            ${
-              checked
-                ? "text-[var(--color-primary)]"
-                : "theme-text-secondary"
-            }
-          `}
-        >
-          {label}
-        </span>
-
-        <div
-          className={`
-            w-5 h-5 rounded-full
-            flex items-center justify-center
-            ${
-              checked
-                ? "bg-[var(--color-primary)] text-white"
-                : "border theme-border theme-text-placeholder"
-            }
-          `}
-        >
-          {checked && <Check size={12} strokeWidth={3} />}
-        </div>
-      </div>
-    </button>
-  );
-}
-
-/* ================================================================
-   TOGGLE ROW
-================================================================ */
-
-function ToggleRow({
-  title,
-  description,
-  checked,
-  onChange,
-}) {
-  return (
-    <div className="flex items-center justify-between gap-5 py-4 first:pt-0 last:pb-0">
-      <div className="min-w-0">
-        <p className="text-sm font-semibold theme-text-secondary">
-          {title}
-        </p>
-
-        <p className="text-xs theme-text-muted mt-1 leading-relaxed">
-          {description}
-        </p>
-      </div>
-
-      <button
-        type="button"
-        onClick={() => onChange(!checked)}
-        aria-label={title}
-        className={`
-          relative w-11 h-6 rounded-full
-          flex-shrink-0 transition-colors
-          ${
-            checked
-              ? "bg-[var(--color-primary)]"
-              : "bg-[var(--color-text-placeholder)]"
-          }
-        `}
-      >
-        <span
-          className={`
-            absolute top-0.5 w-5 h-5 rounded-full
-            bg-white shadow-sm transition-transform
-            ${
-              checked
-                ? "translate-x-5"
-                : "translate-x-0.5"
-            }
-          `}
-        />
-      </button>
-    </div>
-  );
-}
-
-/* ================================================================
-   SUMMARY ROW
-================================================================ */
-
-function SummaryRow({
-  label,
-  value,
-}) {
-  return (
-    <div className="flex items-center justify-between gap-4 py-2.5 border-b theme-border-soft last:border-0">
-      <span className="text-xs theme-text-muted">
-        {label}
-      </span>
-
-      <span className="text-xs font-semibold theme-text text-right">
-        {value}
-      </span>
-    </div>
-  );
-}
-
-/* ================================================================
-   TIP ITEM
-================================================================ */
-
-function TipItem({ text }) {
-  return (
-    <div className="flex items-start gap-2.5">
-      <div className="w-1.5 h-1.5 rounded-full bg-[var(--color-primary)] mt-1.5 flex-shrink-0" />
-
-      <p className="text-xs theme-text-secondary leading-relaxed">
-        {text}
-      </p>
     </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
@@ -16,16 +16,13 @@ import {
   UserRound,
   ScanFace,
   X,
-  Mail,
-  Phone,
-  CalendarDays,
-  Fingerprint,
   AlertCircle,
   Users,
   ChevronLeft,
   ChevronRight,
   RotateCcw,
   Loader2,
+  RefreshCw,
 } from "lucide-react";
 import { apiFetch } from "../../../../../lib/api";
 
@@ -48,8 +45,7 @@ const themeTextHover =
 const themePrimaryRing =
   "focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]";
 
-const themePrimaryBorder =
-  "focus:border-[var(--color-primary)]";
+const themePrimaryBorder = "focus:border-[var(--color-primary)]";
 
 const themeCardShadow =
   "shadow-[0_6px_24px_color-mix(in_srgb,var(--color-text)_6%,transparent)]";
@@ -58,40 +54,22 @@ const themeModalShadow =
   "shadow-[0_20px_60px_color-mix(in_srgb,var(--color-text)_18%,transparent)]";
 
 /* =========================================================
-   ROLE CONFIG
-========================================================= */
-
-const roleConfig = {
-  Guru: {},
-  Siswa: {},
-  Staff: {},
-  Admin: {},
-};
-
-/* =========================================================
    ROLE NORMALIZER
 ========================================================= */
 
 function normalizeRole(role) {
-  const value = String(role || "").toLowerCase();
+  const value = String(
+    typeof role === "object" && role !== null
+      ? role.namaTampilan || role.nama || role.name || role.role || ""
+      : role || "",
+  ).toLowerCase();
 
-  if (value.includes("guru")) {
-    return "Guru";
-  }
+  if (value.includes("guru")) return "Guru";
+  if (value.includes("siswa")) return "Siswa";
+  if (value.includes("staff") || value.includes("staf")) return "Staff";
+  if (value.includes("admin")) return "Admin";
 
-  if (value.includes("siswa")) {
-    return "Siswa";
-  }
-
-  if (value.includes("staff") || value.includes("staf")) {
-    return "Staff";
-  }
-
-  if (value.includes("admin")) {
-    return "Admin";
-  }
-
-  return role || "Staff";
+  return role && typeof role === "string" ? role : "Staff";
 }
 
 /* =========================================================
@@ -101,7 +79,7 @@ function normalizeRole(role) {
 function getInitials(name) {
   if (!name) return "U";
 
-  const words = name
+  const words = String(name)
     .trim()
     .split(/\s+/)
     .filter(Boolean);
@@ -114,12 +92,87 @@ function getInitials(name) {
 }
 
 /* =========================================================
+   BIOMETRIC HELPERS
+========================================================= */
+
+// Mendukung data biometrik berupa objek maupun array.
+function getBiometricRecords(biometric) {
+  if (!biometric) return [];
+
+  const records = Array.isArray(biometric)
+    ? biometric
+    : [biometric];
+
+  return records.filter(
+    (record) => record && typeof record === "object",
+  );
+}
+
+function isFaceRegistered(biometric) {
+  const records = getBiometricRecords(biometric);
+
+  return records.some((record) => {
+    const status = String(
+      record.status ||
+        record.statusBiometrik ||
+        record.statusFaceId ||
+        "",
+    )
+      .trim()
+      .toLowerCase();
+
+    return [
+      "aktif",
+      "active",
+      "terdaftar",
+      "registered",
+    ].includes(status);
+  });
+}
+
+function getActiveBiometric(biometric) {
+  const records = getBiometricRecords(biometric);
+
+  return (
+    records.find((record) => {
+      const status = String(
+        record.status ||
+          record.statusBiometrik ||
+          record.statusFaceId ||
+          "",
+      )
+        .trim()
+        .toLowerCase();
+
+      return [
+        "aktif",
+        "active",
+        "terdaftar",
+        "registered",
+      ].includes(status);
+    }) ||
+    records[0] ||
+    null
+  );
+}
+
+function getAccountStatus(status) {
+  const value = String(
+    typeof status === "object" && status !== null
+      ? status.nama || status.status || ""
+      : status || "",
+  )
+    .trim()
+    .toLowerCase();
+
+  return ["aktif", "active"].includes(value) ? "Aktif" : "Nonaktif";
+}
+
+/* =========================================================
    ROLE BADGE
 ========================================================= */
 
 function RoleBadge({ role }) {
-  const config = roleConfig[role] || roleConfig.Staff;
-
   return (
     <span
       className={[
@@ -147,9 +200,7 @@ function FaceStatusBadge({ status }) {
       className={[
         "inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1",
         "text-xs font-medium",
-        registered
-          ? "theme-success"
-          : "theme-warning",
+        registered ? "theme-success" : "theme-warning",
       ].join(" ")}
     >
       {registered ? (
@@ -157,7 +208,6 @@ function FaceStatusBadge({ status }) {
       ) : (
         <AlertCircle size={13} />
       )}
-
       {status}
     </span>
   );
@@ -168,16 +218,13 @@ function FaceStatusBadge({ status }) {
 ========================================================= */
 
 function AccountStatus({ status }) {
-  const active =
-    String(status).toLowerCase() === "aktif";
+  const active = status === "Aktif";
 
   return (
     <span
       className={[
         "inline-flex items-center gap-1.5 text-xs font-medium",
-        active
-          ? "theme-success"
-          : "theme-text-muted",
+        active ? "theme-success" : "theme-text-muted",
       ].join(" ")}
     >
       <span
@@ -188,7 +235,6 @@ function AccountStatus({ status }) {
             : "bg-[color-mix(in_srgb,var(--color-text)_25%,transparent)]",
         ].join(" ")}
       />
-
       {active ? "Aktif" : "Nonaktif"}
     </span>
   );
@@ -246,74 +292,18 @@ function StatCard({
 }
 
 /* =========================================================
-   INFO ITEM
-========================================================= */
-
-function InfoItem({
-  icon: Icon,
-  label,
-  value,
-}) {
-  return (
-    <div
-      className={[
-        "rounded-xl border p-3",
-        "theme-card",
-        "theme-border",
-      ].join(" ")}
-    >
-      <div className="flex items-start gap-2.5">
-        <div
-          className={[
-            "mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-lg",
-            themePrimarySoft,
-            themePrimarySoftBorder,
-          ].join(" ")}
-        >
-          <Icon
-            size={14}
-            className="text-[var(--color-primary)]"
-          />
-        </div>
-
-        <div className="min-w-0">
-          <p className="text-[10px] font-medium uppercase tracking-wide theme-text-muted">
-            {label}
-          </p>
-
-          <p className="mt-0.5 truncate text-xs font-semibold theme-text-secondary">
-            {value || "—"}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* =========================================================
    PAGE
 ========================================================= */
 
 export default function FaceIdPage() {
   const router = useRouter();
 
-  /* =======================================================
-     SIDEBAR
-  ======================================================= */
-
   const [isCollapsed, setIsCollapsed] = useState(false);
-
-  /* =======================================================
-     DATA
-  ======================================================= */
 
   const [users, setUsers] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState("");
-
-  /* =======================================================
-     FILTER
-  ======================================================= */
 
   const [searchQuery, setSearchQuery] = useState("");
   const [roleFilter, setRoleFilter] = useState("Semua");
@@ -323,59 +313,60 @@ export default function FaceIdPage() {
 
   const itemsPerPage = 7;
 
-  /* =======================================================
-     MODAL
-  ======================================================= */
-
   const [deleteUser, setDeleteUser] = useState(null);
-  const [selectedUser, setSelectedUser] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
   /* =======================================================
      LOAD USERS
   ======================================================= */
 
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async ({ silent = false } = {}) => {
     try {
-      setIsLoading(true);
+      if (silent) {
+        setIsRefreshing(true);
+      } else {
+        setIsLoading(true);
+      }
+
       setError("");
 
       const response = await apiFetch(
         "/api/users?page=1&limit=1000",
-        {
-          method: "GET",
-        },
+        { method: "GET" },
       );
 
-      const rawData =
-        response?.data ||
-        response?.users ||
-        [];
+      // Mendukung beberapa bentuk respons API.
+      let data = [];
 
-      /*
-       * Antisipasi jika response.data
-       * berbentuk object yang memiliki
-       * property data.
-       */
-
-      const data = Array.isArray(rawData)
-        ? rawData
-        : Array.isArray(rawData?.data)
-          ? rawData.data
-          : [];
+      if (Array.isArray(response)) {
+        data = response;
+      } else if (Array.isArray(response?.data)) {
+        data = response.data;
+      } else if (Array.isArray(response?.users)) {
+        data = response.users;
+      } else if (Array.isArray(response?.data?.data)) {
+        data = response.data.data;
+      } else if (Array.isArray(response?.data?.users)) {
+        data = response.data.users;
+      }
 
       const normalized = data.map((item) => {
-        const biometric = item.biometrikWajah;
+        const biometric =
+          item.biometrikWajah ??
+          item.biometrik_wajah ??
+          item.faceId ??
+          item.faceID ??
+          null;
+
+        const biometricRecord = getActiveBiometric(biometric);
+        const registered = isFaceRegistered(biometric);
 
         const role = normalizeRole(
           item.peran?.namaTampilan ||
-            item.peran?.nama,
+            item.peran?.nama ||
+            item.role ||
+            item.peran,
         );
-
-        const registered =
-          String(
-            biometric?.status || "",
-          ).toLowerCase() === "aktif";
 
         return {
           id: item.id,
@@ -383,16 +374,20 @@ export default function FaceIdPage() {
           nama:
             item.namaLengkap ||
             item.namaPengguna ||
+            item.name ||
             "Tanpa Nama",
 
           username:
-            item.namaPengguna || "-",
+            item.namaPengguna ||
+            item.username ||
+            "-",
 
-          email:
-            item.email || "-",
+          email: item.email || "-",
 
           noTelepon:
-            item.noTelepon || "-",
+            item.noTelepon ||
+            item.nomorTelepon ||
+            "-",
 
           peran: role,
 
@@ -401,86 +396,91 @@ export default function FaceIdPage() {
             item.nisn ||
             "-",
 
-          status:
-            String(
-              item.status || "",
-            ).toLowerCase() === "aktif"
-              ? "Aktif"
-              : "Nonaktif",
+          status: getAccountStatus(item.status),
 
-          faceStatus:
-            registered
-              ? "Terdaftar"
-              : "Belum Terdaftar",
+          faceStatus: registered
+            ? "Terdaftar"
+            : "Belum Terdaftar",
 
-          faceId:
-            biometric?.id || null,
+          faceId: registered
+            ? biometricRecord?.id || null
+            : null,
 
           registeredAt:
-            biometric?.dibuatPada || null,
+            biometricRecord?.dibuatPada ||
+            biometricRecord?.createdAt ||
+            biometricRecord?.created_at ||
+            null,
 
           updatedAt:
-            biometric?.diperbaruiPada || null,
+            biometricRecord?.diperbaruiPada ||
+            biometricRecord?.updatedAt ||
+            biometricRecord?.updated_at ||
+            null,
 
           avatar: getInitials(
             item.namaLengkap ||
-              item.namaPengguna,
+              item.namaPengguna ||
+              item.name,
           ),
 
           confidence: null,
 
           facePhoto:
-            biometric?.urlFotoReferensi ||
+            biometricRecord?.urlFotoReferensi ||
+            biometricRecord?.fotoReferensi ||
+            biometricRecord?.facePhoto ||
+            biometricRecord?.foto ||
             null,
         };
       });
 
       setUsers(normalized);
     } catch (err) {
-      console.error(
-        "Gagal mengambil pengguna:",
-        err,
-      );
+      console.error("Gagal mengambil pengguna:", err);
 
       setError(
-        err?.message ||
-          "Gagal mengambil data pengguna.",
+        err?.message || "Gagal mengambil data pengguna.",
       );
-
-      setUsers([]);
     } finally {
       setIsLoading(false);
+      setIsRefreshing(false);
     }
-  };
-
-  useEffect(() => {
-    loadUsers();
   }, []);
 
   /* =======================================================
-     DATE FORMAT
+     LOAD ON MOUNT AND WHEN PAGE BECOMES VISIBLE
   ======================================================= */
 
-  const formatDate = (value) => {
-    if (!value) {
-      return "Belum terdaftar";
-    }
+  useEffect(() => {
+    loadUsers();
 
-    const date = new Date(value);
+    const handleFocus = () => {
+      loadUsers({ silent: true });
+    };
 
-    if (Number.isNaN(date.getTime())) {
-      return "Belum terdaftar";
-    }
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        loadUsers({ silent: true });
+      }
+    };
 
-    return date.toLocaleDateString(
-      "id-ID",
-      {
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      },
+    window.addEventListener("focus", handleFocus);
+
+    document.addEventListener(
+      "visibilitychange",
+      handleVisibilityChange,
     );
-  };
+
+    return () => {
+      window.removeEventListener("focus", handleFocus);
+
+      document.removeEventListener(
+        "visibilitychange",
+        handleVisibilityChange,
+      );
+    };
+  }, [loadUsers]);
 
   /* =======================================================
      FILTER
@@ -488,25 +488,14 @@ export default function FaceIdPage() {
 
   const filteredUsers = useMemo(() => {
     return users.filter((user) => {
-      const search =
-        searchQuery
-          .toLowerCase()
-          .trim();
+      const search = searchQuery.toLowerCase().trim();
 
       const matchesSearch =
         !search ||
-        user.nama
-          .toLowerCase()
-          .includes(search) ||
-        user.username
-          .toLowerCase()
-          .includes(search) ||
-        user.email
-          .toLowerCase()
-          .includes(search) ||
-        user.jabatan
-          .toLowerCase()
-          .includes(search);
+        user.nama.toLowerCase().includes(search) ||
+        user.username.toLowerCase().includes(search) ||
+        user.email.toLowerCase().includes(search) ||
+        user.jabatan.toLowerCase().includes(search);
 
       const matchesRole =
         roleFilter === "Semua" ||
@@ -541,24 +530,15 @@ export default function FaceIdPage() {
 
   const totalPages = Math.max(
     1,
-    Math.ceil(
-      filteredUsers.length /
-        itemsPerPage,
-    ),
+    Math.ceil(filteredUsers.length / itemsPerPage),
   );
 
-  const safeCurrentPage = Math.min(
-    currentPage,
-    totalPages,
-  );
+  const safeCurrentPage = Math.min(currentPage, totalPages);
 
-  const paginatedUsers =
-    filteredUsers.slice(
-      (safeCurrentPage - 1) *
-        itemsPerPage,
-      safeCurrentPage *
-        itemsPerPage,
-    );
+  const paginatedUsers = filteredUsers.slice(
+    (safeCurrentPage - 1) * itemsPerPage,
+    safeCurrentPage * itemsPerPage,
+  );
 
   /* =======================================================
      STATISTICS
@@ -566,25 +546,17 @@ export default function FaceIdPage() {
 
   const totalUsers = users.length;
 
-  const registeredUsers =
-    users.filter(
-      (user) =>
-        user.faceStatus ===
-        "Terdaftar",
-    ).length;
+  const registeredUsers = users.filter(
+    (user) => user.faceStatus === "Terdaftar",
+  ).length;
 
-  const notRegisteredUsers =
-    users.filter(
-      (user) =>
-        user.faceStatus ===
-        "Belum Terdaftar",
-    ).length;
+  const notRegisteredUsers = users.filter(
+    (user) => user.faceStatus === "Belum Terdaftar",
+  ).length;
 
-  const activeUsers =
-    users.filter(
-      (user) =>
-        user.status === "Aktif",
-    ).length;
+  const activeUsers = users.filter(
+    (user) => user.status === "Aktif",
+  ).length;
 
   /* =======================================================
      RESET FILTER
@@ -603,27 +575,19 @@ export default function FaceIdPage() {
   ======================================================= */
 
   const handleOpenDetail = (user) => {
-    if (!user?.id) {
-      return;
-    }
+    if (!user?.id) return;
 
-    router.push(
-      `/admin/pengguna/face-id/${user.id}`,
-    );
+    router.push(`/admin/pengguna/face-id/${user.id}`);
   };
 
   /* =======================================================
-     OPEN EDIT PAGE
+     OPEN EDIT
   ======================================================= */
 
   const handleOpenEdit = (user) => {
-    if (!user?.id) {
-      return;
-    }
+    if (!user?.id) return;
 
-    router.push(
-      `/admin/pengguna/face-id/edit/${user.id}`,
-    );
+    router.push(`/admin/pengguna/face-id/edit/${user.id}`);
   };
 
   /* =======================================================
@@ -631,33 +595,24 @@ export default function FaceIdPage() {
   ======================================================= */
 
   const handleDelete = async () => {
-    if (!deleteUser?.id) {
-      return;
-    }
+    if (!deleteUser?.id) return;
 
     try {
       setIsDeleting(true);
 
       await apiFetch(
         `/api/users/${deleteUser.id}/face-id`,
-        {
-          method: "DELETE",
-        },
+        { method: "DELETE" },
       );
 
       setDeleteUser(null);
-      setSelectedUser(null);
 
       await loadUsers();
-    } catch (error) {
-      console.error(
-        "Gagal menghapus Face ID:",
-        error,
-      );
+    } catch (err) {
+      console.error("Gagal menghapus Face ID:", err);
 
       alert(
-        error?.message ||
-          "Gagal menghapus Face ID.",
+        err?.message || "Gagal menghapus Face ID.",
       );
     } finally {
       setIsDeleting(false);
@@ -672,44 +627,6 @@ export default function FaceIdPage() {
     setIsCollapsed((prev) => !prev);
   };
 
-  /* =======================================================
-     FILE URL
-  ======================================================= */
-
-  const getFileUrl = (filePath) => {
-    if (!filePath) {
-      return "";
-    }
-
-    if (
-      /^https?:\/\//i.test(filePath)
-    ) {
-      return filePath;
-    }
-
-    const apiBase =
-      process.env
-        .NEXT_PUBLIC_API_URL || "";
-
-   
-
-    const base = apiBase
-      .replace(
-        /\/api\/v1\/?$/,
-        "",
-      )
-      .replace(
-        /\/$/,
-        "",
-      );
-
-    return `${base}${
-      filePath.startsWith("/")
-        ? filePath
-        : `/${filePath}`
-    }`;
-  };
-
   return (
     <div
       className={[
@@ -717,10 +634,6 @@ export default function FaceIdPage() {
         "theme-page",
       ].join(" ")}
     >
-      {/* ===================================================
-          SIDEBAR
-      =================================================== */}
-
       <Sidebar
         active="faceId"
         setActive={() => {}}
@@ -729,10 +642,6 @@ export default function FaceIdPage() {
         role="admin"
       />
 
-      {/* ===================================================
-          MAIN
-      =================================================== */}
-
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <div className="sticky top-0 z-40 shrink-0">
           <Header
@@ -740,8 +649,7 @@ export default function FaceIdPage() {
             notifications={[]}
             user={{
               name: "Admin Sekolah",
-              email:
-                "admin@smartschool.com",
+              email: "admin@smartschool.com",
               avatar: "AD",
             }}
           />
@@ -749,72 +657,83 @@ export default function FaceIdPage() {
 
         <main className="min-h-0 flex-1 overflow-hidden">
           <div className="flex h-full min-h-0 flex-col px-4 py-4 sm:px-5 lg:px-6">
-
-            {/* =================================================
-                HEADER
-            ================================================= */}
+            {/* HEADER */}
 
             <div className="mb-4 shrink-0">
               <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                <div className="min-w-0">
-                  <div className="flex items-center gap-2">
-                    <div
-                      className={[
-                        "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
-                        themePrimarySoft,
-                        themePrimarySoftBorder,
-                      ].join(" ")}
-                    >
-                      <ScanFace
-                        size={19}
-                        className="text-[var(--color-primary)]"
-                      />
-                    </div>
+                <div className="flex min-w-0 items-center gap-2">
+                  <div
+                    className={[
+                      "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
+                      themePrimarySoft,
+                      themePrimarySoftBorder,
+                    ].join(" ")}
+                  >
+                    <ScanFace
+                      size={19}
+                      className="text-[var(--color-primary)]"
+                    />
+                  </div>
 
-                    <div className="min-w-0">
-                      <h1 className="truncate text-lg font-bold tracking-tight theme-text sm:text-xl">
-                        Face ID
-                      </h1>
+                  <div className="min-w-0">
+                    <h1 className="truncate text-lg font-bold tracking-tight theme-text sm:text-xl">
+                      Face ID
+                    </h1>
 
-                      <p className="truncate text-xs theme-text-secondary">
-                        Kelola data pengenalan wajah pengguna sekolah
-                      </p>
-                    </div>
+                    <p className="truncate text-xs theme-text-secondary">
+                      Kelola data pengenalan wajah pengguna sekolah
+                    </p>
                   </div>
                 </div>
 
-                <button
-                  onClick={() =>
-                    router.push(
-                      "/admin/pengguna/face-id/tambah",
-                    )
-                  }
-                  className={[
-                    "inline-flex shrink-0 items-center justify-center gap-2",
-                    "rounded-lg px-4 py-2.5 text-sm font-semibold text-white",
-                    "bg-[var(--color-primary)]",
-                    "transition hover:brightness-110",
-                    themePrimaryRing,
-                  ].join(" ")}
-                >
-                  <Plus size={17} />
-                  Tambah Face ID
-                </button>
+                <div className="flex shrink-0 flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => loadUsers({ silent: true })}
+                    disabled={isLoading || isRefreshing}
+                    title="Muat ulang data Face ID"
+                    className={[
+                      "inline-flex items-center justify-center gap-2",
+                      "rounded-lg border px-3 py-2.5 text-sm font-medium",
+                      "theme-card theme-border theme-text-secondary",
+                      themeTextHover,
+                      "disabled:cursor-not-allowed disabled:opacity-50",
+                    ].join(" ")}
+                  >
+                    {isRefreshing ? (
+                      <Loader2 size={16} className="animate-spin" />
+                    ) : (
+                      <RefreshCw size={16} />
+                    )}
+                    Refresh
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() =>
+                      router.push("/admin/pengguna/face-id/tambah")
+                    }
+                    className={[
+                      "inline-flex items-center justify-center gap-2",
+                      "rounded-lg px-4 py-2.5 text-sm font-semibold text-white",
+                      "bg-[var(--color-primary)]",
+                      "transition hover:brightness-110",
+                      themePrimaryRing,
+                    ].join(" ")}
+                  >
+                    <Plus size={17} />
+                    Tambah Face ID
+                  </button>
+                </div>
               </div>
             </div>
 
-            {/* =================================================
-                STATISTICS
-            ================================================= */}
+            {/* STATISTICS */}
 
             <div className="mb-4 grid shrink-0 grid-cols-2 gap-3 xl:grid-cols-4">
               <StatCard
                 title="Total Pengguna"
-                value={
-                  isLoading
-                    ? "..."
-                    : totalUsers
-                }
+                value={isLoading ? "..." : totalUsers}
                 description="Seluruh pengguna"
                 icon={Users}
                 iconBg={themePrimarySoft}
@@ -822,11 +741,7 @@ export default function FaceIdPage() {
 
               <StatCard
                 title="Face ID Terdaftar"
-                value={
-                  isLoading
-                    ? "..."
-                    : registeredUsers
-                }
+                value={isLoading ? "..." : registeredUsers}
                 description="Sudah memiliki Face ID"
                 icon={CheckCircle2}
                 iconBg="theme-success"
@@ -834,11 +749,7 @@ export default function FaceIdPage() {
 
               <StatCard
                 title="Belum Terdaftar"
-                value={
-                  isLoading
-                    ? "..."
-                    : notRegisteredUsers
-                }
+                value={isLoading ? "..." : notRegisteredUsers}
                 description="Perlu registrasi"
                 icon={XCircle}
                 iconBg="theme-warning"
@@ -846,20 +757,14 @@ export default function FaceIdPage() {
 
               <StatCard
                 title="Pengguna Aktif"
-                value={
-                  isLoading
-                    ? "..."
-                    : activeUsers
-                }
+                value={isLoading ? "..." : activeUsers}
                 description="Akun berstatus aktif"
                 icon={UserRound}
                 iconBg={themePrimarySoft}
               />
             </div>
 
-            {/* =================================================
-                MAIN CARD
-            ================================================= */}
+            {/* MAIN CARD */}
 
             <div
               className={[
@@ -878,7 +783,6 @@ export default function FaceIdPage() {
                 ].join(" ")}
               >
                 <div className="flex flex-col gap-3 xl:flex-row xl:items-center">
-
                   <div className="relative min-w-0 flex-1">
                     <Search
                       size={17}
@@ -889,9 +793,7 @@ export default function FaceIdPage() {
                       type="text"
                       value={searchQuery}
                       onChange={(e) => {
-                        setSearchQuery(
-                          e.target.value,
-                        );
+                        setSearchQuery(e.target.value);
                         setCurrentPage(1);
                       }}
                       placeholder="Cari nama, username, email, atau jabatan..."
@@ -909,9 +811,6 @@ export default function FaceIdPage() {
                   </div>
 
                   <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 xl:flex">
-
-                    {/* ROLE */}
-
                     <div className="relative">
                       <Filter
                         size={14}
@@ -921,9 +820,7 @@ export default function FaceIdPage() {
                       <select
                         value={roleFilter}
                         onChange={(e) => {
-                          setRoleFilter(
-                            e.target.value,
-                          );
+                          setRoleFilter(e.target.value);
                           setCurrentPage(1);
                         }}
                         className={[
@@ -936,36 +833,18 @@ export default function FaceIdPage() {
                           themePrimaryRing,
                         ].join(" ")}
                       >
-                        <option value="Semua">
-                          Semua Peran
-                        </option>
-
-                        <option value="Guru">
-                          Guru
-                        </option>
-
-                        <option value="Siswa">
-                          Siswa
-                        </option>
-
-                        <option value="Staff">
-                          Staff
-                        </option>
-
-                        <option value="Admin">
-                          Admin
-                        </option>
+                        <option value="Semua">Semua Peran</option>
+                        <option value="Guru">Guru</option>
+                        <option value="Siswa">Siswa</option>
+                        <option value="Staff">Staff</option>
+                        <option value="Admin">Admin</option>
                       </select>
                     </div>
-
-                    {/* FACE FILTER */}
 
                     <select
                       value={faceFilter}
                       onChange={(e) => {
-                        setFaceFilter(
-                          e.target.value,
-                        );
+                        setFaceFilter(e.target.value);
                         setCurrentPage(1);
                       }}
                       className={[
@@ -978,27 +857,17 @@ export default function FaceIdPage() {
                         themePrimaryRing,
                       ].join(" ")}
                     >
-                      <option value="Semua">
-                        Semua Face ID
-                      </option>
-
-                      <option value="Terdaftar">
-                        Terdaftar
-                      </option>
-
+                      <option value="Semua">Semua Face ID</option>
+                      <option value="Terdaftar">Terdaftar</option>
                       <option value="Belum Terdaftar">
                         Belum Terdaftar
                       </option>
                     </select>
 
-                    {/* STATUS FILTER */}
-
                     <select
                       value={statusFilter}
                       onChange={(e) => {
-                        setStatusFilter(
-                          e.target.value,
-                        );
+                        setStatusFilter(e.target.value);
                         setCurrentPage(1);
                       }}
                       className={[
@@ -1011,22 +880,13 @@ export default function FaceIdPage() {
                         themePrimaryRing,
                       ].join(" ")}
                     >
-                      <option value="Semua">
-                        Semua Status
-                      </option>
-
-                      <option value="Aktif">
-                        Aktif
-                      </option>
-
-                      <option value="Nonaktif">
-                        Nonaktif
-                      </option>
+                      <option value="Semua">Semua Status</option>
+                      <option value="Aktif">Aktif</option>
+                      <option value="Nonaktif">Nonaktif</option>
                     </select>
 
-                    {/* RESET */}
-
                     <button
+                      type="button"
                       onClick={resetFilters}
                       className={[
                         "inline-flex h-10 items-center justify-center gap-1.5",
@@ -1054,9 +914,19 @@ export default function FaceIdPage() {
                     "theme-border-soft",
                   ].join(" ")}
                 >
-                  <div className="flex items-center gap-2 text-xs">
-                    <AlertCircle size={15} />
-                    {error}
+                  <div className="flex items-center justify-between gap-3 text-xs">
+                    <div className="flex items-center gap-2">
+                      <AlertCircle size={15} />
+                      <span>{error}</span>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => loadUsers()}
+                      className="shrink-0 font-semibold underline"
+                    >
+                      Coba lagi
+                    </button>
                   </div>
                 </div>
               )}
@@ -1071,32 +941,22 @@ export default function FaceIdPage() {
                       "theme-card-soft",
                     ].join(" ")}
                   >
-                    <tr
-                      className={[
-                        "border-b",
-                        "theme-border",
-                      ].join(" ")}
-                    >
+                    <tr className={["border-b", "theme-border"].join(" ")}>
                       <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider theme-text-muted">
                         Pengguna
                       </th>
-
                       <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider theme-text-muted">
                         Peran
                       </th>
-
                       <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider theme-text-muted">
                         Face ID
                       </th>
-
                       <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider theme-text-muted">
                         Confidence
                       </th>
-
                       <th className="px-4 py-3 text-left text-[11px] font-semibold uppercase tracking-wider theme-text-muted">
                         Status
                       </th>
-
                       <th className="px-4 py-3 text-right text-[11px] font-semibold uppercase tracking-wider theme-text-muted">
                         Aksi
                       </th>
@@ -1111,16 +971,12 @@ export default function FaceIdPage() {
                   >
                     {isLoading ? (
                       <tr>
-                        <td
-                          colSpan={6}
-                          className="px-4 py-16"
-                        >
+                        <td colSpan={6} className="px-4 py-16">
                           <div className="flex flex-col items-center justify-center">
                             <Loader2
                               size={24}
                               className="animate-spin text-[var(--color-primary)]"
                             />
-
                             <p className="mt-3 text-sm font-medium theme-text-secondary">
                               Mengambil data pengguna...
                             </p>
@@ -1128,191 +984,140 @@ export default function FaceIdPage() {
                         </td>
                       </tr>
                     ) : paginatedUsers.length > 0 ? (
-                      paginatedUsers.map(
-                        (user) => (
-                          <tr
-                            key={user.id}
-                            className={[
-                              "group transition",
-                              themeTextHover,
-                            ].join(" ")}
-                          >
-                            {/* USER */}
+                      paginatedUsers.map((user) => (
+                        <tr
+                          key={user.id}
+                          className={[
+                            "group transition",
+                            themeTextHover,
+                          ].join(" ")}
+                        >
+                          <td className="px-4 py-3">
+                            <div className="flex items-center gap-3">
+                              <div
+                                className={[
+                                  "flex h-9 w-9 shrink-0 items-center justify-center",
+                                  "rounded-lg text-xs font-bold",
+                                  themePrimarySoft,
+                                  "text-[var(--color-primary)]",
+                                ].join(" ")}
+                              >
+                                {user.avatar}
+                              </div>
 
-                            <td className="px-4 py-3">
-                              <div className="flex items-center gap-3">
+                              <div className="min-w-0">
+                                <p className="truncate text-sm font-semibold theme-text">
+                                  {user.nama}
+                                </p>
+                                <p className="truncate text-xs theme-text-muted">
+                                  @{user.username}
+                                </p>
+                              </div>
+                            </div>
+                          </td>
+
+                          <td className="px-4 py-3">
+                            <RoleBadge role={user.peran} />
+                            <p className="mt-1 max-w-[150px] truncate text-[11px] theme-text-muted">
+                              {user.jabatan}
+                            </p>
+                          </td>
+
+                          <td className="px-4 py-3">
+                            <FaceStatusBadge status={user.faceStatus} />
+                            {user.faceId && (
+                              <p className="mt-1 text-[11px] theme-text-muted">
+                                {user.faceId}
+                              </p>
+                            )}
+                          </td>
+
+                          <td className="px-4 py-3">
+                            {user.confidence ? (
+                              <div className="w-[110px]">
+                                <div className="mb-1 flex items-center justify-between">
+                                  <span className="text-xs font-semibold theme-text">
+                                    {user.confidence}%
+                                  </span>
+                                </div>
+
                                 <div
                                   className={[
-                                    "flex h-9 w-9 shrink-0 items-center justify-center",
-                                    "rounded-lg text-xs font-bold",
-                                    themePrimarySoft,
-                                    "text-[var(--color-primary)]",
+                                    "h-1.5 overflow-hidden rounded-full",
+                                    "bg-[color-mix(in_srgb,var(--color-text)_10%,transparent)]",
                                   ].join(" ")}
                                 >
-                                  {user.avatar}
-                                </div>
-
-                                <div className="min-w-0">
-                                  <p className="truncate text-sm font-semibold theme-text">
-                                    {user.nama}
-                                  </p>
-
-                                  <p className="truncate text-xs theme-text-muted">
-                                    @{user.username}
-                                  </p>
-                                </div>
-                              </div>
-                            </td>
-
-                            {/* ROLE */}
-
-                            <td className="px-4 py-3">
-                              <RoleBadge
-                                role={user.peran}
-                              />
-
-                              <p className="mt-1 max-w-[150px] truncate text-[11px] theme-text-muted">
-                                {user.jabatan}
-                              </p>
-                            </td>
-
-                            {/* FACE */}
-
-                            <td className="px-4 py-3">
-                              <FaceStatusBadge
-                                status={
-                                  user.faceStatus
-                                }
-                              />
-
-                              {user.faceId && (
-                                <p className="mt-1 text-[11px] theme-text-muted">
-                                  {user.faceId}
-                                </p>
-                              )}
-                            </td>
-
-                            {/* CONFIDENCE */}
-
-                            <td className="px-4 py-3">
-                              {user.confidence ? (
-                                <div className="w-[110px]">
-                                  <div className="mb-1 flex items-center justify-between">
-                                    <span className="text-xs font-semibold theme-text">
-                                      {
-                                        user.confidence
-                                      }
-                                      %
-                                    </span>
-                                  </div>
-
                                   <div
-                                    className={[
-                                      "h-1.5 overflow-hidden rounded-full",
-                                      "bg-[color-mix(in_srgb,var(--color-text)_10%,transparent)]",
-                                    ].join(" ")}
-                                  >
-                                    <div
-                                      className="h-full rounded-full bg-[var(--color-primary)]"
-                                      style={{
-                                        width: `${user.confidence}%`,
-                                      }}
-                                    />
-                                  </div>
-                                </div>
-                              ) : (
-                                <span className="text-xs theme-text-muted">
-                                  Belum diuji
-                                </span>
-                              )}
-                            </td>
-
-                            {/* STATUS */}
-
-                            <td className="px-4 py-3">
-                              <AccountStatus
-                                status={user.status}
-                              />
-                            </td>
-
-                            {/* ACTION */}
-
-                            <td className="px-4 py-3">
-                              <div className="flex items-center justify-end gap-1">
-
-                                {/* DETAIL */}
-
-                                <button
-                                  onClick={() =>
-                                    handleOpenDetail(
-                                      user,
-                                    )
-                                  }
-                                  title="Lihat detail"
-                                  className={[
-                                    "flex h-8 w-8 items-center justify-center",
-                                    "rounded-lg theme-text-muted transition",
-                                    themePrimaryHover,
-                                    "hover:text-[var(--color-primary)]",
-                                  ].join(" ")}
-                                >
-                                  <Eye size={16} />
-                                </button>
-
-                                {/* EDIT */}
-
-                                <button
-                                  onClick={() =>
-                                    handleOpenEdit(
-                                      user,
-                                    )
-                                  }
-                                  title="Edit Face ID"
-                                  className={[
-                                    "flex h-8 w-8 items-center justify-center",
-                                    "rounded-lg theme-text-muted transition",
-                                    themePrimaryHover,
-                                    "hover:text-[var(--color-primary)]",
-                                  ].join(" ")}
-                                >
-                                  <Edit3 size={16} />
-                                </button>
-
-                                {/* DELETE */}
-
-                                {user.faceStatus ===
-                                  "Terdaftar" && (
-                                  <button
-                                    onClick={() => {
-                                      setDeleteUser(
-                                        user,
-                                      );
-                                      setSelectedUser(
-                                        user,
-                                      );
+                                    className="h-full rounded-full bg-[var(--color-primary)]"
+                                    style={{
+                                      width: `${user.confidence}%`,
                                     }}
-                                    title="Hapus Face ID"
-                                    className={[
-                                      "flex h-8 w-8 items-center justify-center",
-                                      "rounded-lg theme-text-muted transition",
-                                      "hover:bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)]",
-                                      "hover:text-[var(--color-danger)]",
-                                    ].join(" ")}
-                                  >
-                                    <Trash2 size={16} />
-                                  </button>
-                                )}
+                                  />
+                                </div>
                               </div>
-                            </td>
-                          </tr>
-                        ),
-                      )
+                            ) : (
+                              <span className="text-xs theme-text-muted">
+                                Belum diuji
+                              </span>
+                            )}
+                          </td>
+
+                          <td className="px-4 py-3">
+                            <AccountStatus status={user.status} />
+                          </td>
+
+                          <td className="px-4 py-3">
+                            <div className="flex items-center justify-end gap-1">
+                              <button
+                                type="button"
+                                onClick={() => handleOpenDetail(user)}
+                                title="Lihat detail"
+                                className={[
+                                  "flex h-8 w-8 items-center justify-center",
+                                  "rounded-lg theme-text-muted transition",
+                                  themePrimaryHover,
+                                  "hover:text-[var(--color-primary)]",
+                                ].join(" ")}
+                              >
+                                <Eye size={16} />
+                              </button>
+
+                              <button
+                                type="button"
+                                onClick={() => handleOpenEdit(user)}
+                                title="Edit Face ID"
+                                className={[
+                                  "flex h-8 w-8 items-center justify-center",
+                                  "rounded-lg theme-text-muted transition",
+                                  themePrimaryHover,
+                                  "hover:text-[var(--color-primary)]",
+                                ].join(" ")}
+                              >
+                                <Edit3 size={16} />
+                              </button>
+
+                              {user.faceStatus === "Terdaftar" && (
+                                <button
+                                  type="button"
+                                  onClick={() => setDeleteUser(user)}
+                                  title="Hapus Face ID"
+                                  className={[
+                                    "flex h-8 w-8 items-center justify-center",
+                                    "rounded-lg theme-text-muted transition",
+                                    "hover:bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)]",
+                                    "hover:text-[var(--color-danger)]",
+                                  ].join(" ")}
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))
                     ) : (
                       <tr>
-                        <td
-                          colSpan={6}
-                          className="px-4 py-16"
-                        >
+                        <td colSpan={6} className="px-4 py-16">
                           <div className="flex flex-col items-center justify-center text-center">
                             <div
                               className={[
@@ -1331,7 +1136,6 @@ export default function FaceIdPage() {
                             <p className="text-sm font-semibold theme-text">
                               Data tidak ditemukan
                             </p>
-
                             <p className="mt-1 text-xs theme-text-muted">
                               Coba ubah kata pencarian atau filter.
                             </p>
@@ -1354,27 +1158,19 @@ export default function FaceIdPage() {
               >
                 <p className="text-xs theme-text-muted">
                   Menampilkan{" "}
-
                   <span className="font-medium theme-text-secondary">
                     {filteredUsers.length === 0
                       ? 0
-                      : (safeCurrentPage - 1) *
-                          itemsPerPage +
-                        1}
+                      : (safeCurrentPage - 1) * itemsPerPage + 1}
                   </span>{" "}
-
                   -{" "}
-
                   <span className="font-medium theme-text-secondary">
                     {Math.min(
-                      safeCurrentPage *
-                        itemsPerPage,
+                      safeCurrentPage * itemsPerPage,
                       filteredUsers.length,
                     )}
                   </span>{" "}
-
                   dari{" "}
-
                   <span className="font-medium theme-text-secondary">
                     {filteredUsers.length}
                   </span>{" "}
@@ -1382,21 +1178,11 @@ export default function FaceIdPage() {
                 </p>
 
                 <div className="flex items-center gap-1">
-
-                  {/* PREVIOUS */}
-
                   <button
-                    disabled={
-                      safeCurrentPage === 1
-                    }
+                    type="button"
+                    disabled={safeCurrentPage === 1}
                     onClick={() =>
-                      setCurrentPage(
-                        (prev) =>
-                          Math.max(
-                            1,
-                            prev - 1,
-                          ),
-                      )
+                      setCurrentPage((prev) => Math.max(1, prev - 1))
                     }
                     className={[
                       "flex h-8 w-8 items-center justify-center",
@@ -1410,27 +1196,18 @@ export default function FaceIdPage() {
                     <ChevronLeft size={15} />
                   </button>
 
-                  {/* PAGE NUMBERS */}
-
                   {Array.from(
-                    {
-                      length: totalPages,
-                    },
-                    (_, index) =>
-                      index + 1,
+                    { length: totalPages },
+                    (_, index) => index + 1,
                   ).map((page) => (
                     <button
+                      type="button"
                       key={page}
-                      onClick={() =>
-                        setCurrentPage(
-                          page,
-                        )
-                      }
+                      onClick={() => setCurrentPage(page)}
                       className={[
                         "flex h-8 min-w-8 items-center justify-center",
                         "rounded-lg px-2 text-xs font-medium transition",
-                        safeCurrentPage ===
-                        page
+                        safeCurrentPage === page
                           ? "bg-[var(--color-primary)] text-white"
                           : [
                               "theme-text-secondary",
@@ -1442,20 +1219,12 @@ export default function FaceIdPage() {
                     </button>
                   ))}
 
-                  {/* NEXT */}
-
                   <button
-                    disabled={
-                      safeCurrentPage ===
-                      totalPages
-                    }
+                    type="button"
+                    disabled={safeCurrentPage === totalPages}
                     onClick={() =>
-                      setCurrentPage(
-                        (prev) =>
-                          Math.min(
-                            totalPages,
-                            prev + 1,
-                          ),
+                      setCurrentPage((prev) =>
+                        Math.min(totalPages, prev + 1),
                       )
                     }
                     className={[
@@ -1476,9 +1245,7 @@ export default function FaceIdPage() {
         </main>
       </div>
 
-      {/* =====================================================
-          DELETE MODAL
-      ===================================================== */}
+      {/* DELETE MODAL */}
 
       {deleteUser && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center bg-[color-mix(in_srgb,var(--color-text)_45%,transparent)] p-4 backdrop-blur-[2px]">
@@ -1491,9 +1258,6 @@ export default function FaceIdPage() {
             ].join(" ")}
           >
             <div className="flex items-start gap-3">
-
-              {/* ICON */}
-
               <div
                 className={[
                   "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl",
@@ -1503,8 +1267,6 @@ export default function FaceIdPage() {
                 <Trash2 size={19} />
               </div>
 
-              {/* CONTENT */}
-
               <div className="min-w-0">
                 <h2 className="text-base font-bold theme-text">
                   Hapus Face ID?
@@ -1512,23 +1274,17 @@ export default function FaceIdPage() {
 
                 <p className="mt-1 text-xs leading-relaxed theme-text-secondary">
                   Face ID milik{" "}
-
                   <span className="font-semibold theme-text">
                     {deleteUser.nama}
                   </span>{" "}
-
-                  akan dihapus dari sistem.
-                  Akun pengguna tidak akan ikut
+                  akan dihapus dari sistem. Akun pengguna tidak akan ikut
                   terhapus.
                 </p>
               </div>
 
-              {/* CLOSE */}
-
               <button
-                onClick={() =>
-                  setDeleteUser(null)
-                }
+                type="button"
+                onClick={() => setDeleteUser(null)}
                 disabled={isDeleting}
                 className={[
                   "ml-auto flex h-8 w-8 shrink-0 items-center justify-center",
@@ -1540,16 +1296,10 @@ export default function FaceIdPage() {
               </button>
             </div>
 
-            {/* ACTIONS */}
-
             <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-
-              {/* CANCEL */}
-
               <button
-                onClick={() =>
-                  setDeleteUser(null)
-                }
+                type="button"
+                onClick={() => setDeleteUser(null)}
                 disabled={isDeleting}
                 className={[
                   "rounded-lg border px-4 py-2",
@@ -1564,9 +1314,8 @@ export default function FaceIdPage() {
                 Batal
               </button>
 
-              {/* DELETE */}
-
               <button
+                type="button"
                 onClick={handleDelete}
                 disabled={isDeleting}
                 className={[
@@ -1579,10 +1328,7 @@ export default function FaceIdPage() {
               >
                 {isDeleting ? (
                   <>
-                    <Loader2
-                      size={15}
-                      className="animate-spin"
-                    />
+                    <Loader2 size={15} className="animate-spin" />
                     Menghapus...
                   </>
                 ) : (

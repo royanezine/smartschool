@@ -773,3 +773,36 @@ export async function deleteAsesmenMinatBakat(
 
   await handleResponse<any>(response);
 }
+
+
+export type AjukanSesiKonselingPayload = {
+  tanggal: string;
+  waktuMulai: string;
+  waktuSelesai: string;
+  topik: string;
+  masalah?: string;
+  konselorId?: string;
+};
+
+export async function ajukanSesiKonseling(
+  payload: AjukanSesiKonselingPayload,
+) {
+  if (!payload.tanggal || !payload.waktuMulai || !payload.waktuSelesai) {
+    throw new Error("Tanggal dan waktu konseling wajib diisi.");
+  }
+
+  if (!payload.topik) {
+    throw new Error("Topik konseling wajib dipilih.");
+  }
+
+  const response = await fetch(
+    `${API_URL}/api/bk/konseling/ajukan`,
+    {
+      method: "POST",
+      headers: getHeaders(),
+      body: JSON.stringify(payload),
+    },
+  );
+
+  return handleResponse(response);
+}

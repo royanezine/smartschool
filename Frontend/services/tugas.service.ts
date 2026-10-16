@@ -130,27 +130,45 @@ export async function submitTugas(
 }
 
 
-export async function getPengumpulanByTugas(
-  tugasId
-) {
+
+export async function getPengumpulanByTugas(tugasId) {
   if (!tugasId) {
     throw new Error("ID tugas wajib diisi");
   }
 
-  return apiFetch(
+  const response = await apiFetch(
     `/api/tugas/${tugasId}/pengumpulan`
   );
+
+  const data =
+    response?.data?.data ??
+    response?.data ??
+    response;
+
+  if (Array.isArray(data)) {
+    return data;
+  }
+
+  if (Array.isArray(data?.pengumpulan)) {
+    return data.pengumpulan;
+  }
+
+  if (Array.isArray(data?.data)) {
+    return data.data;
+  }
+
+  return [];
 }
 
-
-export async function beriNilaiTugas(
-  pengumpulanId,
-  data
-) {
+export async function beriNilaiTugas(pengumpulanId, data) {
   if (!pengumpulanId) {
-    throw new Error(
-      "ID pengumpulan wajib diisi"
-    );
+    throw new Error("ID pengumpulan wajib diisi");
+  }
+
+  const nilai = Number(data?.nilai);
+
+  if (!Number.isFinite(nilai) || nilai < 0 || nilai > 100) {
+    throw new Error("Nilai harus berupa angka 0–100");
   }
 
   return apiFetch(
@@ -158,115 +176,88 @@ export async function beriNilaiTugas(
     {
       method: "PATCH",
       body: JSON.stringify({
-        nilai: Number(data.nilai),
-        keterangan:
-          data.keterangan ?? null,
+        nilai,
+        keterangan: data?.keterangan?.trim() || null,
       }),
     }
   );
 }
 
-/**
- * Ambil semua tugas guru.
- *
- * Alur:
- * kelas-mapel guru
- * -> tugas setiap kelas-mapel
- */
 export async function getTugasGuru() {
-  const responseKelasMapel =
-    await getKelasMapelGuru();
+  const responseKelasMapel = await getKelasMapelGuru();
 
   const kelasMapelData =
     responseKelasMapel?.data?.data ??
     responseKelasMapel?.data ??
-    responseKelasMapel ??
-    [];
+    responseKelasMapel;
 
   if (!Array.isArray(kelasMapelData)) {
     return [];
   }
 
   const hasil = await Promise.all(
-    kelasMapelData.map(
-      async (kelasMapel) => {
-        try {
-          const responseTugas =
-            await getTugasByKelasMapel(
-              kelasMapel.id
-            );
+    kelasMapelData.map(async (kelasMapel) => {
+      try {
+        const responseTugas = await getTugasByKelasMapel(
+          kelasMapel.id
+        );
 
-          const tugasData =
-            responseTugas?.data?.data ??
-            responseTugas?.data ??
-            responseTugas ??
-            [];
+        const tugasData =
+          responseTugas?.data?.data ??
+          responseTugas?.data ??
+          responseTugas;
 
-          if (!Array.isArray(tugasData)) {
-            return [];
-          }
-
-          return tugasData.map(
-            (tugas) => ({
-              ...tugas,
-
-              kelasMapelId:
-                kelasMapel.id,
-
-              kelas:
-                kelasMapel.kelas ??
-                null,
-
-              mataPelajaran:
-                kelasMapel.mataPelajaran ??
-                null,
-
-              guruPengajar:
-                kelasMapel.guruPengajar ??
-                null,
-
-              kelasNama:
-                kelasMapel?.kelas
-                  ?.nama ??
-                kelasMapel?.kelas
-                  ?.namaKelas ??
-                "-",
-
-              mapelNama:
-                kelasMapel
-                  ?.mataPelajaran
-                  ?.nama ??
-                kelasMapel
-                  ?.mataPelajaran
-                  ?.namaMapel ??
-                kelasMapel
-                  ?.mataPelajaran
-                  ?.nama_mata_pelajaran ??
-                "-",
-
-              guruNama:
-                kelasMapel
-                  ?.guruPengajar
-                  ?.namaLengkap ??
-                "-",
-
-              jumlahPengumpulan:
-                tugas?._count
-                  ?.pengumpulanTugasSiswa ??
-                tugas?.jumlahPengumpulan ??
-                0,
-            })
-          );
-        } catch (error) {
-          console.error(
-            `Gagal mengambil tugas kelas-mapel ${kelasMapel.id}:`,
-            error
-          );
-
+        if (!Array.isArray(tugasData)) {
           return [];
         }
+
+        return tugasData.map((tugas) => ({
+          ...tugas,
+          kelasMapelId: kelasMapel.id,
+
+          kelas: kelasMapel.kelas ?? tugas.kelasMapel?.kelas ?? null,
+
+          mataPelajaran:
+            kelasMapel.mataPelajaran ??
+            tugas.kelasMapel?.mataPelajaran ??
+            null,
+
+          guruPengajar:
+            kelasMapel.guruPengajar ??
+            tugas.kelasMapel?.guruPengajar ??
+            null,
+
+          kelasNama:
+            kelasMapel.kelas?.nama ??
+            kelasMapel.kelas?.namaKelas ??
+            tugas.kelasMapel?.kelas?.nama ??
+            "-",
+
+          mapelNama:
+            kelasMapel.mataPelajaran?.nama ??
+            kelasMapel.mataPelajaran?.namaMapel ??
+            tugas.kelasMapel?.mataPelajaran?.nama ??
+            "-",
+
+          guruNama:
+            kelasMapel.guruPengajar?.namaLengkap ??
+            tugas.kelasMapel?.guruPengajar?.namaLengkap ??
+            "-",
+
+          jumlahPengumpulan:
+            tugas._count?.pengumpulanTugasSiswa ??
+            tugas.jumlahPengumpulan ??
+            0,
+        }));
+      } catch (error) {
+        console.error(
+          `Gagal mengambil tugas kelas-mapel ${kelasMapel.id}:`,
+          error
+        );
+
+        return [];
       }
-    )
+    })
   );
 
   return hasil.flat();

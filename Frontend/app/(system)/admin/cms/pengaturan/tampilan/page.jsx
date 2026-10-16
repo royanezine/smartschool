@@ -242,7 +242,7 @@ export default function TampilanPage() {
 
 
   const themeApiUrl = apiUrl.endsWith("/api")
-    ? `${apiUrl}/v1/cms/tema`
+    ? `${apiUrl}/cms/tema`
     : `${apiUrl}/api/cms/tema`;
 
   /* ==========================================================

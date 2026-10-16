@@ -6,625 +6,636 @@ import { useRouter } from "next/navigation";
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 
+import { createShiftKerja } from "@/services/shiftKerja.service";
+
 import {
   ArrowLeft,
   Clock3,
-  CircleAlert,
-  CheckCircle2,
-  GraduationCap,
-  BriefcaseBusiness,
-  UserRound,
-  Sun,
-  Moon,
+  Save,
+  Loader2,
   AlertCircle,
   Info,
-  Save,
+  Sun,
+  Moon,
+  CheckCircle2,
+  X,
 } from "lucide-react";
 
-// =========================================================
-// FORM
-// =========================================================
-
-const emptyForm = {
-  name: "",
-  code: "",
-  startTime: "",
-  endTime: "",
-  tolerance: "15",
-  status: "Aktif",
-  appliesTo: [],
-  description: "",
+const INITIAL_FORM = {
+  nama: "",
+  kode: "",
+  jamMasuk: "07:00",
+  jamKeluar: "14:00",
+  toleransiTerlambatMenit: "15",
+  status: "aktif",
 };
 
-const categories = [
-  {
-    value: "Guru",
-    label: "Guru",
-    description: "Guru dan tenaga pendidik",
-    icon: GraduationCap,
-    tone: "blue",
-  },
-  {
-    value: "Staff",
-    label: "Staff",
-    description: "Staff dan tenaga kependidikan",
-    icon: BriefcaseBusiness,
-    tone: "violet",
-  },
-  {
-    value: "Siswa",
-    label: "Siswa",
-    description: "Peserta didik",
-    icon: UserRound,
-    tone: "slate",
-  },
-];
+const TIME_REGEX = /^([01]\d|2[0-3]):[0-5]\d$/;
 
-// =========================================================
-// HELPERS
-// =========================================================
+function calculateLateLimit(jamMasuk, toleransi) {
+  if (
+    !TIME_REGEX.test(jamMasuk) ||
+    toleransi === "" ||
+    !Number.isInteger(Number(toleransi)) ||
+    Number(toleransi) < 0
+  ) {
+    return "--:--";
+  }
 
-function calculateLateLimit(startTime, tolerance) {
-  if (!startTime || tolerance === "") return "--:--";
+  const [hours, minutes] = jamMasuk.split(":").map(Number);
+  const total = hours * 60 + minutes + Number(toleransi);
+  const normalized = ((total % 1440) + 1440) % 1440;
 
-  const [hour, minute] = startTime.split(":").map(Number);
-  const total = hour * 60 + minute + Number(tolerance);
+  const finalHours = Math.floor(normalized / 60);
+  const finalMinutes = normalized % 60;
 
-  const finalHour = Math.floor(total / 60) % 24;
-  const finalMinute = total % 60;
-
-  return `${String(finalHour).padStart(2, "0")}:${String(
-    finalMinute
+  return `${String(finalHours).padStart(2, "0")}:${String(
+    finalMinutes
   ).padStart(2, "0")}`;
 }
 
-// =========================================================
-// PAGE
-// =========================================================
+function FieldLabel({ children, required = false }) {
+  return (
+    <label className="theme-text-secondary mb-2 block text-xs font-bold uppercase tracking-wider">
+      {children}
+      {required && (
+        <span className="ml-1 text-[var(--color-danger)]">*</span>
+      )}
+    </label>
+  );
+}
+
+function PreviewRow({ icon, label, value }) {
+  return (
+    <div className="flex items-center justify-between gap-3">
+      <div className="theme-text-muted flex items-center gap-2 text-xs">
+        {icon}
+        <span>{label}</span>
+      </div>
+
+      <span className="theme-text text-right text-sm font-bold">
+        {value}
+      </span>
+    </div>
+  );
+}
+
+function getErrorMessage(error) {
+  return error instanceof Error
+    ? error.message
+    : "Terjadi kesalahan saat menyimpan shift kerja.";
+}
+
+function validateForm(form) {
+  const nama = form.nama.trim();
+  const kode = form.kode.trim();
+  const toleransi = form.toleransiTerlambatMenit;
+
+  if (!nama) {
+    return "Nama shift wajib diisi.";
+  }
+
+  if (nama.length > 50) {
+    return "Nama shift maksimal 50 karakter.";
+  }
+
+  if (kode.length > 20) {
+    return "Kode shift maksimal 20 karakter.";
+  }
+
+  if (!TIME_REGEX.test(form.jamMasuk)) {
+    return "Format jam masuk tidak valid.";
+  }
+
+  if (!TIME_REGEX.test(form.jamKeluar)) {
+    return "Format jam keluar tidak valid.";
+  }
+
+  /*
+   * Validasi ini mengikuti asumsi halaman bahwa shift harus
+   * selesai pada hari yang sama. Backend saat ini hanya
+   * memvalidasi format HH:mm, bukan urutan jam masuk/keluar.
+   */
+  if (form.jamMasuk >= form.jamKeluar) {
+    return "Jam keluar harus lebih besar dari jam masuk. Shift lintas tengah malam belum didukung halaman ini.";
+  }
+
+  if (
+    toleransi === "" ||
+    !Number.isInteger(Number(toleransi)) ||
+    Number(toleransi) < 0
+  ) {
+    return "Toleransi keterlambatan harus berupa bilangan bulat minimal 0 menit.";
+  }
+
+  if (!["aktif", "nonaktif"].includes(form.status)) {
+    return "Status shift tidak valid.";
+  }
+
+  return "";
+}
+
+function getCreatedShiftId(response) {
+  /*
+   * Service createShiftKerja yang sudah dibahas melakukan
+   * unwrap terhadap properti data. Bentuk ini juga aman jika
+   * service mengembalikan respons mentah Backend.
+   */
+  const candidates = [
+    response?.id,
+    response?.data?.id,
+    response?.data?.data?.id,
+  ];
+
+  return candidates.find(
+    (value) => typeof value === "string" && value.length > 0
+  );
+}
 
 export default function TambahMasterShiftPage() {
   const router = useRouter();
 
-  const [form, setForm] = useState(emptyForm);
+  const [form, setForm] = useState(INITIAL_FORM);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState(false);
 
-  const lateLimit = calculateLateLimit(
-    form.startTime,
-    form.tolerance
+  const batasTelat = calculateLateLimit(
+    form.jamMasuk,
+    form.toleransiTerlambatMenit
   );
 
-  const toggleCategory = (category) => {
+  function updateField(field, value) {
     setForm((current) => ({
       ...current,
-      appliesTo: current.appliesTo.includes(category)
-        ? current.appliesTo.filter((item) => item !== category)
-        : [...current.appliesTo, category],
+      [field]: value,
     }));
-  };
 
-  const handleSubmit = (event) => {
+    setError("");
+  }
+
+  function handleBack() {
+    if (saving) return;
+
+    router.push("/admin/presensi/master-shift");
+  }
+
+  async function handleSubmit(event) {
     event.preventDefault();
 
-    if (
-      !form.name.trim() ||
-      !form.code.trim() ||
-      !form.startTime ||
-      !form.endTime ||
-      form.tolerance === ""
-    ) {
-      alert("Mohon lengkapi seluruh data shift.");
+    if (saving || success) return;
+
+    setError("");
+
+    const validationError = validateForm(form);
+
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
-    if (form.appliesTo.length === 0) {
-      alert("Pilih minimal satu pengguna yang menggunakan shift.");
-      return;
+    setSaving(true);
+
+    try {
+      /*
+       * Field dan tipe data disesuaikan dengan
+       * createShiftKerjaSchema Backend.
+       *
+       * sekolahId tidak dikirim secara manual karena tenant
+       * ditentukan oleh middleware/controller Backend.
+       */
+      const payload = {
+        nama: form.nama.trim(),
+        jamMasuk: form.jamMasuk,
+        jamKeluar: form.jamKeluar,
+        toleransiTerlambatMenit: Number(
+          form.toleransiTerlambatMenit
+        ),
+        status: form.status,
+      };
+
+      if (form.kode.trim()) {
+        payload.kode = form.kode.trim();
+      }
+
+      const response = await createShiftKerja(payload);
+
+      /*
+       * createShiftKerja pada service saat ini melakukan
+       * unwrap respons. ID dipakai hanya jika tersedia.
+       * Respons sukses tidak perlu ditolak hanya karena
+       * service tidak mengembalikan ID secara langsung.
+       */
+      const createdId = getCreatedShiftId(response);
+
+      setSuccess(true);
+
+      if (createdId) {
+        router.replace("/admin/presensi/master-shift");
+        router.refresh();
+        return;
+      }
+
+      /*
+       * Endpoint berhasil dipanggil. Kembali ke daftar
+       * agar data terbaru dimuat dari Backend.
+       */
+      router.replace("/admin/presensi/master-shift");
+      router.refresh();
+    } catch (err) {
+      console.error("Gagal membuat shift kerja:", err);
+      setError(getErrorMessage(err));
+    } finally {
+      setSaving(false);
     }
-
-    const tolerance = Number(form.tolerance);
-
-    if (Number.isNaN(tolerance) || tolerance < 0) {
-      alert("Toleransi keterlambatan harus berupa angka yang valid.");
-      return;
-    }
-
-    if (form.startTime >= form.endTime) {
-      alert("Jam pulang harus lebih besar dari jam masuk.");
-      return;
-    }
-
-    
-
-    alert("Shift berhasil ditambahkan.");
-    router.push("/admin/presensi/master-shift");
-  };
+  }
 
   return (
-    <div className="flex h-screen w-full overflow-hidden theme-page theme-text">
+    <div className="theme-page theme-text flex min-h-screen w-full">
       <Sidebar />
 
-      <div className="flex h-screen min-w-0 flex-1 flex-col">
+      <div className="flex min-h-screen min-w-0 flex-1 flex-col">
         <Header />
 
-        <main className="min-h-0 flex-1 overflow-y-auto theme-page">
-          <div className="w-full px-6 py-6 md:px-8 md:py-8 xl:px-10 xl:py-10 2xl:px-12 2xl:py-12">
-
-            {/* =================================================
-                BACK BUTTON
-            ================================================= */}
-
+        <main className="theme-page min-h-0 flex-1">
+          <div className="mx-auto w-full max-w-[1500px] px-5 py-6 md:px-8 md:py-8">
             <button
               type="button"
-              onClick={() =>
-                router.push("/admin/presensi/master-shift")
-              }
-              className="theme-text-secondary mb-5 inline-flex items-center gap-2 text-xs font-semibold transition-colors hover:text-[var(--color-primary)]"
+              onClick={handleBack}
+              disabled={saving}
+              className="theme-text-secondary mb-6 inline-flex items-center gap-2 text-sm font-semibold transition hover:text-[var(--color-primary)] disabled:opacity-50"
             >
-              <span className="theme-card theme-border flex h-8 w-8 items-center justify-center rounded-lg border transition-colors hover:border-[var(--color-primary)]">
-                <ArrowLeft size={14} />
-              </span>
-
+              <ArrowLeft size={16} />
               Kembali ke Master Shift
             </button>
 
-            {/* =================================================
-                PAGE HEADER
-            ================================================= */}
+            {/* HEADER */}
+            <div className="mb-7 flex items-start gap-4">
+              <div className="theme-primary flex h-12 w-12 shrink-0 items-center justify-center rounded-xl">
+                <Clock3 size={21} />
+              </div>
 
-            <div className="mb-6 flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-              <div className="flex min-w-0 items-start gap-4">
-                <div className="theme-primary flex h-12 w-12 shrink-0 items-center justify-center rounded-xl shadow-sm">
-                  <Clock3 size={20} />
-                </div>
+              <div>
+                <p className="theme-sidebar-text-active mb-1 text-[11px] font-bold uppercase tracking-widest">
+                  Presensi / Master Shift
+                </p>
 
-                <div className="min-w-0">
-                  <div className="mb-1.5 flex items-center gap-2">
-                    <span className="theme-primary h-1.5 w-1.5 rounded-full" />
+                <h1 className="theme-text text-2xl font-bold tracking-tight md:text-3xl">
+                  Tambah Shift Baru
+                </h1>
 
-                    <p className="theme-sidebar-text-active text-[11px] font-bold uppercase tracking-[0.12em]">
-                      Master Shift
-                    </p>
-                  </div>
-
-                  <h1 className="theme-text text-2xl font-bold tracking-tight sm:text-[28px]">
-                    Tambah Shift Baru
-                  </h1>
-
-                  <p className="theme-text-muted mt-1 text-sm">
-                    Tambahkan jadwal kerja dan aturan presensi baru.
-                  </p>
-                </div>
+                <p className="theme-text-muted mt-2 max-w-2xl text-sm leading-6">
+                  Tambahkan jadwal kerja dengan mengatur nama,
+                  kode, jam masuk, jam keluar, toleransi
+                  keterlambatan, dan status shift.
+                </p>
               </div>
             </div>
 
-            {/* =================================================
-                FORM
-            ================================================= */}
+            {/* ERROR */}
+            {error && (
+              <div
+                role="alert"
+                className="theme-border mb-6 flex items-start gap-3 rounded-xl border p-4"
+              >
+                <AlertCircle
+                  size={19}
+                  className="mt-0.5 shrink-0 text-[var(--color-danger)]"
+                />
 
-            <form onSubmit={handleSubmit}>
-              <div className="grid grid-cols-1 gap-5 xl:grid-cols-[minmax(0,1fr)_380px] 2xl:grid-cols-[minmax(0,1fr)_420px] xl:gap-6 2xl:gap-7">
+                <div className="min-w-0 flex-1">
+                  <p className="theme-text text-sm font-semibold">
+                    Shift belum berhasil disimpan
+                  </p>
 
-                {/* =================================================
-                    LEFT COLUMN
-                ================================================= */}
-
-                <div className="space-y-5 2xl:space-y-6">
-
-                  {/* INFORMASI SHIFT */}
-
-                  <section className="theme-card theme-border overflow-hidden rounded-xl border shadow-sm">
-                    <div className="theme-card-soft theme-border flex items-center gap-3 border-b px-5 py-4">
-                      <div className="theme-info flex h-9 w-9 items-center justify-center rounded-lg border">
-                        <Clock3 size={15} />
-                      </div>
-
-                      <div>
-                        <p className="theme-text text-sm font-bold">
-                          Informasi Shift
-                        </p>
-
-                        <p className="theme-text-muted mt-0.5 text-[11px]">
-                          Masukkan identitas dan jadwal shift.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-5 p-5 md:grid-cols-2 2xl:p-6">
-
-                      {/* NAMA */}
-
-                      <div className="md:col-span-2">
-                        <label className="theme-text-secondary mb-2 block text-xs font-bold uppercase tracking-wider">
-                          Nama Shift{" "}
-                          <span className="text-[var(--color-danger)]">
-                            *
-                          </span>
-                        </label>
-
-                        <input
-                          value={form.name}
-                          onChange={(e) =>
-                            setForm({
-                              ...form,
-                              name: e.target.value,
-                            })
-                          }
-                          placeholder="Contoh: Shift Pagi"
-                          className="theme-input h-11 w-full rounded-lg border px-3.5 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color:var(--color-primary)/.15]"
-                        />
-                      </div>
-
-                      {/* KODE */}
-
-                      <div>
-                        <label className="theme-text-secondary mb-2 block text-xs font-bold uppercase tracking-wider">
-                          Kode Shift{" "}
-                          <span className="text-[var(--color-danger)]">
-                            *
-                          </span>
-                        </label>
-
-                        <input
-                          value={form.code}
-                          onChange={(e) =>
-                            setForm({
-                              ...form,
-                              code: e.target.value.toUpperCase(),
-                            })
-                          }
-                          placeholder="SHIFT-PAGI"
-                          className="theme-input h-11 w-full rounded-lg border px-3.5 text-sm uppercase outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color:var(--color-primary)/.15]"
-                        />
-                      </div>
-
-                      {/* STATUS */}
-
-                      <div>
-                        <label className="theme-text-secondary mb-2 block text-xs font-bold uppercase tracking-wider">
-                          Status
-                        </label>
-
-                        <select
-                          value={form.status}
-                          onChange={(e) =>
-                            setForm({
-                              ...form,
-                              status: e.target.value,
-                            })
-                          }
-                          className="theme-input h-11 w-full rounded-lg border px-3.5 text-sm font-medium outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color:var(--color-primary)/.15]"
-                        >
-                          <option value="Aktif">Aktif</option>
-                          <option value="Nonaktif">
-                            Nonaktif
-                          </option>
-                        </select>
-                      </div>
-
-                      {/* JAM MASUK */}
-
-                      <div>
-                        <label className="theme-text-secondary mb-2 block text-xs font-bold uppercase tracking-wider">
-                          Jam Masuk{" "}
-                          <span className="text-[var(--color-danger)]">
-                            *
-                          </span>
-                        </label>
-
-                        <input
-                          type="time"
-                          value={form.startTime}
-                          onChange={(e) =>
-                            setForm({
-                              ...form,
-                              startTime: e.target.value,
-                            })
-                          }
-                          className="theme-input h-11 w-full rounded-lg border px-3.5 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color:var(--color-primary)/.15]"
-                        />
-                      </div>
-
-                      {/* JAM PULANG */}
-
-                      <div>
-                        <label className="theme-text-secondary mb-2 block text-xs font-bold uppercase tracking-wider">
-                          Jam Pulang{" "}
-                          <span className="text-[var(--color-danger)]">
-                            *
-                          </span>
-                        </label>
-
-                        <input
-                          type="time"
-                          value={form.endTime}
-                          onChange={(e) =>
-                            setForm({
-                              ...form,
-                              endTime: e.target.value,
-                            })
-                          }
-                          className="theme-input h-11 w-full rounded-lg border px-3.5 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color:var(--color-primary)/.15]"
-                        />
-                      </div>
-
-                      {/* TOLERANSI */}
-
-                      <div className="md:col-span-2">
-                        <label className="theme-text-secondary mb-2 block text-xs font-bold uppercase tracking-wider">
-                          Toleransi Keterlambatan
-                        </label>
-
-                        <div className="relative">
-                          <input
-                            type="number"
-                            min="0"
-                            value={form.tolerance}
-                            onChange={(e) =>
-                              setForm({
-                                ...form,
-                                tolerance: e.target.value,
-                              })
-                            }
-                            className="theme-input h-11 w-full rounded-lg border px-3.5 pr-20 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color:var(--color-primary)/.15]"
-                          />
-
-                          <span className="theme-text-placeholder absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-semibold">
-                            menit
-                          </span>
-                        </div>
-
-                        <p className="theme-text-placeholder mt-1.5 text-[11px]">
-                          Contoh: jam masuk 07:00, toleransi 15 menit
-                          → batas telat 07:15.
-                        </p>
-                      </div>
-
-                      {/* DESKRIPSI */}
-
-                      <div className="md:col-span-2">
-                        <label className="theme-text-secondary mb-2 block text-xs font-bold uppercase tracking-wider">
-                          Deskripsi
-                        </label>
-
-                        <textarea
-                          rows={4}
-                          value={form.description}
-                          onChange={(e) =>
-                            setForm({
-                              ...form,
-                              description: e.target.value,
-                            })
-                          }
-                          placeholder="Masukkan keterangan shift..."
-                          className="theme-input w-full resize-none rounded-lg border px-3.5 py-3 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color:var(--color-primary)/.15]"
-                        />
-                      </div>
-                    </div>
-                  </section>
-
-                  {/* BERLAKU UNTUK */}
-
-                  <section className="theme-card theme-border overflow-hidden rounded-xl border shadow-sm">
-                    <div className="theme-card-soft theme-border flex items-center gap-3 border-b px-5 py-4">
-                      <div className="theme-info flex h-9 w-9 items-center justify-center rounded-lg border">
-                        <UserRound size={15} />
-                      </div>
-
-                      <div>
-                        <p className="theme-text text-sm font-bold">
-                          Berlaku Untuk
-                        </p>
-
-                        <p className="theme-text-muted mt-0.5 text-[11px]">
-                          Tentukan kategori pengguna yang menggunakan
-                          shift ini.
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 gap-3 p-5 md:grid-cols-3 2xl:p-6">
-                      {categories.map((item) => {
-                        const Icon = item.icon;
-                        const selected =
-                          form.appliesTo.includes(item.value);
-
-                        return (
-                          <button
-                            key={item.value}
-                            type="button"
-                            onClick={() =>
-                              toggleCategory(item.value)
-                            }
-                            className={`theme-card relative overflow-hidden rounded-xl border p-4 text-left transition-all ${
-                              selected
-                                ? "border-[var(--color-primary)] bg-[var(--color-primary)]/5"
-                                : "theme-border hover:border-[var(--color-primary)]"
-                            }`}
-                          >
-                            <div className="flex items-center justify-between">
-                              <div
-                                className={`flex h-10 w-10 items-center justify-center rounded-lg border transition-colors ${
-                                  selected
-                                    ? "theme-info"
-                                    : "theme-card-soft theme-text-muted theme-border"
-                                }`}
-                              >
-                                <Icon size={18} />
-                              </div>
-
-                              {selected && (
-                                <div className="theme-primary flex h-6 w-6 items-center justify-center rounded-full">
-                                  <CheckCircle2 size={14} />
-                                </div>
-                              )}
-                            </div>
-
-                            <p className="theme-text mt-3 text-sm font-bold">
-                              {item.label}
-                            </p>
-
-                            <p className="theme-text-muted mt-1 text-[11px] leading-4">
-                              {item.description}
-                            </p>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </section>
+                  <p className="theme-text-muted mt-1 break-words text-sm leading-6">
+                    {error}
+                  </p>
                 </div>
 
-                {/* =================================================
-                    RIGHT COLUMN — PREVIEW
-                ================================================= */}
+                <button
+                  type="button"
+                  aria-label="Tutup pesan error"
+                  onClick={() => setError("")}
+                  className="theme-text-muted rounded p-1"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            )}
 
-                <aside className="xl:sticky xl:top-6">
-                  <div className="theme-card theme-border overflow-hidden rounded-xl border shadow-sm">
-                    <div className="theme-card-soft theme-border flex items-center gap-3 border-b px-5 py-4">
-                      <div className="theme-info flex h-9 w-9 items-center justify-center rounded-lg border">
-                        <Info size={15} />
+            {/* SUCCESS */}
+            {success && (
+              <div
+                role="status"
+                className="theme-border mb-6 flex items-start gap-3 rounded-xl border p-4"
+              >
+                <CheckCircle2
+                  size={19}
+                  className="mt-0.5 shrink-0 text-[var(--color-success)]"
+                />
+
+                <div>
+                  <p className="theme-text text-sm font-semibold">
+                    Shift kerja berhasil dibuat
+                  </p>
+
+                  <p className="theme-text-muted mt-1 text-sm">
+                    Mengarahkan kembali ke daftar Master Shift.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmit}>
+              <div className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_350px]">
+                {/* FORM */}
+                <section className="theme-card theme-border overflow-hidden rounded-xl border shadow-sm">
+                  <div className="theme-card-soft theme-border flex items-center gap-3 border-b px-5 py-4 md:px-6">
+                    <div className="theme-info flex h-9 w-9 items-center justify-center rounded-lg border">
+                      <Clock3 size={17} />
+                    </div>
+
+                    <div>
+                      <h2 className="theme-text text-sm font-bold">
+                        Informasi Shift
+                      </h2>
+
+                      <p className="theme-text-muted mt-1 text-xs">
+                        Lengkapi informasi sesuai validasi Backend.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 gap-5 p-5 md:grid-cols-2 md:p-6">
+                    {/* NAMA */}
+                    <div className="md:col-span-2">
+                      <FieldLabel required>Nama Shift</FieldLabel>
+
+                      <input
+                        type="text"
+                        name="nama"
+                        required
+                        maxLength={50}
+                        autoComplete="off"
+                        value={form.nama}
+                        onChange={(event) =>
+                          updateField("nama", event.target.value)
+                        }
+                        placeholder="Contoh: Shift Pagi"
+                        disabled={saving}
+                        className="theme-input h-11 w-full rounded-lg border px-3.5 text-sm outline-none focus:border-[var(--color-primary)] disabled:opacity-60"
+                      />
+
+                      <p className="theme-text-placeholder mt-1.5 text-xs">
+                        Maksimal 50 karakter.
+                      </p>
+                    </div>
+
+                    {/* KODE */}
+                    <div>
+                      <FieldLabel>Kode Shift</FieldLabel>
+
+                      <input
+                        type="text"
+                        name="kode"
+                        maxLength={20}
+                        autoComplete="off"
+                        value={form.kode}
+                        onChange={(event) =>
+                          updateField(
+                            "kode",
+                            event.target.value.toUpperCase()
+                          )
+                        }
+                        placeholder="Contoh: PAGI-01"
+                        disabled={saving}
+                        className="theme-input h-11 w-full rounded-lg border px-3.5 text-sm uppercase outline-none focus:border-[var(--color-primary)] disabled:opacity-60"
+                      />
+
+                      <p className="theme-text-placeholder mt-1.5 text-xs">
+                        Opsional, maksimal 20 karakter.
+                      </p>
+                    </div>
+
+                    {/* STATUS */}
+                    <div>
+                      <FieldLabel required>Status Shift</FieldLabel>
+
+                      <select
+                        name="status"
+                        value={form.status}
+                        onChange={(event) =>
+                          updateField("status", event.target.value)
+                        }
+                        disabled={saving}
+                        className="theme-input h-11 w-full rounded-lg border px-3.5 text-sm outline-none focus:border-[var(--color-primary)] disabled:opacity-60"
+                      >
+                        <option value="aktif">Aktif</option>
+                        <option value="nonaktif">Nonaktif</option>
+                      </select>
+                    </div>
+
+                    {/* JAM MASUK */}
+                    <div>
+                      <FieldLabel required>Jam Masuk</FieldLabel>
+
+                      <input
+                        type="time"
+                        name="jamMasuk"
+                        required
+                        value={form.jamMasuk}
+                        onChange={(event) =>
+                          updateField("jamMasuk", event.target.value)
+                        }
+                        disabled={saving}
+                        className="theme-input h-11 w-full rounded-lg border px-3.5 text-sm outline-none focus:border-[var(--color-primary)] disabled:opacity-60"
+                      />
+                    </div>
+
+                    {/* JAM KELUAR */}
+                    <div>
+                      <FieldLabel required>Jam Keluar</FieldLabel>
+
+                      <input
+                        type="time"
+                        name="jamKeluar"
+                        required
+                        value={form.jamKeluar}
+                        onChange={(event) =>
+                          updateField("jamKeluar", event.target.value)
+                        }
+                        disabled={saving}
+                        className="theme-input h-11 w-full rounded-lg border px-3.5 text-sm outline-none focus:border-[var(--color-primary)] disabled:opacity-60"
+                      />
+                    </div>
+
+                    {/* TOLERANSI */}
+                    <div className="md:col-span-2">
+                      <FieldLabel required>
+                        Toleransi Keterlambatan
+                      </FieldLabel>
+
+                      <div className="relative">
+                        <input
+                          type="number"
+                          name="toleransiTerlambatMenit"
+                          required
+                          min="0"
+                          step="1"
+                          value={form.toleransiTerlambatMenit}
+                          onChange={(event) =>
+                            updateField(
+                              "toleransiTerlambatMenit",
+                              event.target.value
+                            )
+                          }
+                          disabled={saving}
+                          className="theme-input h-11 w-full rounded-lg border px-3.5 pr-20 text-sm outline-none focus:border-[var(--color-primary)] disabled:opacity-60"
+                        />
+
+                        <span className="theme-text-placeholder absolute right-3.5 top-1/2 -translate-y-1/2 text-xs font-semibold">
+                          menit
+                        </span>
                       </div>
 
-                      <div>
-                        <p className="theme-text text-sm font-bold">
-                          Preview Aturan Presensi
-                        </p>
+                      <p className="theme-text-placeholder mt-1.5 text-xs">
+                        Harus berupa bilangan bulat minimal 0 menit.
+                      </p>
+                    </div>
+                  </div>
 
-                        <p className="theme-text-muted mt-0.5 text-[11px]">
-                          Ringkasan aturan yang akan berlaku.
-                        </p>
+                  {/* ACTIONS */}
+                  <div className="theme-card-soft theme-border flex flex-col-reverse gap-3 border-t px-5 py-4 sm:flex-row sm:justify-end md:px-6">
+                    <button
+                      type="button"
+                      disabled={saving}
+                      onClick={handleBack}
+                      className="theme-card theme-border theme-text-secondary h-11 rounded-lg border px-5 text-sm font-semibold disabled:opacity-50"
+                    >
+                      Batal
+                    </button>
+
+                    <button
+                      type="submit"
+                      disabled={saving || success}
+                      className="theme-primary inline-flex h-11 items-center justify-center gap-2 rounded-lg px-5 text-sm font-semibold disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {saving ? (
+                        <>
+                          <Loader2
+                            size={16}
+                            className="animate-spin"
+                          />
+                          Menyimpan...
+                        </>
+                      ) : (
+                        <>
+                          <Save size={16} />
+                          Simpan Shift
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </section>
+
+                {/* PREVIEW */}
+                <aside className="space-y-5">
+                  <section className="theme-card theme-border overflow-hidden rounded-xl border shadow-sm">
+                    <div className="theme-card-soft theme-border border-b px-5 py-4">
+                      <div className="flex items-center gap-2">
+                        <Info
+                          size={16}
+                          className="theme-sidebar-text-active"
+                        />
+
+                        <h2 className="theme-text text-sm font-bold">
+                          Preview Jadwal
+                        </h2>
                       </div>
                     </div>
 
                     <div className="space-y-4 p-5">
-
-                      {/* JAM MASUK */}
-
                       <PreviewRow
-                        icon={<Sun size={14} />}
+                        icon={<Sun size={15} />}
                         label="Jam Masuk"
-                        value={form.startTime || "--:--"}
+                        value={form.jamMasuk || "--:--"}
                       />
 
-                      <Divider />
-
-                      {/* JAM PULANG */}
+                      <div className="theme-border border-t" />
 
                       <PreviewRow
-                        icon={<Moon size={14} />}
-                        label="Jam Pulang"
-                        value={form.endTime || "--:--"}
+                        icon={<Moon size={15} />}
+                        label="Jam Keluar"
+                        value={form.jamKeluar || "--:--"}
                       />
 
-                      <Divider />
-
-                      {/* TOLERANSI */}
+                      <div className="theme-border border-t" />
 
                       <PreviewRow
-                        icon={<Clock3 size={14} />}
+                        icon={<Clock3 size={15} />}
                         label="Toleransi"
-                        value={`${form.tolerance || 0} menit`}
+                        value={
+                          form.toleransiTerlambatMenit === ""
+                            ? "-- menit"
+                            : `${form.toleransiTerlambatMenit} menit`
+                        }
                       />
 
-                      <Divider />
-
-                      {/* BATAS TELAT */}
+                      <div className="theme-border border-t" />
 
                       <PreviewRow
-                        icon={<AlertCircle size={14} />}
-                        label="Batas Telat"
-                        value={lateLimit}
-                        highlight
+                        icon={<AlertCircle size={15} />}
+                        label="Batas Toleransi"
+                        value={batasTelat}
                       />
-
-                      {/* STATUS PRESENSI */}
 
                       <div className="theme-border border-t pt-4">
-                        <div className="mb-3 flex items-center gap-2">
-                          <span className="theme-primary h-1 w-1 rounded-full" />
+                        <p className="theme-text-muted mb-2 text-xs">
+                          Status
+                        </p>
 
-                          <p className="theme-text-muted text-[10px] font-bold uppercase tracking-wider">
-                            Status Presensi
-                          </p>
-                        </div>
-
-                        <div className="space-y-2">
-                          <StatusRow
-                            label="Hadir"
-                            text="Sampai sebelum batas toleransi"
-                            status="success"
+                        <div className="flex items-center gap-2">
+                          <span
+                            className={`h-2 w-2 rounded-full ${
+                              form.status === "aktif"
+                                ? "bg-[var(--color-success)]"
+                                : "bg-[var(--color-danger)]"
+                            }`}
                           />
 
-                          <StatusRow
-                            label="Telat"
-                            text="Melewati batas toleransi"
-                            status="warning"
-                          />
-
-                          <StatusRow
-                            label="Izin"
-                            text="Pengajuan izin disetujui"
-                            status="info"
-                          />
-
-                          <StatusRow
-                            label="Cuti"
-                            text="Data cuti disetujui"
-                            status="purple"
-                          />
-
-                          <StatusRow
-                            label="Alpha"
-                            text="Tidak ada presensi/izin"
-                            status="danger"
-                          />
-                        </div>
-                      </div>
-
-                      {/* INFO */}
-
-                      <div className="theme-info rounded-lg border p-3.5">
-                        <div className="flex gap-3">
-                          <div className="theme-card flex h-7 w-7 shrink-0 items-center justify-center rounded-lg border">
-                            <CircleAlert
-                              size={13}
-                              className="theme-sidebar-text-active"
-                            />
-                          </div>
-
-                          <p className="theme-text-secondary text-[11px] leading-5">
-                            Shift ini akan menjadi acuan jam masuk
-                            dan jam pulang pada proses presensi.
-                          </p>
+                          <span className="theme-text text-sm font-semibold">
+                            {form.status === "aktif"
+                              ? "Aktif"
+                              : "Nonaktif"}
+                          </span>
                         </div>
                       </div>
                     </div>
-                  </div>
+                  </section>
+
+                  <section className="theme-info rounded-xl border p-4">
+                    <div className="flex items-start gap-3">
+                      <CheckCircle2
+                        size={18}
+                        className="mt-0.5 shrink-0"
+                      />
+
+                      <div>
+                        <h3 className="theme-text text-sm font-semibold">
+                          Aturan input
+                        </h3>
+
+                        <p className="theme-text-secondary mt-1 text-xs leading-5">
+                          Nama maksimal 50 karakter, kode maksimal
+                          20 karakter, waktu menggunakan format HH:mm,
+                          toleransi berupa bilangan bulat minimal 0,
+                          dan status berupa aktif atau nonaktif.
+                        </p>
+                      </div>
+                    </div>
+                  </section>
                 </aside>
-              </div>
-
-              {/* =================================================
-                  BUTTONS
-              ================================================= */}
-
-              <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-                <button
-                  type="button"
-                  onClick={() =>
-                    router.push(
-                      "/admin/presensi/master-shift"
-                    )
-                  }
-                  className="theme-card theme-border theme-text-secondary h-11 rounded-lg border px-5 text-sm font-semibold transition-colors hover:border-[var(--color-primary)] hover:text-[var(--color-primary)]"
-                >
-                  Batal
-                </button>
-
-                <button
-                  type="submit"
-                  className="theme-primary inline-flex h-11 items-center justify-center gap-2 rounded-lg px-6 text-sm font-semibold transition-colors"
-                >
-                  <Save size={15} />
-                  Simpan Shift
-                </button>
               </div>
             </form>
           </div>
@@ -632,99 +643,4 @@ export default function TambahMasterShiftPage() {
       </div>
     </div>
   );
-}
-
-// =========================================================
-// SUB COMPONENTS
-// =========================================================
-
-function PreviewRow({
-  icon,
-  label,
-  value,
-  highlight = false,
-}) {
-  return (
-    <div className="flex items-center justify-between gap-3">
-      <div className="flex min-w-0 items-center gap-2">
-        <span className="theme-sidebar-text-active shrink-0">
-          {icon}
-        </span>
-
-        <span className="theme-text-muted truncate text-xs">
-          {label}
-        </span>
-      </div>
-
-      <span
-        className={`shrink-0 text-sm font-bold ${
-          highlight
-            ? "theme-sidebar-text-active"
-            : "theme-text"
-        }`}
-      >
-        {value}
-      </span>
-    </div>
-  );
-}
-
-function StatusRow({
-  label,
-  text,
-  status,
-}) {
-  const statusClasses = {
-    success:
-      "theme-success",
-    warning:
-      "theme-warning",
-    info:
-      "theme-info",
-    purple:
-      "theme-card-soft theme-text-secondary theme-border",
-    danger:
-      "theme-danger",
-  };
-
-  const dotClasses = {
-    success:
-      "bg-[var(--color-success)]",
-    warning:
-      "bg-[var(--color-warning)]",
-    info:
-      "bg-[var(--color-info)]",
-    purple:
-      "bg-[var(--color-text-muted)]",
-    danger:
-      "bg-[var(--color-danger)]",
-  };
-
-  return (
-    <div
-      className={`theme-border flex items-start gap-3 rounded-lg border p-3 transition-colors hover:border-[var(--color-primary)] ${
-        statusClasses[status] || "theme-card-soft"
-      }`}
-    >
-      <span
-        className={`mt-1 h-2 w-2 shrink-0 rounded-full ${
-          dotClasses[status] || "bg-[var(--color-text-muted)]"
-        }`}
-      />
-
-      <div className="min-w-0">
-        <p className="theme-text text-xs font-bold">
-          {label}
-        </p>
-
-        <p className="theme-text-muted mt-0.5 text-[11px] leading-4">
-          {text}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-function Divider() {
-  return <div className="theme-border h-px border-t" />;
 }

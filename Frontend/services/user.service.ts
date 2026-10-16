@@ -1,73 +1,86 @@
 ﻿
-const API_URL =
-  (process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000").replace(
-    /\/+$/,
-    ""
-  );
+const API_URL = (
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
+).replace(/\/+$/, "");
 
 /* =========================================================
    TYPES
 ========================================================= */
 
+
 export interface User {
   id: string;
 
-  email?: string | null;
-  namaPengguna?: string | null;
-  username?: string | null;
-  namaLengkap?: string | null;
-  nama?: string | null;
-
+  // Informasi akun
+  email: string;
+  namaPengguna: string;
+  namaLengkap: string;
   avatar?: string | null;
-  fotoProfil?: string | null;
 
+  // Identitas
+  nipd?: string | null;
   nip?: string | null;
   nuptk?: string | null;
-  nipd?: string | null;
   nisn?: string | null;
   nik?: string | null;
 
-  jenisKelamin?: string | null;
-  tempatLahir?: string | null;
-  tanggalLahir?: string | null;
-  noTelepon?: string | null;
-
-  alamat?: string | null;
-  alamatKtp?: string | null;
-  alamatDomisili?: string | null;
-  kecamatan?: string | null;
-  kelurahan?: string | null;
-  kota?: string | null;
-
-  status?: string | null;
+  // Jabatan dan kepegawaian
   jabatan?: string | null;
   golongan?: string | null;
+
+  // Shift kerja berupa nilai sederhana, misalnya "pagi" atau "siang"
   shiftKerja?: string | null;
 
-  sekolahId?: string | null;
-  yayasanId?: string | null;
-  peranId?: string | null;
+  // ID relasi master shift kerja
+  shiftKerjaId?: string | null;
 
-  sekolah?: {
-    id: string;
+  // ID relasi kategori jabatan
+  kategoriJabatanId?: string | null;
+
+  // Data master shift kerja dari backend
+  shiftKerjaMaster?: {
+    id?: string;
+    nama?: string | null;
+    kode?: string | null;
+    jamMasuk?: string | null;
+    jamKeluar?: string | null;
+  } | null;
+
+  // Data kategori jabatan dari backend
+  kategoriJabatan?: {
+    id?: string;
     nama?: string | null;
     kode?: string | null;
   } | null;
 
-  yayasan?: {
-    id: string;
+  // Informasi pribadi
+  jenisKelamin?: string | null;
+  tempatLahir?: string | null;
+  tanggalLahir?: string | null;
+  alamat?: string | null;
+  alamatDomisili?: string | null;
+  noTelepon?: string | null;
+
+  // Status dan waktu
+  status?: string | null;
+  dibuatPada?: string | null;
+  diperbaruiPada?: string | null;
+
+  // Sekolah
+  sekolah?: {
+    id?: string;
     nama?: string | null;
+    kode?: string | null;
   } | null;
 
+  // Peran pengguna
   peran?: {
-    id: string;
+    id?: string;
     nama?: string | null;
     namaTampilan?: string | null;
   } | null;
 
-  dibuatPada?: string | null;
-  diperbaruiPada?: string | null;
-
+  // Mendukung properti tambahan dari response backend
   [key: string]: any;
 }
 
@@ -182,11 +195,9 @@ export interface UserMutationResponse {
 ========================================================= */
 
 function getToken(): string | null {
-  if (typeof window === "undefined") {
-    return null;
-  }
+  if (typeof window === "undefined") return null;
 
-  const tokenKeys = [
+  const keys = [
     "token",
     "accessToken",
     "access_token",
@@ -194,13 +205,11 @@ function getToken(): string | null {
     "jwt",
   ];
 
-  for (const key of tokenKeys) {
+  for (const key of keys) {
     const value = localStorage.getItem(key);
 
     if (value?.trim()) {
-      return value
-        .trim()
-        .replace(/^Bearer\s+/i, "");
+      return value.trim().replace(/^Bearer\s+/i, "");
     }
   }
 
@@ -214,27 +223,14 @@ function getToken(): string | null {
 async function parseResponse(response: Response): Promise<any> {
   const rawText = await response.text();
 
-  if (!rawText.trim()) {
-    return null;
-  }
+  if (!rawText.trim()) return null;
 
   try {
     return JSON.parse(rawText);
   } catch {
-    console.error("Response server bukan JSON:", {
-      status: response.status,
-      body: rawText,
-    });
-
-    if (!response.ok) {
-      return {
-        message: rawText.slice(0, 500),
-      };
-    }
-
-    throw new Error(
-      `Server mengembalikan response tidak valid (${response.status}).`
-    );
+    return {
+      message: rawText.slice(0, 1000),
+    };
   }
 }
 
@@ -254,6 +250,11 @@ async function request<T>(
     );
   }
 
+  const normalizedEndpoint = endpoint.startsWith("/")
+    ? endpoint
+    : `/${endpoint}`;
+
+  const url = `${API_URL}/api${normalizedEndpoint}`;
   const headers = new Headers(options.headers);
 
   headers.set("Accept", "application/json");
@@ -272,12 +273,6 @@ async function request<T>(
     headers.set("Content-Type", "application/json");
   }
 
-  const normalizedEndpoint = endpoint.startsWith("/")
-    ? endpoint
-    : `/${endpoint}`;
-
-  const url = `${API_URL}/api${normalizedEndpoint}`;
-
   let response: Response;
 
   try {
@@ -287,10 +282,10 @@ async function request<T>(
       cache: "no-store",
     });
   } catch (error) {
-    console.error("User service network error:", error);
+    console.error("USER API NETWORK ERROR:", error);
 
     throw new Error(
-      `Tidak dapat terhubung ke server (${API_URL}). Pastikan backend berjalan dan alamat API benar.`
+      `Tidak dapat terhubung ke server ${API_URL}. Periksa koneksi backend dan konfigurasi API.`
     );
   }
 
@@ -301,6 +296,7 @@ async function request<T>(
       url,
       method: options.method || "GET",
       status: response.status,
+      statusText: response.statusText,
       response: result,
     });
 
@@ -308,15 +304,17 @@ async function request<T>(
       result?.message ||
       result?.error ||
       result?.detail ||
-      (response.status === 401
-        ? "Sesi login tidak valid. Silakan login kembali."
-        : response.status === 403
-          ? "Akses ditolak. Anda tidak memiliki izin."
-          : response.status === 404
-            ? "Endpoint pengguna tidak ditemukan."
-            : response.status === 409
-              ? "Data pengguna sudah digunakan."
-              : `Request gagal (${response.status})`);
+      (response.status === 400
+        ? "Data pengguna tidak valid."
+        : response.status === 401
+          ? "Sesi login tidak valid. Silakan login kembali."
+          : response.status === 403
+            ? "Anda tidak memiliki izin untuk melakukan tindakan ini."
+            : response.status === 404
+              ? "Data pengguna atau endpoint tidak ditemukan."
+              : response.status === 409
+                ? "Data pengguna sudah digunakan."
+                : `Request gagal (${response.status}).`);
 
     throw new Error(message);
   }
@@ -384,8 +382,6 @@ export async function getUserById(
    POST /api/users
 ========================================================= */
 
-
-
 export async function createUser(
   payload: CreateUserPayload
 ): Promise<UserMutationResponse> {
@@ -395,8 +391,9 @@ export async function createUser(
     email: payload.email.trim(),
     namaLengkap: payload.namaLengkap.trim(),
     kataSandi: payload.kataSandi,
-    peranId: payload.peranId,
-    sekolahId: payload.sekolahId || null,
+    peranId: payload.peranId ?? null,
+    sekolahId: payload.sekolahId ?? null,
+    yayasanId: payload.yayasanId ?? null,
 
     nipd: payload.nipd?.trim() || null,
     nip: payload.nip?.trim() || null,
@@ -432,19 +429,38 @@ export async function createUser(
    PUT /api/users/:id
 ========================================================= */
 
+
+
 export async function updateUser(
   id: string,
   payload: UpdateUserPayload
 ): Promise<UserMutationResponse> {
-  if (!id) {
+  if (!id?.trim()) {
     throw new Error("ID pengguna tidak ditemukan.");
+  }
+
+  const cleanPayload: Record<string, unknown> = {};
+
+  for (const [key, value] of Object.entries(payload)) {
+    if (value === undefined) continue;
+
+    cleanPayload[key] =
+      typeof value === "string" ? value.trim() : value;
+  }
+
+  for (const key of ["email", "namaPengguna", "namaLengkap"]) {
+    const value = cleanPayload[key];
+
+    if (typeof value !== "string" || !value) {
+      throw new Error(`${key} wajib diisi.`);
+    }
   }
 
   return request<UserMutationResponse>(
     `/users/${encodeURIComponent(id)}`,
     {
       method: "PUT",
-      body: JSON.stringify(payload),
+      body: JSON.stringify(cleanPayload),
     }
   );
 }
@@ -457,7 +473,7 @@ export async function updateUser(
 export async function deleteUser(
   id: string
 ): Promise<UserMutationResponse> {
-  if (!id) {
+  if (!id?.trim()) {
     throw new Error("ID pengguna tidak ditemukan.");
   }
 
@@ -478,7 +494,7 @@ export async function updateUserStatus(
   id: string,
   status: string
 ): Promise<UserMutationResponse> {
-  if (!id) {
+  if (!id?.trim()) {
     throw new Error("ID pengguna tidak ditemukan.");
   }
 
@@ -490,7 +506,7 @@ export async function updateUserStatus(
     `/users/${encodeURIComponent(id)}`,
     {
       method: "PUT",
-      body: JSON.stringify({ status }),
+      body: JSON.stringify({ status: status.trim() }),
     }
   );
 }
@@ -532,7 +548,7 @@ export async function getGuruById(id: string) {
 export async function resetUserPassword(
   id: string
 ): Promise<UserMutationResponse> {
-  if (!id) {
+  if (!id?.trim()) {
     throw new Error("ID pengguna tidak ditemukan.");
   }
 

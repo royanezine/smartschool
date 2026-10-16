@@ -17,6 +17,7 @@ import {
   Package,
   Settings,
   User,
+   Wallet,
 } from "lucide-react";
 
 export const guruSidebarConfig = {
@@ -100,11 +101,20 @@ export const guruSidebarConfig = {
     },
 
     {
+      type: "item",
+      key: "input nilai",
+      label: "Input Nilai",
+      icon: FileBarChart,
+      path: "/guru/nilaiUjian",
+      permission: "akademik.view",
+    },
+
+    {
       type: "dropdown",
-      key: "nilai",
-      label: "Nilai",
+      key: "rapor",
+      label: "Rapor",
       icon: Award,
-      path: "/guru/nilai",
+      path: "/guru/nilai/rapor",
       permission: "akademik.view",
 
       children: [
@@ -118,14 +128,6 @@ export const guruSidebarConfig = {
         },
         {
           type: "item",
-          key: "nilai-input",
-          label: "Input Nilai",
-          icon: ClipboardList,
-          path: "/guru/nilaiUjian",
-          permission: "akademik.view",
-        },
-        {
-          type: "item",
           key: "nilai-finalisasi",
           label: "Finalisasi",
           icon: FileCheck2,
@@ -135,14 +137,7 @@ export const guruSidebarConfig = {
       ],
     },
 
-    {
-      type: "item",
-      key: "rapor",
-      label: "Rapor",
-      icon: FileBarChart,
-      path: "/guru/rapor",
-      permission: "akademik.view",
-    },
+    
 
     {
       type: "item",
@@ -157,8 +152,8 @@ export const guruSidebarConfig = {
       type: "item",
       key: "kalender",
       label: "Kalender",
-      icon: CalendarRange,
-      path: "/guru/kalender",
+      icon: CalendarRange,  
+      path: "/guru/jadwal/kalender",
       permission: "akademik.view",
     },
 
@@ -185,7 +180,7 @@ export const guruSidebarConfig = {
       key: "izin-saya",
       label: "Izin Saya",
       icon: ShieldCheck,
-      path: "/guru/izin-saya",
+      path: "/guru/jadwal/izin",
       permission: "akademik.view",
     },
 
@@ -213,6 +208,24 @@ export const guruSidebarConfig = {
       label: "Sarpras",
       icon: Package,
       path: "/guru/sarpras",
+      permission: "akademik.view",
+    },
+
+        // =====================================================
+    // KEUANGAN
+    // =====================================================
+    {
+      type: "header",
+      key: "keuangan-header",
+      label: "Keuangan",
+    },
+
+    {
+      type: "item",
+      key: "slip-gaji",
+      label: "Slip Gaji",
+      icon: Wallet,
+      path: "/guru/slip-gaji",
       permission: "akademik.view",
     },
 

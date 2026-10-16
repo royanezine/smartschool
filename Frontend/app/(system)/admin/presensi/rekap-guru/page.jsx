@@ -1,44 +1,228 @@
+
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-
-import Sidebar from "@/app/components/Sidebar";
-import Header from "@/app/components/Header";
-
 import {
   Search,
   RefreshCw,
   CalendarDays,
   Users,
   Clock3,
-  CircleAlert,
+  BriefcaseBusiness,
   ChevronLeft,
   ChevronRight,
   Eye,
   X,
-  Database,
-  UserCheck,
-  Loader2,
+  AlertCircle,
+  CheckCircle2,
+  LoaderCircle,
+  Filter,
 } from "lucide-react";
 
-/* =========================================================
-   API
-========================================================= */
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
 
-const RAW_API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+const API_BASE = (
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
+).replace(/\/+$/, "");
 
-const API_URL = RAW_API_URL.replace(/\/+$/, "");
+const PAGE_SIZE = 10;
 
-const GURU_ENDPOINT = `${API_URL}/api/users/`;
+function getToken() {
+  if (typeof window === "undefined") return "";
 
-/* =========================================================
-   HELPER
-========================================================= */
+  for (const key of [
+    "token",
+    "accessToken",
+    "access_token",
+    "authToken",
+    "jwt",
+  ]) {
+    const value = window.localStorage.getItem(key);
+    if (value) return value;
+  }
 
-function getTodayDate() {
+  return "";
+}
+
+async function apiRequest(path) {
+  const token = getToken();
+  const url = `${API_BASE}${path}`;
+
+  const response = await fetch(url, {
+    method: "GET",
+    headers: {
+      Accept: "application/json",
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    cache: "no-store",
+  });
+
+  const raw = await response.text();
+  let body;
+
+  try {
+    body = raw ? JSON.parse(raw) : {};
+  } catch {
+    body = { message: raw };
+  }
+
+  if (!response.ok) {
+    const serverMessage =
+      body?.message ||
+      body?.error ||
+      (typeof body === "string" ? body : "");
+
+    if (
+      response.status === 404 &&
+      typeof serverMessage === "string" &&
+      serverMessage.toLowerCase().includes("cannot get")
+    ) {
+      throw new Error(
+        `Endpoint tidak ditemukan: ${url}. Periksa route backend.`
+      );
+    }
+
+    throw new Error(
+      serverMessage || `Request gagal (${response.status}): ${url}`
+    );
+  }
+
+  if (typeof body === "string" && body.trim().startsWith("<")) {
+    throw new Error(
+      `Server mengembalikan HTML, bukan JSON: ${url}. Periksa URL API.`
+    );
+  }
+
+  return body;
+}
+
+function unwrapList(response) {
+  if (Array.isArray(response)) return response;
+
+  const candidates = [
+    response?.data,
+    response?.data?.data,
+    response?.data?.users,
+    response?.data?.pengguna,
+    response?.data?.items,
+    response?.data?.results,
+    response?.data?.shiftKerja,
+    response?.users,
+    response?.pengguna,
+    response?.results,
+    response?.items,
+    response?.shiftKerja,
+  ];
+
+  return candidates.find(Array.isArray) || [];
+}
+
+function getUserId(user) {
+  return (
+    user?.id ??
+    user?.penggunaId ??
+    user?.userId ??
+    user?.pengguna?.id ??
+    user?.user?.id ??
+    null
+  );
+}
+
+function getUserName(user) {
+  return (
+    user?.namaLengkap ||
+    user?.nama ||
+    user?.name ||
+    user?.pengguna?.namaLengkap ||
+    user?.user?.namaLengkap ||
+    user?.email ||
+    "Nama guru belum tersedia"
+  );
+}
+
+function getUserEmail(user) {
+  return (
+    user?.email ||
+    user?.pengguna?.email ||
+    user?.user?.email ||
+    "-"
+  );
+}
+
+function getUserNip(user) {
+  return (
+    user?.nip ||
+    user?.NIP ||
+    user?.nomorIndukPegawai ||
+    user?.pengguna?.nip ||
+    "-"
+  );
+}
+
+function normalizeShift(shift) {
+  return {
+    ...shift,
+    id: shift?.id ?? shift?.shiftKerjaId ?? null,
+    nama: shift?.nama ?? shift?.namaShift ?? "Shift tanpa nama",
+    jamMasuk:
+      shift?.jamMasuk ??
+      shift?.jam_masuk ??
+      null,
+    jamKeluar:
+      shift?.jamKeluar ??
+      shift?.jam_keluar ??
+      null,
+    toleransiTerlambatMenit:
+      shift?.toleransiTerlambatMenit ?? null,
+  };
+}
+
+function isActiveShift(shift) {
+  if (shift?.dihapusPada || shift?.deletedAt) return false;
+
+  if (typeof shift?.status === "boolean") {
+    return shift.status;
+  }
+
+  if (typeof shift?.status === "string") {
+    return ![
+      "nonaktif",
+      "tidak aktif",
+      "inactive",
+      "deleted",
+    ].includes(shift.status.toLowerCase());
+  }
+
+  return true;
+}
+
+function formatTime(value) {
+  if (!value) return "-";
+
+  const match = String(value).match(/(\d{1,2}):(\d{2})/);
+
+  if (!match) return String(value);
+
+  return `${match[1].padStart(2, "0")}:${match[2]}`;
+}
+
+function formatDate(value) {
+  if (!value) return "-";
+
+  const date = new Date(`${value}T00:00:00`);
+
+  if (Number.isNaN(date.getTime())) return String(value);
+
+  return new Intl.DateTimeFormat("id-ID", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  }).format(date);
+}
+
+function todayLocal() {
   const now = new Date();
-
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, "0");
   const day = String(now.getDate()).padStart(2, "0");
@@ -46,2028 +230,757 @@ function getTodayDate() {
   return `${year}-${month}-${day}`;
 }
 
-function formatTanggalIndonesia(tanggal) {
-  if (!tanggal) return "-";
-
-  const date = new Date(`${tanggal}T00:00:00`);
-
-  if (Number.isNaN(date.getTime())) {
-    return tanggal;
-  }
-
-  return date.toLocaleDateString("id-ID", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  });
-}
-
-function getToken() {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
+function StatCard({ icon: Icon, label, value, detail }) {
   return (
-    localStorage.getItem("token") ||
-    localStorage.getItem("accessToken") ||
-    localStorage.getItem("access_token") ||
-    localStorage.getItem("authToken") ||
-    localStorage.getItem("jwt")
+    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+            {label}
+          </p>
+          <p className="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
+            {value}
+          </p>
+          <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+            {detail}
+          </p>
+        </div>
+
+        <div className="rounded-lg bg-blue-50 p-3 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300">
+          <Icon size={21} />
+        </div>
+      </div>
+    </div>
   );
 }
 
-/* =========================================================
-   NORMALIZE RESPONSE USER
-========================================================= */
-
-function extractUserData(result) {
-  if (Array.isArray(result)) {
-    return result;
-  }
-
-  if (Array.isArray(result?.data)) {
-    return result.data;
-  }
-
-  if (Array.isArray(result?.data?.data)) {
-    return result.data.data;
-  }
-
-  if (Array.isArray(result?.rows)) {
-    return result.rows;
-  }
-
-  if (Array.isArray(result?.results)) {
-    return result.results;
-  }
-
-  if (Array.isArray(result?.users)) {
-    return result.users;
-  }
-
-  return [];
-}
-
-/* =========================================================
-   NORMALIZE GURU
-========================================================= */
-
-function normalizeGuru(item, index) {
-  const pengguna = item?.pengguna || item?.user || {};
-
-  const id =
-    item?.id ??
-    pengguna?.id ??
-    `guru-${index}`;
-
-  const nama =
-    item?.namaLengkap ??
-    item?.nama ??
-    pengguna?.namaLengkap ??
-    pengguna?.nama ??
-    "-";
-
-  const nip =
-    item?.nip ??
-    pengguna?.nip ??
-    "-";
-
-  const jabatan =
-    item?.jabatan ??
-    pengguna?.jabatan ??
-    "Guru";
-
-  return {
-    id,
-    nama,
-    nip,
-    jabatan,
-
-    status: "belum_tersedia",
-    jamMasuk: "-",
-    jamPulang: "-",
-
-    terlambat: 0,
-    izin: 0,
-    sakit: 0,
-    alpha: 0,
-
-    original: item,
-  };
-}
-
-/* =========================================================
-   STATUS BADGE
-========================================================= */
-
-function StatusBadge() {
+function EmptyState({ title, description }) {
   return (
-    <span
-      className="
-        inline-flex
-        items-center
-        gap-1.5
-        rounded-full
-        border
-        border-theme-border
-        bg-theme-card-soft
-        px-2.5
-        py-1
-        text-[11px]
-        font-semibold
-        text-theme-text-muted
-        whitespace-nowrap
-      "
-    >
-      <CircleAlert size={12} />
-      Belum tersedia
-    </span>
+    <div className="flex flex-col items-center justify-center px-6 py-14 text-center">
+      <div className="mb-4 rounded-xl bg-slate-100 p-4 text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+        <Users size={26} />
+      </div>
+
+      <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+        {title}
+      </h3>
+
+      <p className="mt-2 max-w-md text-sm leading-6 text-slate-500 dark:text-slate-400">
+        {description}
+      </p>
+    </div>
   );
 }
-
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function RekapGuruPage() {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [teachers, setTeachers] = useState([]);
+  const [shifts, setShifts] = useState([]);
 
-  const [tanggal, setTanggal] = useState(() =>
-    getTodayDate()
-  );
-
-  const [data, setData] = useState([]);
-
-  const [loading, setLoading] = useState(false);
-
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState("");
 
   const [search, setSearch] = useState("");
-
-  const [selectedGuru, setSelectedGuru] = useState(null);
-
+  const [selectedShift, setSelectedShift] = useState("semua");
+  const [selectedDate, setSelectedDate] = useState(todayLocal());
   const [page, setPage] = useState(1);
+  const [selectedTeacher, setSelectedTeacher] = useState(null);
 
-  const [limit, setLimit] = useState(10);
-
-  /* =======================================================
-     FETCH GURU
-  ======================================================= */
-
-  const fetchGuru = useCallback(
-    async (showLoading = true) => {
-      const token = getToken();
-
-      if (!token) {
-        setError(
-          "Sesi login tidak ditemukan. Silakan login kembali."
-        );
-
-        return;
-      }
-
-      if (showLoading) {
-        setLoading(true);
-      }
-
-      setError("");
-
-      try {
-        const url = `${GURU_ENDPOINT}?role=guru`;
-
-        const response = await fetch(url, {
-          method: "GET",
-
-          headers: {
-            Authorization: `Bearer ${token}`,
-            Accept: "application/json",
-          },
-
-          cache: "no-store",
-        });
-
-        const text = await response.text();
-
-        let result = null;
-
-        try {
-          result = text ? JSON.parse(text) : null;
-        } catch {
-          console.error(
-            "Response mentah dari server:",
-            text
-          );
-
-          throw new Error(
-            `Response dari server bukan JSON yang valid: ${text.slice(
-              0,
-              300
-            )}`
-          );
-        }
-
-        if (!response.ok) {
-          throw new Error(
-            result?.message ||
-              result?.error ||
-              result?.detail ||
-              `Gagal mengambil data guru (${response.status})`
-          );
-        }
-
-        const rawData = extractUserData(result);
-
-        const normalized = rawData.map(
-          normalizeGuru
-        );
-
-        setData(normalized);
-        setPage(1);
-      } catch (err) {
-        console.error(
-          "ERROR FETCH DATA GURU:",
-          err
-        );
-
-        setData([]);
-
-        setError(
-          err?.message ||
-            "Gagal mengambil data guru."
-        );
-      } finally {
-        setLoading(false);
-      }
-    },
-    []
-  );
-
-  useEffect(() => {
-    fetchGuru();
-  }, [fetchGuru]);
-
-  /* =======================================================
-     FILTER
-  ======================================================= */
-
-  const filteredData = useMemo(() => {
-    const keyword = search
-      .toLowerCase()
-      .trim();
-
-    if (!keyword) {
-      return data;
+  const loadData = useCallback(async (isRefresh = false) => {
+    if (isRefresh) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
     }
 
-    return data.filter((guru) => {
-      return (
-        guru.nama
-          .toLowerCase()
-          .includes(keyword) ||
-        guru.nip
-          .toLowerCase()
-          .includes(keyword) ||
-        guru.jabatan
-          .toLowerCase()
-          .includes(keyword)
-      );
-    });
-  }, [data, search]);
+    setError("");
 
-  /* =======================================================
-     PAGINATION
-  ======================================================= */
+    try {
+      const [usersResponse, shiftsResponse] = await Promise.all([
+        apiRequest("/api/users?limit=100&role=guru"),
+        apiRequest("/api/shift-kerja?page=1&limit=100"),
+      ]);
+
+      const rawUsers = unwrapList(usersResponse);
+      const rawShifts = unwrapList(shiftsResponse);
+
+      const normalizedShifts = rawShifts
+        .map(normalizeShift)
+        .filter((shift) => shift.id != null);
+
+      const activeShifts = normalizedShifts.filter(isActiveShift);
+
+const normalizedTeachers = rawUsers.map((user, index) => {
+  const userId = getUserId(user);
+
+  // Field dari controller pengguna BE.
+  const shiftKerja = String(user?.shiftKerja || "")
+    .trim()
+    .toLowerCase();
+
+  // Cocokkan nilai shift pengguna dengan master shift.
+  const matchedShift = activeShifts.find((shift) => {
+    const nama = String(shift?.nama || "").trim().toLowerCase();
+    const kode = String(shift?.kode || "").trim().toLowerCase();
+
+    return nama === shiftKerja || kode === shiftKerja;
+  });
+
+  return {
+    id: userId != null ? String(userId) : `teacher-${index}`,
+    nama: getUserName(user),
+    email: getUserEmail(user),
+    nip: getUserNip(user),
+    shiftKerja,
+    shifts: matchedShift ? [matchedShift] : [],
+  };
+});
+
+      setTeachers(normalizedTeachers);
+      setShifts(activeShifts);
+      setPage(1);
+    } catch (err) {
+      console.error("Gagal memuat rekap guru:", err);
+
+      setError(
+        err?.message ||
+          "Data guru dan shift kerja gagal dimuat. Periksa endpoint backend."
+      );
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  const filteredTeachers = useMemo(() => {
+    const keyword = search.trim().toLowerCase();
+
+    return teachers.filter((teacher) => {
+      const matchesSearch =
+        !keyword ||
+        teacher.nama.toLowerCase().includes(keyword) ||
+        teacher.email.toLowerCase().includes(keyword) ||
+        teacher.nip.toLowerCase().includes(keyword);
+
+      const matchesShift =
+        selectedShift === "semua" ||
+        teacher.shifts.some(
+          (shift) => String(shift.id) === String(selectedShift)
+        );
+
+      return matchesSearch && matchesShift;
+    });
+  }, [teachers, search, selectedShift]);
 
   const totalPages = Math.max(
     1,
-    Math.ceil(
-      filteredData.length / limit
-    )
+    Math.ceil(filteredTeachers.length / PAGE_SIZE)
   );
 
-  const paginatedData = useMemo(() => {
-    const start =
-      (page - 1) * limit;
+  const safePage = Math.min(page, totalPages);
 
-    const end = start + limit;
+  const paginatedTeachers = useMemo(() => {
+    const start = (safePage - 1) * PAGE_SIZE;
+    return filteredTeachers.slice(start, start + PAGE_SIZE);
+  }, [filteredTeachers, safePage]);
 
-    return filteredData.slice(
-      start,
-      end
-    );
-  }, [
-    filteredData,
-    page,
-    limit,
-  ]);
+  const teachersWithShift = useMemo(
+    () => teachers.filter((teacher) => teacher.shifts.length > 0).length,
+    [teachers]
+  );
 
-  useEffect(() => {
-    if (page > totalPages) {
-      setPage(totalPages);
-    }
-  }, [
-    page,
-    totalPages,
-  ]);
+  const teachersWithoutShift = teachers.length - teachersWithShift;
 
-  /* =======================================================
-     STATISTICS
-  ======================================================= */
-
-  const statistics = useMemo(() => {
-    return {
-      total: data.length,
-      hadir: 0,
-      terlambat: 0,
-      izin: 0,
-      alpha: 0,
-    };
-  }, [data]);
-
-  /* =======================================================
-     HANDLER
-  ======================================================= */
-
-  const handleTanggalChange = (
-    event
-  ) => {
-    setTanggal(
-      event.target.value
-    );
-
+  function changeSearch(value) {
+    setSearch(value);
     setPage(1);
-  };
+  }
 
-  const handleRefresh = () => {
-    fetchGuru(true);
-  };
-
-  /* =======================================================
-     RENDER
-  ======================================================= */
+  function changeShift(value) {
+    setSelectedShift(value);
+    setPage(1);
+  }
 
   return (
-    <div
-      className="
-        flex
-        h-screen
-        w-full
-        overflow-hidden
-        theme-page
-      "
-    >
-      {/* =====================================================
-          SIDEBAR
-      ===================================================== */}
+    <div className="flex h-dvh overflow-hidden bg-slate-50 dark:bg-slate-950">
+      {/* SIDEBAR */}
+      <aside className="relative z-30 h-full shrink-0">
+        <Sidebar role="admin_sekolah" />
+      </aside>
 
-      <Sidebar
-        role="admin"
-        activeMenu="rekap-guru"
-        isOpen={sidebarOpen}
-        onToggle={() =>
-          setSidebarOpen(!sidebarOpen)
-        }
-      />
+      {/* AREA UTAMA */}
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        {/* HEADER TETAP DI ATAS */}
+        <header className="sticky top-0 z-40 shrink-0 border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+          <Header />
+        </header>
 
-      {/* =====================================================
-          MAIN
-      ===================================================== */}
-
-      <div
-        className="
-          flex
-          flex-1
-          min-w-0
-          h-full
-          flex-col
-          overflow-hidden
-          theme-page
-        "
-      >
-        <Header
-          title="Rekap Absensi Guru"
-          onMenuClick={() =>
-            setSidebarOpen(!sidebarOpen)
-          }
-        />
-
-        <main
-          className="
-            flex-1
-            overflow-y-auto
-            theme-page
-          "
-        >
-          <div
-            className="
-              space-y-5
-              p-4
-              sm:space-y-6
-              sm:p-6
-              lg:p-8
-            "
-          >
-            {/* =================================================
-                HEADER
-            ================================================= */}
-
-            <div
-              className="
-                flex
-                flex-col
-                gap-4
-                lg:flex-row
-                lg:items-center
-                lg:justify-between
-              "
-            >
-              <div className="flex items-center gap-3">
-                <div
-                  className="
-                    flex
-                    h-11
-                    w-11
-                    shrink-0
-                    items-center
-                    justify-center
-                    rounded-xl
-                    bg-[var(--school-primary,#155DFC)]
-                    text-white
-                    shadow-lg
-                    shadow-black/10
-                  "
-                >
-                  <Users size={20} />
+        {/* HANYA BAGIAN KONTEN INI YANG SCROLL */}
+        <main className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain">
+          <div className="mx-auto w-full max-w-[1600px] space-y-6 px-4 py-6 sm:px-6 lg:px-8">
+            {/* JUDUL HALAMAN */}
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <div className="mb-2 flex flex-wrap items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                  <span>Manajemen Guru</span>
+                  <span>/</span>
+                  <span className="text-blue-700 dark:text-blue-400">
+                    Rekap Guru
+                  </span>
                 </div>
 
-                <div className="min-w-0">
-                  <h1
-                    className="
-                      text-xl
-                      font-bold
-                      sm:text-2xl
-                      theme-text
-                    "
-                  >
-                    Rekap Absensi Guru
-                  </h1>
+                <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
+                  Rekap Guru
+                </h1>
 
-                  <p
-                    className="
-                      mt-1
-                      text-xs
-                      sm:text-sm
-                      theme-text-muted
-                    "
-                  >
-                    Daftar guru berdasarkan data
-                    pengguna yang tersedia.
-                  </p>
-                </div>
+                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">
+                  Lihat data guru dan pembagian shift kerja berdasarkan
+                  data yang tersedia di backend.
+                </p>
               </div>
 
               <button
                 type="button"
-                onClick={handleRefresh}
-                disabled={loading}
-                className="
-                  inline-flex
-                  items-center
-                  justify-center
-                  gap-2
-                  rounded-xl
-                  border
-                  border-theme-border
-                  bg-theme-card
-                  px-4
-                  py-2.5
-                  text-sm
-                  font-semibold
-                  theme-text-secondary
-                  transition
-                  hover:bg-theme-card-soft
-                  disabled:cursor-not-allowed
-                  disabled:opacity-60
-                "
+                onClick={() => loadData(true)}
+                disabled={loading || refreshing}
+                className="inline-flex h-11 items-center justify-center gap-2 self-start rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 sm:self-auto"
               >
-                <RefreshCw
-                  size={15}
-                  className={
-                    loading
-                      ? "animate-spin"
-                      : ""
-                  }
-                />
-
-                Refresh
+                {refreshing ? (
+                  <LoaderCircle size={17} className="animate-spin" />
+                ) : (
+                  <RefreshCw size={17} />
+                )}
+                Perbarui data
               </button>
             </div>
 
-            {/* =================================================
-                INFO
-            ================================================= */}
+            {/* TANGGAL REKAP */}
+            <div className="flex flex-col gap-3 rounded-xl border border-blue-100 bg-blue-50/70 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-blue-900/60 dark:bg-blue-950/30">
+              <div className="flex items-start gap-3">
+                <div className="mt-0.5 rounded-lg bg-white p-2 text-blue-700 dark:bg-slate-900 dark:text-blue-300">
+                  <CalendarDays size={19} />
+                </div>
 
-            <div
-              className="
-                flex
-                items-start
-                gap-3
-                rounded-xl
-                border
-                border-theme-border
-                p-4
-                theme-info
-              "
-            >
-              <CircleAlert
-                size={18}
-                className="mt-0.5 shrink-0"
+                <div>
+                  <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                    Tanggal rekap
+                  </p>
+                  <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                    {formatDate(selectedDate)}
+                  </p>
+                </div>
+              </div>
+
+              <div className="flex flex-wrap items-center gap-2">
+                <label
+                  htmlFor="rekap-date"
+                  className="text-sm font-medium text-slate-600 dark:text-slate-300"
+                >
+                  Pilih tanggal
+                </label>
+
+                <input
+                  id="rekap-date"
+                  type="date"
+                  value={selectedDate}
+                  onChange={(event) =>
+                    setSelectedDate(event.target.value)
+                  }
+                  className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:focus:ring-blue-950"
+                />
+              </div>
+            </div>
+
+            {/* INFORMASI KETERSEDIAAN REKAP */}
+            <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/60 dark:bg-amber-950/20">
+              <AlertCircle
+                size={20}
+                className="mt-0.5 shrink-0 text-amber-700 dark:text-amber-400"
               />
 
               <div>
-                <p className="text-sm font-semibold">
-                  Data absensi guru belum tersedia
-                  dari backend
+                <p className="text-sm font-semibold text-amber-900 dark:text-amber-300">
+                  Rekap kehadiran belum tersedia dari endpoint yang
+                  terkonfirmasi
                 </p>
-
-                <p className="mt-1 text-xs leading-5 opacity-90">
-                  Halaman ini menggunakan data guru
-                  dari endpoint pengguna yang tersedia.
-                  Status, jam masuk, dan jam pulang belum
-                  ditampilkan karena backend saat ini
-                  belum menyediakan endpoint rekap
-                  absensi guru.
+                <p className="mt-1 text-sm leading-6 text-amber-800 dark:text-amber-200/80">
+                  Halaman ini menampilkan data guru dan shift yang berhasil
+                  diambil. Status hadir, terlambat, dan jam check-in tidak
+                  dibuat sendiri karena endpoint rekap seluruh guru
+                  berdasarkan tanggal belum terkonfirmasi.
                 </p>
               </div>
             </div>
 
-            {/* =================================================
-                ERROR
-            ================================================= */}
+            {/* STATISTIK */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              <StatCard
+                icon={Users}
+                label="Total guru"
+                value={loading ? "—" : teachers.length}
+                detail="Data dari endpoint pengguna"
+              />
 
+              <StatCard
+                icon={CheckCircle2}
+                label="Guru dengan shift"
+                value={loading ? "—" : teachersWithShift}
+                detail="Berdasarkan relasi shift dari backend"
+              />
+
+              <StatCard
+                icon={Clock3}
+                label="Guru tanpa shift terdeteksi"
+                value={loading ? "—" : teachersWithoutShift}
+                detail="Relasi shift tidak ditemukan pada respons API"
+              />
+            </div>
+
+            {/* ERROR */}
             {error && (
-              <div
-                className="
-                  flex
-                  items-start
-                  gap-3
-                  rounded-xl
-                  border
-                  border-theme-border
-                  p-4
-                  theme-danger
-                "
-              >
-                <CircleAlert
-                  size={19}
-                  className="mt-0.5 shrink-0"
+              <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 dark:border-red-900/60 dark:bg-red-950/20">
+                <AlertCircle
+                  size={20}
+                  className="mt-0.5 shrink-0 text-red-600 dark:text-red-400"
                 />
 
-                <div className="flex-1">
-                  <p className="text-sm font-semibold">
-                    Terjadi kesalahan
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-red-800 dark:text-red-300">
+                    Gagal memuat data
                   </p>
 
-                  <p className="mt-0.5 text-sm">
+                  <p className="mt-1 break-words text-sm text-red-700 dark:text-red-300/80">
                     {error}
                   </p>
-                </div>
 
-                <button
-                  type="button"
-                  onClick={() =>
-                    setError("")
-                  }
-                  className="
-                    opacity-70
-                    transition
-                    hover:opacity-100
-                  "
-                >
-                  <X size={18} />
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => loadData(true)}
+                    className="mt-3 text-sm font-semibold text-red-800 underline underline-offset-4 dark:text-red-300"
+                  >
+                    Coba lagi
+                  </button>
+                </div>
               </div>
             )}
 
-            {/* =================================================
-                FILTER TANGGAL
-            ================================================= */}
+            {/* TABEL GURU */}
+            <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
+              <div className="border-b border-slate-200 p-5 dark:border-slate-800">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                  <div>
+                    <h2 className="text-base font-bold text-slate-900 dark:text-white">
+                      Data guru dan shift
+                    </h2>
 
-            <section
-              className="
-                overflow-hidden
-                rounded-2xl
-                border
-                border-theme-border
-                shadow-sm
-                theme-card
-              "
-            >
-              <div className="p-4 sm:p-5 lg:p-6">
-                <div
-                  className="
-                    flex
-                    flex-col
-                    gap-4
-                    lg:flex-row
-                    lg:items-end
-                  "
-                >
-                  <div className="w-full lg:max-w-xs">
-                    <label
-                      htmlFor="tanggal"
-                      className="
-                        mb-2
-                        block
-                        text-xs
-                        font-semibold
-                        theme-text-secondary
-                      "
-                    >
-                      Tanggal Absensi
-                    </label>
+                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                      Informasi penugasan shift yang berhasil dibaca
+                      dari API.
+                    </p>
+                  </div>
 
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <div className="relative">
-                      <CalendarDays
-                        size={16}
-                        className="
-                          pointer-events-none
-                          absolute
-                          left-3
-                          top-1/2
-                          -translate-y-1/2
-                          theme-text-muted
-                        "
+                      <Search
+                        size={17}
+                        className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
                       />
 
                       <input
-                        id="tanggal"
-                        type="date"
-                        value={tanggal}
-                        onChange={
-                          handleTanggalChange
+                        type="text"
+                        value={search}
+                        onChange={(event) =>
+                          changeSearch(event.target.value)
                         }
-                        className="
-                          theme-input
-                          h-11
-                          w-full
-                          rounded-xl
-                          border
-                          pl-9
-                          pr-3
-                          text-sm
-                          font-medium
-                          outline-none
-                          transition
-                          focus:border-[var(--school-primary,#155DFC)]
-                          focus:ring-2
-                          focus:ring-[var(--school-primary,#155DFC)]/20
-                        "
+                        placeholder="Cari nama, email, atau NIP..."
+                        className="h-11 w-full rounded-lg border border-slate-200 bg-white pl-10 pr-3 text-sm text-slate-700 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:focus:ring-blue-950 sm:w-72"
                       />
                     </div>
-                  </div>
 
-                  <div
-                    className="
-                      pb-2
-                      text-xs
-                      sm:text-sm
-                      theme-text-muted
-                    "
-                  >
-                    Tanggal yang dipilih:{" "}
-                    <span
-                      className="
-                        font-semibold
-                        theme-text
-                      "
-                    >
-                      {formatTanggalIndonesia(
-                        tanggal
-                      )}
-                    </span>
+                    <div className="relative">
+                      <Filter
+                        size={16}
+                        className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                      />
+
+                      <select
+                        value={selectedShift}
+                        onChange={(event) =>
+                          changeShift(event.target.value)
+                        }
+                        className="h-11 w-full appearance-none rounded-lg border border-slate-200 bg-white pl-9 pr-8 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-200 dark:focus:ring-blue-950 sm:w-56"
+                      >
+                        <option value="semua">Semua shift</option>
+
+                        {shifts.map((shift) => (
+                          <option
+                            key={shift.id}
+                            value={String(shift.id)}
+                          >
+                            {shift.nama}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
                 </div>
               </div>
-            </section>
 
-            {/* =================================================
-                STATISTICS
-            ================================================= */}
+              {loading ? (
+                <div className="flex min-h-64 flex-col items-center justify-center gap-3">
+                  <LoaderCircle
+                    size={28}
+                    className="animate-spin text-blue-600"
+                  />
 
-            <div
-              className="
-                grid
-                grid-cols-2
-                gap-3
-                lg:grid-cols-5
-                sm:gap-4
-              "
-            >
-              <StatCard
-                title="Total Guru"
-                value={statistics.total}
-                description="Data guru"
-                icon={Users}
-                iconClass="text-[var(--school-primary,#155DFC)]"
-                loading={loading}
-              />
-
-              <StatCard
-                title="Hadir"
-                value="-"
-                description="Belum tersedia"
-                icon={UserCheck}
-                iconClass="text-emerald-500"
-                loading={false}
-              />
-
-              <StatCard
-                title="Terlambat"
-                value="-"
-                description="Belum tersedia"
-                icon={Clock3}
-                iconClass="text-amber-500"
-                loading={false}
-              />
-
-              <StatCard
-                title="Izin"
-                value="-"
-                description="Belum tersedia"
-                icon={CircleAlert}
-                iconClass="text-sky-500"
-                loading={false}
-              />
-
-              <StatCard
-                title="Alpha"
-                value="-"
-                description="Belum tersedia"
-                icon={CircleAlert}
-                iconClass="text-red-500"
-                loading={false}
-              />
-            </div>
-
-            {/* =================================================
-                SEARCH
-            ================================================= */}
-
-            <section
-              className="
-                rounded-2xl
-                border
-                border-theme-border
-                p-4
-                shadow-sm
-                theme-card
-              "
-            >
-              <div className="relative">
-                <Search
-                  size={16}
-                  className="
-                    absolute
-                    left-3
-                    top-1/2
-                    -translate-y-1/2
-                    theme-text-muted
-                  "
-                />
-
-                <input
-                  type="text"
-                  value={search}
-                  onChange={(event) => {
-                    setSearch(
-                      event.target.value
-                    );
-
-                    setPage(1);
-                  }}
-                  placeholder="Cari nama guru, NIP, atau jabatan..."
-                  className="
-                    theme-input
-                    w-full
-                    rounded-xl
-                    border
-                    py-2.5
-                    pl-9
-                    pr-10
-                    text-sm
-                    outline-none
-                    transition
-                    focus:border-[var(--school-primary,#155DFC)]
-                    focus:ring-2
-                    focus:ring-[var(--school-primary,#155DFC)]/20
-                  "
-                />
-
-                {search && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setSearch("");
-                      setPage(1);
-                    }}
-                    className="
-                      absolute
-                      right-3
-                      top-1/2
-                      -translate-y-1/2
-                      theme-text-muted
-                      transition
-                      hover:opacity-70
-                    "
-                  >
-                    <X size={15} />
-                  </button>
-                )}
-              </div>
-            </section>
-
-            {/* =================================================
-                TABLE
-            ================================================= */}
-
-            <section
-              className="
-                overflow-hidden
-                rounded-2xl
-                border
-                border-theme-border
-                shadow-sm
-                theme-card
-              "
-            >
-              {/* TABLE HEADER */}
-
-              <div
-                className="
-                  flex
-                  flex-col
-                  gap-3
-                  border-b
-                  border-theme-border
-                  px-4
-                  py-4
-                  sm:flex-row
-                  sm:items-center
-                  sm:justify-between
-                  sm:px-5
-                  lg:px-6
-                "
-              >
-                <div>
-                  <div className="flex items-center gap-2">
-                    <div
-                      className="
-                        flex
-                        h-8
-                        w-8
-                        items-center
-                        justify-center
-                        rounded-lg
-                        border
-                        border-theme-border
-                        bg-theme-card-soft
-                      "
-                    >
-                      <Database
-                        size={15}
-                        className="
-                          text-[var(--school-primary,#155DFC)]
-                        "
-                      />
-                    </div>
-
-                    <h2
-                      className="
-                        text-sm
-                        font-bold
-                        theme-text
-                      "
-                    >
-                      Data Guru
-                    </h2>
-                  </div>
-
-                  <p
-                    className="
-                      mt-1
-                      text-xs
-                      theme-text-muted
-                    "
-                  >
-                    Data guru yang tersedia dari
-                    backend.
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
+                    Mengambil data guru dan shift...
                   </p>
                 </div>
+              ) : error ? (
+                <EmptyState
+                  title="Data belum dapat ditampilkan"
+                  description="Periksa pesan error di atas dan pastikan URL endpoint sesuai dengan route backend."
+                />
+              ) : paginatedTeachers.length === 0 ? (
+                <EmptyState
+                  title="Data guru tidak ditemukan"
+                  description="Coba ubah kata kunci pencarian atau filter shift yang dipilih."
+                />
+              ) : (
+                <>
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-[950px] border-collapse text-left">
+                      <thead>
+                        <tr className="border-b border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950/60">
+                          {[
+                            "Guru",
+                            "NIP",
+                            "Shift kerja",
+                            "Jam shift",
+                            "Kehadiran",
+                          ].map((heading) => (
+                            <th
+                              key={heading}
+                              className="px-5 py-4 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400"
+                            >
+                              {heading}
+                            </th>
+                          ))}
 
-                <div
-                  className="
-                    text-xs
-                    theme-text-muted
-                  "
-                >
-                  {filteredData.length} guru
-                </div>
-              </div>
+                          <th className="px-5 py-4 text-right text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                            Detail
+                          </th>
+                        </tr>
+                      </thead>
 
-              {/* TABLE */}
-
-              <div className="overflow-x-auto">
-                <table
-                  className="
-                    w-full
-                    min-w-[900px]
-                    border-collapse
-                    text-sm
-                  "
-                >
-                  <thead>
-                    <tr
-                      className="
-                        bg-[var(--school-primary,#155DFC)]
-                        text-white
-                      "
-                    >
-                      <th className="w-[65px] px-4 py-3 text-center font-semibold">
-                        No
-                      </th>
-
-                      <th className="px-4 py-3 text-left font-semibold">
-                        Guru
-                      </th>
-
-                      <th className="px-4 py-3 text-left font-semibold">
-                        NIP
-                      </th>
-
-                      <th className="px-4 py-3 text-left font-semibold">
-                        Jabatan
-                      </th>
-
-                      <th className="px-4 py-3 text-left font-semibold">
-                        Status
-                      </th>
-
-                      <th className="px-4 py-3 text-left font-semibold">
-                        Jam Masuk
-                      </th>
-
-                      <th className="px-4 py-3 text-left font-semibold">
-                        Jam Pulang
-                      </th>
-
-                      <th className="px-4 py-3 text-center font-semibold">
-                        Aksi
-                      </th>
-                    </tr>
-                  </thead>
-
-                  <tbody>
-                    {loading ? (
-                      Array.from({
-                        length: limit,
-                      }).map(
-                        (_, index) => (
+                      <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                        {paginatedTeachers.map((teacher) => (
                           <tr
-                            key={index}
-                            className="
-                              border-b
-                              border-theme-border-soft
-                            "
+                            key={teacher.id}
+                            className="transition hover:bg-slate-50/80 dark:hover:bg-slate-800/40"
                           >
-                            <td className="px-4 py-3 text-center">
-                              <div
-                                className="
-                                  mx-auto
-                                  h-7
-                                  w-7
-                                  animate-pulse
-                                  rounded-lg
-                                  bg-theme-card-soft
-                                "
-                              />
-                            </td>
-
-                            <td className="px-4 py-3">
-                              <div className="space-y-2">
-                                <div
-                                  className="
-                                    h-4
-                                    w-36
-                                    animate-pulse
-                                    rounded
-                                    bg-theme-card-soft
-                                  "
-                                />
-
-                                <div
-                                  className="
-                                    h-3
-                                    w-24
-                                    animate-pulse
-                                    rounded
-                                    bg-theme-card-soft
-                                  "
-                                />
-                              </div>
-                            </td>
-
-                            <td className="px-4 py-3">
-                              <div
-                                className="
-                                  h-4
-                                  w-24
-                                  animate-pulse
-                                  rounded
-                                  bg-theme-card-soft
-                                "
-                              />
-                            </td>
-
-                            <td className="px-4 py-3">
-                              <div
-                                className="
-                                  h-4
-                                  w-28
-                                  animate-pulse
-                                  rounded
-                                  bg-theme-card-soft
-                                "
-                              />
-                            </td>
-
-                            <td className="px-4 py-3">
-                              <div
-                                className="
-                                  h-6
-                                  w-24
-                                  animate-pulse
-                                  rounded-full
-                                  bg-theme-card-soft
-                                "
-                              />
-                            </td>
-
-                            <td className="px-4 py-3">
-                              <div
-                                className="
-                                  h-4
-                                  w-16
-                                  animate-pulse
-                                  rounded
-                                  bg-theme-card-soft
-                                "
-                              />
-                            </td>
-
-                            <td className="px-4 py-3">
-                              <div
-                                className="
-                                  h-4
-                                  w-16
-                                  animate-pulse
-                                  rounded
-                                  bg-theme-card-soft
-                                "
-                              />
-                            </td>
-
-                            <td className="px-4 py-3">
-                              <div
-                                className="
-                                  mx-auto
-                                  h-8
-                                  w-20
-                                  animate-pulse
-                                  rounded-lg
-                                  bg-theme-card-soft
-                                "
-                              />
-                            </td>
-                          </tr>
-                        )
-                      )
-                    ) : paginatedData.length === 0 ? (
-                      <tr>
-                        <td
-                          colSpan={8}
-                          className="px-4 py-16 text-center"
-                        >
-                          <div className="mx-auto flex max-w-md flex-col items-center">
-                            <div
-                              className="
-                                flex
-                                h-14
-                                w-14
-                                items-center
-                                justify-center
-                                rounded-full
-                                border
-                                border-theme-border
-                                bg-theme-card-soft
-                              "
-                            >
-                              <Users
-                                size={24}
-                                className="
-                                  text-[var(--school-primary,#155DFC)]
-                                "
-                              />
-                            </div>
-
-                            <h3
-                              className="
-                                mt-4
-                                text-base
-                                font-bold
-                                theme-text
-                              "
-                            >
-                              Data guru tidak ditemukan
-                            </h3>
-
-                            <p
-                              className="
-                                mt-1
-                                text-xs
-                                theme-text-muted
-                              "
-                            >
-                              Tidak ada guru yang sesuai
-                              dengan pencarian.
-                            </p>
-                          </div>
-                        </td>
-                      </tr>
-                    ) : (
-                      paginatedData.map(
-                        (guru, index) => (
-                          <tr
-                            key={guru.id}
-                            className="
-                              border-b
-                              border-theme-border-soft
-                              last:border-0
-                              theme-table-hover
-                              transition-colors
-                            "
-                          >
-                            {/* NO */}
-
-                            <td className="px-4 py-3 text-center">
-                              <span
-                                className="
-                                  inline-flex
-                                  h-7
-                                  w-7
-                                  items-center
-                                  justify-center
-                                  rounded-lg
-                                  border
-                                  border-theme-border
-                                  bg-theme-card-soft
-                                  text-xs
-                                  font-bold
-                                  text-[var(--school-primary,#155DFC)]
-                                "
-                              >
-                                {(page - 1) *
-                                  limit +
-                                  index +
-                                  1}
-                              </span>
-                            </td>
-
-                            {/* GURU */}
-
-                            <td className="px-4 py-3">
+                            <td className="px-5 py-4">
                               <div className="flex items-center gap-3">
-                                <div
-                                  className="
-                                    flex
-                                    h-10
-                                    w-10
-                                    shrink-0
-                                    items-center
-                                    justify-center
-                                    rounded-full
-                                    bg-[var(--school-primary,#155DFC)]
-                                    text-xs
-                                    font-bold
-                                    text-white
-                                  "
-                                >
-                                  {guru.nama
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-sm font-bold text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
+                                  {teacher.nama
                                     .split(" ")
+                                    .filter(Boolean)
                                     .slice(0, 2)
-                                    .map(
-                                      (word) =>
-                                        word[0]
-                                    )
+                                    .map((word) => word[0])
                                     .join("")
                                     .toUpperCase()}
                                 </div>
 
                                 <div className="min-w-0">
-                                  <p
-                                    className="
-                                      max-w-[200px]
-                                      truncate
-                                      font-semibold
-                                      theme-text
-                                    "
-                                  >
-                                    {guru.nama}
+                                  <p className="max-w-xs truncate text-sm font-semibold text-slate-900 dark:text-white">
+                                    {teacher.nama}
                                   </p>
 
-                                  <p
-                                    className="
-                                      mt-0.5
-                                      max-w-[200px]
-                                      truncate
-                                      text-[11px]
-                                      theme-text-muted
-                                    "
-                                  >
-                                    {guru.jabatan}
+                                  <p className="mt-1 max-w-xs truncate text-xs text-slate-500 dark:text-slate-400">
+                                    {teacher.email}
                                   </p>
                                 </div>
                               </div>
                             </td>
 
-                            {/* NIP */}
-
-                            <td
-                              className="
-                                px-4
-                                py-3
-                                text-xs
-                                font-medium
-                                theme-text-secondary
-                              "
-                            >
-                              {guru.nip}
+                            <td className="px-5 py-4 text-sm text-slate-600 dark:text-slate-300">
+                              {teacher.nip}
                             </td>
 
-                            {/* JABATAN */}
-
-                            <td
-                              className="
-                                px-4
-                                py-3
-                                text-xs
-                                theme-text-secondary
-                              "
-                            >
-                              {guru.jabatan}
+                            <td className="px-5 py-4">
+                              {teacher.shifts.length > 0 ? (
+                                <div className="flex max-w-xs flex-wrap gap-2">
+                                  {teacher.shifts.map((shift) => (
+                                    <span
+                                      key={shift.id}
+                                      className="inline-flex items-center gap-1.5 rounded-lg border border-blue-100 bg-blue-50 px-2.5 py-1.5 text-xs font-medium text-blue-800 dark:border-blue-900/60 dark:bg-blue-950/40 dark:text-blue-300"
+                                    >
+                                      <BriefcaseBusiness size={13} />
+                                      {shift.nama}
+                                    </span>
+                                  ))}
+                                </div>
+                              ) : (
+                                <span className="inline-flex rounded-lg bg-slate-100 px-2.5 py-1.5 text-xs font-medium text-slate-500 dark:bg-slate-800 dark:text-slate-400">
+                                  Belum terdeteksi
+                                </span>
+                              )}
                             </td>
 
-                            {/* STATUS */}
-
-                            <td className="px-4 py-3">
-                              <StatusBadge />
+                            <td className="px-5 py-4">
+                              {teacher.shifts.length > 0 ? (
+                                <div className="space-y-1.5">
+                                  {teacher.shifts.map((shift) => (
+                                    <p
+                                      key={shift.id}
+                                      className="whitespace-nowrap text-sm text-slate-700 dark:text-slate-300"
+                                    >
+                                      <Clock3
+                                        size={14}
+                                        className="mr-1.5 inline"
+                                      />
+                                      {formatTime(shift.jamMasuk)} –{" "}
+                                      {formatTime(shift.jamKeluar)}
+                                    </p>
+                                  ))}
+                                </div>
+                              ) : (
+                                <span className="text-sm text-slate-400">
+                                  -
+                                </span>
+                              )}
                             </td>
 
-                            {/* JAM MASUK */}
-
-                            <td className="px-4 py-3">
-                              <span
-                                className="
-                                  inline-flex
-                                  items-center
-                                  gap-1.5
-                                  text-xs
-                                  font-semibold
-                                  theme-text-muted
-                                "
-                              >
-                                <Clock3 size={12} />
-                                -
+                            <td className="px-5 py-4">
+                              <span className="inline-flex items-center gap-1.5 rounded-lg bg-amber-50 px-2.5 py-1.5 text-xs font-medium text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
+                                <AlertCircle size={13} />
+                                Belum tersedia
                               </span>
+
+                              <p className="mt-1 text-xs text-slate-400">
+                                Rekap tanggal {selectedDate}
+                              </p>
                             </td>
 
-                            {/* JAM PULANG */}
-
-                            <td className="px-4 py-3">
-                              <span
-                                className="
-                                  inline-flex
-                                  items-center
-                                  gap-1.5
-                                  text-xs
-                                  font-semibold
-                                  theme-text-muted
-                                "
-                              >
-                                <Clock3 size={12} />
-                                -
-                              </span>
-                            </td>
-
-                            {/* DETAIL */}
-
-                            <td className="px-4 py-3 text-center">
+                            <td className="px-5 py-4 text-right">
                               <button
                                 type="button"
-                                onClick={() =>
-                                  setSelectedGuru(
-                                    guru
-                                  )
-                                }
-                                className="
-                                  inline-flex
-                                  items-center
-                                  gap-1.5
-                                  rounded-lg
-                                  border
-                                  border-theme-border
-                                  bg-theme-card
-                                  px-3
-                                  py-2
-                                  text-xs
-                                  font-semibold
-                                  theme-text-secondary
-                                  transition
-                                  hover:bg-theme-card-soft
-                                  hover:text-[var(--school-primary,#155DFC)]
-                                "
+                                onClick={() => setSelectedTeacher(teacher)}
+                                aria-label={`Lihat detail ${teacher.nama}`}
+                                className="inline-flex h-9 items-center gap-2 rounded-lg border border-slate-200 px-3 text-sm font-medium text-slate-700 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 dark:border-slate-700 dark:text-slate-300 dark:hover:border-blue-900 dark:hover:bg-blue-950/40 dark:hover:text-blue-300"
                               >
-                                <Eye size={13} />
+                                <Eye size={15} />
                                 Detail
                               </button>
                             </td>
                           </tr>
-                        )
-                      )
-                    )}
-                  </tbody>
-                </table>
-              </div>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
 
-              {/* =================================================
-                  PAGINATION
-              ================================================= */}
-
-              {!loading &&
-                filteredData.length > 0 && (
-                  <div
-                    className="
-                      flex
-                      flex-col
-                      gap-3
-                      border-t
-                      border-theme-border
-                      bg-theme-card-soft
-                      px-4
-                      py-3
-                      sm:flex-row
-                      sm:items-center
-                      sm:justify-between
-                      sm:px-5
-                    "
-                  >
-                    <p
-                      className="
-                        text-xs
-                        theme-text-muted
-                      "
-                    >
+                  {/* PAGINATION */}
+                  <div className="flex flex-col gap-3 border-t border-slate-200 px-5 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-slate-800">
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
                       Menampilkan{" "}
-                      <span className="font-semibold theme-text">
-                        {(page - 1) *
-                          limit +
-                          1}
-                      </span>{" "}
-                      -{" "}
-                      <span className="font-semibold theme-text">
+                      <span className="font-semibold text-slate-700 dark:text-slate-200">
+                        {filteredTeachers.length === 0
+                          ? 0
+                          : (safePage - 1) * PAGE_SIZE + 1}
+                        {"–"}
                         {Math.min(
-                          page * limit,
-                          filteredData.length
+                          safePage * PAGE_SIZE,
+                          filteredTeachers.length
                         )}
                       </span>{" "}
                       dari{" "}
-                      <span className="font-semibold theme-text">
-                        {filteredData.length}
+                      <span className="font-semibold text-slate-700 dark:text-slate-200">
+                        {filteredTeachers.length}
                       </span>{" "}
                       guru
                     </p>
 
                     <div className="flex items-center gap-2">
-                      <select
-                        value={limit}
-                        onChange={(event) => {
-                          setLimit(
-                            Number(
-                              event.target.value
-                            )
-                          );
-
-                          setPage(1);
-                        }}
-                        className="
-                          theme-input
-                          rounded-lg
-                          border
-                          px-3
-                          py-2
-                          text-xs
-                          outline-none
-                          focus:border-[var(--school-primary,#155DFC)]
-                          focus:ring-2
-                          focus:ring-[var(--school-primary,#155DFC)]/20
-                        "
-                      >
-                        <option value={10}>
-                          10 / halaman
-                        </option>
-
-                        <option value={20}>
-                          20 / halaman
-                        </option>
-
-                        <option value={50}>
-                          50 / halaman
-                        </option>
-                      </select>
-
                       <button
                         type="button"
-                        disabled={page <= 1}
                         onClick={() =>
-                          setPage(
-                            (current) =>
-                              current - 1
-                          )
+                          setPage((current) => Math.max(1, current - 1))
                         }
-                        className="
-                          flex
-                          h-8
-                          w-8
-                          items-center
-                          justify-center
-                          rounded-lg
-                          border
-                          border-theme-border
-                          bg-theme-card
-                          theme-text-muted
-                          transition
-                          hover:bg-theme-card-soft
-                          disabled:cursor-not-allowed
-                          disabled:opacity-40
-                        "
+                        disabled={safePage <= 1}
+                        className="inline-flex h-9 items-center gap-1 rounded-lg border border-slate-200 px-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                       >
-                        <ChevronLeft size={15} />
+                        <ChevronLeft size={16} />
+                        Sebelumnya
                       </button>
 
-                      <span
-                        className="
-                          min-w-[60px]
-                          text-center
-                          text-xs
-                          font-semibold
-                          theme-text-secondary
-                        "
-                      >
-                        {page} / {totalPages}
+                      <span className="px-2 text-sm text-slate-500 dark:text-slate-400">
+                        {safePage} / {totalPages}
                       </span>
 
                       <button
                         type="button"
-                        disabled={
-                          page >= totalPages
-                        }
                         onClick={() =>
-                          setPage(
-                            (current) =>
-                              current + 1
+                          setPage((current) =>
+                            Math.min(totalPages, current + 1)
                           )
                         }
-                        className="
-                          flex
-                          h-8
-                          w-8
-                          items-center
-                          justify-center
-                          rounded-lg
-                          border
-                          border-theme-border
-                          bg-theme-card
-                          theme-text-muted
-                          transition
-                          hover:bg-theme-card-soft
-                          disabled:cursor-not-allowed
-                          disabled:opacity-40
-                        "
+                        disabled={safePage >= totalPages}
+                        className="inline-flex h-9 items-center gap-1 rounded-lg border border-slate-200 px-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                       >
-                        <ChevronRight size={15} />
+                        Berikutnya
+                        <ChevronRight size={16} />
                       </button>
                     </div>
                   </div>
-                )}
+                </>
+              )}
             </section>
           </div>
         </main>
       </div>
 
-      {/* =====================================================
-          DETAIL MODAL
-      ===================================================== */}
-
-      {selectedGuru && (
+      {/* MODAL DETAIL GURU */}
+      {selectedTeacher && (
         <div
-          className="
-            fixed
-            inset-0
-            z-[100]
-            flex
-            items-center
-            justify-center
-            bg-slate-950/60
-            p-4
-            backdrop-blur-sm
-          "
+          className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-slate-950/50 p-4 backdrop-blur-[2px]"
           onMouseDown={(event) => {
-            if (
-              event.target ===
-              event.currentTarget
-            ) {
-              setSelectedGuru(null);
+            if (event.target === event.currentTarget) {
+              setSelectedTeacher(null);
             }
           }}
         >
-          <div
-            className="
-              w-full
-              max-w-lg
-              overflow-hidden
-              rounded-2xl
-              border
-              border-theme-border
-              shadow-2xl
-              theme-card
-            "
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="teacher-detail-title"
+            className="my-auto max-h-[90dvh] w-full max-w-xl overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-2xl dark:border-slate-700 dark:bg-slate-900"
           >
-            {/* HEADER */}
+            <div className="flex items-start justify-between gap-4 border-b border-slate-200 p-5 dark:border-slate-800">
+              <div className="min-w-0">
+                <p className="text-xs font-semibold uppercase tracking-wider text-blue-700 dark:text-blue-400">
+                  Detail guru
+                </p>
 
-            <div
-              className="
-                flex
-                items-center
-                justify-between
-                border-b
-                border-theme-border
-                px-6
-                py-5
-              "
-            >
-              <div className="flex items-center gap-3">
-                <div
-                  className="
-                    flex
-                    h-9
-                    w-9
-                    items-center
-                    justify-center
-                    rounded-lg
-                    border
-                    border-theme-border
-                    bg-theme-card-soft
-                  "
+                <h2
+                  id="teacher-detail-title"
+                  className="mt-2 text-xl font-bold text-slate-900 dark:text-white"
                 >
-                  <Eye
-                    size={17}
-                    className="
-                      text-[var(--school-primary,#155DFC)]
-                    "
-                  />
-                </div>
+                  {selectedTeacher.nama}
+                </h2>
 
-                <div>
-                  <h2
-                    className="
-                      text-sm
-                      font-bold
-                      theme-text
-                    "
-                  >
-                    Detail Guru
-                  </h2>
-
-                  <p
-                    className="
-                      mt-0.5
-                      text-[11px]
-                      theme-text-muted
-                    "
-                  >
-                    {formatTanggalIndonesia(
-                      tanggal
-                    )}
-                  </p>
-                </div>
+                <p className="mt-1 break-all text-sm text-slate-500 dark:text-slate-400">
+                  {selectedTeacher.email}
+                </p>
               </div>
 
               <button
                 type="button"
-                onClick={() =>
-                  setSelectedGuru(null)
-                }
-                className="
-                  flex
-                  h-9
-                  w-9
-                  items-center
-                  justify-center
-                  rounded-lg
-                  theme-text-muted
-                  transition
-                  hover:bg-theme-card-soft
-                  hover:text-[var(--school-primary,#155DFC)]
-                "
+                onClick={() => setSelectedTeacher(null)}
+                aria-label="Tutup detail"
+                className="shrink-0 rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white"
               >
-                <X size={18} />
+                <X size={19} />
               </button>
             </div>
 
-            {/* BODY */}
-
-            <div
-              className="
-                space-y-5
-                px-6
-                py-5
-              "
-            >
-              {/* PROFIL */}
-
-              <div
-                className="
-                  flex
-                  items-center
-                  gap-4
-                  rounded-xl
-                  border
-                  border-theme-border
-                  bg-theme-card-soft
-                  p-4
-                "
-              >
-                <div
-                  className="
-                    flex
-                    h-14
-                    w-14
-                    shrink-0
-                    items-center
-                    justify-center
-                    rounded-full
-                    bg-[var(--school-primary,#155DFC)]
-                    text-lg
-                    font-bold
-                    text-white
-                  "
-                >
-                  {selectedGuru.nama
-                    .split(" ")
-                    .slice(0, 2)
-                    .map(
-                      (word) =>
-                        word[0]
-                    )
-                    .join("")
-                    .toUpperCase()}
+            <div className="space-y-5 p-5">
+              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+                <div className="rounded-lg border border-slate-200 p-4 dark:border-slate-800">
+                  <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                    NIP
+                  </p>
+                  <p className="mt-2 break-words text-sm font-semibold text-slate-900 dark:text-white">
+                    {selectedTeacher.nip}
+                  </p>
                 </div>
 
-                <div className="min-w-0">
-                  <p
-                    className="
-                      truncate
-                      text-base
-                      font-bold
-                      theme-text
-                    "
-                  >
-                    {selectedGuru.nama}
+                <div className="rounded-lg border border-slate-200 p-4 dark:border-slate-800">
+                  <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                    Tanggal rekap
                   </p>
-
-                  <p
-                    className="
-                      mt-0.5
-                      text-xs
-                      theme-text-secondary
-                    "
-                  >
-                    {selectedGuru.jabatan}
-                  </p>
-
-                  <p
-                    className="
-                      mt-0.5
-                      text-[11px]
-                      theme-text-muted
-                    "
-                  >
-                    NIP: {selectedGuru.nip}
+                  <p className="mt-2 text-sm font-semibold text-slate-900 dark:text-white">
+                    {formatDate(selectedDate)}
                   </p>
                 </div>
               </div>
-
-              {/* INFO ABSENSI */}
-
-              <div
-                className="
-                  rounded-xl
-                  border
-                  border-theme-border
-                  p-4
-                  theme-info
-                "
-              >
-                <div className="flex items-start gap-3">
-                  <CircleAlert
-                    size={17}
-                    className="mt-0.5 shrink-0"
-                  />
-
-                  <div>
-                    <p className="text-sm font-semibold">
-                      Data absensi belum tersedia
-                    </p>
-
-                    <p className="mt-1 text-xs leading-5 opacity-90">
-                      Backend saat ini belum
-                      menyediakan endpoint rekap
-                      absensi guru. Karena itu
-                      status, jam masuk, dan jam
-                      pulang tidak dibuat secara
-                      dummy.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* STATUS */}
 
               <div>
-                <p
-                  className="
-                    mb-2
-                    text-[10px]
-                    font-semibold
-                    uppercase
-                    tracking-wide
-                    theme-text-muted
-                  "
-                >
-                  Status Kehadiran
-                </p>
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+                  Shift kerja
+                </h3>
 
-                <StatusBadge />
+                {selectedTeacher.shifts.length > 0 ? (
+                  <div className="mt-3 space-y-3">
+                    {selectedTeacher.shifts.map((shift) => (
+                      <div
+                        key={shift.id}
+                        className="rounded-lg border border-slate-200 p-4 dark:border-slate-800"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="rounded-lg bg-blue-50 p-2 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300">
+                            <Clock3 size={18} />
+                          </div>
+
+                          <div className="min-w-0">
+                            <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                              {shift.nama}
+                            </p>
+
+                            <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">
+                              {formatTime(shift.jamMasuk)} –{" "}
+                              {formatTime(shift.jamKeluar)}
+                            </p>
+
+                            {shift.toleransiTerlambatMenit != null && (
+                              <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                                Toleransi keterlambatan:{" "}
+                                {shift.toleransiTerlambatMenit} menit
+                              </p>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="mt-3 rounded-lg border border-dashed border-slate-300 p-5 text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
+                    Relasi shift untuk guru ini tidak ditemukan dalam
+                    respons backend.
+                  </div>
+                )}
               </div>
 
-              {/* JAM */}
+              <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/60 dark:bg-amber-950/20">
+                <p className="text-sm font-semibold text-amber-900 dark:text-amber-300">
+                  Rekap kehadiran belum tersedia
+                </p>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div
-                  className="
-                    rounded-xl
-                    border
-                    border-theme-border
-                    bg-theme-card
-                    p-4
-                  "
-                >
-                  <div
-                    className="
-                      flex
-                      items-center
-                      gap-2
-                      theme-text-muted
-                    "
-                  >
-                    <Clock3 size={14} />
-
-                    <p
-                      className="
-                        text-[10px]
-                        font-medium
-                        uppercase
-                        tracking-wide
-                      "
-                    >
-                      Jam Masuk
-                    </p>
-                  </div>
-
-                  <p
-                    className="
-                      mt-2
-                      text-lg
-                      font-bold
-                      theme-text
-                    "
-                  >
-                    -
-                  </p>
-                </div>
-
-                <div
-                  className="
-                    rounded-xl
-                    border
-                    border-theme-border
-                    bg-theme-card
-                    p-4
-                  "
-                >
-                  <div
-                    className="
-                      flex
-                      items-center
-                      gap-2
-                      theme-text-muted
-                    "
-                  >
-                    <Clock3 size={14} />
-
-                    <p
-                      className="
-                        text-[10px]
-                        font-medium
-                        uppercase
-                        tracking-wide
-                      "
-                    >
-                      Jam Pulang
-                    </p>
-                  </div>
-
-                  <p
-                    className="
-                      mt-2
-                      text-lg
-                      font-bold
-                      theme-text
-                    "
-                  >
-                    -
-                  </p>
-                </div>
+                <p className="mt-1 text-sm leading-6 text-amber-800 dark:text-amber-200/80">
+                  Data kehadiran guru pada {formatDate(selectedDate)} tidak
+                  ditampilkan karena endpoint rekap semua guru belum
+                  terkonfirmasi. Jam shift adalah jadwal, bukan jam
+                  check-in atau check-out aktual.
+                </p>
               </div>
             </div>
 
-            {/* FOOTER */}
-
-            <div
-              className="
-                border-t
-                border-theme-border
-                bg-theme-card-soft
-                px-6
-                py-4
-              "
-            >
+            <div className="flex justify-end border-t border-slate-200 p-5 dark:border-slate-800">
               <button
                 type="button"
-                onClick={() =>
-                  setSelectedGuru(null)
-                }
-                className="
-                  w-full
-                  rounded-xl
-                  bg-[var(--school-primary,#155DFC)]
-                  px-4
-                  py-2.5
-                  text-sm
-                  font-semibold
-                  text-white
-                  transition
-                  hover:brightness-110
-                "
+                onClick={() => setSelectedTeacher(null)}
+                className="h-10 rounded-lg bg-blue-700 px-5 text-sm font-semibold text-white transition hover:bg-blue-800"
               >
                 Tutup
               </button>
             </div>
-          </div>
+          </section>
         </div>
       )}
-    </div>
-  );
-}
-
-/* =========================================================
-   STAT CARD
-========================================================= */
-
-function StatCard({
-  title,
-  value,
-  description,
-  icon: Icon,
-  iconClass,
-  loading,
-}) {
-  return (
-    <div
-      className="
-        rounded-2xl
-        border
-        border-theme-border
-        p-4
-        shadow-sm
-        transition-all
-        duration-200
-        hover:shadow-md
-        theme-card
-        sm:p-5
-      "
-    >
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <p
-            className="
-              text-[11px]
-              font-medium
-              sm:text-xs
-              theme-text-muted
-            "
-          >
-            {title}
-          </p>
-
-          {loading ? (
-            <div
-              className="
-                mt-2
-                h-8
-                w-16
-                animate-pulse
-                rounded-lg
-                bg-theme-card-soft
-              "
-            />
-          ) : (
-            <p
-              className="
-                mt-1.5
-                text-2xl
-                font-bold
-                sm:text-3xl
-                theme-text
-              "
-            >
-              {value}
-            </p>
-          )}
-
-          <p
-            className="
-              mt-1
-              text-[10px]
-              sm:text-xs
-              theme-text-muted
-            "
-          >
-            {description}
-          </p>
-        </div>
-
-        <div
-          className="
-            flex
-            h-10
-            w-10
-            shrink-0
-            items-center
-            justify-center
-            rounded-xl
-            border
-            border-theme-border
-            bg-theme-card-soft
-          "
-        >
-          {loading ? (
-            <Loader2
-              size={18}
-              className="
-                animate-spin
-                theme-text-muted
-              "
-            />
-          ) : (
-            <Icon
-              size={18}
-              className={iconClass}
-            />
-          )}
-        </div>
-      </div>
     </div>
   );
 }

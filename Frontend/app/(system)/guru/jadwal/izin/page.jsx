@@ -268,7 +268,7 @@ export default function GuruIzinPage() {
       setPageError("");
 
       const response =
-        await getDaftarIzin();
+  await getDaftarIzin({ mine: true });
 
       const daftar =
         normalizeResponseData(

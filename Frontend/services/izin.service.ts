@@ -82,16 +82,17 @@ export async function ajukanIzin(
   return response?.data || response;
 }
 
-export async function getDaftarIzin(): Promise<any> {
-  const response = await apiFetch(
-    "/api/permohonan-izin",
-    {
-      method: "GET",
-    }
-  );
 
-  return response;
+export async function getDaftarIzin(
+  options?: { mine?: boolean }
+): Promise<any> {
+  const params = options?.mine ? "?mine=true" : "";
+
+  return apiFetch(`/api/permohonan-izin${params}`, {
+    method: "GET",
+  });
 }
+
 
 export async function verifikasiIzin(
   id: string,
@@ -119,34 +120,21 @@ export async function verifikasiIzin(
 
 export async function verifikasiPengajuan(
   id: string,
-  data: VerifikasiPengajuanData
+  data: VerifikasiPengajuanData,
 ): Promise<PermohonanIzin> {
   if (!id) {
-    throw new Error(
-      "ID permohonan izin tidak valid."
-    );
-  }
-
-  if (
-    data.status === "disetujui" &&
-    !data.guruPenggantiId
-  ) {
-    throw new Error(
-      "Guru pengganti wajib dipilih."
-    );
+    throw new Error("ID permohonan izin tidak valid.");
   }
 
   const response = await apiFetch(
-    `/api/permohonan-izin/${id}/verifikasi-pengajuan`,
+    `/api/permohonan-izin/${id}/verifikasi`,
     {
       method: "PATCH",
       body: JSON.stringify({
         status: data.status,
         catatan: data.catatan || "",
-        guruPenggantiId:
-          data.guruPenggantiId || null,
       }),
-    }
+    },
   );
 
   return response?.data || response;

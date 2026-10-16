@@ -1,38 +1,69 @@
 import { apiFetch } from "../lib/api";
 
-export type AbsensiStatus =
-  | "hadir"
-  | "izin"
-  | "sakit"
-  | "alpha";
+/* =========================================================
+   TYPES ABSENSI
+========================================================= */
 
-export type AbsensiMetode =
-  | "lokasi"
-  | "barcode"
-  | "face"
-  | "manual";
+export type AbsensiStatus = "hadir" | "izin" | "sakit" | "alpha";
+
+export type AbsensiMetode = "lokasi" | "barcode" | "face" | "manual";
+
+export type StatusCheckInShift = "hadir" | "izin" | "sakit";
+
+export type StatusShiftKerjaAbsensi =
+  | "tepat_waktu"
+  | "terlambat"
+  | "pulang_cepat"
+  | "terlambat_dan_pulang_cepat";
 
 export interface AbsensiPengguna {
   id?: string;
   namaLengkap?: string;
-  nisn?: string;
+  nisn?: string | null;
+  nis?: string | null;
+}
+
+export interface AbsensiShiftKerja {
+  id: string;
+  nama: string;
+  kode?: string | null;
+  jamMasuk: string;
+  jamKeluar: string;
+  toleransiTerlambatMenit?: number;
+  status?: string;
 }
 
 export interface Absensi {
   id: string;
+  sekolahId?: string;
   penggunaId?: string;
-  kelasId?: string;
+  kelasId?: string | null;
+  shiftKerjaId?: string | null;
+
   tanggal?: string;
+  waktuMasuk?: string | null;
+  waktuKeluar?: string | null;
+
   status?: AbsensiStatus;
-  keterangan?: string;
+  statusShift?: StatusShiftKerjaAbsensi | string | null;
+  terlambatMenit?: number | null;
+  durasiKerjaMenit?: number | null;
+  durasiJamKerja?: number | string | null;
+
+  keterangan?: string | null;
   metode?: AbsensiMetode;
+
   lintang?: number | null;
   bujur?: number | null;
   urlFoto?: string | null;
+
   dibuatOleh?: string | null;
+  diperbaruiOleh?: string | null;
   dibuatPada?: string;
   diperbaruiPada?: string;
+
   pengguna?: AbsensiPengguna | null;
+  shiftKerja?: AbsensiShiftKerja | null;
 }
 
 export interface CreateAbsensiData {
@@ -46,134 +77,68 @@ export interface CreateAbsensiData {
   snapshot?: Blob | File | null;
 }
 
-
-
-const RAW_API_URL =
-  process.env.NEXT_PUBLIC_API_URL ||
-  "http://localhost:5000";
-
-const API_URL = (() => {
-  const base = RAW_API_URL.replace(/\/+$/, "");
-
-  if (/\/api$/i.test(base)) {
-    return base;
-  }
-
-  return `${base}/api`;
-})();
-
 /* =========================================================
-   TOKEN
+   TYPES SHIFT KERJA
 ========================================================= */
 
-function getToken(): string | null {
-  if (typeof window === "undefined") {
-    return null;
-  }
+export interface CheckInShiftPayload {
+  shiftKerjaId?: string;
+  status?: StatusCheckInShift;
+  keterangan?: string;
+  metode?: AbsensiMetode;
+  lintang?: number;
+  bujur?: number;
+  barcodeData?: string;
+}
 
-  return (
-    localStorage.getItem("token") ||
-    localStorage.getItem("accessToken") ||
-    localStorage.getItem("access_token") ||
-    localStorage.getItem("authToken") ||
-    localStorage.getItem("jwt")
-  );
+export interface CheckOutShiftPayload {
+  keterangan?: string;
+  metode?: AbsensiMetode;
+  lintang?: number;
+  bujur?: number;
+  barcodeData?: string;
+}
+
+export interface RiwayatShiftResponse {
+  data: Absensi[];
+  page: number;
+  limit: number;
+  total: number;
+  totalPages: number;
 }
 
 /* =========================================================
-   REQUEST
+   HELPER RESPONSE
 ========================================================= */
 
-async function request<T>(
-  endpoint: string,
-  options: RequestInit = {}
-): Promise<T> {
-  const token = getToken();
-
-  const cleanEndpoint = endpoint.startsWith("/")
-    ? endpoint
-    : `/${endpoint}`;
-
-  const url = `${API_URL}${cleanEndpoint}`;
-
-  const headers = new Headers(options.headers);
-
-  const isFormData =
-    options.body instanceof FormData;
-
-  if (!isFormData) {
-    headers.set(
-      "Content-Type",
-      "application/json"
-    );
+function unwrapArray<T>(value: unknown): T[] {
+  if (Array.isArray(value)) {
+    return value as T[];
   }
 
-  if (token) {
-    headers.set(
-      "Authorization",
-      `Bearer ${token}`
-    );
+  if (!value || typeof value !== "object") {
+    return [];
   }
 
-  const response = await fetch(url, {
-    ...options,
-    headers,
-    cache: "no-store",
-  });
+  const result = value as Record<string, unknown>;
 
-  const text = await response.text();
-
-  let result: any = null;
-
-  if (text) {
-    try {
-      result = JSON.parse(text);
-    } catch {
-      result = null;
-    }
+  if (Array.isArray(result.items)) {
+    return result.items as T[];
   }
 
-  if (!response.ok) {
-    let message =
-      "Terjadi kesalahan pada server.";
-
-    if (result?.message) {
-      message = result.message;
-    } else if (text) {
-      message = text;
-    }
-
-    if (response.status === 401) {
-      throw new Error(
-        "Sesi login sudah habis. Silakan login kembali."
-      );
-    }
-
-    if (response.status === 403) {
-      throw new Error(
-        message ||
-          "Kamu tidak memiliki akses."
-      );
-    }
-
-    if (response.status === 404) {
-      throw new Error(
-        `Endpoint tidak ditemukan.\nURL: ${url}`
-      );
-    }
-
-    throw new Error(message);
+  if (Array.isArray(result.data)) {
+    return result.data as T[];
   }
 
-  if (
-    result &&
-    typeof result === "object" &&
-    "data" in result
-  ) {
-    return result.data as T;
+  return [];
+}
+
+function unwrapObject(value: unknown): Record<string, any> {
+  if (!value || typeof value !== "object") {
+    return {};
   }
 
-  return result as T;
+  return value as Record<string, any>;
 }
 
 /* =========================================================
@@ -181,15 +146,12 @@ async function request<T>(
    GET /api/absensi/saya
 ========================================================= */
 
-export async function getAbsensiSaya(): Promise<
-  Absensi[]
-> {
-  return request<Absensi[]>(
-    "/absensi/saya",
-    {
-      method: "GET",
-    }
-  );
+export async function getAbsensiSaya(): Promise<Absensi[]> {
+  const response = await apiFetch("/api/absensi/saya", {
+    method: "GET",
+  });
+
+  return unwrapArray<Absensi>(response);
 }
 
 /* =========================================================
@@ -199,31 +161,29 @@ export async function getAbsensiSaya(): Promise<
 
 export async function getAbsensiKelas(
   kelasId: string,
-  tanggal?: string
+  tanggal?: string,
 ): Promise<Absensi[]> {
   if (!kelasId) {
-    throw new Error(
-      "Kelas ID wajib diisi."
-    );
+    throw new Error("Kelas ID wajib diisi.");
   }
 
-  let endpoint =
-    `/absensi/kelas/${encodeURIComponent(
-      kelasId
-    )}`;
+  const params = new URLSearchParams();
 
   if (tanggal) {
-    endpoint += `?tanggal=${encodeURIComponent(
-      tanggal
-    )}`;
+    params.set("tanggal", tanggal);
   }
 
-  return request<Absensi[]>(
-    endpoint,
-    {
-      method: "GET",
-    }
-  );
+  const query = params.toString();
+
+  const endpoint =
+    `/api/absensi/kelas/${encodeURIComponent(kelasId)}` +
+    (query ? `?${query}` : "");
+
+  const response = await apiFetch(endpoint, {
+    method: "GET",
+  });
+
+  return unwrapArray<Absensi>(response);
 }
 
 /* =========================================================
@@ -232,207 +192,115 @@ export async function getAbsensiKelas(
 ========================================================= */
 
 export async function createAbsensi(
-  data: CreateAbsensiData
+  data: CreateAbsensiData,
 ): Promise<Absensi> {
   if (!data.kelasId) {
-    throw new Error(
-      "Kelas ID wajib diisi."
-    );
+    throw new Error("Kelas ID wajib diisi.");
   }
 
   if (!data.status) {
-    throw new Error(
-      "Status absensi wajib diisi."
-    );
+    throw new Error("Status absensi wajib diisi.");
   }
-
-  /* =====================================================
-     FACE ABSENSI
-  ===================================================== */
 
   if (data.metode === "face") {
     if (!data.snapshot) {
-      throw new Error(
-        "Foto wajah wajib diisi."
-      );
+      throw new Error("Foto wajah wajib diisi.");
     }
 
-    if (
-      data.lintang === undefined ||
-      data.bujur === undefined
-    ) {
-      throw new Error(
-        "Lokasi GPS wajib diaktifkan."
-      );
+    if (data.lintang === undefined || data.bujur === undefined) {
+      throw new Error("Lokasi GPS wajib diaktifkan.");
     }
 
-    const formData =
-      new FormData();
+    const formData = new FormData();
 
-    formData.append(
-      "kelasId",
-      data.kelasId
-    );
-
-    formData.append(
-      "status",
-      data.status
-    );
-
-    formData.append(
-      "metode",
-      "face"
-    );
+    formData.append("kelasId", data.kelasId);
+    formData.append("status", data.status);
+    formData.append("metode", "face");
+    formData.append("lintang", String(data.lintang));
+    formData.append("bujur", String(data.bujur));
 
     if (data.keterangan) {
-      formData.append(
-        "keterangan",
-        data.keterangan
-      );
+      formData.append("keterangan", data.keterangan);
     }
-
-    formData.append(
-      "lintang",
-      String(data.lintang)
-    );
-
-    formData.append(
-      "bujur",
-      String(data.bujur)
-    );
 
     if (data.snapshot instanceof File) {
-      formData.append(
-        "snapshot",
-        data.snapshot,
-        data.snapshot.name ||
-          "snapshot.jpg"
-      );
+      formData.append("snapshot", data.snapshot);
     } else {
-      const file = new File(
-        [data.snapshot],
-        "snapshot.jpg",
-        {
-          type:
-            data.snapshot.type ||
-            "image/jpeg",
-        }
-      );
-
       formData.append(
         "snapshot",
-        file
+        new File([data.snapshot], "snapshot.jpg", {
+          type: data.snapshot.type || "image/jpeg",
+        }),
       );
     }
 
-    return request<Absensi>(
-      "/absensi",
-      {
-        method: "POST",
-        body: formData,
-      }
-    );
+    return apiFetch("/api/absensi", {
+      method: "POST",
+      body: formData,
+    }) as Promise<Absensi>;
   }
 
-  /* =====================================================
-     ABSENSI NON FACE
-  ===================================================== */
-
-  const body: Record<
-    string,
-    unknown
-  > = {
+  const body: Record<string, unknown> = {
     kelasId: data.kelasId,
     status: data.status,
-    metode:
-      data.metode || "manual",
+    metode: data.metode || "manual",
   };
 
-  if (data.keterangan) {
-    body.keterangan =
-      data.keterangan;
-  }
+  if (data.keterangan) body.keterangan = data.keterangan;
+  if (data.lintang !== undefined) body.lintang = data.lintang;
+  if (data.bujur !== undefined) body.bujur = data.bujur;
+  if (data.barcodeData) body.barcodeData = data.barcodeData;
 
-  if (
-    data.lintang !== undefined
-  ) {
-    body.lintang =
-      data.lintang;
-  }
-
-  if (
-    data.bujur !== undefined
-  ) {
-    body.bujur =
-      data.bujur;
-  }
-
-  if (data.barcodeData) {
-    body.barcodeData =
-      data.barcodeData;
-  }
-
-  return request<Absensi>(
-    "/absensi",
-    {
-      method: "POST",
-      body: JSON.stringify(body),
-    }
-  );
+  return apiFetch("/api/absensi", {
+    method: "POST",
+    body: JSON.stringify(body),
+  }) as Promise<Absensi>;
 }
 
 /* =========================================================
    ABSEN DENGAN LOKASI
 ========================================================= */
 
-export async function absenDenganLokasi(
-  data: {
-    kelasId: string;
-    status?: AbsensiStatus;
-    keterangan?: string;
-  }
-): Promise<Absensi> {
+function getCurrentPosition(): Promise<GeolocationPosition> {
   if (
-    typeof navigator ===
-      "undefined" ||
+    typeof navigator === "undefined" ||
     !navigator.geolocation
   ) {
-    throw new Error(
-      "Browser tidak mendukung GPS."
-    );
+    throw new Error("Browser tidak mendukung GPS.");
   }
 
-  const position =
-    await new Promise<GeolocationPosition>(
-      (resolve, reject) => {
-        navigator.geolocation.getCurrentPosition(
-          resolve,
-          reject,
-          {
-            enableHighAccuracy: true,
-            timeout: 15000,
-            maximumAge: 0,
-          }
-        );
-      }
+  return new Promise((resolve, reject) => {
+    navigator.geolocation.getCurrentPosition(
+      resolve,
+      () =>
+        reject(
+          new Error(
+            "Lokasi tidak dapat diakses. Periksa izin GPS browser.",
+          ),
+        ),
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+        maximumAge: 0,
+      },
     );
+  });
+}
+
+export async function absenDenganLokasi(data: {
+  kelasId: string;
+  status?: AbsensiStatus;
+  keterangan?: string;
+}): Promise<Absensi> {
+  const position = await getCurrentPosition();
 
   return createAbsensi({
     kelasId: data.kelasId,
-
-    status:
-      data.status || "hadir",
-
+    status: data.status || "hadir",
     metode: "lokasi",
-
-    keterangan:
-      data.keterangan,
-
-    lintang:
-      position.coords.latitude,
-
-    bujur:
-      position.coords.longitude,
+    keterangan: data.keterangan,
+    lintang: position.coords.latitude,
+    bujur: position.coords.longitude,
   });
 }
 
@@ -440,39 +308,22 @@ export async function absenDenganLokasi(
    ABSEN DENGAN BARCODE
 ========================================================= */
 
-export async function absenDenganBarcode(
-  data: {
-    kelasId: string;
-    barcodeData: string;
-    status?: AbsensiStatus;
-    keterangan?: string;
-  }
-): Promise<Absensi> {
-  if (!data.kelasId) {
-    throw new Error(
-      "Kelas ID wajib diisi."
-    );
-  }
-
+export async function absenDenganBarcode(data: {
+  kelasId: string;
+  barcodeData: string;
+  status?: AbsensiStatus;
+  keterangan?: string;
+}): Promise<Absensi> {
   if (!data.barcodeData) {
-    throw new Error(
-      "Data barcode wajib diisi."
-    );
+    throw new Error("Data barcode wajib diisi.");
   }
 
   return createAbsensi({
     kelasId: data.kelasId,
-
-    status:
-      data.status || "hadir",
-
+    status: data.status || "hadir",
     metode: "barcode",
-
-    barcodeData:
-      data.barcodeData,
-
-    keterangan:
-      data.keterangan,
+    barcodeData: data.barcodeData,
+    keterangan: data.keterangan,
   });
 }
 
@@ -480,56 +331,22 @@ export async function absenDenganBarcode(
    ABSEN DENGAN FACE
 ========================================================= */
 
-export async function absenDenganFace(
-  data: {
-    kelasId: string;
-    snapshot: Blob | File;
-    status?: AbsensiStatus;
-    keterangan?: string;
-    lintang: number;
-    bujur: number;
-  }
-): Promise<Absensi> {
-  if (!data.kelasId) {
-    throw new Error(
-      "Kelas ID wajib diisi."
-    );
-  }
-
-  if (!data.snapshot) {
-    throw new Error(
-      "Foto wajah wajib diisi."
-    );
-  }
-
-  if (
-    data.lintang === undefined ||
-    data.bujur === undefined
-  ) {
-    throw new Error(
-      "Lokasi GPS wajib diaktifkan."
-    );
-  }
-
+export async function absenDenganFace(data: {
+  kelasId: string;
+  snapshot: Blob | File;
+  status?: AbsensiStatus;
+  keterangan?: string;
+  lintang: number;
+  bujur: number;
+}): Promise<Absensi> {
   return createAbsensi({
     kelasId: data.kelasId,
-
-    status:
-      data.status || "hadir",
-
+    status: data.status || "hadir",
     metode: "face",
-
-    keterangan:
-      data.keterangan,
-
-    lintang:
-      data.lintang,
-
-    bujur:
-      data.bujur,
-
-    snapshot:
-      data.snapshot,
+    keterangan: data.keterangan,
+    lintang: data.lintang,
+    bujur: data.bujur,
+    snapshot: data.snapshot,
   });
 }
 
@@ -537,40 +354,16 @@ export async function absenDenganFace(
    ABSEN MANUAL
 ========================================================= */
 
-export async function absenManual(
-  data: {
-    kelasId: string;
-
-    status:
-      | "izin"
-      | "sakit"
-      | "alpha"
-      | "hadir";
-
-    keterangan?: string;
-  }
-): Promise<Absensi> {
-  if (!data.kelasId) {
-    throw new Error(
-      "Kelas ID wajib diisi."
-    );
-  }
-
-  if (!data.status) {
-    throw new Error(
-      "Status wajib diisi."
-    );
-  }
-
+export async function absenManual(data: {
+  kelasId: string;
+  status: AbsensiStatus;
+  keterangan?: string;
+}): Promise<Absensi> {
   return createAbsensi({
     kelasId: data.kelasId,
-
     status: data.status,
-
     metode: "manual",
-
-    keterangan:
-      data.keterangan,
+    keterangan: data.keterangan,
   });
 }
 
@@ -587,57 +380,143 @@ export interface KelasSaya {
 }
 
 export async function getKelasSaya(): Promise<KelasSaya> {
-  const response = await request<any>(
-    "/siswa/me",
-    {
-      method: "GET",
-    }
-  );
+  const response = await apiFetch("/api/siswa/me", {
+    method: "GET",
+  });
+
+  const result = unwrapObject(response);
 
   return {
-    kelasId:
-      response?.kelasId ?? null,
-
-    nama:
-      response?.kelas?.nama ?? "",
-
-    tingkat:
-      response?.kelas?.tingkat ?? "",
-
-    tahunAjaranId:
-      response?.tahunAjaranId ?? "",
+    kelasId: result.kelasId ?? result.kelas?.id ?? "",
+    nama: result.kelas?.nama ?? "",
+    tingkat: result.kelas?.tingkat ?? "",
+    tahunAjaranId: result.tahunAjaranId ?? "",
   };
 }
 
+/* =========================================================
+   ABSENSI SISWA
+   GET /api/absensi/siswa/:siswaId
 
+   Gunakan hanya jika route ini tersedia di backend.
+========================================================= */
 
-export async function getAbsensiSiswa(siswaId) {
+export async function getAbsensiSiswa(
+  siswaId: string,
+): Promise<Absensi[]> {
   if (!siswaId) {
     throw new Error("ID siswa wajib diisi.");
   }
 
-  return request(
-    `/absensi/siswa/${encodeURIComponent(siswaId)}`,
-    {
-      method: "GET",
-    }
+  const response = await apiFetch(
+    `/api/absensi/siswa/${encodeURIComponent(siswaId)}`,
+    { method: "GET" },
   );
+
+  return unwrapArray<Absensi>(response);
 }
 
 /* =========================================================
-   SERVICE
+   CHECK-IN SHIFT
+   POST /api/absensi/check-in
+========================================================= */
+
+export async function checkInShift(
+  data: CheckInShiftPayload = {},
+): Promise<Absensi> {
+  const body: Record<string, unknown> = {
+    status: data.status ?? "hadir",
+    metode: data.metode ?? "lokasi",
+  };
+
+  if (data.shiftKerjaId) body.shiftKerjaId = data.shiftKerjaId;
+  if (data.keterangan) body.keterangan = data.keterangan;
+  if (data.lintang !== undefined) body.lintang = data.lintang;
+  if (data.bujur !== undefined) body.bujur = data.bujur;
+  if (data.barcodeData) body.barcodeData = data.barcodeData;
+
+  return apiFetch("/api/absensi/check-in", {
+    method: "POST",
+    body: JSON.stringify(body),
+  }) as Promise<Absensi>;
+}
+
+/* =========================================================
+   CHECK-OUT SHIFT
+   POST /api/absensi/check-out
+========================================================= */
+
+export async function checkOutShift(
+  data: CheckOutShiftPayload = {},
+): Promise<Absensi> {
+  const body: Record<string, unknown> = {
+    metode: data.metode ?? "lokasi",
+  };
+
+  if (data.keterangan) body.keterangan = data.keterangan;
+  if (data.lintang !== undefined) body.lintang = data.lintang;
+  if (data.bujur !== undefined) body.bujur = data.bujur;
+  if (data.barcodeData) body.barcodeData = data.barcodeData;
+
+  return apiFetch("/api/absensi/check-out", {
+    method: "POST",
+    body: JSON.stringify(body),
+  }) as Promise<Absensi>;
+}
+
+/* =========================================================
+   RIWAYAT SHIFT SAYA
+   GET /api/absensi/shift-saya
+========================================================= */
+
+export async function getRiwayatShiftSaya(
+  page = 1,
+  limit = 20,
+): Promise<RiwayatShiftResponse> {
+  const params = new URLSearchParams({
+    page: String(Math.max(1, Math.floor(page))),
+    limit: String(Math.max(1, Math.floor(limit))),
+  });
+
+  const response = await apiFetch(
+    `/api/absensi/shift-saya?${params.toString()}`,
+    { method: "GET" },
+  );
+
+  const result = unwrapObject(response);
+  const data = unwrapArray<Absensi>(response);
+  const total = Number(result.total ?? data.length);
+  const responseLimit = Number(result.limit ?? limit);
+
+  return {
+    data,
+    page: Number(result.page ?? page),
+    limit: responseLimit,
+    total,
+    totalPages: Number(
+      result.totalPages ??
+        Math.ceil(total / Math.max(responseLimit, 1)),
+    ),
+  };
+}
+
+/* =========================================================
+   DEFAULT EXPORT
 ========================================================= */
 
 const absensiService = {
   getAbsensiSaya,
   getAbsensiKelas,
-  getAbsensiSiswa,
   createAbsensi,
   absenDenganLokasi,
   absenDenganBarcode,
   absenDenganFace,
   absenManual,
   getKelasSaya,
+  getAbsensiSiswa,
+  checkInShift,
+  checkOutShift,
+  getRiwayatShiftSaya,
 };
 
 export default absensiService;

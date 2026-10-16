@@ -1,10 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
-
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
+import { apiFetch } from "@/lib/api";
 
 import {
   LayoutDashboard,
@@ -17,706 +17,951 @@ import {
   ChevronRight,
   Users,
   Clock3,
-  TrendingUp,
-  TrendingDown,
-  Minus,
   Bell,
-  CheckCircle2,
   AlertCircle,
   ArrowUpRight,
   GraduationCap,
-  FileCheck2,
-  BookMarked,
   CalendarCheck2,
   MoreHorizontal,
+  RefreshCw,
 } from "lucide-react";
 
-// =====================================================
-// THEME HELPERS
-// =====================================================
-
-const themePrimaryGradient =
-  "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
-
-const themePrimarySoft =
-  "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
-
-const themePrimarySoftBorder =
-  "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
-
-const themePrimaryText =
-  "text-[var(--color-primary)]";
-
-const themePrimaryHover =
-  "hover:text-[var(--color-primary)]";
-
-const themePrimaryShadow =
-  "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
-
-const themeNeutralSurface =
-  "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
-
-const themeNeutralHover =
-  "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
-
-const themeNeutralBorder =
-  "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
-
-const themeDivider =
-  "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
-
-const themeCardShadow =
-  "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
-
-const themeInfoSurface =
-  "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
-
-const themeInfoBorder =
-  "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
-
-const themeSuccessSurface =
-  "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
-
-const themeSuccessBorder =
-  "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
-
-const themeWarningSurface =
-  "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
-
-const themeWarningBorder =
-  "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
-
-const themeDangerSurface =
-  "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
-
-const themeDangerBorder =
-  "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
-
-// =====================================================
-// DUMMY DATA
-// =====================================================
-
-const kpiData = [
-  {
-    id: "kelas",
-    label: "Kelas Diampu",
-    value: "4",
-    sub: "Kelas aktif",
-    icon: GraduationCap,
-  },
-  {
-    id: "siswa",
-    label: "Siswa Diampu",
-    value: "138",
-    sub: "Total siswa",
-    icon: Users,
-  },
-  {
-    id: "tugas",
-    label: "Tugas Belum Dinilai",
-    value: "12",
-    sub: "Perlu ditinjau",
-    icon: ClipboardList,
-  },
-  {
-    id: "kehadiran",
-    label: "Rata-rata Kehadiran",
-    value: "96.0%",
-    sub: "+1.8% bulan ini",
-    icon: CalendarCheck2,
-  },
-];
-
 const quickMenu = [
-  {
-    id: "jadwal",
-    title: "Jadwal Mengajar",
-    desc: "Lihat jadwal mengajar dan agenda hari ini",
-    stat: "3 sesi hari ini",
-    icon: CalendarDays,
-    path: "/guru/jadwal",
-  },
-  {
-    id: "nilai",
-    title: "Kelola Nilai",
-    desc: "Input dan rekap nilai siswa",
-    stat: "12 belum dinilai",
-    icon: NotebookPen,
-    path: "/guru/nilai",
-  },
-  {
-    id: "absensi",
-    title: "Absensi",
-    desc: "Kelola kehadiran siswa per kelas",
-    stat: "4 kelas aktif",
-    icon: ClipboardCheck,
-    path: "/guru/absensi",
-  },
-  {
-    id: "materi",
-    title: "Materi Pembelajaran",
-    desc: "Kelola bahan ajar dan materi kelas",
-    stat: "18 materi",
-    icon: BookOpen,
-    path: "/guru/materi",
-  },
-  {
-    id: "tugas",
-    title: "Tugas Siswa",
-    desc: "Buat dan pantau pengumpulan tugas",
-    stat: "5 tugas aktif",
-    icon: ClipboardList,
-    path: "/guru/tugas",
-  },
-  {
-    id: "quiz",
-    title: "Quiz & CBT",
-    desc: "Kelola soal dan sesi evaluasi",
-    stat: "2 quiz aktif",
-    icon: HelpCircle,
-    path: "/guru/quiz",
-  },
+  { id: "jadwal", title: "Jadwal Mengajar", desc: "Lihat jadwal dan agenda mengajar", icon: CalendarDays, path: "/guru/jadwal" },
+  { id: "nilai", title: "Kelola Nilai", desc: "Periksa pengumpulan dan penilaian", icon: NotebookPen, path: "/guru/nilai" },
+  { id: "absensi", title: "Absensi", desc: "Pantau kehadiran siswa", icon: ClipboardCheck, path: "/guru/absensi" },
+  { id: "materi", title: "Materi Pembelajaran", desc: "Kelola bahan ajar", icon: BookOpen, path: "/guru/materi" },
+  { id: "tugas", title: "Tugas Siswa", desc: "Pantau tugas dan pengumpulan", icon: ClipboardList, path: "/guru/tugas" },
+  { id: "quiz", title: "Quiz & CBT", desc: "Kelola evaluasi pembelajaran", icon: HelpCircle, path: "/guru/quiz" },
 ];
 
-const scheduleData = [
-  {
-    id: 1,
-    time: "07:00 - 08:30",
-    subject: "Matematika",
-    className: "Kelas 9A",
-    room: "Ruang 09",
-    status: "Selesai",
-  },
-  {
-    id: 2,
-    time: "09:00 - 10:30",
-    subject: "Matematika",
-    className: "Kelas 9B",
-    room: "Ruang 10",
-    status: "Berlangsung",
-  },
-  {
-    id: 3,
-    time: "11:00 - 12:30",
-    subject: "Matematika",
-    className: "Kelas 8A",
-    room: "Ruang 08",
-    status: "Berikutnya",
-  },
-];
+const themeCard =
+  "rounded-2xl border border-[color-mix(in_srgb,var(--color-text)_10%,transparent)] theme-card shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+const themePrimary = "text-[var(--color-primary)]";
+const themeSoft = "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
+const themeMuted = "theme-text-muted";
 
-const classAttendance = [
-  {
-    id: 1,
-    className: "Kelas 9A",
-    students: 34,
-    present: 33,
-    percentage: 98,
-    trend: "up",
-  },
-  {
-    id: 2,
-    className: "Kelas 9B",
-    students: 33,
-    present: 31,
-    percentage: 95,
-    trend: "down",
-  },
-  {
-    id: 3,
-    className: "Kelas 8A",
-    students: 36,
-    present: 35,
-    percentage: 97,
-    trend: "up",
-  },
-  {
-    id: 4,
-    className: "Kelas 8B",
-    students: 35,
-    present: 33,
-    percentage: 94,
-    trend: "same",
-  },
-];
-
-const activityData = [
-  {
-    id: 1,
-    title: "Nilai tugas diperbarui",
-    desc: "Tugas Matematika Kelas 9A",
-    time: "10 menit lalu",
-    icon: FileCheck2,
-    type: "blue",
-  },
-  {
-    id: 2,
-    title: "Materi baru ditambahkan",
-    desc: "Persamaan Kuadrat · Kelas 9B",
-    time: "1 jam lalu",
-    icon: BookMarked,
-    type: "green",
-  },
-  {
-    id: 3,
-    title: "Presensi berhasil disimpan",
-    desc: "Kelas 8A · 35 siswa hadir",
-    time: "2 jam lalu",
-    icon: CheckCircle2,
-    type: "slate",
-  },
-];
-
-const notificationData = [
-  {
-    id: 1,
-    title: "Rapat Wali Kelas",
-    desc: "Rapat wali kelas dijadwalkan pukul 14:00",
-    time: "2 jam lalu",
-    unread: true,
-  },
-  {
-    id: 2,
-    title: "Batas Input Nilai Rapor",
-    desc: "Penginputan nilai ditutup dalam 3 hari",
-    time: "5 jam lalu",
-    unread: true,
-  },
-  {
-    id: 3,
-    title: "Jadwal Mengajar Diperbarui",
-    desc: "Terdapat perubahan jadwal hari Jumat",
-    time: "Kemarin",
-    unread: false,
-  },
-];
-
-// =====================================================
-// HELPERS
-// =====================================================
-
-function TrendIcon({ trend }) {
-  if (trend === "up") {
-    return (
-      <TrendingUp
-        size={14}
-        className="shrink-0 text-[var(--color-success)]"
-      />
-    );
-  }
-
-  if (trend === "down") {
-    return (
-      <TrendingDown
-        size={14}
-        className="shrink-0 theme-danger"
-      />
-    );
-  }
-
-  return (
-    <Minus
-      size={14}
-      className="shrink-0 theme-text-muted"
-    />
-  );
+function getPayload(response) {
+  if (response?.data?.data !== undefined) return response.data.data;
+  if (response?.data !== undefined) return response.data;
+  return response;
 }
 
-function QuickIcon({ Icon }) {
-  return (
-    <div
-      className={`
-        flex h-10 w-10 shrink-0 items-center justify-center
-        rounded-xl
-        ${themePrimarySoft}
-        ${themePrimaryText}
-        transition
-        group-hover:${themePrimaryText}
-        group-hover:bg-[var(--color-primary)]
-        group-hover:text-[var(--color-card)]
-      `}
-    >
-      <Icon size={19} strokeWidth={1.8} />
-    </div>
-  );
+function getArrayPayload(response) {
+  const payload = getPayload(response);
+
+  if (Array.isArray(payload)) return payload;
+  if (Array.isArray(payload?.data)) return payload.data;
+  if (Array.isArray(payload?.items)) return payload.items;
+  if (Array.isArray(payload?.results)) return payload.results;
+  if (Array.isArray(payload?.records)) return payload.records;
+
+  return [];
 }
 
-function ActivityIcon({ Icon, type }) {
-  const styles = {
-    blue: `${themePrimarySoft} ${themePrimaryText}`,
-    green: `${themeSuccessSurface} text-[var(--color-success)]`,
-    slate: `${themeNeutralSurface} theme-text-secondary`,
+function getLocalDateString(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
+/**
+ * Tanggal dalam zona waktu Jakarta (WIB).
+ * Dipakai untuk mencocokkan catatan absensi dengan hari ini.
+ */
+function getJakartaDateString(value = new Date()) {
+  const date = value instanceof Date ? value : new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Jakarta",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(date);
+
+  const year = parts.find((part) => part.type === "year")?.value;
+  const month = parts.find((part) => part.type === "month")?.value;
+  const day = parts.find((part) => part.type === "day")?.value;
+
+  return year && month && day ? `${year}-${month}-${day}` : "";
+}
+
+function formatDate(date = new Date()) {
+  return new Intl.DateTimeFormat("id-ID", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  }).format(date);
+}
+
+function formatTime(value) {
+  if (value === null || value === undefined || value === "") {
+    return "-";
+  }
+
+  // Format jam langsung dari Backend, misalnya "07:30" atau "07:30:00".
+  if (typeof value === "string") {
+    const timeMatch = value.match(
+      /^([01]?\d|2[0-3]):([0-5]\d)(?::([0-5]\d))?$/
+    );
+
+    if (timeMatch) {
+      return `${timeMatch[1].padStart(2, "0")}:${timeMatch[2]}`;
+    }
+  }
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) {
+    return String(value);
+  }
+
+  return new Intl.DateTimeFormat("id-ID", {
+    timeZone: "Asia/Jakarta",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(date);
+}
+
+function normalizeDay(value) {
+  const days = {
+    monday: "senin",
+    tuesday: "selasa",
+    wednesday: "rabu",
+    thursday: "kamis",
+    friday: "jumat",
+    saturday: "sabtu",
+    sunday: "minggu",
   };
 
+  const normalized = String(value || "").toLowerCase().trim();
+  return days[normalized] || normalized;
+}
+
+function getTodayName() {
+  return new Intl.DateTimeFormat("id-ID", { weekday: "long" })
+    .format(new Date())
+    .toLowerCase();
+}
+
+function getScheduleStatus(item) {
+  const start = formatTime(item.jamMulai);
+  const end = formatTime(item.jamSelesai);
+  const now = new Date();
+  const currentMinutes = now.getHours() * 60 + now.getMinutes();
+  const [startHour, startMinute] = start.split(":").map(Number);
+  const [endHour, endMinute] = end.split(":").map(Number);
+
+  if ([startHour, startMinute, endHour, endMinute].some(Number.isNaN)) {
+    return "Jadwal";
+  }
+
+  const startMinutes = startHour * 60 + startMinute;
+  const endMinutes = endHour * 60 + endMinute;
+
+  if (currentMinutes < startMinutes) return "Berikutnya";
+  if (currentMinutes <= endMinutes) return "Berlangsung";
+  return "Selesai";
+}
+
+function isPresentStatus(status) {
+  return ["h", "hadir", "present", "telat", "terlambat"].includes(
+    String(status || "").toLowerCase()
+  );
+}
+
+function getInitials(name, email) {
+  const source = String(name || email || "G")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+
+  if (source.length >= 2) {
+    return `${source[0][0]}${source[1][0]}`.toUpperCase();
+  }
+
+  return (source[0] || "G").slice(0, 2).toUpperCase();
+}
+
+function getUserFromStorage() {
+  if (typeof window === "undefined") return { name: "", email: "" };
+
+  for (const key of ["user", "pengguna", "currentUser"]) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) continue;
+
+      const parsed = JSON.parse(raw);
+      const user = parsed?.data?.user || parsed?.user || parsed;
+
+      if (user && typeof user === "object") {
+        return {
+          name: user.namaLengkap || user.name || user.nama || "",
+          email: user.email || "",
+        };
+      }
+    } catch {
+      // Coba key penyimpanan berikutnya.
+    }
+  }
+
+  return { name: "", email: "" };
+}
+
+function getStoredUserId() {
+  if (typeof window === "undefined") return "";
+
+  for (const key of ["user", "pengguna", "currentUser"]) {
+    try {
+      const raw = localStorage.getItem(key);
+      if (!raw) continue;
+
+      const parsed = JSON.parse(raw);
+      const user = parsed?.data?.user || parsed?.user || parsed;
+      const id = user?.id || user?.userId || user?.penggunaId;
+
+      if (id) return String(id);
+    } catch {
+      // Coba key penyimpanan berikutnya.
+    }
+  }
+
+  return "";
+}
+
+function StatCard({ title, value, subtitle, Icon }) {
   return (
-    <div
-      className={`
-        flex h-9 w-9 shrink-0 items-center justify-center
-        rounded-lg
-        ${styles[type] || styles.slate}
-      `}
-    >
-      <Icon size={16} />
+    <div className={`${themeCard} min-w-0 p-4 sm:p-5`}>
+      <div className="flex items-center gap-3">
+        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themeSoft} ${themePrimary}`}>
+          <Icon size={19} />
+        </div>
+        <div className="min-w-0">
+          <p className={`truncate text-xs ${themeMuted}`}>{title}</p>
+          <p className="mt-1 text-xl font-bold theme-text">{value}</p>
+          <p className={`mt-1 text-[10px] ${themeMuted}`}>{subtitle}</p>
+        </div>
+      </div>
     </div>
   );
 }
 
-function getScheduleStatusClass(status) {
-  if (status === "Berlangsung") {
-    return `${themeInfoSurface} border ${themeInfoBorder} text-[var(--color-info)]`;
+/* =========================================================
+   ABSENSI GURU — REVISI
+========================================================= */
+
+/**
+ * Menentukan tanggal absensi dengan prioritas:
+ * 1. Waktu masuk/keluar (paling akurat).
+ * 2. DibuatPada.
+ * 3. Tanggal shift (fallback terakhir).
+ */
+function getAttendanceDate(item) {
+  if (!item) return "";
+
+  const todayKey = getJakartaDateString(new Date());
+
+  // Waktu masuk/keluar lebih akurat daripada tanggal shift.
+  const timestamps = [
+    item.waktuMasuk,
+    item.waktuKeluar,
+    item.dibuatPada,
+  ]
+    .filter(
+      (value) =>
+        value !== null &&
+        value !== undefined &&
+        value !== ""
+    )
+    .map((value) => ({
+      value,
+      date: getJakartaDateString(value),
+      timestamp: new Date(value).getTime(),
+    }))
+    .filter(
+      (item) =>
+        item.date &&
+        !Number.isNaN(item.timestamp)
+    );
+
+  // Jika salah satu waktu absensi terjadi hari ini, tampilkan catatannya.
+  if (timestamps.some((item) => item.date === todayKey)) {
+    return todayKey;
   }
 
-  if (status === "Selesai") {
-    return `${themeNeutralSurface} border ${themeNeutralBorder} theme-text-muted`;
+  if (timestamps.length > 0) {
+    timestamps.sort((a, b) => b.timestamp - a.timestamp);
+    return timestamps[0].date;
   }
 
-  return `${themeWarningSurface} border ${themeWarningBorder} text-[var(--color-warning)]`;
+  // Gunakan tanggal shift hanya jika tidak ada timestamp absensi.
+  return item.tanggal ? getJakartaDateString(item.tanggal) : "";
 }
 
-// =====================================================
-// MAIN
-// =====================================================
+function getAttendanceTime(item, type) {
+  if (!item) return null;
+
+  const keys =
+    type === "masuk"
+      ? [
+          "waktuMasuk",
+          "jamMasuk",
+          "checkIn",
+          "checkin",
+          "jam_masuk",
+          "waktu_masuk",
+          "check_in",
+          "checkInAt",
+          "checkinAt",
+          "clockIn",
+          "masukPada",
+        ]
+      : [
+          "waktuKeluar",
+          "jamKeluar",
+          "checkOut",
+          "checkout",
+          "jam_keluar",
+          "waktu_keluar",
+          "check_out",
+          "checkOutAt",
+          "checkoutAt",
+          "clockOut",
+          "keluarPada",
+        ];
+
+  for (const key of keys) {
+    const value = item[key];
+
+    if (value !== null && value !== undefined && value !== "") {
+      return value;
+    }
+  }
+
+  // Periksa juga kemungkinan data tersimpan dalam objek relasi.
+  const nestedObjects = [
+    item.absensi,
+    item.data,
+    item.presensi,
+    item.detail,
+  ];
+
+  for (const nested of nestedObjects) {
+    if (!nested || typeof nested !== "object") continue;
+
+    for (const key of keys) {
+      const value = nested[key];
+
+      if (value !== null && value !== undefined && value !== "") {
+        return value;
+      }
+    }
+  }
+
+  return null;
+}
+
+/* =========================================================
+   HALAMAN
+========================================================= */
 
 export default function GuruDashboardPage() {
   const router = useRouter();
 
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState("");
 
-  const notifications = useMemo(
-    () =>
-      notificationData.map((item) => ({
-        id: item.id,
-        title: item.title,
-        desc: item.time,
-        read: !item.unread,
-      })),
-    []
+  const [user, setUser] = useState({ name: "", email: "" });
+  const [kelasMapel, setKelasMapel] = useState([]);
+  const [jadwal, setJadwal] = useState([]);
+  const [notifikasi, setNotifikasi] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const [attendanceByClass, setAttendanceByClass] = useState({});
+  const [attendanceToday, setAttendanceToday] = useState(null);
+  const [attendanceTodayError, setAttendanceTodayError] = useState("");
+  const [pendingSubmissions, setPendingSubmissions] = useState(0);
+  const [taskCountAvailable, setTaskCountAvailable] = useState(true);
+
+  const today = useMemo(() => new Date(), []);
+  const todayString = getLocalDateString();
+
+  /* =======================================================
+     LOAD ATTENDANCE TODAY (REVISI)
+  ======================================================= */
+
+  const loadAttendanceToday = useCallback(async () => {
+    try {
+      setAttendanceTodayError("");
+
+      const response = await apiFetch(
+        "/api/absensi/shift-saya?page=1&limit=100"
+      );
+
+      const records = getArrayPayload(response);
+      const todayKey = getJakartaDateString(new Date());
+
+      const todayRecords = records.filter(
+        (item) => getAttendanceDate(item) === todayKey
+      );
+
+      todayRecords.sort((a, b) => {
+        const getLatestTimestamp = (item) => {
+          const timestamps = [
+            item?.waktuMasuk,
+            item?.waktuKeluar,
+            item?.dibuatPada,
+          ]
+            .filter(Boolean)
+            .map((value) => new Date(value).getTime())
+            .filter((value) => !Number.isNaN(value));
+
+          return timestamps.length ? Math.max(...timestamps) : 0;
+        };
+
+        return getLatestTimestamp(b) - getLatestTimestamp(a);
+      });
+
+      setAttendanceToday(todayRecords[0] || null);
+    } catch (err) {
+      setAttendanceToday(null);
+      setAttendanceTodayError(
+        err?.message || "Data absensi guru gagal dimuat."
+      );
+    }
+  }, []);
+
+  /* =======================================================
+     LOAD DASHBOARD (REVISI bagian filter absensi)
+  ======================================================= */
+
+  const loadDashboard = useCallback(
+    async (isRefresh = false) => {
+      if (isRefresh) setRefreshing(true);
+      else setLoading(true);
+
+      setError("");
+
+      try {
+        setUser(getUserFromStorage());
+
+        const [kelasResult, jadwalResult, notificationResult, attendanceResult] =
+          await Promise.allSettled([
+            apiFetch("/api/kelas-mapel"),
+            apiFetch("/api/jadwal-mengajar"),
+            apiFetch("/api/notifikasi"),
+            apiFetch("/api/absensi/shift-saya?page=1&limit=100"),
+          ]);
+
+        const kelasPayload =
+          kelasResult.status === "fulfilled"
+            ? getPayload(kelasResult.value)
+            : [];
+
+        const jadwalPayload =
+          jadwalResult.status === "fulfilled"
+            ? getPayload(jadwalResult.value)
+            : [];
+
+        const notificationPayload =
+          notificationResult.status === "fulfilled"
+            ? getPayload(notificationResult.value)
+            : null;
+
+        const kelasList = Array.isArray(kelasPayload)
+          ? kelasPayload
+          : Array.isArray(kelasPayload?.items)
+            ? kelasPayload.items
+            : [];
+
+        const jadwalList = Array.isArray(jadwalPayload)
+          ? jadwalPayload
+          : Array.isArray(jadwalPayload?.items)
+            ? jadwalPayload.items
+            : [];
+
+        const notifList = Array.isArray(notificationPayload?.list)
+          ? notificationPayload.list
+          : Array.isArray(notificationPayload)
+            ? notificationPayload
+            : [];
+
+        setNotifikasi(notifList);
+        setUnreadCount(Number(notificationPayload?.unreadCount || 0));
+
+        // ===================================================
+        // Ambil catatan absensi shift hari ini berdasarkan
+        // waktu Jakarta (REVISI).
+        // ===================================================
+        if (attendanceResult.status === "fulfilled") {
+          const attendanceRecords = getArrayPayload(
+            attendanceResult.value
+          );
+
+          const todayKey = getJakartaDateString(new Date());
+
+          const todayRecords = attendanceRecords.filter(
+            (item) => getAttendanceDate(item) === todayKey
+          );
+
+          todayRecords.sort((a, b) => {
+            const getLatestTimestamp = (item) => {
+              const timestamps = [
+                item?.waktuMasuk,
+                item?.waktuKeluar,
+                item?.dibuatPada,
+              ]
+                .filter(Boolean)
+                .map((value) => new Date(value).getTime())
+                .filter((value) => !Number.isNaN(value));
+
+              return timestamps.length ? Math.max(...timestamps) : 0;
+            };
+
+            return getLatestTimestamp(b) - getLatestTimestamp(a);
+          });
+
+          setAttendanceToday(todayRecords[0] || null);
+          setAttendanceTodayError("");
+        } else {
+          setAttendanceToday(null);
+          setAttendanceTodayError(
+            attendanceResult.reason?.message ||
+              "Data absensi guru gagal dimuat."
+          );
+        }
+
+        const storedUserId = getStoredUserId();
+
+        const teacherSchedule = storedUserId
+          ? jadwalList.filter(
+              (item) =>
+                String(item?.kelasMapel?.guruPengajar?.id || "") === storedUserId ||
+                String(item?.kelasMapel?.guruPengajarId || "") === storedUserId
+            )
+          : [];
+
+        const teacherClassMapel = storedUserId
+          ? kelasList.filter(
+              (item) =>
+                String(item?.guruPengajarId || "") === storedUserId ||
+                String(item?.guruPengajar?.id || "") === storedUserId
+            )
+          : [];
+
+        setJadwal(
+          teacherSchedule.filter(
+            (item) => normalizeDay(item.hari) === getTodayName()
+          )
+        );
+
+        setKelasMapel(teacherClassMapel);
+
+        const uniqueClasses = [
+          ...new Map(
+            teacherClassMapel
+              .filter((item) => item?.kelas?.id)
+              .map((item) => [item.kelas.id, item.kelas])
+          ).values(),
+        ];
+
+        const attendanceEntries = await Promise.all(
+          uniqueClasses.map(async (kelas) => {
+            try {
+              const response = await apiFetch(
+                `/api/absensi/kelas/${encodeURIComponent(kelas.id)}?tanggal=${encodeURIComponent(todayString)}`
+              );
+
+              const records = getArrayPayload(response);
+              const present = records.filter((item) =>
+                isPresentStatus(item.status)
+              ).length;
+
+              return [
+                kelas.id,
+                {
+                  id: kelas.id,
+                  name: kelas.nama || kelas.namaKelas || "Kelas",
+                  totalRecorded: records.length,
+                  present,
+                  absent: records.length - present,
+                  percentage:
+                    records.length > 0
+                      ? Math.round((present / records.length) * 100)
+                      : null,
+                },
+              ];
+            } catch {
+              return [
+                kelas.id,
+                {
+                  id: kelas.id,
+                  name: kelas.nama || kelas.namaKelas || "Kelas",
+                  totalRecorded: null,
+                  present: null,
+                  absent: null,
+                  percentage: null,
+                },
+              ];
+            }
+          })
+        );
+
+        setAttendanceByClass(Object.fromEntries(attendanceEntries));
+
+        let pendingCount = 0;
+        let taskDataFailed = false;
+
+        try {
+          const taskLists = await Promise.all(
+            teacherClassMapel.map(async (item) => {
+              if (!item?.id) return [];
+
+              try {
+                const response = await apiFetch(
+                  `/api/tugas/kelas-mapel/${encodeURIComponent(item.id)}`
+                );
+                const tasks = getArrayPayload(response);
+                return tasks;
+              } catch {
+                taskDataFailed = true;
+                return [];
+              }
+            })
+          );
+
+          const tasks = taskLists.flat();
+
+          const submissionLists = await Promise.all(
+            tasks.map(async (task) => {
+              if (!task?.id) return [];
+
+              try {
+                const response = await apiFetch(
+                  `/api/tugas/${encodeURIComponent(task.id)}/pengumpulan`
+                );
+                return getArrayPayload(response);
+              } catch {
+                taskDataFailed = true;
+                return [];
+              }
+            })
+          );
+
+          for (const submissions of submissionLists) {
+            for (const submission of submissions) {
+              const status = String(submission?.status || "").toLowerCase();
+              const hasGrade =
+                submission?.nilai !== null &&
+                submission?.nilai !== undefined;
+
+              if (status !== "dinilai" && !hasGrade) pendingCount += 1;
+            }
+          }
+        } catch {
+          taskDataFailed = true;
+        }
+
+        setPendingSubmissions(pendingCount);
+        setTaskCountAvailable(!taskDataFailed);
+
+        if (
+          kelasResult.status === "rejected" &&
+          jadwalResult.status === "rejected" &&
+          notificationResult.status === "rejected"
+        ) {
+          setError(
+            "Data dashboard tidak berhasil dimuat. Periksa koneksi API dan sesi login."
+          );
+        }
+      } catch (err) {
+        setError(err?.message || "Gagal memuat dashboard.");
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [todayString]
   );
+
+  useEffect(() => {
+    loadDashboard();
+  }, [loadDashboard]);
+
+  const uniqueClassCount = useMemo(
+    () =>
+      new Set(kelasMapel.map((item) => item?.kelas?.id).filter(Boolean)).size,
+    [kelasMapel]
+  );
+
+  const attendanceSummary = useMemo(() => {
+    const rows = Object.values(attendanceByClass).filter(
+      (item) => item.totalRecorded !== null
+    );
+
+    const totalRecorded = rows.reduce((sum, item) => sum + item.totalRecorded, 0);
+    const totalPresent = rows.reduce((sum, item) => sum + item.present, 0);
+
+    return {
+      totalRecorded,
+      totalPresent,
+      totalAbsent: totalRecorded - totalPresent,
+      percentage:
+        totalRecorded > 0
+          ? Math.round((totalPresent / totalRecorded) * 100)
+          : null,
+    };
+  }, [attendanceByClass]);
+
+  const headerNotifications = useMemo(
+    () =>
+      notifikasi.map((item) => ({
+        id: item.id,
+        title: item.judul || "Notifikasi",
+        desc: item.isi || "",
+        read: Boolean(item.dibaca),
+      })),
+    [notifikasi]
+  );
+
+  async function markNotificationAsRead(item) {
+    if (!item?.id || item.dibaca) return;
+
+    try {
+      await apiFetch(
+        `/api/notifikasi/${encodeURIComponent(item.id)}/read`,
+        { method: "PATCH" }
+      );
+
+      setNotifikasi((previous) =>
+        previous.map((notification) =>
+          notification.id === item.id
+            ? { ...notification, dibaca: true }
+            : notification
+        )
+      );
+
+      setUnreadCount((previous) => Math.max(0, previous - 1));
+    } catch (err) {
+      setError(err?.message || "Notifikasi gagal ditandai sudah dibaca.");
+    }
+  }
+
+  async function markAllNotificationsAsRead() {
+    try {
+      await apiFetch("/api/notifikasi/read-all", { method: "PATCH" });
+      setNotifikasi((previous) =>
+        previous.map((item) => ({ ...item, dibaca: true }))
+      );
+      setUnreadCount(0);
+    } catch (err) {
+      setError(err?.message || "Notifikasi gagal diperbarui.");
+    }
+  }
+
+  const displayName = user.name || user.email?.split("@")[0] || "Guru";
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
-
-      {/* =================================================
-          SIDEBAR
-      ================================================= */}
-
       <Sidebar
         active="dashboard"
         setActive={() => {}}
         collapsed={!sidebarOpen}
-        setCollapsed={() =>
-          setSidebarOpen((prev) => !prev)
-        }
+        setCollapsed={() => setSidebarOpen((value) => !value)}
       />
 
-      {/* =================================================
-          CONTENT WRAPPER
-      ================================================= */}
-
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-
-        {/* =================================================
-            HEADER
-        ================================================= */}
-
         <div className="shrink-0">
           <Header
-            toggleSidebar={() =>
-              setSidebarOpen((prev) => !prev)
-            }
-            notifications={notifications}
+            toggleSidebar={() => setSidebarOpen((value) => !value)}
+            notifications={headerNotifications}
             user={{
-              name: "Bu Sari",
-              email: "guru@smartschool.com",
-              avatar: "AS",
+              name: displayName,
+              email: user.email || "",
+              avatar: getInitials(displayName, user.email),
             }}
           />
         </div>
 
-        {/* =================================================
-            MAIN
-        ================================================= */}
-
         <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
-
-          <div className="mx-auto w-full max-w-[1600px] p-3 sm:p-4 md:p-5 lg:p-6 xl:p-7">
-
+          <div className="mx-auto w-full max-w-[1600px] p-3 sm:p-4 md:p-5 lg:p-6">
             <div className="space-y-5 lg:space-y-6">
-
-              {/* =================================================
-                  WELCOME HEADER
-              ================================================= */}
-
-              <section
-                className={`
-                  relative overflow-hidden rounded-2xl
-                  border ${themeNeutralBorder}
-                  theme-card
-                  ${themeCardShadow}
-                `}
-              >
-
-                {/* THEME DECORATION */}
-
-                <div
-                  className={`
-                    pointer-events-none absolute
-                    -right-16 -top-20
-                    h-48 w-48 rounded-full
-                    ${themePrimarySoft}
-                  `}
-                />
-
-                <div
-                  className={`
-                    pointer-events-none absolute
-                    -bottom-20 right-28
-                    h-36 w-36 rounded-full
-                    ${themeNeutralSurface}
-                  `}
-                />
-
-                <div className="relative flex min-w-0 flex-col justify-between gap-5 p-5 sm:p-6 lg:flex-row lg:items-center lg:p-7">
-
-                  <div className="min-w-0">
-
-                    <div className="flex items-start gap-3">
-
-                      <div
-                        className={`
-                          flex h-11 w-11 shrink-0
-                          items-center justify-center
-                          rounded-xl
-                          ${themePrimaryGradient}
-                          text-[var(--color-card)]
-                          ${themePrimaryShadow}
-                        `}
-                      >
-                        <LayoutDashboard
-                          size={20}
-                          strokeWidth={1.8}
-                        />
-                      </div>
-
-                      <div className="min-w-0">
-
-                        <p
-                          className={`text-xs font-medium ${themePrimaryText}`}
-                        >
-                          Dashboard Guru
-                        </p>
-
-                        <h1 className="mt-1 truncate text-xl font-bold tracking-tight theme-text sm:text-2xl lg:text-[26px]">
-                          Selamat pagi, Bu Sari
-                        </h1>
-
-                        <p className="mt-2 max-w-2xl text-xs leading-relaxed theme-text-secondary sm:text-sm">
-                          Pantau aktivitas mengajar, kehadiran,
-                          tugas, dan perkembangan siswa dalam
-                          satu tempat.
-                        </p>
-
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex shrink-0 items-center gap-3">
-
-                    <div
-                      className={`
-                        rounded-xl
-                        border ${themeNeutralBorder}
-                        ${themeNeutralSurface}
-                        px-4 py-3
-                      `}
-                    >
-
-                      <div className="flex items-center gap-2">
-
-                        <CalendarDays
-                          size={15}
-                          className={themePrimaryText}
-                        />
-
-                        <span className="text-xs font-semibold theme-text">
-                          Senin, 17 Agustus 2026
-                        </span>
-
-                      </div>
-
-                      <p className="mt-1 pl-5 text-[10px] theme-text-muted">
-                        Wali Kelas 9A
-                      </p>
-
-                    </div>
-                  </div>
-                </div>
-              </section>
-
-              {/* =================================================
-                  KPI
-              ================================================= */}
-
-              <section
-                className={`
-                  grid grid-cols-2 overflow-hidden
-                  rounded-2xl
-                  border ${themeNeutralBorder}
-                  theme-card
-                  ${themeCardShadow}
-                  lg:grid-cols-4
-                `}
-              >
-
-                {kpiData.map((item, index) => {
-                  const Icon = item.icon;
-
-                  return (
-                    <div
-                      key={item.id}
-                      className={`
-                        min-w-0 p-4 sm:p-5
-                        ${
-                          index < 3
-                            ? "border-b lg:border-b-0 lg:border-r"
-                            : ""
-                        }
-                        ${themeDivider}
-                        ${
-                          index === 1
-                            ? "sm:border-r"
-                            : ""
-                        }
-                      `}
-                    >
-
-                      <div className="flex min-w-0 items-center gap-3">
-
-                        <div
-                          className={`
-                            flex h-10 w-10 shrink-0
-                            items-center justify-center
-                            rounded-xl
-                            ${themePrimarySoft}
-                            ${themePrimaryText}
-                          `}
-                        >
-                          <Icon size={18} />
-                        </div>
-
-                        <div className="min-w-0">
-
-                          <p className="truncate text-[10px] font-medium theme-text-muted sm:text-xs">
-                            {item.label}
-                          </p>
-
-                          <div className="mt-0.5 flex items-end gap-2">
-
-                            <span className="text-lg font-bold leading-none theme-text sm:text-xl">
-                              {item.value}
-                            </span>
-
-                          </div>
-
-                          <p className="mt-1 truncate text-[9px] theme-text-muted sm:text-[10px]">
-                            {item.sub}
-                          </p>
-
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-              </section>
-
-              {/* =================================================
-                  QUICK ACCESS
-              ================================================= */}
-
-              <section>
-
-                <div className="mb-3 flex items-center justify-between">
-
-                  <div>
-
-                    <h2 className="text-sm font-bold theme-text sm:text-base">
-                      Akses Cepat
-                    </h2>
-
-                    <p className="mt-0.5 text-[10px] theme-text-muted sm:text-xs">
-                      Kelola aktivitas pembelajaran
+              {error && (
+                <div className="flex items-start gap-3 rounded-xl border border-red-500/20 bg-red-500/5 p-4">
+                  <AlertCircle size={18} className="mt-0.5 shrink-0 text-red-500" />
+                  <div className="min-w-0 flex-1">
+                    <p className="text-sm font-semibold theme-text">
+                      Ada data yang belum berhasil dimuat
                     </p>
+                    <p className="mt-1 text-xs theme-text-secondary">{error}</p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => loadDashboard(true)}
+                    className="text-xs font-semibold theme-text"
+                  >
+                    Coba lagi
+                  </button>
+                </div>
+              )}
 
+              <section className={`${themeCard} relative overflow-hidden p-5 sm:p-6 lg:p-7`}>
+                <div className={`pointer-events-none absolute -right-12 -top-16 h-44 w-44 rounded-full ${themeSoft}`} />
+                <div className="relative flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
+                  <div className="flex min-w-0 items-start gap-3">
+                    <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${themeSoft} ${themePrimary}`}>
+                      <LayoutDashboard size={21} />
+                    </div>
+                    <div className="min-w-0">
+                      <p className={`text-xs font-medium ${themePrimary}`}>Dashboard Guru</p>
+                      <h1 className="mt-1 break-words text-xl font-bold theme-text sm:text-2xl">
+                        Selamat datang, {displayName}
+                      </h1>
+                      <p className="mt-2 max-w-2xl text-xs leading-relaxed theme-text-secondary sm:text-sm">
+                        Pantau jadwal mengajar, pengumpulan tugas, absensi, dan notifikasi dari satu tempat.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex shrink-0 items-center justify-between gap-3 rounded-xl border border-[color-mix(in_srgb,var(--color-text)_10%,transparent)] p-3 sm:justify-start">
+                    <CalendarDays size={17} className={themePrimary} />
+                    <span className="text-xs font-semibold theme-text">{formatDate(today)}</span>
+                    <button
+                      type="button"
+                      title="Muat ulang data"
+                      onClick={() => loadDashboard(true)}
+                      disabled={refreshing}
+                      className="ml-1 rounded-lg p-2 theme-text-secondary hover:bg-black/5 disabled:opacity-50"
+                    >
+                      <RefreshCw size={15} className={refreshing ? "animate-spin" : ""} />
+                    </button>
+                  </div>
+                </div>
+              </section>
+
+              <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
+                <StatCard title="Kelas Diampu" value={loading ? "…" : uniqueClassCount} subtitle="Kelas unik dari kelas-mapel" Icon={GraduationCap} />
+                <StatCard title="Siswa Diampu" value="—" subtitle="Jumlah anggota kelas belum tersedia" Icon={Users} />
+                <StatCard
+                  title="Pengumpulan Belum Dinilai"
+                  value={loading ? "…" : taskCountAvailable ? pendingSubmissions : "—"}
+                  subtitle={taskCountAvailable ? "Berdasarkan pengumpulan siswa" : "Data penilaian belum berhasil dimuat"}
+                  Icon={ClipboardList}
+                />
+                <StatCard
+                  title="Kehadiran Siswa Hari Ini"
+                  value={loading ? "…" : attendanceSummary.percentage === null ? "—" : `${attendanceSummary.percentage}%`}
+                  subtitle="Dari catatan absensi kelas"
+                  Icon={CalendarCheck2}
+                />
+              </section>
+
+              {/* KEHADIRAN GURU: waktu aktual dari Backend */}
+              <section className={`${themeCard} min-w-0 overflow-hidden`}>
+                <div className="flex items-center gap-3 border-b border-[color-mix(in_srgb,var(--color-text)_8%,transparent)] p-4 sm:p-5">
+                  <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeSoft} ${themePrimary}`}>
+                    <Clock3 size={17} />
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-bold theme-text">Kehadiran hari ini</h2>
+                    <p className={`mt-1 text-xs ${themeMuted}`}>
+                      Waktu absensi dicatat oleh Backend.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => loadDashboard(true)}
+                    disabled={refreshing}
+                    title="Perbarui data kehadiran"
+                    className={`ml-auto rounded-lg p-2 ${themeMuted} hover:bg-black/5 disabled:opacity-50`}
+                  >
+                    <RefreshCw size={15} className={refreshing ? "animate-spin" : ""} />
+                  </button>
+                </div>
+
+                <div className="grid grid-cols-1 gap-4 p-4 sm:grid-cols-2 sm:p-5">
+                  <div className="rounded-xl border border-[color-mix(in_srgb,var(--color-text)_10%,transparent)] p-4">
+                    <p className={`text-xs ${themeMuted}`}>Jam masuk</p>
+                    <p className="mt-2 text-2xl font-bold theme-text">
+                      {getAttendanceTime(attendanceToday, "masuk")
+                        ? formatTime(getAttendanceTime(attendanceToday, "masuk"))
+                        : "-"}
+                    </p>
+                    <p className={`mt-1 text-xs ${themeMuted}`}>
+                      {getAttendanceTime(attendanceToday, "masuk")
+                        ? "Check-in tercatat"
+                        : "Belum ada check-in"}
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl border border-[color-mix(in_srgb,var(--color-text)_10%,transparent)] p-4">
+                    <p className={`text-xs ${themeMuted}`}>Jam pulang</p>
+                    <p className="mt-2 text-2xl font-bold theme-text">
+                      {getAttendanceTime(attendanceToday, "keluar")
+                        ? formatTime(getAttendanceTime(attendanceToday, "keluar"))
+                        : "-"}
+                    </p>
+                    <p className={`mt-1 text-xs ${themeMuted}`}>
+                      {getAttendanceTime(attendanceToday, "keluar")
+                        ? "Check-out tercatat"
+                        : "Belum ada check-out"}
+                    </p>
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+                {attendanceTodayError ? (
+                  <div className="mx-4 mb-4 rounded-lg border border-red-500/20 bg-red-500/5 p-3 sm:mx-5">
+                    <p className="text-xs text-red-500">{attendanceTodayError}</p>
+                  </div>
+                ) : !attendanceToday ? (
+                  <p className={`px-4 pb-4 text-xs ${themeMuted} sm:px-5`}>
+                    Belum ditemukan catatan absensi shift untuk hari ini. Pastikan guru sudah melakukan check-in dan memiliki shift kerja.
+                  </p>
+                ) : (
+                  <div className="px-4 pb-4 sm:px-5">
+                    <p className={`text-xs ${themeMuted}`}>
+                      Status: <span className="font-semibold theme-text">{attendanceToday.statusShift || attendanceToday.status || "Tercatat"}</span>
+                      {attendanceToday.shiftKerja?.nama
+                        ? ` · Shift ${attendanceToday.shiftKerja.nama}`
+                        : ""}
+                    </p>
+                  </div>
+                )}
+              </section>
 
+              {/* AKSES CEPAT */}
+              <section>
+                <div className="mb-3">
+                  <h2 className="text-sm font-bold theme-text sm:text-base">Akses Cepat</h2>
+                  <p className={`mt-1 text-xs ${themeMuted}`}>Kelola aktivitas pembelajaran</p>
+                </div>
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
                   {quickMenu.map((item) => {
                     const Icon = item.icon;
-
                     return (
                       <button
                         key={item.id}
                         type="button"
-                        onClick={() =>
-                          router.push(item.path)
-                        }
-                        className={`
-                          group relative flex min-w-0
-                          items-center gap-4
-                          overflow-hidden rounded-xl
-                          border ${themeNeutralBorder}
-                          theme-card
-                          p-4 text-left
-                          ${themeCardShadow}
-                          transition duration-200
-                          hover:-translate-y-0.5
-                          hover:border-[color-mix(in_srgb,var(--color-primary)_28%,var(--color-text)_10%,transparent)]
-                          ${themeNeutralHover}
-                        `}
+                        onClick={() => router.push(item.path)}
+                        className={`${themeCard} group flex min-w-0 items-center gap-4 p-4 text-left transition hover:-translate-y-0.5`}
                       >
-
-                        <QuickIcon Icon={Icon} />
-
+                        <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themeSoft} ${themePrimary}`}>
+                          <Icon size={19} />
+                        </div>
                         <div className="min-w-0 flex-1">
-
-                          <div className="flex min-w-0 items-center justify-between gap-2">
-
-                            <h3 className="truncate text-sm font-semibold theme-text">
-                              {item.title}
-                            </h3>
-
-                            <ChevronRight
-                              size={15}
-                              className={`
-                                shrink-0
-                                theme-text-muted
-                                transition
-                                group-hover:translate-x-0.5
-                                group-hover:text-[var(--color-primary)]
-                              `}
-                            />
-
+                          <div className="flex items-center justify-between gap-2">
+                            <h3 className="truncate text-sm font-semibold theme-text">{item.title}</h3>
+                            <ChevronRight size={15} className={`shrink-0 ${themeMuted}`} />
                           </div>
-
-                          <p className="mt-1 line-clamp-1 text-[10px] leading-relaxed theme-text-secondary sm:text-xs">
-                            {item.desc}
-                          </p>
-
-                          <span
-                            className={`
-                              mt-2 inline-flex max-w-full
-                              rounded-md
-                              ${themeNeutralSurface}
-                              px-2 py-1
-                              text-[9px] font-medium
-                              theme-text-secondary
-                            `}
-                          >
-                            {item.stat}
-                          </span>
-
+                          <p className="mt-1 text-xs theme-text-secondary">{item.desc}</p>
                         </div>
                       </button>
                     );
@@ -724,719 +969,222 @@ export default function GuruDashboardPage() {
                 </div>
               </section>
 
-              {/* =================================================
-                  MAIN INFORMATION
-              ================================================= */}
-
+              {/* JADWAL DAN NOTIFIKASI */}
               <section className="grid min-w-0 grid-cols-1 gap-5 xl:grid-cols-3">
-
-                {/* =================================================
-                    JADWAL HARI INI
-                ================================================= */}
-
-                <div
-                  className={`
-                    min-w-0 overflow-hidden
-                    rounded-2xl
-                    border ${themeNeutralBorder}
-                    theme-card
-                    ${themeCardShadow}
-                    xl:col-span-2
-                  `}
-                >
-
-                  <div
-                    className={`
-                      flex items-center justify-between
-                      border-b ${themeDivider}
-                      p-4 sm:p-5
-                    `}
-                  >
-
-                    <div className="flex min-w-0 items-center gap-3">
-
-                      <div
-                        className={`
-                          flex h-9 w-9 shrink-0
-                          items-center justify-center
-                          rounded-lg
-                          ${themePrimarySoft}
-                          ${themePrimaryText}
-                        `}
-                      >
+                <div className={`${themeCard} min-w-0 overflow-hidden xl:col-span-2`}>
+                  <div className="flex items-center justify-between gap-3 border-b border-[color-mix(in_srgb,var(--color-text)_8%,transparent)] p-4 sm:p-5">
+                    <div className="flex items-center gap-3">
+                      <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeSoft} ${themePrimary}`}>
                         <Clock3 size={17} />
                       </div>
-
-                      <div className="min-w-0">
-
-                        <h2 className="text-sm font-bold theme-text">
-                          Jadwal Hari Ini
-                        </h2>
-
-                        <p className="mt-0.5 text-[10px] theme-text-muted">
-                          Senin, 17 Agustus 2026
-                        </p>
-
+                      <div>
+                        <h2 className="text-sm font-bold theme-text">Jadwal Hari Ini</h2>
+                        <p className={`mt-1 text-xs ${themeMuted}`}>{formatDate(today)}</p>
                       </div>
                     </div>
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        router.push("/guru/jadwal")
-                      }
-                      className={`
-                        flex shrink-0 items-center gap-1
-                        text-[10px] font-semibold
-                        ${themePrimaryText}
-                        ${themePrimaryHover}
-                        sm:text-xs
-                      `}
-                    >
-                      Lihat jadwal
-                      <ChevronRight size={13} />
+                    <button type="button" onClick={() => router.push("/guru/jadwal")} className={`flex items-center gap-1 text-xs font-semibold ${themePrimary}`}>
+                      Lihat jadwal <ChevronRight size={13} />
                     </button>
                   </div>
 
-                  <div className={`divide-y ${themeDivider}`}>
+                  {loading ? (
+                    <p className="p-5 text-sm theme-text-secondary">Memuat jadwal…</p>
+                  ) : jadwal.length === 0 ? (
+                    <div className="p-6 text-center">
+                      <CalendarDays size={25} className={`mx-auto ${themeMuted}`} />
+                      <p className="mt-3 text-sm font-semibold theme-text">Belum ada jadwal yang dapat ditampilkan</p>
+                      <p className={`mt-1 text-xs ${themeMuted}`}>Periksa penugasan guru pada kelas-mapel dan data jadwal di Backend.</p>
+                    </div>
+                  ) : (
+                    <div className="divide-y divide-[color-mix(in_srgb,var(--color-text)_8%,transparent)]">
+                      {jadwal.map((item, index) => {
+                        const status = getScheduleStatus(item);
+                        const kelasMapelItem = item.kelasMapel || {};
 
-                    {scheduleData.map((item) => {
-                      const isActive =
-                        item.status === "Berlangsung";
-
-                      return (
-                        <div
-                          key={item.id}
-                          className={`
-                            flex min-w-0 items-center gap-3
-                            p-4 sm:p-5
-                            ${
-                              isActive
-                                ? themeInfoSurface
-                                : ""
-                            }
-                          `}
-                        >
-
-                          {/* TIME */}
-
-                          <div className="w-[82px] shrink-0 sm:w-[100px]">
-
-                            <p className="text-xs font-bold theme-text sm:text-sm">
-                              {item.time.split(" - ")[0]}
-                            </p>
-
-                            <p className="mt-0.5 text-[9px] theme-text-muted sm:text-[10px]">
-                              {item.time.split(" - ")[1]}
-                            </p>
-
-                          </div>
-
-                          {/* LINE */}
-
-                          <div className="relative flex h-12 shrink-0 items-center">
-
-                            <div
-                              className={`
-                                h-2.5 w-2.5
-                                rounded-full
-                                border-2
-                                border-[var(--color-primary)]
-                                theme-card
-                              `}
-                            />
-
-                            {item.id !== scheduleData.length && (
-                              <div
-                                className={`
-                                  absolute left-1/2 top-7
-                                  h-8 w-px
-                                  -translate-x-1/2
-                                  bg-[color-mix(in_srgb,var(--color-text)_12%,transparent)]
-                                `}
-                              />
-                            )}
-
-                          </div>
-
-                          {/* CONTENT */}
-
-                          <div className="min-w-0 flex-1">
-
-                            <p className="truncate text-xs font-semibold theme-text sm:text-sm">
-                              {item.subject}
-                            </p>
-
-                            <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1">
-
-                              <span className="inline-flex items-center gap-1 text-[9px] theme-text-muted sm:text-[10px]">
-                                <Users size={11} />
-                                {item.className}
-                              </span>
-
-                              <span className="inline-flex items-center gap-1 text-[9px] theme-text-muted sm:text-[10px]">
-                                <BookOpen size={11} />
-                                {item.room}
-                              </span>
-
+                        return (
+                          <div key={item.id || `${index}-${item.jamMulai}`} className={`flex min-w-0 items-center gap-3 p-4 sm:p-5 ${status === "Berlangsung" ? "bg-[color-mix(in_srgb,var(--color-info)_7%,transparent)]" : ""}`}>
+                            <div className="w-[78px] shrink-0">
+                              <p className="text-xs font-bold theme-text">{formatTime(item.jamMulai)}</p>
+                              <p className={`mt-1 text-[10px] ${themeMuted}`}>{formatTime(item.jamSelesai)}</p>
                             </div>
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-sm font-semibold theme-text">
+                                {kelasMapelItem.mataPelajaran?.nama || kelasMapelItem.mataPelajaran?.namaMapel || "Mata pelajaran"}
+                              </p>
+                              <p className={`mt-1 text-xs ${themeMuted}`}>
+                                {kelasMapelItem.kelas?.nama || kelasMapelItem.kelas?.namaKelas || "Kelas belum tersedia"}
+                                {item.ruangan ? ` · ${item.ruangan}` : ""}
+                              </p>
+                            </div>
+                            <span className="hidden rounded-full border border-[color-mix(in_srgb,var(--color-text)_12%,transparent)] px-2 py-1 text-[10px] theme-text-secondary sm:inline-flex">
+                              {status}
+                            </span>
                           </div>
-
-                          {/* STATUS */}
-
-                          <span
-                            className={`
-                              hidden shrink-0
-                              rounded-full
-                              border
-                              px-2.5 py-1
-                              text-[9px] font-semibold
-                              sm:inline-flex
-                              ${getScheduleStatusClass(
-                                item.status
-                              )}
-                            `}
-                          >
-                            {item.status}
-                          </span>
-
-                        </div>
-                      );
-                    })}
-
-                  </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
 
-                {/* =================================================
-                    AKTIVITAS TERBARU
-                ================================================= */}
-
-                <div
-                  className={`
-                    min-w-0 overflow-hidden
-                    rounded-2xl
-                    border ${themeNeutralBorder}
-                    theme-card
-                    ${themeCardShadow}
-                  `}
-                >
-
-                  <div
-                    className={`
-                      flex items-center justify-between
-                      border-b ${themeDivider}
-                      p-4 sm:p-5
-                    `}
-                  >
-
+                <div className={`${themeCard} min-w-0 overflow-hidden`}>
+                  <div className="flex items-center justify-between gap-3 border-b border-[color-mix(in_srgb,var(--color-text)_8%,transparent)] p-4 sm:p-5">
                     <div className="flex items-center gap-3">
-
-                      <div
-                        className={`
-                          flex h-9 w-9
-                          items-center justify-center
-                          rounded-lg
-                          ${themePrimarySoft}
-                          ${themePrimaryText}
-                        `}
-                      >
-                        <MoreHorizontal size={17} />
+                      <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeSoft} ${themePrimary}`}>
+                        <Bell size={17} />
                       </div>
-
                       <div>
-
-                        <h2 className="text-sm font-bold theme-text">
-                          Aktivitas Terbaru
-                        </h2>
-
-                        <p className="mt-0.5 text-[10px] theme-text-muted">
-                          Aktivitas pembelajaran
-                        </p>
-
+                        <h2 className="text-sm font-bold theme-text">Notifikasi</h2>
+                        <p className={`mt-1 text-xs ${themeMuted}`}>Informasi akun kamu</p>
                       </div>
                     </div>
+                    {unreadCount > 0 && (
+                      <span className={`rounded-full px-2 py-1 text-[10px] font-semibold ${themeSoft} ${themePrimary}`}>
+                        {unreadCount} baru
+                      </span>
+                    )}
                   </div>
 
-                  <div className={`divide-y ${themeDivider}`}>
-
-                    {activityData.map((item) => {
-                      const Icon = item.icon;
-
-                      return (
-                        <div
+                  {loading ? (
+                    <p className="p-4 text-sm theme-text-secondary">Memuat notifikasi…</p>
+                  ) : notifikasi.length === 0 ? (
+                    <p className="p-5 text-sm theme-text-secondary">Belum ada notifikasi.</p>
+                  ) : (
+                    <div className="divide-y divide-[color-mix(in_srgb,var(--color-text)_8%,transparent)]">
+                      {notifikasi.slice(0, 5).map((item) => (
+                        <button
                           key={item.id}
-                          className={`
-                            flex gap-3 p-4
-                            transition
-                            ${themeNeutralHover}
-                            sm:p-5
-                          `}
+                          type="button"
+                          onClick={() => markNotificationAsRead(item)}
+                          className="flex w-full gap-3 p-4 text-left transition hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]"
                         >
-
-                          <ActivityIcon
-                            Icon={Icon}
-                            type={item.type}
-                          />
-
+                          <span className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${item.dibaca ? "bg-[var(--color-text-muted)]" : "bg-[var(--color-primary)]"}`} />
                           <div className="min-w-0 flex-1">
-
-                            <p className="truncate text-xs font-semibold theme-text">
-                              {item.title}
+                            <p className="text-xs font-semibold theme-text">{item.judul || "Notifikasi"}</p>
+                            <p className="mt-1 line-clamp-2 text-xs theme-text-secondary">{item.isi || "Tidak ada detail."}</p>
+                            <p className={`mt-1 text-[10px] ${themeMuted}`}>
+                              {item.dibuatPada ? new Date(item.dibuatPada).toLocaleString("id-ID") : ""}
                             </p>
-
-                            <p className="mt-1 line-clamp-2 text-[10px] leading-relaxed theme-text-secondary">
-                              {item.desc}
-                            </p>
-
-                            <p className="mt-1.5 text-[9px] theme-text-muted">
-                              {item.time}
-                            </p>
-
                           </div>
-                        </div>
-                      );
-                    })}
+                        </button>
+                      ))}
+                    </div>
+                  )}
 
-                  </div>
+                  {unreadCount > 0 && (
+                    <button
+                      type="button"
+                      onClick={markAllNotificationsAsRead}
+                      className={`w-full border-t border-[color-mix(in_srgb,var(--color-text)_8%,transparent)] p-3 text-xs font-semibold ${themePrimary}`}
+                    >
+                      Tandai semua dibaca
+                    </button>
+                  )}
                 </div>
               </section>
 
-              {/* =================================================
-                  BOTTOM
-              ================================================= */}
-
-              <section className="grid min-w-0 grid-cols-1 gap-5 lg:grid-cols-3">
-
-                {/* =================================================
-                    KEHADIRAN
-                ================================================= */}
-
-                <div
-                  className={`
-                    min-w-0 overflow-hidden
-                    rounded-2xl
-                    border ${themeNeutralBorder}
-                    theme-card
-                    ${themeCardShadow}
-                    lg:col-span-2
-                  `}
-                >
-
-                  <div
-                    className={`
-                      flex items-center justify-between
-                      border-b ${themeDivider}
-                      p-4 sm:p-5
-                    `}
-                  >
-
-                    <div className="flex min-w-0 items-center gap-3">
-
-                      <div
-                        className={`
-                          flex h-9 w-9 shrink-0
-                          items-center justify-center
-                          rounded-lg
-                          ${themePrimarySoft}
-                          ${themePrimaryText}
-                        `}
-                      >
-                        <CalendarCheck2 size={17} />
-                      </div>
-
-                      <div className="min-w-0">
-
-                        <h2 className="truncate text-sm font-bold theme-text">
-                          Kehadiran per Kelas
-                        </h2>
-
-                        <p className="mt-0.5 text-[10px] theme-text-muted">
-                          Rekap kehadiran siswa
-                        </p>
-
-                      </div>
+              {/* REKAP KEHADIRAN SISWA PER KELAS */}
+              <section className={`${themeCard} min-w-0 overflow-hidden`}>
+                <div className="flex items-center justify-between gap-3 border-b border-[color-mix(in_srgb,var(--color-text)_8%,transparent)] p-4 sm:p-5">
+                  <div className="flex items-center gap-3">
+                    <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeSoft} ${themePrimary}`}>
+                      <CalendarCheck2 size={17} />
                     </div>
-
-                    <button
-                      type="button"
-                      onClick={() =>
-                        router.push("/guru/absensi")
-                      }
-                      className={`
-                        flex shrink-0 items-center gap-1
-                        text-[10px] font-semibold
-                        ${themePrimaryText}
-                        ${themePrimaryHover}
-                        sm:text-xs
-                      `}
-                    >
-                      Lihat semua
-                      <ChevronRight size={13} />
-                    </button>
-                  </div>
-
-                  <div className="p-4 sm:p-5">
-
-                    <div className="space-y-5">
-
-                      {classAttendance.map((kelas) => (
-                        <div
-                          key={kelas.id}
-                          className="min-w-0"
-                        >
-
-                          <div className="mb-2 flex items-center justify-between gap-3">
-
-                            <div className="flex min-w-0 items-center gap-2">
-
-                              <span className="truncate text-xs font-semibold theme-text-secondary sm:text-sm">
-                                {kelas.className}
-                              </span>
-
-                              <span className="shrink-0 text-[9px] theme-text-muted">
-                                {kelas.present}/
-                                {kelas.students} hadir
-                              </span>
-
-                            </div>
-
-                            <div className="flex shrink-0 items-center gap-1.5">
-
-                              <span className="text-xs font-semibold theme-text-secondary">
-                                {kelas.percentage}%
-                              </span>
-
-                              <TrendIcon
-                                trend={kelas.trend}
-                              />
-
-                            </div>
-                          </div>
-
-                          <div
-                            className={`
-                              h-2 overflow-hidden
-                              rounded-full
-                              ${themeNeutralSurface}
-                            `}
-                          >
-                            <div
-                              className="
-                                h-full rounded-full
-                                bg-[var(--color-primary)]
-                                transition-all duration-500
-                              "
-                              style={{
-                                width: `${kelas.percentage}%`,
-                              }}
-                            />
-                          </div>
-
-                        </div>
-                      ))}
-
-                    </div>
-
-                    <div
-                      className={`
-                        mt-5 grid grid-cols-2 gap-3
-                        border-t ${themeDivider}
-                        pt-5 sm:grid-cols-3
-                      `}
-                    >
-
-                      <div>
-
-                        <p className="text-[9px] theme-text-muted">
-                          Rata-rata
-                        </p>
-
-                        <p className="mt-1 text-sm font-bold theme-text">
-                          96.0%
-                        </p>
-
-                      </div>
-
-                      <div>
-
-                        <p className="text-[9px] theme-text-muted">
-                          Hadir Hari Ini
-                        </p>
-
-                        <p className="mt-1 text-sm font-bold theme-text">
-                          132 siswa
-                        </p>
-
-                      </div>
-
-                      <div className="col-span-2 sm:col-span-1">
-
-                        <p className="text-[9px] theme-text-muted">
-                          Tidak Hadir
-                        </p>
-
-                        <p className="mt-1 text-sm font-bold theme-text">
-                          6 siswa
-                        </p>
-
-                      </div>
-
+                    <div>
+                      <h2 className="text-sm font-bold theme-text">Kehadiran per Kelas</h2>
+                      <p className={`mt-1 text-xs ${themeMuted}`}>Berdasarkan catatan absensi hari ini</p>
                     </div>
                   </div>
+                  <button type="button" onClick={() => router.push("/guru/absensi")} className={`flex items-center gap-1 text-xs font-semibold ${themePrimary}`}>
+                    Lihat absensi <ChevronRight size={13} />
+                  </button>
                 </div>
 
-                {/* =================================================
-                    NOTIFICATION
-                ================================================= */}
-
-                <div
-                  className={`
-                    min-w-0 overflow-hidden
-                    rounded-2xl
-                    border ${themeNeutralBorder}
-                    theme-card
-                    ${themeCardShadow}
-                  `}
-                >
-
-                  <div
-                    className={`
-                      flex items-center justify-between
-                      border-b ${themeDivider}
-                      p-4 sm:p-5
-                    `}
-                  >
-
-                    <div className="flex items-center gap-3">
-
-                      <div
-                        className={`
-                          relative flex h-9 w-9
-                          items-center justify-center
-                          rounded-lg
-                          ${themePrimarySoft}
-                          ${themePrimaryText}
-                        `}
-                      >
-
-                        <Bell size={17} />
-
-                        <span
-                          className="
-                            absolute right-1.5 top-1.5
-                            h-1.5 w-1.5 rounded-full
-                            bg-[var(--color-warning)]
-                          "
-                        />
-
-                      </div>
-
-                      <div>
-
-                        <h2 className="text-sm font-bold theme-text">
-                          Notifikasi
-                        </h2>
-
-                        <p className="mt-0.5 text-[10px] theme-text-muted">
-                          Informasi terbaru
-                        </p>
-
-                      </div>
-                    </div>
-
-                    <span
-                      className={`
-                        rounded-full
-                        ${themePrimarySoft}
-                        px-2 py-1
-                        text-[9px] font-semibold
-                        ${themePrimaryText}
-                      `}
-                    >
-                      2 baru
-                    </span>
-
-                  </div>
-
-                  <div className={`divide-y ${themeDivider}`}>
-
-                    {notificationData.map((item) => (
-                      <div
-                        key={item.id}
-                        className={`
-                          flex gap-3 p-4
-                          transition
-                          ${themeNeutralHover}
-                        `}
-                      >
-
-                        <div className="pt-1">
-
-                          <span
-                            className={`
-                              block h-2 w-2 rounded-full
-                              ${
-                                item.unread
-                                  ? "bg-[var(--color-primary)]"
-                                  : "bg-[var(--color-text-muted)]"
-                              }
-                            `}
-                          />
-
-                        </div>
-
-                        <div className="min-w-0 flex-1">
-
-                          <div className="flex items-start justify-between gap-2">
-
-                            <p className="min-w-0 truncate text-xs font-semibold theme-text-secondary">
-                              {item.title}
+                {loading ? (
+                  <p className="p-5 text-sm theme-text-secondary">Memuat data absensi…</p>
+                ) : Object.keys(attendanceByClass).length === 0 ? (
+                  <p className="p-5 text-sm theme-text-secondary">Belum ada data kelas yang dapat ditampilkan.</p>
+                ) : (
+                  <div className="space-y-5 p-4 sm:p-5">
+                    {Object.values(attendanceByClass).map((item) => (
+                      <div key={item.id} className="min-w-0">
+                        <div className="mb-2 flex items-center justify-between gap-3">
+                          <div className="min-w-0">
+                            <p className="truncate text-xs font-semibold theme-text sm:text-sm">{item.name}</p>
+                            <p className={`mt-1 text-[10px] ${themeMuted}`}>
+                              {item.totalRecorded === null
+                                ? "Data absensi tidak tersedia"
+                                : `${item.present} hadir dari ${item.totalRecorded} catatan absensi`}
                             </p>
-
-                            {item.unread && (
-                              <span
-                                className={`
-                                  shrink-0
-                                  text-[8px] font-semibold
-                                  ${themePrimaryText}
-                                `}
-                              >
-                                BARU
-                              </span>
-                            )}
-
                           </div>
-
-                          <p className="mt-1 line-clamp-2 text-[10px] leading-relaxed theme-text-muted">
-                            {item.desc}
-                          </p>
-
-                          <p className="mt-1.5 text-[9px] theme-text-muted">
-                            {item.time}
-                          </p>
-
+                          <span className="shrink-0 text-xs font-semibold theme-text-secondary">
+                            {item.percentage === null ? "—" : `${item.percentage}%`}
+                          </span>
+                        </div>
+                        <div className="h-2 overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]">
+                          <div className="h-full rounded-full bg-[var(--color-primary)] transition-all" style={{ width: `${item.percentage ?? 0}%` }} />
                         </div>
                       </div>
                     ))}
 
+                    <div className="grid grid-cols-1 gap-3 border-t border-[color-mix(in_srgb,var(--color-text)_8%,transparent)] pt-4 sm:grid-cols-3">
+                      <div>
+                        <p className={`text-xs ${themeMuted}`}>Catatan absensi</p>
+                        <p className="mt-1 text-lg font-bold theme-text">{attendanceSummary.totalRecorded}</p>
+                      </div>
+                      <div>
+                        <p className={`text-xs ${themeMuted}`}>Hadir / terlambat</p>
+                        <p className="mt-1 text-lg font-bold theme-text">{attendanceSummary.totalPresent}</p>
+                      </div>
+                      <div>
+                        <p className={`text-xs ${themeMuted}`}>Catatan tidak hadir</p>
+                        <p className="mt-1 text-lg font-bold theme-text">{attendanceSummary.totalAbsent}</p>
+                      </div>
+                    </div>
+
+                    <p className={`text-[10px] leading-relaxed ${themeMuted}`}>
+                      Persentase dihitung dari catatan absensi yang dikembalikan API, bukan dari jumlah seluruh siswa terdaftar.
+                    </p>
                   </div>
-
-                  <button
-                    type="button"
-                    className={`
-                      flex w-full items-center
-                      justify-center gap-1
-                      border-t ${themeDivider}
-                      p-3
-                      text-[10px] font-semibold
-                      ${themePrimaryText}
-                      ${themeNeutralHover}
-                      sm:text-xs
-                    `}
-                  >
-                    Lihat semua notifikasi
-                    <ArrowUpRight size={13} />
-                  </button>
-
-                </div>
+                )}
               </section>
 
-              {/* =================================================
-                  REMINDER
-              ================================================= */}
-
-              <section
-                className={`
-                  rounded-2xl
-                  border ${themeInfoBorder}
-                  ${themeInfoSurface}
-                  p-4 sm:p-5
-                `}
-              >
-
-                <div className="flex min-w-0 items-start gap-3">
-
-                  <div
-                    className={`
-                      flex h-9 w-9 shrink-0
-                      items-center justify-center
-                      rounded-lg
-                      theme-card
-                      border ${themeInfoBorder}
-                      text-[var(--color-info)]
-                    `}
-                  >
-                    <AlertCircle size={17} />
+              {/* PENGINGAT */}
+              <section className="rounded-2xl border border-[color-mix(in_srgb,var(--color-info)_22%,transparent)] bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)] p-4 sm:p-5">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg border border-[color-mix(in_srgb,var(--color-info)_22%,transparent)] theme-card">
+                    <AlertCircle size={17} className="text-[var(--color-info)]" />
                   </div>
-
                   <div className="min-w-0 flex-1">
-
-                    <p className="text-xs font-bold theme-text">
-                      Pengingat
+                    <p className="text-sm font-bold theme-text">Pengingat penilaian</p>
+                    <p className="mt-1 text-xs leading-relaxed theme-text-secondary">
+                      {taskCountAvailable
+                        ? `Terdapat ${pendingSubmissions} pengumpulan siswa yang belum terdeteksi selesai dinilai.`
+                        : "Data pengumpulan belum berhasil diambil. Periksa izin akses dan endpoint tugas."}
                     </p>
-
-                    <p className="mt-1 text-[10px] leading-relaxed theme-text-secondary sm:text-xs">
-                      Masih ada{" "}
-                      <span className="font-semibold theme-text">
-                        12 tugas
-                      </span>{" "}
-                      yang belum dinilai. Segera lakukan
-                      penilaian agar progres pembelajaran
-                      tetap terpantau.
-                    </p>
-
                   </div>
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      router.push("/guru/nilai")
-                    }
-                    className={`
-                      hidden shrink-0
-                      items-center gap-1
-                      rounded-lg
-                      theme-card
-                      border ${themeNeutralBorder}
-                      px-3 py-2
-                      text-[10px] font-semibold
-                      ${themePrimaryText}
-                      ${themePrimaryHover}
-                      shadow-sm
-                      transition
-                      sm:flex
-                    `}
-                  >
-                    Periksa Nilai
-                    <ArrowUpRight size={13} />
+                  <button type="button" onClick={() => router.push("/guru/nilai")} className={`hidden shrink-0 items-center gap-1 rounded-lg border border-[color-mix(in_srgb,var(--color-text)_10%,transparent)] px-3 py-2 text-xs font-semibold sm:flex ${themePrimary}`}>
+                    Periksa nilai <ArrowUpRight size={13} />
                   </button>
-
                 </div>
-
-                <button
-                  type="button"
-                  onClick={() =>
-                    router.push("/guru/nilai")
-                  }
-                  className={`
-                    mt-3 flex w-full
-                    items-center justify-center gap-1
-                    rounded-lg
-                    theme-card
-                    border ${themeNeutralBorder}
-                    px-3 py-2
-                    text-[10px] font-semibold
-                    ${themePrimaryText}
-                    shadow-sm
-                    sm:hidden
-                  `}
-                >
-                  Periksa Nilai
-                  <ArrowUpRight size={13} />
+                <button type="button" onClick={() => router.push("/guru/nilai")} className={`mt-3 flex w-full items-center justify-center gap-1 rounded-lg border border-[color-mix(in_srgb,var(--color-text)_10%,transparent)] p-2 text-xs font-semibold sm:hidden ${themePrimary}`}>
+                  Periksa nilai <ArrowUpRight size={13} />
                 </button>
-
               </section>
 
+              {/* AKTIVITAS */}
+              <section className={`${themeCard} p-4 sm:p-5`}>
+                <div className="flex items-center gap-3">
+                  <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeSoft} ${themePrimary}`}>
+                    <MoreHorizontal size={17} />
+                  </div>
+                  <div>
+                    <h2 className="text-sm font-bold theme-text">Aktivitas Terbaru</h2>
+                    <p className={`mt-1 text-xs ${themeMuted}`}>
+                      Belum tersedia endpoint aktivitas khusus guru pada route yang diperiksa.
+                    </p>
+                  </div>
+                </div>
+              </section>
             </div>
           </div>
         </main>

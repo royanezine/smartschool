@@ -10,6 +10,7 @@ import {
   CalendarDays,
   Library,
   BookOpenCheck,
+   MessageCircle,
   MonitorPlay,
   User,
 } from "lucide-react";
@@ -130,6 +131,15 @@ export const siswaSidebarConfig = {
       label: "Jadwal",
       icon: CalendarDays,
       path: "/siswa/jadwal",
+    },
+
+       // Konseling BK
+    {
+      type: "item",
+      key: "konseling",
+      label: "Konseling",
+      icon: MessageCircle,
+      path: "/siswa/konseling",
     },
 
     // ============================================================

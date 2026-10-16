@@ -1,6 +1,7 @@
+
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -26,9 +27,21 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  // =====================================================
-  // ROLE ID
-  // =====================================================
+
+  useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+  const emailFromUrl = params.get("email");
+
+  const savedEmail =
+    localStorage.getItem("onboarding_email") ||
+    localStorage.getItem("tenant_register_email");
+
+  const email = emailFromUrl || savedEmail;
+
+  if (email) {
+    setIdentifier(email);
+  }
+}, []);
 
   const ROLE_IDS = {
     super_admin: "4da87e0a-a994-4fe7-87f1-cdb9f57078a8",
@@ -60,8 +73,7 @@ export default function LoginForm() {
 
       if (parts.length !== 3) return null;
 
-      const base64Url = parts[1];
-      const base64 = base64Url
+      const base64 = parts[1]
         .replace(/-/g, "+")
         .replace(/_/g, "/");
 
@@ -105,14 +117,19 @@ export default function LoginForm() {
       payload.roleName;
 
     if (directRole) {
-      return normalizeRole(
+      const roleValue =
         typeof directRole === "object"
-          ? directRole.nama || directRole.name || directRole.namaPeran
-          : directRole
-      );
+          ? directRole.nama ||
+            directRole.name ||
+            directRole.namaPeran
+          : directRole;
+
+      return normalizeRole(roleValue);
     }
 
-    const roleId = String(payload.roleId || "")
+    const roleId = String(
+      payload.roleId || payload.peranId || ""
+    )
       .trim()
       .toLowerCase();
 
@@ -168,7 +185,7 @@ export default function LoginForm() {
   };
 
   // =====================================================
-  // LOGIN
+  // HANDLE LOGIN
   // =====================================================
 
   const handleLogin = async (e) => {
@@ -193,154 +210,196 @@ export default function LoginForm() {
     setLoading(true);
 
     try {
-      // Panggil auth service
+      // Bersihkan token sementara dari percobaan sebelumnya.
+      sessionStorage.removeItem("pin_setup_token");
+      sessionStorage.removeItem("pin_access_token");
+
       const data = await login(loginIdentifier, kataSandi);
 
-      console.log("RESPONS LOGIN:", data);
+      // Jangan tampilkan token ke console.
+      console.log("LOGIN: respons diterima dari server.");
 
-      // Ambil token
-      const token = data?.token ?? data?.data?.token;
+      // Menangani respons API dengan atau tanpa pembungkus data.
+      const response =
+        data?.data?.data ??
+        data?.data ??
+        data;
 
-      if (!token) {
-        throw new Error("Token login tidak diterima dari server.");
+      if (!response || typeof response !== "object") {
+        throw new Error(
+          "Format respons login dari server tidak valid."
+        );
       }
 
-      // Decode JWT
+      // ==========================================
+      // 1. SISWA BELUM MEMILIKI PIN
+      // ==========================================
+
+      if (response.requiresPinSetup === true) {
+        const setupToken = response.setupToken;
+
+        if (!setupToken) {
+          throw new Error(
+            "Token pembuatan PIN tidak diterima dari server."
+          );
+        }
+
+        // Pastikan sesi pengguna sebelumnya tidak tertinggal.
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        sessionStorage.removeItem("token");
+        sessionStorage.removeItem("user");
+
+        sessionStorage.setItem(
+          "pin_setup_token",
+          setupToken
+        );
+
+        sessionStorage.removeItem("pin_access_token");
+
+        router.replace("/pin/setup");
+        return;
+      }
+
+      // ==========================================
+      // 2. SISWA SUDAH MEMILIKI PIN
+      // ==========================================
+
+      if (response.requiresPin === true) {
+        const pinToken = response.pinToken;
+
+        if (!pinToken) {
+          throw new Error(
+            "Token verifikasi PIN tidak diterima dari server."
+          );
+        }
+
+        // Jangan memakai sesi login pengguna sebelumnya.
+        localStorage.removeItem("token");
+        localStorage.removeItem("user");
+        sessionStorage.removeItem("token");
+        sessionStorage.removeItem("user");
+
+        sessionStorage.setItem(
+          "pin_access_token",
+          pinToken
+        );
+
+        sessionStorage.removeItem("pin_setup_token");
+
+        router.replace("/pin/verify");
+        return;
+      }
+
+      // ==========================================
+      // 3. LOGIN NORMAL: ADMIN, GURU, DAN ROLE LAIN
+      // ==========================================
+
+      const token = response.token;
+
+      if (!token) {
+        throw new Error(
+          response.message ||
+            "Token login tidak diterima dari server."
+        );
+      }
+
       const payload = decodeJwtPayload(token);
 
       if (!payload) {
         throw new Error("Token login tidak valid.");
       }
 
-      // Ambil data user dari beberapa kemungkinan struktur respons
-      const userData =
-        data?.user ??
-        data?.data?.user ??
-        data?.data?.data?.user ??
-        {};
+      const userData = response.user ?? {};
 
-      // Tentukan role
-      const role =
-        getRoleFromPayload({
-          ...payload,
-          role:
-            userData.role ??
-            userData.namaPeran ??
-            payload.role,
-          roleId:
-            userData.roleId ??
-            userData.peranId ??
-            payload.roleId,
-        }) ||
-        getRoleFromPayload(userData);
-
-      if (!role) {
-        console.error("ROLE TIDAK DIKENALI:", {
-          payload,
-          userData,
-        });
-
-        throw new Error(
-          "Role pengguna tidak dapat ditentukan. Periksa role atau roleId dari backend."
-        );
-      }
-
-      // =================================================
-      // SUSUN DATA PENGGUNA
-      // =================================================
-
-      const namaLengkap =
-        userData.namaLengkap ??
-        userData.nama_lengkap ??
-        userData.name ??
-        userData.nama ??
-        userData.fullName ??
-        payload.namaLengkap ??
-        payload.nama_lengkap ??
-        payload.name ??
-        payload.nama ??
-        payload.fullName ??
-        "";
-
-      const userInfo = {
-        id:
-          userData.id ??
-          userData.userId ??
-          payload.userId ??
-          payload.id ??
-          null,
-
-        userId:
-          userData.userId ??
-          userData.id ??
-          payload.userId ??
-          payload.id ??
-          null,
-
-        identifier: loginIdentifier,
-
-        namaLengkap,
-
-        namaPengguna:
-          userData.namaPengguna ??
-          userData.username ??
-          payload.namaPengguna ??
-          payload.username ??
-          "",
-
-        // Utamakan email dari backend
-        email:
-          userData.email ??
-          payload.email ??
-          (loginIdentifier.includes("@")
-            ? loginIdentifier
-            : ""),
-
-        sekolahId:
-          userData.sekolahId ??
-          payload.sekolahId ??
-          payload.schoolId ??
-          null,
-
-        yayasanId:
-          userData.yayasanId ??
-          payload.yayasanId ??
-          null,
-
+      const rolePayload = {
+        ...payload,
+        role:
+          userData.role ??
+          payload.role,
         roleId:
           userData.roleId ??
           userData.peranId ??
+          payload.roleId,
+        peranId:
+          userData.peranId ??
+          payload.peranId,
+      };
+
+      const role =
+        getRoleFromPayload(rolePayload) ||
+        getRoleFromPayload(userData);
+
+      if (!role) {
+        console.error("Role pengguna tidak dikenali.");
+
+        throw new Error(
+          "Role pengguna tidak dapat ditentukan. Periksa data role dari Backend."
+        );
+      }
+
+      const userId =
+        userData.id ??
+        payload.userId ??
+        payload.id ??
+        null;
+
+      const userInfo = {
+        id: userId,
+        userId,
+        identifier: loginIdentifier,
+
+        namaLengkap:
+          userData.namaLengkap ??
+          payload.namaLengkap ??
+          "",
+
+        namaPengguna:
+          userData.namaPengguna ??
+          payload.namaPengguna ??
+          "",
+
+        email:
+          userData.email ??
+          payload.email ??
+          "",
+
+        sekolahId:
+          payload.sekolahId ??
+          userData.sekolahId ??
+          null,
+
+        yayasanId:
+          payload.yayasanId ??
+          userData.yayasanId ??
+          null,
+
+        roleId:
           payload.roleId ??
+          payload.peranId ??
+          userData.roleId ??
+          userData.peranId ??
           null,
 
         role,
       };
 
-      console.log("USER YANG DISIMPAN:", userInfo);
-
-      // =================================================
-      // BERSIHKAN SESSION LAMA
-      // =================================================
-
+      // Bersihkan sesi lama sebelum menyimpan sesi baru.
       localStorage.removeItem("token");
       localStorage.removeItem("user");
       sessionStorage.removeItem("token");
       sessionStorage.removeItem("user");
 
-      // =================================================
-      // SIMPAN TOKEN DAN USER
-      // =================================================
-
+      // Simpan token akses dan identitas pengguna.
       localStorage.setItem("token", token);
-      localStorage.setItem("user", JSON.stringify(userInfo));
+      localStorage.setItem(
+        "user",
+        JSON.stringify(userInfo)
+      );
 
-      // Beri tahu Header pada tab yang sama bahwa user berubah
       window.dispatchEvent(new Event("user-updated"));
 
-      // =================================================
-      // REMEMBER ME
-      // =================================================
-
+      // Ingat identifier jika dipilih.
       if (rememberMe) {
         localStorage.setItem(
           "remembered_identifier",
@@ -350,25 +409,17 @@ export default function LoginForm() {
         localStorage.removeItem("remembered_identifier");
       }
 
-      // =================================================
-      // BERSIHKAN DATA ONBOARDING LAMA
-      // =================================================
-
+      // Bersihkan data onboarding yang sudah selesai.
       sessionStorage.removeItem("onboarding_email");
       sessionStorage.removeItem("onboarding_paket_id");
       sessionStorage.removeItem("onboarding_pendaftaran_id");
       sessionStorage.removeItem("onboarding_payment_url");
-
-      // =================================================
-      // REDIRECT
-      // =================================================
 
       const redirectPath = getRedirectPath(role);
 
       console.log("LOGIN BERHASIL:", {
         role,
         redirectPath,
-        userInfo,
       });
 
       router.replace(redirectPath);
@@ -402,6 +453,7 @@ export default function LoginForm() {
 
   // =====================================================
   // RENDER
+  // Desain dipertahankan seperti sebelumnya.
   // =====================================================
 
   return (

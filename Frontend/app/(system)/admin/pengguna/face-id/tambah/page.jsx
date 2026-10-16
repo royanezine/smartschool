@@ -649,94 +649,89 @@ export default function TambahFaceIdPage() {
      REGISTER FACE ID
   ======================================================= */
 
-  const handleRegisterFace = async () => {
-    if (!selectedUser) {
-      setError(
-        "Pilih pengguna terlebih dahulu."
+
+/* =======================================================
+   REGISTER FACE ID
+======================================================= */
+
+const handleRegisterFace = async () => {
+  if (!selectedUser) {
+    setError("Pilih pengguna terlebih dahulu.");
+    return;
+  }
+
+  if (!capturedFile) {
+    setError("Ambil foto wajah terlebih dahulu.");
+    return;
+  }
+
+  try {
+    setSaving(true);
+    setError("");
+    setSuccessMessage("");
+
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      throw new Error(
+        "Token login tidak ditemukan. Silakan login kembali."
       );
-      return;
     }
 
-    if (!capturedFile) {
-      setError(
-        "Ambil foto wajah terlebih dahulu."
-      );
-      return;
-    }
+    const formData = new FormData();
+    formData.append("foto", capturedFile);
 
-    try {
-      setSaving(true);
-      setError("");
-      setSuccessMessage("");
-
-      const token =
-        localStorage.getItem("token");
-
-      if (!token) {
-        throw new Error(
-          "Token login tidak ditemukan. Silakan login kembali."
-        );
+    const response = await fetch(
+      `${API_URL}/users/${selectedUser.id}/face-id`,
+      {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
       }
+    );
 
-      const formData = new FormData();
+    const result = await response.json();
 
-      formData.append(
-        "foto",
-        capturedFile
-      );
-
-      const response = await fetch(
-        `${API_URL}/users/${selectedUser.id}/face-id`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: formData,
-        }
-      );
-
-      const result =
-        await response.json();
-
-      if (!response.ok) {
-        throw new Error(
-          result?.message ||
-            "Gagal mendaftarkan Face ID."
-        );
-      }
-
-      setRegistrationComplete(true);
-
-      setSuccessMessage(
+    if (!response.ok) {
+      throw new Error(
         result?.message ||
-          "Face ID berhasil didaftarkan."
-      );
-
-      await loadUsers();
-
-      setSelectedUser((prev) =>
-        prev
-          ? {
-              ...prev,
-              faceId: true,
-            }
-          : prev
-      );
-    } catch (err) {
-      console.error(
-        "Register Face ID error:",
-        err
-      );
-
-      setError(
-        err?.message ||
+          result?.detail ||
           "Gagal mendaftarkan Face ID."
       );
-    } finally {
-      setSaving(false);
     }
-  };
+
+    // Registrasi berhasil di Backend.
+    setRegistrationComplete(true);
+
+    setSuccessMessage(
+      result?.message ||
+        "Face ID berhasil didaftarkan."
+    );
+
+    // Hentikan kamera jika masih aktif.
+    stopCamera();
+
+    // Beri kesempatan agar pesan berhasil tampil,
+    // kemudian kembali ke halaman daftar Face ID.
+    await new Promise((resolve) =>
+      setTimeout(resolve, 800)
+    );
+
+    router.replace("/admin/pengguna/face-id");
+    router.refresh();
+  } catch (err) {
+    console.error("Register Face ID error:", err);
+
+    setError(
+      err?.message ||
+        "Gagal mendaftarkan Face ID."
+    );
+  } finally {
+    setSaving(false);
+  }
+};
 
   /* =======================================================
      CLOSE SELECTED USER

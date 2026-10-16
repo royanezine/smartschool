@@ -36,8 +36,8 @@ function getApiBaseUrl() {
 export default function PublicCmsPage() {
   const params = useParams();
 
-  const subdomain = params?.slug;
-  const pageSlug = params?.pageSlug;
+const subdomain = params?.tenant;
+const pageSlug = params?.pageSlug;
 
   const [page, setPage] = useState(null);
   const [loading, setLoading] = useState(true);

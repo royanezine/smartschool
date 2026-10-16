@@ -18,8 +18,6 @@ import {
   X,
 } from "lucide-react";
 
-
-
 /* =========================================================
    NAVIGATION CONFIG
 ========================================================= */
@@ -63,14 +61,6 @@ const SIDEBAR_COLLAPSED_WIDTH = "w-[72px]";
 /* =========================================================
    ACTIVE STYLE
 ========================================================= */
-
-/*
- * LIGHT:
- * biru terang + teks putih
- *
- * DARK:
- * biru gelap + teks biru terang
- */
 
 const ACTIVE_SOLID = `
   bg-[#2474e8]
@@ -1252,6 +1242,8 @@ export default function Sidebar({
           router.push(item.path);
         }
 
+        setMobileOpen(false);
+
         return;
       }
 
@@ -1285,6 +1277,10 @@ export default function Sidebar({
 
     if (item.path) {
       router.push(item.path);
+
+      if (isMobile) {
+        setMobileOpen(false);
+      }
     }
   };
 
@@ -1352,7 +1348,7 @@ export default function Sidebar({
   ======================================================= */
 
   const showLabels =
-    !collapsed;
+    !collapsed || isMobile;
 
   const transitionClass =
     allowTransition
@@ -1370,7 +1366,7 @@ export default function Sidebar({
 
   const wrapperClasses =
     isMobile
-      ? "relative shrink-0 h-screen w-[72px] z-50 overflow-visible"
+      ? "relative shrink-0 h-screen w-0 z-50 overflow-visible"
       : `
           relative
           shrink-0
@@ -1394,11 +1390,8 @@ export default function Sidebar({
           inset-y-0
           left-0
           z-50
-          ${
-            collapsed
-              ? SIDEBAR_COLLAPSED_WIDTH
-              : "w-64 max-w-[85vw]"
-          }
+          w-64
+          max-w-[85vw]
 
           bg-[#f4f8ff]
           dark:bg-[#0b1220]
@@ -1412,11 +1405,13 @@ export default function Sidebar({
 
           overflow-visible
 
-          ${transitionClass}
+          transition-transform
+          duration-300
+          ease-in-out
 
           ${
             mobileOpen
-              ? "translate-x-0"
+              ? "translate-x-0 shadow-2xl"
               : "-translate-x-full"
           }
         `
@@ -1474,51 +1469,53 @@ export default function Sidebar({
         )}
 
       {/* ===================================================
-          MOBILE OPEN BUTTON
+          MOBILE OPEN BUTTON (BURGER)
+          - hanya muncul saat sidebar TERTUTUP
       =================================================== */}
 
-      {isMobile &&
-        !mobileOpen && (
-          <button
-            type="button"
-            onClick={() =>
-              setMobileOpen(true)
-            }
-            aria-label="Buka sidebar"
-            className="
-              fixed
-              left-4
-              top-4
-              z-30
+      {isMobile && !mobileOpen && (
+        <button
+          type="button"
+          onClick={() =>
+            setMobileOpen(true)
+          }
+          aria-label="Buka sidebar"
+          aria-expanded={false}
+          className="
+            fixed
+            top-4
+            left-4
+            z-[60]
 
-              flex
-              h-10
-              w-10
-              items-center
-              justify-center
+            flex
+            h-10
+            w-10
+            items-center
+            justify-center
 
-              rounded-xl
+            rounded-xl
 
-              bg-[#2474e8]
-              dark:bg-blue-800
+            bg-[#2474e8]
+            dark:bg-blue-800
 
-              text-white
+            text-white
 
-              shadow-lg
-              dark:shadow-black/40
+            shadow-lg
+            dark:shadow-black/40
 
-              hover:bg-blue-600
-              dark:hover:bg-blue-700
+            hover:bg-blue-600
+            dark:hover:bg-blue-700
 
-              transition-all
-              duration-200
+            active:scale-95
 
-              lg:hidden
-            "
-          >
-            <Menu size={20} />
-          </button>
-        )}
+            transition-all
+            duration-300
+            ease-in-out
+          "
+        >
+          <Menu size={20} />
+        </button>
+      )}
 
       {/* ===================================================
           SIDEBAR WRAPPER
@@ -1569,12 +1566,12 @@ export default function Sidebar({
               <div
                 ref={logoWrapRef}
                 onMouseEnter={
-                  collapsed
+                  collapsed && !isMobile
                     ? showLogoTooltip
                     : undefined
                 }
                 onMouseLeave={
-                  collapsed
+                  collapsed && !isMobile
                     ? hideLogoTooltip
                     : undefined
                 }
@@ -1591,27 +1588,27 @@ export default function Sidebar({
                   min-w-0
                 "
               >
-              <div
-  className="
-    relative
-    w-12
-    h-12
-    shrink-0
+                <div
+                  className="
+                    relative
+                    w-12
+                    h-12
+                    shrink-0
 
-    rounded-full
+                    rounded-full
 
-    bg-white
-    dark:bg-blue-100
+                    bg-white
+                    dark:bg-blue-100
 
-    shadow-md
-    shadow-blue-900/20
-    dark:shadow-black/30
+                    shadow-md
+                    shadow-blue-900/20
+                    dark:shadow-black/30
 
-    ring-2
-    ring-white/40
-    dark:ring-blue-300/20
-  "
->
+                    ring-2
+                    ring-white/40
+                    dark:ring-blue-300/20
+                  "
+                >
                   <Image
                     src="/logo/logoSS.png"
                     alt="Logo SmartSchool"
@@ -1679,7 +1676,7 @@ export default function Sidebar({
                 )}
               </div>
 
-              {/* MOBILE CLOSE */}
+              {/* MOBILE CLOSE (satu-satunya tombol X) */}
 
               {isMobile &&
                 mobileOpen && (
@@ -1900,7 +1897,7 @@ export default function Sidebar({
                       ];
 
                     const collapsedIconMode =
-                      collapsed;
+                      collapsed && !isMobile;
 
                     /* =================================================
                        MENU STATE

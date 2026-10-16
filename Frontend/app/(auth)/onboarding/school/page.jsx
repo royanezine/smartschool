@@ -1,1082 +1,971 @@
-    "use client";
-
-    import { useEffect, useState } from "react";
-    import Image from "next/image";
-    import {
-      Building2,
-      User,
-      Mail,
-      Phone,
-      MapPin,
-      Globe,
-      Lock,
-      ArrowRight,
-      ArrowLeft,
-      Loader2,
-      CheckCircle2,
-    } from "lucide-react";
-
-    import { getPaketById } from "@/services/paket.service";
-    import { registerTenant } from "@/services/tenant.service";
-
-    export default function SchoolOnboardingPage() {
-      const [paket, setPaket] = useState(null);
-      const [loadingPaket, setLoadingPaket] = useState(true);
-      const [loading, setLoading] = useState(false);
-
-      const [error, setError] = useState("");
-
-      const [form, setForm] = useState({
-        nama: "",
-        email: "",
-        namaSekolah: "",
-        jenjang: "",
-        subdomain: "",
-        alamatSekolah: "",
-        teleponSekolah: "",
-        kataSandi: "",
-        konfirmasiKataSandi: "",
-        logo: "",
-      });
-
-      // =====================================================
-      // LOAD PAKET
-      // =====================================================
-
-      useEffect(() => {
-        const loadPaket = async () => {
-          try {
-            const params = new URLSearchParams(
-              window.location.search
-            );
-
-            let paketId = params.get("paketId");
-
-            const storedPaket =
-              sessionStorage.getItem(
-                "selected_paket"
-              );
-
-            // PRIORITAS 1: selected_paket
-            if (storedPaket) {
-              try {
-                const parsedPaket =
-                  JSON.parse(storedPaket);
-
-                if (parsedPaket?.id) {
-                  setPaket(parsedPaket);
-
-                  sessionStorage.setItem(
-                    "selected_paket_id",
-                    String(parsedPaket.id)
-                  );
-
-                  setLoadingPaket(false);
-                  return;
-                }
-              } catch (storageError) {
-                console.error(
-                  "Gagal membaca selected_paket:",
-                  storageError
-                );
-
-                sessionStorage.removeItem(
-                  "selected_paket"
-                );
-              }
-            }
-
-            // PRIORITAS 2: URL
-            if (!paketId) {
-              paketId =
-                sessionStorage.getItem(
-                  "selected_paket_id"
-                );
-            }
-
-            // TIDAK ADA PAKET
-            if (!paketId) {
-              setError(
-                "Belum ada paket yang dipilih."
-              );
-
-              setLoadingPaket(false);
-              return;
-            }
-
-            sessionStorage.setItem(
-              "selected_paket_id",
-              paketId
-            );
-
-            const response =
-              await getPaketById(paketId);
-
-            if (!response?.data) {
-              throw new Error(
-                "Paket tidak ditemukan."
-              );
-            }
-
-            setPaket(response.data);
-
-            sessionStorage.setItem(
-              "selected_paket",
-              JSON.stringify(response.data)
-            );
-          } catch (error) {
-            console.error(
-              "Load paket error:",
-              error
-            );
-
-            setError(
-              error instanceof Error
-                ? error.message
-                : "Gagal mengambil data paket."
-            );
-          } finally {
-            setLoadingPaket(false);
-          }
-        };
-
-        loadPaket();
-      }, []);
-
-      // =====================================================
-      // HANDLE CHANGE
-      // =====================================================
-
-      const handleChange = (e) => {
-        const { name, value } = e.target;
-
-        let newValue = value;
-
-        // SUBDOMAIN
-        if (name === "subdomain") {
-          newValue = value
-            .toLowerCase()
-            .replace(/[^a-z0-9-]/g, "-")
-            .replace(/-+/g, "-")
-            .replace(/^-+|-+$/g, "");
-        }
-
-        setForm((prev) => ({
-          ...prev,
-          [name]: newValue,
-        }));
-
-        setError("");
-      };
-
-      // =====================================================
-      // HANDLE SUBMIT
-      // =====================================================
-
-      const handleSubmit = async (e) => {
-        e.preventDefault();
-
-        if (loading) return;
-
-        setError("");
-
-        // ===================================================
-        // CEK PAKET
-        // ===================================================
-
-        if (!paket?.id) {
-          setError(
-            "Paket belum dipilih."
-          );
-          return;
-        }
-
-        // ===================================================
-        // NORMALISASI
-        // ===================================================
-
-        const nama =
-          form.nama.trim();
-
-        const email =
-          form.email.trim().toLowerCase();
-
-        const namaSekolah =
-          form.namaSekolah.trim();
-
-        const jenjang =
-          form.jenjang.trim();
-
-        const subdomain =
-          form.subdomain.trim().toLowerCase();
-
-        const alamatSekolah =
-          form.alamatSekolah.trim();
-
-        const teleponSekolah =
-          form.teleponSekolah.trim();
-
-        const kataSandi =
-          form.kataSandi;
-
-        const konfirmasiKataSandi =
-          form.konfirmasiKataSandi;
-
-        // ===================================================
-        // VALIDASI WAJIB
-        // ===================================================
-
-        if (
-          !nama ||
-          !email ||
-          !namaSekolah ||
-          !jenjang ||
-          !subdomain ||
-          !alamatSekolah ||
-          !teleponSekolah ||
-          !kataSandi ||
-          !konfirmasiKataSandi
-        ) {
-          setError(
-            "Mohon lengkapi seluruh data yang wajib diisi."
-          );
-          return;
-        }
-
-        // ===================================================
-        // VALIDASI NAMA
-        // ===================================================
-
-        if (nama.length < 3) {
-          setError(
-            "Nama lengkap minimal 3 karakter."
-          );
-          return;
-        }
-
-        // ===================================================
-        // VALIDASI EMAIL
-        // ===================================================
-
-        if (
-          !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(
-            email
-          )
-        ) {
-          setError(
-            "Format email tidak valid."
-          );
-          return;
-        }
-
-        // ===================================================
-        // VALIDASI NAMA SEKOLAH
-        // ===================================================
-
-        if (namaSekolah.length < 3) {
-          setError(
-            "Nama sekolah minimal 3 karakter."
-          );
-          return;
-        }
-
-        // ===================================================
-        // VALIDASI ALAMAT
-        // ===================================================
-
-        if (alamatSekolah.length < 5) {
-          setError(
-            "Alamat sekolah minimal 5 karakter."
-          );
-          return;
-        }
-
-        // ===================================================
-        // VALIDASI TELEPON
-        // ===================================================
-
-        const cleanPhone =
-          teleponSekolah.replace(
-            /[\s-]/g,
-            ""
-          );
-
-        if (
-          !/^[0-9+()]+$/.test(
-            cleanPhone
-          )
-        ) {
-          setError(
-            "Nomor telepon hanya boleh berisi angka dan simbol telepon yang valid."
-          );
-          return;
-        }
-
-        if (cleanPhone.length < 8) {
-          setError(
-            "Nomor telepon sekolah minimal 8 karakter."
-          );
-          return;
-        }
-
-        // ===================================================
-        // VALIDASI SUBDOMAIN
-        // ===================================================
-
-        if (
-          !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(
-            subdomain
-          )
-        ) {
-          setError(
-            "Subdomain hanya boleh menggunakan huruf kecil, angka, dan tanda strip (-)."
-          );
-          return;
-        }
-
-        if (
-          subdomain.length < 3
-        ) {
-          setError(
-            "Subdomain minimal 3 karakter."
-          );
-          return;
-        }
-
-        // ===================================================
-        // VALIDASI PASSWORD
-        // ===================================================
-
-        if (kataSandi.length < 8) {
-          setError(
-            "Kata sandi minimal 8 karakter."
-          );
-          return;
-        }
-
-        if (!/[A-Z]/.test(kataSandi)) {
-          setError(
-            "Kata sandi harus memiliki minimal 1 huruf kapital."
-          );
-          return;
-        }
-
-        if (!/[0-9]/.test(kataSandi)) {
-          setError(
-            "Kata sandi harus memiliki minimal 1 angka."
-          );
-          return;
-        }
-
-        if (
-          kataSandi !==
-          konfirmasiKataSandi
-        ) {
-          setError(
-            "Konfirmasi kata sandi tidak sama."
-          );
-          return;
-        }
-
-        // ===================================================
-        // PAKET ID
-        // ===================================================
-
-        const paketId =
-          String(paket.id);
+
+"use client";
+
+import { useEffect, useState } from "react";
+import Image from "next/image";
+import {
+  AlertCircle,
+  ArrowLeft,
+  ArrowRight,
+  Building2,
+  CalendarDays,
+  CheckCircle2,
+  Check,
+  Eye,
+  EyeOff,
+  Globe,
+  GraduationCap,
+  Loader2,
+  Lock,
+  Mail,
+  MapPin,
+  Phone,
+  ShieldCheck,
+  Sparkles,
+  User,
+} from "lucide-react";
+
+import { getPaketById } from "@/services/paket.service";
+import { registerTenant } from "@/services/tenant.service";
+
+function formatRupiah(value) {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 0,
+  }).format(Number(value || 0));
+}
+
+function InputField({
+  label,
+  name,
+  value,
+  onChange,
+  placeholder,
+  icon: Icon,
+  type = "text",
+  required = false,
+  autoComplete,
+  hint,
+  suffix,
+}) {
+  return (
+    <div className="space-y-1.5">
+      <label
+        htmlFor={name}
+        className="block text-sm font-semibold text-slate-700"
+      >
+        {label}
+        {required && <span className="ml-1 text-blue-600">*</span>}
+      </label>
+
+      <div className="relative">
+        {Icon && (
+          <Icon
+            size={17}
+            className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+          />
+        )}
+
+        <input
+          id={name}
+          name={name}
+          type={type}
+          value={value}
+          onChange={onChange}
+          placeholder={placeholder}
+          required={required}
+          autoComplete={autoComplete}
+          className={`w-full rounded-xl border border-slate-200 bg-slate-50/50 py-3 ${
+            Icon ? "pl-10" : "pl-4"
+          } ${suffix ? "pr-32" : "pr-4"} text-sm text-slate-800 outline-none transition hover:border-slate-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10`}
+        />
+
+        {suffix && (
+          <div className="absolute right-0 top-0 flex h-full items-center rounded-r-xl border-l border-slate-200 bg-slate-100/80 px-3 text-xs text-slate-500">
+            {suffix}
+          </div>
+        )}
+      </div>
+
+      {hint && <p className="text-xs text-slate-400">{hint}</p>}
+    </div>
+  );
+}
+
+function SectionHeading({ icon: Icon, title, description }) {
+  return (
+    <div className="mb-5 flex items-start gap-3">
+      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+        <Icon size={19} />
+      </div>
+
+      <div>
+        <h2 className="text-base font-bold text-slate-900">{title}</h2>
+        <p className="mt-1 text-xs leading-5 text-slate-500">
+          {description}
+        </p>
+      </div>
+    </div>
+  );
+}
+
+function ProgressStep({ number, title, description, active, completed }) {
+  return (
+    <div className="flex items-start gap-3">
+      <div className="flex flex-col items-center">
+        <div
+          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+            completed
+              ? "bg-blue-600 text-white"
+              : active
+              ? "border-2 border-blue-600 bg-blue-50 text-blue-600"
+              : "border border-slate-200 bg-white text-slate-400"
+          }`}
+        >
+          {completed ? <Check size={15} /> : number}
+        </div>
+
+        <div
+          className={`mt-1 h-8 w-px ${
+            completed ? "bg-blue-600" : "bg-slate-200"
+          }`}
+        />
+      </div>
+
+      <div className="pb-4">
+        <p
+          className={`text-sm font-semibold ${
+            active || completed ? "text-slate-900" : "text-slate-400"
+          }`}
+        >
+          {title}
+        </p>
+        <p className="mt-0.5 text-xs text-slate-400">{description}</p>
+      </div>
+    </div>
+  );
+}
+
+export default function SchoolOnboardingPage() {
+  const [paket, setPaket] = useState(null);
+  const [loadingPaket, setLoadingPaket] = useState(true);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const [form, setForm] = useState({
+    nama: "",
+    email: "",
+    namaSekolah: "",
+    jenjang: "",
+    subdomain: "",
+    alamatSekolah: "",
+    teleponSekolah: "",
+    kataSandi: "",
+    konfirmasiKataSandi: "",
+    logo: "",
+  });
+
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadPaket() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        let paketId = params.get("paketId");
+        let storedPaket = null;
 
         if (!paketId) {
-          setError(
-            "ID paket tidak ditemukan."
-          );
-          return;
-        }
-
-        // ===================================================
-        // CEK HARGA
-        // SEMUA PAKET HARUS BERBAYAR
-        // ===================================================
-
-        const hargaPaket =
-          Number(paket.harga);
-
-        if (
-          !Number.isFinite(hargaPaket) ||
-          hargaPaket <= 0
-        ) {
-          setError(
-            "Paket yang dipilih tidak dapat digunakan karena harga paket tidak valid."
-          );
-          return;
-        }
-
-        // ===================================================
-        // LOADING
-        // ===================================================
-
-        setLoading(true);
-
-        try {
-          // =================================================
-          // PAYLOAD
-          // =================================================
-
-          const payload = {
-            nama,
-            email,
-            namaSekolah,
-            jenjang,
-            subdomain,
-            alamatSekolah,
-            teleponSekolah: cleanPhone,
-            kataSandi,
-            paketId,
-
-            ...(form.logo.trim()
-              ? {
-                  logo: form.logo.trim(),
-                }
-              : {}),
-          };
-
-          console.log(
-            "========== REGISTER TENANT =========="
-          );
-
-          console.log(
-            "PAYLOAD:",
-            payload
-          );
-
-          // =================================================
-          // REGISTER
-          // =================================================
-
-          const response =
-            await registerTenant(
-              payload
-            );
-
-          console.log(
-            "REGISTER RESPONSE:",
-            response
-          );
-
-          if (!response?.success) {
-            throw new Error(
-              response?.message ||
-                "Pendaftaran sekolah gagal."
-            );
+          try {
+            const raw = sessionStorage.getItem("selected_paket");
+            if (raw) {
+              storedPaket = JSON.parse(raw);
+              paketId =
+                storedPaket?.id ||
+                storedPaket?.paketId ||
+                storedPaket?._id;
+            }
+          } catch {
+            storedPaket = null;
           }
-
-          // =================================================
-          // SIMPAN SESSION
-          // =================================================
-
-          sessionStorage.setItem(
-            "onboarding_email",
-            email
-          );
-
-          sessionStorage.setItem(
-            "onboarding_paket_id",
-            paketId
-          );
-
-          // =================================================
-          // KE VERIFY
-          // =================================================
-
-          window.location.replace(
-            "/onboarding/verify"
-          );
-        } catch (error) {
-          console.error(
-            "Register tenant error:",
-            error
-          );
-
-          setError(
-            error instanceof Error
-              ? error.message
-              : "Gagal melakukan pendaftaran sekolah."
-          );
-        } finally {
-          setLoading(false);
         }
+
+        if (!paketId) {
+          paketId = sessionStorage.getItem("selected_paket_id");
+        }
+
+        if (paketId) {
+          const response = await getPaketById(paketId);
+
+          const result =
+            response?.data?.data ??
+            response?.data ??
+            response?.paket ??
+            response;
+
+          const normalized =
+            result?.success && result?.data ? result.data : result;
+
+          if (
+            isMounted &&
+            normalized &&
+            normalized.success !== false
+          ) {
+            setPaket(normalized);
+            sessionStorage.setItem(
+              "selected_paket",
+              JSON.stringify(normalized)
+            );
+            sessionStorage.setItem("selected_paket_id", String(paketId));
+            return;
+          }
+        }
+
+        if (isMounted && storedPaket) {
+          setPaket(storedPaket);
+        }
+      } catch (err) {
+        console.error("Gagal mengambil detail paket:", err);
+      } finally {
+        if (isMounted) setLoadingPaket(false);
+      }
+    }
+
+    loadPaket();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  function handleChange(event) {
+    const { name, value } = event.target;
+
+    if (name === "subdomain") {
+      const sanitized = value
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9-]/g, "")
+        .replace(/-+/g, "-")
+        .replace(/^-+|-+$/g, "");
+
+      setForm((prev) => ({ ...prev, [name]: sanitized }));
+      return;
+    }
+
+    setForm((prev) => ({ ...prev, [name]: value }));
+  }
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+    setError("");
+
+    const nama = form.nama.trim();
+    const email = form.email.trim();
+    const namaSekolah = form.namaSekolah.trim();
+    const subdomain = form.subdomain.trim();
+    const alamatSekolah = form.alamatSekolah.trim();
+    const teleponSekolah = form.teleponSekolah.replace(/[^\d+]/g, "");
+    const logo = form.logo.trim();
+
+    if (
+      !nama ||
+      !email ||
+      !namaSekolah ||
+      !form.jenjang ||
+      !subdomain ||
+      !alamatSekolah ||
+      !teleponSekolah ||
+      !form.kataSandi ||
+      !form.konfirmasiKataSandi
+    ) {
+      setError("Mohon lengkapi semua data yang wajib diisi.");
+      return;
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError("Format email tidak valid.");
+      return;
+    }
+
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(subdomain)) {
+      setError(
+        "Subdomain hanya boleh menggunakan huruf kecil, angka, dan tanda hubung."
+      );
+      return;
+    }
+
+    if (form.kataSandi.length < 8) {
+      setError("Kata sandi minimal 8 karakter.");
+      return;
+    }
+
+    if (form.kataSandi !== form.konfirmasiKataSandi) {
+      setError("Konfirmasi kata sandi tidak sama.");
+      return;
+    }
+
+    if (!paket) {
+      setError("Paket belum ditemukan. Silakan pilih paket terlebih dahulu.");
+      return;
+    }
+
+    const paketId = paket.id || paket.paketId || paket._id;
+
+    if (!paketId) {
+      setError("ID paket tidak ditemukan. Silakan pilih ulang paket.");
+      return;
+    }
+
+    if (logo) {
+      try {
+        const parsedUrl = new URL(logo);
+        if (!["http:", "https:"].includes(parsedUrl.protocol)) {
+          throw new Error("URL tidak valid");
+        }
+      } catch {
+        setError("URL logo harus berupa alamat URL yang valid.");
+        return;
+      }
+    }
+
+    setLoading(true);
+
+    try {
+      // Sesuai kontrak BE: JSON, bukan FormData.
+      // logo adalah URL string opsional, bukan objek File.
+      const payload = {
+        paketId,
+        nama,
+        namaSekolah,
+        jenjang: form.jenjang,
+        subdomain,
+        email,
+        teleponSekolah,
+        alamatSekolah,
+        kataSandi: form.kataSandi,
+        ...(logo ? { logo } : {}),
       };
 
-      // =====================================================
-      // LOADING PAKET
-      // =====================================================
+      const response = await registerTenant(payload);
 
-      if (loadingPaket) {
-        return (
-          <main className="min-h-screen flex items-center justify-center bg-slate-50 px-5">
-            <div className="text-center">
-              <Loader2
-                size={30}
-                className="animate-spin text-blue-600 mx-auto mb-3"
-              />
-
-              <p className="text-sm text-slate-500">
-                Memuat paket...
-              </p>
-            </div>
-          </main>
+      if (response?.success === false) {
+        throw new Error(
+          response?.message || "Registrasi sekolah gagal."
         );
       }
 
-      // =====================================================
-      // PAKET TIDAK ADA
-      // =====================================================
+      sessionStorage.setItem("onboarding_email", email);
+      sessionStorage.setItem("onboarding_paket_id", String(paketId));
 
-      if (!paket) {
-        return (
-          <main className="min-h-screen bg-slate-50 flex items-center justify-center px-5">
-            <div className="bg-white border border-red-200 rounded-2xl shadow-sm p-8 max-w-md w-full text-center">
-              <div className="w-12 h-12 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                <Building2
-                  size={22}
-                  className="text-red-500"
+      // Halaman verifikasi menangani OTP dan alur pembayaran/trial.
+      window.location.assign("/onboarding/verify");
+    } catch (err) {
+      console.error("Registrasi sekolah gagal:", err);
+      setError(
+        err?.message ||
+          "Terjadi kesalahan saat mendaftarkan sekolah. Silakan coba kembali."
+      );
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  const namaPaket = paket?.nama || paket?.namaPaket || "Paket SmartSchool";
+  const hargaPaket = Number(paket?.harga ?? 0);
+  const fiturPaket = Array.isArray(paket?.fitur) ? paket.fitur : [];
+  const durasi = paket?.durasi ?? paket?.durasiHari;
+
+  return (
+    <main className="min-h-screen bg-[#f5f8fc] text-slate-900">
+      <nav className="sticky top-0 z-50 border-b border-slate-200/80 bg-white/90 backdrop-blur-xl">
+        <div className="mx-auto flex h-[68px] max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+          <a href="/" className="flex items-center gap-3">
+            <div className="relative h-9 w-9">
+              <Image
+                src="/logo/logoSS.png"
+                alt="SmartSchool Logo"
+                fill
+                priority
+                sizes="36px"
+                className="object-contain"
+              />
+            </div>
+            <span className="text-lg font-bold tracking-tight">
+              Smart<span className="text-blue-600">School</span>
+            </span>
+          </a>
+
+          <a
+            href="/"
+            className="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-500 transition hover:bg-slate-100 hover:text-blue-600"
+          >
+            <ArrowLeft size={16} />
+            <span className="hidden sm:inline">Kembali</span>
+          </a>
+        </div>
+      </nav>
+
+      <section className="relative overflow-hidden bg-[#0f172a]">
+        <div className="pointer-events-none absolute inset-0">
+          <div className="absolute -right-20 -top-20 h-[350px] w-[350px] rounded-full bg-blue-600/20 blur-3xl" />
+          <div className="absolute -bottom-32 left-[-80px] h-[350px] w-[350px] rounded-full bg-indigo-600/10 blur-3xl" />
+        </div>
+
+        <div className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-12 lg:px-8 lg:py-14">
+          <div className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.07] px-3 py-1.5 text-xs font-semibold text-blue-200">
+            <Sparkles size={13} />
+            Onboarding Sekolah
+          </div>
+
+          <h1 className="text-3xl font-bold leading-tight tracking-tight text-white sm:text-4xl">
+            Daftarkan sekolah Anda
+            <br />
+            bersama <span className="text-blue-400">SmartSchool</span>
+          </h1>
+
+          <p className="mt-4 max-w-2xl text-sm leading-7 text-slate-300 sm:text-base">
+            Lengkapi informasi sekolah untuk mulai menggunakan platform
+            manajemen sekolah terintegrasi.
+          </p>
+        </div>
+      </section>
+
+      <section className="pb-16 pt-8 sm:pb-20 sm:pt-10">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+          <div className="grid items-start gap-6 lg:grid-cols-[260px_minmax(0,1fr)_340px] lg:gap-8">
+            <aside className="hidden lg:block">
+              <div className="sticky top-24 rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
+                <p className="mb-4 text-xs font-semibold uppercase tracking-wider text-slate-400">
+                  Langkah Pendaftaran
+                </p>
+
+                <ProgressStep
+                  number="1"
+                  title="Data Sekolah"
+                  description="Informasi pendaftaran"
+                  active
                 />
+                <ProgressStep
+                  number="2"
+                  title="Verifikasi"
+                  description="Konfirmasi email"
+                />
+                <ProgressStep
+                  number="3"
+                  title="Pembayaran"
+                  description="Aktivasi layanan"
+                />
+
+                <div className="mt-4 rounded-xl border border-blue-100 bg-blue-50/60 p-3.5">
+                  <div className="flex items-start gap-2.5">
+                    <ShieldCheck
+                      size={15}
+                      className="mt-0.5 shrink-0 text-blue-600"
+                    />
+                    <p className="text-[11px] leading-5 text-slate-600">
+                      Data digunakan untuk proses pendaftaran SmartSchool.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </aside>
+
+            <section className="min-w-0 overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
+              <div className="border-b border-slate-100 bg-gradient-to-r from-blue-50/50 to-transparent px-5 py-5 sm:px-7 sm:py-6">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-600 text-white">
+                    <Building2 size={19} />
+                  </div>
+                  <div>
+                    <h2 className="text-base font-bold sm:text-lg">
+                      Informasi Pendaftaran
+                    </h2>
+                    <p className="mt-1 text-xs leading-5 text-slate-500 sm:text-sm">
+                      Isi data dengan benar agar proses verifikasi berjalan
+                      lancar.
+                    </p>
+                  </div>
+                </div>
               </div>
 
-              <h1 className="text-lg font-bold text-slate-900">
-                Paket tidak ditemukan
-              </h1>
+              <form onSubmit={handleSubmit} className="space-y-8 p-5 sm:p-7">
+                <div>
+                  <SectionHeading
+                    icon={User}
+                    title="Data Penanggung Jawab"
+                    description="Informasi orang yang mengelola pendaftaran."
+                  />
 
-              <p className="text-sm text-slate-500 mt-2">
-                {error ||
-                  "Silakan kembali ke halaman paket dan pilih paket terlebih dahulu."}
-              </p>
+                  <div className="grid gap-5 sm:grid-cols-2">
+                    <InputField
+                      label="Nama Lengkap"
+                      name="nama"
+                      value={form.nama}
+                      onChange={handleChange}
+                      placeholder="Nama penanggung jawab"
+                      icon={User}
+                      required
+                      autoComplete="name"
+                    />
 
-              <button
-                type="button"
-                onClick={() => {
-                  sessionStorage.removeItem(
-                    "selected_paket"
-                  );
+                    <InputField
+                      label="Email Aktif"
+                      name="email"
+                      value={form.email}
+                      onChange={handleChange}
+                      placeholder="nama@email.com"
+                      icon={Mail}
+                      type="email"
+                      required
+                      autoComplete="email"
+                      hint="Gunakan email yang bisa Anda akses untuk OTP."
+                    />
+                  </div>
+                </div>
 
-                  sessionStorage.removeItem(
-                    "selected_paket_id"
-                  );
+                <div className="h-px bg-slate-100" />
 
-                  window.location.href =
-                    "/#pricing";
-                }}
-                className="mt-6 px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-sm font-semibold transition"
-              >
-                Kembali ke Paket
-              </button>
-            </div>
-          </main>
-        );
-      }
+                <div>
+                  <SectionHeading
+                    icon={Building2}
+                    title="Informasi Sekolah"
+                    description="Identitas dan alamat sekolah yang didaftarkan."
+                  />
 
-      // =====================================================
-      // PAGE
-      // =====================================================
+                  <div className="space-y-5">
+                    <InputField
+                      label="Nama Sekolah atau Yayasan"
+                      name="namaSekolah"
+                      value={form.namaSekolah}
+                      onChange={handleChange}
+                      placeholder="Contoh: SMA Nusantara"
+                      icon={Building2}
+                      required
+                    />
 
-      return (
-        <main className="min-h-screen bg-slate-50">
-          {/* HEADER */}
+                    <div className="space-y-1.5">
+                      <label
+                        htmlFor="jenjang"
+                        className="block text-sm font-semibold text-slate-700"
+                      >
+                        Jenjang Pendidikan
+                        <span className="ml-1 text-blue-600">*</span>
+                      </label>
 
-          <header className="bg-white border-b border-slate-200">
-            <div className="max-w-7xl mx-auto px-5 sm:px-6 py-4 flex items-center justify-between gap-4">
-              <div className="flex items-center gap-3 min-w-0">
-                <div className="relative w-9 h-9 shrink-0">
-                  <Image
-                    src="/logo/logoSS.png"
-                    alt="SmartSchool"
-                    fill
-                    priority
-                    className="object-contain"
+                      <div className="relative">
+                        <GraduationCap
+                          size={17}
+                          className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                        />
+                        <select
+                          id="jenjang"
+                          name="jenjang"
+                          value={form.jenjang}
+                          onChange={handleChange}
+                          required
+                          className="w-full appearance-none rounded-xl border border-slate-200 bg-slate-50/50 py-3 pl-10 pr-4 text-sm outline-none transition hover:border-slate-300 focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
+                        >
+                          <option value="">Pilih jenjang pendidikan</option>
+                          <option value="SD">SD / MI</option>
+                          <option value="SMP">SMP / MTs</option>
+                          <option value="SMA">SMA / MA</option>
+                          <option value="SMK">SMK</option>
+                          <option value="Yayasan">Yayasan</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    <InputField
+                      label="Alamat Lengkap Sekolah"
+                      name="alamatSekolah"
+                      value={form.alamatSekolah}
+                      onChange={handleChange}
+                      placeholder="Jalan, kecamatan, kota, dan provinsi"
+                      icon={MapPin}
+                      required
+                    />
+
+                    <InputField
+                      label="Nomor Telepon Sekolah"
+                      name="teleponSekolah"
+                      value={form.teleponSekolah}
+                      onChange={handleChange}
+                      placeholder="Contoh: 081234567890"
+                      icon={Phone}
+                      type="tel"
+                      required
+                      autoComplete="tel"
+                    />
+                  </div>
+                </div>
+
+                <div className="h-px bg-slate-100" />
+
+                <div>
+                  <SectionHeading
+                    icon={Globe}
+                    title="Alamat Website Sekolah"
+                    description="Tentukan alamat unik untuk website sekolah."
+                  />
+
+                  <InputField
+                    label="Subdomain"
+                    name="subdomain"
+                    value={form.subdomain}
+                    onChange={handleChange}
+                    placeholder="nama-sekolah"
+                    icon={Globe}
+                    required
+                    suffix=".smartschool.id"
+                    hint="Gunakan huruf kecil, angka, dan tanda hubung."
+                  />
+
+                  {form.subdomain && (
+                    <div className="mt-3 rounded-xl border border-blue-100 bg-blue-50/60 p-3.5">
+                      <p className="text-xs font-semibold text-slate-700">
+                        Pratinjau alamat website
+                      </p>
+                      <p className="mt-1 break-all text-sm font-medium text-blue-600">
+                        https://{form.subdomain}.smartschool.id
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="h-px bg-slate-100" />
+
+                <div>
+                  <SectionHeading
+                    icon={Globe}
+                    title="Logo Sekolah"
+                    description="Opsional. Masukkan URL logo yang dapat diakses publik."
+                  />
+
+                  <InputField
+                    label="URL Logo"
+                    name="logo"
+                    value={form.logo}
+                    onChange={handleChange}
+                    placeholder="https://contoh.com/logo.png"
+                    icon={Globe}
+                    type="url"
+                    hint="BE menerima URL logo, bukan unggahan file langsung."
                   />
                 </div>
 
-                <span className="font-bold text-lg text-slate-900 whitespace-nowrap">
-                  SMART{" "}
-                  <span className="text-blue-600">
-                    SCHOOL
-                  </span>
-                </span>
-              </div>
+                <div className="h-px bg-slate-100" />
 
-              <div className="text-xs sm:text-sm text-slate-500 whitespace-nowrap">
-                Pendaftaran Sekolah
-              </div>
-            </div>
-          </header>
+                <div>
+                  <SectionHeading
+                    icon={Lock}
+                    title="Keamanan Akun"
+                    description="Buat kata sandi untuk akun pengelola sekolah."
+                  />
 
-          {/* CONTENT */}
+                  <div className="grid gap-5 sm:grid-cols-2">
+                    <div className="space-y-1.5">
+                      <label
+                        htmlFor="kataSandi"
+                        className="block text-sm font-semibold text-slate-700"
+                      >
+                        Kata Sandi *
+                      </label>
 
-          <div className="max-w-7xl mx-auto px-4 sm:px-5 py-8 sm:py-10">
-            {/* PROGRESS */}
+                      <div className="relative">
+                        <Lock
+                          size={17}
+                          className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                        />
+                        <input
+                          id="kataSandi"
+                          name="kataSandi"
+                          type={showPassword ? "text" : "password"}
+                          value={form.kataSandi}
+                          onChange={handleChange}
+                          placeholder="Minimal 8 karakter"
+                          required
+                          minLength={8}
+                          autoComplete="new-password"
+                          className="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-3 pl-10 pr-11 text-sm outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowPassword((prev) => !prev)}
+                          aria-label={
+                            showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"
+                          }
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                        >
+                          {showPassword ? <EyeOff size={17} /> : <Eye size={17} />}
+                        </button>
+                      </div>
 
-            <div className="max-w-3xl mx-auto mb-8 sm:mb-10 overflow-x-auto">
-              <div className="flex items-center justify-center min-w-[560px]">
-                <ProgressStep
-                  number="1"
-                  label="Data Sekolah"
-                  active
-                />
-
-                <div className="w-12 sm:w-16 h-px bg-slate-300 mx-2 sm:mx-4" />
-
-                <ProgressStep
-                  number="2"
-                  label="Verifikasi"
-                />
-
-                <div className="w-12 sm:w-16 h-px bg-slate-300 mx-2 sm:mx-4" />
-
-                <ProgressStep
-                  number="3"
-                  label="Pembayaran"
-                />
-              </div>
-            </div>
-
-            <div className="grid lg:grid-cols-[minmax(0,1fr)_360px] gap-6 lg:gap-8 items-start">
-              {/* FORM */}
-
-              <div className="bg-white border border-slate-200 shadow-sm rounded-2xl p-5 sm:p-7">
-                <div className="mb-7">
-                  <div className="flex items-center gap-3 mb-2">
-                    <div className="w-10 h-10 bg-blue-50 rounded-xl flex items-center justify-center shrink-0">
-                      <Building2
-                        size={20}
-                        className="text-blue-600"
-                      />
+                      {form.kataSandi && (
+                        <p className="text-xs text-slate-400">
+                          {form.kataSandi.length < 8
+                            ? "Kata sandi terlalu pendek"
+                            : form.kataSandi.length < 12
+                            ? "Kata sandi cukup kuat"
+                            : "Kata sandi sangat kuat"}
+                        </p>
+                      )}
                     </div>
 
-                    <div>
-                      <h1 className="text-xl font-bold text-slate-900">
-                        Daftarkan Sekolah
-                      </h1>
+                    <div className="space-y-1.5">
+                      <label
+                        htmlFor="konfirmasiKataSandi"
+                        className="block text-sm font-semibold text-slate-700"
+                      >
+                        Konfirmasi Kata Sandi *
+                      </label>
 
-                      <p className="text-sm text-slate-500">
-                        Lengkapi data sekolah dan akun admin.
-                      </p>
+                      <div className="relative">
+                        <Lock
+                          size={17}
+                          className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+                        />
+                        <input
+                          id="konfirmasiKataSandi"
+                          name="konfirmasiKataSandi"
+                          type={showConfirmPassword ? "text" : "password"}
+                          value={form.konfirmasiKataSandi}
+                          onChange={handleChange}
+                          placeholder="Ulangi kata sandi"
+                          required
+                          autoComplete="new-password"
+                          className="w-full rounded-xl border border-slate-200 bg-slate-50/50 py-3 pl-10 pr-11 text-sm outline-none transition focus:border-blue-500 focus:bg-white focus:ring-4 focus:ring-blue-500/10"
+                        />
+                        <button
+                          type="button"
+                          onClick={() =>
+                            setShowConfirmPassword((prev) => !prev)
+                          }
+                          aria-label={
+                            showConfirmPassword
+                              ? "Sembunyikan konfirmasi kata sandi"
+                              : "Tampilkan konfirmasi kata sandi"
+                          }
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+                        >
+                          {showConfirmPassword ? (
+                            <EyeOff size={17} />
+                          ) : (
+                            <Eye size={17} />
+                          )}
+                        </button>
+                      </div>
+
+                      {form.konfirmasiKataSandi && (
+                        <div className="flex items-center gap-1.5">
+                          {form.kataSandi === form.konfirmasiKataSandi ? (
+                            <>
+                              <CheckCircle2 size={13} className="text-emerald-500" />
+                              <p className="text-xs text-emerald-600">
+                                Kata sandi sudah cocok
+                              </p>
+                            </>
+                          ) : (
+                            <>
+                              <AlertCircle size={13} className="text-rose-500" />
+                              <p className="text-xs text-rose-600">
+                                Kata sandi belum cocok
+                              </p>
+                            </>
+                          )}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
 
-                {/* ERROR */}
-
                 {error && (
-                  <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl text-sm text-red-600 leading-6">
-                    {error}
+                  <div
+                    role="alert"
+                    className="flex items-start gap-3 rounded-xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700"
+                  >
+                    <AlertCircle size={18} className="mt-0.5 shrink-0" />
+                    <p className="leading-6">{error}</p>
                   </div>
                 )}
 
-                <form
-                  onSubmit={handleSubmit}
-                  className="space-y-7"
-                >
-                  {/* ADMIN */}
-
-                  <section>
-                    <h2 className="text-sm font-bold text-slate-900 mb-4">
-                      Data Admin Sekolah
-                    </h2>
-
-                    <div className="grid md:grid-cols-2 gap-5">
-                      <Input
-                        label="Nama Lengkap"
-                        name="nama"
-                        value={form.nama}
-                        onChange={handleChange}
-                        placeholder="Nama admin"
-                        icon={<User size={16} />}
-                        required
-                      />
-
-                      <Input
-                        label="Email"
-                        name="email"
-                        type="email"
-                        value={form.email}
-                        onChange={handleChange}
-                        placeholder="admin@sekolah.sch.id"
-                        icon={<Mail size={16} />}
-                        required
-                      />
-                    </div>
-                  </section>
-
-                  {/* SEKOLAH */}
-
-                  <section>
-                    <h2 className="text-sm font-bold text-slate-900 mb-4">
-                      Informasi Sekolah
-                    </h2>
-
-                    <div className="space-y-5">
-                      <Input
-                        label="Nama Sekolah"
-                        name="namaSekolah"
-                        value={form.namaSekolah}
-                        onChange={handleChange}
-                        placeholder="Contoh: SMK Taruna Bhakti"
-                        icon={
-                          <Building2 size={16} />
-                        }
-                        required
-                      />
-
-                      <div className="grid md:grid-cols-2 gap-5">
-                        {/* JENJANG */}
-
-                        <div>
-                          <label className="block text-sm font-medium text-slate-700 mb-2">
-                            Jenjang
-                          </label>
-
-                          <select
-                            name="jenjang"
-                            value={form.jenjang}
-                            onChange={handleChange}
-                            required
-                            className="w-full h-11 px-3 border border-slate-200 rounded-xl bg-white text-sm text-slate-800 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                          >
-                            <option value="">
-                              Pilih jenjang
-                            </option>
-
-                            <option value="SD">
-                              SD
-                            </option>
-
-                            <option value="SMP">
-                              SMP
-                            </option>
-
-                            <option value="SMA">
-                              SMA
-                            </option>
-
-                            <option value="SMK">
-                              SMK
-                            </option>
-
-                            <option value="SLB">
-                              SLB
-                            </option>
-
-                            <option value="Lainnya">
-                              Lainnya
-                            </option>
-                          </select>
-                        </div>
-
-                        {/* SUBDOMAIN */}
-
-                        <Input
-                          label="Subdomain"
-                          name="subdomain"
-                          value={form.subdomain}
-                          onChange={handleChange}
-                          placeholder="smk-taruna-bhakti"
-                          icon={
-                            <Globe size={16} />
-                          }
-                          required
-                        />
-                      </div>
-
-                      <p className="text-xs text-slate-400 -mt-3">
-                        Gunakan huruf kecil, angka, dan tanda
-                        strip (-).
-                        <br />
-                        Contoh:
-                        smk-taruna-bhakti.smartschool.id
-                      </p>
-
-                      {/* ALAMAT */}
-
-                      <div>
-                        <label className="block text-sm font-medium text-slate-700 mb-2">
-                          Alamat Sekolah
-                        </label>
-
-                        <div className="relative">
-                          <MapPin
-                            size={16}
-                            className="absolute left-3 top-3.5 text-slate-400"
-                          />
-
-                          <textarea
-                            name="alamatSekolah"
-                            value={
-                              form.alamatSekolah
-                            }
-                            onChange={handleChange}
-                            placeholder="Contoh: Jl. Raya Pendidikan No. 10"
-                            required
-                            minLength={5}
-                            rows={3}
-                            className="w-full pl-10 pr-3 py-3 border border-slate-200 rounded-xl text-sm text-slate-800 outline-none resize-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                          />
-                        </div>
-
-                        <p className="text-xs text-slate-400 mt-1.5">
-                          Alamat minimal 5 karakter.
-                        </p>
-                      </div>
-
-                      {/* TELEPON */}
-
-                      <Input
-                        label="Nomor Telepon Sekolah"
-                        name="teleponSekolah"
-                        value={
-                          form.teleponSekolah
-                        }
-                        onChange={handleChange}
-                        placeholder="081234567890"
-                        icon={
-                          <Phone size={16} />
-                        }
-                        required
-                      />
-
-                      {/* LOGO */}
-
-                      <Input
-                        label="URL Logo Sekolah"
-                        name="logo"
-                        value={form.logo}
-                        onChange={handleChange}
-                        placeholder="https://..."
-                        icon={
-                          <Globe size={16} />
-                        }
-                      />
-                    </div>
-                  </section>
-
-                  {/* PASSWORD */}
-
-                  <section>
-                    <h2 className="text-sm font-bold text-slate-900 mb-4">
-                      Keamanan Akun
-                    </h2>
-
-                    <div className="grid md:grid-cols-2 gap-5">
-                      <Input
-                        label="Kata Sandi"
-                        name="kataSandi"
-                        type="password"
-                        value={form.kataSandi}
-                        onChange={handleChange}
-                        placeholder="Minimal 8 karakter"
-                        icon={<Lock size={16} />}
-                        required
-                      />
-
-                      <Input
-                        label="Konfirmasi Kata Sandi"
-                        name="konfirmasiKataSandi"
-                        type="password"
-                        value={
-                          form.konfirmasiKataSandi
-                        }
-                        onChange={handleChange}
-                        placeholder="Ulangi kata sandi"
-                        icon={<Lock size={16} />}
-                        required
-                      />
-                    </div>
-
-                    <p className="text-xs text-slate-400 mt-2">
-                      Minimal 8 karakter, memiliki 1 huruf
-                      kapital dan 1 angka.
+                <div className="space-y-4 border-t border-slate-100 pt-6">
+                  <div className="flex items-start gap-2 text-xs leading-5 text-slate-400">
+                    <ShieldCheck size={15} className="mt-0.5 shrink-0 text-blue-500" />
+                    <p>
+                      Dengan melanjutkan, kamu menyatakan bahwa data yang
+                      diberikan benar dan dapat digunakan untuk proses
+                      pendaftaran SmartSchool.
                     </p>
-                  </section>
-
-                  {/* BUTTON */}
-
-                  <div className="pt-2 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-between gap-4">
-                    <button
-                      type="button"
-                      disabled={loading}
-                      onClick={() =>
-                        window.history.back()
-                      }
-                      className="px-5 py-3 text-sm font-medium text-slate-600 hover:text-slate-900 flex items-center justify-center gap-2 transition"
-                    >
-                      <ArrowLeft size={16} />
-                      Kembali
-                    </button>
-
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed text-white rounded-xl text-sm font-semibold flex items-center justify-center gap-2 transition"
-                    >
-                      {loading ? (
-                        <>
-                          <Loader2
-                            size={16}
-                            className="animate-spin"
-                          />
-                          Mendaftarkan...
-                        </>
-                      ) : (
-                        <>
-                          Lanjutkan
-                          <ArrowRight size={16} />
-                        </>
-                      )}
-                    </button>
                   </div>
-                </form>
-              </div>
 
-              {/* PACKAGE */}
+                  <button
+                    type="submit"
+                    disabled={loading || loadingPaket}
+                    className="group flex w-full items-center justify-center gap-2 rounded-xl bg-[#155DFC] px-5 py-4 text-sm font-bold text-white transition hover:bg-[#0D47C9] disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {loading || loadingPaket ? (
+                      <>
+                        <Loader2 size={18} className="animate-spin" />
+                        {loadingPaket
+                          ? "Memuat paket..."
+                          : "Memproses pendaftaran..."}
+                      </>
+                    ) : (
+                      <>
+                        Lanjutkan Pendaftaran
+                        <ArrowRight
+                          size={18}
+                          className="transition-transform group-hover:translate-x-0.5"
+                        />
+                      </>
+                    )}
+                  </button>
 
-              <div className="bg-white border border-slate-200 rounded-2xl shadow-sm p-6 lg:sticky lg:top-6">
-                <p className="text-xs font-semibold text-blue-600 uppercase tracking-wide mb-2">
-                  Paket yang dipilih
-                </p>
-
-                <h2 className="text-xl font-bold text-slate-900">
-                  {paket.nama}
-                </h2>
-
-                <p className="text-sm text-slate-500 mt-2 leading-6">
-                  {paket.deskripsi}
-                </p>
-
-                <div className="my-5 h-px bg-slate-100" />
-
-                <div className="mb-5">
-                  <p className="text-xs text-slate-500">
-                    Harga
-                  </p>
-
-                  <p className="text-2xl font-bold text-slate-900 mt-1">
-                    {formatRupiah(paket.harga)}
-                  </p>
-
-                  <p className="text-xs text-slate-400">
-                    / {paket.durasi}
+                  <p className="text-center text-xs text-slate-400">
+                    Pastikan data yang dimasukkan sudah benar.
                   </p>
                 </div>
+              </form>
+            </section>
 
-                <div className="space-y-3">
-                  {paket.fitur?.map((fitur) => (
-                    <div
-                      key={fitur.id}
-                      className="flex gap-2"
-                    >
-                      <CheckCircle2
-                        size={17}
-                        className="text-blue-600 shrink-0 mt-0.5"
-                      />
+            <aside className="space-y-5 lg:sticky lg:top-24">
+              <section className="overflow-hidden rounded-2xl border border-slate-200/80 bg-white shadow-sm">
+                <div className="h-1.5 bg-gradient-to-r from-blue-600 via-blue-500 to-indigo-500" />
 
-                      <span className="text-sm text-slate-600">
-                        {fitur.nama}
-                      </span>
+                <div className="border-b border-slate-100 bg-gradient-to-br from-blue-50/50 to-transparent px-6 py-6">
+                  <div className="mb-4 flex items-center justify-between">
+                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-600 text-white">
+                      <GraduationCap size={22} />
                     </div>
-                  ))}
+                    <span className="rounded-full border border-blue-200 bg-blue-50 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wide text-blue-600">
+                      Paket Pilihan
+                    </span>
+                  </div>
+
+                  <p className="text-xs font-medium text-slate-500">
+                    Paket SmartSchool Anda
+                  </p>
+                  <h2 className="mt-1 text-2xl font-bold tracking-tight text-slate-900">
+                    {loadingPaket ? "Memuat paket..." : namaPaket}
+                  </h2>
+                  <p className="mt-2 text-sm leading-6 text-slate-500">
+                    {paket?.deskripsi ||
+                      "Solusi terintegrasi untuk membantu pengelolaan sekolah secara digital."}
+                  </p>
                 </div>
-              </div>
-            </div>
+
+                <div className="p-6">
+                  <p className="text-xs font-medium uppercase tracking-wide text-slate-400">
+                    Biaya Berlangganan
+                  </p>
+
+                  {loadingPaket ? (
+                    <div className="mt-3 h-9 w-40 animate-pulse rounded-lg bg-slate-100" />
+                  ) : (
+                    <p className="mt-2 break-words text-3xl font-extrabold tracking-tight text-blue-700">
+                      {formatRupiah(hargaPaket)}
+                    </p>
+                  )}
+
+                  <div className="mt-3 flex items-center gap-2 text-sm text-slate-500">
+                    <CalendarDays size={15} />
+                    <span>
+                      Durasi: {durasi ?? "-"}
+                      {typeof durasi === "number" ? " hari" : ""}
+                    </span>
+                  </div>
+
+                  {hargaPaket <= 0 && !loadingPaket && (
+                    <p className="mt-3 rounded-lg border border-emerald-100 bg-emerald-50 p-3 text-xs leading-5 text-emerald-700">
+                      Paket ini akan diproses sebagai trial sesuai aturan Backend.
+                    </p>
+                  )}
+
+                  <div className="my-6 h-px bg-slate-100" />
+
+                  <h3 className="flex items-center gap-2 text-sm font-bold text-slate-900">
+                    <CheckCircle2 size={16} className="text-blue-600" />
+                    Fitur yang Tersedia
+                  </h3>
+
+                  {fiturPaket.length > 0 ? (
+                    <ul className="mt-4 space-y-3">
+                      {fiturPaket.map((fitur, index) => {
+                        const namaFitur =
+                          typeof fitur === "string"
+                            ? fitur
+                            : fitur?.nama ||
+                              fitur?.namaFitur ||
+                              fitur?.fitur ||
+                              fitur?.judul ||
+                              "Fitur SmartSchool";
+
+                        return (
+                          <li
+                            key={`${namaFitur}-${index}`}
+                            className="flex items-start gap-2.5 text-sm leading-5 text-slate-600"
+                          >
+                            <CheckCircle2
+                              size={16}
+                              className="mt-0.5 shrink-0 text-blue-600"
+                            />
+                            <span>{namaFitur}</span>
+                          </li>
+                        );
+                      })}
+                    </ul>
+                  ) : (
+                    <ul className="mt-4 space-y-3">
+                      {[
+                        "Pengelolaan data sekolah",
+                        "Manajemen akademik",
+                        "Akses sistem terintegrasi",
+                      ].map((feature) => (
+                        <li
+                          key={feature}
+                          className="flex items-start gap-2.5 text-sm text-slate-600"
+                        >
+                          <CheckCircle2
+                            size={16}
+                            className="mt-0.5 shrink-0 text-blue-600"
+                          />
+                          <span>{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </div>
+              </section>
+
+              <section className="rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-600">
+                    <ShieldCheck size={20} />
+                  </div>
+                  <div>
+                    <h3 className="text-sm font-bold text-slate-900">
+                      Proses pendaftaran aman
+                    </h3>
+                    <p className="mt-1 text-xs leading-5 text-slate-500">
+                      Lengkapi data dan ikuti verifikasi email sebelum
+                      melanjutkan ke proses berikutnya.
+                    </p>
+                  </div>
+                </div>
+              </section>
+            </aside>
           </div>
-        </main>
-      );
-    }
 
-    // =====================================================
-    // PROGRESS STEP
-    // =====================================================
-
-    function ProgressStep({
-      number,
-      label,
-      active = false,
-    }) {
-      return (
-        <div className="flex items-center shrink-0">
-          <div
-            className={`w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold ${
-              active
-                ? "bg-blue-600 text-white"
-                : "bg-slate-200 text-slate-500"
-            }`}
-          >
-            {number}
-          </div>
-
-          <span
-            className={`ml-2 text-sm ${
-              active
-                ? "font-semibold text-blue-600"
-                : "text-slate-400"
-            }`}
-          >
-            {label}
-          </span>
+          <footer className="mt-12 border-t border-slate-200 pt-6 text-center">
+            <p className="text-xs text-slate-400">
+              © {new Date().getFullYear()} SmartSchool. All rights reserved.
+            </p>
+          </footer>
         </div>
-      );
-    }
-
-    // =====================================================
-    // INPUT
-    // =====================================================
-
-    function Input({
-      label,
-      icon,
-      ...props
-    }) {
-      return (
-        <div>
-          <label className="block text-sm font-medium text-slate-700 mb-2">
-            {label}
-          </label>
-
-          <div className="relative">
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">
-              {icon}
-            </div>
-
-            <input
-              {...props}
-              className="w-full h-11 pl-10 pr-3 border border-slate-200 rounded-xl text-sm text-slate-800 outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-            />
-          </div>
-        </div>
-      );
-    }
-
-    // =====================================================
-    // FORMAT RUPIAH
-    // =====================================================
-
-    function formatRupiah(value) {
-      if (
-        value === undefined ||
-        value === null
-      ) {
-        return "Rp0";
-      }
-
-      const number = Number(value);
-
-      if (!Number.isFinite(number)) {
-        return "Rp0";
-      }
-
-      return new Intl.NumberFormat(
-        "id-ID",
-        {
-          style: "currency",
-          currency: "IDR",
-          maximumFractionDigits: 0,
-        }
-      ).format(number);
-    }
+      </section>
+    </main>
+  );
+}

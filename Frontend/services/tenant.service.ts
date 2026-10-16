@@ -1,18 +1,28 @@
+
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 /**
  * ============================================================
- * GET API URL
+ * API URL
+ * Mendukung:
+ * http://localhost:5000
+ * http://localhost:5000/api
  * ============================================================
  */
-function getApiUrl() {
+function getApiUrl(): string {
   if (!API_URL) {
     throw new Error(
       "NEXT_PUBLIC_API_URL belum dikonfigurasi."
     );
   }
 
-  return API_URL.replace(/\/$/, "");
+  return API_URL.trim()
+    .replace(/\/+$/, "")
+    .replace(/\/api$/i, "");
+}
+
+function getTenantEndpoint(path: string): string {
+  return `${getApiUrl()}/api/tenant/${path.replace(/^\/+/, "")}`;
 }
 
 /**
@@ -20,319 +30,340 @@ function getApiUrl() {
  * PARSE API RESPONSE
  * ============================================================
  */
-async function parseResponse(response: Response) {
+
+async function parseResponse<T = unknown>(
+  response: Response
+): Promise<T> {
   const text = await response.text();
 
   let result: any = null;
 
-  try {
-    result = text ? JSON.parse(text) : null;
-  } catch {
-    throw new Error(
-      `Server mengembalikan response yang tidak valid. Status: ${response.status}`
-    );
+  if (text.trim()) {
+    try {
+      result = JSON.parse(text);
+    } catch {
+      console.error("[TENANT API] Response bukan JSON:", {
+        url: response.url,
+        status: response.status,
+        body: text.slice(0, 1000),
+      });
+
+      throw new Error(
+        `Respons backend tidak valid (HTTP ${response.status}).`
+      );
+    }
   }
 
-  console.log(
-    "========== API RESPONSE =========="
-  );
+  if (!response.ok || result?.success === false) {
+    // Tampilkan informasi untuk debugging.
+    // Jangan mencetak kata sandi atau kode OTP.
+    console.error("[TENANT API] Request gagal:", {
+      url: response.url,
+      status: response.status,
+      message: result?.message,
+      error: result?.error,
+      details: result?.details,
+      errors: result?.errors,
+    });
 
-  console.log(
-    "STATUS:",
-    response.status
-  );
-
-  console.log(
-    "OK:",
-    response.ok
-  );
-
-  console.log(
-    "RESULT:",
-    result
-  );
-
-  console.log(
-    "================================="
-  );
-
-  /**
-   * Jika HTTP status bukan 2xx
-   */
-  if (!response.ok) {
     throw new Error(
       result?.message ||
         result?.error ||
-        result?.errors?.[0]?.message ||
-        `Request gagal. Status: ${response.status}`
+        (Array.isArray(result?.errors)
+          ? result.errors
+              .map((item: any) => item?.message ?? String(item))
+              .join(", ")
+          : undefined) ||
+        `Request gagal (HTTP ${response.status}).`
     );
   }
 
-  return result;
+  if (result === null) {
+    throw new Error("Backend mengembalikan respons kosong.");
+  }
+
+  return result as T;
+}
+
+
+/**
+ * ============================================================
+ * TIPE DATA
+ * ============================================================
+ */
+export type TenantBank =
+  | "bca"
+  | "bni"
+  | "bri"
+  | "mandiri"
+  | "permata";
+
+export type JenisPendaftaran =
+  | "sekolah"
+  | "yayasan";
+
+export type JenjangSekolah =
+  | "SD"
+  | "SMP"
+  | "SMA"
+  | "SMK"
+  | "SLB"
+  | "Lainnya";
+
+/**
+ * ============================================================
+ * REGISTER TENANT REQUEST
+ * ============================================================
+ */
+export interface RegisterTenantData {
+  jenisPendaftaran?: JenisPendaftaran;
+
+  paketId: string;
+  nama: string;
+  email: string;
+  kataSandi: string;
+
+  // Data sekolah
+  namaSekolah?: string;
+  jenjang?: JenjangSekolah;
+  subdomain?: string;
+  alamatSekolah?: string;
+  teleponSekolah?: string;
+  logo?: string;
+
+  // Data yayasan
+  namaYayasan?: string;
+  alamatYayasan?: string;
+  teleponYayasan?: string;
+  emailYayasan?: string;
+  npypYayasan?: string;
+
+  // Kompatibilitas kode pemanggil lama.
+  // Tidak dikirim ke backend.
+  yayasanId?: string;
+}
+
+/**
+ * ============================================================
+ * REGISTER TENANT RESPONSE
+ * ============================================================
+ */
+export interface RegisterTenantResponse {
+  success: boolean;
+  message: string;
+  data?: unknown;
 }
 
 /**
  * ============================================================
  * REGISTER TENANT
+ *
+ * POST /api/tenant/register
  * ============================================================
  */
-export interface RegisterTenantData {
-  paketId: string;
-  nama: string;
-  namaSekolah: string;
-  jenjang: string;
-  subdomain: string;
-  email: string;
-  teleponSekolah: string;
-  alamatSekolah: string;
-  kataSandi: string;
-  logo?: string;
-  yayasanId?: string;
-}
-
-export interface RegisterTenantResponse {
-  success: boolean;
-  message: string;
-  data?: any;
-}
-
-
 export async function registerTenant(
   data: RegisterTenantData
 ): Promise<RegisterTenantResponse> {
-  const response = await fetch(
-    `${getApiUrl()}/api/tenant/register`,
-    {
-      method: "POST",
+  const jenisPendaftaran =
+    data.jenisPendaftaran ?? "sekolah";
 
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
+  const payload: Record<string, unknown> = {
+    jenisPendaftaran,
+    paketId: data.paketId,
+    nama: data.nama.trim(),
+    email: data.email.trim().toLowerCase(),
+    kataSandi: data.kataSandi,
+  };
 
-      body: JSON.stringify({
-        paketId: data.paketId,
+  if (jenisPendaftaran === "sekolah") {
+    payload.namaSekolah = data.namaSekolah?.trim();
+    payload.jenjang = data.jenjang;
+    payload.subdomain = data.subdomain
+      ?.trim()
+      .toLowerCase();
+    payload.alamatSekolah = data.alamatSekolah?.trim();
+    payload.teleponSekolah = data.teleponSekolah?.trim();
 
-        nama: data.nama
-          .trim(),
-
-        namaSekolah:
-          data.namaSekolah.trim(),
-
-        jenjang:
-          data.jenjang,
-
-        subdomain:
-          data.subdomain
-            .trim()
-            .toLowerCase(),
-
-        email:
-          data.email
-            .trim()
-            .toLowerCase(),
-
-        teleponSekolah:
-          data.teleponSekolah.trim(),
-
-        alamatSekolah:
-          data.alamatSekolah.trim(),
-
-        kataSandi:
-          data.kataSandi,
-
-        ...(data.logo?.trim()
-          ? {
-              logo:
-                data.logo.trim(),
-            }
-          : {}),
-
-        ...(data.yayasanId
-          ? {
-              yayasanId:
-                data.yayasanId,
-            }
-          : {}),
-      }),
+    if (data.logo?.trim()) {
+      payload.logo = data.logo.trim();
     }
-  );
+  } else {
+    payload.namaYayasan = data.namaYayasan?.trim();
+    payload.alamatYayasan = data.alamatYayasan?.trim();
+    payload.teleponYayasan = data.teleponYayasan?.trim();
+    payload.emailYayasan = data.emailYayasan
+      ?.trim()
+      .toLowerCase();
+    payload.npypYayasan = data.npypYayasan?.trim();
+  }
 
-  return parseResponse(
-    response
-  );
+  const endpoint = getTenantEndpoint("register");
+
+  console.log("[REGISTER TENANT] Request:", {
+    endpoint,
+    jenisPendaftaran,
+    paketId: data.paketId,
+    email: data.email.trim().toLowerCase(),
+  });
+
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
+
+  const result =
+    await parseResponse<RegisterTenantResponse>(response);
+
+  console.log("[REGISTER TENANT] Response:", {
+    success: result.success,
+    message: result.message,
+  });
+
+  return result;
 }
 
 /**
  * ============================================================
  * VERIFY TENANT RESPONSE
+ *
+ * Sesuai respons verifyAndPay pada backend.
  * ============================================================
  */
 export interface VerifyTenantResponse {
   success: boolean;
-
   message: string;
-
   data?: {
-    payment_url?: string;
-
-    is_trial?: boolean;
-
     order_id?: string;
-
-    bank?: string;
-
-    va_number?: string;
-
     gross_amount?: number;
+    bank?: TenantBank;
+    va_number?: string | null;
+    biller_code?: string | null;
+    bill_key?: string | null;
+    expiry_time?: string | null;
+    is_trial?: boolean;
+    jenis_pendaftaran?: JenisPendaftaran;
   };
 }
 
-
+/**
+ * ============================================================
+ * VERIFY TENANT / OTP
+ *
+ * POST /api/tenant/verify
+ * ============================================================
+ */
 export async function verifyTenant(
   email: string,
   kodeOtp: string,
-  bank?: "bca" | "bni" | "bri"
+  bank?: TenantBank
 ): Promise<VerifyTenantResponse> {
   const normalizedEmail = email.trim().toLowerCase();
-  const normalizedOtp = kodeOtp.trim();
+  const normalizedOtp = kodeOtp.replace(/\s+/g, "");
 
-  console.log(
-    "========== VERIFY REQUEST =========="
-  );
+  if (!normalizedEmail) {
+    throw new Error("Email wajib diisi.");
+  }
 
-  console.log(
-    "EMAIL:",
-    normalizedEmail
-  );
+  if (!/^\d{6}$/.test(normalizedOtp)) {
+    throw new Error("Kode OTP harus terdiri dari 6 digit.");
+  }
 
-  console.log(
-    "OTP LENGTH:",
-    normalizedOtp.length
-  );
+  const allowedBanks: TenantBank[] = [
+    "bca",
+    "bni",
+    "bri",
+    "mandiri",
+    "permata",
+  ];
 
-  console.log(
-    "BANK:",
-    bank || "tidak ada"
-  );
+  if (bank && !allowedBanks.includes(bank)) {
+    throw new Error("Pilihan bank tidak valid.");
+  }
 
-  console.log(
-    "===================================="
-  );
+  const payload = {
+    email: normalizedEmail,
+    kodeOtp: normalizedOtp,
+    ...(bank ? { bank } : {}),
+  };
 
-  const response = await fetch(
-    `${getApiUrl()}/api/tenant/verify`,
-    {
-      method: "POST",
+  const endpoint = getTenantEndpoint("verify");
 
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
+  console.log("[VERIFY TENANT] Request:", {
+    endpoint,
+    email: normalizedEmail,
+    otpLength: normalizedOtp.length,
+    bank: bank ?? "tidak ada",
+  });
 
-      body: JSON.stringify({
-        email: normalizedEmail,
-        kodeOtp: normalizedOtp,
+  const response = await fetch(endpoint, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+    },
+    body: JSON.stringify(payload),
+  });
 
-        ...(bank
-          ? {
-              bank: bank.toLowerCase(),
-            }
-          : {}),
-      }),
-    }
-  );
+  const result =
+    await parseResponse<VerifyTenantResponse>(response);
 
-  const result = await parseResponse(response);
-
-  console.log(
-    "========== VERIFY RESPONSE =========="
-  );
-
-  console.log(
-    "SUCCESS:",
-    result?.success
-  );
-
-  console.log(
-    "MESSAGE:",
-    result?.message
-  );
-
-  console.log(
-    "IS TRIAL:",
-    result?.data?.is_trial
-  );
-
-  console.log(
-    "PAYMENT URL:",
-    result?.data?.payment_url
-  );
-
-  console.log(
-    "ORDER ID:",
-    result?.data?.order_id
-  );
-
-  console.log(
-    "VA NUMBER:",
-    result?.data?.va_number
-  );
-
-  console.log(
-    "BANK:",
-    result?.data?.bank
-  );
-
-  console.log(
-    "GROSS AMOUNT:",
-    result?.data?.gross_amount
-  );
-
-  console.log(
-    "====================================="
-  );
+  console.log("[VERIFY TENANT] Response:", {
+    success: result.success,
+    message: result.message,
+    isTrial: result.data?.is_trial,
+    orderId: result.data?.order_id,
+    bank: result.data?.bank,
+    grossAmount: result.data?.gross_amount,
+    hasVaNumber: Boolean(result.data?.va_number),
+  });
 
   return result;
 }
 
-
+/**
+ * ============================================================
+ * GET TENANT STATUS
+ *
+ * GET /api/tenant/status
+ *
+ * Gunakan hanya jika route ini sudah tersedia di backend.
+ * Fungsi ini tidak menganggap pembayaran berhasil apabila
+ * endpoint status gagal diakses.
+ * ============================================================
+ */
 export interface GetTenantStatusResponse {
   success: boolean;
   message?: string;
   data?: {
     status?: string;
+    is_trial?: boolean;
+    order_id?: string;
+    [key: string]: unknown;
   };
 }
 
 export async function getTenantStatus(): Promise<GetTenantStatusResponse> {
+  const endpoint = getTenantEndpoint("status");
+
   try {
-    const response = await fetch(
-      `${getApiUrl()}/api/tenant/status`,
-      {
-        method: "GET",
-        headers: {
-          Accept: "application/json",
-        },
-      }
-    );
+    const response = await fetch(endpoint, {
+      method: "GET",
+      headers: {
+        Accept: "application/json",
+      },
+      cache: "no-store",
+    });
 
-    if (!response.ok) {
-      return {
-        success: false,
-        message: `Status HTTP ${response.status}`,
-        data: { status: "waiting" },
-      };
-    }
+    const result =
+      await parseResponse<GetTenantStatusResponse>(response);
 
-    const result = await parseResponse(response);
-
-    return result as GetTenantStatusResponse;
+    return result;
   } catch (error) {
-    console.error(
-      "Gagal mengecek status tenant:",
-      error
-    );
+    console.error("[GET TENANT STATUS] Error:", error);
 
     return {
       success: false,
@@ -340,7 +371,9 @@ export async function getTenantStatus(): Promise<GetTenantStatusResponse> {
         error instanceof Error
           ? error.message
           : "Gagal mengecek status tenant.",
-      data: { status: "waiting" },
+      data: {
+        status: "waiting",
+      },
     };
   }
 }

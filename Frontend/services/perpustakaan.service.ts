@@ -1,6 +1,6 @@
 import { apiFetch } from "../lib/api";
 
-const BASE_PATH = "/perpustakaan";
+const BASE_PATH = "/api/perpustakaan";
 
 /* =========================================================
    TYPES
@@ -21,23 +21,27 @@ export type PeminjamanParams = {
 export type BukuPayload = {
   kodeBuku: string;
   judul: string;
-  penulis: string;
+  penulis?: string;
   penerbit?: string;
   tahunTerbit?: number;
   isbn?: string;
-  tipe: string;
-  kategori: string;
+  tipe: "FISIK" | "EBOOK";
+  kategori?: string;
   deskripsi?: string;
   coverUrl?: string;
   urlEbook?: string;
-  jumlah: number;
-  status: string;
+  jumlah?: number;
+  status?: string;
 };
+
 
 export type PeminjamanPayload = {
   bukuId: string;
-  penggunaId?: string;
+  tanggalJatuhTempo: string; // Format YYYY-MM-DD
+  catatan?: string;
 };
+
+
 
 /* =========================================================
    HELPER
@@ -73,33 +77,18 @@ function unwrapList(response: any) {
    BUKU
 ========================================================= */
 
-export async function getBuku(
-  params: BukuParams = {},
-) {
+export async function getBuku(params: BukuParams = {}) {
   const query = new URLSearchParams();
 
-  if (params.search) {
-    query.set("search", params.search);
-  }
-
-  if (params.tipe) {
-    query.set("tipe", params.tipe);
-  }
-
-  if (params.kategori) {
-    query.set("kategori", params.kategori);
-  }
-
-  if (params.status) {
-    query.set("status", params.status);
-  }
+  if (params.search) query.set("search", params.search);
+  if (params.tipe) query.set("tipe", params.tipe);
+  if (params.kategori) query.set("kategori", params.kategori);
+  if (params.status) query.set("status", params.status);
 
   const queryString = query.toString();
 
   const response = await apiFetch(
-    `${BASE_PATH}/buku${
-      queryString ? `?${queryString}` : ""
-    }`,
+    `${BASE_PATH}/buku${queryString ? `?${queryString}` : ""}`,
   );
 
   return unwrapList(response);
@@ -107,22 +96,17 @@ export async function getBuku(
 
 export async function getBukuById(id: string) {
   const response = await apiFetch(
-    `${BASE_PATH}/buku/${id}`,
+    `${BASE_PATH}/buku/${encodeURIComponent(id)}`,
   );
 
   return unwrap(response);
 }
 
-export async function createBuku(
-  payload: BukuPayload,
-) {
-  const response = await apiFetch(
-    `${BASE_PATH}/buku`,
-    {
-      method: "POST",
-      body: JSON.stringify(payload),
-    },
-  );
+export async function createBuku(payload: BukuPayload) {
+  const response = await apiFetch(`${BASE_PATH}/buku`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
 
   return unwrap(response);
 }
@@ -132,7 +116,7 @@ export async function updateBuku(
   payload: Partial<BukuPayload>,
 ) {
   const response = await apiFetch(
-    `${BASE_PATH}/buku/${id}`,
+    `${BASE_PATH}/buku/${encodeURIComponent(id)}`,
     {
       method: "PUT",
       body: JSON.stringify(payload),
@@ -143,12 +127,9 @@ export async function updateBuku(
 }
 
 export async function deleteBuku(id: string) {
-  return apiFetch(
-    `${BASE_PATH}/buku/${id}`,
-    {
-      method: "DELETE",
-    },
-  );
+  return apiFetch(`${BASE_PATH}/buku/${encodeURIComponent(id)}`, {
+    method: "DELETE",
+  });
 }
 
 /* =========================================================
@@ -160,38 +141,25 @@ export async function getPeminjaman(
 ) {
   const query = new URLSearchParams();
 
-  if (params.status) {
-    query.set("status", params.status);
-  }
-
+  if (params.status) query.set("status", params.status);
   if (params.penggunaId) {
-    query.set(
-      "penggunaId",
-      params.penggunaId,
-    );
+    query.set("penggunaId", params.penggunaId);
   }
 
   const queryString = query.toString();
 
   const response = await apiFetch(
-    `${BASE_PATH}/peminjaman${
-      queryString ? `?${queryString}` : ""
-    }`,
+    `${BASE_PATH}/peminjaman${queryString ? `?${queryString}` : ""}`,
   );
 
   return unwrapList(response);
 }
 
-export async function pinjamBuku(
-  payload: PeminjamanPayload,
-) {
-  const response = await apiFetch(
-    `${BASE_PATH}/peminjaman`,
-    {
-      method: "POST",
-      body: JSON.stringify(payload),
-    },
-  );
+export async function pinjamBuku(payload: PeminjamanPayload) {
+  const response = await apiFetch(`${BASE_PATH}/peminjaman`, {
+    method: "POST",
+    body: JSON.stringify(payload),
+  });
 
   return unwrap(response);
 }
@@ -201,7 +169,7 @@ export async function kembalikanBuku(
   payload: Record<string, unknown> = {},
 ) {
   const response = await apiFetch(
-    `${BASE_PATH}/peminjaman/${id}/kembali`,
+    `${BASE_PATH}/peminjaman/${encodeURIComponent(id)}/kembali`,
     {
       method: "PUT",
       body: JSON.stringify(payload),

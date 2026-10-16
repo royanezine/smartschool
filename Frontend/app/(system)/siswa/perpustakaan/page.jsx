@@ -1127,44 +1127,64 @@ export default function PerpustakaanSiswaPage() {
     [filteredBooks],
   );
 
-  const handleBorrow = async (book) => {
-    if (!book?.id || !userId) {
-      setError(
-        "Data siswa atau buku tidak lengkap.",
-      );
-      return;
-    }
+ 
+const handleBorrow = async (book) => {
+  if (!book?.id || !userId) {
+    setError("Data siswa atau buku tidak lengkap.");
+    return;
+  }
 
-    if (
-      book.tipe === "EBOOK" ||
-      book.status !== "aktif" ||
-      Number(book.jumlahTersedia || 0) <= 0
-    ) {
-      return;
-    }
+  if (
+    book.tipe === "EBOOK" ||
+    book.status !== "aktif" ||
+    Number(book.jumlahTersedia || 0) <= 0
+  ) {
+    setError("Buku tidak tersedia untuk dipinjam.");
+    return;
+  }
 
-    setSavingId(String(book.id));
-    setError("");
+  setSavingId(String(book.id));
+  setError("");
 
-    try {
-      await pinjamBuku({
-        bukuId: String(book.id),
-        penggunaId: String(userId),
-      });
+  try {
+    // Contoh lama peminjaman 7 hari dari hari ini.
+    // Format tanggal harus YYYY-MM-DD.
+    const tanggalJatuhTempo = new Date();
+    tanggalJatuhTempo.setDate(
+      tanggalJatuhTempo.getDate() + 7
+    );
 
-      setSelectedBook(null);
-      await loadData(true);
-    } catch (err) {
-      setError(
-        getErrorMessage(
-          err,
-          "Gagal membuat transaksi peminjaman.",
-        ),
-      );
-    } finally {
-      setSavingId("");
-    }
-  };
+    const tahun = tanggalJatuhTempo.getFullYear();
+    const bulan = String(
+      tanggalJatuhTempo.getMonth() + 1
+    ).padStart(2, "0");
+    const tanggal = String(
+      tanggalJatuhTempo.getDate()
+    ).padStart(2, "0");
+
+    const tanggalJatuhTempoString =
+      `${tahun}-${bulan}-${tanggal}`;
+
+    await pinjamBuku({
+      bukuId: String(book.id),
+      tanggalJatuhTempo: tanggalJatuhTempoString,
+    });
+
+    setSelectedBook(null);
+
+    await loadData(true);
+  } catch (err) {
+    setError(
+      getErrorMessage(
+        err,
+        "Gagal membuat transaksi peminjaman."
+      )
+    );
+  } finally {
+    setSavingId("");
+  }
+};
+
 
   const handleReturn = async (loan) => {
     if (!loan?.id) {

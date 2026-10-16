@@ -1,457 +1,757 @@
 "use client";
 
-import { useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  Plus,
-  Search,
   Wallet,
-  TrendingUp,
-  Users,
+  Search,
+  RefreshCw,
   Eye,
-  Edit,
-  Trash2,
+  X,
   ChevronLeft,
   ChevronRight,
-  FileText,
-  X,
-  Save,
-  CreditCard,
+  ArrowDownCircle,
+  ArrowUpCircle,
+  Receipt,
+  AlertCircle,
+  CheckCircle2,
+  Loader2,
+  TrendingUp,
+  TrendingDown,
+  Users,
+  Plus,
+  Minus,
+  History,
 } from "lucide-react";
 
-import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
+import Header from "@/app/components/Header";
 
-export default function TabunganSiswaPage() {
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [search, setSearch] = useState("");
-  const [currentPage, setCurrentPage] = useState(1);
-  const [entriesPerPage] = useState(5);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [selectedStudent, setSelectedStudent] = useState(null);
+import {
+  getTabungan,
+  getDetailTabungan,
+  getMutasiTabungan,
+  getLaporanTabungan,
+  setorTabungan,
+  tarikTabungan,
+} from "@/services/tabungan.service";
 
-  const [formData, setFormData] = useState({
-    nama: "",
-    kelas: "",
-    saldo: "",
-    totalSetor: "",
-    totalTarik: "",
-  });
+const EMPTY_META = {
+  page: 1,
+  limit: 10,
+  total: 0,
+  totalPages: 1,
+};
 
-  const toggleSidebar = () => setIsCollapsed((prev) => !prev);
+const INITIAL_FORM = {
+  siswaId: "",
+  akunKasId: "",
+  jumlah: "",
+  tanggal: new Date().toISOString().slice(0, 10),
+  keterangan: "",
+};
 
-  const [students, setStudents] = useState([
-    {
-      id: 1,
-      nama: "Ahmad Fauzi",
-      kelas: "XII IPA 1",
-      saldo: 450000,
-      totalSetor: 600000,
-      totalTarik: 150000,
-    },
-    {
-      id: 2,
-      nama: "Siti Rahma",
-      kelas: "XI IPS 2",
-      saldo: 275000,
-      totalSetor: 350000,
-      totalTarik: 75000,
-    },
-    {
-      id: 3,
-      nama: "Budi Santoso",
-      kelas: "X MIPA 3",
-      saldo: 620000,
-      totalSetor: 700000,
-      totalTarik: 80000,
-    },
-    {
-      id: 4,
-      nama: "Dewi Lestari",
-      kelas: "XII IPS 1",
-      saldo: 120000,
-      totalSetor: 200000,
-      totalTarik: 80000,
-    },
-    {
-      id: 5,
-      nama: "Eko Prasetyo",
-      kelas: "XI IPA 2",
-      saldo: 380000,
-      totalSetor: 500000,
-      totalTarik: 120000,
-    },
-    {
-      id: 6,
-      nama: "Fitriani Nur",
-      kelas: "X MIPA 1",
-      saldo: 520000,
-      totalSetor: 650000,
-      totalTarik: 130000,
-    },
-    {
-      id: 7,
-      nama: "Galih Prabowo",
-      kelas: "XII IPS 2",
-      saldo: 90000,
-      totalSetor: 200000,
-      totalTarik: 110000,
-    },
-  ]);
+function formatRupiah(value) {
+  const amount = Number(value ?? 0);
 
-  const filtered = students.filter(
-    (s) =>
-      s.nama.toLowerCase().includes(search.toLowerCase()) ||
-      s.kelas.toLowerCase().includes(search.toLowerCase())
-  );
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 0,
+  }).format(Number.isFinite(amount) ? amount : 0);
+}
 
-  const totalSaldo = students.reduce((a, b) => a + b.saldo, 0);
-  const totalSetor = students.reduce((a, b) => a + b.totalSetor, 0);
-  const totalTarik = students.reduce((a, b) => a + b.totalTarik, 0);
+function formatTanggal(value) {
+  if (!value) return "-";
 
-  const indexOfLast = currentPage * entriesPerPage;
-  const indexOfFirst = indexOfLast - entriesPerPage;
-  const currentEntries = filtered.slice(indexOfFirst, indexOfLast);
-  const totalPages = Math.ceil(filtered.length / entriesPerPage);
+  const date = new Date(value);
 
-  const handleOpenModal = (student = null) => {
-    if (student) {
-      setSelectedStudent(student);
+  if (Number.isNaN(date.getTime())) return "-";
 
-      setFormData({
-        nama: student.nama,
-        kelas: student.kelas,
-        saldo: student.saldo.toString(),
-        totalSetor: student.totalSetor.toString(),
-        totalTarik: student.totalTarik.toString(),
-      });
-    } else {
-      setSelectedStudent(null);
+  return new Intl.DateTimeFormat("id-ID", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }).format(date);
+}
 
-      setFormData({
-        nama: "",
-        kelas: "",
-        saldo: "",
-        totalSetor: "",
-        totalTarik: "",
-      });
-    }
+function getErrorMessage(error) {
+  return error instanceof Error
+    ? error.message
+    : "Terjadi kesalahan. Silakan coba kembali.";
+}
 
-    setIsModalOpen(true);
-  };
+function StatusBadge({ status }) {
+  const normalized = String(status || "").toLowerCase();
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setSelectedStudent(null);
-  };
+  const isActive = ["aktif", "active"].includes(normalized);
 
-  const handleSave = () => {
-    if (selectedStudent) {
-      setStudents(
-        students.map((s) =>
-          s.id === selectedStudent.id
-            ? {
-                ...s,
-                ...formData,
-                saldo: parseInt(formData.saldo),
-                totalSetor: parseInt(formData.totalSetor),
-                totalTarik: parseInt(formData.totalTarik),
-              }
-            : s
-        )
-      );
-    } else {
-      const newId =
-        students.length > 0
-          ? Math.max(...students.map((s) => s.id)) + 1
-          : 1;
-
-      setStudents([
-        ...students,
-        {
-          id: newId,
-          nama: formData.nama,
-          kelas: formData.kelas,
-          saldo: parseInt(formData.saldo),
-          totalSetor: parseInt(formData.totalSetor),
-          totalTarik: parseInt(formData.totalTarik),
-        },
-      ]);
-    }
-
-    handleCloseModal();
-  };
-
-  const handleDelete = (id) => {
-    if (confirm("Apakah Anda yakin ingin menghapus data ini?")) {
-      setStudents(students.filter((s) => s.id !== id));
-    }
-  };
-
-  const handleViewDetail = (student) => {
-    setSelectedStudent(student);
-    setIsDetailModalOpen(true);
-  };
+  const className = isActive
+    ? "theme-success"
+    : "theme-card-soft theme-text-secondary";
 
   return (
-    <div className="flex h-screen w-full overflow-hidden theme-page">
+    <span
+      className={`inline-flex items-center gap-1.5 rounded-full border theme-border px-2.5 py-1 text-[11px] font-semibold ${className}`}
+    >
+      <span className="h-1.5 w-1.5 rounded-full bg-current" />
+      {status || "-"}
+    </span>
+  );
+}
+
+function StatCard({ title, value, description, icon: Icon, loading }) {
+  return (
+    <div className="theme-card rounded-2xl border p-4 shadow-sm transition hover:shadow-md sm:p-5">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="theme-text-muted text-xs font-medium">{title}</p>
+
+          {loading ? (
+            <div className="theme-card-soft mt-3 h-7 w-24 animate-pulse rounded-lg" />
+          ) : (
+            <p className="theme-text mt-2 break-words text-xl font-bold sm:text-2xl">
+              {value}
+            </p>
+          )}
+
+          <p className="theme-text-placeholder mt-1 text-[11px]">
+            {description}
+          </p>
+        </div>
+
+        <div className="theme-card-soft theme-border flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border">
+          <Icon size={18} className="theme-text-secondary" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+export default function TabunganSiswaPage() {
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+
+  const [tabungan, setTabungan] = useState([]);
+  const [ringkasan, setRingkasan] = useState({ totalSaldo: 0 });
+  const [laporan, setLaporan] = useState({
+    totalSetoran: 0,
+    jumlahSetoran: 0,
+    totalPenarikan: 0,
+    jumlahPenarikan: 0,
+    totalSaldoSemuaSiswa: 0,
+    jumlahRekening: 0,
+  });
+  const [meta, setMeta] = useState(EMPTY_META);
+
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10);
+  const [search, setSearch] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  const [detailOpen, setDetailOpen] = useState(false);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [selectedTabungan, setSelectedTabungan] = useState(null);
+  const [detail, setDetail] = useState(null);
+  const [mutasi, setMutasi] = useState([]);
+  const [mutasiMeta, setMutasiMeta] = useState(EMPTY_META);
+
+  const [transactionOpen, setTransactionOpen] = useState(false);
+  const [transactionType, setTransactionType] = useState("setor");
+  const [form, setForm] = useState(INITIAL_FORM);
+
+  // =====================================================
+  // LOAD DATA
+  // =====================================================
+
+  const loadTabungan = useCallback(async () => {
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await getTabungan({
+        page,
+        limit,
+        q: search || undefined,
+      });
+
+      setTabungan(Array.isArray(response?.data) ? response.data : []);
+
+      setRingkasan({
+        totalSaldo: Number(response?.ringkasan?.totalSaldo ?? 0),
+      });
+
+      setMeta(response?.meta || EMPTY_META);
+    } catch (err) {
+      setTabungan([]);
+      setRingkasan({ totalSaldo: 0 });
+      setMeta(EMPTY_META);
+      setError(getErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  }, [page, limit, search]);
+
+  const loadLaporan = useCallback(async () => {
+    try {
+      const response = await getLaporanTabungan();
+
+      setLaporan({
+        totalSetoran: Number(response?.totalSetoran ?? 0),
+        jumlahSetoran: Number(response?.jumlahSetoran ?? 0),
+        totalPenarikan: Number(response?.totalPenarikan ?? 0),
+        jumlahPenarikan: Number(response?.jumlahPenarikan ?? 0),
+        totalSaldoSemuaSiswa: Number(
+          response?.totalSaldoSemuaSiswa ?? 0
+        ),
+        jumlahRekening: Number(response?.jumlahRekening ?? 0),
+      });
+    } catch (err) {
+      console.error("Gagal memuat laporan tabungan:", err);
+    }
+  }, []);
+
+  const refreshData = useCallback(async () => {
+    setRefreshing(true);
+
+    try {
+      await Promise.all([loadTabungan(), loadLaporan()]);
+    } finally {
+      setRefreshing(false);
+    }
+  }, [loadTabungan, loadLaporan]);
+
+  useEffect(() => {
+    loadTabungan();
+  }, [loadTabungan]);
+
+  useEffect(() => {
+    loadLaporan();
+  }, [loadLaporan]);
+
+  // =====================================================
+  // SEARCH
+  // =====================================================
+
+  function handleSearch(event) {
+    event.preventDefault();
+    setPage(1);
+    setSearch(searchInput.trim());
+  }
+
+  function resetSearch() {
+    setSearchInput("");
+    setSearch("");
+    setPage(1);
+  }
+
+  // =====================================================
+  // DETAIL
+  // =====================================================
+
+  async function openDetail(item) {
+    if (!item?.siswaId) {
+      setError("ID siswa tidak ditemukan pada data tabungan.");
+      return;
+    }
+
+    setSelectedTabungan(item);
+    setDetailOpen(true);
+    setDetailLoading(true);
+    setDetail(null);
+    setMutasi([]);
+    setError("");
+
+    try {
+      const [detailResponse, mutasiResponse] = await Promise.all([
+        getDetailTabungan(item.siswaId),
+        getMutasiTabungan(item.siswaId, { page: 1, limit: 10 }),
+      ]);
+
+      setDetail(detailResponse);
+
+      setMutasi(
+        Array.isArray(mutasiResponse?.data) ? mutasiResponse.data : []
+      );
+
+      setMutasiMeta(mutasiResponse?.meta || EMPTY_META);
+    } catch (err) {
+      setError(getErrorMessage(err));
+    } finally {
+      setDetailLoading(false);
+    }
+  }
+
+  function closeDetail() {
+    setDetailOpen(false);
+    setSelectedTabungan(null);
+    setDetail(null);
+    setMutasi([]);
+    setMutasiMeta(EMPTY_META);
+  }
+
+  // =====================================================
+  // MODAL SETOR / TARIK
+  // =====================================================
+
+  function openTransaction(type, item = null) {
+    setTransactionType(type);
+    setForm({
+      ...INITIAL_FORM,
+      siswaId: item?.siswaId || "",
+      tanggal: new Date().toISOString().slice(0, 10),
+    });
+
+    setSuccess("");
+    setError("");
+    setTransactionOpen(true);
+  }
+
+  function closeTransaction() {
+    if (submitting) return;
+
+    setTransactionOpen(false);
+    setForm(INITIAL_FORM);
+  }
+
+  function updateForm(field, value) {
+    setForm((previous) => ({
+      ...previous,
+      [field]: value,
+    }));
+  }
+
+  async function submitTransaction(event) {
+    event.preventDefault();
+    setError("");
+    setSuccess("");
+
+    const jumlah = Number(form.jumlah);
+
+    if (!form.siswaId.trim()) {
+      setError("ID siswa wajib diisi.");
+      return;
+    }
+
+    if (!form.akunKasId.trim()) {
+      setError("ID akun kas wajib diisi.");
+      return;
+    }
+
+    if (!Number.isFinite(jumlah) || jumlah <= 0) {
+      setError("Jumlah transaksi harus lebih dari 0.");
+      return;
+    }
+
+    if (!form.tanggal) {
+      setError("Tanggal transaksi wajib diisi.");
+      return;
+    }
+
+    const payload = {
+      siswaId: form.siswaId.trim(),
+      akunKasId: form.akunKasId.trim(),
+      jumlah,
+      tanggal: form.tanggal,
+      ...(form.keterangan.trim()
+        ? { keterangan: form.keterangan.trim() }
+        : {}),
+    };
+
+    setSubmitting(true);
+
+    try {
+      if (transactionType === "setor") {
+        await setorTabungan(payload);
+        setSuccess("Setoran tabungan berhasil disimpan.");
+      } else {
+        await tarikTabungan(payload);
+        setSuccess("Penarikan tabungan berhasil disimpan.");
+      }
+
+      setTransactionOpen(false);
+      setForm(INITIAL_FORM);
+
+      await Promise.all([loadTabungan(), loadLaporan()]);
+
+      if (detailOpen && selectedTabungan?.siswaId) {
+        await openDetail(selectedTabungan);
+      }
+    } catch (err) {
+      setError(getErrorMessage(err));
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  const totalPages = Math.max(Number(meta?.totalPages || 1), 1);
+  const currentPage = Number(meta?.page || page);
+  const selectedStudent = selectedTabungan?.siswa;
+
+  const averageSetoran = useMemo(
+    () =>
+      laporan.jumlahSetoran > 0
+        ? laporan.totalSetoran / laporan.jumlahSetoran
+        : 0,
+    [laporan.totalSetoran, laporan.jumlahSetoran]
+  );
+
+  const averagePenarikan = useMemo(
+    () =>
+      laporan.jumlahPenarikan > 0
+        ? laporan.totalPenarikan / laporan.jumlahPenarikan
+        : 0,
+    [laporan.totalPenarikan, laporan.jumlahPenarikan]
+  );
+
+  return (
+    // ✅ Root flex row — Sidebar & kolom kanan sejajar full height
+    <div className="theme-page flex h-screen w-full overflow-hidden">
+      {/* Sidebar full height, tidak ikut scroll */}
       <Sidebar
-        active="tabunganSiswa"
-        setActive={() => {}}
-        collapsed={isCollapsed}
-        setCollapsed={setIsCollapsed}
+        role="admin_sekolah"
+        activeMenu="tabungan-siswa"
+        isOpen={sidebarOpen}
+        onToggle={() => setSidebarOpen((value) => !value)}
       />
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+      {/* Kolom kanan: Header di atas + Main scroll di bawah */}
+      <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
+        {/* Header hanya di area kanan sidebar */}
         <Header
-          toggleSidebar={toggleSidebar}
-          notifications={[]}
-          user={{
-            name: "Admin Sekolah",
-            email: "admin@smartschool.com",
-            avatar: "AD",
-          }}
+          title="Tabungan Siswa"
+          onMenuClick={() => setSidebarOpen((value) => !value)}
         />
 
-        <main className="min-h-0 flex-1 overflow-y-auto overflow-x-hidden theme-page">
-          <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 xl:px-10">
-            {/* Header */}
-            <div className="mb-6 rounded-2xl theme-header p-6 sm:p-8">
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                <div className="flex items-center gap-4">
-                  <div
-                    className="
-                      flex h-14 w-14 shrink-0 items-center justify-center
-                      rounded-xl
-                      border border-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]
-                      bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
-                      text-[var(--color-primary)]
-                    "
+        {/* Hanya main yang scroll */}
+        <main className="flex-1 overflow-y-auto">
+          <div className="space-y-5 p-4 sm:p-6 lg:p-8">
+            {/* HEADER HALAMAN */}
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3">
+                <div className="theme-primary flex h-11 w-11 shrink-0 items-center justify-center rounded-xl">
+                  <Wallet size={20} />
+                </div>
+
+                <div>
+                  <p className="theme-text-placeholder text-[10px] font-semibold uppercase tracking-wide">
+                    Keuangan / Tabungan Siswa
+                  </p>
+
+                  <h1 className="theme-text mt-1 text-xl font-bold sm:text-2xl">
+                    Tabungan Siswa
+                  </h1>
+
+                  <p className="theme-text-secondary mt-1 text-xs sm:text-sm">
+                    Kelola saldo tabungan, setoran, penarikan, dan mutasi
+                    tabungan siswa.
+                  </p>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={refreshData}
+                disabled={refreshing || loading}
+                className="theme-card-soft theme-text-secondary theme-border inline-flex items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition hover:opacity-80 disabled:opacity-50"
+              >
+                <RefreshCw
+                  size={16}
+                  className={refreshing ? "animate-spin" : ""}
+                />
+                Muat Ulang
+              </button>
+            </div>
+
+            {/* NOTIFIKASI */}
+            {error && (
+              <div className="theme-danger flex items-start gap-3 rounded-xl border p-4">
+                <AlertCircle size={18} className="mt-0.5 shrink-0" />
+
+                <p className="flex-1 text-sm">{error}</p>
+
+                <button
+                  type="button"
+                  onClick={() => setError("")}
+                  aria-label="Tutup pesan error"
+                  className="hover:opacity-70"
+                >
+                  <X size={17} />
+                </button>
+              </div>
+            )}
+
+            {success && (
+              <div className="theme-success flex items-start gap-3 rounded-xl border p-4">
+                <CheckCircle2 size={18} className="mt-0.5 shrink-0" />
+
+                <p className="flex-1 text-sm">{success}</p>
+
+                <button
+                  type="button"
+                  onClick={() => setSuccess("")}
+                  aria-label="Tutup pesan sukses"
+                  className="hover:opacity-70"
+                >
+                  <X size={17} />
+                </button>
+              </div>
+            )}
+
+            {/* STATISTIK */}
+            <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-6">
+              <StatCard
+                title="Total Saldo"
+                value={formatRupiah(ringkasan.totalSaldo)}
+                description="Saldo dari daftar tabungan"
+                icon={Wallet}
+                loading={loading}
+              />
+
+              <StatCard
+                title="Total Setoran"
+                value={formatRupiah(laporan.totalSetoran)}
+                description={`${laporan.jumlahSetoran} transaksi setoran`}
+                icon={TrendingUp}
+                loading={loading}
+              />
+
+              <StatCard
+                title="Total Penarikan"
+                value={formatRupiah(laporan.totalPenarikan)}
+                description={`${laporan.jumlahPenarikan} transaksi penarikan`}
+                icon={TrendingDown}
+                loading={loading}
+              />
+
+              <StatCard
+                title="Jumlah Rekening"
+                value={Number(laporan.jumlahRekening || 0).toLocaleString(
+                  "id-ID"
+                )}
+                description="Rekening tabungan terlapor"
+                icon={Users}
+                loading={loading}
+              />
+
+              <StatCard
+                title="Rata-rata Setoran"
+                value={formatRupiah(averageSetoran)}
+                description="Per transaksi setoran"
+                icon={TrendingUp}
+                loading={loading}
+              />
+
+              <StatCard
+                title="Rata-rata Penarikan"
+                value={formatRupiah(averagePenarikan)}
+                description="Per transaksi penarikan"
+                icon={TrendingDown}
+                loading={loading}
+              />
+            </section>
+
+            {/* TABEL TABUNGAN */}
+            <section className="theme-card overflow-hidden rounded-2xl border shadow-sm">
+              <div className="theme-border flex flex-col gap-4 border-b px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+                <div>
+                  <h2 className="theme-text text-sm font-bold">
+                    Daftar Tabungan
+                  </h2>
+
+                  <p className="theme-text-muted mt-1 text-xs">
+                    Menampilkan rekening tabungan siswa sesuai data backend.
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap gap-2">
+                  <button
+                    type="button"
+                    onClick={() => openTransaction("setor")}
+                    className="theme-primary inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm transition hover:opacity-90"
                   >
-                    <Wallet size={28} />
-                  </div>
+                    <Plus size={17} />
+                    Setor
+                  </button>
 
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wider theme-primary">
-                      Keuangan & Kas
-                    </p>
+                  <button
+                    type="button"
+                    onClick={() => openTransaction("tarik")}
+                    className="theme-card-soft theme-text-secondary theme-border inline-flex items-center justify-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition hover:opacity-80"
+                  >
+                    <Minus size={17} />
+                    Tarik
+                  </button>
+                </div>
+              </div>
 
-                    <h1 className="text-2xl font-bold tracking-tight theme-text sm:text-3xl">
-                      Tabungan Siswa
-                    </h1>
+              {/* SEARCH */}
+              <form
+                onSubmit={handleSearch}
+                className="theme-border flex flex-col gap-3 border-b p-4 sm:flex-row sm:p-5"
+              >
+                <div className="relative flex-1">
+                  <Search
+                    size={16}
+                    className="theme-text-placeholder absolute left-3 top-1/2 -translate-y-1/2"
+                  />
 
-                    <p className="mt-1 text-sm theme-text-secondary">
-                      Kelola saldo tabungan siswa secara lengkap
-                    </p>
-                  </div>
+                  <input
+                    type="text"
+                    value={searchInput}
+                    onChange={(event) => setSearchInput(event.target.value)}
+                    placeholder="Cari nama siswa atau NIS..."
+                    className="theme-input h-11 w-full rounded-xl border pl-9 pr-3 text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                  />
                 </div>
 
                 <button
-                  onClick={() => handleOpenModal()}
-                  className="
-                    inline-flex items-center gap-2 rounded-lg
-                    theme-primary
-                    px-4 py-2.5
-                    text-sm font-medium
-                    transition
-                    shadow-[0_10px_30px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]
-                    hover:brightness-95
-                  "
+                  type="submit"
+                  className="theme-primary inline-flex h-11 items-center justify-center rounded-xl px-5 text-sm font-semibold shadow-sm transition hover:opacity-90"
                 >
-                  <Plus size={16} />
-                  Tambah Siswa
+                  Cari
                 </button>
-              </div>
-            </div>
 
-            {/* Statistik */}
-            <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-              <StatCard
-                icon={<Wallet size={22} />}
-                label="Total Saldo"
-                value={`Rp ${totalSaldo.toLocaleString()}`}
-                color="blue"
-                subtext="Semua saldo siswa"
-              />
+                {search && (
+                  <button
+                    type="button"
+                    onClick={resetSearch}
+                    className="theme-card-soft theme-text-secondary theme-border inline-flex h-11 items-center justify-center rounded-xl border px-4 text-sm font-semibold transition hover:opacity-80"
+                  >
+                    Reset
+                  </button>
+                )}
+              </form>
 
-              <StatCard
-                icon={<TrendingUp size={22} />}
-                label="Total Setoran"
-                value={`Rp ${totalSetor.toLocaleString()}`}
-                color="emerald"
-                subtext="Total uang masuk"
-              />
-
-              <StatCard
-                icon={<CreditCard size={22} />}
-                label="Total Penarikan"
-                value={`Rp ${totalTarik.toLocaleString()}`}
-                color="red"
-                subtext="Total uang keluar"
-              />
-
-              <StatCard
-                icon={<Users size={22} />}
-                label="Total Siswa"
-                value={students.length}
-                color="purple"
-                subtext="Terdaftar di sistem"
-              />
-            </div>
-
-            {/* Search */}
-            <div className="relative mb-4">
-              <Search
-                size={18}
-                className="absolute left-3.5 top-1/2 -translate-y-1/2 theme-text-muted"
-              />
-
-              <input
-                value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
-                  setCurrentPage(1);
-                }}
-                placeholder="Cari siswa atau kelas..."
-                className="
-                  w-full rounded-xl
-                  theme-input
-                  py-2.5 pl-10 pr-4
-                  text-sm outline-none transition
-                  placeholder:theme-text-placeholder
-                  focus:border-[var(--color-primary)]
-                  focus:ring-4
-                  focus:ring-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
-                "
-              />
-            </div>
-
-            {/* Tabel */}
-            <div className="overflow-hidden rounded-2xl border theme-border theme-card shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)]">
+              {/* DATA */}
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full min-w-[760px] border-collapse text-sm">
                   <thead>
-                    <tr className="border-b theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)]">
-                      <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider theme-text-muted">
-                        Nama
+                    <tr className="theme-primary">
+                      <th className="px-4 py-3 text-left text-xs font-semibold">
+                        No.
                       </th>
 
-                      <th className="px-4 py-3.5 text-left text-xs font-semibold uppercase tracking-wider theme-text-muted">
-                        Kelas
+                      <th className="px-4 py-3 text-left text-xs font-semibold">
+                        Nama Siswa
                       </th>
 
-                      <th className="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-wider theme-text-muted">
+                      <th className="px-4 py-3 text-left text-xs font-semibold">
+                        NIS
+                      </th>
+
+                      <th className="px-4 py-3 text-left text-xs font-semibold">
                         Saldo
                       </th>
 
-                      <th className="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-wider theme-text-muted">
-                        Total Setor
+                      <th className="px-4 py-3 text-left text-xs font-semibold">
+                        Status
                       </th>
 
-                      <th className="px-4 py-3.5 text-right text-xs font-semibold uppercase tracking-wider theme-text-muted">
-                        Total Tarik
-                      </th>
-
-                      <th className="px-4 py-3.5 text-center text-xs font-semibold uppercase tracking-wider theme-text-muted">
+                      <th className="px-4 py-3 text-center text-xs font-semibold">
                         Aksi
                       </th>
                     </tr>
                   </thead>
 
-                  <tbody className="divide-y theme-border-soft">
-                    {currentEntries.length === 0 ? (
-                      <tr>
-                        <td
-                          colSpan={6}
-                          className="px-4 py-12 text-center theme-text-muted"
+                  <tbody>
+                    {loading ? (
+                      Array.from({ length: 3 }).map((_, index) => (
+                        <tr
+                          key={index}
+                          className="theme-border border-b"
                         >
-                          <div className="flex flex-col items-center gap-2">
-                            <FileText
-                              size={32}
-                              className="theme-text-placeholder"
+                          {Array.from({ length: 6 }).map((__, cell) => (
+                            <td key={cell} className="px-4 py-4">
+                              <div className="theme-card-soft h-4 w-24 animate-pulse rounded" />
+                            </td>
+                          ))}
+                        </tr>
+                      ))
+                    ) : tabungan.length === 0 ? (
+                      <tr>
+                        <td colSpan={6} className="px-4 py-14 text-center">
+                          <div className="theme-card-soft mx-auto flex h-12 w-12 items-center justify-center rounded-full">
+                            <Wallet
+                              size={21}
+                              className="theme-text-muted"
                             />
-
-                            <p className="text-sm font-medium">
-                              Tidak ada siswa ditemukan
-                            </p>
-
-                            <p className="text-xs">
-                              Coba ubah kata kunci pencarian
-                            </p>
                           </div>
+
+                          <p className="theme-text mt-3 text-sm font-bold">
+                            Data tabungan tidak ditemukan
+                          </p>
+
+                          <p className="theme-text-secondary mt-1 text-xs">
+                            Coba ubah kata kunci pencarian atau muat ulang
+                            data.
+                          </p>
                         </td>
                       </tr>
                     ) : (
-                      currentEntries.map((s) => (
+                      tabungan.map((item, index) => (
                         <tr
-                          key={s.id}
-                          className="
-                            group transition
-                            hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]
-                          "
+                          key={item.id}
+                          className="theme-border theme-table-hover border-b transition-colors"
                         >
-                          <td className="px-4 py-3.5 font-medium theme-text">
-                            {s.nama}
+                          <td className="theme-text-secondary px-4 py-4 text-xs">
+                            {(currentPage - 1) * limit + index + 1}
                           </td>
 
-                          <td className="px-4 py-3.5 theme-text-secondary">
-                            {s.kelas}
+                          <td className="px-4 py-4">
+                            <p className="theme-text text-sm font-semibold">
+                              {item.siswa?.namaLengkap || "-"}
+                            </p>
+
+                            <p className="theme-text-placeholder mt-1 text-[11px]">
+                              NISN: {item.siswa?.nisn || "-"}
+                            </p>
                           </td>
 
-                          <td className="px-4 py-3.5 text-right font-bold theme-primary">
-                            Rp {s.saldo.toLocaleString()}
+                          <td className="theme-text-secondary px-4 py-4 text-xs">
+                            {item.siswa?.nis || "-"}
                           </td>
 
-                          <td className="px-4 py-3.5 text-right font-medium theme-success">
-                            Rp {s.totalSetor.toLocaleString()}
+                          <td className="theme-text px-4 py-4 text-xs font-bold">
+                            {formatRupiah(item.saldo)}
                           </td>
 
-                          <td className="px-4 py-3.5 text-right font-medium theme-danger">
-                            Rp {s.totalTarik.toLocaleString()}
+                          <td className="px-4 py-4">
+                            <StatusBadge status={item.status} />
                           </td>
 
-                          <td className="px-4 py-3.5 text-center">
-                            <div className="flex items-center justify-center gap-1">
+                          <td className="px-4 py-4">
+                            <div className="flex justify-center gap-1.5">
                               <button
-                                onClick={() => handleViewDetail(s)}
-                                className="
-                                  rounded-lg p-1.5
-                                  theme-text-muted
-                                  transition
-                                  hover:bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]
-                                  hover:text-[var(--color-primary)]
-                                "
+                                type="button"
                                 title="Lihat detail"
+                                onClick={() => openDetail(item)}
+                                className="theme-card-soft theme-text-secondary theme-border inline-flex h-8 items-center justify-center gap-1.5 rounded-lg border px-3 text-xs font-semibold transition hover:opacity-80"
                               >
-                                <Eye size={16} />
+                                <Eye size={14} />
+                                Detail
                               </button>
 
                               <button
-                                onClick={() => handleOpenModal(s)}
-                                className="
-                                  rounded-lg p-1.5
-                                  theme-text-muted
-                                  transition
-                                  hover:bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]
-                                  hover:text-[var(--color-primary)]
-                                "
-                                title="Edit"
+                                type="button"
+                                title="Setor tabungan siswa"
+                                onClick={() => openTransaction("setor", item)}
+                                className="theme-success flex h-8 w-8 items-center justify-center rounded-lg border theme-border transition hover:opacity-80"
                               >
-                                <Edit size={16} />
+                                <ArrowDownCircle size={15} />
                               </button>
 
                               <button
-                                onClick={() => handleDelete(s.id)}
-                                className="
-                                  rounded-lg p-1.5
-                                  theme-text-muted
-                                  transition
-                                  hover:bg-[color-mix(in_srgb,var(--color-danger)_8%,transparent)]
-                                  hover:text-[var(--color-danger)]
-                                "
-                                title="Hapus"
+                                type="button"
+                                title="Tarik tabungan siswa"
+                                onClick={() => openTransaction("tarik", item)}
+                                className="theme-warning flex h-8 w-8 items-center justify-center rounded-lg border theme-border transition hover:opacity-80"
                               >
-                                <Trash2 size={16} />
+                                <ArrowUpCircle size={15} />
                               </button>
                             </div>
                           </td>
@@ -462,457 +762,451 @@ export default function TabunganSiswaPage() {
                 </table>
               </div>
 
-              {/* Pagination */}
-              {filtered.length > 0 && (
-                <div className="flex items-center justify-between border-t theme-border bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)] px-4 py-3">
-                  <p className="text-sm theme-text-muted">
-                    Menampilkan {indexOfFirst + 1}-
-                    {Math.min(indexOfLast, filtered.length)} dari{" "}
-                    {filtered.length} siswa
-                  </p>
+              {/* PAGINATION */}
+              <div className="theme-border flex flex-col gap-3 border-t px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+                <p className="theme-text-secondary text-xs">
+                  Total {Number(meta?.total || 0).toLocaleString("id-ID")} data
+                  {" · "}Halaman {currentPage} dari {totalPages}
+                </p>
 
-                  <div className="flex items-center gap-1">
-                    <button
-                      onClick={() =>
-                        setCurrentPage((p) => Math.max(1, p - 1))
-                      }
-                      disabled={currentPage === 1}
-                      className="
-                        rounded-lg border theme-border
-                        theme-card
-                        p-2 theme-text-muted
-                        transition
-                        hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]
-                        disabled:opacity-40
-                      "
-                    >
-                      <ChevronLeft size={16} />
-                    </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    disabled={currentPage <= 1 || loading}
+                    onClick={() =>
+                      setPage((previous) => Math.max(1, previous - 1))
+                    }
+                    className="theme-card-soft theme-text-secondary theme-border inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border px-3 text-xs font-semibold transition hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    <ChevronLeft size={14} />
+                    Sebelumnya
+                  </button>
 
-                    {Array.from({ length: totalPages }, (_, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setCurrentPage(i + 1)}
-                        className={`
-                          rounded-lg px-3.5 py-1.5
-                          text-sm font-medium transition
-                          ${
-                            currentPage === i + 1
-                              ? "theme-primary shadow-[0_4px_12px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]"
-                              : "theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]"
-                          }
-                        `}
-                      >
-                        {i + 1}
-                      </button>
-                    ))}
-
-                    <button
-                      onClick={() =>
-                        setCurrentPage((p) => Math.min(totalPages, p + 1))
-                      }
-                      disabled={currentPage === totalPages}
-                      className="
-                        rounded-lg border theme-border
-                        theme-card
-                        p-2 theme-text-muted
-                        transition
-                        hover:bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]
-                        disabled:opacity-40
-                      "
-                    >
-                      <ChevronRight size={16} />
-                    </button>
-                  </div>
+                  <button
+                    type="button"
+                    disabled={currentPage >= totalPages || loading}
+                    onClick={() =>
+                      setPage((previous) =>
+                        Math.min(totalPages, previous + 1)
+                      )
+                    }
+                    className="theme-card-soft theme-text-secondary theme-border inline-flex h-9 items-center justify-center gap-1.5 rounded-lg border px-3 text-xs font-semibold transition hover:opacity-80 disabled:cursor-not-allowed disabled:opacity-40"
+                  >
+                    Berikutnya
+                    <ChevronRight size={14} />
+                  </button>
                 </div>
-              )}
-            </div>
+              </div>
+            </section>
 
-            {/* Footer */}
-            <footer className="mt-8 border-t theme-border-soft pt-6 text-center text-xs theme-text-muted">
-              © 2026 SmartSchool • Tabungan Siswa
-            </footer>
+            {/* RINGKASAN LAPORAN */}
+            <div className="theme-info rounded-2xl border p-5">
+              <div className="flex items-start gap-3">
+                <Receipt size={20} className="mt-0.5 shrink-0" />
+
+                <div>
+                  <h3 className="theme-text text-sm font-bold">
+                    Ringkasan laporan tabungan
+                  </h3>
+
+                  <p className="theme-text-secondary mt-1 text-xs">
+                    Total saldo seluruh rekening berdasarkan laporan:{" "}
+                    <strong className="theme-text">
+                      {formatRupiah(laporan.totalSaldoSemuaSiswa)}
+                    </strong>
+                    .
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </main>
       </div>
 
-      {/* ============================================================
-          MODAL TAMBAH / EDIT
-      ============================================================ */}
-      {isModalOpen && (
+      {/* =================================================
+          MODAL DETAIL DAN MUTASI
+      ================================================== */}
+      {detailOpen && (
         <div
-          className="
-            fixed inset-0 z-50 flex items-center justify-center
-            bg-[color-mix(in_srgb,var(--color-text)_55%,transparent)]
-            p-4 backdrop-blur-sm
-          "
+          className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/50 p-4"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) closeDetail();
+          }}
         >
-          <div
-            className="
-              w-full max-w-lg rounded-2xl
-              theme-card
-              p-6
-              shadow-[0_20px_60px_color-mix(in_srgb,var(--color-text)_20%,transparent)]
-              animate-in fade-in zoom-in duration-200
-            "
-          >
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-xl font-bold theme-text">
-                {selectedStudent ? "Edit Siswa" : "Tambah Siswa"}
-              </h2>
+          <section className="theme-card my-auto max-h-[90vh] w-full max-w-4xl overflow-y-auto rounded-2xl border shadow-xl">
+            <div className="theme-border flex items-center justify-between border-b p-5">
+              <div>
+                <h2 className="theme-text text-lg font-bold">
+                  Detail Tabungan Siswa
+                </h2>
 
-              <button
-                onClick={handleCloseModal}
-                className="
-                  rounded-lg p-1
-                  theme-text-muted
-                  transition
-                  hover:bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)]
-                "
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            <div className="space-y-4">
-              <FormInput
-                label="Nama Siswa"
-                type="text"
-                value={formData.nama}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    nama: e.target.value,
-                  })
-                }
-                placeholder="Masukkan nama siswa"
-              />
-
-              <FormInput
-                label="Kelas"
-                type="text"
-                value={formData.kelas}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    kelas: e.target.value,
-                  })
-                }
-                placeholder="Contoh: XII IPA 1"
-              />
-
-              <FormInput
-                label="Saldo (Rp)"
-                type="number"
-                value={formData.saldo}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    saldo: e.target.value,
-                  })
-                }
-                placeholder="Masukkan saldo"
-              />
-
-              <FormInput
-                label="Total Setor (Rp)"
-                type="number"
-                value={formData.totalSetor}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    totalSetor: e.target.value,
-                  })
-                }
-                placeholder="Masukkan total setor"
-              />
-
-              <FormInput
-                label="Total Tarik (Rp)"
-                type="number"
-                value={formData.totalTarik}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    totalTarik: e.target.value,
-                  })
-                }
-                placeholder="Masukkan total tarik"
-              />
-            </div>
-
-            <div className="mt-6 flex justify-end gap-3">
-              <button
-                onClick={handleCloseModal}
-                className="
-                  rounded-lg border theme-border
-                  theme-card-soft
-                  px-4 py-2
-                  text-sm font-medium
-                  theme-text-secondary
-                  transition
-                  hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]
-                "
-              >
-                Batal
-              </button>
-
-              <button
-                onClick={handleSave}
-                className="
-                  rounded-lg
-                  theme-primary
-                  px-4 py-2
-                  text-sm font-medium
-                  transition
-                  shadow-[0_6px_18px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]
-                  hover:brightness-95
-                "
-              >
-                <Save size={16} className="mr-2 inline" />
-                Simpan
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ============================================================
-          MODAL DETAIL
-      ============================================================ */}
-      {isDetailModalOpen && selectedStudent && (
-        <div
-          className="
-            fixed inset-0 z-50 flex items-center justify-center
-            bg-[color-mix(in_srgb,var(--color-text)_55%,transparent)]
-            p-4 backdrop-blur-sm
-          "
-        >
-          <div
-            className="
-              w-full max-w-md rounded-2xl
-              theme-card
-              p-6
-              shadow-[0_20px_60px_color-mix(in_srgb,var(--color-text)_20%,transparent)]
-              animate-in fade-in zoom-in duration-200
-            "
-          >
-            <div className="mb-4 flex items-center justify-between">
-              <h2 className="text-xl font-bold theme-text">
-                Detail Siswa
-              </h2>
-
-              <button
-                onClick={() => setIsDetailModalOpen(false)}
-                className="
-                  rounded-lg p-1
-                  theme-text-muted
-                  transition
-                  hover:bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)]
-                "
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            <div className="space-y-3">
-              <DetailRow
-                label="Nama"
-                value={selectedStudent.nama}
-              />
-
-              <DetailRow
-                label="Kelas"
-                value={selectedStudent.kelas}
-              />
-
-              <DetailRow
-                label="Saldo"
-                value={`Rp ${selectedStudent.saldo.toLocaleString()}`}
-                valueClass="theme-primary"
-                bold
-              />
-
-              <DetailRow
-                label="Total Setor"
-                value={`Rp ${selectedStudent.totalSetor.toLocaleString()}`}
-                valueClass="theme-success"
-              />
-
-              <div className="flex justify-between py-2">
-                <span className="text-sm theme-text-muted">
-                  Total Tarik
-                </span>
-
-                <span className="text-sm font-semibold theme-danger">
-                  Rp {selectedStudent.totalTarik.toLocaleString()}
-                </span>
+                <p className="theme-text-secondary mt-1 text-xs">
+                  Informasi saldo dan riwayat mutasi tabungan.
+                </p>
               </div>
-            </div>
 
-            <div className="mt-6 flex justify-end">
               <button
-                onClick={() => setIsDetailModalOpen(false)}
-                className="
-                  rounded-lg
-                  theme-primary
-                  px-4 py-2
-                  text-sm font-medium
-                  transition
-                  hover:brightness-95
-                "
+                type="button"
+                onClick={closeDetail}
+                className="theme-text-muted flex h-8 w-8 items-center justify-center rounded-lg hover:opacity-70"
+                aria-label="Tutup detail"
               >
-                Tutup
+                <X size={18} />
               </button>
             </div>
-          </div>
+
+            <div className="space-y-5 p-5">
+              {detailLoading ? (
+                <div className="flex justify-center py-12">
+                  <Loader2
+                    size={24}
+                    className="theme-text-secondary animate-spin"
+                  />
+                </div>
+              ) : (
+                <>
+                  <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+                    <div className="theme-card-soft theme-border rounded-xl border p-4">
+                      <p className="theme-text-placeholder text-[10px] font-semibold uppercase tracking-wide">
+                        Nama siswa
+                      </p>
+
+                      <p className="theme-text mt-2 text-sm font-semibold">
+                        {detail?.siswa?.namaLengkap ||
+                          selectedStudent?.namaLengkap ||
+                          "-"}
+                      </p>
+                    </div>
+
+                    <div className="theme-card-soft theme-border rounded-xl border p-4">
+                      <p className="theme-text-placeholder text-[10px] font-semibold uppercase tracking-wide">
+                        NIS
+                      </p>
+
+                      <p className="theme-text mt-2 text-sm font-semibold">
+                        {detail?.siswa?.nis || selectedStudent?.nis || "-"}
+                      </p>
+                    </div>
+
+                    <div className="theme-info rounded-xl border p-4">
+                      <p className="theme-text-secondary text-[10px] font-semibold uppercase tracking-wide">
+                        Saldo tabungan
+                      </p>
+
+                      <p className="theme-text mt-2 text-lg font-bold">
+                        {formatRupiah(
+                          detail?.saldo ?? selectedTabungan?.saldo ?? 0
+                        )}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="theme-text mb-3 flex items-center gap-2 text-sm font-bold">
+                      <History size={16} />
+                      Riwayat Mutasi
+                    </h3>
+
+                    <div className="theme-border overflow-x-auto rounded-xl border">
+                      <table className="w-full min-w-[650px] border-collapse text-sm">
+                        <thead>
+                          <tr className="theme-primary">
+                            <th className="px-4 py-3 text-left text-xs font-semibold">
+                              Tanggal
+                            </th>
+
+                            <th className="px-4 py-3 text-left text-xs font-semibold">
+                              Nomor Transaksi
+                            </th>
+
+                            <th className="px-4 py-3 text-left text-xs font-semibold">
+                              Jenis
+                            </th>
+
+                            <th className="px-4 py-3 text-right text-xs font-semibold">
+                              Jumlah
+                            </th>
+
+                            <th className="px-4 py-3 text-right text-xs font-semibold">
+                              Saldo Sesudah
+                            </th>
+                          </tr>
+                        </thead>
+
+                        <tbody>
+                          {mutasi.length === 0 ? (
+                            <tr>
+                              <td
+                                colSpan={5}
+                                className="theme-text-muted px-4 py-8 text-center text-xs"
+                              >
+                                Belum ada mutasi tabungan.
+                              </td>
+                            </tr>
+                          ) : (
+                            mutasi.map((item) => {
+                              const isSetor = item.jenis === "setor";
+
+                              return (
+                                <tr
+                                  key={item.id}
+                                  className="theme-border border-b"
+                                >
+                                  <td className="theme-text-secondary px-4 py-3 text-xs">
+                                    {formatTanggal(item.tanggal)}
+                                  </td>
+
+                                  <td className="theme-text px-4 py-3 text-xs font-semibold">
+                                    {item.nomorTransaksi || "-"}
+                                  </td>
+
+                                  <td className="px-4 py-3">
+                                    <span
+                                      className={`inline-flex items-center gap-1.5 rounded-full border theme-border px-2.5 py-1 text-[11px] font-semibold ${
+                                        isSetor
+                                          ? "theme-success"
+                                          : "theme-warning"
+                                      }`}
+                                    >
+                                      <span className="h-1.5 w-1.5 rounded-full bg-current" />
+                                      {isSetor ? "Setoran" : "Penarikan"}
+                                    </span>
+                                  </td>
+
+                                  <td
+                                    className={`px-4 py-3 text-right text-xs font-bold ${
+                                      isSetor
+                                        ? "theme-success"
+                                        : "theme-warning"
+                                    }`}
+                                  >
+                                    {isSetor ? "+" : "-"}
+                                    {formatRupiah(item.jumlah)}
+                                  </td>
+
+                                  <td className="theme-text px-4 py-3 text-right text-xs font-semibold">
+                                    {formatRupiah(item.saldoSesudah)}
+                                  </td>
+                                </tr>
+                              );
+                            })
+                          )}
+                        </tbody>
+                      </table>
+                    </div>
+
+                    <div className="theme-text-muted mt-3 flex justify-between text-[11px]">
+                      <span>
+                        Total {mutasiMeta?.total || mutasi.length} mutasi
+                      </span>
+                      <span>
+                        Halaman {mutasiMeta?.page || 1} dari{" "}
+                        {mutasiMeta?.totalPages || 1}
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap justify-end gap-2">
+                    <button
+                      type="button"
+                      onClick={() =>
+                        openTransaction("setor", selectedTabungan)
+                      }
+                      className="theme-primary inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm transition hover:opacity-90"
+                    >
+                      <Plus size={15} />
+                      Setor
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() =>
+                        openTransaction("tarik", selectedTabungan)
+                      }
+                      className="theme-card-soft theme-text-secondary theme-border inline-flex items-center gap-2 rounded-xl border px-4 py-2.5 text-sm font-semibold transition hover:opacity-80"
+                    >
+                      <Minus size={15} />
+                      Tarik
+                    </button>
+                  </div>
+                </>
+              )}
+            </div>
+          </section>
         </div>
       )}
-    </div>
-  );
-}
 
-/* ================================================================
-   FORM INPUT
-================================================================ */
-
-function FormInput({
-  label,
-  type = "text",
-  value,
-  onChange,
-  placeholder,
-}) {
-  return (
-    <div>
-      <label className="mb-1.5 block text-sm font-medium theme-text-secondary">
-        {label}
-      </label>
-
-      <input
-        type={type}
-        value={value}
-        onChange={onChange}
-        placeholder={placeholder}
-        className="
-          w-full rounded-lg
-          theme-input
-          px-3 py-2
-          text-sm
-          outline-none
-          transition
-          placeholder:theme-text-placeholder
-          focus:border-[var(--color-primary)]
-          focus:ring-2
-          focus:ring-[color-mix(in_srgb,var(--color-primary)_20%,transparent)]
-        "
-      />
-    </div>
-  );
-}
-
-/* ================================================================
-   DETAIL ROW
-================================================================ */
-
-function DetailRow({
-  label,
-  value,
-  valueClass = "theme-text",
-  bold = false,
-}) {
-  return (
-    <div className="flex justify-between border-b theme-border-soft py-2">
-      <span className="text-sm theme-text-muted">
-        {label}
-      </span>
-
-      <span
-        className={`text-sm ${
-          bold ? "font-bold" : "font-semibold"
-        } ${valueClass}`}
-      >
-        {value}
-      </span>
-    </div>
-  );
-}
-
-/* ================================================================
-   STAT CARD
-================================================================ */
-
-function StatCard({
-  icon,
-  label,
-  value,
-  color,
-  subtext,
-}) {
-  const colors = {
-    blue: `
-      bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]
-      text-[var(--color-primary)]
-    `,
-
-    emerald: `
-      bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)]
-      text-[var(--color-success)]
-    `,
-
-    red: `
-      bg-[color-mix(in_srgb,var(--color-danger)_10%,transparent)]
-      text-[var(--color-danger)]
-    `,
-
-    purple: `
-      bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)]
-      text-[var(--color-info)]
-    `,
-  };
-
-  return (
-    <div
-      className="
-        group rounded-2xl
-        border theme-border
-        theme-card
-        p-5
-        shadow-[0_1px_3px_color-mix(in_srgb,var(--color-text)_8%,transparent)]
-        transition
-        hover:shadow-[0_8px_24px_color-mix(in_srgb,var(--color-text)_10%,transparent)]
-      "
-    >
-      <div className="flex items-start gap-4">
+      {/* =================================================
+          MODAL SETOR / TARIK
+      ================================================== */}
+      {transactionOpen && (
         <div
-          className={`
-            flex h-12 w-12 shrink-0
-            items-center justify-center
-            rounded-xl
-            transition
-            group-hover:scale-105
-            ${colors[color]}
-          `}
+          className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto bg-slate-950/50 p-4"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget && !submitting) {
+              closeTransaction();
+            }
+          }}
         >
-          {icon}
+          <section className="theme-card my-auto w-full max-w-lg rounded-2xl border shadow-xl">
+            <div className="theme-border flex items-center justify-between border-b p-5">
+              <div>
+                <h2 className="theme-text text-lg font-bold">
+                  {transactionType === "setor"
+                    ? "Setor Tabungan"
+                    : "Tarik Tabungan"}
+                </h2>
+
+                <p className="theme-text-secondary mt-1 text-xs">
+                  {transactionType === "setor"
+                    ? "Catat setoran ke rekening tabungan siswa."
+                    : "Catat penarikan dari rekening tabungan siswa."}
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={closeTransaction}
+                disabled={submitting}
+                className="theme-text-muted flex h-8 w-8 items-center justify-center rounded-lg hover:opacity-70 disabled:opacity-50"
+                aria-label="Tutup formulir transaksi"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            <form onSubmit={submitTransaction} className="space-y-4 p-5">
+              <div>
+                <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
+                  ID Siswa <span className="theme-danger-text">*</span>
+                </label>
+
+                <input
+                  required
+                  value={form.siswaId}
+                  onChange={(event) =>
+                    updateForm("siswaId", event.target.value)
+                  }
+                  placeholder="Masukkan ID siswa dari database"
+                  className="theme-input h-11 w-full rounded-xl border px-3 text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                />
+
+                <p className="theme-text-placeholder mt-1 text-[11px]">
+                  Gunakan ID siswa yang sesuai dengan data backend.
+                </p>
+              </div>
+
+              <div>
+                <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
+                  ID Akun Kas <span className="theme-danger-text">*</span>
+                </label>
+
+                <input
+                  required
+                  value={form.akunKasId}
+                  onChange={(event) =>
+                    updateForm("akunKasId", event.target.value)
+                  }
+                  placeholder="Masukkan ID akun kas aktif"
+                  className="theme-input h-11 w-full rounded-xl border px-3 text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                />
+
+                <p className="theme-text-placeholder mt-1 text-[11px]">
+                  Masukkan ID akun kas aktif yang valid untuk sekolah ini.
+                </p>
+              </div>
+
+              <div>
+                <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
+                  Jumlah (Rp) <span className="theme-danger-text">*</span>
+                </label>
+
+                <input
+                  required
+                  type="number"
+                  min="1"
+                  step="1"
+                  value={form.jumlah}
+                  onChange={(event) =>
+                    updateForm("jumlah", event.target.value)
+                  }
+                  placeholder="Contoh: 50000"
+                  className="theme-input h-11 w-full rounded-xl border px-3 text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                />
+              </div>
+
+              <div>
+                <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
+                  Tanggal transaksi{" "}
+                  <span className="theme-danger-text">*</span>
+                </label>
+
+                <input
+                  required
+                  type="date"
+                  value={form.tanggal}
+                  onChange={(event) =>
+                    updateForm("tanggal", event.target.value)
+                  }
+                  className="theme-input h-11 w-full rounded-xl border px-3 text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                />
+              </div>
+
+              <div>
+                <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
+                  Keterangan
+                </label>
+
+                <textarea
+                  rows={3}
+                  value={form.keterangan}
+                  onChange={(event) =>
+                    updateForm("keterangan", event.target.value)
+                  }
+                  placeholder="Keterangan transaksi (opsional)"
+                  className="theme-input w-full resize-y rounded-xl border px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[var(--color-primary)]/20"
+                />
+              </div>
+
+              {error && (
+                <div className="theme-danger rounded-xl border p-3 text-xs">
+                  {error}
+                </div>
+              )}
+
+              <div className="theme-border flex justify-end gap-2 border-t pt-4">
+                <button
+                  type="button"
+                  onClick={closeTransaction}
+                  disabled={submitting}
+                  className="theme-card-soft theme-text-secondary theme-border inline-flex items-center justify-center rounded-xl border px-4 py-2.5 text-sm font-semibold transition hover:opacity-80 disabled:opacity-50"
+                >
+                  Batal
+                </button>
+
+                <button
+                  type="submit"
+                  disabled={submitting}
+                  className={`inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 ${
+                    transactionType === "setor"
+                      ? "theme-primary"
+                      : "theme-warning"
+                  }`}
+                >
+                  {submitting && (
+                    <Loader2 size={15} className="animate-spin" />
+                  )}
+                  {submitting
+                    ? "Memproses..."
+                    : transactionType === "setor"
+                      ? "Simpan Setoran"
+                      : "Simpan Penarikan"}
+                </button>
+              </div>
+            </form>
+          </section>
         </div>
-
-        <div className="min-w-0 flex-1">
-          <p className="text-xs font-medium theme-text-muted">
-            {label}
-          </p>
-
-          <p className="mt-1 text-xl font-bold theme-text">
-            {value}
-          </p>
-
-          {subtext && (
-            <p className="mt-0.5 text-xs theme-text-muted">
-              {subtext}
-            </p>
-          )}
-        </div>
-      </div>
+      )}
     </div>
   );
 }

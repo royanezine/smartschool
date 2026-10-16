@@ -1,0 +1,704 @@
+"use client";
+
+import { useCallback, useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
+
+import {
+  getPenggajianById,
+  updateStatusPenggajian,
+} from "@/services/penggajian.service";
+
+import {
+  ArrowLeft,
+  Save,
+  RefreshCw,
+  Wallet,
+  UserRound,
+  CalendarDays,
+  Clock3,
+  BriefcaseBusiness,
+  FileText,
+  AlertCircle,
+  CheckCircle2,
+  LoaderCircle,
+  X,
+  Info,
+} from "lucide-react";
+
+const STATUS_OPTIONS = [
+  { value: "draft", label: "Draft" },
+  { value: "disetujui", label: "Disetujui" },
+  { value: "dibekukan", label: "Dibekukan" },
+  { value: "dibayar", label: "Dibayar" },
+];
+
+const MONTHS = [
+  "Januari",
+  "Februari",
+  "Maret",
+  "April",
+  "Mei",
+  "Juni",
+  "Juli",
+  "Agustus",
+  "September",
+  "Oktober",
+  "November",
+  "Desember",
+];
+
+function formatCurrency(value) {
+  return new Intl.NumberFormat("id-ID", {
+    style: "currency",
+    currency: "IDR",
+    maximumFractionDigits: 0,
+  }).format(Number(value ?? 0));
+}
+
+function formatNumber(value, digits = 2) {
+  return new Intl.NumberFormat("id-ID", {
+    maximumFractionDigits: digits,
+  }).format(Number(value ?? 0));
+}
+
+function formatDate(value) {
+  if (!value) return "-";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) return "-";
+
+  return date.toLocaleDateString("id-ID", {
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  });
+}
+
+function getErrorMessage(error) {
+  return error instanceof Error
+    ? error.message
+    : "Terjadi kesalahan saat memproses permintaan.";
+}
+
+function normalizeDetailResponse(response) {
+  let result = response;
+
+  for (let index = 0; index < 4; index += 1) {
+    if (
+      result &&
+      typeof result === "object" &&
+      result.id
+    ) {
+      return result;
+    }
+
+    if (
+      result?.data &&
+      typeof result.data === "object" &&
+      !Array.isArray(result.data)
+    ) {
+      result = result.data;
+      continue;
+    }
+
+    break;
+  }
+
+  throw new Error(
+    response?.message ||
+      "Data detail penggajian tidak ditemukan dalam respons sistem."
+  );
+}
+
+function normalizeActionResponse(response) {
+  if (!response || typeof response !== "object") {
+    return {};
+  }
+
+  const payload =
+    response.data &&
+    typeof response.data === "object" &&
+    !Array.isArray(response.data)
+      ? response.data
+      : response;
+
+  return {
+    ...payload,
+    message: response.message ?? payload.message,
+    success: response.success ?? payload.success,
+  };
+}
+
+function getStatusStyle(status) {
+  switch (String(status ?? "").toLowerCase()) {
+    case "disetujui":
+      return "bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300";
+    case "dibekukan":
+      return "bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300";
+    case "dibayar":
+      return "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300";
+    default:
+      return "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300";
+  }
+}
+
+export default function EditPenggajianPage() {
+  const router = useRouter();
+  const params = useParams();
+
+  const id = Array.isArray(params?.id)
+    ? params.id[0]
+    : params?.id;
+
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [item, setItem] = useState(null);
+
+  const [status, setStatus] = useState("draft");
+  const [catatan, setCatatan] = useState("");
+
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+
+  const loadDetail = useCallback(async () => {
+    if (!id) {
+      setError("ID penggajian tidak ditemukan.");
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    setError("");
+    setNotice("");
+
+    try {
+      const response = await getPenggajianById(id);
+      const result = normalizeDetailResponse(response);
+
+      setItem(result);
+      setStatus(result.status ?? "draft");
+      setCatatan(result.catatan ?? "");
+    } catch (err) {
+      setItem(null);
+      setError(getErrorMessage(err));
+    } finally {
+      setLoading(false);
+    }
+  }, [id]);
+
+  useEffect(() => {
+    loadDetail();
+  }, [loadDetail]);
+
+  async function handleSubmit(event) {
+    event.preventDefault();
+
+    if (!item?.id || saving) return;
+
+    if (!STATUS_OPTIONS.some((option) => option.value === status)) {
+      setError("Status penggajian yang dipilih tidak valid.");
+      return;
+    }
+
+    const statusBerubah = status !== item.status;
+    const catatanBerubah = catatan !== (item.catatan ?? "");
+
+    if (!statusBerubah && !catatanBerubah) {
+      setNotice("Tidak ada perubahan yang perlu disimpan.");
+      return;
+    }
+
+    if (
+      status === "dibekukan" &&
+      item.status !== "dibekukan" &&
+      item.status !== "disetujui"
+    ) {
+      const confirmed = window.confirm(
+        "Status ini akan membekukan data penggajian. Pastikan data sudah benar sebelum melanjutkan."
+      );
+
+      if (!confirmed) return;
+    }
+
+    setSaving(true);
+    setError("");
+    setNotice("");
+
+    try {
+      const response = await updateStatusPenggajian(item.id, {
+        status,
+        catatan,
+      });
+
+      const result = normalizeActionResponse(response);
+
+      setItem((current) =>
+        current
+          ? {
+              ...current,
+              status,
+              catatan,
+            }
+          : current
+      );
+
+      setNotice(
+        result.message || "Perubahan penggajian berhasil disimpan."
+      );
+    } catch (err) {
+      setError(getErrorMessage(err));
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  const bulanLabel =
+    MONTHS[Number(item?.bulan) - 1] ?? item?.bulan ?? "-";
+
+  return (
+    <div className="flex h-screen w-full overflow-hidden bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+      <Sidebar
+        role="admin"
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
+
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <div className="shrink-0">
+          <Header onMenuClick={() => setSidebarOpen(true)} />
+        </div>
+
+        <main className="flex-1 overflow-y-auto">
+          <div className="mx-auto w-full max-w-[1600px] p-4 sm:p-6 lg:p-8">
+            <div className="mb-7">
+              <div className="mb-2 flex flex-wrap items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+                <button
+                  type="button"
+                  onClick={() =>
+                    router.push("/admin/keuangan/penggajian")
+                  }
+                  className="transition hover:text-blue-700 dark:hover:text-blue-400"
+                >
+                  Keuangan
+                </button>
+
+                <span>/</span>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    router.push("/admin/keuangan/penggajian")
+                  }
+                  className="transition hover:text-blue-700 dark:hover:text-blue-400"
+                >
+                  Penggajian
+                </button>
+
+                <span>/</span>
+
+                <span className="text-blue-700 dark:text-blue-400">
+                  Edit Penggajian
+                </span>
+              </div>
+
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                <div>
+                  <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+                    Edit Penggajian
+                  </h1>
+
+                  <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">
+                    Periksa data penggajian dan sesuaikan status serta
+                    catatan sesuai kebutuhan.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() =>
+                    router.push("/admin/keuangan/penggajian")
+                  }
+                  className="inline-flex h-10 items-center justify-center gap-2 self-start rounded-lg border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 sm:self-auto"
+                >
+                  <ArrowLeft size={16} />
+                  Kembali
+                </button>
+              </div>
+            </div>
+
+            {error && (
+              <AlertBox
+                type="error"
+                message={error}
+                onClose={() => setError("")}
+              />
+            )}
+
+            {notice && (
+              <AlertBox
+                type="success"
+                message={notice}
+                onClose={() => setNotice("")}
+              />
+            )}
+
+            {loading ? (
+              <div className="flex min-h-72 flex-col items-center justify-center rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+                <LoaderCircle
+                  size={28}
+                  className="animate-spin text-blue-600"
+                />
+                <p className="mt-3 text-sm font-medium">
+                  Memuat detail penggajian...
+                </p>
+                <p className="mt-1 text-xs text-slate-500">
+                  Mengambil data dari sistem
+                </p>
+              </div>
+            ) : !item ? (
+              <div className="flex min-h-72 flex-col items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-center dark:border-slate-800 dark:bg-slate-900">
+                <AlertCircle size={30} className="text-red-500" />
+                <h2 className="mt-3 font-semibold">
+                  Data penggajian tidak ditemukan
+                </h2>
+                <p className="mt-1 max-w-md text-sm text-slate-500 dark:text-slate-400">
+                  Periksa kembali data yang dipilih atau muat ulang halaman.
+                </p>
+                <button
+                  type="button"
+                  onClick={loadDetail}
+                  className="mt-4 inline-flex h-10 items-center gap-2 rounded-lg bg-blue-700 px-4 text-sm font-medium text-white hover:bg-blue-800"
+                >
+                  <RefreshCw size={16} />
+                  Coba Lagi
+                </button>
+              </div>
+            ) : (
+              <form onSubmit={handleSubmit}>
+                <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
+                  <div className="space-y-5 xl:col-span-2">
+                    <section className="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+                      <div className="border-b border-slate-200 p-4 dark:border-slate-800 sm:p-5">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300">
+                            <UserRound size={20} />
+                          </div>
+
+                          <div>
+                            <h2 className="font-semibold">
+                              Informasi Pegawai
+                            </h2>
+                            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                              Identitas pegawai dan periode penggajian.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-5 p-4 sm:grid-cols-2 sm:p-5">
+                        <ReadOnlyField
+                          label="Nama Pegawai"
+                          value={item.pengguna?.namaLengkap}
+                          icon={UserRound}
+                        />
+
+                        <ReadOnlyField
+                          label="NIP"
+                          value={item.pengguna?.nip}
+                          icon={BriefcaseBusiness}
+                        />
+
+                        <ReadOnlyField
+                          label="Kategori Jabatan"
+                          value={
+                            item.pengguna?.kategoriJabatan?.nama ??
+                            item.pengguna?.jabatan
+                          }
+                          icon={BriefcaseBusiness}
+                        />
+
+                        <ReadOnlyField
+                          label="Periode Penggajian"
+                          value={`${bulanLabel} ${item.tahun}`}
+                          icon={CalendarDays}
+                        />
+
+                        <ReadOnlyField
+                          label="Tanggal Mulai"
+                          value={formatDate(item.tanggalMulai)}
+                          icon={CalendarDays}
+                        />
+
+                        <ReadOnlyField
+                          label="Tanggal Selesai"
+                          value={formatDate(item.tanggalSelesai)}
+                          icon={CalendarDays}
+                        />
+                      </div>
+                    </section>
+
+                    <section className="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+                      <div className="border-b border-slate-200 p-4 dark:border-slate-800 sm:p-5">
+                        <div className="flex items-center gap-3">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300">
+                            <Wallet size={20} />
+                          </div>
+
+                          <div>
+                            <h2 className="font-semibold">
+                              Rincian Penggajian
+                            </h2>
+                            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                              Nilai hasil kalkulasi yang tercatat dalam sistem.
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 gap-5 p-4 sm:grid-cols-2 sm:p-5">
+                        <ReadOnlyField
+                          label="Total Hari Kerja"
+                          value={`${formatNumber(item.totalHariKerja, 0)} hari`}
+                          icon={CalendarDays}
+                        />
+
+                        <ReadOnlyField
+                          label="Total Jam Kerja"
+                          value={`${formatNumber(item.totalJamKerja)} jam`}
+                          icon={Clock3}
+                        />
+
+                        <ReadOnlyField
+                          label="Tarif per Jam"
+                          value={formatCurrency(item.tarifPerJam)}
+                          icon={Wallet}
+                        />
+
+                        <div className="rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-900/60 dark:bg-blue-950/30">
+                          <p className="text-sm font-medium text-blue-800 dark:text-blue-300">
+                            Total Gaji
+                          </p>
+                          <p className="mt-2 break-words text-xl font-bold text-blue-900 dark:text-blue-100 sm:text-2xl">
+                            {formatCurrency(item.totalGaji)}
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="mx-4 mb-4 flex items-start gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-600 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-400 sm:mx-5 sm:mb-5">
+                        <Info
+                          size={16}
+                          className="mt-0.5 shrink-0 text-blue-600"
+                        />
+                        <p>
+                          Rincian jam kerja, tarif, dan total gaji ditampilkan
+                          sebagai baca-saja. Perubahan nilai tersebut memerlukan
+                          endpoint pembaruan khusus dari BE.
+                        </p>
+                      </div>
+                    </section>
+                  </div>
+
+                  <div className="space-y-5">
+                    <section className="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+                      <div className="border-b border-slate-200 p-4 dark:border-slate-800 sm:p-5">
+                        <h2 className="font-semibold">
+                          Pengaturan Penggajian
+                        </h2>
+                        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                          Ubah status dan catatan data penggajian.
+                        </p>
+                      </div>
+
+                      <div className="space-y-5 p-4 sm:p-5">
+                        <div>
+                          <label
+                            htmlFor="status"
+                            className="mb-2 block text-sm font-medium"
+                          >
+                            Status Penggajian
+                          </label>
+
+                          <select
+                            id="status"
+                            value={status}
+                            onChange={(event) =>
+                              setStatus(event.target.value)
+                            }
+                            required
+                            className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-950 dark:focus:ring-blue-950"
+                          >
+                            {STATUS_OPTIONS.map((option) => (
+                              <option
+                                key={option.value}
+                                value={option.value}
+                              >
+                                {option.label}
+                              </option>
+                            ))}
+                          </select>
+
+                          <div className="mt-3">
+                            <span
+                              className={`inline-flex items-center rounded-md px-2.5 py-1 text-xs font-semibold ${getStatusStyle(status)}`}
+                            >
+                              Status dipilih:{" "}
+                              {STATUS_OPTIONS.find(
+                                (option) => option.value === status
+                              )?.label ?? status}
+                            </span>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label
+                            htmlFor="catatan"
+                            className="mb-2 block text-sm font-medium"
+                          >
+                            Catatan
+                          </label>
+
+                          <textarea
+                            id="catatan"
+                            value={catatan}
+                            onChange={(event) =>
+                              setCatatan(event.target.value)
+                            }
+                            rows={5}
+                            maxLength={1000}
+                            placeholder="Tambahkan catatan penggajian jika diperlukan..."
+                            className="w-full resize-y rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-950 dark:focus:ring-blue-950"
+                          />
+
+                          <p className="mt-1 text-right text-xs text-slate-400">
+                            {catatan.length}/1000 karakter
+                          </p>
+                        </div>
+
+                        <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-300">
+                          Perubahan status dapat memengaruhi proses
+                          penggajian berikutnya. Pastikan status yang dipilih
+                          sudah sesuai.
+                        </div>
+
+                        <div className="flex flex-col gap-2 pt-1">
+                          <button
+                            type="submit"
+                            disabled={saving || loading}
+                            className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-blue-700 px-4 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+                          >
+                            {saving ? (
+                              <LoaderCircle
+                                size={17}
+                                className="animate-spin"
+                              />
+                            ) : (
+                              <Save size={17} />
+                            )}
+
+                            {saving ? "Menyimpan..." : "Simpan Perubahan"}
+                          </button>
+
+                          <button
+                            type="button"
+                            disabled={saving}
+                            onClick={() =>
+                              router.push("/admin/keuangan/penggajian")
+                            }
+                            className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                          >
+                            <ArrowLeft size={16} />
+                            Kembali ke Daftar
+                          </button>
+                        </div>
+                      </div>
+                    </section>
+
+                    <section className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 sm:p-5">
+                      <div className="flex items-start gap-3">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                          <FileText size={18} />
+                        </div>
+
+                        <div>
+                          <h3 className="text-sm font-semibold">
+                            Informasi Data
+                          </h3>
+                          <p className="mt-1 break-all text-xs leading-5 text-slate-500 dark:text-slate-400">
+                            ID Penggajian: {item.id}
+                          </p>
+                          <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
+                            Perubahan status dan catatan dikirim ke sistem
+                            melalui endpoint pembaruan status penggajian.
+                          </p>
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+                </div>
+              </form>
+            )}
+
+            <p className="mt-5 text-xs leading-5 text-slate-400">
+              Data penggajian mengikuti data yang tercatat dalam sistem.
+            </p>
+          </div>
+        </main>
+      </div>
+    </div>
+  );
+}
+
+function ReadOnlyField({ label, value, icon: Icon }) {
+  return (
+    <div>
+      <p className="mb-2 text-sm font-medium text-slate-600 dark:text-slate-300">
+        {label}
+      </p>
+
+      <div className="flex min-h-11 items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-950">
+        <Icon
+          size={16}
+          className="shrink-0 text-slate-400"
+        />
+        <span className="break-words text-sm font-medium">
+          {value === null || value === undefined || value === ""
+            ? "-"
+            : value}
+        </span>
+      </div>
+    </div>
+  );
+}
+
+function AlertBox({ type, message, onClose }) {
+  const success = type === "success";
+  const Icon = success ? CheckCircle2 : AlertCircle;
+
+  return (
+    <div
+      role={success ? "status" : "alert"}
+      className={`mb-5 flex items-start gap-3 rounded-lg border p-4 text-sm ${
+        success
+          ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/30 dark:text-emerald-300"
+          : "border-red-200 bg-red-50 text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300"
+      }`}
+    >
+      <Icon size={19} className="mt-0.5 shrink-0" />
+      <p className="min-w-0 flex-1 break-words">{message}</p>
+      <button
+        type="button"
+        aria-label="Tutup notifikasi"
+        onClick={onClose}
+        className="rounded p-1 hover:bg-black/5 dark:hover:bg-white/5"
+      >
+        <X size={16} />
+      </button>
+    </div>
+  );
+}

@@ -1,3 +1,4 @@
+
 "use client";
 
 import {
@@ -63,6 +64,7 @@ function formatTanggal(value) {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
+
   return date.toLocaleDateString("id-ID", {
     day: "2-digit",
     month: "long",
@@ -74,6 +76,7 @@ function formatTanggalSingkat(value) {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
+
   return date.toLocaleDateString("id-ID", {
     day: "2-digit",
     month: "2-digit",
@@ -85,6 +88,7 @@ function formatTanggalWaktu(value) {
   if (!value) return "-";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "-";
+
   return date.toLocaleString("id-ID", {
     day: "2-digit",
     month: "long",
@@ -96,17 +100,27 @@ function formatTanggalWaktu(value) {
 
 function hitungDurasi(tanggalMulai, tanggalSelesai) {
   if (!tanggalMulai || !tanggalSelesai) return "-";
+
   const mulai = new Date(tanggalMulai);
   const selesai = new Date(tanggalSelesai);
-  if (Number.isNaN(mulai.getTime()) || Number.isNaN(selesai.getTime())) return "-";
+
+  if (
+    Number.isNaN(mulai.getTime()) ||
+    Number.isNaN(selesai.getTime())
+  ) {
+    return "-";
+  }
+
   const selisih = Math.abs(selesai.getTime() - mulai.getTime());
   const hari = Math.floor(selisih / (1000 * 60 * 60 * 24));
+
   return `${hari + 1} hari`;
 }
 
 function getInitials(name) {
   if (!name) return "GU";
-  return name
+
+  return String(name)
     .split(" ")
     .filter(Boolean)
     .slice(0, 2)
@@ -130,22 +144,28 @@ function getStatusLabel(status) {
 function getStatusStyle(status) {
   if (status === "menunggu") {
     return {
-      badge: "bg-[var(--color-primary)] from-amber-50 to-orange-50 theme-warning border-amber-200",
+      badge:
+        "bg-[var(--color-primary)] from-amber-50 to-orange-50 theme-warning border-amber-200",
       dot: "bg-amber-500",
     };
   }
+
   if (status === "disetujui") {
     return {
-      badge: "bg-[var(--color-primary)] from-emerald-50 to-teal-50 theme-success border-emerald-200",
+      badge:
+        "bg-[var(--color-primary)] from-emerald-50 to-teal-50 theme-success border-emerald-200",
       dot: "bg-emerald-500",
     };
   }
+
   if (status === "ditolak") {
     return {
-      badge: "bg-[var(--color-primary)] from-red-50 to-rose-50 theme-danger border-red-200",
+      badge:
+        "bg-[var(--color-primary)] from-red-50 to-rose-50 theme-danger border-red-200",
       dot: "bg-red-500",
     };
   }
+
   return {
     badge: "theme-card-soft theme-text-secondary theme-border",
     dot: "bg-slate-400",
@@ -156,16 +176,24 @@ function getJenisStyle(jenis) {
   if (jenis === "sakit") {
     return "theme-warning border border-transparent";
   }
+
   if (jenis === "izin") {
     return "bg-[var(--color-primary)] from-blue-50 to-indigo-50 theme-text-primary border-blue-200";
   }
+
   return "theme-card-soft theme-text-secondary theme-border";
 }
 
 function getUploadUrl(url) {
   if (!url) return null;
-  if (url.startsWith("http://") || url.startsWith("https://")) return url;
-  const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
+  if (url.startsWith("http://") || url.startsWith("https://")) {
+    return url;
+  }
+
+  const baseUrl =
+    process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+
   return `${baseUrl.replace(/\/$/, "")}/${url.replace(/^\//, "")}`;
 }
 
@@ -176,36 +204,67 @@ function getUploadUrl(url) {
 function mapIzinToAdminData(item) {
   return {
     id: item?.id,
+
     nama:
       item?.pengguna?.namaLengkap ||
       item?.namaLengkap ||
       "Tidak diketahui",
+
     nip: item?.pengguna?.nip || item?.nip || "-",
+
     jabatan: item?.pengguna?.jabatan || item?.jabatan || "Guru",
+
     penggunaId: item?.penggunaId || item?.pengguna?.id || null,
+
     jenis: item?.jenis || "-",
+
     tanggalMulai: item?.tanggalMulai || null,
+
     tanggalSelesai: item?.tanggalSelesai || null,
+
     alasan: item?.alasan || "-",
+
     urlBukti: item?.urlBukti || null,
+
     status: item?.status || "menunggu",
+
     catatan: item?.catatan || null,
+
     penyetujuId: item?.penyetujuId || null,
+
     penyetujuNama: item?.penyetuju?.namaLengkap || null,
+
     dibuatPada: item?.dibuatPada || null,
+
     diperbaruiPada: item?.diperbaruiPada || null,
+
+    // ID guru pengganti bisa berasal dari field ID
+    // atau objek guru pengganti yang dikirim BE.
     guruPenggantiId:
-      item?.guruPenggantiId || item?.guruPengganti?.id || null,
+      item?.guruPenggantiId ||
+      item?.guruPengganti?.id ||
+      item?.guruPengganti?.userId ||
+      item?.guruPengganti?.penggunaId ||
+      null,
+
+    // Simpan objek guru pengganti jika tersedia dari BE.
     guruPengganti: item?.guruPengganti || null,
   };
 }
 
 function normalizeGuru(item) {
   if (!item) return null;
+
   const id = item.id || item.userId || item.penggunaId;
+
   const namaLengkap =
-    item.namaLengkap || item.nama || item.name || item.pengguna?.namaLengkap;
+    item.namaLengkap ||
+    item.nama ||
+    item.name ||
+    item.pengguna?.namaLengkap;
+
   if (!id || !namaLengkap) return null;
+
   return {
     id: String(id),
     namaLengkap,
@@ -228,29 +287,41 @@ export default function PermohonanIzinGuruPage() {
   const [data, setData] = useState([]);
   const [guruList, setGuruList] = useState([]);
   const [selectedId, setSelectedId] = useState(null);
+
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("semua");
   const [jenisFilter, setJenisFilter] = useState("semua");
+
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [guruLoading, setGuruLoading] = useState(false);
+
   const [guruError, setGuruError] = useState("");
   const [error, setError] = useState("");
+
   const [processingId, setProcessingId] = useState(null);
+
   const [showApproveModal, setShowApproveModal] = useState(false);
   const [showRejectModal, setShowRejectModal] = useState(false);
-  const [selectedGuruPenggantiId, setSelectedGuruPenggantiId] = useState("");
+
+  const [selectedGuruPenggantiId, setSelectedGuruPenggantiId] =
+    useState("");
+
   const [rejectCatatan, setRejectCatatan] = useState("");
 
   /* =========================================================
-     LOAD
+     LOAD DATA IZIN
   ========================================================= */
 
   const loadData = useCallback(
     async (showRefresh = false) => {
       try {
-        if (showRefresh) setRefreshing(true);
-        else setLoading(true);
+        if (showRefresh) {
+          setRefreshing(true);
+        } else {
+          setLoading(true);
+        }
+
         setError("");
 
         const response = await getDaftarIzin();
@@ -260,12 +331,23 @@ export default function PermohonanIzinGuruPage() {
         setData(mapped);
 
         if (selectedId) {
-          const masihAda = mapped.some((item) => item.id === selectedId);
-          if (!masihAda) setSelectedId(null);
+          const masihAda = mapped.some(
+            (item) => String(item.id) === String(selectedId)
+          );
+
+          if (!masihAda) {
+            setSelectedId(null);
+          }
         }
       } catch (err) {
-        console.error("Gagal mengambil data permohonan izin:", err);
-        setError(err?.message || "Gagal mengambil data permohonan izin.");
+        console.error(
+          "Gagal mengambil data permohonan izin:",
+          err
+        );
+
+        setError(
+          err?.message || "Gagal mengambil data permohonan izin."
+        );
       } finally {
         setLoading(false);
         setRefreshing(false);
@@ -274,20 +356,35 @@ export default function PermohonanIzinGuruPage() {
     [selectedId]
   );
 
+  /* =========================================================
+     LOAD DAFTAR GURU
+  ========================================================= */
+
   const loadGuru = useCallback(async () => {
     try {
       setGuruLoading(true);
       setGuruError("");
 
-      const response = await apiFetch("/api/users/?role=guru&limit=100", {
-        method: "GET",
-      });
+      const response = await apiFetch(
+        "/api/users/?role=guru&limit=100",
+        {
+          method: "GET",
+        }
+      );
 
       const normalized = normalizeResponseData(response);
-      const normalizedGuru = normalized.map(normalizeGuru).filter(Boolean);
+
+      const normalizedGuru = normalized
+        .map(normalizeGuru)
+        .filter(Boolean);
 
       const uniqueGuru = Array.from(
-        new Map(normalizedGuru.map((guru) => [String(guru.id), guru])).values()
+        new Map(
+          normalizedGuru.map((guru) => [
+            String(guru.id),
+            guru,
+          ])
+        ).values()
       );
 
       setGuruList(uniqueGuru);
@@ -299,7 +396,11 @@ export default function PermohonanIzinGuruPage() {
       }
     } catch (err) {
       console.error("Gagal mengambil daftar guru:", err);
-      setGuruError(err?.message || "Daftar guru tidak dapat dimuat.");
+
+      setGuruError(
+        err?.message || "Daftar guru tidak dapat dimuat."
+      );
+
       setGuruList([]);
     } finally {
       setGuruLoading(false);
@@ -312,30 +413,66 @@ export default function PermohonanIzinGuruPage() {
   }, [loadData, loadGuru]);
 
   /* =========================================================
-     SELECTED
+     DATA TERPILIH
   ========================================================= */
 
   const selectedData = useMemo(() => {
     if (!selectedId) return null;
-    return data.find((item) => item.id === selectedId) || null;
+
+    return (
+      data.find(
+        (item) => String(item.id) === String(selectedId)
+      ) || null
+    );
   }, [data, selectedId]);
 
   const selectedGuruPengganti = useMemo(() => {
     if (!selectedGuruPenggantiId) return null;
+
     return (
       guruList.find(
-        (guru) => String(guru.id) === String(selectedGuruPenggantiId)
+        (guru) =>
+          String(guru.id) ===
+          String(selectedGuruPenggantiId)
       ) || null
     );
   }, [guruList, selectedGuruPenggantiId]);
 
+  /*
+   * Mencari guru pengganti untuk panel detail:
+   * 1. Gunakan objek guru lengkap dari response BE jika tersedia.
+   * 2. Jika hanya ada ID, cari nama guru di guruList.
+   * 3. Jika ID tidak ditemukan, kembalikan null agar UI
+   *    menampilkan pesan yang sesuai.
+   */
   const detailGuruPengganti = useMemo(() => {
-    if (!selectedData?.guruPenggantiId) return null;
-    if (selectedData.guruPengganti) return selectedData.guruPengganti;
+    if (!selectedData) return null;
+
+    const guruDariResponse = selectedData.guruPengganti;
+
+    if (
+      guruDariResponse &&
+      (guruDariResponse.namaLengkap ||
+        guruDariResponse.nama ||
+        guruDariResponse.name)
+    ) {
+      return {
+        ...guruDariResponse,
+        namaLengkap:
+          guruDariResponse.namaLengkap ||
+          guruDariResponse.nama ||
+          guruDariResponse.name,
+        nip: guruDariResponse.nip || "-",
+      };
+    }
+
+    const guruId = selectedData.guruPenggantiId;
+
+    if (!guruId) return null;
+
     return (
       guruList.find(
-        (guru) =>
-          String(guru.id) === String(selectedData.guruPenggantiId)
+        (guru) => String(guru.id) === String(guruId)
       ) || null
     );
   }, [selectedData, guruList]);
@@ -346,27 +483,48 @@ export default function PermohonanIzinGuruPage() {
 
   const filteredData = useMemo(() => {
     const keyword = search.trim().toLowerCase();
+
     return data.filter((item) => {
       const matchSearch =
         !keyword ||
-        item.nama.toLowerCase().includes(keyword) ||
-        String(item.nip || "").toLowerCase().includes(keyword) ||
-        String(item.alasan || "").toLowerCase().includes(keyword);
+        String(item.nama || "")
+          .toLowerCase()
+          .includes(keyword) ||
+        String(item.nip || "")
+          .toLowerCase()
+          .includes(keyword) ||
+        String(item.alasan || "")
+          .toLowerCase()
+          .includes(keyword);
 
       const matchStatus =
-        statusFilter === "semua" || item.status === statusFilter;
-      const matchJenis = jenisFilter === "semua" || item.jenis === jenisFilter;
+        statusFilter === "semua" ||
+        item.status === statusFilter;
+
+      const matchJenis =
+        jenisFilter === "semua" ||
+        item.jenis === jenisFilter;
 
       return matchSearch && matchStatus && matchJenis;
     });
   }, [data, search, statusFilter, jenisFilter]);
 
+  /* =========================================================
+     STATISTIK
+  ========================================================= */
+
   const statistics = useMemo(() => {
     return {
       total: data.length,
-      menunggu: data.filter((item) => item.status === "menunggu").length,
-      disetujui: data.filter((item) => item.status === "disetujui").length,
-      ditolak: data.filter((item) => item.status === "ditolak").length,
+      menunggu: data.filter(
+        (item) => item.status === "menunggu"
+      ).length,
+      disetujui: data.filter(
+        (item) => item.status === "disetujui"
+      ).length,
+      ditolak: data.filter(
+        (item) => item.status === "ditolak"
+      ).length,
     };
   }, [data]);
 
@@ -376,41 +534,66 @@ export default function PermohonanIzinGuruPage() {
 
   const handleSelectData = (item) => {
     setSelectedId(item.id);
-    setSelectedGuruPenggantiId(item.guruPenggantiId || "");
+
+    setSelectedGuruPenggantiId(
+      item.guruPenggantiId
+        ? String(item.guruPenggantiId)
+        : ""
+    );
+
     setRejectCatatan("");
     setError("");
   };
 
   const openApproveModal = () => {
     if (!selectedData) return;
-    setSelectedGuruPenggantiId(selectedData.guruPenggantiId || "");
+
+    setSelectedGuruPenggantiId(
+      selectedData.guruPenggantiId
+        ? String(selectedData.guruPenggantiId)
+        : ""
+    );
+
     setGuruError("");
-    if (guruList.length === 0) loadGuru();
+
+    if (guruList.length === 0) {
+      loadGuru();
+    }
+
     setShowApproveModal(true);
   };
 
   const closeApproveModal = () => {
     if (processingId) return;
+
     setShowApproveModal(false);
-    if (!selectedData?.guruPenggantiId) setSelectedGuruPenggantiId("");
+
+    if (!selectedData?.guruPenggantiId) {
+      setSelectedGuruPenggantiId("");
+    }
   };
 
   const openRejectModal = () => {
     if (!selectedData) return;
+
     setRejectCatatan(selectedData.catatan || "");
     setShowRejectModal(true);
   };
 
   const closeRejectModal = () => {
     if (processingId) return;
+
     setShowRejectModal(false);
     setRejectCatatan("");
   };
 
   const handleApprove = async () => {
     if (!selectedData) return;
+
     if (!selectedGuruPenggantiId) {
-      setError("Silakan pilih guru pengganti terlebih dahulu.");
+      setError(
+        "Silakan pilih guru pengganti terlebih dahulu."
+      );
       return;
     }
 
@@ -425,11 +608,21 @@ export default function PermohonanIzinGuruPage() {
       });
 
       setShowApproveModal(false);
+
       await loadData(true);
-      setSelectedGuruPenggantiId(selectedGuruPenggantiId);
+
+      setSelectedGuruPenggantiId(
+        String(selectedGuruPenggantiId)
+      );
     } catch (err) {
-      console.error("Gagal menyetujui permohonan:", err);
-      setError(err?.message || "Gagal menyetujui permohonan izin.");
+      console.error(
+        "Gagal menyetujui permohonan:",
+        err
+      );
+
+      setError(
+        err?.message || "Gagal menyetujui permohonan izin."
+      );
     } finally {
       setProcessingId(null);
     }
@@ -444,16 +637,25 @@ export default function PermohonanIzinGuruPage() {
 
       await verifikasiIzin(selectedData.id, {
         status: "ditolak",
-        catatan: rejectCatatan.trim() || "Permohonan izin ditolak.",
+        catatan:
+          rejectCatatan.trim() ||
+          "Permohonan izin ditolak.",
       });
 
       setShowRejectModal(false);
       setRejectCatatan("");
       setSelectedGuruPenggantiId("");
+
       await loadData(true);
     } catch (err) {
-      console.error("Gagal menolak permohonan:", err);
-      setError(err?.message || "Gagal menolak permohonan izin.");
+      console.error(
+        "Gagal menolak permohonan:",
+        err
+      );
+
+      setError(
+        err?.message || "Gagal menolak permohonan izin."
+      );
     } finally {
       setProcessingId(null);
     }
@@ -467,19 +669,17 @@ export default function PermohonanIzinGuruPage() {
     <div className="flex h-screen w-full overflow-hidden theme-page">
       <Sidebar />
 
-      <div className="flex flex-1 flex-col min-w-0 h-screen overflow-hidden">
-        <header className="flex-shrink-0 z-30 theme-card backdrop-blur-md border-b theme-border">
+      <div className="flex h-screen min-w-0 flex-1 flex-col overflow-hidden">
+        <header className="z-30 flex-shrink-0 border-b theme-border theme-card backdrop-blur-md">
           <Header />
         </header>
 
-        <main className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden theme-page">
-          <div className="w-full p-4 sm:p-6 lg:p-8 space-y-6">
-
-            {/* ============================================================
-                HEADER PAGE — card dengan aksen gradient
-            ============================================================ */}
-            <div className="relative overflow-hidden rounded-2xl theme-card border theme-border shadow-sm">
+        <main className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto theme-page">
+          <div className="w-full space-y-6 p-4 sm:p-6 lg:p-8">
+            {/* HEADER PAGE */}
+            <div className="relative overflow-hidden rounded-2xl border theme-border theme-card shadow-sm">
               <div className="absolute inset-x-0 top-0 h-1 bg-[var(--color-primary)]" />
+
               <div className="p-5 sm:p-6">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                   <div className="flex items-start gap-4">
@@ -498,12 +698,13 @@ export default function PermohonanIzinGuruPage() {
                         </span>
                       </div>
 
-                      <h1 className="text-xl sm:text-2xl font-bold tracking-tight theme-text">
+                      <h1 className="text-xl font-bold tracking-tight theme-text sm:text-2xl">
                         Permohonan Izin Guru
                       </h1>
 
                       <p className="mt-1 text-sm theme-text-muted">
-                        Kelola pengajuan izin dan penugasan guru pengganti.
+                        Kelola pengajuan izin dan penugasan guru
+                        pengganti.
                       </p>
                     </div>
                   </div>
@@ -518,7 +719,9 @@ export default function PermohonanIzinGuruPage() {
                     className="inline-flex h-10 shrink-0 items-center justify-center gap-2 rounded-xl border theme-border theme-card px-4 text-sm font-medium theme-text-secondary shadow-sm transition hover:theme-card-soft hover:border-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     <RefreshCw
-                      className={`h-4 w-4 ${refreshing ? "animate-spin" : ""}`}
+                      className={`h-4 w-4 ${
+                        refreshing ? "animate-spin" : ""
+                      }`}
                     />
                     {refreshing ? "Memuat..." : "Refresh"}
                   </button>
@@ -530,10 +733,14 @@ export default function PermohonanIzinGuruPage() {
             {error && (
               <div className="flex items-start gap-3 rounded-xl border border-red-200 bg-[var(--color-primary)] from-red-50 to-rose-50 px-4 py-3 text-sm theme-danger shadow-sm">
                 <AlertCircle className="mt-0.5 h-5 w-5 shrink-0" />
+
                 <div className="flex-1">
-                  <p className="font-semibold">Terjadi kesalahan</p>
+                  <p className="font-semibold">
+                    Terjadi kesalahan
+                  </p>
                   <p className="mt-0.5">{error}</p>
                 </div>
+
                 <button
                   type="button"
                   onClick={() => setError("")}
@@ -544,57 +751,54 @@ export default function PermohonanIzinGuruPage() {
               </div>
             )}
 
-            {/* ============================================================
-                STATISTICS — dengan top accent bar
-            ============================================================ */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4 w-full">
+            {/* STATISTICS */}
+            <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <StatCard
                 label="Total Pengajuan"
                 value={statistics.total}
                 icon={FileText}
                 gradient="from-blue-500 to-indigo-600"
                 shadow="shadow-sm"
-              
+                accent="bg-gradient-to-r from-blue-500 to-indigo-600"
               />
+
               <StatCard
                 label="Menunggu"
                 value={statistics.menunggu}
                 icon={Clock3}
                 gradient="from-amber-500 to-orange-500"
                 shadow="shadow-amber-500/25"
-               
+                accent="bg-gradient-to-r from-amber-500 to-orange-500"
               />
+
               <StatCard
                 label="Disetujui"
                 value={statistics.disetujui}
                 icon={CheckCircle2}
                 gradient="from-emerald-500 to-teal-500"
                 shadow="shadow-emerald-500/25"
-               
+                accent="bg-gradient-to-r from-emerald-500 to-teal-500"
               />
+
               <StatCard
                 label="Ditolak"
                 value={statistics.ditolak}
                 icon={XCircle}
                 gradient="from-red-500 to-rose-500"
                 shadow="shadow-red-500/25"
-                
+                accent="bg-gradient-to-r from-red-500 to-rose-500"
               />
             </div>
 
-            {/* ============================================================
-                MAIN GRID
-            ============================================================ */}
+            {/* MAIN GRID */}
             <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_440px]">
-
-              {/* ============================================================
-                  TABLE
-              ============================================================ */}
+              {/* TABLE */}
               <div className="overflow-hidden rounded-2xl border theme-border theme-card shadow-sm">
                 <div className="border-b theme-border bg-[var(--color-primary)] from-slate-50/50 to-white p-4">
                   <div className="flex flex-col gap-3 lg:flex-row lg:items-center">
                     <div className="relative flex-1">
                       <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 theme-text-placeholder" />
+
                       <input
                         type="text"
                         value={search}
@@ -607,24 +811,39 @@ export default function PermohonanIzinGuruPage() {
                     <div className="flex flex-col gap-3 sm:flex-row">
                       <div className="relative">
                         <Filter className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 theme-text-placeholder" />
+
                         <select
                           value={statusFilter}
-                          onChange={(e) => setStatusFilter(e.target.value)}
+                          onChange={(e) =>
+                            setStatusFilter(e.target.value)
+                          }
                           className="h-10 w-full min-w-[155px] cursor-pointer appearance-none rounded-xl border theme-border theme-card pl-10 pr-8 text-sm theme-text-secondary outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]"
                         >
-                          <option value="semua">Semua Status</option>
-                          <option value="menunggu">Menunggu</option>
-                          <option value="disetujui">Disetujui</option>
-                          <option value="ditolak">Ditolak</option>
+                          <option value="semua">
+                            Semua Status
+                          </option>
+                          <option value="menunggu">
+                            Menunggu
+                          </option>
+                          <option value="disetujui">
+                            Disetujui
+                          </option>
+                          <option value="ditolak">
+                            Ditolak
+                          </option>
                         </select>
                       </div>
 
                       <select
                         value={jenisFilter}
-                        onChange={(e) => setJenisFilter(e.target.value)}
+                        onChange={(e) =>
+                          setJenisFilter(e.target.value)
+                        }
                         className="h-10 min-w-[130px] cursor-pointer rounded-xl border theme-border theme-card px-3 text-sm theme-text-secondary outline-none transition focus:border-[var(--color-primary)] focus:ring-4 focus:ring-[color-mix(in_srgb,var(--color-primary)_12%,transparent)]"
                       >
-                        <option value="semua">Semua Jenis</option>
+                        <option value="semua">
+                          Semua Jenis
+                        </option>
                         <option value="sakit">Sakit</option>
                         <option value="izin">Izin</option>
                       </select>
@@ -657,12 +876,16 @@ export default function PermohonanIzinGuruPage() {
                     <tbody className="divide-y divide-[var(--color-border-soft)]">
                       {loading ? (
                         <tr>
-                          <td colSpan={5} className="px-5 py-16 text-center">
+                          <td
+                            colSpan={5}
+                            className="px-5 py-16 text-center"
+                          >
                             <div className="flex flex-col items-center justify-center">
                               <div className="relative">
-                                <div className="absolute inset-0 rounded-full bg-blue-200 blur-lg opacity-50" />
+                                <div className="absolute inset-0 rounded-full bg-blue-200 opacity-50 blur-lg" />
                                 <Loader2 className="relative h-7 w-7 animate-spin theme-text-primary" />
                               </div>
+
                               <p className="mt-3 text-sm theme-text-muted">
                                 Memuat data...
                               </p>
@@ -671,25 +894,35 @@ export default function PermohonanIzinGuruPage() {
                         </tr>
                       ) : filteredData.length === 0 ? (
                         <tr>
-                          <td colSpan={5} className="px-5 py-16 text-center">
+                          <td
+                            colSpan={5}
+                            className="px-5 py-16 text-center"
+                          >
                             <div className="mx-auto flex max-w-sm flex-col items-center">
                               <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br theme-card-soft">
                                 <FileText className="h-6 w-6 theme-text-placeholder" />
                               </div>
+
                               <p className="mt-3 text-sm font-semibold theme-text-secondary">
                                 Tidak ada data
                               </p>
+
                               <p className="mt-1 text-xs theme-text-muted">
-                                Belum ada permohonan izin yang sesuai dengan
-                                filter.
+                                Belum ada permohonan izin yang
+                                sesuai dengan filter.
                               </p>
                             </div>
                           </td>
                         </tr>
                       ) : (
                         filteredData.map((item) => {
-                          const isSelected = item.id === selectedId;
-                          const statusStyle = getStatusStyle(item.status);
+                          const isSelected =
+                            String(item.id) === String(selectedId);
+
+                          const statusStyle = getStatusStyle(
+                            item.status
+                          );
+
                           return (
                             <tr
                               key={item.id}
@@ -705,10 +938,12 @@ export default function PermohonanIzinGuruPage() {
                                   <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl theme-primary text-xs font-bold text-white shadow-md shadow-sm">
                                     {getInitials(item.nama)}
                                   </div>
+
                                   <div className="min-w-0">
                                     <p className="truncate text-sm font-semibold theme-text">
                                       {item.nama}
                                     </p>
+
                                     <p className="mt-0.5 text-xs theme-text-muted">
                                       NIP: {item.nip}
                                     </p>
@@ -728,10 +963,16 @@ export default function PermohonanIzinGuruPage() {
 
                               <td className="px-5 py-4">
                                 <p className="text-sm font-medium theme-text-secondary">
-                                  {formatTanggalSingkat(item.tanggalMulai)}
+                                  {formatTanggalSingkat(
+                                    item.tanggalMulai
+                                  )}
                                 </p>
+
                                 <p className="mt-0.5 text-xs theme-text-muted">
-                                  s/d {formatTanggalSingkat(item.tanggalSelesai)}
+                                  s/d{" "}
+                                  {formatTanggalSingkat(
+                                    item.tanggalSelesai
+                                  )}
                                 </p>
                               </td>
 
@@ -784,24 +1025,25 @@ export default function PermohonanIzinGuruPage() {
                 )}
               </div>
 
-              {/* ============================================================
-                  DETAIL PANEL
-              ============================================================ */}
+              {/* DETAIL PANEL */}
               <div className="overflow-hidden rounded-2xl border theme-border theme-card shadow-sm">
                 {!selectedData ? (
                   <div className="flex min-h-[560px] flex-col items-center justify-center px-6 text-center">
                     <div className="relative">
-                      <div className="absolute inset-0 rounded-full bg-blue-200 blur-2xl opacity-40" />
+                      <div className="absolute inset-0 rounded-full bg-blue-200 opacity-40 blur-2xl" />
+
                       <div className="relative flex h-16 w-16 items-center justify-center rounded-2xl theme-primary text-white shadow-lg shadow-blue-500/30">
                         <FileText className="h-7 w-7" />
                       </div>
                     </div>
+
                     <h3 className="mt-5 text-base font-bold theme-text">
                       Pilih pengajuan
                     </h3>
+
                     <p className="mt-1.5 max-w-xs text-sm leading-6 theme-text-muted">
-                      Pilih salah satu permohonan izin pada tabel untuk melihat
-                      detail pengajuan.
+                      Pilih salah satu permohonan izin pada tabel
+                      untuk melihat detail pengajuan.
                     </p>
                   </div>
                 ) : (
@@ -812,17 +1054,20 @@ export default function PermohonanIzinGuruPage() {
                           <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl theme-primary text-sm font-bold text-white shadow-md shadow-sm">
                             {getInitials(selectedData.nama)}
                           </div>
+
                           <div className="min-w-0">
                             <h2 className="truncate text-base font-bold theme-text">
                               {selectedData.nama}
                             </h2>
+
                             <p className="mt-0.5 text-xs theme-text-muted">
                               NIP: {selectedData.nip}
                             </p>
                           </div>
                         </div>
+
                         <span
-                          className={`shrink-0 inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${
+                          className={`inline-flex shrink-0 items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-semibold ${
                             getStatusStyle(selectedData.status).badge
                           }`}
                         >
@@ -842,6 +1087,7 @@ export default function PermohonanIzinGuruPage() {
                           <p className="text-[11px] font-semibold uppercase tracking-wider text-orange-500">
                             Jenis Izin
                           </p>
+
                           <span
                             className={`mt-2 inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${getJenisStyle(
                               selectedData.jenis
@@ -850,10 +1096,12 @@ export default function PermohonanIzinGuruPage() {
                             {getJenisLabel(selectedData.jenis)}
                           </span>
                         </div>
+
                         <div className="rounded-xl border border-blue-100 bg-gradient-to-br from-blue-50/60 to-indigo-50/30 p-3.5">
                           <p className="text-[11px] font-semibold uppercase tracking-wider text-blue-500">
                             Durasi
                           </p>
+
                           <p className="mt-2 text-sm font-bold theme-text">
                             {hitungDurasi(
                               selectedData.tanggalMulai,
@@ -868,25 +1116,34 @@ export default function PermohonanIzinGuruPage() {
                           <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-blue-100 theme-text-primary">
                             <CalendarDays className="h-3.5 w-3.5" />
                           </div>
+
                           <p className="text-sm font-bold theme-text">
                             Periode Izin
                           </p>
                         </div>
+
                         <div className="grid grid-cols-2 gap-4">
                           <div>
                             <p className="text-[11px] font-semibold uppercase tracking-wider theme-text-placeholder">
                               Mulai
                             </p>
+
                             <p className="mt-1 text-sm font-semibold theme-text">
-                              {formatTanggal(selectedData.tanggalMulai)}
+                              {formatTanggal(
+                                selectedData.tanggalMulai
+                              )}
                             </p>
                           </div>
+
                           <div>
                             <p className="text-[11px] font-semibold uppercase tracking-wider theme-text-placeholder">
                               Selesai
                             </p>
+
                             <p className="mt-1 text-sm font-semibold theme-text">
-                              {formatTanggal(selectedData.tanggalSelesai)}
+                              {formatTanggal(
+                                selectedData.tanggalSelesai
+                              )}
                             </p>
                           </div>
                         </div>
@@ -896,6 +1153,7 @@ export default function PermohonanIzinGuruPage() {
                         <p className="mb-2 text-sm font-bold theme-text">
                           Alasan
                         </p>
+
                         <div className="rounded-xl border theme-border bg-gradient-to-br from-slate-50/80 to-white p-4">
                           <p className="whitespace-pre-wrap text-sm leading-6 theme-text-secondary">
                             {selectedData.alasan}
@@ -908,8 +1166,11 @@ export default function PermohonanIzinGuruPage() {
                           <p className="mb-2 text-sm font-bold theme-text">
                             Bukti Izin
                           </p>
+
                           <a
-                            href={getUploadUrl(selectedData.urlBukti)}
+                            href={getUploadUrl(
+                              selectedData.urlBukti
+                            )}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="flex items-center justify-between rounded-xl border theme-border theme-card p-3 transition hover:border-blue-300 hover:theme-info/40 hover:shadow-md hover:shadow-blue-500/10"
@@ -918,15 +1179,18 @@ export default function PermohonanIzinGuruPage() {
                               <div className="flex h-9 w-9 items-center justify-center rounded-lg theme-primary text-white shadow-md shadow-sm">
                                 <FileText className="h-4 w-4" />
                               </div>
+
                               <div>
                                 <p className="text-sm font-semibold theme-text">
                                   Lihat bukti izin
                                 </p>
+
                                 <p className="text-xs theme-text-muted">
                                   Buka dokumen/lampiran
                                 </p>
                               </div>
                             </div>
+
                             <ExternalLink className="h-4 w-4 theme-text-placeholder" />
                           </a>
                         </div>
@@ -938,10 +1202,12 @@ export default function PermohonanIzinGuruPage() {
                           <div className="flex h-9 w-9 items-center justify-center rounded-xl theme-primary text-white shadow-md shadow-sm">
                             <UserCheck className="h-4.5 w-4.5" />
                           </div>
+
                           <div>
                             <p className="text-sm font-bold theme-text">
                               Guru Pengganti
                             </p>
+
                             <p className="text-xs theme-text-muted">
                               Ditugaskan menggantikan selama izin.
                             </p>
@@ -949,44 +1215,52 @@ export default function PermohonanIzinGuruPage() {
                         </div>
 
                         {selectedData.status === "menunggu" ? (
-                          <div className="rounded-lg border border-dashed border-blue-300/70 theme-card/70 p-3">
+                          <div className="rounded-lg border border-dashed border-blue-300/70 theme-card p-3">
                             <p className="text-sm theme-text-muted">
-                              Guru pengganti akan ditentukan saat permohonan
-                              disetujui.
+                              Guru pengganti belum ditentukan
+                              karena permohonan masih menunggu
+                              persetujuan.
                             </p>
                           </div>
                         ) : detailGuruPengganti ? (
                           <div className="rounded-lg border border-blue-200 theme-card p-3 shadow-sm">
                             <div className="flex items-center justify-between gap-3">
-                              <div className="flex items-center gap-3">
-                                <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-xs font-bold text-white shadow-md shadow-emerald-500/20">
-                                  {getInitials(detailGuruPengganti.namaLengkap)}
+                              <div className="flex min-w-0 items-center gap-3">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-xs font-bold text-white">
+                                  {getInitials(
+                                    detailGuruPengganti.namaLengkap
+                                  )}
                                 </div>
-                                <div>
-                                  <p className="text-sm font-semibold theme-text">
+
+                                <div className="min-w-0">
+                                  <p className="break-words text-sm font-semibold theme-text">
                                     {detailGuruPengganti.namaLengkap}
                                   </p>
+
                                   <p className="mt-0.5 text-xs theme-text-muted">
                                     NIP: {detailGuruPengganti.nip || "-"}
                                   </p>
                                 </div>
                               </div>
+
                               <CheckCircle2 className="h-5 w-5 shrink-0 text-emerald-500" />
                             </div>
                           </div>
                         ) : selectedData.guruPenggantiId ? (
                           <div className="rounded-lg border border-amber-200 bg-amber-50 p-3">
                             <p className="text-sm font-semibold text-amber-800">
-                              Guru pengganti sudah dipilih
+                              ID guru pengganti tersedia, tetapi
+                              nama belum ditemukan.
                             </p>
-                            <p className="mt-1 text-xs theme-warning">
-                              ID guru pengganti: {selectedData.guruPenggantiId}
+
+                            <p className="mt-1 break-all text-xs text-amber-700">
+                              ID: {selectedData.guruPenggantiId}
                             </p>
                           </div>
                         ) : (
                           <div className="rounded-lg border theme-border theme-card p-3">
                             <p className="text-sm theme-text-muted">
-                              Belum ada guru pengganti.
+                              Belum ada data guru pengganti.
                             </p>
                           </div>
                         )}
@@ -997,6 +1271,7 @@ export default function PermohonanIzinGuruPage() {
                           <p className="mb-2 text-sm font-bold theme-text">
                             Catatan
                           </p>
+
                           <div className="rounded-xl border border-amber-200/70 bg-gradient-to-br from-amber-50/70 to-orange-50/40 p-4">
                             <p className="whitespace-pre-wrap text-sm leading-6 text-amber-900/80">
                               {selectedData.catatan}
@@ -1008,18 +1283,23 @@ export default function PermohonanIzinGuruPage() {
                       <div className="border-t theme-border pt-4">
                         <div className="space-y-2.5">
                           <div className="flex items-center justify-between gap-4">
-                            <span className="text-xs font-medium theme-text-placeholder uppercase tracking-wider">
+                            <span className="text-xs font-medium uppercase tracking-wider theme-text-placeholder">
                               Diajukan
                             </span>
+
                             <span className="text-right text-xs font-semibold theme-text-secondary">
-                              {formatTanggalWaktu(selectedData.dibuatPada)}
+                              {formatTanggalWaktu(
+                                selectedData.dibuatPada
+                              )}
                             </span>
                           </div>
+
                           {selectedData.penyetujuNama && (
                             <div className="flex items-center justify-between gap-4">
-                              <span className="text-xs font-medium theme-text-placeholder uppercase tracking-wider">
+                              <span className="text-xs font-medium uppercase tracking-wider theme-text-placeholder">
                                 Diproses oleh
                               </span>
+
                               <span className="text-right text-xs font-semibold theme-text-secondary">
                                 {selectedData.penyetujuNama}
                               </span>
@@ -1033,11 +1313,12 @@ export default function PermohonanIzinGuruPage() {
                           <button
                             type="button"
                             onClick={openRejectModal}
-                            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-red-200 theme-card px-4 text-sm font-bold text-red-600 transition hover:bg-red-50 hover:border-red-300 hover:shadow-md hover:shadow-red-500/10"
+                            className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-red-200 theme-card px-4 text-sm font-bold text-red-600 transition hover:border-red-300 hover:bg-red-50 hover:shadow-md hover:shadow-red-500/10"
                           >
                             <XCircle className="h-4 w-4" />
                             Tolak
                           </button>
+
                           <button
                             type="button"
                             onClick={openApproveModal}
@@ -1057,28 +1338,30 @@ export default function PermohonanIzinGuruPage() {
         </main>
       </div>
 
-      {/* =========================================================
-          MODAL APPROVE
-      ========================================================= */}
+      {/* MODAL APPROVE */}
       {showApproveModal && selectedData && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
           <div className="w-full max-w-lg overflow-hidden rounded-2xl theme-card shadow-2xl">
             <div className="relative border-b theme-border bg-[var(--color-primary)] from-emerald-50/70 to-teal-50/40 px-5 py-4">
               <div className="absolute inset-x-0 top-0 h-1 bg-[var(--color-primary)] from-emerald-500 to-teal-500" />
+
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-md shadow-emerald-500/25">
                     <CheckCircle2 className="h-5 w-5" />
                   </div>
+
                   <div>
                     <h3 className="text-base font-bold theme-text">
                       Setujui Permohonan
                     </h3>
+
                     <p className="mt-0.5 text-xs theme-text-muted">
                       Tentukan guru pengganti sebelum menyetujui.
                     </p>
                   </div>
                 </div>
+
                 <button
                   type="button"
                   onClick={closeApproveModal}
@@ -1096,23 +1379,32 @@ export default function PermohonanIzinGuruPage() {
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl theme-primary text-xs font-bold text-white shadow-md shadow-sm">
                     {getInitials(selectedData.nama)}
                   </div>
+
                   <div>
                     <p className="text-sm font-bold theme-text">
                       {selectedData.nama}
                     </p>
+
                     <p className="mt-0.5 text-xs theme-text-muted">
                       NIP: {selectedData.nip}
                     </p>
                   </div>
                 </div>
+
                 <div className="mt-3 border-t theme-border pt-3">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs font-medium theme-text-placeholder uppercase tracking-wider">
+                    <span className="text-xs font-medium uppercase tracking-wider theme-text-placeholder">
                       Periode
                     </span>
+
                     <span className="text-xs font-semibold theme-text-secondary">
-                      {formatTanggalSingkat(selectedData.tanggalMulai)} -{" "}
-                      {formatTanggalSingkat(selectedData.tanggalSelesai)}
+                      {formatTanggalSingkat(
+                        selectedData.tanggalMulai
+                      )}{" "}
+                      -{" "}
+                      {formatTanggalSingkat(
+                        selectedData.tanggalSelesai
+                      )}
                     </span>
                   </div>
                 </div>
@@ -1123,8 +1415,10 @@ export default function PermohonanIzinGuruPage() {
                   Guru Pengganti
                   <span className="ml-1 theme-danger">*</span>
                 </label>
+
                 <div className="relative">
                   <Users className="pointer-events-none absolute left-3 top-1/2 z-10 h-4 w-4 -translate-y-1/2 theme-text-placeholder" />
+
                   <select
                     value={selectedGuruPenggantiId}
                     onChange={(e) => {
@@ -1138,9 +1432,10 @@ export default function PermohonanIzinGuruPage() {
                       {guruLoading
                         ? "Memuat daftar guru..."
                         : guruList.length === 0
-                        ? "Tidak ada guru tersedia"
-                        : "Pilih guru pengganti"}
+                          ? "Tidak ada guru tersedia"
+                          : "Pilih guru pengganti"}
                     </option>
+
                     {guruList.map((guru) => (
                       <option key={guru.id} value={guru.id}>
                         {guru.namaLengkap}
@@ -1159,7 +1454,10 @@ export default function PermohonanIzinGuruPage() {
 
                 {guruError && (
                   <div className="mt-2 rounded-lg border border-red-200 bg-red-50 p-3">
-                    <p className="text-xs text-red-600">{guruError}</p>
+                    <p className="text-xs text-red-600">
+                      {guruError}
+                    </p>
+
                     <button
                       type="button"
                       onClick={loadGuru}
@@ -1170,33 +1468,42 @@ export default function PermohonanIzinGuruPage() {
                   </div>
                 )}
 
-                {!guruLoading && !guruError && guruList.length === 0 && (
-                  <p className="mt-2 text-xs text-amber-600">
-                    Data guru belum tersedia.
-                  </p>
-                )}
+                {!guruLoading &&
+                  !guruError &&
+                  guruList.length === 0 && (
+                    <p className="mt-2 text-xs text-amber-600">
+                      Data guru belum tersedia.
+                    </p>
+                  )}
               </div>
 
               {selectedGuruPengganti && (
                 <div className="overflow-hidden rounded-xl border border-emerald-200 bg-gradient-to-br from-emerald-50/70 to-teal-50/40 p-4">
                   <div className="mb-3 flex items-center gap-2">
                     <UserCheck className="h-4 w-4 text-emerald-600" />
+
                     <p className="text-sm font-bold text-emerald-900">
                       Guru pengganti yang dipilih
                     </p>
                   </div>
+
                   <div className="flex items-center gap-3 rounded-lg border border-emerald-200/70 theme-card p-3 shadow-sm">
                     <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-xs font-bold text-white shadow-md shadow-emerald-500/20">
-                      {getInitials(selectedGuruPengganti.namaLengkap)}
+                      {getInitials(
+                        selectedGuruPengganti.namaLengkap
+                      )}
                     </div>
+
                     <div className="min-w-0">
                       <p className="text-sm font-bold theme-text">
                         {selectedGuruPengganti.namaLengkap}
                       </p>
+
                       <p className="mt-0.5 text-xs theme-text-muted">
                         NIP: {selectedGuruPengganti.nip || "-"}
                       </p>
                     </div>
+
                     <CheckCircle2 className="ml-auto h-5 w-5 shrink-0 text-emerald-500" />
                   </div>
                 </div>
@@ -1204,9 +1511,10 @@ export default function PermohonanIzinGuruPage() {
 
               <div className="flex gap-3 rounded-xl border border-blue-100 bg-[var(--color-primary)] from-blue-50/70 to-indigo-50/40 p-3">
                 <AlertCircle className="mt-0.5 h-4 w-4 shrink-0 theme-text-primary" />
+
                 <p className="text-xs leading-5 theme-text-primary">
-                  Setelah disetujui, guru yang dipilih akan tercatat sebagai
-                  guru pengganti dan menerima notifikasi penugasan.
+                  Pastikan guru pengganti yang dipilih sudah benar
+                  sebelum menyetujui permohonan.
                 </p>
               </div>
             </div>
@@ -1220,6 +1528,7 @@ export default function PermohonanIzinGuruPage() {
               >
                 Batal
               </button>
+
               <button
                 type="button"
                 onClick={handleApprove}
@@ -1248,28 +1557,30 @@ export default function PermohonanIzinGuruPage() {
         </div>
       )}
 
-      {/* =========================================================
-          MODAL REJECT
-      ========================================================= */}
+      {/* MODAL REJECT */}
       {showRejectModal && selectedData && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-sm">
           <div className="w-full max-w-md overflow-hidden rounded-2xl theme-card shadow-2xl">
             <div className="relative border-b theme-border bg-[var(--color-primary)] from-red-50/70 to-rose-50/40 px-5 py-4">
               <div className="absolute inset-x-0 top-0 h-1 bg-[var(--color-primary)] from-red-500 to-rose-500" />
+
               <div className="flex items-start justify-between">
                 <div className="flex items-center gap-3">
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-md shadow-red-500/25">
                     <XCircle className="h-5 w-5" />
                   </div>
+
                   <div>
                     <h3 className="text-base font-bold theme-text">
                       Tolak Permohonan
                     </h3>
+
                     <p className="mt-0.5 text-xs theme-text-muted">
                       Berikan alasan penolakan jika diperlukan.
                     </p>
                   </div>
                 </div>
+
                 <button
                   type="button"
                   onClick={closeRejectModal}
@@ -1287,10 +1598,12 @@ export default function PermohonanIzinGuruPage() {
                   <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-gradient-to-br from-red-500 to-rose-600 text-white shadow-md shadow-red-500/20">
                     <XCircle className="h-5 w-5" />
                   </div>
+
                   <div>
                     <p className="text-sm font-bold text-red-800">
                       {selectedData.nama}
                     </p>
+
                     <p className="mt-0.5 text-xs text-red-600">
                       Permohonan akan ditolak.
                     </p>
@@ -1302,9 +1615,12 @@ export default function PermohonanIzinGuruPage() {
                 <label className="mb-2 block text-sm font-bold theme-text">
                   Catatan Penolakan
                 </label>
+
                 <textarea
                   value={rejectCatatan}
-                  onChange={(e) => setRejectCatatan(e.target.value)}
+                  onChange={(e) =>
+                    setRejectCatatan(e.target.value)
+                  }
                   rows={4}
                   placeholder="Masukkan catatan penolakan..."
                   disabled={!!processingId}
@@ -1322,6 +1638,7 @@ export default function PermohonanIzinGuruPage() {
               >
                 Batal
               </button>
+
               <button
                 type="button"
                 onClick={handleReject}
@@ -1352,19 +1669,29 @@ export default function PermohonanIzinGuruPage() {
    STAT CARD
 ========================================================= */
 
-function StatCard({ label, value, icon: Icon, gradient, shadow, accent }) {
+function StatCard({
+  label,
+  value,
+  icon: Icon,
+  gradient,
+  shadow,
+  accent,
+}) {
   return (
     <div className="group relative overflow-hidden rounded-2xl border theme-border theme-card p-5 shadow-sm transition hover:shadow-lg hover:shadow-slate-200/50">
-      <div className={`absolute inset-x-0 top-0 h-1 ${accent}`} />
+      <div className={`absolute inset-x-0 top-0 h-1 ${accent || ""}`} />
+
       <div className="flex items-center justify-between">
         <div>
           <p className="text-xs font-semibold uppercase tracking-wider theme-text-placeholder">
             {label}
           </p>
+
           <p className="mt-2 text-3xl font-bold tracking-tight theme-text">
             {value}
           </p>
         </div>
+
         <div
           className={`flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br ${gradient} text-white shadow-md ${shadow} transition group-hover:scale-105`}
         >
