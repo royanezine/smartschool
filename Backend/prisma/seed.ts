@@ -1,14 +1,13 @@
 import { PrismaPg } from "@prisma/adapter-pg";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, TipePaket } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  console.log("⏳ Memulai seeder database...");
+  console.log("Memulai seeder database...");
 
-  // 1. PERAN (Role)
   const daftarPeran = [
     {
       nama: "super_admin",
@@ -39,9 +38,8 @@ async function main() {
       });
     }
   }
-  console.log("✅ Data Peran (Role) berhasil dibuat!");
+  console.log("Data Peran (Role) berhasil dibuat");
 
-  // Ambil semua peran untuk referensi
   const peranSuperAdmin = await prisma.peran.findFirst({
     where: { nama: "super_admin" },
   });
@@ -66,7 +64,6 @@ async function main() {
   if (!peranGuru) throw new Error("Peran guru tidak ditemukan");
   if (!peranSiswa) throw new Error("Peran siswa tidak ditemukan");
 
-  // 2. SUPER ADMIN
   const hashedPasswordSuper = await bcrypt.hash("SuperAdmin123!", 10);
   const superAdmin = await prisma.pengguna.upsert({
     where: { email: "superadmin@smartschool.com" },
@@ -80,9 +77,8 @@ async function main() {
       status: "aktif",
     },
   });
-  console.log("✅ Akun Super Admin berhasil dibuat!");
+  console.log("Akun Super Admin berhasil dibuat");
 
-  // 3. MODUL
   const modulList = [
     {
       kode: "manajemen_pengguna",
@@ -158,11 +154,10 @@ async function main() {
     });
     createdModuls.push(mod);
   }
-  console.log("✅ Data Modul berhasil dibuat!");
+  console.log("Data Modul berhasil dibuat");
 
   const modulMap = Object.fromEntries(createdModuls.map((m) => [m.kode, m.id]));
 
-  // 4. IZIN
   const aksiList = ["view", "create", "update", "delete"];
   const izinData = [];
   for (const mod of modulList) {
@@ -185,13 +180,12 @@ async function main() {
     });
     createdIzin.push(i);
   }
-  console.log("✅ Data Izin berhasil dibuat!");
+  console.log("Data Izin berhasil dibuat");
 
   const izinMap = Object.fromEntries(createdIzin.map((i) => [i.nama, i.id]));
 
-  // 5. PERAN IZIN
   await prisma.peranIzin.deleteMany({});
-  console.log("🗑️ Data PeranIzin lama dihapus.");
+  console.log("Data PeranIzin lama dihapus");
 
   const peranIzinMapping = {
     super_admin: { modul: modulList.map((m) => m.kode), aksi: aksiList },
@@ -217,7 +211,7 @@ async function main() {
 
   const peranMap: Record<string, string> = {
     super_admin: peranSuperAdmin.id,
-    admin_yayasan: peranAdminYayasan.id, 
+    admin_yayasan: peranAdminYayasan.id,
     admin_sekolah: peranAdminSekolah.id,
     guru: peranGuru.id,
     siswa: peranSiswa.id,
@@ -236,7 +230,7 @@ async function main() {
   ] of Object.entries(peranIzinMapping)) {
     const peranId = peranMap[peranNama];
     if (!peranId) {
-      console.warn(`⚠️ Peran "${peranNama}" tidak ditemukan, dilewati.`);
+      console.warn(`Peran "${peranNama}" tidak ditemukan, dilewati.`);
       continue;
     }
     for (const modKode of modulListPeran) {
@@ -244,7 +238,7 @@ async function main() {
         const izinNama = `${modKode}.${aksi}`;
         const izinId = izinMap[izinNama];
         if (!izinId) {
-          console.warn(`⚠️ Izin "${izinNama}" tidak ditemukan, dilewati.`);
+          console.warn(`Izin "${izinNama}" tidak ditemukan, dilewati.`);
           continue;
         }
         peranIzinEntries.push({
@@ -261,15 +255,15 @@ async function main() {
     data: peranIzinEntries,
     skipDuplicates: true,
   });
-  console.log(`✅ ${peranIzinEntries.length} data PeranIzin berhasil dibuat!`);
+  console.log(`${peranIzinEntries.length} data PeranIzin berhasil dibuat`);
 
-  // 6. PAKET
   const paketData = [
     {
       nama: "Basic",
       deskripsi: "Paket dasar untuk uji coba, durasi 2 minggu",
       harga: 500000,
-      durasi: 14, 
+      durasi: 14,
+      tipe: TipePaket.SEKOLAH,
       status: "aktif",
     },
     {
@@ -277,6 +271,7 @@ async function main() {
       deskripsi: "Paket profesional 6 bulan",
       harga: 2000000,
       durasi: 180,
+      tipe: TipePaket.SEKOLAH,
       status: "aktif",
     },
     {
@@ -284,6 +279,15 @@ async function main() {
       deskripsi: "Paket enterprise 12 bulan dengan semua fitur",
       harga: 4000000,
       durasi: 365,
+      tipe: TipePaket.SEKOLAH,
+      status: "aktif",
+    },
+    {
+      nama: "Paket Yayasan Standar",
+      deskripsi: "Paket yayasan 12 bulan untuk mengelola banyak cabang sekolah",
+      harga: 5000000,
+      durasi: 365,
+      tipe: TipePaket.YAYASAN,
       status: "aktif",
     },
   ];
@@ -305,15 +309,14 @@ async function main() {
     }
     createdPaket.push(paket);
   }
-  console.log("✅ Data Paket berhasil dibuat!");
+  console.log("Data Paket berhasil dibuat");
 
   const paketMap = Object.fromEntries(createdPaket.map((p) => [p.nama, p.id]));
 
-  // 7. PAKET MODUL
   await prisma.paketModul.deleteMany({});
-  console.log("🗑️ Data PaketModul lama dihapus.");
+  console.log("Data PaketModul lama dihapus");
 
-  const paketModulMapping = {
+  const paketModulMapping: Record<string, string[]> = {
     Basic: ["akademik", "tugas", "ujian", "lms", "laporan"],
     Pro: [
       "manajemen_pengguna",
@@ -326,19 +329,20 @@ async function main() {
       "laporan",
     ],
     Enterprise: modulList.map((m) => m.kode),
+    "Paket Yayasan Standar": ["yayasan", "manajemen_sekolah", "laporan"],
   };
 
   const paketModulEntries = [];
   for (const [paketNama, modulKodes] of Object.entries(paketModulMapping)) {
     const paketId = paketMap[paketNama];
     if (!paketId) {
-      console.warn(`⚠️ Paket "${paketNama}" tidak ditemukan, dilewati.`);
+      console.warn(`Paket "${paketNama}" tidak ditemukan, dilewati.`);
       continue;
     }
     for (const modKode of modulKodes) {
       const modulId = modulMap[modKode];
       if (!modulId) {
-        console.warn(`⚠️ Modul "${modKode}" tidak ditemukan, dilewati.`);
+        console.warn(`Modul "${modKode}" tidak ditemukan, dilewati.`);
         continue;
       }
       paketModulEntries.push({
@@ -355,14 +359,10 @@ async function main() {
     data: paketModulEntries,
     skipDuplicates: true,
   });
-  console.log(
-    `✅ ${paketModulEntries.length} data PaketModul berhasil dibuat!`,
-  );
+  console.log(`${paketModulEntries.length} data PaketModul berhasil dibuat`);
 
-  // 8. DATA SEKOLAH DUMMY UNTUK TESTING
-  console.log("⏳ Membuat data sekolah dummy...");
+  console.log("Membuat data sekolah dummy...");
 
-  // 8.1 Yayasan
   const yayasan = await prisma.yayasan.upsert({
     where: { npyp: "1234567890" },
     update: {},
@@ -377,9 +377,46 @@ async function main() {
       diperbaruiOleh: superAdmin.id,
     },
   });
-  console.log("✅ Yayasan dummy dibuat");
+  console.log("Yayasan dummy dibuat");
 
-  // 8.2 Sekolah
+  const paketYayasan = await prisma.paket.findFirst({
+    where: { nama: "Paket Yayasan Standar" },
+  });
+
+  if (paketYayasan) {
+    const mulaiYayasan = new Date();
+    const berakhirYayasan = new Date(mulaiYayasan);
+    berakhirYayasan.setDate(berakhirYayasan.getDate() + paketYayasan.durasi);
+
+    await prisma.yayasan.update({
+      where: { id: yayasan.id },
+      data: {
+        paketId: paketYayasan.id,
+        statusLangganan: "active",
+        tanggalMulaiLangganan: mulaiYayasan,
+        tanggalBerakhirLangganan: berakhirYayasan,
+      },
+    });
+    console.log("Langganan Paket Yayasan Standar untuk yayasan dummy diaktifkan");
+  }
+
+  await prisma.pengguna.upsert({
+    where: { email: "admin@yayasan.smartschool.com" },
+    update: {},
+    create: {
+      namaPengguna: "adminyayasan",
+      email: "admin@yayasan.smartschool.com",
+      kataSandi: await bcrypt.hash("Yayasan123!", 10),
+      namaLengkap: "Admin Yayasan",
+      peranId: peranAdminYayasan.id,
+      yayasanId: yayasan.id,
+      status: "aktif",
+      dibuatOleh: superAdmin.id,
+      diperbaruiOleh: superAdmin.id,
+    },
+  });
+  console.log("Admin Yayasan dummy dibuat");
+
   const sekolah = await prisma.sekolah.upsert({
     where: { subdomain: "smart" },
     update: {},
@@ -397,15 +434,13 @@ async function main() {
       diperbaruiOleh: superAdmin.id,
     },
   });
-  console.log("✅ Sekolah dummy dibuat");
+  console.log("Sekolah dummy dibuat");
 
-  //  UNTUK MENGAKTIFKAN LANGGANAN 
   const paketEnterprise = await prisma.paket.findFirst({
     where: { nama: "Enterprise" },
   });
 
-  if (paketEnterprise) {
-    // Buat tanggal kedaluwarsa 1 tahun dari sekarang
+  if (paketEnterprise && !sekolah.langgananAktifId) {
     const endDate = new Date();
     endDate.setFullYear(endDate.getFullYear() + 1);
 
@@ -423,16 +458,14 @@ async function main() {
       },
     });
 
-    // Hubungkan ID langganan aktif ke tabel sekolah
     await prisma.sekolah.update({
       where: { id: sekolah.id },
       data: { langgananAktifId: langganan.id },
     });
 
-    console.log("✅ Langganan Enterprise untuk sekolah dummy diaktifkan");
+    console.log("Langganan Enterprise untuk sekolah dummy diaktifkan");
   }
 
-  // 8.3 Tahun Ajaran
   let tahunAjaran = await prisma.tahunAjaran.findFirst({
     where: {
       sekolahId: sekolah.id,
@@ -450,9 +483,8 @@ async function main() {
       },
     });
   }
-  console.log("✅ Tahun Ajaran dummy dibuat");
+  console.log("Tahun Ajaran dummy dibuat");
 
-  // 8.4 Kelas
   const daftarKelas = [
     { nama: "XII IPA 1", tingkat: 12 },
     { nama: "XII IPS 1", tingkat: 12 },
@@ -483,9 +515,8 @@ async function main() {
     }
     kelasMap[k.nama] = kelas;
   }
-  console.log("✅ Kelas dummy dibuat");
+  console.log("Kelas dummy dibuat");
 
-  // 8.5 Mata Pelajaran
   const daftarMapel = [
     "Matematika",
     "Fisika",
@@ -521,10 +552,9 @@ async function main() {
     }
     mapelMap[nama] = mapel;
   }
-  console.log("✅ Mata Pelajaran dummy dibuat");
+  console.log("Mata Pelajaran dummy dibuat");
 
-  // 8.6 Admin Sekolah
-  const adminSekolah = await prisma.pengguna.upsert({
+  await prisma.pengguna.upsert({
     where: { email: "admin@smartschool.com" },
     update: {},
     create: {
@@ -539,9 +569,8 @@ async function main() {
       diperbaruiOleh: superAdmin.id,
     },
   });
-  console.log("✅ Admin Sekolah dummy dibuat");
+  console.log("Admin Sekolah dummy dibuat");
 
-  // 8.7 Guru
   const daftarGuru = [
     {
       nama: "Budi Santoso",
@@ -600,9 +629,8 @@ async function main() {
     }
     guruMap[g.mapel] = guru;
   }
-  console.log("✅ Guru dummy dibuat");
+  console.log("Guru dummy dibuat");
 
-  // 8.8 Siswa
   const daftarSiswa = [
     { nama: "Andi Wijaya", nisn: "1234567890", kelas: "XII IPA 1" },
     { nama: "Budi Pratama", nisn: "1234567891", kelas: "XII IPA 1" },
@@ -640,14 +668,13 @@ async function main() {
     }
     siswaList.push({ siswa, kelasNama: s.kelas });
   }
-  console.log("✅ Siswa dummy dibuat");
+  console.log("Siswa dummy dibuat");
 
-  // 8.9 Kelas Mapel (guru mengajar mapel di kelas tertentu)
   const kelasMapelData = [];
   for (const [mapelNama, guru] of Object.entries(guruMap)) {
     const mapel = mapelMap[mapelNama];
     if (!mapel) continue;
-    for (const [kelasNama, kelas] of Object.entries(kelasMap)) {
+    for (const [, kelas] of Object.entries(kelasMap)) {
       const existing = await prisma.kelasMapel.findFirst({
         where: {
           kelasId: kelas.id,
@@ -673,9 +700,8 @@ async function main() {
       skipDuplicates: true,
     });
   }
-  console.log("✅ Kelas Mapel dummy dibuat");
+  console.log("Kelas Mapel dummy dibuat");
 
-  // 8.10 Siswa Kelas
   const siswaKelasData = [];
   for (const item of siswaList) {
     const kelas = kelasMap[item.kelasNama];
@@ -701,9 +727,8 @@ async function main() {
       skipDuplicates: true,
     });
   }
-  console.log("✅ Siswa Kelas dummy dibuat");
+  console.log("Siswa Kelas dummy dibuat");
 
-  // 8.11 PENGUNA KHUSUS UNTUK TESTING OTP
   const otpTestUser = await prisma.pengguna.upsert({
     where: { email: "divaalhenaputri@gmail.com" },
     update: {},
@@ -719,9 +744,8 @@ async function main() {
       diperbaruiOleh: superAdmin.id,
     },
   });
-  console.log("✅ Pengguna testing OTP (divaalhenaputri@gmail.com) dibuat");
+  console.log("Pengguna testing OTP (divaalhenaputri@gmail.com) dibuat");
 
-  // Tambahkan ke siswaKelas (XII IPA 1)
   const kelasXIIIPA1 = kelasMap["XII IPA 1"];
   if (kelasXIIIPA1) {
     const existingSiswaKelas = await prisma.anggotaKelas.findFirst({
@@ -738,12 +762,12 @@ async function main() {
           tahunAjaranId: kelasXIIIPA1.tahunAjaranId,
         },
       });
-      console.log("✅ Pengguna OTP ditambahkan ke kelas XII IPA 1");
+      console.log("Pengguna OTP ditambahkan ke kelas XII IPA 1");
     }
   }
 
-  console.log("✅ Data sekolah dummy selesai!");
-  console.log("🚀 Seeder selesai dieksekusi!");
+  console.log("Data sekolah dummy selesai");
+  console.log("Seeder selesai dieksekusi");
 }
 
 main()

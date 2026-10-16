@@ -47,6 +47,16 @@ export const registerTenant = async (
     });
     if (!paket) throw new AppError("Paket langganan tidak ditemukan", 400);
 
+    const tipeDiharapkan = isYayasan ? "YAYASAN" : "SEKOLAH";
+    if (paket.tipe !== tipeDiharapkan) {
+      throw new AppError(
+        isYayasan
+          ? "Pendaftaran yayasan wajib memakai paket yayasan"
+          : "Pendaftaran sekolah tidak dapat memakai paket yayasan",
+        400,
+      );
+    }
+
     const hashedPassword = await bcrypt.hash(validatedData.kataSandi, 10);
     const otp = generateOtp();
 
@@ -65,14 +75,12 @@ export const registerTenant = async (
           emailPendaftar: validatedData.email,
           kataSandiPendaftar: hashedPassword,
 
-          // Yayasan fields
           namaYayasan: validatedData.namaYayasan ?? null,
           alamatYayasan: validatedData.alamatYayasan ?? null,
           teleponYayasan: validatedData.teleponYayasan ?? null,
           emailYayasan: validatedData.emailYayasan ?? null,
           npypYayasan: validatedData.npypYayasan ?? null,
 
-          // Sekolah fields (diset null jika yayasan)
           namaSekolah: isYayasan ? null : (validatedData.namaSekolah ?? null),
           jenjangSekolah: isYayasan ? null : (validatedData.jenjang ?? null),
           subdomain: isYayasan ? null : (validatedData.subdomain ?? null),
@@ -139,7 +147,6 @@ export const konversiPendaftaranTenant = async (
     throw new AppError("Data pendaftaran tidak ditemukan", 404);
   }
 
-  // Idempotensi: jika sudah dikonversi/aktif, tidak menduplikasi data
   if (pendaftaran.status === "aktif") {
     return {
       alreadyActive: true,
@@ -187,6 +194,26 @@ export const konversiPendaftaranTenant = async (
       });
     }
 
+    const mulaiLangganan = new Date();
+    const berakhirLangganan = new Date(mulaiLangganan);
+    if (options.isTrial) {
+      berakhirLangganan.setMonth(berakhirLangganan.getMonth() + 1);
+    } else {
+      berakhirLangganan.setDate(
+        berakhirLangganan.getDate() + pendaftaran.paket.durasi,
+      );
+    }
+
+    yayasan = await tx.yayasan.update({
+      where: { id: yayasan.id },
+      data: {
+        paketId: pendaftaran.paketId,
+        statusLangganan: options.isTrial ? "trialing" : "active",
+        tanggalMulaiLangganan: mulaiLangganan,
+        tanggalBerakhirLangganan: berakhirLangganan,
+      },
+    });
+
     const pengguna = await tx.pengguna.create({
       data: {
         namaPengguna,
@@ -219,7 +246,6 @@ export const konversiPendaftaranTenant = async (
       pengguna,
     };
   } else {
-    // Pendaftaran Sekolah
     const peranAdminSekolah = await tx.peran.findFirst({
       where: { nama: "admin_sekolah" },
     });
