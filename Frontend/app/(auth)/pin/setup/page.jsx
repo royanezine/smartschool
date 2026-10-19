@@ -4,6 +4,7 @@ import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { setupPin } from "@/services/auth.services";
+import { setSession, getRoleHome } from "@/lib/auth";
 import {
   Eye,
   EyeOff,
@@ -151,24 +152,14 @@ export default function SetupPinPage() {
         throw new Error("Data pengguna tidak diterima dari server.");
       }
 
-      localStorage.removeItem("token");
-      localStorage.setItem("token", result.token);
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          ...user,
-          userId: user.id,
-          role: user.role,
-        })
-      );
+      // Simpan token + identitas sesi secara atomik.
+      const sessionUser = setSession(result.token, user);
 
       sessionStorage.removeItem("pin_setup_token");
       sessionStorage.removeItem("pin_access_token");
 
-      window.dispatchEvent(new Event("user-updated"));
-
       setSuccess("PIN berhasil dibuat. Mengarahkan ke dashboard...");
-      router.replace("/siswa");
+      router.replace(getRoleHome(sessionUser?.role) || "/siswa");
     } catch (err) {
       setError(err?.message || "Gagal membuat PIN. Silakan coba lagi.");
     } finally {

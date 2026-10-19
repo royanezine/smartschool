@@ -122,6 +122,15 @@ export const siswaSidebarConfig = {
       path: "/siswa/absensi",
     },
 
+    // Raport
+    {
+      type: "item",
+      key: "raport",
+      label: "Raport",
+      icon: FileBarChart,
+      path: "/siswa/raport",
+    },
+
    
 
     // Jadwal

@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation";
 
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
+import AuthGuard from "@/app/components/auth/AuthGuard";
+import { getSessionUser } from "@/lib/auth";
 
 /* =========================================================
    USER HELPER
@@ -149,40 +151,41 @@ export default function SiswaLayout({
   useEffect(() => {
     setMounted(true);
 
-    try {
-      const storedUser =
-        localStorage.getItem("user");
+    // Sinkronkan identitas dari sesi aktif setiap kali berubah
+    // (tab ini maupun tab lain), agar tidak menampilkan data lama.
+    const loadUser = () => {
+      const sessionUser = getSessionUser();
 
-      if (!storedUser) {
+      if (!sessionUser) {
+        setUser({
+          username: "Siswa",
+          email: "Akun siswa",
+        });
         return;
       }
 
-      const parsedUser =
-        JSON.parse(storedUser);
+      const username = getUsername(sessionUser);
 
-      const username =
-        getUsername(parsedUser);
-
-      const email =
-        parsedUser?.email ||
-        parsedUser?.emailPengguna ||
-        parsedUser?.data?.email ||
-        "Akun siswa";
+      const email = sessionUser.email || "Akun siswa";
 
       setUser({
         username,
         email:
-          typeof email === "string" &&
-          email.trim() !== ""
+          typeof email === "string" && email.trim() !== ""
             ? email.trim()
             : "Akun siswa",
       });
-    } catch (error) {
-      console.error(
-        "Gagal membaca user siswa:",
-        error
-      );
-    }
+    };
+
+    loadUser();
+
+    // Sesi disimpan di localStorage: reaksi terhadap perubahan sesi
+    // pada tab ini melalui event `user-updated`.
+    window.addEventListener("user-updated", loadUser);
+
+    return () => {
+      window.removeEventListener("user-updated", loadUser);
+    };
   }, []);
 
   /* =======================================================
@@ -203,58 +206,60 @@ export default function SiswaLayout({
   );
 
   return (
-    <div className="theme-page flex h-screen w-full overflow-hidden">
-      {/* ===================================================
-          SIDEBAR
-      =================================================== */}
+    <AuthGuard allowedRoles={["siswa"]}>
+      <div className="theme-page flex h-screen w-full overflow-hidden">
+        {/* ===================================================
+            SIDEBAR
+        =================================================== */}
 
-      <Sidebar
-        role="siswa"
-        activeMenu={activeMenu}
-      />
+        <Sidebar
+          role="siswa"
+          activeMenu={activeMenu}
+        />
 
-      {/* ===================================================
-          MAIN
-      =================================================== */}
+        {/* ===================================================
+            MAIN
+        =================================================== */}
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        {/* =================================================
-            HEADER
-        ================================================= */}
+        <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+          {/* =================================================
+              HEADER
+          ================================================= */}
 
-        <div className="shrink-0">
-          <Header
-            user={{
-              name: user.username,
-              email: user.email,
-              avatar,
-            }}
-          />
+          <div className="shrink-0">
+            <Header
+              user={{
+                name: user.username,
+                email: user.email,
+                avatar,
+              }}
+            />
+          </div>
+
+          {/* =================================================
+              PAGE CONTENT
+          ================================================= */}
+
+          <main
+            className={`
+              theme-page
+              min-h-0
+              flex-1
+              overflow-y-auto
+              overflow-x-hidden
+              transition-opacity
+              duration-300
+              ${
+                mounted
+                  ? "opacity-100"
+                  : "opacity-0"
+              }
+            `}
+          >
+            {children}
+          </main>
         </div>
-
-        {/* =================================================
-            PAGE CONTENT
-        ================================================= */}
-
-        <main
-          className={`
-            theme-page
-            min-h-0
-            flex-1
-            overflow-y-auto
-            overflow-x-hidden
-            transition-opacity
-            duration-300
-            ${
-              mounted
-                ? "opacity-100"
-                : "opacity-0"
-            }
-          `}
-        >
-          {children}
-        </main>
       </div>
-    </div>
+    </AuthGuard>
   );
 }

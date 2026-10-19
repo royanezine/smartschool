@@ -1,4 +1,5 @@
 import { apiFetch } from "../lib/api";
+import { clearSession } from "../lib/auth";
 
 const ENDPOINT = "/api/ppdb";
 
@@ -255,8 +256,8 @@ export async function uploadBerkasPpdb(
   }
 
   if (response.status === 401) {
-    localStorage.removeItem("token");
-    localStorage.removeItem("user");
+    // Hapus sesi aktif secara lengkap (token + user + key lama).
+    clearSession();
     window.location.href = "/login";
 
     throw new Error(

@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
+import AuthGuard from "@/app/components/auth/AuthGuard";
 
 export default function YayasanLayout({ children }) {
   const pathname = usePathname();
@@ -75,46 +76,50 @@ export default function YayasanLayout({ children }) {
   // ============================================================
 
   return (
-    <div className="theme-page theme-text min-h-screen flex overflow-hidden">
-      {/* ======================================================
-          SIDEBAR
-      ====================================================== */}
+    <AuthGuard
+      allowedRoles={["admin_yayasan", "yayasan", "super_admin"]}
+    >
+      <div className="theme-page theme-text min-h-screen flex overflow-hidden">
+        {/* ======================================================
+            SIDEBAR
+        ====================================================== */}
 
-      <Sidebar
-        role="yayasan"
-        active={activeMenu}
-        setActive={() => {}}
-        collapsed={!sidebarOpen}
-        setCollapsed={() => setSidebarOpen((prev) => !prev)}
-      />
-
-      {/* ======================================================
-          MAIN AREA
-      ====================================================== */}
-
-      <div className="flex-1 flex flex-col min-w-0 min-h-screen">
-        {/* ====================================================
-            HEADER
-        ==================================================== */}
-
-        <Header
-          toggleSidebar={() => setSidebarOpen((prev) => !prev)}
-          notifications={notifications}
-          user={{
-            name: "Admin Yayasan",
-            email: "admin@smartschool.com",
-            avatar: "Y",
-          }}
+        <Sidebar
+          role="yayasan"
+          active={activeMenu}
+          setActive={() => {}}
+          collapsed={!sidebarOpen}
+          setCollapsed={() => setSidebarOpen((prev) => !prev)}
         />
 
-        {/* ====================================================
-            PAGE CONTENT
-        ==================================================== */}
+        {/* ======================================================
+            MAIN AREA
+        ====================================================== */}
 
-        <main className="flex-1 min-w-0 overflow-y-auto theme-page">
-          {children}
-        </main>
+        <div className="flex-1 flex flex-col min-w-0 min-h-screen">
+          {/* ====================================================
+              HEADER
+          ==================================================== */}
+
+          <Header
+            toggleSidebar={() => setSidebarOpen((prev) => !prev)}
+            notifications={notifications}
+            user={{
+              name: "Admin Yayasan",
+              email: "admin@smartschool.com",
+              avatar: "Y",
+            }}
+          />
+
+          {/* ====================================================
+              PAGE CONTENT
+          ==================================================== */}
+
+          <main className="flex-1 min-w-0 overflow-y-auto theme-page">
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
+    </AuthGuard>
   );
 }

@@ -1,175 +1,57 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import Image from "next/image";
-import { ShieldCheck, ArrowLeft, Loader2 } from "lucide-react";
+import { AlertCircle, ArrowLeft, ShieldCheck } from "lucide-react";
+
+const IDENTIFIER_KEY = "login_identifier";
+
+/*
+ * ============================================================
+ * CATATAN AUDIT — LOGIN DENGAN OTP BELUM DIDUKUNG BACKEND
+ * ============================================================
+ * Backend SmartSchool (Backend/src/routes/auth.routes.ts) TIDAK
+ * mendefinisikan rute POST /api/auth/verify-login. Satu-satunya alur
+ * login yang benar-benar didukung adalah:
+ *
+ *   POST /api/auth/login  (identifier + kataSandi)
+ *     - siswa belum punya PIN -> requiresPinSetup -> /pin/setup
+ *     - siswa sudah punya PIN -> requiresPin      -> /pin/verify
+ *     - role lain             -> JWT langsung
+ *
+ * OTP di Backend hanya dipakai untuk verifikasi pendaftaran
+ * (POST /api/auth/verify-register), lupa kata sandi, dan lupa PIN —
+ * bukan untuk login.
+ *
+ * Karena itu halaman ini TIDAK memanggil endpoint apa pun, TIDAK
+ * membuat sesi, dan TIDAK menampilkan login sebagai berhasil. Halaman
+ * hanya menjelaskan keterbatasan lalu mengarahkan pengguna kembali ke
+ * halaman login berbasis kata sandi.
+ * ============================================================
+ */
 
 export default function VerifyLoginPage() {
   const [identifier, setIdentifier] = useState("");
-  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
 
-  const inputRefs = useRef([]);
-
-  
   useEffect(() => {
-    const savedIdentifier = sessionStorage.getItem("login_identifier");
+    try {
+      const saved = sessionStorage.getItem(IDENTIFIER_KEY);
 
-    if (!savedIdentifier) {
-      window.location.href = "/login";
-      return;
+      if (saved) {
+        setIdentifier(saved);
+      }
+    } catch {
+      /* sessionStorage bisa diblokir; tidak perlu gagal total */
     }
-
-    setIdentifier(savedIdentifier);
-
-    // Fokus ke input OTP pertama
-    setTimeout(() => {
-      inputRefs.current[0]?.focus();
-    }, 100);
   }, []);
 
-  
-  const handleOtpChange = (index, value) => {
-    // Hanya boleh angka
-    if (!/^\d*$/.test(value)) {
-      return;
-    }
-
-    
-    const newValue = value.slice(-1);
-
-    const newOtp = [...otp];
-    newOtp[index] = newValue;
-
-    setOtp(newOtp);
-    setError("");
-    setSuccess("");
-
-    
-    if (newValue && index < 5) {
-      inputRefs.current[index + 1]?.focus();
-    }
-  };
-
- 
-  const handleKeyDown = (index, e) => {
-    if (e.key === "Backspace" && !otp[index] && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-    }
-
-    // Panah kiri
-    if (e.key === "ArrowLeft" && index > 0) {
-      inputRefs.current[index - 1]?.focus();
-    }
-
-    // Panah kanan
-    if (e.key === "ArrowRight" && index < 5) {
-      inputRefs.current[index + 1]?.focus();
-    }
-  };
-
- 
-  const handlePaste = (e) => {
-    e.preventDefault();
-
-    const pastedData = e.clipboardData
-      .getData("text")
-      .replace(/\D/g, "")
-      .slice(0, 6);
-
-    if (!pastedData) return;
-
-    const newOtp = ["", "", "", "", "", ""];
-
-    pastedData.split("").forEach((digit, index) => {
-      newOtp[index] = digit;
-    });
-
-    setOtp(newOtp);
-    setError("");
-
-    const nextIndex = Math.min(pastedData.length, 5);
-
-    setTimeout(() => {
-      inputRefs.current[nextIndex]?.focus();
-    }, 50);
-  };
-
-  
-  const handleVerify = async (e) => {
-    e.preventDefault();
-
-    setError("");
-    setSuccess("");
-
-    const kodeOtp = otp.join("");
-
-    // Pastikan 6 digit
-    if (kodeOtp.length !== 6) {
-      setError("Silakan masukkan kode OTP 6 digit.");
-      return;
-    }
-
-    if (!identifier) {
-      setError("Sesi login tidak ditemukan. Silakan login kembali.");
-      return;
-    }
-
-    setLoading(true);
-
-    try {
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/auth/verify-login`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            identifier: identifier,
-            kodeOtp: kodeOtp,
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || "Verifikasi OTP gagal.");
-      }
-
-      if (!data.token) {
-        throw new Error("Token login tidak diterima dari server.");
-      }
-
-      
-      localStorage.setItem("token", data.token);
-
-      // Hapus identifier sementara
-      sessionStorage.removeItem("login_identifier");
-
-      setSuccess("Verifikasi berhasil. Mengarahkan ke onboarding...");
-
-     
-      setTimeout(() => {
-        window.location.href = "/onboarding/status";
-      }, 700);
-    } catch (error) {
-      setError(
-        error instanceof Error
-          ? error.message
-          : "Terjadi kesalahan saat verifikasi OTP."
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  
   const handleBackToLogin = () => {
-    sessionStorage.removeItem("login_identifier");
+    try {
+      sessionStorage.removeItem(IDENTIFIER_KEY);
+    } catch {
+      /* abaikan */
+    }
+
     window.location.href = "/login";
   };
 
@@ -225,21 +107,17 @@ export default function VerifyLoginPage() {
         <div className="bg-white rounded-2xl shadow-xl p-7">
           {/* HEADER */}
           <div className="flex flex-col items-center text-center mb-6">
-            <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center mb-3">
-              <ShieldCheck
-                size={25}
-                className="text-blue-600"
-              />
+            <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center mb-3">
+              <AlertCircle size={25} className="text-amber-500" />
             </div>
 
             <h1 className="font-bold text-xl text-slate-900">
-              Verifikasi Login
+              Verifikasi Login Belum Tersedia
             </h1>
 
             <p className="text-sm text-gray-500 mt-1 leading-5">
-              Masukkan kode OTP yang telah dikirim
-              <br />
-              ke email kamu.
+              Login dengan kode OTP belum didukung oleh server SmartSchool
+              saat ini.
             </p>
 
             {identifier && (
@@ -249,82 +127,50 @@ export default function VerifyLoginPage() {
             )}
           </div>
 
-          {/* ERROR */}
-          {error && (
-            <div className="mb-4 rounded-lg bg-red-50 border border-red-200 px-3 py-2.5 text-xs text-red-600 text-center">
-              {error}
-            </div>
-          )}
+          {/* PENJELASAN */}
+          <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3.5">
+            <p className="text-xs leading-5 text-amber-800">
+              Halaman ini tidak mengirim permintaan ke server dan tidak
+              membuat sesi login. Tidak ada alur login berbasis OTP pada
+              Backend, sehingga login tidak dapat dinyatakan berhasil dari
+              sini.
+            </p>
+          </div>
 
-          {/* SUCCESS */}
-          {success && (
-            <div className="mb-4 rounded-lg bg-green-50 border border-green-200 px-3 py-2.5 text-xs text-green-600 text-center">
-              {success}
-            </div>
-          )}
+          {/* ALUR YANG DIDUKUNG */}
+          <div className="mt-5">
+            <p className="text-xs font-semibold text-slate-700 mb-2">
+              Gunakan salah satu alur login yang tersedia:
+            </p>
 
-          {/* ==========================================
-              OTP FORM
-          ========================================== */}
-          <form onSubmit={handleVerify}>
-            <label className="block text-xs font-semibold text-slate-800 mb-3 text-center">
-              Kode OTP
-            </label>
-
-            <div className="flex justify-center gap-2 mb-6">
-              {otp.map((digit, index) => (
-                <input
-                  key={index}
-                  ref={(element) => {
-                    inputRefs.current[index] = element;
-                  }}
-                  type="text"
-                  inputMode="numeric"
-                  maxLength={1}
-                  value={digit}
-                  onChange={(e) =>
-                    handleOtpChange(index, e.target.value)
-                  }
-                  onKeyDown={(e) => handleKeyDown(index, e)}
-                  onPaste={handlePaste}
-                  className="w-11 h-12 sm:w-12 sm:h-13 text-center text-lg font-bold text-slate-900 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                  aria-label={`Digit OTP ${index + 1}`}
-                  disabled={loading}
+            <ul className="space-y-2">
+              <li className="flex items-start gap-2 text-xs leading-5 text-slate-600">
+                <ShieldCheck
+                  size={14}
+                  className="mt-0.5 shrink-0 text-blue-600"
                 />
-              ))}
-            </div>
+                Email/username dan kata sandi untuk admin sekolah, guru, dan
+                super admin.
+              </li>
 
-            {/* SUBMIT */}
-            <button
-              type="submit"
-              disabled={loading || otp.join("").length !== 6}
-              className="w-full flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed text-white text-sm font-semibold py-2.5 rounded-lg transition duration-300 shadow-lg shadow-blue-200"
-            >
-              {loading ? (
-                <>
-                  <Loader2
-                    size={16}
-                    className="animate-spin"
-                  />
-                  Memverifikasi...
-                </>
-              ) : (
-                <>
-                  <ShieldCheck size={16} />
-                  Verifikasi & Masuk
-                </>
-              )}
-            </button>
-          </form>
+              <li className="flex items-start gap-2 text-xs leading-5 text-slate-600">
+                <ShieldCheck
+                  size={14}
+                  className="mt-0.5 shrink-0 text-blue-600"
+                />
+                Siswa memasukkan kata sandi lebih dahulu, lalu membuat atau
+                memverifikasi PIN 6 digit sesuai arahan server.
+              </li>
+            </ul>
+          </div>
 
           {/* BACK */}
           <button
             type="button"
             onClick={handleBackToLogin}
-            disabled={loading}
-            className="w-full mt-4 flex items-center justify-center gap-2 text-xs text-slate-500 hover:text-blue-600 transition"
+            className="w-full mt-6 flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold py-2.5 rounded-lg transition duration-300 shadow-lg shadow-blue-200"
           >
-            <ArrowLeft size={14} />
+            <ArrowLeft size={16} />
             Kembali ke halaman login
           </button>
         </div>

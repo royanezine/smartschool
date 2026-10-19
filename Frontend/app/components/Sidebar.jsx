@@ -32,6 +32,7 @@ import {
   getAuthRole,
   getPermissions,
   getActiveModules,
+  clearSession,
 } from "../../lib/auth";
 
 /* =========================================================
@@ -46,7 +47,9 @@ const configByRole = {
   siswa: siswaSidebarConfig,
 };
 
-const DEFAULT_ROLE = "admin";
+// Catatan: TIDAK ada default role. Bila role tidak dapat ditentukan
+// dari sesi terautentikasi, sidebar tidak menampilkan menu apa pun
+// (bukan menampilkan menu admin secara salah).
 
 /* =========================================================
    CONSTANTS
@@ -84,10 +87,24 @@ function normalizeRole(role) {
     return "";
   }
 
-  return String(role)
+  const cleaned = String(role)
     .trim()
     .toLowerCase()
-    .replace(/-/g, "_");
+    .replace(/[\s-]+/g, "_");
+
+  if (cleaned === "superadmin") {
+    return "super_admin";
+  }
+
+  if (cleaned === "adminyayasan") {
+    return "admin_yayasan";
+  }
+
+  if (cleaned === "adminsekolah") {
+    return "admin_sekolah";
+  }
+
+  return cleaned;
 }
 
 function getSidebarRole(role) {
@@ -405,6 +422,11 @@ export default function Sidebar({
   const [mounted, setMounted] =
     useState(false);
 
+  // Versi sesi: dinaikkan setiap token/user berubah agar role
+  // dihitung ulang dari sumber kebenaran.
+  const [authTick, setAuthTick] =
+    useState(0);
+
   const [permissions, setPermissions] =
     useState([]);
 
@@ -522,55 +544,39 @@ export default function Sidebar({
         setPermissions([]);
         setModules([]);
       }
+
+      // Naikkan versi sesi agar role dihitung ulang dari token.
+      setAuthTick((value) => value + 1);
     };
 
     loadAuthData();
 
-    const handleStorage = (event) => {
-      if (event.key === "token") {
-        loadAuthData();
-      }
-    };
-
+    // Sesi disimpan di localStorage. Kita bereaksi pada perubahan sesi
+    // TAB INI (`user-updated`); event `storage` sengaja tidak dipakai
+    // agar akun tab lain tidak menimpa tab ini.
     window.addEventListener(
-      "storage",
-      handleStorage
+      "user-updated",
+      loadAuthData
     );
 
     return () => {
       window.removeEventListener(
-        "storage",
-        handleStorage
+        "user-updated",
+        loadAuthData
       );
     };
   }, [mounted]);
 
   /* =======================================================
      ROLE
+     -------------------------------------------------------
+     Sumber kebenaran utama = role dari token sesi. URL dan prop
+     hanya fallback. Ini mencegah menu tertukar saat identitas
+     sesi berubah (mis. setelah reload / berpindah akun).
   ======================================================= */
 
   const role = useMemo(() => {
-    const pathnameRole =
-      resolveRole(pathname);
-
-    /* URL */
-
-    if (pathnameRole) {
-      return pathnameRole;
-    }
-
-    /* PROP */
-
-    if (roleProp) {
-      const propRole =
-        getSidebarRole(roleProp);
-
-      if (propRole) {
-        return propRole;
-      }
-    }
-
-    /* TOKEN */
+    /* TOKEN (sumber kebenaran) */
 
     const tokenRole =
       getAuthRole();
@@ -584,16 +590,39 @@ export default function Sidebar({
       }
     }
 
-    return DEFAULT_ROLE;
-  }, [pathname, roleProp]);
+    /* PROP */
+
+    if (roleProp) {
+      const propRole =
+        getSidebarRole(roleProp);
+
+      if (propRole) {
+        return propRole;
+      }
+    }
+
+    /* URL */
+
+    const pathnameRole =
+      resolveRole(pathname);
+
+    if (pathnameRole) {
+      return pathnameRole;
+    }
+
+    return "";
+    // authTick sengaja dipakai agar role dihitung ulang saat sesi berubah.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname, roleProp, authTick]);
 
   /* =======================================================
      CONFIG
   ======================================================= */
 
   const config =
-    configByRole[role] ??
-    configByRole[DEFAULT_ROLE];
+    role && configByRole[role]
+      ? configByRole[role]
+      : null;
 
   /* =======================================================
      MENU
@@ -1322,22 +1351,13 @@ export default function Sidebar({
 
   const handleLogout = () => {
     try {
-      localStorage.removeItem(
-        "token"
-      );
+      // Hapus sesi aktif secara lengkap (token + user + key lama).
+      clearSession();
 
-      localStorage.removeItem(
-        SIDEBAR_COLLAPSED_KEY
-      );
-
-      sessionStorage.removeItem(
-        SIDEBAR_SCROLL_KEY
-      );
+      localStorage.removeItem(SIDEBAR_COLLAPSED_KEY);
+      sessionStorage.removeItem(SIDEBAR_SCROLL_KEY);
     } catch (e) {
-      console.error(
-        "[SIDEBAR] Logout error:",
-        e
-      );
+      console.error("[SIDEBAR] Logout error:", e);
     }
 
     router.push("/login");
@@ -1670,7 +1690,7 @@ export default function Sidebar({
                       "
                     >
                       {config?.brandName ||
-                        "ADMIN SEKOLAH"}
+                        "SmartSchool"}
                     </span>
                   </div>
                 )}

@@ -12,6 +12,8 @@ import {
   Loader2,
 } from "lucide-react";
 
+import { setSession, clearSession, getRoleHome } from "@/lib/auth";
+
 function VerifyRegisterPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -112,10 +114,50 @@ function VerifyRegisterPageContent() {
       }
 
       // ==========================================
-      // SIMPAN TOKEN DARI BACKEND
+      // SISWA BELUM MEMILIKI PIN
       // ==========================================
+      if (result?.requiresPinSetup === true) {
+        if (!result.setupToken) {
+          throw new Error(
+            "Token pembuatan PIN tidak diterima dari server."
+          );
+        }
+
+        clearSession();
+
+        sessionStorage.setItem(
+          "pin_setup_token",
+          result.setupToken
+        );
+        sessionStorage.removeItem("pin_access_token");
+
+        setSuccess(
+          "Verifikasi berhasil. Silakan buat PIN keamanan Anda."
+        );
+
+        setTimeout(() => {
+          router.replace("/pin/setup");
+        }, 1200);
+
+        return;
+      }
+
+      // ==========================================
+      // SIMPAN SESI (TOKEN + IDENTITAS) SECARA ATOMIK
+      // ==========================================
+      let sessionHome = "/login";
+
       if (result?.token) {
-        localStorage.setItem("token", result.token);
+        // Satu sumber kebenaran: token + user dari respons autentikasi.
+        const sessionUser = setSession(
+          result.token,
+          result.user ?? null
+        );
+
+        sessionHome = getRoleHome(sessionUser?.role) || "/login";
+      } else {
+        // Tanpa token: jangan tinggalkan sesi setengah jadi.
+        clearSession();
       }
 
       setSuccess(
@@ -124,10 +166,10 @@ function VerifyRegisterPageContent() {
       );
 
       // ==========================================
-      // REDIRECT KE LOGIN
+      // REDIRECT
       // ==========================================
       setTimeout(() => {
-        router.push("/login");
+        router.replace(sessionHome);
       }, 1500);
     } catch (error) {
       console.error("VERIFY REGISTER ERROR:", error);

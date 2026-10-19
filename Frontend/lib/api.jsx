@@ -1,11 +1,13 @@
+import { getToken, clearSession } from "./auth";
+
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
 export async function apiFetch(endpoint, options = {}) {
-  const token =
-    typeof window !== "undefined"
-      ? localStorage.getItem("token")
-      : null;
+  // Selalu ambil token dari sumber kebenaran tunggal (lib/auth), yaitu
+  // token sesi aktif di localStorage. Tidak ada fallback ke token
+  // global di memori.
+  const token = getToken();
 
   const isFormData =
     typeof FormData !== "undefined" &&
@@ -62,6 +64,11 @@ export async function apiFetch(endpoint, options = {}) {
    * HANDLE ERROR
    */
   if (!response.ok) {
+    // HTTP 401 = sesi tidak valid/kedaluwarsa. Bersihkan sesi aktif.
+    if (response.status === 401) {
+      clearSession();
+    }
+
     let message = `Request gagal. Status: ${response.status}`;
 
     if (data && typeof data === "object") {

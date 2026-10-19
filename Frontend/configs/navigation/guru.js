@@ -120,6 +120,14 @@ export const guruSidebarConfig = {
       children: [
         {
           type: "item",
+          key: "rapor-kelas",
+          label: "Rapor Kelas (Wali)",
+          icon: Award,
+          path: "/guru/rapor",
+          permission: "akademik.view",
+        },
+        {
+          type: "item",
           key: "nilai-bobot",
           label: "Setup Bobot",
           icon: Award,

@@ -25,6 +25,12 @@ import {
   markAllNotifikasiAsRead,
 } from "@/services/notifikasi.service";
 
+import {
+  getAuthRole,
+  getSessionUser,
+  clearSession,
+} from "@/lib/auth";
+
 export default function Header({ notifications = [], user: userProp = null }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -46,30 +52,32 @@ export default function Header({ notifications = [], user: userProp = null }) {
 
  
 const [currentUser, setCurrentUser] = useState(null);
+const [authRole, setAuthRole] = useState(null);
 const [isProfileOpen, setIsProfileOpen] = useState(false);
 const [isNotifOpen, setIsNotifOpen] = useState(false);
 
 useEffect(() => {
-  const loadCurrentUser = () => {
+  // Satu sumber kebenaran: token + user dari lib/auth.
+  const syncSession = () => {
     try {
-      const savedUser = localStorage.getItem("user");
-      const parsedUser = savedUser ? JSON.parse(savedUser) : null;
-
-      setCurrentUser(parsedUser);
+      setCurrentUser(getSessionUser());
+      setAuthRole(getAuthRole());
     } catch (error) {
       console.error("Gagal membaca data pengguna:", error);
       setCurrentUser(null);
+      setAuthRole(null);
     }
   };
 
-  loadCurrentUser();
+  syncSession();
 
-  window.addEventListener("storage", loadCurrentUser);
-  window.addEventListener("user-updated", loadCurrentUser);
+  // `user-updated` = perubahan sesi pada TAB INI. Sesi disimpan di
+  // localStorage (dibagi antar tab); kita sengaja TIDAK memakai event
+  // `storage` agar perubahan akun di tab lain tidak menimpa tab ini.
+  window.addEventListener("user-updated", syncSession);
 
   return () => {
-    window.removeEventListener("storage", loadCurrentUser);
-    window.removeEventListener("user-updated", loadCurrentUser);
+    window.removeEventListener("user-updated", syncSession);
   };
 }, []);
 
@@ -98,7 +106,7 @@ const displayAvatar =
      ROLE DARI PATHNAME
   ============================================================ */
 
-  const resolveRole = (currentPathname) => {
+  const resolveRoleFromPath = (currentPathname) => {
     if (currentPathname?.startsWith("/super-admin")) {
       return "super-admin";
     }
@@ -123,10 +131,28 @@ const displayAvatar =
       return "siswa";
     }
 
-    return "super-admin";
+    return "";
   };
 
-  const role = resolveRole(pathname);
+  // Petakan role kanonik (dari token) ke key tampilan Header.
+  const AUTH_ROLE_TO_HEADER_ROLE = {
+    super_admin: "super-admin",
+    cms_admin: "cms-admin",
+    admin_sekolah: "admin-sekolah",
+    admin: "admin-sekolah",
+    admin_yayasan: "yayasan",
+    yayasan: "yayasan",
+    guru: "guru",
+    siswa: "siswa",
+  };
+
+  // Role utama berasal dari sesi terautentikasi (token). URL hanya
+  // fallback bila token tidak memuat role yang dikenali. Tidak ada
+  // lagi default "super-admin" yang salah.
+  const role =
+    AUTH_ROLE_TO_HEADER_ROLE[authRole] ||
+    resolveRoleFromPath(pathname) ||
+    "user";
 
   /* ============================================================
      PATH PER ROLE
@@ -163,9 +189,14 @@ const displayAvatar =
       pengaturan: "/siswa/pengaturan",
       bantuan: "/siswa/bantuan",
     },
+    user: {
+      profile: "/login",
+      pengaturan: "/login",
+      bantuan: "/login",
+    },
   };
 
-  const currentPathMap = pathMap[role] || pathMap["super-admin"];
+  const currentPathMap = pathMap[role] || pathMap.user;
 
   const roleLabel =
     {
@@ -175,7 +206,8 @@ const displayAvatar =
       yayasan: "Yayasan",
       guru: "Guru",
       siswa: "Siswa",
-    }[role] || "User";
+      user: "Pengguna",
+    }[role] || "Pengguna";
 
   const roleBadgeColor =
     {
@@ -185,6 +217,7 @@ const displayAvatar =
       yayasan: "text-blue-600 bg-blue-100",
       guru: "text-emerald-600 bg-emerald-100",
       siswa: "text-cyan-600 bg-cyan-100",
+      user: "text-slate-600 bg-slate-100",
     }[role] || "text-slate-600 bg-slate-100";
 
   /* ============================================================
@@ -367,9 +400,8 @@ const displayAvatar =
   const handleLogout = () => {
     setIsProfileOpen(false);
 
-    localStorage.removeItem("token");
-    localStorage.removeItem("accessToken");
-    localStorage.removeItem("user");
+    // Hapus sesi aktif (token + user + key token lama) secara lengkap.
+    clearSession();
 
     router.push("/login");
   };

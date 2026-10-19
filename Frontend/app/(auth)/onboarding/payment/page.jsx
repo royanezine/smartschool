@@ -10,6 +10,7 @@ import {
   ExternalLink,
   Loader2,
   ShieldCheck,
+  AlertCircle,
 } from "lucide-react";
 
 export default function PaymentPage() {
@@ -24,41 +25,33 @@ export default function PaymentPage() {
   const [error, setError] = useState("");
 
   useEffect(() => {
-    const savedUrl = sessionStorage.getItem(
-      "onboarding_payment_url"
-    );
+    // Informasi pembayaran berasal dari respons POST /api/tenant/verify yang
+    // sudah disimpan oleh halaman verifikasi. Backend saat ini tidak memiliki
+    // rute create-va maupun status tenant, sehingga halaman ini tidak boleh
+    // memanggil endpoint tambahan apa pun dan tidak mengarang status sukses.
+    const savedUrl = sessionStorage.getItem("onboarding_payment_url") || "";
+    const savedOrderId = sessionStorage.getItem("onboarding_order_id") || "";
+    const savedVaNumber = sessionStorage.getItem("onboarding_va_number") || "";
+    const savedBank =
+      sessionStorage.getItem("onboarding_payment_bank") ||
+      sessionStorage.getItem("onboarding_bank") ||
+      "";
+    const savedAmount =
+      sessionStorage.getItem("onboarding_gross_amount") || "";
 
-    const savedOrderId = sessionStorage.getItem(
-      "onboarding_order_id"
-    );
-
-    const savedVaNumber = sessionStorage.getItem(
-      "onboarding_va_number"
-    );
-
-    const savedBank = sessionStorage.getItem(
-      "onboarding_payment_bank"
-    );
-
-    const savedAmount = sessionStorage.getItem(
-      "onboarding_gross_amount"
-    );
-
-    // Dukung respons payment_url jika tersedia.
-    // Jika tidak, gunakan informasi Virtual Account.
     if (!savedUrl && !savedVaNumber) {
       setError(
-        "Informasi pembayaran belum tersedia. Silakan periksa kembali proses verifikasi atau lakukan verifikasi sesuai status pendaftaran."
+        "Informasi pembayaran belum tersedia. Silakan ulangi proses verifikasi email untuk membuat nomor Virtual Account."
       );
       setLoading(false);
       return;
     }
 
-    setPaymentUrl(savedUrl || "");
-    setOrderId(savedOrderId || "");
-    setVaNumber(savedVaNumber || "");
-    setBank(savedBank || "");
-    setAmount(savedAmount || "");
+    setPaymentUrl(savedUrl);
+    setOrderId(savedOrderId);
+    setVaNumber(savedVaNumber);
+    setBank(savedBank);
+    setAmount(savedAmount);
     setLoading(false);
   }, []);
 
@@ -97,7 +90,7 @@ export default function PaymentPage() {
     return (
       <main className="flex min-h-screen items-center justify-center bg-slate-50 px-4">
         <div className="flex items-center gap-3 text-sm font-medium text-slate-600">
-          <Loader2 size={20} className="animate-spin" />
+          <Loader2 size={20} className="animate-spin text-blue-600" />
           Memuat pembayaran...
         </div>
       </main>
@@ -125,28 +118,38 @@ export default function PaymentPage() {
             </h1>
 
             <p className="mt-3 text-sm leading-6 text-slate-500">
-              Gunakan informasi berikut untuk menyelesaikan pembayaran pendaftaran sekolah.
+              Gunakan informasi berikut untuk menyelesaikan pembayaran
+              pendaftaran sekolah.
             </p>
           </div>
 
           {error && (
             <div
               role="alert"
-              className="mt-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-800"
+              className="mt-5 flex items-start gap-2.5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm leading-6 text-amber-800"
             >
-              {error}
+              <AlertCircle size={18} className="mt-0.5 shrink-0 text-amber-600" />
+              <span>{error}</span>
             </div>
           )}
 
           {vaNumber && (
             <>
               <div className="mt-7 rounded-2xl border border-slate-200 p-5">
-                <p className="text-xs font-medium text-slate-500">
-                  Bank tujuan
-                </p>
-                <p className="mt-1 text-lg font-bold text-slate-900">
-                  {bank || "Virtual Account"}
-                </p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-medium text-slate-500">
+                      Bank tujuan
+                    </p>
+                    <p className="mt-1 text-lg font-bold uppercase text-slate-900">
+                      {bank || "Virtual Account"}
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
+                    <span className="h-2 w-2 rounded-full bg-amber-500 animate-pulse" />
+                    Menunggu Pembayaran
+                  </div>
+                </div>
 
                 <div className="mt-5">
                   <p className="text-xs font-medium text-slate-500">
@@ -154,7 +157,7 @@ export default function PaymentPage() {
                   </p>
 
                   <div className="mt-2 flex items-center gap-2">
-                    <p className="min-w-0 flex-1 break-all text-lg font-bold tracking-wide text-slate-900">
+                    <p className="min-w-0 flex-1 break-all text-xl font-mono font-bold tracking-wider text-slate-900">
                       {vaNumber}
                     </p>
 
@@ -162,7 +165,7 @@ export default function PaymentPage() {
                       type="button"
                       onClick={handleCopyVA}
                       aria-label="Salin nomor Virtual Account"
-                      className="shrink-0 rounded-xl border border-slate-200 p-3 text-slate-600 transition hover:bg-slate-50"
+                      className="shrink-0 rounded-xl border border-slate-200 p-3 text-slate-600 transition hover:bg-slate-50 active:scale-95"
                     >
                       <Copy size={18} />
                     </button>
@@ -171,7 +174,7 @@ export default function PaymentPage() {
 
                 <div className="mt-5 border-t border-slate-100 pt-4">
                   <p className="text-xs font-medium text-slate-500">
-                    Total pembayaran
+                    Total tagihan
                   </p>
                   <p className="mt-1 text-2xl font-bold text-blue-700">
                     {formatRupiah(amount)}
@@ -179,11 +182,11 @@ export default function PaymentPage() {
                 </div>
 
                 {orderId && (
-                  <div className="mt-4">
+                  <div className="mt-4 border-t border-slate-100 pt-3">
                     <p className="text-xs text-slate-500">
                       ID transaksi
                     </p>
-                    <p className="mt-1 break-all text-sm font-medium text-slate-800">
+                    <p className="mt-1 break-all text-xs font-mono font-medium text-slate-700">
                       {orderId}
                     </p>
                   </div>
@@ -200,9 +203,29 @@ export default function PaymentPage() {
                     Cara menyelesaikan pembayaran
                   </p>
                   <p className="mt-1 text-xs leading-5 text-blue-800">
-                    Buka aplikasi atau layanan resmi bank yang dipilih, lalu gunakan menu Virtual Account untuk membayar nomor dan nominal yang tertera. Ikuti petunjuk bank dan periksa kembali detail transaksi sebelum mengonfirmasi.
+                    Buka mobile banking atau ATM bank yang dipilih, masuk ke
+                    menu transfer Virtual Account, masukkan nomor Virtual
+                    Account dan nominal tepat di atas. Setelah pembayaran
+                    diterima, sekolah akan diaktifkan oleh server.
                   </p>
                 </div>
+              </div>
+
+              <div className="mt-6 rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                <p className="text-xs leading-5 text-slate-500">
+                  Halaman ini tidak dapat memverifikasi status pembayaran
+                  secara langsung karena Backend belum menyediakan endpoint
+                  status tenant. Konfirmasi pembayaran diproses oleh server
+                  melalui notifikasi Midtrans. Setelah sekolah diaktifkan,
+                  Anda dapat masuk menggunakan akun yang terdaftar.
+                </p>
+                <button
+                  type="button"
+                  onClick={() => router.push("/login")}
+                  className="mt-4 flex w-full items-center justify-center gap-2 rounded-2xl border border-blue-600 bg-blue-50/50 px-5 py-3 text-sm font-semibold text-blue-700 transition hover:bg-blue-100"
+                >
+                  Masuk ke Halaman Login
+                </button>
               </div>
             </>
           )}
@@ -221,10 +244,10 @@ export default function PaymentPage() {
           {!vaNumber && !paymentUrl && (
             <button
               type="button"
-              onClick={() => router.push("/onboarding/school")}
+              onClick={() => router.push("/onboarding/verify")}
               className="mt-5 w-full rounded-2xl bg-blue-600 px-5 py-3.5 text-sm font-semibold text-white hover:bg-blue-700"
             >
-              Kembali ke Pendaftaran
+              Kembali ke Verifikasi
             </button>
           )}
 
@@ -238,7 +261,9 @@ export default function PaymentPage() {
           </button>
 
           <p className="mt-6 text-center text-xs leading-5 text-slate-400">
-            Status pembayaran akan diproses oleh Backend melalui notifikasi Midtrans. Jangan menganggap pembayaran berhasil hanya berdasarkan tampilan halaman ini.
+            Status pembayaran diproses oleh Backend melalui notifikasi
+            Midtrans. Jangan menganggap pembayaran berhasil hanya berdasarkan
+            tampilan halaman ini.
           </p>
         </div>
       </div>

@@ -22,6 +22,7 @@ import {
   Building2,
   Layers3,
   AlertCircle,
+  UserCheck,
 } from "lucide-react";
 
 import {
@@ -32,6 +33,10 @@ import {
 import {
   getTahunAjaran,
 } from "@/services/tahunAjaran.service";
+
+import {
+  getUsers,
+} from "@/services/user.service";
 
 import {
   getGedung,
@@ -93,11 +98,20 @@ export default function AdminKelasEditPage() {
 
   const [loadingLantai, setLoadingLantai] = useState(false);
 
+  const [loadingGuru, setLoadingGuru] = useState(true);
+
   const [tahunAjaranList, setTahunAjaranList] = useState([]);
 
   const [gedungList, setGedungList] = useState([]);
 
   const [lantaiList, setLantaiList] = useState([]);
+
+  const [guruList, setGuruList] = useState([]);
+
+  // Menyimpan objek wali kelas yang sedang ditugaskan (dari detail kelas),
+  // agar tetap tampil pada dropdown walau statusnya tidak aktif / tidak
+  // lagi muncul pada daftar guru aktif.
+  const [waliKelasAwal, setWaliKelasAwal] = useState(null);
 
   const [jumlahSiswa, setJumlahSiswa] = useState(0);
 
@@ -116,6 +130,40 @@ export default function AdminKelasEditPage() {
     fotoKelasUrl: null,
   });
 
+  // Dideklarasikan sebelum useEffect agar tidak memicu peringatan
+  // react-hooks/immutability (fungsi dipakai sebelum dideklarasikan).
+  async function loadGuru() {
+    try {
+      setLoadingGuru(true);
+
+      // Ambil data guru dari API (bukan data dummy/hardcode).
+      const response = await getUsers({
+        page: 1,
+        limit: 200,
+        role: "guru",
+        status: "aktif",
+      });
+
+      const list = unwrapData(response);
+
+      setGuruList(list);
+    } catch (err) {
+      console.error(
+        "Gagal mengambil data guru:",
+        err
+      );
+
+      setGuruList([]);
+
+      setError(
+        err?.message ||
+          "Gagal mengambil data guru."
+      );
+    } finally {
+      setLoadingGuru(false);
+    }
+  }
+
   // =========================================================
   // LOAD SEMUA DATA
   // =========================================================
@@ -123,6 +171,7 @@ export default function AdminKelasEditPage() {
   useEffect(() => {
     loadTahunAjaran();
     loadGedung();
+    loadGuru();
   }, []);
 
   // =========================================================
@@ -315,6 +364,8 @@ export default function AdminKelasEditPage() {
           data.foto_kelas_url ||
           null,
       });
+
+      setWaliKelasAwal(data.waliKelas || null);
 
       const count = Number(
         data?._count?.anggota ??
@@ -598,6 +649,34 @@ export default function AdminKelasEditPage() {
       (item) =>
         item.id === form.lantaiId
     );
+
+  // Opsi wali kelas: gabungan guru aktif dari API + wali yang sedang
+  // ditugaskan (jika tidak ada pada daftar guru aktif).
+  const opsiWali = (() => {
+    const list = Array.isArray(guruList)
+      ? [...guruList]
+      : [];
+
+    if (
+      form.waliKelasId &&
+      waliKelasAwal?.id &&
+      !list.some(
+        (guru) =>
+          String(guru.id) ===
+          String(form.waliKelasId)
+      )
+    ) {
+      list.unshift(waliKelasAwal);
+    }
+
+    return list;
+  })();
+
+  const selectedWali = opsiWali.find(
+    (guru) =>
+      String(guru.id) ===
+      String(form.waliKelasId)
+  );
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
@@ -932,6 +1011,70 @@ export default function AdminKelasEditPage() {
                           className="theme-input theme-card-soft h-11 w-full rounded-xl border pl-10 pr-3 text-sm font-semibold outline-none"
                         />
                       </div>
+                    </div>
+
+                    {/* WALI KELAS */}
+
+                    <div className="min-w-0 md:col-span-2">
+                      <label className="theme-text-secondary mb-1.5 block text-xs font-semibold">
+                        Wali Kelas
+                      </label>
+
+                      <div className="relative">
+                        <UserCheck
+                          size={17}
+                          className="theme-text-placeholder pointer-events-none absolute left-3.5 top-1/2 z-10 -translate-y-1/2"
+                        />
+
+                        <select
+                          name="waliKelasId"
+                          value={form.waliKelasId}
+                          onChange={handleChange}
+                          disabled={loading || loadingGuru}
+                          className="theme-input h-11 w-full appearance-none rounded-xl border pl-10 pr-10 text-sm outline-none disabled:opacity-60"
+                        >
+                          <option value="">
+                            {loadingGuru
+                              ? "Memuat data guru..."
+                              : "Belum ditentukan / Tanpa wali kelas"}
+                          </option>
+
+                          {opsiWali.map((guru) => (
+                            <option
+                              key={guru.id}
+                              value={guru.id}
+                            >
+                              {guru.namaLengkap ||
+                                guru.namaPengguna ||
+                                guru.email}
+                              {guru.nip
+                                ? ` (NIP ${guru.nip})`
+                                : ""}
+                            </option>
+                          ))}
+                        </select>
+
+                        <ChevronDown
+                          size={16}
+                          className="theme-text-placeholder pointer-events-none absolute right-3.5 top-1/2 -translate-y-1/2"
+                        />
+                      </div>
+
+                      <p className="theme-text-muted mt-1.5 text-[11px] leading-5">
+                        {selectedWali
+                          ? `Wali kelas saat ini: ${
+                              selectedWali.namaLengkap ||
+                              selectedWali.namaPengguna ||
+                              selectedWali.email
+                            }`
+                          : "Kelas ini belum memiliki wali kelas."}
+                      </p>
+
+                      <p className="theme-text-muted mt-0.5 text-[11px] leading-5">
+                        Satu guru dapat menjadi wali kelas pada lebih dari
+                        satu kelas. Mengubah wali di sini tidak mengubah
+                        penugasan pada kelas lain.
+                      </p>
                     </div>
 
                     {/* GEDUNG */}

@@ -8,6 +8,8 @@ import {
   getKelasById,
 } from "@/services/kelas.service";
 
+import { getSessionUser } from "@/lib/auth";
+
 import {
   BookOpen,
   Calculator,
@@ -355,6 +357,34 @@ function getUserKelasName(user) {
   return typeof kelasName === "string"
     ? kelasName.trim()
     : "";
+}
+
+/* =========================================================
+   SESI PENGGUNA (SUMBER KEBENARAN TUNGGAL)
+========================================================= */
+
+/*
+ * Membaca identitas siswa dari sesi kanonik (lib/auth).
+ *
+ * lib/auth memastikan `user` pada storage selalu cocok dengan token,
+ * sehingga nama/ID siswa tidak tertukar dengan akun lain pada origin
+ * yang sama.
+ */
+function readSessionUser() {
+  const sessionUser = getSessionUser();
+
+  if (!sessionUser || typeof sessionUser !== "object") {
+    return null;
+  }
+
+  return {
+    username: getUsername(sessionUser),
+    email: sessionUser.email || "",
+    userId: getUserId(sessionUser),
+    sekolahId: sessionUser.sekolahId || sessionUser.schoolId || "",
+    kelasId: getUserKelasId(sessionUser),
+    kelasName: getUserKelasName(sessionUser),
+  };
 }
 
 /* =========================================================
@@ -706,70 +736,39 @@ export default function SiswaDashboardPage() {
   useEffect(() => {
     setMounted(true);
 
-    try {
-      const storedUser = localStorage.getItem("user");
+    const sessionUser = readSessionUser();
 
-      if (!storedUser) {
-        console.warn("[USER] Data user tidak ditemukan di localStorage.");
-        return;
-      }
-
-      const parsedUser = JSON.parse(storedUser);
-      const userData =
-        parsedUser?.user ||
-        parsedUser?.data?.user ||
-        parsedUser?.data ||
-        parsedUser;
-
-      const username =
-        getUsername(parsedUser) ||
-        getUsername(userData) ||
-        "";
-
-      const email =
-        parsedUser?.email ||
-        parsedUser?.emailPengguna ||
-        userData?.email ||
-        userData?.emailPengguna ||
-        "";
-
-      const userId = getUserId(parsedUser) || getUserId(userData);
-
-      const sekolahId =
-        parsedUser?.sekolahId ||
-        parsedUser?.schoolId ||
-        userData?.sekolahId ||
-        userData?.schoolId ||
-        "";
-
-      const kelasId =
-        getUserKelasId(parsedUser) ||
-        getUserKelasId(userData);
-
-      const kelasName =
-        getUserKelasName(parsedUser) ||
-        getUserKelasName(userData);
-
-      setUser({
-        username,
-        email,
-        userId,
-        sekolahId,
-        kelasId,
-        kelasName,
-      });
-
-      console.log("[USER] Data user login berhasil dibaca:", {
-        username,
-        email,
-        userId,
-        sekolahId,
-        kelasId,
-        kelasName,
-      });
-    } catch (error) {
-      console.error("Gagal membaca user login:", error);
+    if (!sessionUser) {
+      console.warn(
+        "[USER] Sesi pengguna tidak ditemukan. Silakan login kembali."
+      );
+      return;
     }
+
+    setUser(sessionUser);
+
+    console.log("[USER] Data user login berhasil dibaca:", sessionUser);
+  }, []);
+
+  /*
+   * Sinkronkan identitas bila sesi berubah (tab ini atau tab lain),
+   * agar nama/ID profil di dashboard tidak tertinggal akun sebelumnya.
+   */
+  useEffect(() => {
+    const syncUser = () => {
+      const sessionUser = readSessionUser();
+
+      if (sessionUser) {
+        setUser(sessionUser);
+      }
+    };
+
+    // Sesi disimpan di localStorage: reaksi event `user-updated` pada tab ini.
+    window.addEventListener("user-updated", syncUser);
+
+    return () => {
+      window.removeEventListener("user-updated", syncUser);
+    };
   }, []);
 
   /* =======================================================
@@ -784,10 +783,10 @@ export default function SiswaDashboardPage() {
         setLoadingMapel(true);
         setMapelError("");
 
-        const storedUser = localStorage.getItem("user");
         const token = getToken();
+        const sessionUser = readSessionUser();
 
-        if (!storedUser) {
+        if (!sessionUser) {
           throw new Error(
             "Data pengguna belum ditemukan. Silakan login kembali."
           );
@@ -799,26 +798,14 @@ export default function SiswaDashboardPage() {
           );
         }
 
-        const parsedUser = JSON.parse(storedUser);
-        const userData =
-          parsedUser?.user ||
-          parsedUser?.data?.user ||
-          parsedUser?.data ||
-          parsedUser;
-
-        const userId =
-          getUserId(parsedUser) ||
-          getUserId(userData);
+        const userId = sessionUser.userId;
+        const existingKelasId = sessionUser.kelasId;
 
         if (!userId) {
           throw new Error(
             "ID siswa tidak ditemukan dari akun yang sedang login."
           );
         }
-
-        const existingKelasId =
-          getUserKelasId(parsedUser) ||
-          getUserKelasId(userData);
 
         /* Cari kelas siswa */
         const kelasSiswa = await findStudentClass(

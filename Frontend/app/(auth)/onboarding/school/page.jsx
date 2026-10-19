@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import {
   AlertCircle,
@@ -26,7 +26,11 @@ import {
 } from "lucide-react";
 
 import { getPaketById } from "@/services/paket.service";
-import { registerTenant } from "@/services/tenant.service";
+import {
+  registerTenant,
+  isTenantApiError,
+  isOtpEmailFailureAfterSave,
+} from "@/services/tenant.service";
 
 function formatRupiah(value) {
   return new Intl.NumberFormat("id-ID", {
@@ -155,6 +159,11 @@ export default function SchoolOnboardingPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  // Guard ref sinkron untuk mencegah dua permintaan registrasi berjalan
+  // bersamaan (double-click atau submit via Enter) sebelum React sempat
+  // merender ulang dan menonaktifkan tombol.
+  const submittingRef = useRef(false);
+
   const [form, setForm] = useState({
     nama: "",
     email: "",
@@ -260,6 +269,12 @@ export default function SchoolOnboardingPage() {
 
   async function handleSubmit(event) {
     event.preventDefault();
+
+    // Cegah pengiriman ganda. Nilai `loading` (state) bisa belum ter-render
+    // saat dua submit terjadi sangat cepat, sehingga dicek juga guard ref
+    // sinkron tepat sebelum pemanggilan API (lihat di bawah).
+    if (loading) return;
+
     setError("");
 
     const nama = form.nama.trim();
@@ -331,6 +346,13 @@ export default function SchoolOnboardingPage() {
       }
     }
 
+    // Guard ref sinkron: dua submit yang datang beruntun tidak akan
+    // mengirim dua request registrasi. Backend sendiri menghapus data
+    // "menunggu_verifikasi" lama lalu membuat ulang saat retry, tetapi
+    // Frontend tetap tidak boleh memicu request ganda sekaligus.
+    if (submittingRef.current) return;
+    submittingRef.current = true;
+
     setLoading(true);
 
     try {
@@ -351,24 +373,61 @@ export default function SchoolOnboardingPage() {
 
       const response = await registerTenant(payload);
 
-      if (response?.success === false) {
+      // Backend mengonfirmasi keberhasilan dengan { success: true }.
+      // Respons tanpa penanda sukses eksplisit (mis. body kosong atau JSON
+      // tak terduga) TIDAK boleh dianggap OTP sudah terkirim, sehingga tidak
+      // boleh menavigasi ke halaman verifikasi.
+      if (response?.success !== true) {
         throw new Error(
-          response?.message || "Registrasi sekolah gagal."
+          response?.message ||
+            "Server belum mengonfirmasi bahwa pendaftaran dapat dilanjutkan. Silakan coba lagi."
         );
       }
 
-      sessionStorage.setItem("onboarding_email", email);
+      sessionStorage.setItem("onboarding_email", email.trim().toLowerCase());
       sessionStorage.setItem("onboarding_paket_id", String(paketId));
 
       // Halaman verifikasi menangani OTP dan alur pembayaran/trial.
       window.location.assign("/onboarding/verify");
     } catch (err) {
-      console.error("Registrasi sekolah gagal:", err);
+      console.warn(
+        "[ONBOARDING] Registrasi sekolah gagal:",
+        err instanceof Error ? err.message : "Terjadi kesalahan"
+      );
+
+      // Kondisi B: Backend mengonfirmasi bahwa data pendaftaran SUDAH
+      // tersimpan di server, tetapi pengiriman email OTP gagal. Deteksi
+      // dilakukan lewat isOtpEmailFailureAfterSave yang memeriksa konfirmasi
+      // pada payload JSON Backend — BUKAN sekadar status HTTP 502 — sehingga
+      // proxy/gateway 502 JSON generik tidak salah dianggap sebagai bukti
+      // data sudah tersimpan.
+      if (isOtpEmailFailureAfterSave(err)) {
+        setError(
+          "Data pendaftaran sekolah Anda sudah tersimpan di server, tetapi email OTP gagal dikirim karena gangguan layanan email (SMTP) di sisi server — ini bukan kesalahan data yang Anda isi. " +
+            "Perbaikan pengiriman email hanya dapat dilakukan di sisi server; mengulang dari halaman ini tidak akan mengubah penyebabnya selama layanan email masih bermasalah. " +
+            "Silakan coba lagi beberapa saat kemudian dengan menekan \"Lanjutkan Pendaftaran\", lalu masukkan kode OTP yang dikirim ke email Anda. " +
+            "Jika email tetap tidak diterima, hubungi dukungan SmartSchool."
+        );
+        return;
+      }
+
+      // Kegagalan jaringan: permintaan tidak sampai ke server, sehingga
+      // data pendaftaran belum dapat dipastikan tersimpan.
+      if (isTenantApiError(err) && err.status === 0) {
+        setError(
+          "Tidak dapat terhubung ke server SmartSchool. Periksa koneksi internet Anda, lalu coba lagi."
+        );
+        return;
+      }
+
+      // Kondisi A / error HTTP lain (mis. 400 validasi, 409 konflik):
+      // tampilkan pesan aman dari server apa adanya.
       setError(
         err?.message ||
           "Terjadi kesalahan saat mendaftarkan sekolah. Silakan coba kembali."
       );
     } finally {
+      submittingRef.current = false;
       setLoading(false);
     }
   }

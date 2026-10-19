@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 
 import { login } from "@/services/auth.services";
+import { setSession, clearSession, normalizeRole, getRoleHome } from "@/lib/auth";
 
 export default function LoginForm() {
   const router = useRouter();
@@ -48,19 +49,6 @@ export default function LoginForm() {
     admin_sekolah: "edeb2f0a-0486-47af-a0d7-536734c34f3e",
     guru: "11181899-51aa-4b53-8165-1fc87e022d81",
     siswa: "c643899d-6a7d-4552-a310-a39b6e9103ee",
-  };
-
-  // =====================================================
-  // NORMALIZE ROLE
-  // =====================================================
-
-  const normalizeRole = (value) => {
-    if (!value) return "";
-
-    return String(value)
-      .trim()
-      .toLowerCase()
-      .replace(/\s+/g, "_");
   };
 
   // =====================================================
@@ -158,30 +146,21 @@ export default function LoginForm() {
   // REDIRECT BERDASARKAN ROLE
   // =====================================================
 
+  /*
+   * Peta role -> beranda diambil dari satu sumber kebenaran
+   * (lib/auth) supaya login dan penjagaan area tidak pernah
+   * memberi tujuan yang berbeda untuk role yang sama.
+   */
   const getRedirectPath = (role) => {
-    switch (role) {
-      case "super_admin":
-        return "/super-admin";
-
-      case "admin_sekolah":
-        return "/admin/dashboard";
-
-      case "guru":
-        return "/guru";
-
-      case "siswa":
-        return "/siswa";
-
-      case "orang_tua":
-      case "orangtua":
-        return "/orang-tua/dashboard";
-
-      case "yayasan":
-        return "/yayasan";
-
-      default:
-        return "/admin/dashboard";
+    if (role === "orang_tua" || role === "orangtua") {
+      return "/orang-tua/dashboard";
     }
+
+    const home = getRoleHome(role);
+
+    // Role yang belum punya beranda khusus tetap diarahkan ke
+    // area admin agar penjagaan role (AuthGuard) yang memutuskan.
+    return home && home !== "/login" ? home : "/admin/dashboard";
   };
 
   // =====================================================
@@ -245,10 +224,9 @@ export default function LoginForm() {
         }
 
         // Pastikan sesi pengguna sebelumnya tidak tertinggal.
+        clearSession();
         localStorage.removeItem("token");
         localStorage.removeItem("user");
-        sessionStorage.removeItem("token");
-        sessionStorage.removeItem("user");
 
         sessionStorage.setItem(
           "pin_setup_token",
@@ -275,10 +253,9 @@ export default function LoginForm() {
         }
 
         // Jangan memakai sesi login pengguna sebelumnya.
+        clearSession();
         localStorage.removeItem("token");
         localStorage.removeItem("user");
-        sessionStorage.removeItem("token");
-        sessionStorage.removeItem("user");
 
         sessionStorage.setItem(
           "pin_access_token",
@@ -384,20 +361,13 @@ export default function LoginForm() {
         role,
       };
 
-      // Bersihkan sesi lama sebelum menyimpan sesi baru.
+      // Bersihkan sesi lama lalu simpan token + identitas secara ATOMIK
+      // supaya nama/role tidak pernah berasal dari akun lain.
+      clearSession();
       localStorage.removeItem("token");
       localStorage.removeItem("user");
-      sessionStorage.removeItem("token");
-      sessionStorage.removeItem("user");
 
-      // Simpan token akses dan identitas pengguna.
-      localStorage.setItem("token", token);
-      localStorage.setItem(
-        "user",
-        JSON.stringify(userInfo)
-      );
-
-      window.dispatchEvent(new Event("user-updated"));
+      setSession(token, userInfo);
 
       // Ingat identifier jika dipilih.
       if (rememberMe) {

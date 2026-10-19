@@ -17,6 +17,8 @@ const BANKS = [
   { value: "bca", label: "BCA" },
   { value: "bni", label: "BNI" },
   { value: "bri", label: "BRI" },
+  { value: "mandiri", label: "Mandiri" },
+  { value: "permata", label: "Permata" },
 ];
 
 export default function VerifyPage() {
@@ -165,6 +167,17 @@ export default function VerifyPage() {
         sessionStorage.setItem("onboarding_payment_url", data.payment_url);
 
         setSuccess("Verifikasi berhasil. Mengarahkan ke pembayaran...");
+
+        setTimeout(() => {
+          router.push("/onboarding/payment");
+        }, 500);
+
+        return;
+      }
+
+      // Mendukung alur verifikasi email sukses lalu memilih bank di halaman pembayaran
+      if (data.email_verified || data.status === "menunggu_pembayaran") {
+        setSuccess("Verifikasi berhasil. Mengarahkan ke pemilihan pembayaran...");
 
         setTimeout(() => {
           router.push("/onboarding/payment");

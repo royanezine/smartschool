@@ -4,6 +4,7 @@ import { useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { verifyPin } from "@/services/auth.services";
+import { setSession, getRoleHome } from "@/lib/auth";
 import {
   Eye,
   EyeOff,
@@ -143,23 +144,15 @@ export default function VerifyPinPage() {
         throw new Error("Data pengguna tidak diterima dari server.");
       }
 
-      localStorage.removeItem("token");
-      localStorage.setItem("token", result.token);
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          ...user,
-          userId: user.id,
-          role: user.role,
-        })
-      );
+      // Simpan token + identitas dari sesi PIN yang baru diverifikasi
+      // secara atomik (satu sumber kebenaran).
+      const sessionUser = setSession(result.token, user);
 
       sessionStorage.removeItem("pin_setup_token");
       sessionStorage.removeItem("pin_access_token");
 
-      window.dispatchEvent(new Event("user-updated"));
-
-      router.replace("/siswa");
+      // Arahkan berdasarkan role sesi yang sebenarnya.
+      router.replace(getRoleHome(sessionUser?.role) || "/siswa");
     } catch (err) {
       setError(
         err?.message ||

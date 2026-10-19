@@ -26,6 +26,116 @@ function getTenantEndpoint(path: string): string {
 }
 
 /**
+ * Error khusus pemanggilan API tenant.
+ * Menyimpan status HTTP dan errorCode dari server agar pemanggil
+ * (mis. halaman onboarding) dapat mengklasifikasikan kegagalan dengan benar
+ * tanpa menebak dari teks pesan.
+ */
+export class TenantApiError extends Error {
+  readonly status: number;
+  readonly errorCode?: string;
+  readonly payload?: unknown;
+
+  constructor(
+    message: string,
+    status: number,
+    errorCode?: string,
+    payload?: unknown,
+  ) {
+    super(message);
+    this.name = "TenantApiError";
+    this.status = status;
+    this.errorCode = errorCode;
+    this.payload = payload;
+  }
+}
+
+/**
+ * Pemeriksa tipe yang aman meskipun instance Error melewati batas bundel.
+ */
+export function isTenantApiError(error: unknown): error is TenantApiError {
+  if (error instanceof TenantApiError) {
+    return true;
+  }
+
+  return (
+    typeof error === "object" &&
+    error !== null &&
+    (error as { name?: unknown }).name === "TenantApiError" &&
+    typeof (error as { status?: unknown }).status === "number"
+  );
+}
+
+/**
+ * Klasifikasi kegagalan OTP SETELAH data pendaftaran tersimpan.
+ *
+ * Backend (POST /api/tenant/register) menyimpan pendaftaran lebih dahulu,
+ * lalu — bila pengiriman email OTP gagal — membalas HTTP 502 dengan body
+ * JSON: { success: false, message, errorCode }. Karena status 502 untuk
+ * kasus ini dipetakan Backend ke errorCode generik "INTERNAL_SERVER_ERROR"
+ * (tidak ada kode khusus SMTP), satu-satunya sinyal yang benar-benar
+ * mengonfirmasi kondisi ini adalah pesan resmi Backend yang menyatakan
+ * bahwa pendaftaran tersimpan namun email OTP gagal dikirim.
+ *
+ * Fungsi ini SENGAJA tidak hanya mengandalkan status HTTP 502: proxy/gateway
+ * yang membalas 502 JSON generik tidak boleh dianggap sebagai konfirmasi
+ * bahwa data pendaftaran sudah tersimpan.
+ */
+export function isOtpEmailFailureAfterSave(
+  error: unknown,
+): error is TenantApiError {
+  if (!isTenantApiError(error)) {
+    return false;
+  }
+
+  // 502 "UPSTREAM_UNAVAILABLE" dibuat parseResponse untuk respons non-JSON
+  // dari proxy/gateway, bukan dari handler Backend, sehingga bukan konfirmasi.
+  if (error.status !== 502 || error.errorCode === "UPSTREAM_UNAVAILABLE") {
+    return false;
+  }
+
+  const payload = error.payload;
+
+  if (!payload || typeof payload !== "object") {
+    return false;
+  }
+
+  if ((payload as { success?: unknown }).success !== false) {
+    return false;
+  }
+
+  const message = String(
+    (payload as { message?: unknown }).message ?? error.message ?? "",
+  );
+
+  // Konfirmasi Backend: "Pendaftaran tersimpan, tetapi email OTP gagal dikirim..."
+  const menyebutOtp = /\botp\b/i.test(message);
+  const menyebutTersimpanAtauGagalKirim =
+    /tersimpan/i.test(message) || /gagal\s+dikirim/i.test(message);
+
+  return menyebutOtp && menyebutTersimpanAtauGagalKirim;
+}
+
+const NETWORK_ERROR_MESSAGE =
+  "Tidak dapat terhubung ke server SmartSchool. Periksa koneksi internet Anda, lalu coba lagi.";
+
+/**
+ * Membungkus fetch agar kegagalan jaringan (koneksi ditolak, offline, DNS,
+ * timeout) tidak bocor sebagai TypeError tanpa status. Server yang benar-benar
+ * tidak dapat dijangkau dibedakan dari respons HTTP berstatus.
+ */
+async function requestTenant(
+  path: string,
+  init: RequestInit,
+): Promise<Response> {
+  try {
+    return await fetch(getTenantEndpoint(path), init);
+  } catch {
+    throw new TenantApiError(NETWORK_ERROR_MESSAGE, 0, "NETWORK_ERROR");
+  }
+}
+
+/**
  * ============================================================
  * PARSE API RESPONSE
  * ============================================================
@@ -37,49 +147,95 @@ async function parseResponse<T = unknown>(
   const text = await response.text();
 
   let result: any = null;
+  let safePath = "endpoint";
+  try {
+    if (response.url) {
+      safePath = new URL(response.url).pathname;
+    }
+  } catch {
+    safePath = "endpoint";
+  }
 
   if (text.trim()) {
     try {
       result = JSON.parse(text);
     } catch {
-      console.error("[TENANT API] Response bukan JSON:", {
-        url: response.url,
+      // Tangani respons non-JSON (misal proxy HTML 502/504) dengan aman tanpa mencetak body
+      console.warn("[TENANT API] Respons non-JSON diterima:", {
+        endpoint: safePath,
         status: response.status,
-        body: text.slice(0, 1000),
       });
 
-      throw new Error(
-        `Respons backend tidak valid (HTTP ${response.status}).`
+      if (!response.ok) {
+        if (response.status === 502 || response.status === 504) {
+          throw new TenantApiError(
+            "Layanan server sementara tidak dapat dihubungi (HTTP " +
+              response.status +
+              "). Silakan coba lagi nanti.",
+            response.status,
+            "UPSTREAM_UNAVAILABLE"
+          );
+        }
+        throw new TenantApiError(
+          `Terjadi kesalahan pada server (HTTP ${response.status}).`,
+          response.status,
+          "HTTP_ERROR"
+        );
+      }
+
+      throw new TenantApiError(
+        `Respons backend tidak valid (HTTP ${response.status}).`,
+        response.status,
+        "INVALID_RESPONSE"
       );
     }
   }
 
   if (!response.ok || result?.success === false) {
-    // Tampilkan informasi untuk debugging.
-    // Jangan mencetak kata sandi atau kode OTP.
-    console.error("[TENANT API] Request gagal:", {
-      url: response.url,
+    // Ekstraksi dan sanitasi pesan error tanpa mengekspos stack trace atau data sensitif
+    const rawMessage =
+      result?.message ||
+      result?.error ||
+      (Array.isArray(result?.errors)
+        ? result.errors
+            .map((item: any) =>
+              typeof item === "string" ? item : item?.message ?? String(item)
+            )
+            .filter(Boolean)
+            .join(", ")
+        : undefined) ||
+      `Request gagal (HTTP ${response.status}).`;
+
+    // Hilangkan informasi stack trace jika ada
+    const sanitizedMessage = String(rawMessage)
+      .split("\n")[0]
+      ?.replace(/^Error:\s*/i, "")
+      ?.trim() || `Request gagal (HTTP ${response.status}).`;
+
+    // Catat hanya informasi diagnostik yang aman: endpoint, status, dan pesan tersanitasi
+    console.warn("[TENANT API] Request gagal:", {
+      endpoint: safePath,
       status: response.status,
-      message: result?.message,
-      error: result?.error,
-      details: result?.details,
-      errors: result?.errors,
+      message: sanitizedMessage,
     });
 
-    throw new Error(
-      result?.message ||
-        result?.error ||
-        (Array.isArray(result?.errors)
-          ? result.errors
-              .map((item: any) => item?.message ?? String(item))
-              .join(", ")
-          : undefined) ||
-        `Request gagal (HTTP ${response.status}).`
+    throw new TenantApiError(
+      sanitizedMessage,
+      response.status,
+      result?.errorCode,
+      result
     );
   }
 
   if (result === null) {
-    throw new Error("Backend mengembalikan respons kosong.");
+    if (response.ok) {
+      return {} as T;
+    }
+    throw new TenantApiError(
+      `Backend mengembalikan respons kosong (HTTP ${response.status}).`,
+      response.status,
+      "EMPTY_RESPONSE"
+    );
   }
 
   return result as T;
@@ -197,16 +353,12 @@ export async function registerTenant(
     payload.npypYayasan = data.npypYayasan?.trim();
   }
 
-  const endpoint = getTenantEndpoint("register");
-
-  console.log("[REGISTER TENANT] Request:", {
-    endpoint,
+  console.log("[REGISTER TENANT] Mengirim permintaan registrasi:", {
     jenisPendaftaran,
     paketId: data.paketId,
-    email: data.email.trim().toLowerCase(),
   });
 
-  const response = await fetch(endpoint, {
+  const response = await requestTenant("register", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -290,16 +442,12 @@ export async function verifyTenant(
     ...(bank ? { bank } : {}),
   };
 
-  const endpoint = getTenantEndpoint("verify");
-
-  console.log("[VERIFY TENANT] Request:", {
-    endpoint,
-    email: normalizedEmail,
+  console.log("[VERIFY TENANT] Mengirim verifikasi OTP:", {
     otpLength: normalizedOtp.length,
     bank: bank ?? "tidak ada",
   });
 
-  const response = await fetch(endpoint, {
+  const response = await requestTenant("verify", {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -326,54 +474,32 @@ export async function verifyTenant(
 
 /**
  * ============================================================
- * GET TENANT STATUS
+ * CATATAN AUDIT — ENDPOINT YANG TIDAK TERSEDIA DI BACKEND
+ * ============================================================
+ * Kontrak Backend saat ini (Backend/src/routes/tenant.routes.ts)
+ * HANYA mendefinisikan:
  *
- * GET /api/tenant/status
+ *   POST /api/tenant/register   (registerTenant)
+ *   POST /api/tenant/verify     (verifyAndPay)
  *
- * Gunakan hanya jika route ini sudah tersedia di backend.
- * Fungsi ini tidak menganggap pembayaran berhasil apabila
- * endpoint status gagal diakses.
+ * Dua fungsi berikut dahulunya ada di layanan ini dan memanggil rute
+ * yang TIDAK tersedia, sehingga dihapus agar Frontend tidak pernah
+ * memanggil endpoint yang tidak ada:
+ *
+ *   1. POST /api/tenant/create-va
+ *      Virtual Account sebenarnya sudah dibuat di dalam
+ *      POST /api/tenant/verify (bank dikirim saat verifikasi OTP).
+ *      Rute terpisah tidak ada, jadi memanggilnya akan menghasilkan 404.
+ *
+ *   2. GET /api/tenant/status?order_id=...&email=...
+ *      Tidak ada rute status tenant di Backend. Status pembayaran dan
+ *      aktivasi sekolah hanya diproses melalui webhook Midtrans
+ *      (POST /api/webhooks/midtrans). Tanpa rute ini, Frontend tidak
+ *      dapat memverifikasi status pembayaran sendiri, sehingga tidak
+ *      boleh menampilkan status "berhasil" tanpa konfirmasi server.
+ *
+ * Kedua rute di atas harus ditambahkan di Backend terlebih dahulu
+ * (tanpa mengubah Backend dari sisi Frontend) agar pemeriksaan status
+ * pembayaran onboarding dapat diintegrasikan sepenuhnya.
  * ============================================================
  */
-export interface GetTenantStatusResponse {
-  success: boolean;
-  message?: string;
-  data?: {
-    status?: string;
-    is_trial?: boolean;
-    order_id?: string;
-    [key: string]: unknown;
-  };
-}
-
-export async function getTenantStatus(): Promise<GetTenantStatusResponse> {
-  const endpoint = getTenantEndpoint("status");
-
-  try {
-    const response = await fetch(endpoint, {
-      method: "GET",
-      headers: {
-        Accept: "application/json",
-      },
-      cache: "no-store",
-    });
-
-    const result =
-      await parseResponse<GetTenantStatusResponse>(response);
-
-    return result;
-  } catch (error) {
-    console.error("[GET TENANT STATUS] Error:", error);
-
-    return {
-      success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : "Gagal mengecek status tenant.",
-      data: {
-        status: "waiting",
-      },
-    };
-  }
-}

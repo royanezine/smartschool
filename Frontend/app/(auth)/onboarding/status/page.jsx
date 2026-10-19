@@ -12,8 +12,6 @@ import {
   AlertCircle,
 } from "lucide-react";
 
-import { getTenantStatus } from "@/services/tenant.service";
-
 export default function WaitingActivationPage() {
   // ==========================================
   // STATE
@@ -28,145 +26,28 @@ export default function WaitingActivationPage() {
   // REF
   // ==========================================
 
-  const intervalRef = useRef(null);
   const isMountedRef = useRef(true);
 
   // ==========================================
   // CHECK STATUS KE BACKEND
   // ==========================================
 
-  const checkStatus = async () => {
+  const checkStatus = () => {
     if (!isMountedRef.current) {
       return;
     }
 
-    try {
-      setError("");
-      setLoading(true);
-
-      console.log("Mengecek status tenant/payment...");
-
-      const response = await getTenantStatus();
-
-      if (!isMountedRef.current) {
-        return;
-      }
-
-      console.log(
-        "Response status tenant:",
-        response
-      );
-
-      setLastChecked(new Date());
-
-      /*
-       * ==========================================
-       * SESUAIKAN DENGAN RESPONSE BE
-       * ==========================================
-       *
-       * Contoh response:
-       *
-       * {
-       *   success: true,
-       *   data: {
-       *     status: "active"
-       *   }
-       * }
-       *
-       * atau:
-       *
-       * {
-       *   status: "active"
-       * }
-       */
-
-      const tenantStatus =
-        response?.data?.status ||
-        response?.status;
-
-      // ==========================================
-      // ACTIVE
-      // ==========================================
-
-      if (
-        tenantStatus === "active" ||
-        tenantStatus === "ACTIVE" ||
-        tenantStatus === "paid" ||
-        tenantStatus === "PAID"
-      ) {
-        setStatus("active");
-
-        if (intervalRef.current) {
-          clearInterval(intervalRef.current);
-          intervalRef.current = null;
-        }
-
-        setLoading(false);
-
-        return;
-      }
-
-      // ==========================================
-      // WAITING
-      // ==========================================
-
-      if (
-        tenantStatus === "waiting" ||
-        tenantStatus === "pending" ||
-        tenantStatus === "WAITING" ||
-        tenantStatus === "PENDING"
-      ) {
-        setStatus("waiting");
-        setLoading(false);
-
-        return;
-      }
-
-      // ==========================================
-      // FAILED / REJECTED
-      // ==========================================
-
-      if (
-        tenantStatus === "failed" ||
-        tenantStatus === "rejected" ||
-        tenantStatus === "FAILED" ||
-        tenantStatus === "REJECTED"
-      ) {
-        setStatus("failed");
-        setLoading(false);
-
-        if (intervalRef.current) {
-          clearInterval(intervalRef.current);
-          intervalRef.current = null;
-        }
-
-        return;
-      }
-
-      // ==========================================
-      // STATUS TIDAK DIKENALI
-      // ==========================================
-
-      setStatus("waiting");
-      setLoading(false);
-    } catch (error) {
-      console.error(
-        "Gagal mengecek status:",
-        error
-      );
-
-      if (!isMountedRef.current) {
-        return;
-      }
-
-      setError(
-        error instanceof Error
-          ? error.message
-          : "Gagal mengecek status pembayaran."
-      );
-
-      setLoading(false);
-    }
+    /*
+     * Backend saat ini TIDAK menyediakan endpoint status tenant
+     * (GET /api/tenant/status tidak ada). Aktivasi sekolah hanya diproses
+     * oleh server melalui webhook Midtrans, sehingga Frontend tidak dapat
+     * memverifikasi status pembayaran sendiri. Halaman ini karena itu hanya
+     * menampilkan status menunggu dan TIDAK pernah mengarang status aktif.
+     */
+    setError("");
+    setLastChecked(new Date());
+    setStatus("waiting");
+    setLoading(false);
   };
 
   // ==========================================
@@ -176,21 +57,12 @@ export default function WaitingActivationPage() {
   useEffect(() => {
     isMountedRef.current = true;
 
-    // Cek pertama kali
+    // Cek pertama kali. Tidak ada polling karena endpoint status tenant
+    // tidak tersedia di Backend.
     checkStatus();
-
-    // Cek setiap 5 detik
-    intervalRef.current = setInterval(() => {
-      checkStatus();
-    }, 5000);
 
     return () => {
       isMountedRef.current = false;
-
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
-        intervalRef.current = null;
-      }
     };
   }, []);
 
@@ -449,10 +321,11 @@ export default function WaitingActivationPage() {
             </h1>
 
             <p className="text-sm text-slate-500 mt-3 leading-6">
-              Pembayaran kamu sedang diproses.
+              Pembayaran kamu sedang diproses oleh
+              server SmartSchool.
               <br />
-              Kami akan mengecek status pembayaran
-              secara otomatis.
+              Sekolah akan diaktifkan server setelah
+              notifikasi pembayaran diterima.
             </p>
           </div>
 
@@ -470,11 +343,11 @@ export default function WaitingActivationPage() {
 
               <div>
                 <p className="text-sm font-semibold text-slate-800">
-                  Memeriksa pembayaran
+                  Menunggu konfirmasi server
                 </p>
 
                 <p className="text-xs text-slate-500 mt-0.5">
-                  Pemeriksaan otomatis setiap 5 detik
+                  Status resmi berasal dari Backend (Midtrans)
                 </p>
               </div>
 
@@ -495,7 +368,7 @@ export default function WaitingActivationPage() {
 
           <div className="mt-6 text-center">
             <p className="text-xs text-slate-400">
-              Terakhir diperiksa
+              Terakhir diperbarui
             </p>
 
             <p className="text-xs font-medium text-slate-600 mt-1">
@@ -521,8 +394,8 @@ export default function WaitingActivationPage() {
             />
 
             {loading
-              ? "Mengecek..."
-              : "Cek Status Sekarang"}
+              ? "Memuat..."
+              : "Perbarui Informasi"}
           </button>
         </div>
 
@@ -544,9 +417,10 @@ export default function WaitingActivationPage() {
               </p>
 
               <p className="text-xs text-slate-400 mt-1 leading-5">
-                Kamu dapat tetap berada di halaman
-                ini. Sistem akan memperbarui status
-                pembayaran secara otomatis.
+                Halaman ini tidak dapat memverifikasi
+                pembayaran sendiri. Setelah sekolah
+                diaktifkan server, kamu dapat masuk
+                melalui halaman login.
               </p>
             </div>
 

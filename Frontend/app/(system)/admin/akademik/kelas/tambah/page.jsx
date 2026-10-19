@@ -23,10 +23,12 @@ import {
   Layers3,
   Loader2,
   AlertCircle,
+  UserCheck,
 } from "lucide-react";
 
 import { createKelas } from "@/services/kelas.service";
 import { getTahunAjaran } from "@/services/tahunAjaran.service";
+import { getUsers } from "@/services/user.service";
 import {
   getGedung,
   getLantaiByGedung,
@@ -170,10 +172,12 @@ export default function AdminKelasTambahPage() {
   const [loadingTahun, setLoadingTahun] = useState(true);
   const [loadingGedung, setLoadingGedung] = useState(true);
   const [loadingLantai, setLoadingLantai] = useState(false);
+  const [loadingGuru, setLoadingGuru] = useState(true);
 
   const [tahunAjaranList, setTahunAjaranList] = useState([]);
   const [gedungList, setGedungList] = useState([]);
   const [lantaiList, setLantaiList] = useState([]);
+  const [guruList, setGuruList] = useState([]);
 
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
@@ -183,13 +187,49 @@ export default function AdminKelasTambahPage() {
     tingkat: "",
     tahunAjaranId: "",
     kapasitas: "30",
+    waliKelasId: "",
     gedungId: "",
     lantaiId: "",
   });
 
+  // Dideklarasikan sebelum useEffect agar tidak memicu peringatan
+  // react-hooks/immutability (fungsi dipakai sebelum dideklarasikan).
+  async function loadGuru() {
+    try {
+      setLoadingGuru(true);
+
+      // Ambil data guru dari API (bukan data dummy/hardcode).
+      const response = await getUsers({
+        page: 1,
+        limit: 200,
+        role: "guru",
+        status: "aktif",
+      });
+
+      const list = unwrapData(response);
+
+      setGuruList(list);
+    } catch (err) {
+      console.error(
+        "Gagal mengambil data guru:",
+        err
+      );
+
+      setGuruList([]);
+
+      setError(
+        err?.message ||
+          "Gagal mengambil data guru."
+      );
+    } finally {
+      setLoadingGuru(false);
+    }
+  }
+
   useEffect(() => {
     loadTahunAjaran();
     loadGedung();
+    loadGuru();
   }, []);
 
   async function loadTahunAjaran() {
@@ -370,7 +410,7 @@ export default function AdminKelasTambahPage() {
         tingkat: Number(form.tingkat),
         tahunAjaranId: form.tahunAjaranId,
         kapasitas,
-        waliKelasId: null,
+        waliKelasId: form.waliKelasId || null,
         lantaiId: form.lantaiId || null,
         fotoKelasUrl: null,
       };
@@ -645,6 +685,37 @@ export default function AdminKelasTambahPage() {
                       min="1"
                       required
                     />
+
+                    {/* WALI KELAS */}
+
+                    <FormSelect
+                      label="Wali Kelas"
+                      name="waliKelasId"
+                      value={form.waliKelasId}
+                      onChange={handleChange}
+                      icon={UserCheck}
+                      disabled={loadingGuru}
+                    >
+                      <option value="">
+                        {loadingGuru
+                          ? "Memuat data guru..."
+                          : "Belum ditentukan / Tanpa wali kelas"}
+                      </option>
+
+                      {guruList.map((guru) => (
+                        <option
+                          key={guru.id}
+                          value={guru.id}
+                        >
+                          {guru.namaLengkap ||
+                            guru.namaPengguna ||
+                            guru.email}
+                          {guru.nip
+                            ? ` (NIP ${guru.nip})`
+                            : ""}
+                        </option>
+                      ))}
+                    </FormSelect>
 
                     {/* GEDUNG */}
 

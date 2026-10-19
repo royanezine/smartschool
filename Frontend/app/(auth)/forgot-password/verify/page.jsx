@@ -15,6 +15,8 @@ import {
   RefreshCw,
 } from "lucide-react";
 
+import { setSession } from "@/lib/auth";
+
 export default function VerifikasiPage() {
   const router = useRouter();
 
@@ -108,18 +110,19 @@ export default function VerifikasiPage() {
       // Simpan token jika backend langsung
       // memberikan token setelah verifikasi.
       if (data?.token) {
-        localStorage.setItem(
-          "token",
-          data.token,
+        // Simpan sesi secara ATOMIK di sessionStorage tab ini melalui
+        // satu sumber kebenaran (lib/auth).
+        setSession(data.token, data.user ?? null);
+      } else {
+        // Belum ada token: jangan membuat sesi. Simpan petunjuk
+        // non-sesi pada sessionStorage tab ini saja.
+        sessionStorage.setItem(
+          "user",
+          JSON.stringify({
+            email: email.trim(),
+          }),
         );
       }
-
-      localStorage.setItem(
-        "user",
-        JSON.stringify({
-          email: email.trim(),
-        }),
-      );
 
       sessionStorage.removeItem(
         "register_email",

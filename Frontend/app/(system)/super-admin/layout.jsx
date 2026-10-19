@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
+import AuthGuard from "@/app/components/auth/AuthGuard";
 
 // ============================================================
 // NOTIFICATION DATA
@@ -113,45 +114,47 @@ export default function SuperAdminLayout({ children }) {
   );
 
   return (
-    <div className="theme-page flex h-screen w-full overflow-hidden">
-      {/* ======================================================
-          SIDEBAR GLOBAL
-      ====================================================== */}
+    <AuthGuard allowedRoles={["super_admin"]}>
+      <div className="theme-page flex h-screen w-full overflow-hidden">
+        {/* ======================================================
+            SIDEBAR GLOBAL
+        ====================================================== */}
 
-      <Sidebar
-        active={activeMenu}
-        setActive={() => {}}
-        collapsed={!sidebarOpen}
-        setCollapsed={() =>
-          setSidebarOpen((prev) => !prev)
-        }
-      />
-
-      {/* ======================================================
-          MAIN AREA
-      ====================================================== */}
-
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <Header
-          toggleSidebar={() =>
+        <Sidebar
+          active={activeMenu}
+          setActive={() => {}}
+          collapsed={!sidebarOpen}
+          setCollapsed={() =>
             setSidebarOpen((prev) => !prev)
           }
-          notifications={notifications}
-          user={{
-            name: "Super Admin",
-            email: "admin@smartschool.com",
-            avatar: "SA",
-          }}
         />
 
-        {/* ====================================================
-            GLOBAL PAGE CONTENT
-        ==================================================== */}
+        {/* ======================================================
+            MAIN AREA
+        ====================================================== */}
 
-        <main className="theme-page theme-text min-h-0 flex-1 overflow-y-auto">
-          {children}
-        </main>
+        <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+          <Header
+            toggleSidebar={() =>
+              setSidebarOpen((prev) => !prev)
+            }
+            notifications={notifications}
+            user={{
+              name: "Super Admin",
+              email: "admin@smartschool.com",
+              avatar: "SA",
+            }}
+          />
+
+          {/* ====================================================
+              GLOBAL PAGE CONTENT
+          ==================================================== */}
+
+          <main className="theme-page theme-text min-h-0 flex-1 overflow-y-auto">
+            {children}
+          </main>
+        </div>
       </div>
-    </div>
+    </AuthGuard>
   );
 }

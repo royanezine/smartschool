@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
+import { clearSession } from "@/lib/auth";
 
 import {
   User,
@@ -154,11 +155,8 @@ export default function ProfilGuruPage() {
       console.log("PROFILE RESPONSE:", result);
 
       if (response.status === 401) {
-        localStorage.removeItem("token");
-        localStorage.removeItem("accessToken");
-        localStorage.removeItem("access_token");
-        localStorage.removeItem("authToken");
-        localStorage.removeItem("jwt");
+        // Hapus sesi aktif secara lengkap (token + user).
+        clearSession();
 
         router.push("/login");
         return;

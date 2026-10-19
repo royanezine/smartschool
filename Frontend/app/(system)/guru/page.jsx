@@ -696,6 +696,22 @@ export default function GuruDashboardPage() {
     loadDashboard();
   }, [loadDashboard]);
 
+  /*
+   * Sinkronkan identitas pengguna bila sesi berubah
+   * (pada tab ini atau tab lain), agar nama profil di dashboard
+   * tidak tertinggal data akun sebelumnya.
+   */
+  useEffect(() => {
+    const syncUser = () => setUser(getUserFromStorage());
+
+    // Sesi disimpan di localStorage: cukup reaksi event `user-updated` tab ini.
+    window.addEventListener("user-updated", syncUser);
+
+    return () => {
+      window.removeEventListener("user-updated", syncUser);
+    };
+  }, []);
+
   const uniqueClassCount = useMemo(
     () =>
       new Set(kelasMapel.map((item) => item?.kelas?.id).filter(Boolean)).size,
