@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { getToken, getStoredUser } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 
 import { getKelas, getKelasById } from "@/services/kelas.service";
@@ -246,7 +247,7 @@ function getCurrentUser() {
   }
 
   try {
-    const rawUser = localStorage.getItem("user");
+    const rawUser = getStoredUser();
 
     if (!rawUser) {
       return null;
@@ -267,16 +268,7 @@ function getCurrentUser() {
 // GET TOKEN
 // ============================================================
 
-function getToken() {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  return (
-    localStorage.getItem("token") ||
-    localStorage.getItem("accessToken")
-  );
-}
+// getToken diimpor dari @/lib/auth (single source of truth)
 
 // ============================================================
 // GET HEADERS

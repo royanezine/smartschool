@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { getStoredUser } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 
 import {
@@ -111,9 +112,7 @@ function parseData(response) {
 function getCurrentUser() {
   if (typeof window === "undefined") return null;
   try {
-    const rawUser = localStorage.getItem("user");
-    if (!rawUser) return null;
-    return JSON.parse(rawUser);
+    return getStoredUser();
   } catch {
     return null;
   }

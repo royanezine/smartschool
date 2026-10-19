@@ -15,7 +15,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 
-import { setSession } from "@/lib/auth";
+import { setSession, getRoleHome } from "@/lib/auth";
 
 export default function VerifikasiPage() {
   const router = useRouter();
@@ -33,6 +33,7 @@ export default function VerifikasiPage() {
     );
 
     if (savedEmail) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setEmail(savedEmail);
     }
   }, []);
@@ -107,21 +108,21 @@ export default function VerifikasiPage() {
         );
       }
 
-      // Simpan token jika backend langsung
-      // memberikan token setelah verifikasi.
+      // Tujuan redirect ditentukan dari sesi hasil autentikasi (role pada
+      // token), bukan dari nama halaman. Tanpa token tidak ada sesi yang
+      // dibuat dan pengguna diarahkan ke halaman login.
+      let redirectPath = "/login";
+
       if (data?.token) {
-        // Simpan sesi secara ATOMIK di sessionStorage tab ini melalui
-        // satu sumber kebenaran (lib/auth).
-        setSession(data.token, data.user ?? null);
-      } else {
-        // Belum ada token: jangan membuat sesi. Simpan petunjuk
-        // non-sesi pada sessionStorage tab ini saja.
-        sessionStorage.setItem(
-          "user",
-          JSON.stringify({
-            email: email.trim(),
-          }),
+        // Simpan sesi secara ATOMIK melalui satu sumber kebenaran
+        // (lib/auth) lalu arahkan sesuai role token.
+        const sessionUser = setSession(
+          data.token,
+          data.user ?? null,
         );
+
+        redirectPath =
+          getRoleHome(sessionUser?.role) || "/login";
       }
 
       sessionStorage.removeItem(
@@ -134,7 +135,7 @@ export default function VerifikasiPage() {
       );
 
       setTimeout(() => {
-        router.push("/admin/dashboard");
+        router.push(redirectPath);
       }, 1200);
     } catch (err) {
       console.error(

@@ -35,6 +35,17 @@ const LEGACY_TOKEN_KEYS = [
   "jwt",
 ];
 
+/**
+ * Seluruh key storage yang merupakan bagian dari sesi autentikasi.
+ * Dipakai untuk menyaring event `storage` lintas-tab: hanya perubahan
+ * pada key sesi yang memicu sinkronisasi identitas.
+ */
+export const AUTH_SESSION_KEYS = [
+  AUTH_TOKEN_KEY,
+  AUTH_USER_KEY,
+  ...LEGACY_TOKEN_KEYS,
+];
+
 function isBrowser() {
   return typeof window !== "undefined";
 }
@@ -42,9 +53,14 @@ function isBrowser() {
 /**
  * Penyimpanan sesi aktif.
  *
- * Sesi (token + user) disimpan di localStorage (mekanisme sebelumnya)
- * agar konsisten dengan modul/service yang membaca token langsung dari
- * localStorage. localStorage dibagi antar tab pada origin yang sama.
+ * Sesi (token + user) disimpan di sessionStorage sebagai penyimpanan
+ * utama. sessionStorage TIDAK dibagi antar-tab pada origin yang sama,
+ * sehingga setiap tab memiliki sesi sendiri dan login multi-akun
+ * dalam satu browser menjadi mungkin.
+ *
+ * localStorage tetap menyimpan salinan untuk backward compatibility
+ * dengan file yang membaca langsung dari localStorage. Namun, sumber
+ * kebenaran utama adalah sessionStorage.
  *
  * Catatan penting: TIDAK ada lagi pembersihan otomatis localStorage
  * (dulu `purgeLegacyLocalAuth`) karena `token`/`user` di localStorage
@@ -55,18 +71,38 @@ function authStore() {
     return null;
   }
 
+  return window.sessionStorage;
+}
+
+/**
+ * Penyimpanan legacy (localStorage) untuk backward compatibility.
+ */
+function legacyAuthStore() {
+  if (!isBrowser()) {
+    return null;
+  }
+
   return window.localStorage;
 }
 
 /**
  * Mengambil token akses dari storage.
+ *
+ * Sumber utama: sessionStorage (per-tab). Fallback ke localStorage
+ * untuk backward compatibility saat user belum reload setelah upgrade.
  */
 export function getToken() {
   if (!isBrowser()) {
     return null;
   }
 
-  const token = authStore()?.getItem(AUTH_TOKEN_KEY);
+  // Utama: sessionStorage (per-tab, tidak dibagi antar tab)
+  let token = authStore()?.getItem(AUTH_TOKEN_KEY);
+
+  // Fallback: localStorage (untuk backward compatibility)
+  if (!token) {
+    token = legacyAuthStore()?.getItem(AUTH_TOKEN_KEY);
+  }
 
   return token && token.trim() ? token.trim() : null;
 }
@@ -314,16 +350,26 @@ export function normalizeUser(rawUser, payload = null) {
         rawUser
       : {};
 
-  const id =
-    source.id ??
-    source.userId ??
-    payload?.userId ??
-    null;
+  // Identitas (id) dan roleId HANYA boleh mengikuti klaim token yang
+  // aktif. `user` di storage hanyalah cache tampilan; bila ia berasal
+  // dari akun lain (sisa sesi pada origin yang sama) datanya tidak
+  // boleh menimpa identitas token. Fallback ke `source` hanya dipakai
+  // ketika token memang tidak memuat id/roleId.
+  const tokenId = payload?.userId ?? payload?.id ?? null;
+  const sourceId = source.id ?? source.userId ?? null;
 
+  const id = tokenId ?? sourceId ?? null;
+
+  // Role HARUS berasal dari klaim token (hasil autentikasi). `user` di
+  // storage hanyalah cache identitas; bila ia tertinggal dari akun lain
+  // (mis. sisa sesi "super_admin" pada origin yang sama), role TIDAK
+  // boleh ikut tertular. Karena itu klaim token didahulukan, dan data
+  // storage hanya dipakai sebagai fallback saat token tidak memuat role.
   const roleRaw =
+    payload?.role ??
+    payload?.peran ??
     source.role ??
     source.peran ??
-    payload?.role ??
     null;
 
   return {
@@ -343,10 +389,10 @@ export function normalizeUser(rawUser, payload = null) {
     email: source.email ?? payload?.email ?? "",
     role: normalizeRole(roleRaw) || null,
     roleId:
-      source.roleId ??
-      source.peranId ??
       payload?.roleId ??
       payload?.peranId ??
+      source.roleId ??
+      source.peranId ??
       null,
     sekolahId: source.sekolahId ?? payload?.sekolahId ?? null,
     yayasanId: source.yayasanId ?? payload?.yayasanId ?? null,
@@ -355,6 +401,10 @@ export function normalizeUser(rawUser, payload = null) {
 
 /**
  * Menyimpan sesi (token + user) secara ATOMIK di storage.
+ *
+ * Sesi disimpan di sessionStorage (per-tab) sebagai sumber utama.
+ * localStorage juga menerima salinan untuk backward compatibility
+ * dengan file yang membaca langsung dari localStorage.
  *
  * Selalu gunakan fungsi ini alih-alih menulis storage sendiri,
  * agar token dan identitas tidak pernah berbeda pemiliknya.
@@ -369,18 +419,31 @@ export function setSession(token, rawUser = null) {
   }
 
   const store = authStore();
+  const legacyStore = legacyAuthStore();
   const cleanToken = String(token).trim();
   const payload = decodeToken(cleanToken);
   const user = normalizeUser(rawUser, payload);
 
+  // Tulis ke sessionStorage (utama)
   store.setItem(AUTH_TOKEN_KEY, cleanToken);
   store.setItem(AUTH_USER_KEY, JSON.stringify(user));
 
-  // Hapus key token lama agar tidak ada sumber kebenaran kedua.
+  // Juga tulis ke localStorage (backward compatibility)
+  if (legacyStore) {
+    try {
+      legacyStore.setItem(AUTH_TOKEN_KEY, cleanToken);
+      legacyStore.setItem(AUTH_USER_KEY, JSON.stringify(user));
+    } catch {
+      /* localStorage mungkin penuh atau diblokir */
+    }
+  }
+
+  // Hapus key token lama dari kedua storage
   LEGACY_TOKEN_KEYS.forEach((key) => {
     try {
       store.removeItem(key);
-    } catch (error) {
+      legacyStore?.removeItem(key);
+    } catch {
       /* ignore */
     }
   });
@@ -393,9 +456,10 @@ export function setSession(token, rawUser = null) {
 /**
  * Menghapus sesi secara lengkap (token + user + key lama).
  *
- * Karena sesi disimpan di localStorage (dibagi antar tab), logout
- * membersihkan sesi untuk seluruh tab pada origin ini. Tidak
- * mengganggu data non-autentikasi.
+ * Membersihkan sesi dari sessionStorage (utama) dan localStorage
+ * (backward compatibility). Karena sesi utama ada di sessionStorage,
+ * logout hanya memengaruhi tab ini. Tab lain dengan akun berbeda
+ * tidak terpengaruh.
  */
 export function clearSession() {
   if (!isBrowser()) {
@@ -403,6 +467,7 @@ export function clearSession() {
   }
 
   const store = authStore();
+  const legacyStore = legacyAuthStore();
 
   const keys = [
     AUTH_TOKEN_KEY,
@@ -413,7 +478,8 @@ export function clearSession() {
   keys.forEach((key) => {
     try {
       store.removeItem(key);
-    } catch (error) {
+      legacyStore?.removeItem(key);
+    } catch {
       /* ignore */
     }
   });
@@ -424,9 +490,9 @@ export function clearSession() {
 /**
  * Memberi tahu seluruh komponen pada TAB INI bahwa sesi berubah.
  *
- * Sesi kini tersimpan di localStorage (dibagi antar tab). Perubahan
- * sesi pada tab lain tidak otomatis memicu event ini; event `storage`
- * browser dapat dipakai bila perlu sinkronisasi antar-tab.
+ * Sesi tersimpan di localStorage (dibagi antar tab). Perubahan pada tab
+ * lain TIDAK memicu event ini, melainkan event `storage` browser.
+ * Gunakan `subscribeAuth()` agar menerima keduanya (tab ini + tab lain).
  */
 export function emitAuthUpdate() {
   if (!isBrowser()) {
@@ -438,6 +504,65 @@ export function emitAuthUpdate() {
   } catch (error) {
     /* ignore */
   }
+}
+
+/**
+ * Berlangganan perubahan sesi dengan perilaku antar-tab yang eksplisit.
+ *
+ * Desain produksi: sesi disimpan di localStorage sehingga SATU sesi
+ * dibagi oleh seluruh tab pada origin yang sama. Karena itu listener
+ * dipanggil untuk:
+ * - `AUTH_EVENT`  : perubahan pada TAB INI (login/logout).
+ * - `storage`      : perubahan dari TAB LAIN pada origin yang sama.
+ *
+ * Dengan begitu tab tidak pernah menampilkan identitas lama/campur saat
+ * sesi bersama berubah. Untuk menguji beberapa akun secara INDEPENDEN,
+ * gunakan konteks browser terpisah (profil/incognito/origin berbeda)
+ * sehingga localStorage-nya tidak dibagi.
+ *
+ * @param {(session: ReturnType<typeof getSession>) => void} listener
+ * @returns {() => void} fungsi untuk berhenti berlangganan.
+ */
+export function subscribeAuth(listener) {
+  if (!isBrowser() || typeof listener !== "function") {
+    return () => {};
+  }
+
+  const handleAuthEvent = () => {
+    listener(getSession());
+  };
+
+  const handleStorage = (event) => {
+    // Abaikan perubahan storage non-sesi (mis. preferensi UI).
+    if (!event) {
+      return;
+    }
+
+    if (
+      event.storageArea &&
+      event.storageArea !== window.localStorage
+    ) {
+      return;
+    }
+
+    // `key === null` berarti storage dibersihkan (clear()).
+    if (
+      event.key !== null &&
+      !AUTH_SESSION_KEYS.includes(event.key)
+    ) {
+      return;
+    }
+
+    listener(getSession());
+  };
+
+  window.addEventListener(AUTH_EVENT, handleAuthEvent);
+  window.addEventListener("storage", handleStorage);
+
+  return () => {
+    window.removeEventListener(AUTH_EVENT, handleAuthEvent);
+    window.removeEventListener("storage", handleStorage);
+  };
 }
 
 /**
@@ -488,11 +613,34 @@ export function getSessionUser() {
   const tokenUserId = payload.userId ?? null;
   const storedUserId = stored.userId ?? stored.id ?? null;
 
-  if (
+  const tokenRole = normalizeRole(
+    payload?.role ?? payload?.peran ?? null
+  );
+
+  const storedRole = normalizeRole(
+    stored.role ?? stored.peran ?? null
+  );
+
+  const idMismatch =
     tokenUserId &&
     storedUserId &&
-    String(tokenUserId) !== String(storedUserId)
-  ) {
+    String(tokenUserId) !== String(storedUserId);
+
+  // Role pada storage yang berbeda dari klaim token menandakan data
+  // `user` berasal dari akun lain (mis. sisa sesi "super_admin").
+  // Termasuk kasus ketika `user` di storage tidak memuat id, sehingga
+  // pemeriksaan id di atas tidak dapat mendeteksinya.
+  const roleMismatch =
+    tokenRole && storedRole && tokenRole !== storedRole;
+
+  // Token memuat id, tetapi `user` di storage tidak memuat id sama sekali:
+  // identitas pada storage tidak dapat diverifikasi terhadap token. Karena
+  // `setSession` selalu menulis id dari token, kondisi ini hanya muncul
+  // untuk data sisa/rusak, sehingga lebih aman direkonstruksi dari token
+  // agar nama akun lain tidak bocor.
+  const idUnknown = Boolean(tokenUserId) && !storedUserId;
+
+  if (idMismatch || roleMismatch || idUnknown) {
     console.warn(
       "[AUTH] Data user pada storage tidak cocok dengan token. " +
         "Identitas direkonstruksi dari token."

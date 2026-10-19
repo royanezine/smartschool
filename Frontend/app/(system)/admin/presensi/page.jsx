@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { getToken } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 
 import Sidebar from "@/app/components/Sidebar";
@@ -267,7 +268,7 @@ async function fetchUserById(userId) {
 
   const token =
     typeof window !== "undefined"
-      ? localStorage.getItem("token")
+      ? getToken()
       : null;
 
   if (!token) {

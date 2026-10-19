@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
 import { apiFetch } from "@/lib/api";
+import { getSessionUser, subscribeAuth } from "@/lib/auth";
 
 import {
   LayoutDashboard,
@@ -191,49 +192,38 @@ function getInitials(name, email) {
 }
 
 function getUserFromStorage() {
-  if (typeof window === "undefined") return { name: "", email: "" };
+  // Satu sumber kebenaran: identitas dari sesi aktif (lib/auth).
+  // Membaca localStorage("user") langsung berisiko menampilkan data akun
+  // lain ketika sesi pada origin yang sama berubah.
+  const sessionUser = getSessionUser();
 
-  for (const key of ["user", "pengguna", "currentUser"]) {
-    try {
-      const raw = localStorage.getItem(key);
-      if (!raw) continue;
-
-      const parsed = JSON.parse(raw);
-      const user = parsed?.data?.user || parsed?.user || parsed;
-
-      if (user && typeof user === "object") {
-        return {
-          name: user.namaLengkap || user.name || user.nama || "",
-          email: user.email || "",
-        };
-      }
-    } catch {
-      // Coba key penyimpanan berikutnya.
-    }
+  if (!sessionUser || typeof sessionUser !== "object") {
+    return { name: "", email: "" };
   }
 
-  return { name: "", email: "" };
+  return {
+    name:
+      sessionUser.namaLengkap ||
+      sessionUser.nama ||
+      sessionUser.name ||
+      "",
+    email: sessionUser.email || "",
+  };
 }
 
 function getStoredUserId() {
-  if (typeof window === "undefined") return "";
+  const sessionUser = getSessionUser();
 
-  for (const key of ["user", "pengguna", "currentUser"]) {
-    try {
-      const raw = localStorage.getItem(key);
-      if (!raw) continue;
-
-      const parsed = JSON.parse(raw);
-      const user = parsed?.data?.user || parsed?.user || parsed;
-      const id = user?.id || user?.userId || user?.penggunaId;
-
-      if (id) return String(id);
-    } catch {
-      // Coba key penyimpanan berikutnya.
-    }
+  if (!sessionUser || typeof sessionUser !== "object") {
+    return "";
   }
 
-  return "";
+  const id =
+    sessionUser.userId ||
+    sessionUser.id ||
+    sessionUser.penggunaId;
+
+  return id ? String(id) : "";
 }
 
 function StatCard({ title, value, subtitle, Icon }) {
@@ -704,11 +694,12 @@ export default function GuruDashboardPage() {
   useEffect(() => {
     const syncUser = () => setUser(getUserFromStorage());
 
-    // Sesi disimpan di localStorage: cukup reaksi event `user-updated` tab ini.
-    window.addEventListener("user-updated", syncUser);
+    // Sinkronkan pada perubahan sesi tab ini maupun tab lain (satu sesi
+    // per browser pada produksi), agar profil tidak tertinggal.
+    const unsubscribe = subscribeAuth(syncUser);
 
     return () => {
-      window.removeEventListener("user-updated", syncUser);
+      unsubscribe();
     };
   }, []);
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { getStoredUser } from "@/lib/auth";
 import { useParams, useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -18,17 +19,7 @@ import { getKelasById } from "@/services/kelas.service";
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
 
-function getStoredUser() {
-  if (typeof window === "undefined") return null;
-  try {
-    const raw = localStorage.getItem("user");
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    return parsed?.user || parsed?.data?.user || parsed?.data || parsed;
-  } catch {
-    return null;
-  }
-}
+// getStoredUser diimpor dari @/lib/auth (single source of truth)
 
 function getTeacherId(user) {
   const id = user?.userId || user?.id || user?.penggunaId || user?.guruId ||

@@ -6,7 +6,7 @@ import { usePathname } from "next/navigation";
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
 import AuthGuard from "@/app/components/auth/AuthGuard";
-import { getSessionUser } from "@/lib/auth";
+import { getSessionUser, subscribeAuth } from "@/lib/auth";
 
 /* =========================================================
    USER HELPER
@@ -179,12 +179,12 @@ export default function SiswaLayout({
 
     loadUser();
 
-    // Sesi disimpan di localStorage: reaksi terhadap perubahan sesi
-    // pada tab ini melalui event `user-updated`.
-    window.addEventListener("user-updated", loadUser);
+    // Sinkronkan pada perubahan sesi tab ini maupun tab lain (satu sesi
+    // per browser pada produksi), agar nama/email tidak tertinggal.
+    const unsubscribe = subscribeAuth(loadUser);
 
     return () => {
-      window.removeEventListener("user-updated", loadUser);
+      unsubscribe();
     };
   }, []);
 

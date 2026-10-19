@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { getToken } from "@/lib/auth";
 import { useParams, useRouter } from "next/navigation";
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
@@ -67,7 +68,7 @@ export default function EditFaceIdPage() {
     }
 
     return (
-      localStorage.getItem("token") ||
+      getToken() ||
       localStorage.getItem("accessToken")
     );
   };

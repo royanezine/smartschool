@@ -1,4 +1,6 @@
 
+import { getToken } from "../lib/auth";
+
 const API_BASE_URL = (
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
 ).replace(/\/+$/, "");
@@ -143,7 +145,7 @@ async function apiFetch<T>(
   }
 
   if (typeof window !== "undefined") {
-    const token = localStorage.getItem("token");
+    const token = getToken();
 
     if (token) {
       headers.set("Authorization", `Bearer ${token}`);

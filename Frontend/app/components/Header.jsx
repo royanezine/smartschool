@@ -29,6 +29,7 @@ import {
   getAuthRole,
   getSessionUser,
   clearSession,
+  subscribeAuth,
 } from "@/lib/auth";
 
 export default function Header({ notifications = [], user: userProp = null }) {
@@ -71,13 +72,14 @@ useEffect(() => {
 
   syncSession();
 
-  // `user-updated` = perubahan sesi pada TAB INI. Sesi disimpan di
-  // localStorage (dibagi antar tab); kita sengaja TIDAK memakai event
-  // `storage` agar perubahan akun di tab lain tidak menimpa tab ini.
-  window.addEventListener("user-updated", syncSession);
+  // `subscribeAuth` menangani perubahan sesi pada TAB INI (`user-updated`)
+  // maupun TAB LAIN pada origin yang sama (`storage`). Sesi produksi
+  // memang dibagi satu browser, jadi profil yang tampil selalu mengikuti
+  // token aktif dan tidak pernah tertinggal akun sebelumnya.
+  const unsubscribe = subscribeAuth(syncSession);
 
   return () => {
-    window.removeEventListener("user-updated", syncSession);
+    unsubscribe();
   };
 }, []);
 

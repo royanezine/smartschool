@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { getToken } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 
 import Sidebar from "@/app/components/Sidebar";
@@ -268,7 +269,7 @@ export default function TambahFaceIdPage() {
       setError("");
 
       const token =
-        localStorage.getItem("token");
+        getToken();
 
       if (!token) {
         throw new Error(
@@ -670,7 +671,7 @@ const handleRegisterFace = async () => {
     setError("");
     setSuccessMessage("");
 
-    const token = localStorage.getItem("token");
+    const token = getToken();
 
     if (!token) {
       throw new Error(

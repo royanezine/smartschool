@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { Suspense, useEffect, useState } from "react";
+import { Suspense, useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Image from "next/image";
 import {
@@ -36,9 +36,28 @@ function VerifyRegisterPageContent() {
     const emailFromUrl = searchParams.get("email");
 
     if (emailFromUrl) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setEmail(emailFromUrl);
+      return;
+    }
+
+    // Halaman register mengarah ke sini tanpa query string. Ambil email
+    // pendaftaran dari sessionStorage tab ini (di-set halaman register
+    // setelah pendaftaran berhasil) agar verifikasi OTP dapat dilanjutkan
+    // tanpa memakai identitas/sesi akun lain.
+    try {
+      const savedEmail = sessionStorage.getItem("register_email");
+
+      if (savedEmail) {
+        setEmail(savedEmail);
+      }
+    } catch {
+      /* sessionStorage bisa diblokir; pengguna masih dapat mengisi manual */
     }
   }, [searchParams]);
+
+  // Request ID untuk mencegah response API lama menimpa sesi baru.
+  const requestIdRef = useRef(0);
 
   // ==========================================
   // COUNTDOWN KIRIM ULANG OTP
@@ -80,6 +99,9 @@ function VerifyRegisterPageContent() {
     try {
       setLoading(true);
 
+      // Increment request ID untuk membatalkan response sebelumnya
+      const currentRequestId = ++requestIdRef.current;
+
       const API_URL =
         process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
@@ -107,6 +129,11 @@ function VerifyRegisterPageContent() {
         );
       }
 
+      // Abaikan response ini jika request baru sudah dimulai
+      if (currentRequestId !== requestIdRef.current) {
+        return;
+      }
+
       if (!response.ok) {
         throw new Error(
           result?.message || "Verifikasi OTP gagal."
@@ -123,8 +150,9 @@ function VerifyRegisterPageContent() {
           );
         }
 
-        clearSession();
-
+        // Simpan token setup PIN tanpa menghapus sesi aktif.
+        // Jika user sudah login dengan akun lain, sesi tersebut tetap terjaga
+        // hingga PIN berhasil dibuat dan token akses diterima.
         sessionStorage.setItem(
           "pin_setup_token",
           result.setupToken
@@ -156,8 +184,18 @@ function VerifyRegisterPageContent() {
 
         sessionHome = getRoleHome(sessionUser?.role) || "/login";
       } else {
-        // Tanpa token: jangan tinggalkan sesi setengah jadi.
-        clearSession();
+        // Tanpa token: jangan menghapus sesi yang sudah ada (mis. user
+        // sedang login dengan akun lain). Biarkan sesi aktif tetap terjaga.
+        console.warn(
+          "[AUTH] Verifikasi register berhasil tetapi tidak mengembalikan token."
+        );
+      }
+
+      // Email pendaftaran sudah tidak diperlukan setelah verifikasi.
+      try {
+        sessionStorage.removeItem("register_email");
+      } catch {
+        /* abaikan */
       }
 
       setSuccess(

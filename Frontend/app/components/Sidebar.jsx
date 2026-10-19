@@ -33,6 +33,7 @@ import {
   getPermissions,
   getActiveModules,
   clearSession,
+  subscribeAuth,
 } from "../../lib/auth";
 
 /* =========================================================
@@ -551,19 +552,13 @@ export default function Sidebar({
 
     loadAuthData();
 
-    // Sesi disimpan di localStorage. Kita bereaksi pada perubahan sesi
-    // TAB INI (`user-updated`); event `storage` sengaja tidak dipakai
-    // agar akun tab lain tidak menimpa tab ini.
-    window.addEventListener(
-      "user-updated",
-      loadAuthData
-    );
+    // Sesi produksi dibagi satu browser (localStorage). `subscribeAuth`
+    // bereaksi pada perubahan sesi tab ini maupun tab lain, sehingga role
+    // dan menu selalu dihitung ulang dari token yang aktif.
+    const unsubscribe = subscribeAuth(loadAuthData);
 
     return () => {
-      window.removeEventListener(
-        "user-updated",
-        loadAuthData
-      );
+      unsubscribe();
     };
   }, [mounted]);
 

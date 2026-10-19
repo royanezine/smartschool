@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getToken } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -18,10 +19,7 @@ const API_URL = (
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
 ).replace(/\/$/, "");
 
-const getToken = () => {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem("token");
-};
+// getToken diimpor dari @/lib/auth (single source of truth)
 
 // ============================================================
 // THEME HELPERS

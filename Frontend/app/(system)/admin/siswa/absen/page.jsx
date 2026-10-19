@@ -1,5 +1,7 @@
 "use client";
 
+import { getToken } from "@/lib/auth";
+
 import {
   useCallback,
   useEffect,
@@ -409,7 +411,7 @@ async function downloadExcel({
 }) {
   const token =
     typeof window !== "undefined"
-      ? localStorage.getItem("token")
+      ? getToken()
       : null;
 
   if (!token) {

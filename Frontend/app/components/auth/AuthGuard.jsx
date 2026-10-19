@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import { getSession, getRoleHome, clearSession } from "@/lib/auth";
+import { getSession, getRoleHome, clearSession, subscribeAuth } from "@/lib/auth";
 
 /*
  * ============================================================
@@ -96,15 +96,15 @@ export default function AuthGuard({ allowedRoles = [], children }) {
 
     verify();
 
-    // Sesi disimpan di localStorage (dibagi antar tab). Kita mendengarkan
-    // event sesi pada tab ini (`user-updated`); guard tetap memeriksa ulang
-    // sesi saat navigasi/rerender sehingga tidak ada modul yang kehilangan
-    // sesi.
-    window.addEventListener("user-updated", verify);
+    // Perilaku antar-tab dinyatakan eksplisit: sesi produksi dibagi satu
+    // browser (localStorage). `subscribeAuth` memicu `verify` baik saat
+    // sesi berubah di tab ini maupun di tab lain, sehingga guard selalu
+    // menilai token yang aktif dan tidak tertinggal identitas lama.
+    const unsubscribe = subscribeAuth(verify);
 
     return () => {
       cancelled = true;
-      window.removeEventListener("user-updated", verify);
+      unsubscribe();
     };
   }, [router, allowedKey, skipGuard]);
 
