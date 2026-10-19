@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getToken } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 
 import {
@@ -8,7 +9,7 @@ import {
   getKelasById,
 } from "@/services/kelas.service";
 
-import { getSessionUser } from "@/lib/auth";
+import { getSessionUser, subscribeAuth } from "@/lib/auth";
 
 import {
   BookOpen,
@@ -449,20 +450,7 @@ function extractObject(response) {
    TOKEN
 ========================================================= */
 
-function getToken() {
-  if (typeof window === "undefined") {
-    return "";
-  }
-
-  return (
-    localStorage.getItem("token") ||
-    localStorage.getItem("accessToken") ||
-    localStorage.getItem("access_token") ||
-    localStorage.getItem("authToken") ||
-    localStorage.getItem("jwt") ||
-    ""
-  );
-}
+// getToken diimpor dari @/lib/auth (single source of truth)
 
 /* =========================================================
    GET HEADERS
@@ -763,11 +751,12 @@ export default function SiswaDashboardPage() {
       }
     };
 
-    // Sesi disimpan di localStorage: reaksi event `user-updated` pada tab ini.
-    window.addEventListener("user-updated", syncUser);
+    // Sinkronkan pada perubahan sesi tab ini maupun tab lain (satu sesi
+    // per browser pada produksi), agar profil tidak tertinggal.
+    const unsubscribe = subscribeAuth(syncUser);
 
     return () => {
-      window.removeEventListener("user-updated", syncUser);
+      unsubscribe();
     };
   }, []);
 

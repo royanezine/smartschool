@@ -38,13 +38,7 @@ const API_BASE = (() => {
    AUTH
 ========================================================= */
 
-const getToken = (): string | null => {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  return localStorage.getItem("token");
-};
+import { getToken } from "../lib/auth";
 
 /* =========================================================
    FETCH HELPER

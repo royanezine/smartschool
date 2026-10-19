@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getToken as getTokenFromLib } from "@/lib/auth";
 import {
   Save,
   Palette,
@@ -254,7 +255,7 @@ export default function TampilanPage() {
       return null;
     }
 
-    return localStorage.getItem("token");
+    return getTokenFromLib();
   };
 
   /* ==========================================================

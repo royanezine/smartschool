@@ -1,5 +1,7 @@
 "use client";
 
+import { getToken } from "@/lib/auth";
+
 import {
   useCallback,
   useEffect,
@@ -54,12 +56,13 @@ const USERS_ENDPOINT = `${API_URL}/api/users`;
    HELPER TOKEN
 ========================================================= */
 
-const getToken = () => {
+// getToken diimpor dari @/lib/auth (single source of truth)
+const _getTokenPlaceholder = () => {
   if (typeof window === "undefined") {
     return null;
   }
 
-  return localStorage.getItem("token");
+  return getToken();
 };
 
 /* =========================================================

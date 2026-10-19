@@ -1,5 +1,7 @@
 ﻿"use client";
 
+import { getToken, getStoredUser } from "@/lib/auth";
+
 import {
   Suspense,
   useCallback,
@@ -129,7 +131,7 @@ const themeDisabled =
 async function apiRequest(endpoint, options = {}) {
   const token =
     typeof window !== "undefined"
-      ? localStorage.getItem("token")
+      ? getToken()
       : null;
 
   const headers = {
@@ -201,7 +203,7 @@ function getLoggedInUserId() {
   }
 
   try {
-    const storedUser = localStorage.getItem("user");
+    const storedUser = getStoredUser();
 
     if (storedUser) {
       const user = JSON.parse(storedUser);
@@ -227,7 +229,7 @@ function getLoggedInUserId() {
   }
 
   try {
-    const token = localStorage.getItem("token");
+    const token = getToken();
 
     if (!token) {
       return null;

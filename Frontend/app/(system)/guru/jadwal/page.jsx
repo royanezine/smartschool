@@ -6,6 +6,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { getStoredUser } from "@/lib/auth";
 import {
   Camera,
   MapPin,
@@ -99,11 +100,7 @@ const themeFocus =
    AUTH
 ========================================================= */
 
-function getToken() {
-  if (typeof window === "undefined") return null;
-
-  return localStorage.getItem("token");
-}
+import { getToken } from "@/lib/auth";
 
 /* =========================================================
    RESPONSE
@@ -484,7 +481,7 @@ export default function PresensiGuruPage() {
 
       const userRaw =
         typeof window !== "undefined"
-          ? localStorage.getItem("user")
+          ? getStoredUser()
           : null;
 
       if (userRaw) {

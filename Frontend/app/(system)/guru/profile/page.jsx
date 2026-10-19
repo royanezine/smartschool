@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
-import { clearSession } from "@/lib/auth";
+import { clearSession, getToken } from "@/lib/auth";
 
 import {
   User,
@@ -128,12 +128,7 @@ export default function ProfilGuruPage() {
       setLoading(true);
       setError("");
 
-      const token =
-        localStorage.getItem("token") ||
-        localStorage.getItem("accessToken") ||
-        localStorage.getItem("access_token") ||
-        localStorage.getItem("authToken") ||
-        localStorage.getItem("jwt");
+      const token = getToken();
 
       if (!token) {
         router.push("/login");

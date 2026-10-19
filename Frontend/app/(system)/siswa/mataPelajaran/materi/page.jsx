@@ -2,6 +2,7 @@
 "use client";
 
 import { Suspense, useEffect, useMemo, useState } from "react";
+import { getToken, getStoredUser } from "@/lib/auth";
 import { useRouter, useSearchParams } from "next/navigation";
 
 import {
@@ -339,7 +340,7 @@ function getCurrentUser() {
   }
 
   try {
-    const rawUser = localStorage.getItem("user");
+    const rawUser = getStoredUser();
 
     return rawUser ? JSON.parse(rawUser) : null;
   } catch (error) {
@@ -738,7 +739,7 @@ async function handleDownload(item) {
   try {
     const token =
       typeof window !== "undefined"
-        ? localStorage.getItem("token")
+        ? getToken()
         : null;
 
     const response = await fetch(url, {

@@ -1,7 +1,7 @@
 
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -167,6 +167,9 @@ export default function LoginForm() {
   // HANDLE LOGIN
   // =====================================================
 
+  // Request ID untuk mencegah response API lama menimpa sesi baru.
+  const requestIdRef = useRef(0);
+
   const handleLogin = async (e) => {
     e.preventDefault();
 
@@ -188,12 +191,20 @@ export default function LoginForm() {
 
     setLoading(true);
 
+    // Increment request ID untuk membatalkan response sebelumnya
+    const currentRequestId = ++requestIdRef.current;
+
     try {
       // Bersihkan token sementara dari percobaan sebelumnya.
       sessionStorage.removeItem("pin_setup_token");
       sessionStorage.removeItem("pin_access_token");
 
       const data = await login(loginIdentifier, kataSandi);
+
+      // Abaikan response ini jika request baru sudah dimulai
+      if (currentRequestId !== requestIdRef.current) {
+        return;
+      }
 
       // Jangan tampilkan token ke console.
       console.log("LOGIN: respons diterima dari server.");
@@ -364,10 +375,15 @@ export default function LoginForm() {
       // Bersihkan sesi lama lalu simpan token + identitas secara ATOMIK
       // supaya nama/role tidak pernah berasal dari akun lain.
       clearSession();
-      localStorage.removeItem("token");
-      localStorage.removeItem("user");
+      sessionStorage.removeItem("token");
+      sessionStorage.removeItem("user");
 
       setSession(token, userInfo);
+
+      // Abaikan response ini jika request baru sudah dimulai setelah setSession
+      if (currentRequestId !== requestIdRef.current) {
+        return;
+      }
 
       // Ingat identifier jika dipilih.
       if (rememberMe) {

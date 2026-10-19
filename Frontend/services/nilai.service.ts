@@ -25,13 +25,7 @@ export interface ExportRekapNilaiParams {
    GET TOKEN
 ========================================================= */
 
-function getToken(): string | null {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  return localStorage.getItem("token");
-}
+import { getToken } from "../lib/auth";
 
 /* =========================================================
    EXPORT REKAP NILAI

@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { getToken } from "@/lib/auth";
 import { useParams, useRouter } from "next/navigation";
 
 import {
@@ -92,7 +93,7 @@ async function getUjianById(id) {
 
   const token =
     typeof window !== "undefined"
-      ? localStorage.getItem("token")
+      ? getToken()
       : null;
 
   const response = await fetch(

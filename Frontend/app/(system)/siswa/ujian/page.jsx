@@ -2,6 +2,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { getStoredUser } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 
 import {
@@ -304,7 +305,7 @@ function normalizeObjectResponse(response) {
 
 function getLoggedInUserId() {
   try {
-    const rawUser = localStorage.getItem("user");
+    const rawUser = getStoredUser();
 
     if (!rawUser) return null;
 

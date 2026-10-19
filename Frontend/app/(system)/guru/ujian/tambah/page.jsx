@@ -2,6 +2,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { getStoredUser } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 
 import {
@@ -134,8 +135,8 @@ function getCurrentUser() {
   if (typeof window === "undefined") return null;
 
   try {
-    const raw = localStorage.getItem("user");
-    return raw ? JSON.parse(raw) : null;
+    const raw = getStoredUser();
+    return raw;
   } catch (error) {
     console.error("Gagal membaca user:", error);
     return null;

@@ -2,31 +2,11 @@
 
 import { useEffect } from "react";
 
+import { getToken } from "@/lib/auth";
+
 const API_URL = (
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
 ).replace(/\/$/, "");
-
-const TOKEN_KEYS = [
-  "token",
-  "accessToken",
-  "access_token",
-  "authToken",
-  "jwt",
-];
-
-function getToken() {
-  if (typeof window === "undefined") return null;
-
-  for (const key of TOKEN_KEYS) {
-    const value = localStorage.getItem(key);
-
-    if (value && value.trim()) {
-      return value.trim();
-    }
-  }
-
-  return null;
-}
 
 /* ============================================================
    APPLY SCHOOL THEME

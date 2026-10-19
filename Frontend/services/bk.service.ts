@@ -319,13 +319,7 @@ export interface UpdateAsesmenMinatBakatPayload {
 // HELPER
 // =========================================================
 
-function getToken(): string | null {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  return localStorage.getItem("token");
-}
+import { getToken } from "../lib/auth";
 
 function getHeaders(): HeadersInit {
   const token = getToken();

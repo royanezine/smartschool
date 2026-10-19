@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getStoredUser } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeft,
@@ -119,7 +120,7 @@ export default function TambahTugasPage() {
       setLoading(true);
       setError("");
 
-      const storedUser = localStorage.getItem("user");
+      const storedUser = getStoredUser();
       let currentUser = null;
 
       try {

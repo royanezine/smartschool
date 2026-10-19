@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { getStoredUser } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 
 import Sidebar from "@/app/components/Sidebar";
@@ -172,7 +173,7 @@ export default function UploadMateriPage() {
       }
 
       const rawUser =
-        localStorage.getItem("user");
+        getStoredUser();
 
       if (!rawUser) {
         console.warn(

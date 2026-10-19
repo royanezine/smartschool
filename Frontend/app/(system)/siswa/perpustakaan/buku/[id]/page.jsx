@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { getToken } from "@/lib/auth";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import {
@@ -29,6 +30,8 @@ import {
   pinjamBuku,
   kembalikanBuku,
 } from "@/services/perpustakaan.service";
+
+import { getSessionUser } from "@/lib/auth";
 
 /* =========================================================
    THEME HELPERS
@@ -131,37 +134,12 @@ function getErrorMessage(error, fallback) {
   );
 }
 
-function getToken() {
-  if (typeof window === "undefined") {
-    return "";
-  }
-
-  return (
-    localStorage.getItem("token") ||
-    localStorage.getItem("accessToken") ||
-    localStorage.getItem("access_token") ||
-    localStorage.getItem("authToken") ||
-    localStorage.getItem("jwt") ||
-    ""
-  );
-}
+// getToken diimpor dari @/lib/auth (single source of truth)
 
 function getStoredUser() {
-  if (typeof window === "undefined") {
-    return null;
-  }
-
-  try {
-    const raw = localStorage.getItem("user");
-
-    if (!raw) {
-      return null;
-    }
-
-    return JSON.parse(raw);
-  } catch {
-    return null;
-  }
+  // Identitas selalu berasal dari sesi aktif (lib/auth). Membaca
+  // localStorage("user") langsung berisiko menampilkan akun lain.
+  return getSessionUser();
 }
 
 function getUserId(user) {

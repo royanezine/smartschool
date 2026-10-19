@@ -1,6 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
+import { getToken } from "@/lib/auth";
 import {
     Building2,
     School,
@@ -118,10 +119,7 @@ export default function DetailYayasanPage() {
                     process.env.NEXT_PUBLIC_API_URL ||
                     "http://localhost:5000";
 
-                const token =
-                    typeof window !== "undefined"
-                        ? localStorage.getItem("token")
-                        : null;
+                const token = getToken();
 
                 if (!token) {
                     throw new Error(

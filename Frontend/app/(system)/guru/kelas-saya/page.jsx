@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { getStoredUser } from "@/lib/auth";
 import { useRouter } from "next/navigation";
 
 import { getKelasMapel } from "@/services/kelasMapel.service";
@@ -88,26 +89,7 @@ const cardAccents = [
    DATA HELPERS
 ========================================================= */
 
-function getStoredUser() {
-  if (typeof window === "undefined") return null;
-
-  try {
-    const raw = localStorage.getItem("user");
-    if (!raw) return null;
-
-    const parsed = JSON.parse(raw);
-
-    return (
-      parsed?.user ||
-      parsed?.data?.user ||
-      parsed?.data ||
-      parsed
-    );
-  } catch (error) {
-    console.error("[KELAS SAYA] Gagal membaca user:", error);
-    return null;
-  }
-}
+// getStoredUser diimpor dari @/lib/auth (single source of truth)
 
 function getTeacherId(user) {
   if (!user) return "";

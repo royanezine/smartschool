@@ -1,4 +1,5 @@
 import { apiFetch } from "../lib/api";
+import { getToken } from "../lib/auth";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
@@ -16,10 +17,7 @@ export async function getGedung() {
       };
     }
 
-    const token =
-      typeof window !== "undefined"
-        ? localStorage.getItem("token")
-        : null;
+    const token = getToken();
 
     const headers = {
       "Content-Type": "application/json",

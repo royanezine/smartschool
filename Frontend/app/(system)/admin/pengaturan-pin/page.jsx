@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { getToken, getStoredUser } from "@/lib/auth";
 import {
   Search,
   ShieldCheck,
@@ -260,11 +261,9 @@ export default function PengaturanPinPage() {
 
   useEffect(() => {
     try {
-      const user = JSON.parse(
-        localStorage.getItem("user") || "{}"
-      );
+      const user = getStoredUser() || {};
 
-      const token = localStorage.getItem("token");
+      const token = getToken();
 
       const role = String(
         user?.role ||
