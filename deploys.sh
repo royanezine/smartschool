@@ -34,9 +34,10 @@ command -v pm2 >/dev/null 2>&1 || die "pm2 tidak ditemukan."
 command -v curl >/dev/null 2>&1 || die "curl tidak ditemukan."
 
 log "Memeriksa perubahan lokal sebelum pull"
-if [[ -n "$(git -C "$ROOT_DIR" status --porcelain)" ]]; then
+if [[ -n "$(git -C "$ROOT_DIR" status --porcelain --untracked-files=all \
+  | grep -vE '^\?\? deploy\.sh$|^\?\? deploys\.sh$' || true)" ]]; then
   git -C "$ROOT_DIR" status --short
-  die "Ada perubahan lokal. Amankan/commit perubahan tersebut sebelum deploy; script tidak akan menimpa perubahan lokal."
+  die "Ada perubahan lokal selain file deploy. Amankan perubahan tersebut sebelum deploy."
 fi
 
 log "Pull branch $BRANCH"
