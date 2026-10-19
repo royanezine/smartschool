@@ -10,25 +10,19 @@ import { isSuperAdmin } from "../utils/rbac";
 
 export const createSoal = async (req: AuthRequest, res: Response) => {
   const data = createSoalSchema.parse(req.body);
+  const sekolahId = req.user?.sekolahId;
+  const isSuper = isSuperAdmin(req.user?.role);
 
-  const asesmen = await prisma.asesmen.findUnique({
-    where: { id: data.ujianId },
-    include: {
-      kelasMapel: {
-        include: {
-          kelas: { select: { sekolahId: true } },
-        },
-      },
+  const asesmen = await prisma.asesmen.findFirst({
+    where: {
+      id: data.ujianId,
+      dihapusPada: null,
+      ...(!isSuper && { kelasMapel: { kelas: { sekolahId } } }),
     },
   });
 
   if (!asesmen) {
-    throw new AppError("Ujian tidak ditemukan", 404);
-  }
-
-  const isSuper = isSuperAdmin(req.user?.role);
-  if (!isSuper && asesmen.kelasMapel.kelas.sekolahId !== req.user?.sekolahId) {
-    throw new AppError("Akses ditolak: Ujian milik sekolah lain", 403);
+    throw new AppError("Data tidak ditemukan atau Anda tidak memiliki akses", 403);
   }
 
   if (
@@ -77,31 +71,29 @@ export const createSoal = async (req: AuthRequest, res: Response) => {
 
 export const getSoalByUjian = async (req: AuthRequest, res: Response) => {
   const ujianId = req.params.ujianId as string;
+  const sekolahId = req.user?.sekolahId;
   const role = req.user?.role ?? "";
+  const isSuper = isSuperAdmin(role);
   const showKunci = ["guru", "super_admin", "admin_sekolah"].includes(role);
 
-  const asesmen = await prisma.asesmen.findUnique({
-    where: { id: ujianId },
-    include: {
-      kelasMapel: {
-        include: {
-          kelas: { select: { sekolahId: true } },
-        },
-      },
+  const asesmen = await prisma.asesmen.findFirst({
+    where: {
+      id: ujianId,
+      dihapusPada: null,
+      ...(!isSuper && { kelasMapel: { kelas: { sekolahId } } }),
     },
   });
 
   if (!asesmen) {
-    throw new AppError("Ujian tidak ditemukan", 404);
-  }
-
-  const isSuper = isSuperAdmin(req.user?.role);
-  if (!isSuper && asesmen.kelasMapel.kelas.sekolahId !== req.user?.sekolahId) {
-    throw new AppError("Akses ditolak: Ujian milik sekolah lain", 403);
+    throw new AppError("Data tidak ditemukan atau Anda tidak memiliki akses", 403);
   }
 
   const soal = await prisma.soalAsesmen.findMany({
-    where: { asesmenId: ujianId },
+    where: {
+      asesmenId: ujianId,
+      dihapusPada: null,
+      ...(!isSuper && { asesmen: { kelasMapel: { kelas: { sekolahId } } } }),
+    },
     select: {
       id: true,
       asesmenId: true,
@@ -126,31 +118,21 @@ export const getSoalByUjian = async (req: AuthRequest, res: Response) => {
 
 export const getSoalById = async (req: AuthRequest, res: Response) => {
   const id = req.params.id as string;
+  const sekolahId = req.user?.sekolahId;
   const role = req.user?.role ?? "";
+  const isSuper = isSuperAdmin(role);
   const showKunci = ["guru", "super_admin", "admin_sekolah"].includes(role);
 
-  const soal = await prisma.soalAsesmen.findUnique({
-    where: { id },
-    include: {
-      asesmen: {
-        include: {
-          kelasMapel: {
-            include: {
-              kelas: { select: { sekolahId: true } },
-            },
-          },
-        },
-      },
+  const soal = await prisma.soalAsesmen.findFirst({
+    where: {
+      id,
+      dihapusPada: null,
+      ...(!isSuper && { asesmen: { kelasMapel: { kelas: { sekolahId } } } }),
     },
   });
 
   if (!soal) {
-    throw new AppError("Soal ujian tidak ditemukan", 404);
-  }
-
-  const isSuper = isSuperAdmin(req.user?.role);
-  if (!isSuper && soal.asesmen.kelasMapel.kelas.sekolahId !== req.user?.sekolahId) {
-    throw new AppError("Akses ditolak: Soal milik sekolah lain", 403);
+    throw new AppError("Data tidak ditemukan atau Anda tidak memiliki akses", 403);
   }
 
   const soalData: any = {
@@ -175,30 +157,20 @@ export const getSoalById = async (req: AuthRequest, res: Response) => {
 
 export const updateSoal = async (req: AuthRequest, res: Response) => {
   const id = req.params.id as string;
+  const sekolahId = req.user?.sekolahId;
+  const isSuper = isSuperAdmin(req.user?.role);
   const data = updateSoalSchema.parse(req.body);
 
-  const existing = await prisma.soalAsesmen.findUnique({
-    where: { id },
-    include: {
-      asesmen: {
-        include: {
-          kelasMapel: {
-            include: {
-              kelas: { select: { sekolahId: true } },
-            },
-          },
-        },
-      },
+  const existing = await prisma.soalAsesmen.findFirst({
+    where: {
+      id,
+      dihapusPada: null,
+      ...(!isSuper && { asesmen: { kelasMapel: { kelas: { sekolahId } } } }),
     },
   });
 
   if (!existing) {
-    throw new AppError("Soal ujian tidak ditemukan", 404);
-  }
-
-  const isSuper = isSuperAdmin(req.user?.role);
-  if (!isSuper && existing.asesmen.kelasMapel.kelas.sekolahId !== req.user?.sekolahId) {
-    throw new AppError("Akses ditolak: Soal milik sekolah lain", 403);
+    throw new AppError("Data tidak ditemukan atau Anda tidak memiliki akses", 403);
   }
 
   const { jawabanBenar, ...restData } = data;
@@ -221,29 +193,19 @@ export const updateSoal = async (req: AuthRequest, res: Response) => {
 
 export const deleteSoal = async (req: AuthRequest, res: Response) => {
   const id = req.params.id as string;
+  const sekolahId = req.user?.sekolahId;
+  const isSuper = isSuperAdmin(req.user?.role);
 
-  const existing = await prisma.soalAsesmen.findUnique({
-    where: { id },
-    include: {
-      asesmen: {
-        include: {
-          kelasMapel: {
-            include: {
-              kelas: { select: { sekolahId: true } },
-            },
-          },
-        },
-      },
+  const existing = await prisma.soalAsesmen.findFirst({
+    where: {
+      id,
+      dihapusPada: null,
+      ...(!isSuper && { asesmen: { kelasMapel: { kelas: { sekolahId } } } }),
     },
   });
 
   if (!existing) {
-    throw new AppError("Soal ujian tidak ditemukan", 404);
-  }
-
-  const isSuper = isSuperAdmin(req.user?.role);
-  if (!isSuper && existing.asesmen.kelasMapel.kelas.sekolahId !== req.user?.sekolahId) {
-    throw new AppError("Akses ditolak: Soal milik sekolah lain", 403);
+    throw new AppError("Data tidak ditemukan atau Anda tidak memiliki akses", 403);
   }
 
   await prisma.soalAsesmen.delete({ where: { id } });

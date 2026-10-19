@@ -2,6 +2,91 @@ import { Request, Response, NextFunction } from "express";
 import { prisma } from "../config/db";
 import { AppError } from "../utils/appError";
 import { successResponse } from "../utils/responseFormatter";
+import { bangunTema } from "../utils/temaDefault";
+
+export const getPublicProfil = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const subdomain = req.params.subdomain as string;
+
+    const sekolah = await prisma.sekolah.findUnique({
+      where: { subdomain },
+      select: {
+        id: true,
+        nama: true,
+        subdomain: true,
+        npsn: true,
+        jenjang: true,
+        alamat: true,
+        telepon: true,
+        email: true,
+        kode: true,
+        logoBesarUrl: true,
+        logoKecilUrl: true,
+        faviconUrl: true,
+        status: true,
+        halamanCms: {
+          where: {
+            status: "aktif",
+            dihapusPada: null,
+          },
+          select: {
+            judul: true,
+            slug: true,
+          },
+        },
+      },
+    });
+
+    if (!sekolah) throw new AppError("Sekolah tidak ditemukan", 404);
+
+    return successResponse(res, "Berhasil mengambil profil sekolah publik", {
+      ...sekolah,
+      daftarCms: sekolah.halamanCms,
+    }, 200);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getPublicTema = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const subdomain = req.params.subdomain as string;
+
+    const sekolah = await prisma.sekolah.findUnique({
+      where: { subdomain },
+      select: { id: true },
+    });
+
+    if (!sekolah) throw new AppError("Sekolah tidak ditemukan", 404);
+
+    const overrides = await prisma.pengaturanSistem.findMany({
+      where: {
+        sekolahId: sekolah.id,
+        kelompok: { in: ["tema_warna", "warna_tema"] },
+        dihapusPada: null,
+      },
+      select: { kunci: true, nilai: true },
+    });
+
+    const normalizedOverrides = overrides.map((o) => {
+      if (o.kunci.startsWith("warna.")) return o;
+      const parts = o.kunci.split(".");
+      if (parts.length === 2) {
+        return { kunci: `warna.${parts[0]}.${parts[1]}`, nilai: o.nilai };
+      }
+      if (parts.length === 1) {
+        return { kunci: `warna.tema.${parts[0]}`, nilai: o.nilai };
+      }
+      return o;
+    });
+
+    const tema = bangunTema(normalizedOverrides);
+
+    return successResponse(res, "Berhasil mengambil tema sekolah publik", tema, 200);
+  } catch (error) {
+    next(error);
+  }
+};
 
 export const getPublicArtikel = async (req: Request, res: Response, next: NextFunction) => {
   try {

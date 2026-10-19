@@ -1,4 +1,5 @@
 import { Request, Response, NextFunction } from "express";
+import { TipePaket } from "@prisma/client";
 import { prisma } from "../config/db";
 import { AppError } from "../utils/appError";
 import { successResponse } from "../utils/responseFormatter";
@@ -47,7 +48,7 @@ export const registerTenant = async (
     });
     if (!paket) throw new AppError("Paket langganan tidak ditemukan", 400);
 
-    const tipeDiharapkan = isYayasan ? "YAYASAN" : "SEKOLAH";
+    const tipeDiharapkan = isYayasan ? TipePaket.YAYASAN : TipePaket.SEKOLAH;
     if (paket.tipe !== tipeDiharapkan) {
       throw new AppError(
         isYayasan

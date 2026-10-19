@@ -28,9 +28,9 @@ const loadKelasMapelGuru = async (
     },
   });
 
-  if (!km) throw new AppError("Kelas mapel tidak ditemukan", 404);
+  if (!km) throw new AppError("Data tidak ditemukan atau Anda tidak memiliki akses", 403);
   if (km.guruPengajarId !== userId)
-    throw new AppError("Anda bukan guru pengampu kelas mapel ini", 403);
+    throw new AppError("Data tidak ditemukan atau Anda tidak memiliki akses", 403);
 
   return km;
 };
@@ -84,18 +84,15 @@ export const exportRekapNilai = async (req: AuthRequest, res: Response) => {
       pengguna: {
         sekolahId,
       },
+      kelasMapel: {
+        kelas: {
+          sekolahId,
+        },
+        ...(kelasId ? { kelasId: String(kelasId) } : {}),
+      },
+      ...(kelasMapelId ? { kelasMapelId: String(kelasMapelId) } : {}),
       dihapusOleh: null,
     };
-
-    if (kelasId) {
-      nilaiWhere.kelasMapel = {
-        kelasId: String(kelasId),
-      };
-    }
-
-    if (kelasMapelId) {
-      nilaiWhere.kelasMapelId = String(kelasMapelId);
-    }
 
     const nilai = await prisma.nilai.findMany({
       where: nilaiWhere,
@@ -145,6 +142,9 @@ export const exportRekapNilai = async (req: AuthRequest, res: Response) => {
           },
           asesmen: {
             kelasMapel: {
+              kelas: {
+                sekolahId,
+              },
               ...(kelasMapelId
                 ? {
                     id: String(kelasMapelId),
@@ -325,7 +325,11 @@ export const getKomponenNilaiByMapel = async (
     await loadKelasMapelGuru(kelasMapelId, userId, sekolahId);
 
     const komponen = await prisma.komponenNilai.findMany({
-      where: { kelasMapelId, dihapusOleh: null },
+      where: {
+        kelasMapelId,
+        dihapusOleh: null,
+        kelasMapel: { kelas: { sekolahId } },
+      },
       orderBy: { dibuatPada: "asc" },
     });
 
@@ -373,7 +377,11 @@ export const createKomponenNilai = async (
       );
 
     const existing = await prisma.komponenNilai.findMany({
-      where: { kelasMapelId, dihapusOleh: null },
+      where: {
+        kelasMapelId,
+        dihapusOleh: null,
+        kelasMapel: { kelas: { sekolahId } },
+      },
       select: { bobot: true },
     });
     const totalLama = existing.reduce((acc, k) => acc + Number(k.bobot), 0);
@@ -430,12 +438,20 @@ export const getGridNilai = async (
 
     const [komponen, siswa, nilai, final] = await Promise.all([
       prisma.komponenNilai.findMany({
-        where: { kelasMapelId, dihapusOleh: null },
+        where: {
+          kelasMapelId,
+          dihapusOleh: null,
+          kelasMapel: { kelas: { sekolahId } },
+        },
         orderBy: { dibuatPada: "asc" },
       }),
       getSiswaKelas(km.kelasId),
       prisma.nilai.findMany({
-        where: { kelasMapelId, dihapusOleh: null },
+        where: {
+          kelasMapelId,
+          dihapusOleh: null,
+          kelasMapel: { kelas: { sekolahId } },
+        },
         select: { penggunaId: true, komponenNilaiId: true, nilai: true },
       }),
       isFinalized(kelasMapelId),
@@ -498,7 +514,11 @@ export const inputNilaiBulk = async (
 
     const [komponen, siswa] = await Promise.all([
       prisma.komponenNilai.findMany({
-        where: { kelasMapelId, dihapusOleh: null },
+        where: {
+          kelasMapelId,
+          dihapusOleh: null,
+          kelasMapel: { kelas: { sekolahId } },
+        },
         select: { id: true },
       }),
       getSiswaKelas(km.kelasId),
@@ -562,7 +582,11 @@ export const inputNilaiBulk = async (
     }
 
     const existing = await prisma.nilai.findMany({
-      where: { kelasMapelId, dihapusOleh: null },
+      where: {
+        kelasMapelId,
+        dihapusOleh: null,
+        kelasMapel: { kelas: { sekolahId } },
+      },
       select: { id: true, penggunaId: true, komponenNilaiId: true },
     });
     const existingMap = new Map<string, string>();
@@ -620,7 +644,11 @@ export const finalisasiNilai = async (
       throw new AppError("Nilai sudah difinalisasi", 400);
 
     const komponen = await prisma.komponenNilai.findMany({
-      where: { kelasMapelId, dihapusOleh: null },
+      where: {
+        kelasMapelId,
+        dihapusOleh: null,
+        kelasMapel: { kelas: { sekolahId } },
+      },
       orderBy: { dibuatPada: "asc" },
     });
 
@@ -647,7 +675,11 @@ export const finalisasiNilai = async (
       throw new AppError("Tidak ada siswa di kelas ini", 400);
 
     const nilaiRows = await prisma.nilai.findMany({
-      where: { kelasMapelId, dihapusOleh: null },
+      where: {
+        kelasMapelId,
+        dihapusOleh: null,
+        kelasMapel: { kelas: { sekolahId } },
+      },
       select: { penggunaId: true, komponenNilaiId: true, nilai: true },
     });
     const nilaiMap = new Map<string, number>();
@@ -746,14 +778,15 @@ export const tarikSumberNilai = async (
         id: komponenNilaiId,
         kelasMapelId,
         dihapusOleh: null,
+        kelasMapel: { kelas: { sekolahId } },
       },
       select: { id: true },
     });
 
     if (!komponen) {
       throw new AppError(
-        "Komponen nilai tidak ditemukan pada kelas mapel ini",
-        404,
+        "Data tidak ditemukan atau Anda tidak memiliki akses",
+        403,
       );
     }
 
@@ -768,12 +801,13 @@ export const tarikSumberNilai = async (
           id: sumberId,
           kelasMapelId,
           dihapusOleh: null,
+          kelasMapel: { kelas: { sekolahId } },
         },
         select: { id: true },
       });
 
       if (!asesmen) {
-        throw new AppError("Asesmen tidak ditemukan pada kelas mapel ini", 404);
+        throw new AppError("Data tidak ditemukan atau Anda tidak memiliki akses", 403);
       }
 
       const hasil = await prisma.hasilAsesmen.findMany({
@@ -781,6 +815,7 @@ export const tarikSumberNilai = async (
           dihapusOleh: null,
           percobaanAsesmen: {
             asesmenId: sumberId,
+            asesmen: { kelasMapel: { kelas: { sekolahId } } },
             dihapusOleh: null,
           },
         },
@@ -829,17 +864,19 @@ export const tarikSumberNilai = async (
           id: sumberId,
           kelasMapelId,
           dihapusOleh: null,
+          kelasMapel: { kelas: { sekolahId } },
         },
         select: { id: true },
       });
 
       if (!tugas) {
-        throw new AppError("Tugas tidak ditemukan pada kelas mapel ini", 404);
+        throw new AppError("Data tidak ditemukan atau Anda tidak memiliki akses", 403);
       }
 
       const pengumpulan = await prisma.pengumpulanTugas.findMany({
         where: {
           tugasId: sumberId,
+          tugas: { kelasMapel: { kelas: { sekolahId } } },
           dihapusOleh: null,
         },
         select: {
@@ -971,14 +1008,15 @@ export const importNilaiExcel = async (
         id: komponenNilaiId,
         kelasMapelId,
         dihapusOleh: null,
+        kelasMapel: { kelas: { sekolahId } },
       },
       select: { id: true },
     });
 
     if (!komponen) {
       throw new AppError(
-        "Komponen nilai tidak ditemukan pada kelas mapel ini",
-        404,
+        "Data tidak ditemukan atau Anda tidak memiliki akses",
+        403,
       );
     }
 

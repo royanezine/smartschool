@@ -4,70 +4,83 @@ import { AppError } from "../utils/appError";
 import { successResponse } from "../utils/responseFormatter";
 import { AuthRequest } from "../middlewares/auth.middleware";
 import {
-    createTugasSchema,
-    updateTugasSchema,
-    submitTugasSchema,
-    nilaiTugasSchema,
+  createTugasSchema,
+  updateTugasSchema,
+  submitTugasSchema,
+  nilaiTugasSchema,
 } from "../validations/tugas.validation";
 
-// guru CREATE TUGAS
+// GURU: CREATE TUGAS
 export const createTugas = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const userId = (req as AuthRequest).user?.userId;
-        const validated = createTugasSchema.parse(req.body);
+  try {
+    const userId = (req as AuthRequest).user?.userId;
+    const sekolahId = (req as AuthRequest).user?.sekolahId;
+    const validated = createTugasSchema.parse(req.body);
 
-        const kelasMapel = await prisma.kelasMapel.findFirst({
-            where: {
-                id: validated.kelasMapelId,
-                guruPengajarId: userId,
-            },
-        });
+    const kelasMapel = await prisma.kelasMapel.findFirst({
+      where: {
+        id: validated.kelasMapelId,
+        guruPengajarId: userId,
+        kelas: { sekolahId },
+      },
+    });
 
-        if (!kelasMapel) {
-            throw new AppError("Kelas mapel tidak di temukan atau Anda bukan pengampu mapel ini", 403);
-        }
-
-        const tugas = await prisma.tugas.create({
-            data: {
-                kelasMapelId: validated.kelasMapelId,
-                judul: validated.judul,
-                deskripsi: validated.judul,
-                batasWaktu: new Date(validated.batasWaktu),
-                dibuatOleh: userId,
-            },
-        });
-        
-        return successResponse(res, "Tugas berhasil di buat", tugas, 201);
-    } catch (error) {
-        next(error);
+    if (!kelasMapel) {
+      throw new AppError("Data tidak ditemukan atau Anda tidak memiliki akses", 403);
     }
+
+    const tugas = await prisma.tugas.create({
+      data: {
+        kelasMapelId: validated.kelasMapelId,
+        judul: validated.judul,
+        deskripsi: validated.deskripsi ?? validated.judul,
+        batasWaktu: new Date(validated.batasWaktu),
+        dibuatOleh: userId,
+      },
+    });
+
+    return successResponse(res, "Tugas berhasil dibuat", tugas, 201);
+  } catch (error) {
+    next(error);
+  }
 };
 
-// GET TUGAS PER KELAS MAPEL 
+// GET TUGAS PER KELAS MAPEL
 export const getTugasByKelasMapel = async (req: Request, res: Response, next: NextFunction) => {
-    try {
-        const kelasMapelId = req.params.kelasMapelId as string;
-        const data = await prisma.tugas.findMany({
-            where: { kelasMapelId, dihapusPada: null },
-            include: {
-                _count: { select: { pengumpulanTugasSiswa: true } },
-            },
-            orderBy: { batasWaktu: "asc" },
-        });
-        return successResponse(res, "Berhasil mengambil daftar tugas", data);
-    } catch (error) {
-        next(error);
-    }
+  try {
+    const kelasMapelId = req.params.kelasMapelId as string;
+    const sekolahId = (req as AuthRequest).user?.sekolahId;
+
+    const data = await prisma.tugas.findMany({
+      where: {
+        kelasMapelId,
+        dihapusPada: null,
+        kelasMapel: { kelas: { sekolahId } },
+      },
+      include: {
+        _count: { select: { pengumpulanTugasSiswa: true } },
+      },
+      orderBy: { batasWaktu: "asc" },
+    });
+    return successResponse(res, "Berhasil mengambil daftar tugas", data);
+  } catch (error) {
+    next(error);
+  }
 };
 
 // DETAIL TUGAS
 export const getDetailTugas = async (req: Request, res: Response, next: NextFunction) => {
-    try {
+  try {
     const id = req.params.id as string;
     const userId = (req as AuthRequest).user?.userId;
+    const sekolahId = (req as AuthRequest).user?.sekolahId;
 
     const tugas = await prisma.tugas.findFirst({
-      where: { id, dihapusPada: null },
+      where: {
+        id,
+        dihapusPada: null,
+        kelasMapel: { kelas: { sekolahId } },
+      },
       include: {
         kelasMapel: {
           include: {
@@ -76,12 +89,12 @@ export const getDetailTugas = async (req: Request, res: Response, next: NextFunc
           },
         },
         pengumpulanTugasSiswa: {
-            where: { penggunaId: userId },
-            },
+          where: { penggunaId: userId },
+        },
       },
     });
-      
-        if (!tugas) throw new AppError("Tugas tidak ditemukan", 404);
+
+    if (!tugas) throw new AppError("Data tidak ditemukan atau Anda tidak memiliki akses", 403);
     return successResponse(res, "Berhasil mengambil detail tugas", tugas);
   } catch (error) {
     next(error);
@@ -92,7 +105,20 @@ export const getDetailTugas = async (req: Request, res: Response, next: NextFunc
 export const updateTugas = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = req.params.id as string;
+    const sekolahId = (req as AuthRequest).user?.sekolahId;
     const validated = updateTugasSchema.parse(req.body);
+
+    const existing = await prisma.tugas.findFirst({
+      where: {
+        id,
+        dihapusPada: null,
+        kelasMapel: { kelas: { sekolahId } },
+      },
+    });
+
+    if (!existing) {
+      throw new AppError("Data tidak ditemukan atau Anda tidak memiliki akses", 403);
+    }
 
     const tugas = await prisma.tugas.update({
       where: { id },
@@ -109,10 +135,24 @@ export const updateTugas = async (req: Request, res: Response, next: NextFunctio
   }
 };
 
-// GURU DELETE TUGAS 
+// GURU: DELETE TUGAS
 export const deleteTugas = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = req.params.id as string;
+    const sekolahId = (req as AuthRequest).user?.sekolahId;
+
+    const existing = await prisma.tugas.findFirst({
+      where: {
+        id,
+        dihapusPada: null,
+        kelasMapel: { kelas: { sekolahId } },
+      },
+    });
+
+    if (!existing) {
+      throw new AppError("Data tidak ditemukan atau Anda tidak memiliki akses", 403);
+    }
+
     await prisma.tugas.update({
       where: { id },
       data: { dihapusPada: new Date() },
@@ -128,21 +168,29 @@ export const submitTugas = async (req: Request, res: Response, next: NextFunctio
   try {
     const tugasId = req.params.id as string;
     const userId = (req as AuthRequest).user?.userId as string;
+    const sekolahId = (req as AuthRequest).user?.sekolahId;
     const validated = submitTugasSchema.parse(req.body);
 
     const tugas = await prisma.tugas.findFirst({
-      where: { id: tugasId, dihapusPada: null },
+      where: {
+        id: tugasId,
+        dihapusPada: null,
+        kelasMapel: { kelas: { sekolahId } },
+      },
     });
 
-    if (!tugas) throw new AppError("Tugas tidak ditemukan", 404);
+    if (!tugas) throw new AppError("Data tidak ditemukan atau Anda tidak memiliki akses", 403);
 
     const now = new Date();
     const statusPengumpulan = tugas.batasWaktu && now > tugas.batasWaktu ? "terlambat" : "dikumpulkan";
 
+    const existingPengumpulan = await prisma.pengumpulanTugas.findFirst({
+      where: { tugasId, penggunaId: userId },
+    });
+
     const pengumpulan = await prisma.pengumpulanTugas.upsert({
       where: {
-        // Asumsi relasi tugas-siswa
-        id: (await prisma.pengumpulanTugas.findFirst({ where: { tugasId, penggunaId: userId } }))?.id || "new-id",
+        id: existingPengumpulan?.id || "new-id",
       },
       update: {
         urlFile: validated.urlFile,
@@ -170,8 +218,23 @@ export const submitTugas = async (req: Request, res: Response, next: NextFunctio
 export const getPengumpulanByTugas = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const tugasId = req.params.id as string;
+    const sekolahId = (req as AuthRequest).user?.sekolahId;
+
+    const tugas = await prisma.tugas.findFirst({
+      where: {
+        id: tugasId,
+        dihapusPada: null,
+        kelasMapel: { kelas: { sekolahId } },
+      },
+    });
+
+    if (!tugas) throw new AppError("Data tidak ditemukan atau Anda tidak memiliki akses", 403);
+
     const data = await prisma.pengumpulanTugas.findMany({
-      where: { tugasId },
+      where: {
+        tugasId,
+        tugas: { kelasMapel: { kelas: { sekolahId } } },
+      },
       include: {
         pengguna: {
           select: {
@@ -194,9 +257,21 @@ export const getPengumpulanByTugas = async (req: Request, res: Response, next: N
 export const beriNilaiTugas = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const pengumpulanId = req.params.pengumpulanId as string;
+    const sekolahId = (req as AuthRequest).user?.sekolahId;
     const validated = nilaiTugasSchema.parse(req.body);
 
-    const pengumpulan = await prisma.pengumpulanTugas.update({
+    const pengumpulan = await prisma.pengumpulanTugas.findFirst({
+      where: {
+        id: pengumpulanId,
+        tugas: { kelasMapel: { kelas: { sekolahId } } },
+      },
+    });
+
+    if (!pengumpulan) {
+      throw new AppError("Data tidak ditemukan atau Anda tidak memiliki akses", 403);
+    }
+
+    const updated = await prisma.pengumpulanTugas.update({
       where: { id: pengumpulanId },
       data: {
         nilai: validated.nilai,
@@ -205,9 +280,8 @@ export const beriNilaiTugas = async (req: Request, res: Response, next: NextFunc
       },
     });
 
-    return successResponse(res, "Nilai tugas berhasil disimpan", pengumpulan);
+    return successResponse(res, "Nilai tugas berhasil disimpan", updated);
   } catch (error) {
     next(error);
   }
 };
-

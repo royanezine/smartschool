@@ -19,7 +19,8 @@ export const createKategoriArtikel = async (req: Request, res: Response, next: N
   try {
     const sekolahId = (req as any).user.sekolahId;
     const validatedData = kategoriArtikelSchema.parse(req.body);
-    const slug = validatedData.nama.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now();
+    const rawJudul = validatedData.nama || (req.body.judul as string) || "kategori";
+    const slug = rawJudul.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 35) + '-' + Date.now();
     const kategori = await prisma.kategoriArtikel.create({
       data: { ...validatedData, slug, sekolahId },
     });
@@ -46,12 +47,14 @@ export const updateKategoriArtikel = async (req: Request, res: Response, next: N
     const id = req.params.id as string;
     const sekolahId = (req as any).user.sekolahId;
     const validatedData = kategoriArtikelSchema.parse(req.body);
-    const slug = validatedData.nama.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now();
 
     const kategori = await prisma.kategoriArtikel.findFirst({
       where: { id, sekolahId, dihapusPada: null },
     });
     if (!kategori) throw new AppError("Kategori artikel tidak ditemukan", 404);
+
+    const rawJudul = validatedData.nama || (req.body.judul as string) || kategori.nama;
+    const slug = rawJudul.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 35) + '-' + Date.now();
 
     const updated = await prisma.kategoriArtikel.update({
       where: { id },
@@ -87,7 +90,7 @@ export const createArtikelCms = async (req: Request, res: Response, next: NextFu
   try {
     const sekolahId = (req as any).user.sekolahId;
     const validatedData = artikelCmsSchema.parse(req.body);
-    const slug = validatedData.judul.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now();
+    const slug = validatedData.judul.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 80) + '-' + Date.now();
     const artikel = await prisma.artikelCms.create({
       data: { ...validatedData, slug, sekolahId },
     });
@@ -115,12 +118,14 @@ export const updateArtikelCms = async (req: Request, res: Response, next: NextFu
     const id = req.params.id as string;
     const sekolahId = (req as any).user.sekolahId;
     const validatedData = artikelCmsSchema.parse(req.body);
-    const slug = validatedData.judul.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now();
 
     const artikel = await prisma.artikelCms.findFirst({
       where: { id, sekolahId, dihapusPada: null },
     });
     if (!artikel) throw new AppError("Artikel tidak ditemukan", 404);
+
+    const rawJudul = validatedData.judul || artikel.judul;
+    const slug = rawJudul.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 80) + '-' + Date.now();
 
     const updated = await prisma.artikelCms.update({
       where: { id },
@@ -157,7 +162,7 @@ export const createHalamanCms = async (req: Request, res: Response, next: NextFu
   try {
     const sekolahId = (req as any).user.sekolahId;
     const validatedData = halamanCmsSchema.parse(req.body);
-    const slug = validatedData.judul.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now();
+    const slug = validatedData.judul.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 80) + '-' + Date.now();
     const halaman = await prisma.halamanCms.create({
       data: { ...validatedData, slug, sekolahId },
     });
@@ -184,12 +189,14 @@ export const updateHalamanCms = async (req: Request, res: Response, next: NextFu
     const id = req.params.id as string;
     const sekolahId = (req as any).user.sekolahId;
     const validatedData = halamanCmsSchema.parse(req.body);
-    const slug = validatedData.judul.toLowerCase().replace(/[^a-z0-9]+/g, '-') + '-' + Date.now();
 
     const halaman = await prisma.halamanCms.findFirst({
       where: { id, sekolahId, dihapusPada: null },
     });
     if (!halaman) throw new AppError("Halaman tidak ditemukan", 404);
+
+    const rawJudul = validatedData.judul || halaman.judul;
+    const slug = rawJudul.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 80) + '-' + Date.now();
 
     const updated = await prisma.halamanCms.update({
       where: { id },
