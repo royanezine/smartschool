@@ -126,3 +126,37 @@ export const uploadNilaiExcel = multer({
     cb(null, true);
   },
 });
+
+const storageBuku = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const dir = path.join(process.cwd(), "uploads/buku");
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    cb(null, dir);
+  },
+  filename: (req, file, cb) => {
+    const ext = path.extname(file.originalname).toLowerCase();
+    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
+    cb(null, `${file.fieldname}-${uniqueSuffix}${ext}`);
+  },
+});
+
+export const uploadBuku = multer({
+  storage: storageBuku,
+  limits: { fileSize: 20 * 1024 * 1024 }, //ini Batasnya 20MB (karena PDF buku/ebook biasanya lumayan besar)
+  fileFilter: (req, file, cb) => {
+    const allowedExtensions = [".png", ".jpg", ".jpeg", ".pdf"];
+    const ext = path.extname(file.originalname).toLowerCase();
+
+    if (allowedExtensions.includes(ext)) {
+      cb(null, true);
+    } else {
+      cb(
+        new Error(
+          "Format file tidak didukung. Cover harus JPG/PNG, dan Ebook harus PDF."
+        )
+      );
+    }
+  },
+});

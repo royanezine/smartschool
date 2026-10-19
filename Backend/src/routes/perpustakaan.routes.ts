@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { uploadBuku } from "../middlewares/upload.middleware";
 
 import {
   getBuku,
@@ -29,45 +30,45 @@ router.use(authenticate);
 router.use(requireSekolah);
 
 router.get("/buku", getBuku);
-
 router.get("/buku/:id", getBukuById);
 
 router.post(
   "/buku",
   authorizeRoles("super_admin", "admin_sekolah", "guru"),
+  uploadBuku.fields([
+    { name: "coverUrl", maxCount: 1 },
+    { name: "urlEbook", maxCount: 1 },
+  ]),
   validate(createBukuSchema),
-  createBuku
+  createBuku,
 );
 
 router.put(
   "/buku/:id",
   authorizeRoles("super_admin", "admin_sekolah", "guru"),
+  uploadBuku.fields([
+    { name: "coverUrl", maxCount: 1 },
+    { name: "urlEbook", maxCount: 1 },
+  ]),
   validate(updateBukuSchema),
-  updateBuku
+  updateBuku,
 );
 
 router.delete(
   "/buku/:id",
   authorizeRoles("super_admin", "admin_sekolah", "guru"),
-  deleteBuku
+  deleteBuku,
 );
 
-router.get(
-  "/peminjaman",
-  getPeminjaman
-);
+router.get("/peminjaman", getPeminjaman);
 
-router.post(
-  "/peminjaman",
-  validate(peminjamanBukuSchema),
-  pinjamBuku
-);
+router.post("/peminjaman", validate(peminjamanBukuSchema), pinjamBuku);
 
 router.put(
   "/peminjaman/:id/kembali",
   authorizeRoles("super_admin", "admin_sekolah", "guru"),
   validate(pengembalianBukuSchema),
-  kembalikanBuku
+  kembalikanBuku,
 );
 
 export default router;

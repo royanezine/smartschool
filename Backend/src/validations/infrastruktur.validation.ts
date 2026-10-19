@@ -1,10 +1,10 @@
 import { z } from "zod";
 
-// Schema Gedung
 export const createGedungSchema = z.object({
-  nama: z.string().min(1, "Nama gedung wajib diisi").max(100),
-  kode: z.string().max(50).optional().nullable(),
-  fotoUrl: z.string().url("Format URL foto tidak valid").optional().nullable(),
+  nama: z.string(),
+  kode: z.string().optional(),
+  fotoGedung: z.string().optional(), 
+  status: z.string().optional(),
 });
 
 export const updateGedungSchema = createGedungSchema.partial();
