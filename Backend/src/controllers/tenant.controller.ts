@@ -12,7 +12,15 @@ import { generateOtp } from "../utils/generateOtp";
 import { sendOtpEmail } from "../utils/email";
 import crypto from "crypto";
 
-const MIDTRANS_CHARGE_URL = "https://api.sandbox.midtrans.com/v2/charge";
+const MIDTRANS_SNAP_URL = "https://app.sandbox.midtrans.com/snap/v1/transactions";
+
+const SNAP_PAYMENT_BY_BANK: Record<string, string> = {
+  bca: "bca_va",
+  bni: "bni_va",
+  bri: "bri_va",
+  permata: "permata_va",
+  mandiri: "echannel",
+};
 
 export const registerTenant = async (
   req: Request,
@@ -401,13 +409,6 @@ export const verifyAndPay = async (
     if (!paket) throw new AppError("Paket tidak ditemukan", 404);
 
     if (Number(paket.harga) > 0) {
-      if (!selectedBank) {
-        throw new AppError(
-          "Pilihan bank wajib dipilih untuk pembayaran (bca, bni, bri, mandiri, permata)",
-          400,
-        );
-      }
-
       const serverKey = process.env.MIDTRANS_SERVER_KEY;
       if (!serverKey)
         throw new AppError("Konfigurasi pembayaran belum lengkap", 500);
@@ -417,7 +418,6 @@ export const verifyAndPay = async (
       const totalHarga = Number(paket.harga);
 
       const payload: Record<string, any> = {
-        payment_type: selectedBank === "mandiri" ? "echannel" : "bank_transfer",
         transaction_details: {
           order_id: orderId,
           gross_amount: totalHarga,
@@ -428,18 +428,22 @@ export const verifyAndPay = async (
         },
       };
 
+      if (selectedBank && SNAP_PAYMENT_BY_BANK[selectedBank]) {
+        payload.enabled_payments = [SNAP_PAYMENT_BY_BANK[selectedBank]];
+      }
+
       if (selectedBank === "mandiri") {
         payload.echannel = {
-          bill_info1: "Payment",
-          bill_info2: "Debt",
-        };
-      } else {
-        payload.bank_transfer = {
-          bank: selectedBank,
+          bill_info1: "Pembayaran",
+          bill_info2: "Registrasi",
         };
       }
 
-      const midtransResponse = await fetch(MIDTRANS_CHARGE_URL, {
+      if (process.env.MIDTRANS_FINISH_URL) {
+        payload.callbacks = { finish: process.env.MIDTRANS_FINISH_URL };
+      }
+
+      const midtransResponse = await fetch(MIDTRANS_SNAP_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -449,33 +453,25 @@ export const verifyAndPay = async (
         body: JSON.stringify(payload),
       });
 
-      const chargeResponse: any = await midtransResponse.json();
+      const snapResponse: any = await midtransResponse.json();
 
-      if (!midtransResponse.ok || chargeResponse.status_code !== "201") {
-        console.error("[TENANT] Midtrans Core API error:", {
+      if (!midtransResponse.ok || !snapResponse.token) {
+        console.error("[TENANT] Midtrans Snap error:", {
           httpStatus: midtransResponse.status,
-          response: chargeResponse,
+          response: snapResponse,
           bank: selectedBank,
           orderId,
         });
 
+        const snapMessage = Array.isArray(snapResponse.error_messages)
+          ? snapResponse.error_messages.join(", ")
+          : snapResponse.status_message;
+
         throw new AppError(
-          chargeResponse.status_message ||
+          snapMessage ||
             "Gagal membuat transaksi pembayaran. Periksa konfigurasi pembayaran atau coba lagi nanti.",
           502,
         );
-      }
-
-      let vaNumber: string | null = null;
-      if (selectedBank === "mandiri") {
-        vaNumber =
-          chargeResponse.biller_code && chargeResponse.bill_key
-            ? `${chargeResponse.biller_code} - ${chargeResponse.bill_key}`
-            : chargeResponse.bill_key || chargeResponse.biller_code || null;
-      } else if (selectedBank === "permata") {
-        vaNumber = chargeResponse.permata_va_number || null;
-      } else {
-        vaNumber = chargeResponse.va_numbers?.[0]?.va_number || null;
       }
 
       await prisma.$transaction(async (tx) => {
@@ -496,11 +492,13 @@ export const verifyAndPay = async (
         {
           order_id: orderId,
           gross_amount: totalHarga,
-          bank: selectedBank,
-          va_number: vaNumber,
-          biller_code: chargeResponse.biller_code || null,
-          bill_key: chargeResponse.bill_key || null,
-          expiry_time: chargeResponse.expiry_time || null,
+          bank: selectedBank ?? null,
+          snap_token: snapResponse.token,
+          redirect_url: snapResponse.redirect_url || null,
+          va_number: null,
+          biller_code: null,
+          bill_key: null,
+          expiry_time: null,
           is_trial: false,
         },
         201,
