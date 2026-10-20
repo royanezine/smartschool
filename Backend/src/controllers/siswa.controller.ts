@@ -183,7 +183,15 @@ export const createSiswa = async (
     }
 
     const peranSiswa = await prisma.peran.findFirst({
-      where: { nama: "siswa", sekolahId },
+      where: {
+        nama: "siswa",
+        status: "aktif",
+        dihapusPada: null,
+        OR: [{ sekolahId }, { sekolahId: null }],
+      },
+      orderBy: {
+        sekolahId: "desc",
+      },
     });
     if (!peranSiswa) throw new AppError("Role siswa tidak ditemukan", 500);
 
@@ -330,7 +338,15 @@ export const bulkImportSiswa = async (
     if (!file) throw new AppError("File excel wajib diunggah", 400);
 
     const peranSiswa = await prisma.peran.findFirst({
-      where: { nama: "siswa" },
+      where: {
+        nama: "siswa",
+        status: "aktif",
+        dihapusPada: null,
+        OR: [{ sekolahId }, { sekolahId: null }],
+      },
+      orderBy: {
+        sekolahId: "desc",
+      },
     });
     if (!peranSiswa) throw new AppError("Role siswa tidak ditemukan", 500);
 

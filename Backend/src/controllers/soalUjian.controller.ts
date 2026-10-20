@@ -6,7 +6,7 @@ import {
 } from "../validations/soalUjian.validation";
 import { AppError } from "../utils/appError";
 import { AuthRequest } from "../middlewares/auth.middleware";
-import { isSuperAdmin } from "../utils/rbac";
+import { isSuperAdmin, normalizeRole } from "../utils/rbac";
 
 export const createSoal = async (req: AuthRequest, res: Response) => {
   const data = createSoalSchema.parse(req.body);
@@ -72,9 +72,9 @@ export const createSoal = async (req: AuthRequest, res: Response) => {
 export const getSoalByUjian = async (req: AuthRequest, res: Response) => {
   const ujianId = req.params.ujianId as string;
   const sekolahId = req.user?.sekolahId;
-  const role = req.user?.role ?? "";
-  const isSuper = isSuperAdmin(role);
-  const showKunci = ["guru", "super_admin", "admin_sekolah"].includes(role);
+  const normRole = normalizeRole(req.user?.role);
+  const isSuper = isSuperAdmin(req.user?.role);
+  const userId = req.user?.userId;
 
   const asesmen = await prisma.asesmen.findFirst({
     where: {
@@ -82,10 +82,35 @@ export const getSoalByUjian = async (req: AuthRequest, res: Response) => {
       dihapusPada: null,
       ...(!isSuper && { kelasMapel: { kelas: { sekolahId } } }),
     },
+    include: {
+      kelasMapel: { include: { kelas: true } },
+    },
   });
 
   if (!asesmen) {
     throw new AppError("Data tidak ditemukan atau Anda tidak memiliki akses", 403);
+  }
+
+  let showKunci = false;
+  if (isSuper || normRole === "guru" || normRole === "admin_sekolah") {
+    if (isSuper || (asesmen.kelasMapel?.kelas?.sekolahId && asesmen.kelasMapel.kelas.sekolahId === sekolahId)) {
+      showKunci = true;
+    }
+  } else if (normRole === "siswa" && userId) {
+    const now = new Date();
+    const isWaktuBerakhir = asesmen.waktuSelesai ? now > new Date(asesmen.waktuSelesai) : false;
+    if (isWaktuBerakhir) {
+      const percobaan = await prisma.percobaanAsesmen.findFirst({
+        where: {
+          asesmenId: asesmen.id,
+          siswaId: userId,
+          status: { in: ["selesai", "dinilai"] },
+        },
+      });
+      if (percobaan) {
+        showKunci = true;
+      }
+    }
   }
 
   const soal = await prisma.soalAsesmen.findMany({
@@ -119,9 +144,9 @@ export const getSoalByUjian = async (req: AuthRequest, res: Response) => {
 export const getSoalById = async (req: AuthRequest, res: Response) => {
   const id = req.params.id as string;
   const sekolahId = req.user?.sekolahId;
-  const role = req.user?.role ?? "";
-  const isSuper = isSuperAdmin(role);
-  const showKunci = ["guru", "super_admin", "admin_sekolah"].includes(role);
+  const normRole = normalizeRole(req.user?.role);
+  const isSuper = isSuperAdmin(req.user?.role);
+  const userId = req.user?.userId;
 
   const soal = await prisma.soalAsesmen.findFirst({
     where: {
@@ -129,10 +154,39 @@ export const getSoalById = async (req: AuthRequest, res: Response) => {
       dihapusPada: null,
       ...(!isSuper && { asesmen: { kelasMapel: { kelas: { sekolahId } } } }),
     },
+    include: {
+      asesmen: {
+        include: {
+          kelasMapel: { include: { kelas: true } },
+        },
+      },
+    },
   });
 
   if (!soal) {
     throw new AppError("Data tidak ditemukan atau Anda tidak memiliki akses", 403);
+  }
+
+  let showKunci = false;
+  if (isSuper || normRole === "guru" || normRole === "admin_sekolah") {
+    if (isSuper || (soal.asesmen?.kelasMapel?.kelas?.sekolahId && soal.asesmen.kelasMapel.kelas.sekolahId === sekolahId)) {
+      showKunci = true;
+    }
+  } else if (normRole === "siswa" && userId) {
+    const now = new Date();
+    const isWaktuBerakhir = soal.asesmen?.waktuSelesai ? now > new Date(soal.asesmen.waktuSelesai) : false;
+    if (isWaktuBerakhir) {
+      const percobaan = await prisma.percobaanAsesmen.findFirst({
+        where: {
+          asesmenId: soal.asesmenId,
+          siswaId: userId,
+          status: { in: ["selesai", "dinilai"] },
+        },
+      });
+      if (percobaan) {
+        showKunci = true;
+      }
+    }
   }
 
   const soalData: any = {

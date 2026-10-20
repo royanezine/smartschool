@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authenticate } from "../middlewares/auth.middleware";
-import { requireTenant } from "../middlewares/tenant.middleware";
+import { requireTenant, requireSubscription } from "../middlewares/tenant.middleware";
 import { requireIzin } from "../middlewares/izin.middleware";
 import { authorizeRoles } from "../middlewares/role.middleware";
 import {
@@ -16,7 +16,7 @@ import {
 
 const router = Router();
 
-router.use(authenticate, requireTenant);
+router.use(authenticate, requireTenant, requireSubscription);
 
 router.post("/", requireIzin("tugas.create"), createTugas);
 router.put("/:id", requireIzin("tugas.update"), updateTugas);

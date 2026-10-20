@@ -3,6 +3,7 @@ import { prisma } from "../config/db";
 import { AppError } from "../utils/appError";
 import { successResponse } from "../utils/responseFormatter";
 import { AuthRequest } from "../middlewares/auth.middleware";
+import { isSuperAdmin } from "../utils/rbac";
 import {
   createTugasSchema,
   updateTugasSchema,
@@ -167,15 +168,19 @@ export const deleteTugas = async (req: Request, res: Response, next: NextFunctio
 export const submitTugas = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const tugasId = req.params.id as string;
-    const userId = (req as AuthRequest).user?.userId as string;
-    const sekolahId = (req as AuthRequest).user?.sekolahId;
+    const authReq = req as AuthRequest;
+    const userId = authReq.user?.userId as string;
+    const sekolahId = authReq.user?.sekolahId;
+    const isSuper = isSuperAdmin(authReq.user?.role);
     const validated = submitTugasSchema.parse(req.body);
+
+    if (!userId) throw new AppError("Data tidak ditemukan atau Anda tidak memiliki akses", 403);
 
     const tugas = await prisma.tugas.findFirst({
       where: {
         id: tugasId,
         dihapusPada: null,
-        kelasMapel: { kelas: { sekolahId } },
+        ...(!isSuper ? { kelasMapel: { kelas: { sekolahId } } } : {}),
       },
     });
 
@@ -188,25 +193,29 @@ export const submitTugas = async (req: Request, res: Response, next: NextFunctio
       where: { tugasId, penggunaId: userId },
     });
 
-    const pengumpulan = await prisma.pengumpulanTugas.upsert({
-      where: {
-        id: existingPengumpulan?.id || "new-id",
-      },
-      update: {
-        urlFile: validated.urlFile,
-        keterangan: validated.keterangan,
-        status: statusPengumpulan,
-        diperbaruiPada: now,
-      },
-      create: {
-        tugasId,
-        penggunaId: userId,
-        urlFile: validated.urlFile,
-        keterangan: validated.keterangan,
-        status: statusPengumpulan,
-        dibuatOleh: userId,
-      },
-    });
+    let pengumpulan;
+    if (existingPengumpulan) {
+      pengumpulan = await prisma.pengumpulanTugas.update({
+        where: { id: existingPengumpulan.id },
+        data: {
+          urlFile: validated.urlFile,
+          keterangan: validated.keterangan,
+          status: statusPengumpulan,
+          diperbaruiOleh: userId,
+        },
+      });
+    } else {
+      pengumpulan = await prisma.pengumpulanTugas.create({
+        data: {
+          tugasId,
+          penggunaId: userId,
+          urlFile: validated.urlFile,
+          keterangan: validated.keterangan,
+          status: statusPengumpulan,
+          dibuatOleh: userId,
+        },
+      });
+    }
 
     return successResponse(res, `Tugas berhasil dikumpulkan (${statusPengumpulan})`, pengumpulan, 201);
   } catch (error) {

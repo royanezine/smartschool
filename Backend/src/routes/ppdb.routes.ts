@@ -1,7 +1,7 @@
 import { Router } from "express";
 
 import { authenticate } from "../middlewares/auth.middleware";
-import { requireTenant } from "../middlewares/tenant.middleware";
+import { requireTenant, requireSubscription } from "../middlewares/tenant.middleware";
 import { requireIzin } from "../middlewares/izin.middleware";
 import { validate } from "../middlewares/validation.middleware";
 
@@ -35,6 +35,7 @@ router.patch(
   "/:id/verifikasi",
   authenticate,
   requireTenant,
+  requireSubscription,
   requireIzin("ppdb.update"),
   verifikasiPpdb
 );

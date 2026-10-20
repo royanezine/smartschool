@@ -3,7 +3,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { authenticate } from "../middlewares/auth.middleware";
-import { requireTenant } from "../middlewares/tenant.middleware";
+import { requireTenant, requireSubscription } from "../middlewares/tenant.middleware";
 import { requireIzin } from "../middlewares/izin.middleware";
 import {
   getMateriPembelajaran,
@@ -62,7 +62,7 @@ const validate = (schema: any) => (req: any, res: any, next: any) => {
   next();
 };
 
-router.use(authenticate, requireTenant);
+router.use(authenticate, requireTenant, requireSubscription);
 
 router.get("/", requireIzin("lms.view"), getMateriPembelajaran);
 router.get("/:id", requireIzin("lms.view"), getMateriPembelajaranById);

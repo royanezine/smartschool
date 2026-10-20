@@ -15,7 +15,7 @@ import { AuthRequest } from "../middlewares/auth.middleware";
 import { hitungJarakMeter } from "../utils/geo";
 import { successResponse, paginatedResponse } from "../utils/responseFormatter";
 import { NextFunction } from "express";
-import { normalizeRole, canManageRole } from "../utils/rbac";
+import { normalizeRole, canManageRole, isSuperAdmin } from "../utils/rbac";
 
 export const registerFaceIdByAdmin = async (
   req: AuthRequest,
@@ -122,20 +122,64 @@ export const registerFaceIdByAdmin = async (
   }
 };
 
-export const createAbsensi = async (req: AuthRequest, res: Response) => {
-  const userId = req.user!.userId;
-  const sekolahId = req.user!.sekolahId;
+export const createAbsensi = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  const userId = req.user?.userId;
+  const isSuper = isSuperAdmin(req.user?.role);
+  const userSekolahId = req.user?.sekolahId;
   const file = req.file;
 
-  const data = createAbsensiSchema.parse(req.body);
-
   try {
-    const sekolah = await prisma.sekolah.findUnique({
-      where: { id: sekolahId! },
+    if (!userId) {
+      throw new AppError("Data tidak ditemukan atau Anda tidak memiliki akses", 403);
+    }
+
+    const data = createAbsensiSchema.parse(req.body);
+
+    const siswa = await prisma.pengguna.findFirst({
+      where: {
+        id: userId,
+        status: "aktif",
+        dihapusPada: null,
+        ...(!isSuper && userSekolahId ? { sekolahId: userSekolahId } : {}),
+      },
     });
 
-    if (!sekolah) {
-      throw new AppError("Data sekolah tidak ditemukan", 404);
+    if (!siswa || !siswa.sekolahId) {
+      throw new AppError("Data tidak ditemukan atau Anda tidak memiliki akses", 403);
+    }
+
+    const effectiveSekolahId = siswa.sekolahId;
+
+    if (!isSuper && userSekolahId && effectiveSekolahId !== userSekolahId) {
+      throw new AppError("Data tidak ditemukan atau Anda tidak memiliki akses", 403);
+    }
+
+    // Pastikan kelas berada pada sekolah yang sama
+    const kelas = await prisma.kelas.findFirst({
+      where: {
+        id: data.kelasId,
+        sekolahId: effectiveSekolahId,
+        dihapusPada: null,
+      },
+    });
+
+    if (!kelas) {
+      throw new AppError("Data tidak ditemukan atau Anda tidak memiliki akses", 403);
+    }
+
+    const sekolah = await prisma.sekolah.findFirst({
+      where: {
+        id: effectiveSekolahId,
+        dihapusPada: null,
+      },
+    });
+
+    if (!sekolah || sekolah.status !== "aktif") {
+      throw new AppError("Data tidak ditemukan atau Anda tidak memiliki akses", 403);
     }
 
     if (
@@ -146,14 +190,6 @@ export const createAbsensi = async (req: AuthRequest, res: Response) => {
         `Metode absensi ${data.metode} sedang dinonaktifkan oleh sekolah`,
         400,
       );
-    }
-
-    const siswa = await prisma.pengguna.findUnique({
-      where: { id: userId },
-    });
-
-    if (!siswa) {
-      throw new AppError("Data siswa tidak ditemukan", 404);
     }
 
     if (data.metode === "barcode") {
@@ -295,7 +331,7 @@ export const createAbsensi = async (req: AuthRequest, res: Response) => {
       fs.unlinkSync(file.path);
     }
 
-    throw error;
+    next(error);
   }
 };
 
@@ -312,38 +348,68 @@ export const getAbsensiSaya = async (req: AuthRequest, res: Response) => {
   return successResponse(res, "Data absensi berhasil diambil", absensi);
 };
 
-export const getAbsensiKelas = async (req: AuthRequest, res: Response) => {
-  const kelasId = req.params.kelasId as string;
-  const { tanggal } = req.query;
+export const getAbsensiKelas = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const kelasId = req.params.kelasId as string;
+    const { tanggal } = req.query;
+    const isSuper = isSuperAdmin(req.user?.role);
+    const sekolahId = req.user?.sekolahId;
 
-  const where: any = {
-    kelasId,
-  };
+    if (!isSuper && !sekolahId) {
+      throw new AppError("Data tidak ditemukan atau Anda tidak memiliki akses", 403);
+    }
 
-  if (tanggal) {
-    const tanggalFilter = new Date(tanggal as string);
-    tanggalFilter.setHours(0, 0, 0, 0);
+    const kelas = await prisma.kelas.findFirst({
+      where: {
+        id: kelasId,
+        dihapusPada: null,
+        ...(!isSuper ? { sekolahId } : {}),
+      },
+    });
 
-    where.tanggal = tanggalFilter;
-  }
+    if (!kelas) {
+      throw new AppError("Data tidak ditemukan atau Anda tidak memiliki akses", 403);
+    }
 
-  const absensi = await prisma.absensi.findMany({
-    where,
-    include: {
-      pengguna: {
-        select: {
-          id: true,
-          namaLengkap: true,
-          nisn: true,
+    const where: any = {
+      kelasId,
+      kelas: {
+        dihapusPada: null,
+        ...(!isSuper ? { sekolahId } : {}),
+      },
+    };
+
+    if (tanggal) {
+      const tanggalFilter = new Date(tanggal as string);
+      tanggalFilter.setHours(0, 0, 0, 0);
+
+      where.tanggal = tanggalFilter;
+    }
+
+    const absensi = await prisma.absensi.findMany({
+      where,
+      include: {
+        pengguna: {
+          select: {
+            id: true,
+            namaLengkap: true,
+            nisn: true,
+          },
         },
       },
-    },
-    orderBy: {
-      dibuatPada: "desc",
-    },
-  });
+      orderBy: {
+        dibuatPada: "desc",
+      },
+    });
 
-  return successResponse(res, "Data absensi kelas berhasil diambil", absensi);
+    return successResponse(res, "Data absensi kelas berhasil diambil", absensi);
+  } catch (error) {
+    next(error);
+  }
 };
 
 export const exportRekapAbsensi = async (req: AuthRequest, res: Response) => {

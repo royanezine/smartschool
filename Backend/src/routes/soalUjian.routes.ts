@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authenticate } from "../middlewares/auth.middleware";
-import { requireTenant } from "../middlewares/tenant.middleware";
+import { requireTenant, requireSubscription } from "../middlewares/tenant.middleware";
 import { requireIzin } from "../middlewares/izin.middleware";
 import {
   createSoal,
@@ -12,7 +12,7 @@ import {
 
 const router = Router();
 
-router.use(authenticate, requireTenant);
+router.use(authenticate, requireTenant, requireSubscription);
 
 router.post("/", requireIzin("ujian.create"), createSoal);
 router.get("/ujian/:ujianId", requireIzin("ujian.view"), getSoalByUjian);

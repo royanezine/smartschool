@@ -73,3 +73,36 @@ export const verifyPinToken = (token: string): PinTokenPayload => {
 
   return payload;
 };
+
+export interface PpdbUploadTokenPayload {
+  pendaftaranId: string;
+  nomorPendaftaran: string;
+  sekolahId: string;
+  purpose: "ppdb_upload";
+}
+
+export const generatePpdbUploadToken = (
+  pendaftaranId: string,
+  nomorPendaftaran: string,
+  sekolahId: string,
+): string => {
+  return jwt.sign(
+    { pendaftaranId, nomorPendaftaran, sekolahId, purpose: "ppdb_upload" },
+    JWT_SECRET!,
+    { expiresIn: "7d" },
+  );
+};
+
+export const verifyPpdbUploadToken = (token: string): PpdbUploadTokenPayload => {
+  const payload = jwt.verify(token, JWT_SECRET!) as PpdbUploadTokenPayload;
+
+  if (
+    !payload.pendaftaranId ||
+    !payload.sekolahId ||
+    payload.purpose !== "ppdb_upload"
+  ) {
+    throw new Error("Token pendaftaran PPDB tidak valid");
+  }
+
+  return payload;
+};

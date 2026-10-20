@@ -10,7 +10,7 @@ import {
   submitUjianSchema,
 } from "../validations/ujian.validation";
 
-import { isSuperAdmin } from "../utils/rbac";
+import { isSuperAdmin, normalizeRole } from "../utils/rbac";
 
 export const createUjian = async (
   req: Request,
@@ -106,9 +106,12 @@ export const getDetailUjian = async (
 ) => {
   try {
     const id = req.params.id as string;
-    const role = (req as AuthRequest).user?.role;
-    const sekolahId = (req as AuthRequest).user?.sekolahId;
-    const isSuper = isSuperAdmin(role);
+    const authReq = req as AuthRequest;
+    const userRole = authReq.user?.role;
+    const normRole = normalizeRole(userRole);
+    const sekolahId = authReq.user?.sekolahId;
+    const isSuper = isSuperAdmin(userRole);
+    const userId = authReq.user?.userId;
 
     const asesmen = await prisma.asesmen.findFirst({
       where: {
@@ -118,18 +121,6 @@ export const getDetailUjian = async (
       },
       include: {
         kelasMapel: { include: { mataPelajaran: true, kelas: true } },
-        soalAsesmen: {
-          select: {
-            id: true,
-            teksSoal: true,
-            jenisSoal: true,
-            pilihan: true,
-            poin: true,
-            nomorUrut: true,
-            kunciJawaban: role === "guru" ? true : false,
-          },
-          orderBy: { nomorUrut: "asc" },
-        },
       },
     });
 
@@ -137,7 +128,51 @@ export const getDetailUjian = async (
       throw new AppError("Data tidak ditemukan atau Anda tidak memiliki akses", 403);
     }
 
-    return successResponse(res, "Berhasil mengambil detail ujian", asesmen);
+    let showKunci = false;
+    if (isSuper || normRole === "guru" || normRole === "admin_sekolah") {
+      if (isSuper || (asesmen.kelasMapel?.kelas?.sekolahId && asesmen.kelasMapel.kelas.sekolahId === sekolahId)) {
+        showKunci = true;
+      }
+    } else if (normRole === "siswa" && userId) {
+      const now = new Date();
+      const isWaktuBerakhir = asesmen.waktuSelesai ? now > new Date(asesmen.waktuSelesai) : false;
+      if (isWaktuBerakhir) {
+        const percobaan = await prisma.percobaanAsesmen.findFirst({
+          where: {
+            asesmenId: asesmen.id,
+            siswaId: userId,
+            status: { in: ["selesai", "dinilai"] },
+          },
+        });
+        if (percobaan) {
+          showKunci = true;
+        }
+      }
+    }
+
+    const soalAsesmen = await prisma.soalAsesmen.findMany({
+      where: {
+        asesmenId: id,
+        dihapusPada: null,
+      },
+      select: {
+        id: true,
+        teksSoal: true,
+        jenisSoal: true,
+        pilihan: true,
+        poin: true,
+        nomorUrut: true,
+        kunciJawaban: showKunci,
+      },
+      orderBy: { nomorUrut: "asc" },
+    });
+
+    const result = {
+      ...asesmen,
+      soalAsesmen,
+    };
+
+    return successResponse(res, "Berhasil mengambil detail ujian", result);
   } catch (error) {
     next(error);
   }

@@ -18,12 +18,12 @@ import {
   deletePelanggaranSiswa,
 } from "../controllers/bk.controller";
 import { authenticate } from "../middlewares/auth.middleware";
-import { requireTenant } from "../middlewares/tenant.middleware";
+import { requireTenant, requireSubscription } from "../middlewares/tenant.middleware";
 import { authorizeRoles } from "../middlewares/role.middleware";
 
 const router = Router();
 
-router.use(authenticate, requireTenant);
+router.use(authenticate, requireTenant, requireSubscription);
 
 router.get("/konseling", getSesiKonseling);
 router.post("/konseling/ajukan", authorizeRoles("siswa"), ajukanSesiKonseling);

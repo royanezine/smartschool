@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { authenticate } from "../middlewares/auth.middleware";
-import { requireTenant } from "../middlewares/tenant.middleware";
+import { requireTenant, requireSubscription } from "../middlewares/tenant.middleware";
 import { requireIzin } from "../middlewares/izin.middleware";
 import { authorizeRoles } from "../middlewares/role.middleware";
 import {
@@ -15,7 +15,7 @@ import {
 
 const router = Router();
 
-router.use(authenticate, requireTenant);
+router.use(authenticate, requireTenant, requireSubscription);
 
 router.get("/diampu", authorizeRoles("admin_sekolah", "guru"), getMapelDiampu);
 router.get("/siswa", authorizeRoles("admin_sekolah", "siswa"), getMapelSiswa);

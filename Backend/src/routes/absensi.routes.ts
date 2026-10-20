@@ -13,7 +13,7 @@ import {
   getMetodeAbsensiAktif,
 } from "../controllers/absensi.controller";
 import { authenticate } from "../middlewares/auth.middleware";
-import { requireTenant } from "../middlewares/tenant.middleware";
+import { requireTenant, requireSubscription } from "../middlewares/tenant.middleware";
 import { requireIzin } from "../middlewares/izin.middleware";
 import { uploadBiometrik } from "../middlewares/upload.middleware";
 import { registerFaceIdByAdmin } from "../controllers/absensi.controller";
@@ -36,7 +36,7 @@ const storage = multer.diskStorage({
 });
 const upload = multer({ storage });
 
-router.use(authenticate, requireTenant);
+router.use(authenticate, requireTenant, requireSubscription);
 
 router.post(
   "/",

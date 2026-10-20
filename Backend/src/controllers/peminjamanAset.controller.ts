@@ -162,7 +162,7 @@ export const serahkanKeSiswa = async (
     });
 
     if (!pinjam) {
-      throw new AppError("Data peminjaman tidak ditemukan", 404);
+      throw new AppError("Data tidak ditemukan atau Anda tidak memiliki akses", 403);
     }
     if (pinjam.status !== "disetujui") {
       throw new AppError(
@@ -174,7 +174,7 @@ export const serahkanKeSiswa = async (
     let namaPengambil = validated.namaSiswaPengambil || null;
     if (validated.siswaPengambilId) {
       const siswa = await prisma.pengguna.findFirst({
-        where: { id: validated.siswaPengambilId, sekolahId },
+        where: { id: validated.siswaPengambilId, sekolahId, dihapusPada: null },
       });
       if (!siswa) {
         throw new AppError(
@@ -187,10 +187,12 @@ export const serahkanKeSiswa = async (
 
     const result = await prisma.$transaction(async (tx) => {
       for (const item of pinjam.detailPeminjaman) {
-        const aset = await tx.aset.findUnique({ where: { id: item.asetId } });
+        const aset = await tx.aset.findFirst({
+          where: { id: item.asetId, sekolahId, dihapusPada: null },
+        });
         if (!aset || aset.jumlahStok < item.jumlah) {
           throw new AppError(
-            `Stok aset ${aset?.nama || item.asetId} tidak mencukupi saat penyerahan`,
+            `Stok aset ${aset?.nama || item.asetId} tidak mencukupi atau aset telah dinonaktifkan`,
             400
           );
         }
@@ -248,7 +250,7 @@ export const kembalikanAset = async (
     });
 
     if (!pinjam) {
-      throw new AppError("Data peminjaman tidak ditemukan", 404);
+      throw new AppError("Data tidak ditemukan atau Anda tidak memiliki akses", 403);
     }
     if (pinjam.status !== "dipinjam") {
       throw new AppError(
@@ -260,7 +262,7 @@ export const kembalikanAset = async (
     let namaPengembali = validated.namaSiswaPengembali || null;
     if (validated.siswaPengembaliId) {
       const siswa = await prisma.pengguna.findFirst({
-        where: { id: validated.siswaPengembaliId, sekolahId },
+        where: { id: validated.siswaPengembaliId, sekolahId, dihapusPada: null },
       });
       if (!siswa) {
         throw new AppError(
@@ -277,10 +279,17 @@ export const kembalikanAset = async (
       for (const item of pinjam.detailPeminjaman) {
         const dataReturn = itemKondisiMap.get(item.asetId);
 
-        await tx.aset.update({
-          where: { id: item.asetId },
-          data: { jumlahStok: { increment: item.jumlah } },
+        const aset = await tx.aset.findFirst({
+          where: { id: item.asetId, sekolahId },
         });
+
+        // Jangan kembalikan (increment) stok pada aset yang sudah di-soft-delete (dihapusPada !== null)
+        if (aset && aset.dihapusPada === null) {
+          await tx.aset.update({
+            where: { id: item.asetId },
+            data: { jumlahStok: { increment: item.jumlah } },
+          });
+        }
 
         await tx.detailPeminjamanAset.update({
           where: { id: item.id },

@@ -2,6 +2,7 @@ import { Response, NextFunction } from "express";
 import { AuthRequest } from "./auth.middleware";
 import { prisma } from "../config/db";
 import { isSuperAdmin } from "../utils/rbac";
+import { cekLanggananYayasan } from "../utils/yayasanLangganan";
 
 export const requireTenant = async (
   req: AuthRequest,
@@ -90,6 +91,34 @@ export const requireSubscription = async (
         message: "Pengguna tidak memiliki sekolah",
         errorCode: "NO_TENANT_LINKED",
       });
+    }
+
+    const sekolah = await prisma.sekolah.findUnique({
+      where: {
+        id: sekolahId,
+      },
+      select: {
+        id: true,
+        status: true,
+        dihapusPada: true,
+        yayasanId: true,
+      },
+    });
+
+    if (!sekolah || sekolah.dihapusPada !== null) {
+      return res.status(404).json({
+        success: false,
+        message: "Sekolah tidak ditemukan",
+        errorCode: "TENANT_NOT_FOUND",
+      });
+    }
+
+    // Jika sekolah berada di bawah naungan yayasan, cek langganan yayasan terlebih dahulu
+    if (sekolah.yayasanId) {
+      const { aktif } = await cekLanggananYayasan(sekolah.yayasanId);
+      if (aktif) {
+        return next();
+      }
     }
 
     const langganan = await prisma.langgananSekolah.findFirst({

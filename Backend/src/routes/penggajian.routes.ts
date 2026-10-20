@@ -9,12 +9,12 @@ import {
   getSlipGajiSaya,
 } from "../controllers/penggajian.controller";
 import { authenticate } from "../middlewares/auth.middleware";
-import { requireTenant } from "../middlewares/tenant.middleware";
+import { requireTenant, requireSubscription } from "../middlewares/tenant.middleware";
 import { authorizeRoles } from "../middlewares/role.middleware";
 
 const router = Router();
 
-router.use(authenticate, requireTenant);
+router.use(authenticate, requireTenant, requireSubscription);
 
 // Rute untuk pegawai/guru melihat slip gajinya sendiri yang sudah disetujui/dibekukan
 router.get("/slip/saya", getSlipGajiSaya);

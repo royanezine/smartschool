@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import bcrypt from "bcryptjs";
 import { prisma } from "../config/db";
 import {
@@ -21,7 +21,8 @@ import {
   verifyPinToken,
 } from "../utils/generateToken";
 import { ambilIzinDanModul } from "../services/auth.services";
-import { isSuperAdmin } from "../utils/rbac";
+import { isSuperAdmin, normalizeRole } from "../utils/rbac";
+import { AuthRequest } from "../middlewares/auth.middleware";
 
 export const register = async (req: Request, res: Response) => {
   const data = registerSchema.parse(req.body);
@@ -702,33 +703,58 @@ export const resetPin = async (req: Request, res: Response) => {
   });
 };
 
-export const resetPinByAdmin = async (req: Request, res: Response) => {
-  const userId = req.params.userId as string;
+export const resetPinByAdmin = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const authReq = req as AuthRequest;
+    const userId = req.params.userId as string;
+    const actorRole = authReq.user?.role;
+    const isSuper = isSuperAdmin(actorRole);
+    const actorSekolahId = authReq.user?.sekolahId;
 
-  const targetUser = await prisma.pengguna.findUnique({
-    where: { id: userId },
-    include: { peran: true },
-  });
+    if (!isSuper && !actorSekolahId) {
+      throw new AppError("Data tidak ditemukan atau Anda tidak memiliki akses", 403);
+    }
 
-  if (!targetUser) {
-    throw new AppError("Pengguna tidak ditemukan", 404);
+    const targetUser = await prisma.pengguna.findFirst({
+      where: {
+        id: userId,
+        dihapusPada: null,
+        ...(!isSuper ? { sekolahId: actorSekolahId } : {}),
+      },
+      include: { peran: true },
+    });
+
+    if (!targetUser) {
+      throw new AppError("Data tidak ditemukan atau Anda tidak memiliki akses", 403);
+    }
+
+    if (!isSuper && targetUser.sekolahId !== actorSekolahId) {
+      throw new AppError("Data tidak ditemukan atau Anda tidak memiliki akses", 403);
+    }
+
+    if (normalizeRole(targetUser.peran?.nama) !== "siswa") {
+      throw new AppError("Reset PIN hanya berlaku untuk akun siswa", 400);
+    }
+
+    await prisma.pengguna.update({
+      where: { id: userId },
+      data: {
+        pinHash: null,
+        pinFailedAttempts: 0,
+        pinLockedUntil: null,
+      },
+    });
+
+    return res.status(200).json({
+      success: true,
+      message:
+        "PIN siswa berhasil direset oleh admin. Siswa akan diminta membuat PIN baru saat login berikutnya.",
+    });
+  } catch (error) {
+    next(error);
   }
-
-  if (targetUser.peran?.nama?.trim().toLowerCase() !== "siswa") {
-    throw new AppError("Reset PIN hanya berlaku untuk akun siswa", 400);
-  }
-
-  await prisma.pengguna.update({
-    where: { id: userId },
-    data: {
-      pinHash: null,
-      pinFailedAttempts: 0,
-      pinLockedUntil: null,
-    },
-  });
-
-  return res.status(200).json({
-    success: true,
-    message: "PIN siswa berhasil direset oleh admin. Siswa akan diminta membuat PIN baru saat login berikutnya.",
-  });
 };

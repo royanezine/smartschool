@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+import fs from "fs";
 import { prisma } from "../config/db";
 import bcrypt from "bcryptjs";
 
@@ -6,6 +7,12 @@ import {
   validasiUmurPpdb,
   generateNomorPendaftaran,
 } from "../utils/ppdb.utils";
+import {
+  generatePpdbUploadToken,
+  verifyPpdbUploadToken,
+  verifyAccessToken,
+} from "../utils/generateToken";
+import { isSuperAdmin } from "../utils/rbac";
 
 export const daftarPpdb = async (
   req: Request,
@@ -185,11 +192,19 @@ export const daftarPpdb = async (
         },
       });
 
+    const uploadToken = generatePpdbUploadToken(
+      pendaftaran.id,
+      pendaftaran.nomorPendaftaran,
+      pendaftaran.sekolahId,
+    );
+
     return res.status(201).json({
       success: true,
-      message:
-        "Pendaftaran PPDB berhasil dikirim",
-      data: pendaftaran,
+      message: "Pendaftaran PPDB berhasil dikirim",
+      data: {
+        ...pendaftaran,
+        tokenPendaftaran: uploadToken,
+      },
     });
   } catch (error) {
     console.error(error);
@@ -217,9 +232,78 @@ export const uploadBerkasPpdb = async (
       });
 
     if (!pendaftaran) {
+      if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
       return res.status(404).json({
         success: false,
         message: "Data pendaftaran tidak ditemukan",
+      });
+    }
+
+    // Otorisasi: Verifikasi hak upload berkas
+    let authorized = false;
+
+    // 1. Cek jika pengguna login sebagai admin/staff sekolah yang relevan atau superadmin
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      try {
+        const token = authHeader.split(" ")[1];
+        if (token) {
+          const decoded = verifyAccessToken(token);
+          if (decoded && decoded.userId) {
+            const isSuper = isSuperAdmin(decoded.role);
+            if (isSuper || (decoded.sekolahId && decoded.sekolahId === pendaftaran.sekolahId)) {
+              authorized = true;
+            }
+          }
+        }
+      } catch {
+        // Bukan login bearer token, lanjut ke pengecekan token PPDB
+      }
+    }
+
+    // 2. Jika bukan admin terautentikasi, periksa token pendaftaran unik pendaftar
+    if (!authorized) {
+      const rawToken =
+        (req.headers["x-ppdb-token"] as string) ||
+        (authHeader && authHeader.startsWith("Bearer ") ? authHeader.split(" ")[1] : null) ||
+        (req.body.token as string) ||
+        (req.body.tokenPendaftaran as string) ||
+        (req.query.token as string) ||
+        (req.query.tokenPendaftaran as string);
+
+      if (!rawToken) {
+        if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+        return res.status(403).json({
+          success: false,
+          message: "Akses ditolak: Token pendaftaran diperlukan untuk mengunggah berkas",
+          errorCode: "REGISTRATION_TOKEN_REQUIRED",
+        });
+      }
+
+      try {
+        const payload = verifyPpdbUploadToken(rawToken);
+        if (
+          payload.pendaftaranId === pendaftaran.id &&
+          payload.sekolahId === pendaftaran.sekolahId
+        ) {
+          authorized = true;
+        }
+      } catch (err: any) {
+        if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+        return res.status(403).json({
+          success: false,
+          message: "Akses ditolak: Token pendaftaran tidak valid atau telah kadaluarsa",
+          errorCode: "INVALID_REGISTRATION_TOKEN",
+        });
+      }
+    }
+
+    if (!authorized) {
+      if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
+      return res.status(403).json({
+        success: false,
+        message: "Akses ditolak: Anda tidak memiliki hak mengunggah berkas untuk pendaftaran ini",
+        errorCode: "FORBIDDEN",
       });
     }
 
@@ -239,6 +323,7 @@ export const uploadBerkasPpdb = async (
     ];
 
     if (!allowedBerkas.includes(namaBerkas)) {
+      if (req.file && fs.existsSync(req.file.path)) fs.unlinkSync(req.file.path);
       return res.status(400).json({
         success: false,
         message:
@@ -286,6 +371,10 @@ export const uploadBerkasPpdb = async (
       data: berkas,
     });
   } catch (error) {
+    if (req.file && fs.existsSync(req.file.path)) {
+      fs.unlinkSync(req.file.path);
+    }
+    console.error(error);
     console.error(error);
 
     return res.status(500).json({

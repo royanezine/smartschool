@@ -8,12 +8,12 @@ import {
   assignUserShiftAndJabatan,
 } from "../controllers/shiftKerja.controller";
 import { authenticate } from "../middlewares/auth.middleware";
-import { requireTenant } from "../middlewares/tenant.middleware";
+import { requireTenant, requireSubscription } from "../middlewares/tenant.middleware";
 import { authorizeRoles } from "../middlewares/role.middleware";
 
 const router = Router();
 
-router.use(authenticate, requireTenant);
+router.use(authenticate, requireTenant, requireSubscription);
 
 // Akses terbatas: Admin Sekolah dan Superadmin
 router.use(authorizeRoles("admin_sekolah", "super_admin"));

@@ -1,7 +1,8 @@
 import { Response } from "express";
 import { prisma } from "../config/db";
 import { AuthRequest } from "../middlewares/auth.middleware";
-import { normalizeRole } from "../utils/rbac";
+import { isSuperAdmin, normalizeRole } from "../utils/rbac";
+import { AppError } from "../utils/appError";
 
 const WAKTU_REGEX = /^([01]\d|2[0-3]):[0-5]\d$/;
 const TANGGAL_REGEX = /^\d{4}-\d{2}-\d{2}$/;
@@ -539,12 +540,13 @@ export const createSesiKonseling = async (
   res: Response
 ) => {
   try {
+    const isSuper = isSuperAdmin(req.user?.role);
     const sekolahId = req.user?.sekolahId;
 
-    if (!sekolahId) {
-      return res.status(401).json({
+    if (!isSuper && !sekolahId) {
+      return res.status(403).json({
         success: false,
-        message: "Sekolah tidak ditemukan",
+        message: "Data tidak ditemukan atau Anda tidak memiliki akses",
       });
     }
 
@@ -572,23 +574,49 @@ export const createSesiKonseling = async (
     const siswa = await prisma.pengguna.findFirst({
       where: {
         id: siswaId,
-        sekolahId,
         dihapusPada: null,
+        ...(!isSuper ? { sekolahId } : {}),
       },
     });
 
-    if (!siswa) {
-      return res.status(404).json({
+    if (!siswa || !siswa.sekolahId) {
+      return res.status(403).json({
         success: false,
-        message: "Siswa tidak ditemukan",
+        message: "Data tidak ditemukan atau Anda tidak memiliki akses",
       });
+    }
+
+    const targetSekolahId = siswa.sekolahId;
+
+    if (!isSuper && sekolahId && targetSekolahId !== sekolahId) {
+      return res.status(403).json({
+        success: false,
+        message: "Data tidak ditemukan atau Anda tidak memiliki akses",
+      });
+    }
+
+    if (konselorId) {
+      const konselor = await prisma.pengguna.findFirst({
+        where: {
+          id: konselorId,
+          sekolahId: targetSekolahId,
+          dihapusPada: null,
+        },
+      });
+
+      if (!konselor) {
+        return res.status(403).json({
+          success: false,
+          message: "Data tidak ditemukan atau Anda tidak memiliki akses",
+        });
+      }
     }
 
     const data = await prisma.sesiKonseling.create({
       data: {
-        sekolahId,
+        sekolahId: targetSekolahId,
         siswaId,
-        konselorId,
+        konselorId: konselorId || null,
         tanggal: new Date(tanggal),
         waktuMulai,
         waktuSelesai,
@@ -620,30 +648,33 @@ export const updateSesiKonseling = async (
   res: Response
 ) => {
   try {
+    const isSuper = isSuperAdmin(req.user?.role);
     const sekolahId = req.user?.sekolahId;
     const id = String(req.params.id);
 
-    if (!sekolahId) {
-      return res.status(401).json({
+    if (!isSuper && !sekolahId) {
+      return res.status(403).json({
         success: false,
-        message: "Sekolah tidak ditemukan",
+        message: "Data tidak ditemukan atau Anda tidak memiliki akses",
       });
     }
 
     const existing = await prisma.sesiKonseling.findFirst({
       where: {
         id,
-        sekolahId,
         dihapusPada: null,
+        ...(!isSuper ? { sekolahId } : {}),
       },
     });
 
     if (!existing) {
-      return res.status(404).json({
+      return res.status(403).json({
         success: false,
-        message: "Sesi konseling tidak ditemukan",
+        message: "Data tidak ditemukan atau Anda tidak memiliki akses",
       });
     }
+
+    const targetSekolahId = existing.sekolahId;
 
     const {
       siswaId,
@@ -659,11 +690,43 @@ export const updateSesiKonseling = async (
       catatan,
     } = req.body;
 
+    if (siswaId && siswaId !== existing.siswaId) {
+      const siswa = await prisma.pengguna.findFirst({
+        where: {
+          id: siswaId,
+          sekolahId: targetSekolahId,
+          dihapusPada: null,
+        },
+      });
+      if (!siswa) {
+        return res.status(403).json({
+          success: false,
+          message: "Data tidak ditemukan atau Anda tidak memiliki akses",
+        });
+      }
+    }
+
+    if (konselorId && konselorId !== existing.konselorId) {
+      const konselor = await prisma.pengguna.findFirst({
+        where: {
+          id: konselorId,
+          sekolahId: targetSekolahId,
+          dihapusPada: null,
+        },
+      });
+      if (!konselor) {
+        return res.status(403).json({
+          success: false,
+          message: "Data tidak ditemukan atau Anda tidak memiliki akses",
+        });
+      }
+    }
+
     const data = await prisma.sesiKonseling.update({
       where: { id },
       data: {
-        siswaId,
-        konselorId,
+        siswaId: siswaId || undefined,
+        konselorId: konselorId !== undefined ? konselorId : undefined,
         tanggal: tanggal ? new Date(tanggal) : undefined,
         waktuMulai,
         waktuSelesai,
