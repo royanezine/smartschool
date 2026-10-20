@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -22,8 +21,6 @@ import {
   ChevronLeft,
   ChevronRight,
   ClipboardCheck,
-  ScanLine,
-  Camera,
   Hand,
   Info,
   ShieldCheck,
@@ -36,60 +33,61 @@ import {
 } from "@/services/absensi.service";
 
 const PAGE_SIZE = 10;
+const TIME_ZONE = "Asia/Jakarta";
+const REFRESH_INTERVAL = 10000;
 
-/*
- * Metode tetap ditampilkan agar pengguna mengetahui opsi yang direncanakan.
- * Endpoint checkInShift yang tersedia belum memverifikasi barcode atau
- * foto wajah. Karena itu, kedua metode tersebut dinonaktifkan di FE.
- */
 const METODE_ABSENSI = [
   {
     value: "lokasi",
     label: "Lokasi GPS",
-    description: "Gunakan lokasi perangkat untuk mencatat presensi.",
+    description: "Gunakan lokasi perangkat saat melakukan check-in.",
     icon: MapPin,
-    available: true,
-  },
-  {
-    value: "barcode",
-    label: "Barcode / QR",
-    description: "Belum didukung validasi barcode pada endpoint shift.",
-    icon: ScanLine,
-    available: false,
-  },
-  {
-    value: "face",
-    label: "Face ID",
-    description: "Belum didukung verifikasi wajah pada endpoint shift.",
-    icon: Camera,
-    available: false,
   },
   {
     value: "manual",
     label: "Manual",
-    description: "Mengirim presensi dengan metode manual.",
+    description: "Kirim presensi dengan metode manual.",
     icon: Hand,
-    available: true,
   },
 ];
 
-const pad = (value) => String(value).padStart(2, "0");
+const getDateParts = (value = new Date()) => {
+  const parts = new Intl.DateTimeFormat("en-CA", {
+    timeZone: TIME_ZONE,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).formatToParts(value);
+
+  const result = {};
+
+  for (const part of parts) {
+    if (part.type !== "literal") {
+      result[part.type] = part.value;
+    }
+  }
+
+  return result;
+};
 
 const getToday = () => {
-  const date = new Date();
-
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
-    date.getDate()
-  )}`;
+  const { year, month, day } = getDateParts();
+  return `${year}-${month}-${day}`;
 };
 
 const formatDate = (value) => {
   if (!value) return "-";
 
-  if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+  if (
+    typeof value === "string" &&
+    /^\d{4}-\d{2}-\d{2}$/.test(value)
+  ) {
     const [year, month, day] = value.split("-").map(Number);
 
-    return new Date(year, month - 1, day).toLocaleDateString("id-ID", {
+    return new Date(
+      Date.UTC(year, month - 1, day, 12)
+    ).toLocaleDateString("id-ID", {
+      timeZone: "UTC",
       day: "2-digit",
       month: "long",
       year: "numeric",
@@ -101,6 +99,7 @@ const formatDate = (value) => {
   if (Number.isNaN(date.getTime())) return "-";
 
   return date.toLocaleDateString("id-ID", {
+    timeZone: TIME_ZONE,
     day: "2-digit",
     month: "long",
     year: "numeric",
@@ -108,9 +107,14 @@ const formatDate = (value) => {
 };
 
 const formatTime = (value) => {
-  if (!value) return "-";
+  if (value === null || value === undefined || value === "") {
+    return "-";
+  }
 
-  if (typeof value === "string" && /^\d{2}:\d{2}(:\d{2})?$/.test(value)) {
+  if (
+    typeof value === "string" &&
+    /^\d{2}:\d{2}(:\d{2})?$/.test(value)
+  ) {
     return value.slice(0, 5);
   }
 
@@ -119,45 +123,51 @@ const formatTime = (value) => {
   if (Number.isNaN(date.getTime())) return "-";
 
   return date.toLocaleTimeString("id-ID", {
+    timeZone: TIME_ZONE,
     hour: "2-digit",
     minute: "2-digit",
     hour12: false,
   });
 };
 
-/*
- * tanggal dari BE adalah tanggal pencatatan harian.
- * waktuMasuk adalah timestamp check-in aktual.
- *
- * Untuk membandingkan tanggal dengan tanggal lokal browser, gunakan
- * waktuMasuk terlebih dahulu. Jika belum ada, gunakan tanggal dari BE.
- */
-const getDateKey = (value) => {
-  if (!value) return "";
+const getRecordDate = (record) => {
+  // waktuMasuk adalah timestamp presensi aktual.
+  if (record?.waktuMasuk) {
+    const date = new Date(record.waktuMasuk);
 
-  if (typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
-    return value;
+    if (!Number.isNaN(date.getTime())) {
+      const { year, month, day } = getDateParts(date);
+      return `${year}-${month}-${day}`;
+    }
   }
 
-  const date = new Date(value);
+  // tanggal merupakan tanggal kalender dari record Backend.
+  if (
+    typeof record?.tanggal === "string" &&
+    /^\d{4}-\d{2}-\d{2}/.test(record.tanggal)
+  ) {
+    return record.tanggal.slice(0, 10);
+  }
 
-  if (Number.isNaN(date.getTime())) return "";
+  if (record?.tanggal) {
+    const date = new Date(record.tanggal);
 
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(
-    date.getDate()
-  )}`;
-};
-
-const getRecordDate = (record) => {
-  if (record?.waktuMasuk) {
-    return getDateKey(record.waktuMasuk);
+    if (!Number.isNaN(date.getTime())) {
+      const { year, month, day } = getDateParts(date);
+      return `${year}-${month}-${day}`;
+    }
   }
 
   if (record?.dibuatPada) {
-    return getDateKey(record.dibuatPada);
+    const date = new Date(record.dibuatPada);
+
+    if (!Number.isNaN(date.getTime())) {
+      const { year, month, day } = getDateParts(date);
+      return `${year}-${month}-${day}`;
+    }
   }
 
-  return getDateKey(record?.tanggal);
+  return "";
 };
 
 const normalizeText = (value) =>
@@ -230,22 +240,31 @@ const getAttendanceStatus = (record) => {
 };
 
 const getShiftName = (record) =>
-  record?.shiftKerja?.nama ?? record?.shift?.nama ?? "Shift kerja";
+  record?.shiftKerja?.nama ??
+  record?.shiftKerjaMaster?.nama ??
+  record?.shift?.nama ??
+  "Shift kerja";
 
 const getShiftStart = (record) =>
-  record?.shiftKerja?.jamMasuk ?? record?.shift?.jamMasuk ?? null;
+  record?.shiftKerja?.jamMasuk ??
+  record?.shiftKerjaMaster?.jamMasuk ??
+  record?.shift?.jamMasuk ??
+  null;
 
 const getShiftEnd = (record) =>
   record?.shiftKerja?.jamKeluar ??
-  record?.shiftKerja?.jamPulang ??
+  record?.shiftKerjaMaster?.jamKeluar ??
   record?.shift?.jamKeluar ??
-  record?.shift?.jamPulang ??
   null;
 
-const getMethodLabel = (method) =>
-  METODE_ABSENSI.find((item) => item.value === method)?.label ??
-  method ??
-  "-";
+const getMethodLabel = (method) => {
+  const found = METODE_ABSENSI.find(
+    (item) => item.value === method
+  );
+
+  if (found) return found.label;
+  return method || "-";
+};
 
 const getErrorMessage = (error) => {
   const message = String(error?.message ?? "");
@@ -266,7 +285,9 @@ const getCurrentLocation = () =>
       typeof navigator === "undefined" ||
       !navigator.geolocation
     ) {
-      reject(new Error("Browser tidak mendukung akses lokasi."));
+      reject(
+        new Error("Browser tidak mendukung akses lokasi.")
+      );
       return;
     }
 
@@ -311,23 +332,46 @@ const getCurrentLocation = () =>
   });
 
 const normalizeAttendanceResponse = (response) => {
+  // Bentuk respons langsung berupa array.
   if (Array.isArray(response)) return response;
 
+  // Bentuk respons yang umum digunakan service.
   if (Array.isArray(response?.data)) return response.data;
-
-  if (Array.isArray(response?.data?.data)) return response.data.data;
-
   if (Array.isArray(response?.items)) return response.items;
 
-  if (Array.isArray(response?.data?.items)) return response.data.items;
+  // Bentuk successResponse/paginatedResponse bertingkat.
+  if (Array.isArray(response?.data?.data)) {
+    return response.data.data;
+  }
+
+  if (Array.isArray(response?.data?.items)) {
+    return response.data.items;
+  }
+
+  if (Array.isArray(response?.result?.data)) {
+    return response.result.data;
+  }
 
   return [];
 };
 
+const getRecordTimestamp = (record) => {
+  const value =
+    record?.waktuMasuk ??
+    record?.dibuatPada ??
+    record?.tanggal;
+
+  if (!value) return 0;
+
+  const timestamp = new Date(value).getTime();
+
+  return Number.isNaN(timestamp) ? 0 : timestamp;
+};
+
 export default function AbsensiGuruPage() {
   const [isCollapsed, setIsCollapsed] = useState(false);
-
   const [records, setRecords] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [activeAction, setActiveAction] = useState("");
@@ -338,71 +382,108 @@ export default function AbsensiGuruPage() {
   const [selectedMethod, setSelectedMethod] = useState("lokasi");
   const [keterangan, setKeterangan] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
-
-  const today = getToday();
-
-  /* =======================================================
-     LOAD RIWAYAT DARI BACKEND
-  ======================================================= */
-
-  const fetchHistory = useCallback(async (showLoading = true) => {
-    try {
-      if (showLoading) setLoading(true);
-
-      setError("");
-
-      /*
-       * Service memanggil:
-       * GET /api/absensi/shift-saya?page=1&limit=100
-       *
-       * BE default-nya 20 data. Parameter limit di endpoint
-       * mendukung pagination, sehingga halaman meminta maksimal 100.
-       */
-      const response = await getRiwayatShiftSaya(1, 100);
-      const data = normalizeAttendanceResponse(response);
-
-      setRecords(data);
-      setCurrentPage(1);
-    } catch (err) {
-      console.error("Gagal mengambil riwayat presensi:", err);
-      setRecords([]);
-      setError(getErrorMessage(err));
-    } finally {
-      if (showLoading) setLoading(false);
-    }
-  }, []);
+  const [today, setToday] = useState(() => getToday());
 
   useEffect(() => {
-    fetchHistory();
+    const updateToday = () => setToday(getToday());
+
+    updateToday();
+
+    const intervalId = setInterval(updateToday, 30000);
+
+    return () => clearInterval(intervalId);
+  }, []);
+
+  /* RIWAYAT DARI BACKEND */
+
+  const fetchHistory = useCallback(
+    async (showLoading = true) => {
+      try {
+        if (showLoading) setLoading(true);
+
+        setError("");
+
+        // Gunakan fungsi service yang sudah tersedia.
+        const response = await getRiwayatShiftSaya(1, 100);
+        const data = normalizeAttendanceResponse(response);
+
+        const sortedData = [...data].sort(
+          (a, b) =>
+            getRecordTimestamp(b) - getRecordTimestamp(a)
+        );
+
+        setRecords(sortedData);
+
+        setCurrentPage((previousPage) => {
+          const maxPage = Math.max(
+            1,
+            Math.ceil(sortedData.length / PAGE_SIZE)
+          );
+
+          return Math.min(previousPage, maxPage);
+        });
+      } catch (err) {
+        console.error(
+          "Gagal mengambil riwayat presensi:",
+          err
+        );
+
+        if (showLoading) {
+          setError(getErrorMessage(err));
+        }
+      } finally {
+        if (showLoading) setLoading(false);
+      }
+    },
+    []
+  );
+
+  useEffect(() => {
+    fetchHistory(true);
+
+    const intervalId = setInterval(() => {
+      if (
+        typeof document !== "undefined" &&
+        document.visibilityState === "visible"
+      ) {
+        fetchHistory(false);
+      }
+    }, REFRESH_INTERVAL);
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        fetchHistory(false);
+      }
+    };
+
+    document.addEventListener(
+      "visibilitychange",
+      handleVisibilityChange
+    );
+
+    return () => {
+      clearInterval(intervalId);
+
+      document.removeEventListener(
+        "visibilitychange",
+        handleVisibilityChange
+      );
+    };
   }, [fetchHistory]);
 
-  /* =======================================================
-     PRESENSI HARI INI
-  ======================================================= */
+  /* PRESENSI HARI INI */
 
-  const todayRecords = useMemo(() => {
-    return records
-      .filter((record) => getRecordDate(record) === today)
-      .sort((a, b) => {
-        const dateA = new Date(
-          a?.waktuMasuk ?? a?.dibuatPada ?? 0
-        ).getTime();
+  const todayRecords = useMemo(
+    () =>
+      records
+        .filter((record) => getRecordDate(record) === today)
+        .sort(
+          (a, b) =>
+            getRecordTimestamp(b) - getRecordTimestamp(a)
+        ),
+    [records, today]
+  );
 
-        const dateB = new Date(
-          b?.waktuMasuk ?? b?.dibuatPada ?? 0
-        ).getTime();
-
-        return dateB - dateA;
-      });
-  }, [records, today]);
-
-  /*
-   * Backend checkOutShift mencari absensi hari ini yang:
-   * - memiliki shiftKerjaId
-   * - waktuKeluar masih null
-   *
-   * FE menggunakan catatan hari ini untuk mengatur tombol.
-   */
   const todayRecord = todayRecords[0] ?? null;
 
   const hasCheckedIn = Boolean(todayRecord?.waktuMasuk);
@@ -411,20 +492,18 @@ export default function AbsensiGuruPage() {
   const canCheckIn = !hasCheckedIn;
   const canCheckOut = hasCheckedIn && !hasCheckedOut;
 
-  /* =======================================================
-     RINGKASAN RIWAYAT
-  ======================================================= */
+  /* STATISTIK */
 
   const summary = useMemo(() => {
     const hadir = records.filter((record) => {
-      const statusShift = normalizeText(record?.statusShift);
+      const shiftStatus = normalizeText(record?.statusShift);
       const status = normalizeText(record?.status);
 
       return (
-        statusShift === "tepat_waktu" ||
-        statusShift === "terlambat" ||
-        statusShift === "terlambat_dan_pulang_cepat" ||
-        statusShift === "pulang_cepat" ||
+        shiftStatus === "tepat_waktu" ||
+        shiftStatus === "terlambat" ||
+        shiftStatus === "terlambat_dan_pulang_cepat" ||
+        shiftStatus === "pulang_cepat" ||
         status === "hadir"
       );
     }).length;
@@ -450,26 +529,18 @@ export default function AbsensiGuruPage() {
     };
   }, [records]);
 
-  /* =======================================================
-     PAYLOAD CHECK-IN / CHECK-OUT
-  ======================================================= */
+  /* PAYLOAD CHECK-IN */
 
-  const getMethodPayload = async (method) => {
-    if (!METODE_ABSENSI.some((item) => item.value === method && item.available)) {
-      throw new Error(
-        "Metode ini belum didukung oleh implementasi Backend presensi shift. Pilih Lokasi GPS atau Manual."
-      );
-    }
-
+  const getMethodPayload = async () => {
     const payload = {
-      metode: method,
+      metode: selectedMethod,
     };
 
     if (keterangan.trim()) {
       payload.keterangan = keterangan.trim();
     }
 
-    if (method === "lokasi") {
+    if (selectedMethod === "lokasi") {
       const location = await getCurrentLocation();
 
       payload.lintang = location.lintang;
@@ -479,20 +550,20 @@ export default function AbsensiGuruPage() {
     return payload;
   };
 
-  /* =======================================================
-     CHECK-IN
-  ======================================================= */
+  /* CHECK-IN */
 
   const handleCheckIn = async () => {
     if (submitting || loading || !canCheckIn) return;
 
-    const confirmed = window.confirm(
-      `Lakukan check-in menggunakan metode ${getMethodLabel(
-        selectedMethod
-      )}?`
-    );
-
-    if (!confirmed) return;
+    if (
+      !window.confirm(
+        `Lakukan check-in menggunakan metode ${getMethodLabel(
+          selectedMethod
+        )}?`
+      )
+    ) {
+      return;
+    }
 
     try {
       setSubmitting(true);
@@ -500,22 +571,15 @@ export default function AbsensiGuruPage() {
       setError("");
       setNotice("");
 
-      const payload = await getMethodPayload(selectedMethod);
+      const payload = await getMethodPayload();
 
-      /*
-       * Kontrak BE checkInShift:
-       * status, metode, keterangan?, lintang?, bujur?, shiftKerjaId?
-       *
-       * Tidak mengirim shiftKerjaId berarti BE menggunakan shift
-       * yang telah ditugaskan pada akun pengguna.
-       */
       await checkInShift({
         status: "hadir",
         ...payload,
       });
 
       setNotice(
-        "Check-in berhasil dicatat oleh Backend. Riwayat sedang diperbarui."
+        "Check-in berhasil dicatat. Riwayat presensi diperbarui."
       );
 
       setKeterangan("");
@@ -530,20 +594,14 @@ export default function AbsensiGuruPage() {
     }
   };
 
-  /* =======================================================
-     CHECK-OUT
-  ======================================================= */
+  /* CHECK-OUT */
 
   const handleCheckOut = async () => {
     if (submitting || loading || !canCheckOut) return;
 
-    const confirmed = window.confirm(
-      `Lakukan check-out menggunakan metode ${getMethodLabel(
-        selectedMethod
-      )}?`
-    );
-
-    if (!confirmed) return;
+    if (!window.confirm("Lakukan check-out sekarang?")) {
+      return;
+    }
 
     try {
       setSubmitting(true);
@@ -551,11 +609,6 @@ export default function AbsensiGuruPage() {
       setError("");
       setNotice("");
 
-      /*
-       * Controller checkOutShift hanya menggunakan keterangan.
-       * Metode dan GPS bukan bagian dari proses validasi check-out
-       * yang ditampilkan pada controller BE yang diberikan.
-       */
       const payload = {};
 
       if (keterangan.trim()) {
@@ -565,7 +618,7 @@ export default function AbsensiGuruPage() {
       await checkOutShift(payload);
 
       setNotice(
-        "Check-out berhasil dicatat oleh Backend. Riwayat sedang diperbarui."
+        "Check-out berhasil dicatat. Riwayat presensi diperbarui."
       );
 
       setKeterangan("");
@@ -580,9 +633,7 @@ export default function AbsensiGuruPage() {
     }
   };
 
-  /* =======================================================
-     PAGINATION
-  ======================================================= */
+  /* PAGINATION */
 
   const totalPages = Math.max(
     1,
@@ -599,10 +650,6 @@ export default function AbsensiGuruPage() {
       setCurrentPage(page);
     }
   };
-
-  /* =======================================================
-     STATUS HARI INI
-  ======================================================= */
 
   const currentStatus = !hasCheckedIn
     ? {
@@ -623,9 +670,7 @@ export default function AbsensiGuruPage() {
     (item) => item.value === selectedMethod
   );
 
-  /* =======================================================
-     RENDER
-  ======================================================= */
+  /* TAMPILAN */
 
   return (
     <div className="flex h-screen w-full theme-page overflow-hidden">
@@ -638,7 +683,9 @@ export default function AbsensiGuruPage() {
 
       <div className="flex-1 flex flex-col min-w-0 h-full overflow-hidden">
         <Header
-          toggleSidebar={() => setIsCollapsed((value) => !value)}
+          toggleSidebar={() =>
+            setIsCollapsed((value) => !value)
+          }
           notifications={[]}
           user={{
             name: "Guru",
@@ -664,14 +711,15 @@ export default function AbsensiGuruPage() {
                     </h1>
 
                     <p className="text-sm theme-text-secondary mt-1">
-                      Kelola kehadiran, check-in, dan check-out berdasarkan shift kerja.
+                      Kelola kehadiran, check-in, dan check-out
+                      berdasarkan shift kerja.
                     </p>
                   </div>
                 </div>
 
                 <button
                   type="button"
-                  onClick={() => fetchHistory()}
+                  onClick={() => fetchHistory(true)}
                   disabled={loading || submitting}
                   className="inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl border theme-border theme-card theme-text-secondary hover:text-[var(--color-primary)] transition disabled:opacity-50"
                 >
@@ -683,7 +731,7 @@ export default function AbsensiGuruPage() {
                 </button>
               </div>
 
-              {/* TANGGAL DAN STATUS */}
+              {/* TANGGAL */}
 
               <div className="theme-card border theme-border rounded-xl p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div className="flex items-center gap-3">
@@ -692,7 +740,9 @@ export default function AbsensiGuruPage() {
                   </div>
 
                   <div>
-                    <p className="text-xs theme-text-muted">Hari ini</p>
+                    <p className="text-xs theme-text-muted">
+                      Hari ini
+                    </p>
 
                     <p className="text-sm font-semibold theme-text mt-1">
                       {formatDate(today)}
@@ -708,23 +758,28 @@ export default function AbsensiGuruPage() {
                 </span>
               </div>
 
-              {/* ERROR */}
+              {/* PESAN ERROR */}
 
               {error && (
                 <div className="flex items-start gap-3 p-4 rounded-xl border theme-danger">
-                  <CircleAlert size={20} className="shrink-0 mt-0.5" />
+                  <CircleAlert
+                    size={20}
+                    className="shrink-0 mt-0.5"
+                  />
 
                   <div className="flex-1 min-w-0">
                     <p className="text-sm font-semibold">
                       Presensi belum berhasil diproses
                     </p>
 
-                    <p className="text-sm mt-1 break-words">{error}</p>
+                    <p className="text-sm mt-1 break-words">
+                      {error}
+                    </p>
                   </div>
 
                   <button
                     type="button"
-                    onClick={() => fetchHistory()}
+                    onClick={() => fetchHistory(true)}
                     disabled={loading || submitting}
                     className="text-sm font-medium hover:opacity-80 disabled:opacity-50"
                   >
@@ -733,16 +788,19 @@ export default function AbsensiGuruPage() {
                 </div>
               )}
 
-              {/* SUCCESS */}
+              {/* PESAN SUKSES */}
 
               {notice && (
                 <div className="flex items-start gap-3 p-4 rounded-xl border theme-success">
-                  <CheckCircle2 size={20} className="shrink-0 mt-0.5" />
+                  <CheckCircle2
+                    size={20}
+                    className="shrink-0 mt-0.5"
+                  />
                   <p className="text-sm">{notice}</p>
                 </div>
               )}
 
-              {/* KARTU PRESENSI */}
+              {/* PRESENSI DAN SHIFT */}
 
               <section className="grid grid-cols-1 lg:grid-cols-3 gap-4">
                 <div className="theme-card border theme-border rounded-xl p-5 lg:col-span-2">
@@ -753,7 +811,7 @@ export default function AbsensiGuruPage() {
                       </p>
 
                       <p className="text-xs theme-text-muted mt-1">
-                        Waktu presensi mengikuti catatan dari Backend.
+                        Jam masuk dan pulang mengikuti data Backend.
                       </p>
                     </div>
 
@@ -770,7 +828,9 @@ export default function AbsensiGuruPage() {
                       </div>
 
                       <p className="text-2xl font-semibold theme-text mt-3">
-                        {loading ? "—" : formatTime(todayRecord?.waktuMasuk)}
+                        {loading
+                          ? "—"
+                          : formatTime(todayRecord?.waktuMasuk)}
                       </p>
                     </div>
 
@@ -781,54 +841,47 @@ export default function AbsensiGuruPage() {
                       </div>
 
                       <p className="text-2xl font-semibold theme-text mt-3">
-                        {loading ? "—" : formatTime(todayRecord?.waktuKeluar)}
+                        {loading
+                          ? "—"
+                          : formatTime(todayRecord?.waktuKeluar)}
                       </p>
                     </div>
                   </div>
 
-                  {/* METODE PRESENSI */}
+                  {/* PILIH METODE */}
 
                   <div className="mt-6">
-                    <div className="flex items-center justify-between gap-3 mb-3">
-                      <div>
-                        <p className="text-sm font-semibold theme-text">
-                          Metode presensi
-                        </p>
+                    <p className="text-sm font-semibold theme-text">
+                      Metode presensi
+                    </p>
 
-                        <p className="text-xs theme-text-muted mt-1">
-                          Pilih metode yang didukung endpoint Backend.
-                        </p>
-                      </div>
-                    </div>
+                    <p className="text-xs theme-text-muted mt-1 mb-3">
+                      Pilih metode yang tersedia pada endpoint shift.
+                    </p>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       {METODE_ABSENSI.map((method) => {
                         const Icon = method.icon;
-                        const selected = selectedMethod === method.value;
-                        const disabled = submitting || !method.available;
+                        const selected =
+                          selectedMethod === method.value;
 
                         return (
                           <button
                             key={method.value}
                             type="button"
                             onClick={() => {
-                              if (!method.available) return;
+                              if (submitting) return;
 
                               setSelectedMethod(method.value);
                               setError("");
                               setNotice("");
                             }}
-                            disabled={disabled}
-                            title={
-                              method.available
-                                ? method.label
-                                : "Belum didukung oleh endpoint shift"
-                            }
+                            disabled={submitting}
                             className={`text-left p-4 rounded-xl border transition ${
                               selected
                                 ? "border-[var(--color-primary)] ring-1 ring-[var(--color-primary)] theme-card"
                                 : "theme-border theme-card hover:border-[var(--color-primary)]"
-                            } ${!method.available ? "opacity-60 cursor-not-allowed" : ""} disabled:cursor-not-allowed`}
+                            } disabled:opacity-50`}
                           >
                             <div className="flex items-start gap-3">
                               <div
@@ -872,9 +925,8 @@ export default function AbsensiGuruPage() {
                         htmlFor="keterangan"
                         className="block text-sm font-medium theme-text mb-2"
                       >
-                        Keterangan
+                        Keterangan{" "}
                         <span className="font-normal theme-text-muted">
-                          {" "}
                           (opsional)
                         </span>
                       </label>
@@ -883,14 +935,14 @@ export default function AbsensiGuruPage() {
                         id="keterangan"
                         rows={2}
                         value={keterangan}
-                        onChange={(event) => setKeterangan(event.target.value)}
+                        onChange={(event) =>
+                          setKeterangan(event.target.value)
+                        }
                         disabled={submitting}
                         placeholder="Tambahkan keterangan jika diperlukan..."
                         className="w-full px-4 py-3 rounded-xl border theme-border theme-card theme-text text-sm outline-none resize-y focus:ring-2 focus:ring-[var(--color-primary)]"
                       />
                     </div>
-
-                    {/* INFO METODE */}
 
                     <div className="flex items-start gap-2 mt-4 p-3 rounded-xl border theme-border theme-card-soft">
                       <Info
@@ -901,24 +953,29 @@ export default function AbsensiGuruPage() {
                       <p className="text-xs theme-text-secondary leading-5">
                         Metode terpilih:{" "}
                         <strong>{selectedMethodInfo?.label}</strong>.{" "}
-                        {selectedMethod === "manual"
-                          ? "Presensi dikirim dengan metode manual. Validasi dan pencatatan tetap dilakukan oleh Backend."
-                          : "Browser akan meminta izin lokasi ketika proses check-in dijalankan. Backend memvalidasi koordinat apabila titik koordinat sekolah tersedia."}
+                        {selectedMethod === "lokasi"
+                          ? "Browser akan meminta izin lokasi saat check-in. Backend memeriksa metode dan koordinat berdasarkan pengaturan sekolah."
+                          : "Presensi dikirim menggunakan metode manual. Backend tetap memproses dan mencatat presensi."}
                       </p>
                     </div>
                   </div>
 
-                  {/* ACTIONS */}
+                  {/* TOMBOL CHECK-IN DAN CHECK-OUT */}
 
                   <div className="mt-5 flex flex-col sm:flex-row gap-3">
                     <button
                       type="button"
                       onClick={handleCheckIn}
-                      disabled={loading || submitting || !canCheckIn}
+                      disabled={
+                        loading || submitting || !canCheckIn
+                      }
                       className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl theme-primary font-semibold text-sm transition disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {activeAction === "checkin" ? (
-                        <Loader2 size={17} className="animate-spin" />
+                        <Loader2
+                          size={17}
+                          className="animate-spin"
+                        />
                       ) : (
                         <LogIn size={17} />
                       )}
@@ -933,11 +990,16 @@ export default function AbsensiGuruPage() {
                     <button
                       type="button"
                       onClick={handleCheckOut}
-                      disabled={loading || submitting || !canCheckOut}
+                      disabled={
+                        loading || submitting || !canCheckOut
+                      }
                       className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-3 rounded-xl border theme-border theme-card theme-text-secondary font-semibold text-sm hover:border-[var(--color-primary)] transition disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {activeAction === "checkout" ? (
-                        <Loader2 size={17} className="animate-spin" />
+                        <Loader2
+                          size={17}
+                          className="animate-spin"
+                        />
                       ) : (
                         <LogOut size={17} />
                       )}
@@ -951,7 +1013,7 @@ export default function AbsensiGuruPage() {
                   </div>
                 </div>
 
-                {/* SHIFT HARI INI */}
+                {/* INFORMASI SHIFT */}
 
                 <div className="theme-card border theme-border rounded-xl p-5">
                   <div className="flex items-start justify-between gap-3">
@@ -961,7 +1023,7 @@ export default function AbsensiGuruPage() {
                       </p>
 
                       <p className="text-xs theme-text-muted mt-1">
-                        Berdasarkan catatan shift dari Backend.
+                        Berdasarkan catatan presensi.
                       </p>
                     </div>
 
@@ -970,10 +1032,14 @@ export default function AbsensiGuruPage() {
                     </div>
                   </div>
 
-                  {todayRecord?.shiftKerja ? (
+                  {todayRecord?.shiftKerja ||
+                  todayRecord?.shiftKerjaMaster ||
+                  todayRecord?.shift ? (
                     <div className="mt-6 space-y-4">
                       <div>
-                        <p className="text-xs theme-text-muted">Nama shift</p>
+                        <p className="text-xs theme-text-muted">
+                          Nama shift
+                        </p>
 
                         <p className="text-base font-semibold theme-text mt-1">
                           {getShiftName(todayRecord)}
@@ -991,10 +1057,6 @@ export default function AbsensiGuruPage() {
                           {formatTime(getShiftEnd(todayRecord))}
                         </p>
                       </div>
-
-                      <p className="text-xs theme-text-muted leading-5">
-                        Jadwal berasal dari relasi shift yang dikembalikan Backend.
-                      </p>
                     </div>
                   ) : (
                     <div className="mt-6 p-4 rounded-xl theme-card-soft border theme-border">
@@ -1005,7 +1067,9 @@ export default function AbsensiGuruPage() {
                       </p>
 
                       <p className="text-xs theme-text-muted mt-2 leading-5">
-                        Riwayat shift belum tersedia atau akun belum memiliki catatan shift. Pastikan Admin Sekolah telah menetapkan shift kerja untuk akun guru.
+                        Shift kerja ditampilkan apabila tersedia pada
+                        catatan riwayat. Pastikan Admin Sekolah telah
+                        menetapkan shift untuk akun guru.
                       </p>
                     </div>
                   )}
@@ -1021,7 +1085,9 @@ export default function AbsensiGuruPage() {
                       <History size={17} />
                     </div>
 
-                    <p className="text-xs theme-text-muted">Total catatan</p>
+                    <p className="text-xs theme-text-muted">
+                      Total catatan
+                    </p>
                   </div>
 
                   <p className="text-2xl font-bold theme-text mt-3">
@@ -1049,7 +1115,9 @@ export default function AbsensiGuruPage() {
                       <Timer size={17} />
                     </div>
 
-                    <p className="text-xs theme-text-muted">Terlambat</p>
+                    <p className="text-xs theme-text-muted">
+                      Terlambat
+                    </p>
                   </div>
 
                   <p className="text-2xl font-bold theme-text mt-3">
@@ -1074,7 +1142,7 @@ export default function AbsensiGuruPage() {
                 </div>
               </section>
 
-              {/* RIWAYAT */}
+              {/* TABEL RIWAYAT */}
 
               <section className="theme-card border theme-border rounded-xl overflow-hidden">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-5 border-b theme-border">
@@ -1084,7 +1152,7 @@ export default function AbsensiGuruPage() {
                     </h2>
 
                     <p className="text-xs theme-text-muted mt-1">
-                      Catatan check-in dan check-out yang dikembalikan Backend.
+                      Riwayat check-in dan check-out dari Backend.
                     </p>
                   </div>
 
@@ -1130,7 +1198,10 @@ export default function AbsensiGuruPage() {
                     <tbody>
                       {loading ? (
                         <tr>
-                          <td colSpan={7} className="px-5 py-14 text-center">
+                          <td
+                            colSpan={7}
+                            className="px-5 py-14 text-center"
+                          >
                             <Loader2
                               size={26}
                               className="animate-spin mx-auto text-[var(--color-primary)]"
@@ -1143,7 +1214,10 @@ export default function AbsensiGuruPage() {
                         </tr>
                       ) : paginatedRecords.length === 0 ? (
                         <tr>
-                          <td colSpan={7} className="px-5 py-14 text-center">
+                          <td
+                            colSpan={7}
+                            className="px-5 py-14 text-center"
+                          >
                             <div className="w-12 h-12 rounded-full theme-info mx-auto flex items-center justify-center">
                               <History size={23} />
                             </div>
@@ -1153,7 +1227,8 @@ export default function AbsensiGuruPage() {
                             </p>
 
                             <p className="text-xs theme-text-muted mt-1">
-                              Riwayat akan muncul setelah presensi berhasil dicatat.
+                              Riwayat akan muncul setelah presensi
+                              berhasil dicatat.
                             </p>
                           </td>
                         </tr>
@@ -1171,9 +1246,9 @@ export default function AbsensiGuruPage() {
                             >
                               <td className="px-5 py-4 text-sm theme-text-secondary whitespace-nowrap">
                                 {formatDate(
-                                  record.waktuMasuk ??
-                                    record.dibuatPada ??
-                                    record.tanggal
+                                  record.tanggal ??
+                                    record.waktuMasuk ??
+                                    record.dibuatPada
                                 )}
                               </td>
 
@@ -1221,7 +1296,10 @@ export default function AbsensiGuruPage() {
                       Menampilkan{" "}
                       {(currentPage - 1) * PAGE_SIZE + 1}
                       {" – "}
-                      {Math.min(currentPage * PAGE_SIZE, records.length)}
+                      {Math.min(
+                        currentPage * PAGE_SIZE,
+                        records.length
+                      )}
                       {" dari "}
                       {records.length} catatan
                     </p>
@@ -1229,7 +1307,9 @@ export default function AbsensiGuruPage() {
                     <div className="flex items-center gap-2">
                       <button
                         type="button"
-                        onClick={() => changePage(currentPage - 1)}
+                        onClick={() =>
+                          changePage(currentPage - 1)
+                        }
                         disabled={currentPage <= 1}
                         className="p-2 rounded-lg border theme-border theme-card theme-text-secondary disabled:opacity-40"
                         aria-label="Halaman sebelumnya"
@@ -1243,7 +1323,9 @@ export default function AbsensiGuruPage() {
 
                       <button
                         type="button"
-                        onClick={() => changePage(currentPage + 1)}
+                        onClick={() =>
+                          changePage(currentPage + 1)
+                        }
                         disabled={currentPage >= totalPages}
                         className="p-2 rounded-lg border theme-border theme-card theme-text-secondary disabled:opacity-40"
                         aria-label="Halaman berikutnya"
@@ -1269,11 +1351,12 @@ export default function AbsensiGuruPage() {
                   </p>
 
                   <p className="text-xs theme-text-muted mt-1 leading-5">
-                    Jam masuk, jam pulang, durasi kerja, dan status
-                    keterlambatan mengikuti hasil Backend. Check-out
-                    menggunakan catatan shift aktif yang ditemukan Backend.
-                    Face ID dan barcode belum tersedia sebagai metode
-                    verifikasi pada endpoint shift yang diberikan.
+                    Riwayat diperbarui otomatis setiap 10 detik
+                    saat halaman aktif. Jam masuk, jam pulang,
+                    status, dan shift mengikuti data Backend.
+                    Metode Face ID dan barcode tidak ditampilkan
+                    karena belum diverifikasi pada endpoint shift
+                    dalam implementasi Backend yang diberikan.
                   </p>
                 </div>
               </div>

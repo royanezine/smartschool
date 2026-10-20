@@ -258,13 +258,7 @@ export default function TambahKategoriPage() {
 
                 <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                   <div className="min-w-0">
-                    <div className="mb-2 flex items-center gap-2">
-                      <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-primary)]" />
 
-                      <span className="theme-primary text-[11px] font-bold uppercase tracking-[0.16em]">
-                        Sarana & Prasarana
-                      </span>
-                    </div>
 
                     <h1 className="theme-text text-2xl font-bold tracking-tight sm:text-3xl">
                       Tambah Kategori Aset

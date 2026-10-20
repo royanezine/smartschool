@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -22,11 +21,23 @@ import {
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 
+// Mendukung NEXT_PUBLIC_API_URL dengan atau tanpa akhiran /api.
 const API_BASE = (
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
-).replace(/\/+$/, "");
+)
+  .replace(/\/+$/, "")
+  .replace(/\/api$/i, "");
 
 const PAGE_SIZE = 10;
+
+function todayLocal() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = String(now.getMonth() + 1).padStart(2, "0");
+  const day = String(now.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
 
 function getToken() {
   if (typeof window === "undefined") return "";
@@ -64,39 +75,28 @@ async function apiRequest(path) {
   try {
     body = raw ? JSON.parse(raw) : {};
   } catch {
-    body = { message: raw };
+    body = null;
   }
 
   if (!response.ok) {
-    const serverMessage =
+    const message =
       body?.message ||
       body?.error ||
-      (typeof body === "string" ? body : "");
+      `Request gagal dengan status ${response.status}.`;
 
-    if (
-      response.status === 404 &&
-      typeof serverMessage === "string" &&
-      serverMessage.toLowerCase().includes("cannot get")
-    ) {
-      throw new Error(
-        `Endpoint tidak ditemukan: ${url}. Periksa route backend.`
-      );
-    }
-
-    throw new Error(
-      serverMessage || `Request gagal (${response.status}): ${url}`
-    );
+    throw new Error(message);
   }
 
-  if (typeof body === "string" && body.trim().startsWith("<")) {
+  if (body === null) {
     throw new Error(
-      `Server mengembalikan HTML, bukan JSON: ${url}. Periksa URL API.`
+      `Server tidak mengembalikan JSON yang valid. Periksa endpoint: ${url}`,
     );
   }
 
   return body;
 }
 
+// Mengambil array dari format respons API yang umum digunakan.
 function unwrapList(response) {
   if (Array.isArray(response)) return response;
 
@@ -110,12 +110,43 @@ function unwrapList(response) {
     response?.data?.shiftKerja,
     response?.users,
     response?.pengguna,
-    response?.results,
     response?.items,
+    response?.results,
     response?.shiftKerja,
   ];
 
   return candidates.find(Array.isArray) || [];
+}
+
+// Backend monitoring guru mengembalikan ringkasan dan array data guru.
+function unwrapMonitoring(response) {
+  let current = response;
+
+  for (let i = 0; i < 5; i += 1) {
+    if (
+      current &&
+      typeof current === "object" &&
+      Array.isArray(current.data)
+    ) {
+      return current;
+    }
+
+    if (
+      current &&
+      typeof current === "object" &&
+      current.data &&
+      typeof current.data === "object"
+    ) {
+      current = current.data;
+      continue;
+    }
+
+    break;
+  }
+
+  throw new Error(
+    "Format respons monitoring tidak sesuai. Pastikan endpoint monitoring-guru mengembalikan data guru dalam array.",
+  );
 }
 
 function getUserId(user) {
@@ -161,31 +192,28 @@ function getUserNip(user) {
 }
 
 function normalizeShift(shift) {
+  if (!shift || typeof shift !== "object") return null;
+
   return {
     ...shift,
-    id: shift?.id ?? shift?.shiftKerjaId ?? null,
-    nama: shift?.nama ?? shift?.namaShift ?? "Shift tanpa nama",
-    jamMasuk:
-      shift?.jamMasuk ??
-      shift?.jam_masuk ??
-      null,
-    jamKeluar:
-      shift?.jamKeluar ??
-      shift?.jam_keluar ??
-      null,
+    id: shift.id ?? shift.shiftKerjaId ?? null,
+    nama: shift.nama ?? shift.namaShift ?? "Shift tanpa nama",
+    jamMasuk: shift.jamMasuk ?? shift.jam_masuk ?? null,
+    jamKeluar: shift.jamKeluar ?? shift.jam_keluar ?? null,
     toleransiTerlambatMenit:
-      shift?.toleransiTerlambatMenit ?? null,
+      shift.toleransiTerlambatMenit ?? null,
   };
 }
 
 function isActiveShift(shift) {
-  if (shift?.dihapusPada || shift?.deletedAt) return false;
+  if (!shift) return false;
+  if (shift.dihapusPada || shift.deletedAt) return false;
 
-  if (typeof shift?.status === "boolean") {
+  if (typeof shift.status === "boolean") {
     return shift.status;
   }
 
-  if (typeof shift?.status === "string") {
+  if (typeof shift.status === "string") {
     return ![
       "nonaktif",
       "tidak aktif",
@@ -210,6 +238,7 @@ function formatTime(value) {
 function formatDate(value) {
   if (!value) return "-";
 
+  // Hindari pergeseran tanggal akibat konversi UTC.
   const date = new Date(`${value}T00:00:00`);
 
   if (Number.isNaN(date.getTime())) return String(value);
@@ -221,13 +250,46 @@ function formatDate(value) {
   }).format(date);
 }
 
-function todayLocal() {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
+function formatStatus(value) {
+  if (!value) return "Belum ada catatan";
 
-  return `${year}-${month}-${day}`;
+  const labels = {
+    tepat_waktu: "Tepat waktu",
+    terlambat: "Terlambat",
+    pulang_cepat: "Pulang cepat",
+    terlambat_dan_pulang_cepat: "Terlambat & pulang cepat",
+    hadir: "Hadir",
+    izin: "Izin",
+    sakit: "Sakit",
+    alpha: "Alpha",
+    belum_absen: "Belum ada catatan",
+    belum_ada_data: "Belum ada catatan",
+  };
+
+  return (
+    labels[value] ||
+    String(value).replaceAll("_", " ")
+  );
+}
+
+function getStatusStyle(status) {
+  if (status === "tepat_waktu" || status === "hadir") {
+    return "bg-emerald-50 text-emerald-800 dark:bg-emerald-950/40 dark:text-emerald-300";
+  }
+
+  if (
+    status === "terlambat" ||
+    status === "pulang_cepat" ||
+    status === "terlambat_dan_pulang_cepat"
+  ) {
+    return "bg-amber-50 text-amber-800 dark:bg-amber-950/40 dark:text-amber-300";
+  }
+
+  if (status === "izin" || status === "sakit") {
+    return "bg-blue-50 text-blue-800 dark:bg-blue-950/40 dark:text-blue-300";
+  }
+
+  return "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300";
 }
 
 function StatCard({ icon: Icon, label, value, detail }) {
@@ -272,9 +334,53 @@ function EmptyState({ title, description }) {
   );
 }
 
+function AttendanceDetails({ attendance }) {
+  if (!attendance) {
+    return (
+      <span className="inline-flex items-center gap-1.5 rounded-lg bg-slate-100 px-2.5 py-1.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+        <AlertCircle size={13} />
+        Belum ada catatan
+      </span>
+    );
+  }
+
+  const status = attendance.statusShift || attendance.status;
+
+  return (
+    <div className="space-y-1.5">
+      <span
+        className={`inline-flex items-center gap-1.5 rounded-lg px-2.5 py-1.5 text-xs font-medium ${getStatusStyle(status)}`}
+      >
+        {status === "tepat_waktu" || status === "hadir" ? (
+          <CheckCircle2 size={13} />
+        ) : (
+          <AlertCircle size={13} />
+        )}
+
+        {formatStatus(status)}
+      </span>
+
+      <p className="text-xs text-slate-500 dark:text-slate-400">
+        Masuk: {formatTime(attendance.waktuMasuk)}
+      </p>
+
+      <p className="text-xs text-slate-500 dark:text-slate-400">
+        Pulang: {formatTime(attendance.waktuKeluar)}
+      </p>
+
+      {Number(attendance.terlambatMenit) > 0 && (
+        <p className="text-xs font-medium text-amber-700 dark:text-amber-400">
+          Terlambat: {attendance.terlambatMenit} menit
+        </p>
+      )}
+    </div>
+  );
+}
+
 export default function RekapGuruPage() {
   const [teachers, setTeachers] = useState([]);
   const [shifts, setShifts] = useState([]);
+  const [monitoring, setMonitoring] = useState(null);
 
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -286,71 +392,150 @@ export default function RekapGuruPage() {
   const [page, setPage] = useState(1);
   const [selectedTeacher, setSelectedTeacher] = useState(null);
 
-  const loadData = useCallback(async (isRefresh = false) => {
-    if (isRefresh) {
-      setRefreshing(true);
-    } else {
-      setLoading(true);
-    }
+  const loadData = useCallback(
+    async (isRefresh = false) => {
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
 
-    setError("");
+      setError("");
 
-    try {
-      const [usersResponse, shiftsResponse] = await Promise.all([
-        apiRequest("/api/users?limit=100&role=guru"),
-        apiRequest("/api/shift-kerja?page=1&limit=100"),
-      ]);
+      try {
+        const [
+          usersResponse,
+          shiftsResponse,
+          monitoringResponse,
+        ] = await Promise.all([
+          apiRequest("/api/users?limit=100&role=guru"),
+          apiRequest("/api/shift-kerja?page=1&limit=100"),
+          apiRequest(
+            `/api/absensi/monitoring-guru?tanggal=${encodeURIComponent(selectedDate)}`,
+          ),
+        ]);
 
-      const rawUsers = unwrapList(usersResponse);
-      const rawShifts = unwrapList(shiftsResponse);
+        const rawUsers = unwrapList(usersResponse);
+        const rawShifts = unwrapList(shiftsResponse);
+        const monitoringPayload = unwrapMonitoring(monitoringResponse);
 
-      const normalizedShifts = rawShifts
-        .map(normalizeShift)
-        .filter((shift) => shift.id != null);
+        const normalizedShifts = rawShifts
+          .map(normalizeShift)
+          .filter((shift) => shift && shift.id != null);
 
-      const activeShifts = normalizedShifts.filter(isActiveShift);
+        const activeShifts = normalizedShifts.filter(isActiveShift);
 
-const normalizedTeachers = rawUsers.map((user, index) => {
-  const userId = getUserId(user);
+        const monitoringData = monitoringPayload.data;
 
-  // Field dari controller pengguna BE.
-  const shiftKerja = String(user?.shiftKerja || "")
-    .trim()
-    .toLowerCase();
+        const monitoringById = new Map(
+          monitoringData.map((item) => [
+            String(item.id),
+            item,
+          ]),
+        );
 
-  // Cocokkan nilai shift pengguna dengan master shift.
-  const matchedShift = activeShifts.find((shift) => {
-    const nama = String(shift?.nama || "").trim().toLowerCase();
-    const kode = String(shift?.kode || "").trim().toLowerCase();
+        // Jika BE mengirim ringkasan monitoring, gunakan data monitoring
+        // sebagai sumber utama, termasuk ketika jumlah guru adalah nol.
+        // Endpoint users hanya menjadi fallback bila ringkasan tidak tersedia.
+        const hasMonitoringSummary =
+          Number.isFinite(Number(monitoringPayload.totalGuru));
 
-    return nama === shiftKerja || kode === shiftKerja;
-  });
+        const sourceTeachers = hasMonitoringSummary
+          ? monitoringData
+          : rawUsers;
 
-  return {
-    id: userId != null ? String(userId) : `teacher-${index}`,
-    nama: getUserName(user),
-    email: getUserEmail(user),
-    nip: getUserNip(user),
-    shiftKerja,
-    shifts: matchedShift ? [matchedShift] : [],
-  };
-});
+        const normalizedTeachers = sourceTeachers.map(
+          (user, index) => {
+            const userId = getUserId(user);
 
-      setTeachers(normalizedTeachers);
-      setShifts(activeShifts);
-      setPage(1);
-    } catch (err) {
-      console.error("Gagal memuat rekap guru:", err);
+            const teacherId =
+              userId != null
+                ? String(userId)
+                : `teacher-${index}`;
 
-      setError(
-        err?.message ||
-          "Data guru dan shift kerja gagal dimuat. Periksa endpoint backend."
-      );
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  }, []);
+            const monitoringItem = monitoringById.get(teacherId);
+
+            const attendance =
+              monitoringItem?.absensi ??
+              user?.absensi ??
+              null;
+
+            const assignedShiftId =
+              user?.shiftKerjaId ??
+              user?.shiftKerjaMaster?.id ??
+              user?.shiftKerja?.id ??
+              attendance?.shiftKerjaId ??
+              null;
+
+            const assignedShiftName =
+              user?.shiftKerjaMaster?.nama ??
+              user?.shiftKerja?.nama ??
+              attendance?.shiftKerja?.nama ??
+              "";
+
+            const matchedShift = activeShifts.find((shift) => {
+              if (
+                assignedShiftId != null &&
+                String(shift.id) === String(assignedShiftId)
+              ) {
+                return true;
+              }
+
+              return (
+                assignedShiftName &&
+                shift.nama.toLowerCase() ===
+                  String(assignedShiftName).toLowerCase()
+              );
+            });
+
+            const fallbackShift = normalizeShift(
+              user?.shiftKerjaMaster ??
+                user?.shiftKerja ??
+                attendance?.shiftKerja ??
+                null,
+            );
+
+            const assignedShift =
+              matchedShift ||
+              (fallbackShift?.id ? fallbackShift : null);
+
+            return {
+              id: teacherId,
+              nama: getUserName(user),
+              email: getUserEmail(user),
+              nip: getUserNip(user),
+              shifts: assignedShift ? [assignedShift] : [],
+              attendance,
+              statusMonitoring:
+                monitoringItem?.statusMonitoring ??
+                user?.statusMonitoring ??
+                (attendance
+                  ? attendance.statusShift || attendance.status
+                  : "belum_absen"),
+            };
+          },
+        );
+
+        setTeachers(normalizedTeachers);
+        setShifts(activeShifts);
+        setMonitoring(
+          hasMonitoringSummary ? monitoringPayload : null,
+        );
+        setPage(1);
+      } catch (err) {
+        console.error("Gagal memuat rekap guru:", err);
+
+        setError(
+          err?.message ||
+            "Data guru dan monitoring kehadiran gagal dimuat.",
+        );
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    [selectedDate],
+  );
 
   useEffect(() => {
     loadData();
@@ -364,12 +549,12 @@ const normalizedTeachers = rawUsers.map((user, index) => {
         !keyword ||
         teacher.nama.toLowerCase().includes(keyword) ||
         teacher.email.toLowerCase().includes(keyword) ||
-        teacher.nip.toLowerCase().includes(keyword);
+        String(teacher.nip).toLowerCase().includes(keyword);
 
       const matchesShift =
         selectedShift === "semua" ||
         teacher.shifts.some(
-          (shift) => String(shift.id) === String(selectedShift)
+          (shift) => String(shift.id) === String(selectedShift),
         );
 
       return matchesSearch && matchesShift;
@@ -378,22 +563,23 @@ const normalizedTeachers = rawUsers.map((user, index) => {
 
   const totalPages = Math.max(
     1,
-    Math.ceil(filteredTeachers.length / PAGE_SIZE)
+    Math.ceil(filteredTeachers.length / PAGE_SIZE),
   );
 
   const safePage = Math.min(page, totalPages);
 
   const paginatedTeachers = useMemo(() => {
     const start = (safePage - 1) * PAGE_SIZE;
+
     return filteredTeachers.slice(start, start + PAGE_SIZE);
   }, [filteredTeachers, safePage]);
 
-  const teachersWithShift = useMemo(
-    () => teachers.filter((teacher) => teacher.shifts.length > 0).length,
-    [teachers]
-  );
+  const teachersWithShift = teachers.filter(
+    (teacher) => teacher.shifts.length > 0,
+  ).length;
 
-  const teachersWithoutShift = teachers.length - teachersWithShift;
+  const teachersWithoutShift =
+    teachers.length - teachersWithShift;
 
   function changeSearch(value) {
     setSearch(value);
@@ -405,24 +591,30 @@ const normalizedTeachers = rawUsers.map((user, index) => {
     setPage(1);
   }
 
+  const sudahAbsen =
+    monitoring?.sudahAbsen ??
+    teachers.filter((teacher) => teacher.attendance).length;
+
+  const totalGuru = monitoring?.totalGuru ?? teachers.length;
+
+  const belumAbsen =
+    monitoring?.belumAbsen ??
+    Math.max(0, totalGuru - sudahAbsen);
+
   return (
     <div className="flex h-dvh overflow-hidden bg-slate-50 dark:bg-slate-950">
-      {/* SIDEBAR */}
       <aside className="relative z-30 h-full shrink-0">
         <Sidebar role="admin_sekolah" />
       </aside>
 
-      {/* AREA UTAMA */}
       <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-        {/* HEADER TETAP DI ATAS */}
         <header className="sticky top-0 z-40 shrink-0 border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
           <Header />
         </header>
 
-        {/* HANYA BAGIAN KONTEN INI YANG SCROLL */}
         <main className="min-h-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain">
           <div className="mx-auto w-full max-w-[1600px] space-y-6 px-4 py-6 sm:px-6 lg:px-8">
-            {/* JUDUL HALAMAN */}
+            {/* JUDUL */}
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
                 <div className="mb-2 flex flex-wrap items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
@@ -438,8 +630,8 @@ const normalizedTeachers = rawUsers.map((user, index) => {
                 </h1>
 
                 <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">
-                  Lihat data guru dan pembagian shift kerja berdasarkan
-                  data yang tersedia di backend.
+                  Pantau pembagian shift dan catatan kehadiran guru
+                  berdasarkan tanggal yang dipilih.
                 </p>
               </div>
 
@@ -458,7 +650,7 @@ const normalizedTeachers = rawUsers.map((user, index) => {
               </button>
             </div>
 
-            {/* TANGGAL REKAP */}
+            {/* TANGGAL */}
             <div className="flex flex-col gap-3 rounded-xl border border-blue-100 bg-blue-50/70 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-blue-900/60 dark:bg-blue-950/30">
               <div className="flex items-start gap-3">
                 <div className="mt-0.5 rounded-lg bg-white p-2 text-blue-700 dark:bg-slate-900 dark:text-blue-300">
@@ -487,57 +679,65 @@ const normalizedTeachers = rawUsers.map((user, index) => {
                   id="rekap-date"
                   type="date"
                   value={selectedDate}
-                  onChange={(event) =>
-                    setSelectedDate(event.target.value)
-                  }
+                  onChange={(event) => {
+                    setSelectedDate(event.target.value);
+                    setPage(1);
+                  }}
                   className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:focus:ring-blue-950"
                 />
               </div>
             </div>
 
-            {/* INFORMASI KETERSEDIAAN REKAP */}
-            <div className="flex items-start gap-3 rounded-xl border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/60 dark:bg-amber-950/20">
-              <AlertCircle
-                size={20}
-                className="mt-0.5 shrink-0 text-amber-700 dark:text-amber-400"
-              />
-
-              <div>
-                <p className="text-sm font-semibold text-amber-900 dark:text-amber-300">
-                  Rekap kehadiran belum tersedia dari endpoint yang
-                  terkonfirmasi
-                </p>
-                <p className="mt-1 text-sm leading-6 text-amber-800 dark:text-amber-200/80">
-                  Halaman ini menampilkan data guru dan shift yang berhasil
-                  diambil. Status hadir, terlambat, dan jam check-in tidak
-                  dibuat sendiri karena endpoint rekap seluruh guru
-                  berdasarkan tanggal belum terkonfirmasi.
-                </p>
-              </div>
-            </div>
-
-            {/* STATISTIK */}
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {/* RINGKASAN */}
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
               <StatCard
                 icon={Users}
                 label="Total guru"
-                value={loading ? "—" : teachers.length}
-                detail="Data dari endpoint pengguna"
+                value={loading ? "—" : totalGuru}
+                detail="Guru pada data monitoring"
               />
 
               <StatCard
                 icon={CheckCircle2}
-                label="Guru dengan shift"
-                value={loading ? "—" : teachersWithShift}
-                detail="Berdasarkan relasi shift dari backend"
+                label="Sudah memiliki catatan"
+                value={loading ? "—" : sudahAbsen}
+                detail="Memiliki catatan absensi pada tanggal terpilih"
               />
 
               <StatCard
-                icon={Clock3}
-                label="Guru tanpa shift terdeteksi"
-                value={loading ? "—" : teachersWithoutShift}
-                detail="Relasi shift tidak ditemukan pada respons API"
+                icon={AlertCircle}
+                label="Belum memiliki catatan"
+                value={loading ? "—" : belumAbsen}
+                detail="Bukan otomatis berarti alpha"
               />
+
+              <StatCard
+                icon={BriefcaseBusiness}
+                label="Guru dengan shift"
+                value={loading ? "—" : teachersWithShift}
+                detail={`${teachersWithoutShift} guru tanpa shift terdeteksi`}
+              />
+            </div>
+
+            {/* INFORMASI */}
+            <div className="flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50/70 p-4 dark:border-blue-900/60 dark:bg-blue-950/30">
+              <CalendarDays
+                size={20}
+                className="mt-0.5 shrink-0 text-blue-700 dark:text-blue-300"
+              />
+
+              <div>
+                <p className="text-sm font-semibold text-slate-900 dark:text-white">
+                  Monitoring kehadiran guru
+                </p>
+                <p className="mt-1 text-sm leading-6 text-slate-600 dark:text-slate-300">
+                  Status dan jam masuk/pulang ditampilkan berdasarkan
+                  catatan yang dikembalikan backend untuk tanggal{" "}
+                  {formatDate(selectedDate)}. Guru yang tidak memiliki
+                  catatan ditandai sebagai belum memiliki catatan,
+                  bukan langsung dianggap alpha.
+                </p>
+              </div>
             </div>
 
             {/* ERROR */}
@@ -568,18 +768,17 @@ const normalizedTeachers = rawUsers.map((user, index) => {
               </div>
             )}
 
-            {/* TABEL GURU */}
+            {/* TABEL */}
             <section className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
               <div className="border-b border-slate-200 p-5 dark:border-slate-800">
                 <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                   <div>
                     <h2 className="text-base font-bold text-slate-900 dark:text-white">
-                      Data guru dan shift
+                      Data guru dan kehadiran
                     </h2>
 
                     <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                      Informasi penugasan shift yang berhasil dibaca
-                      dari API.
+                      Status kehadiran dan waktu absensi sesuai data BE.
                     </p>
                   </div>
 
@@ -638,23 +837,23 @@ const normalizedTeachers = rawUsers.map((user, index) => {
                   />
 
                   <p className="text-sm text-slate-500 dark:text-slate-400">
-                    Mengambil data guru dan shift...
+                    Mengambil data guru dan kehadiran...
                   </p>
                 </div>
               ) : error ? (
                 <EmptyState
                   title="Data belum dapat ditampilkan"
-                  description="Periksa pesan error di atas dan pastikan URL endpoint sesuai dengan route backend."
+                  description="Periksa pesan error di atas dan pastikan endpoint monitoring tersedia."
                 />
               ) : paginatedTeachers.length === 0 ? (
                 <EmptyState
                   title="Data guru tidak ditemukan"
-                  description="Coba ubah kata kunci pencarian atau filter shift yang dipilih."
+                  description="Coba ubah kata kunci pencarian atau filter shift."
                 />
               ) : (
                 <>
                   <div className="overflow-x-auto">
-                    <table className="w-full min-w-[950px] border-collapse text-left">
+                    <table className="w-full min-w-[1050px] border-collapse text-left">
                       <thead>
                         <tr className="border-b border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-950/60">
                           {[
@@ -757,20 +956,21 @@ const normalizedTeachers = rawUsers.map((user, index) => {
                             </td>
 
                             <td className="px-5 py-4">
-                              <span className="inline-flex items-center gap-1.5 rounded-lg bg-amber-50 px-2.5 py-1.5 text-xs font-medium text-amber-800 dark:bg-amber-950/40 dark:text-amber-300">
-                                <AlertCircle size={13} />
-                                Belum tersedia
-                              </span>
+                              <AttendanceDetails
+                                attendance={teacher.attendance}
+                              />
 
                               <p className="mt-1 text-xs text-slate-400">
-                                Rekap tanggal {selectedDate}
+                                {formatDate(selectedDate)}
                               </p>
                             </td>
 
                             <td className="px-5 py-4 text-right">
                               <button
                                 type="button"
-                                onClick={() => setSelectedTeacher(teacher)}
+                                onClick={() =>
+                                  setSelectedTeacher(teacher)
+                                }
                                 aria-label={`Lihat detail ${teacher.nama}`}
                                 className="inline-flex h-9 items-center gap-2 rounded-lg border border-slate-200 px-3 text-sm font-medium text-slate-700 transition hover:border-blue-200 hover:bg-blue-50 hover:text-blue-700 dark:border-slate-700 dark:text-slate-300 dark:hover:border-blue-900 dark:hover:bg-blue-950/40 dark:hover:text-blue-300"
                               >
@@ -792,10 +992,10 @@ const normalizedTeachers = rawUsers.map((user, index) => {
                         {filteredTeachers.length === 0
                           ? 0
                           : (safePage - 1) * PAGE_SIZE + 1}
-                        {"–"}
+                        –
                         {Math.min(
                           safePage * PAGE_SIZE,
-                          filteredTeachers.length
+                          filteredTeachers.length,
                         )}
                       </span>{" "}
                       dari{" "}
@@ -809,7 +1009,9 @@ const normalizedTeachers = rawUsers.map((user, index) => {
                       <button
                         type="button"
                         onClick={() =>
-                          setPage((current) => Math.max(1, current - 1))
+                          setPage((current) =>
+                            Math.max(1, current - 1),
+                          )
                         }
                         disabled={safePage <= 1}
                         className="inline-flex h-9 items-center gap-1 rounded-lg border border-slate-200 px-3 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
@@ -826,7 +1028,7 @@ const normalizedTeachers = rawUsers.map((user, index) => {
                         type="button"
                         onClick={() =>
                           setPage((current) =>
-                            Math.min(totalPages, current + 1)
+                            Math.min(totalPages, current + 1),
                           )
                         }
                         disabled={safePage >= totalPages}
@@ -844,7 +1046,7 @@ const normalizedTeachers = rawUsers.map((user, index) => {
         </main>
       </div>
 
-      {/* MODAL DETAIL GURU */}
+      {/* MODAL DETAIL */}
       {selectedTeacher && (
         <div
           className="fixed inset-0 z-[100] flex items-center justify-center overflow-y-auto bg-slate-950/50 p-4 backdrop-blur-[2px]"
@@ -894,6 +1096,7 @@ const normalizedTeachers = rawUsers.map((user, index) => {
                   <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
                     NIP
                   </p>
+
                   <p className="mt-2 break-words text-sm font-semibold text-slate-900 dark:text-white">
                     {selectedTeacher.nip}
                   </p>
@@ -903,6 +1106,7 @@ const normalizedTeachers = rawUsers.map((user, index) => {
                   <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
                     Tanggal rekap
                   </p>
+
                   <p className="mt-2 text-sm font-semibold text-slate-900 dark:text-white">
                     {formatDate(selectedDate)}
                   </p>
@@ -949,24 +1153,49 @@ const normalizedTeachers = rawUsers.map((user, index) => {
                   </div>
                 ) : (
                   <div className="mt-3 rounded-lg border border-dashed border-slate-300 p-5 text-sm text-slate-500 dark:border-slate-700 dark:text-slate-400">
-                    Relasi shift untuk guru ini tidak ditemukan dalam
-                    respons backend.
+                    Relasi shift guru ini tidak ditemukan dalam respons
+                    backend.
                   </div>
                 )}
               </div>
 
-              <div className="rounded-lg border border-amber-200 bg-amber-50 p-4 dark:border-amber-900/60 dark:bg-amber-950/20">
-                <p className="text-sm font-semibold text-amber-900 dark:text-amber-300">
-                  Rekap kehadiran belum tersedia
-                </p>
+              <div>
+                <h3 className="text-sm font-semibold text-slate-900 dark:text-white">
+                  Catatan kehadiran
+                </h3>
 
-                <p className="mt-1 text-sm leading-6 text-amber-800 dark:text-amber-200/80">
-                  Data kehadiran guru pada {formatDate(selectedDate)} tidak
-                  ditampilkan karena endpoint rekap semua guru belum
-                  terkonfirmasi. Jam shift adalah jadwal, bukan jam
-                  check-in atau check-out aktual.
-                </p>
+                <div className="mt-3 rounded-lg border border-slate-200 p-4 dark:border-slate-800">
+                  <AttendanceDetails
+                    attendance={selectedTeacher.attendance}
+                  />
+
+                  {selectedTeacher.attendance && (
+                    <div className="mt-4 space-y-2 border-t border-slate-100 pt-3 text-sm dark:border-slate-800">
+                      <p className="text-slate-600 dark:text-slate-300">
+                        Metode:{" "}
+                        {selectedTeacher.attendance.metode || "-"}
+                      </p>
+
+                      <p className="text-slate-600 dark:text-slate-300">
+                        Keterangan:{" "}
+                        {selectedTeacher.attendance.keterangan || "-"}
+                      </p>
+
+                      <p className="text-slate-600 dark:text-slate-300">
+                        Durasi kerja:{" "}
+                        {selectedTeacher.attendance.durasiJamKerja ??
+                          selectedTeacher.attendance.durasiKerjaMenit ??
+                          "-"}
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
+
+              <p className="text-xs leading-5 text-slate-500 dark:text-slate-400">
+                Data ini berasal dari catatan absensi backend. Jika tidak
+                ada catatan, status tidak otomatis dianggap alpha.
+              </p>
             </div>
 
             <div className="flex justify-end border-t border-slate-200 p-5 dark:border-slate-800">

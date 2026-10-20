@@ -162,7 +162,7 @@ export default function EditPageCms() {
       setSuccess("Perubahan halaman berhasil disimpan.");
 
       setTimeout(() => {
-        router.push(`/cmsAdmin/pages/${id}`);
+        router.push(`/admin/cms/pages/${id}`);
       }, 700);
     } catch (err) {
       console.error("Gagal memperbarui halaman:", err);
@@ -261,7 +261,7 @@ export default function EditPageCms() {
 
               <div className="mb-6">
                 <Link
-                  href="/cmsAdmin/pages"
+                  href="/admin/cms/pages"
                   className="theme-text-muted inline-flex items-center gap-2 text-sm font-semibold transition hover:text-[var(--color-primary)]"
                 >
                   <ArrowLeft className="h-4 w-4" />
@@ -653,7 +653,7 @@ export default function EditPageCms() {
                       </button>
 
                       <Link
-                        href="/cmsAdmin/pages"
+                        href="/admin/cms/pages"
                         className="theme-card theme-border theme-text-secondary mt-2 inline-flex w-full items-center justify-center gap-2 rounded-xl border px-5 py-3 text-sm font-semibold transition theme-sidebar-hover"
                       >
                         <ArrowLeft className="h-4 w-4" />

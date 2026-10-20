@@ -550,6 +550,7 @@ export default function SettingTarifPage() {
   ======================================================= */
 
   return (
+    // 1. ROOT: flex h-screen overflow-hidden agar halaman tidak bisa di-scroll
     <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar
         active="settingTarif"
@@ -558,19 +559,28 @@ export default function SettingTarifPage() {
         setCollapsed={setIsCollapsed}
       />
 
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <Header
-          toggleSidebar={toggleSidebar}
-          notifications={[]}
-          user={{
-            name: "Admin Sekolah",
-            email: "admin@smartschool.com",
-            avatar: "AD",
-          }}
-        />
+      {/* 2. BODY: flex min-h-0 flex-1 untuk sidebar + main sejajar */}
+      <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
+        
+        {/* 3. HEADER: dibungkus shrink-0 agar tetap di atas */}
+        <div className="shrink-0">
+          <Header
+            toggleSidebar={toggleSidebar}
+            notifications={[]}
+            user={{
+              name: "Admin Sekolah",
+              email: "admin@smartschool.com",
+              avatar: "AD",
+            }}
+          />
+        </div>
 
+        {/* 4. MAIN: min-w-0 flex-1 overflow-y-auto agar hanya area ini yang scroll */}
         <main className="theme-page min-h-0 flex-1 overflow-y-auto overflow-x-hidden">
-          <div className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8 xl:px-10">
+          
+          {/* 5. KONTEN: w-full (bukan max-w-7xl) agar card melebar saat zoom out */}
+          <div className="w-full px-4 py-6 sm:px-6 lg:px-8 xl:px-10">
+            
             {/* PAGE HEADER */}
             <div className="theme-card theme-border mb-6 overflow-hidden rounded-2xl border p-6 shadow-[0_10px_30px_color-mix(in_srgb,var(--color-text)_8%,transparent)] sm:p-8">
               <div className="flex flex-col gap-5 sm:flex-row sm:items-center sm:justify-between">
@@ -654,8 +664,8 @@ export default function SettingTarifPage() {
               </div>
             )}
 
-            {/* STATISTIK */}
-            <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {/* 6. STATISTIK: Grid responsif hingga 2xl:grid-cols-6 */}
+            <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4 2xl:grid-cols-6">
               <StatCard
                 icon={<Layers size={22} />}
                 label="Total Kategori"

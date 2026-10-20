@@ -146,7 +146,7 @@ export default function CreatePagePage() {
       setSuccessMessage("Halaman berhasil dibuat.");
 
       setTimeout(() => {
-        router.push("/cmsAdmin/pages");
+        router.push("/admin/cms/pages");
         router.refresh();
       }, 700);
     } catch (error) {
@@ -215,7 +215,7 @@ export default function CreatePagePage() {
               <div className="mb-6 flex flex-col gap-4 sm:mb-7 lg:flex-row lg:items-center lg:justify-between">
                 <div className="flex min-w-0 flex-wrap items-center gap-2 text-sm">
                   <Link
-                    href="/cmsAdmin"
+                    href="/admin/cms"
                     className="theme-text-muted transition hover:text-[var(--color-primary)]"
                   >
                     Dashboard
@@ -224,7 +224,7 @@ export default function CreatePagePage() {
                   <span className="theme-text-placeholder">/</span>
 
                   <Link
-                    href="/cmsAdmin/pages"
+                    href="/admin/cms/pages"
                     className="theme-text-muted transition hover:text-[var(--color-primary)]"
                   >
                     Halaman Statis
@@ -238,7 +238,7 @@ export default function CreatePagePage() {
                 </div>
 
                 <Link
-                  href="/cmsAdmin/pages"
+                  href="/admin/cms/pages"
                   className="
                     theme-card theme-border theme-text-secondary
                     inline-flex w-fit items-center gap-2 rounded-xl
@@ -653,7 +653,7 @@ export default function CreatePagePage() {
                           <button
                             type="button"
                             onClick={() =>
-                              router.push("/cmsAdmin/pages")
+                              router.push("/admin/cms/pages")
                             }
                             disabled={loading}
                             className="theme-card theme-border theme-text-secondary mt-2 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border px-5 text-sm font-semibold transition hover:bg-[var(--color-header-hover)] disabled:opacity-50"
@@ -866,7 +866,7 @@ export default function CreatePagePage() {
                         <button
                           type="button"
                           onClick={() =>
-                            router.push("/cmsAdmin/pages")
+                            router.push("/admin/cms/pages")
                           }
                           disabled={loading}
                           className="theme-card theme-border theme-text-secondary inline-flex w-full items-center justify-center gap-2 rounded-xl border px-5 py-3 text-sm font-semibold transition hover:bg-[var(--color-header-hover)] disabled:opacity-50 sm:w-auto"

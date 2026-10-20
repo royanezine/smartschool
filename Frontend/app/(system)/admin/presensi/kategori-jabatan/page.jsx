@@ -90,8 +90,8 @@ function StatusBadge({ status }) {
     <span
       className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium ${
         aktif
-          ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-300 dark:ring-emerald-800"
-          : "bg-slate-100 text-slate-600 ring-1 ring-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:ring-slate-700"
+          ? "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200 dark:bg-emerald-950/50 dark:text-emerald-300 dark:ring-emerald-900/60"
+          : "bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] theme-text-muted ring-1 ring-[color-mix(in_srgb,var(--color-text)_8%,transparent)]"
       }`}
     >
       {aktif ? <CheckCircle2 size={13} /> : <XCircle size={13} />}
@@ -109,19 +109,15 @@ function Modal({ title, description, onClose, children, wide = false }) {
       }}
     >
       <section
-        className={`my-auto w-full ${
+        className={`theme-card my-auto w-full ${
           wide ? "max-w-2xl" : "max-w-xl"
-        } overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-2xl dark:border-slate-800 dark:bg-slate-900`}
+        } overflow-hidden rounded-2xl border theme-border shadow-2xl`}
       >
-        <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-5 py-4 dark:border-slate-800 sm:px-6">
+        <div className="flex items-start justify-between gap-4 border-b theme-border px-5 py-4 sm:px-6">
           <div>
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
-              {title}
-            </h2>
+            <h2 className="text-lg font-semibold theme-text">{title}</h2>
             {description && (
-              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                {description}
-              </p>
+              <p className="mt-1 text-sm theme-text-muted">{description}</p>
             )}
           </div>
 
@@ -129,7 +125,7 @@ function Modal({ title, description, onClose, children, wide = false }) {
             type="button"
             onClick={onClose}
             aria-label="Tutup dialog"
-            className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 dark:hover:bg-slate-800 dark:hover:text-white"
+            className="rounded-lg p-2 theme-text-muted transition hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] hover:theme-text"
           >
             <X size={19} />
           </button>
@@ -146,15 +142,13 @@ function Modal({ title, description, onClose, children, wide = false }) {
 function Field({ label, required, hint, children }) {
   return (
     <label className="block space-y-1.5">
-      <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
+      <span className="text-sm font-medium theme-text">
         {label}
         {required && <span className="ml-1 text-red-500">*</span>}
       </span>
       {children}
       {hint && (
-        <span className="block text-xs text-slate-500 dark:text-slate-400">
-          {hint}
-        </span>
+        <span className="block text-xs theme-text-muted">{hint}</span>
       )}
     </label>
   );
@@ -163,7 +157,14 @@ function Field({ label, required, hint, children }) {
 /**
  * Header kolom yang bisa diklik untuk sorting ASC/DESC.
  */
-function SortableHeader({ label, column, sortBy, sortOrder, onSort, align = "left" }) {
+function SortableHeader({
+  label,
+  column,
+  sortBy,
+  sortOrder,
+  onSort,
+  align = "left",
+}) {
   const active = sortBy === column;
 
   return (
@@ -175,10 +176,12 @@ function SortableHeader({ label, column, sortBy, sortOrder, onSort, align = "lef
       <button
         type="button"
         onClick={() => onSort(column)}
-        className={`inline-flex items-center gap-1.5 transition hover:text-slate-800 dark:hover:text-slate-100 ${
-          active ? "text-blue-700 dark:text-blue-300" : ""
+        className={`inline-flex items-center gap-1.5 transition hover:theme-text ${
+          active ? "theme-primary-text" : ""
         }`}
-        title={`Urutkan ${label} ${active && sortOrder === "asc" ? "DESC" : "ASC"}`}
+        title={`Urutkan ${label} ${
+          active && sortOrder === "asc" ? "DESC" : "ASC"
+        }`}
       >
         {label}
         {active ? (
@@ -196,17 +199,18 @@ function SortableHeader({ label, column, sortBy, sortOrder, onSort, align = "lef
 }
 
 const inputClass =
-  "w-full rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-blue-500 dark:disabled:bg-slate-900";
+  "theme-input w-full rounded-xl border px-3.5 py-2.5 text-sm outline-none transition disabled:cursor-not-allowed disabled:opacity-50";
 
 const buttonSecondary =
-  "inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800";
+  "inline-flex items-center justify-center gap-2 rounded-xl border theme-border theme-card px-3.5 py-2.5 text-sm font-medium theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] disabled:cursor-not-allowed disabled:opacity-50 transition";
 
 const buttonPrimary =
-  "inline-flex items-center justify-center gap-2 rounded-xl bg-blue-700 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50";
+  "inline-flex items-center justify-center gap-2 rounded-xl theme-primary px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 transition";
 
 export default function KategoriJabatanPage() {
   const [items, setItems] = useState([]);
   const router = useRouter();
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -354,13 +358,13 @@ export default function KategoriJabatanPage() {
     router.push("/admin/presensi/kategori-jabatan/tambah");
   }
 
- function openEdit(item) {
-  router.push(`/admin/presensi/kategori-jabatan/${item.id}/edit`);
-}
+  function openEdit(item) {
+    router.push(`/admin/presensi/kategori-jabatan/${item.id}/edit`);
+  }
 
   function openDetail(item) {
-  router.push(`/admin/presensi/kategori-jabatan/${item.id}`);
-}
+    router.push(`/admin/presensi/kategori-jabatan/${item.id}`);
+  }
 
   function openTarif(item) {
     setError("");
@@ -510,414 +514,437 @@ export default function KategoriJabatanPage() {
   const currentTarif = selected?.tarifAktif;
 
   return (
-    <div className="flex h-screen overflow-hidden bg-slate-50 dark:bg-slate-950">
-      <Sidebar />
+    <div className="theme-page flex h-screen w-full overflow-hidden">
+      <Sidebar
+        role="admin"
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
 
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <Header />
+        <div className="shrink-0">
+          <Header onMenuClick={() => setSidebarOpen(true)} />
+        </div>
 
-        <main className="min-h-0 flex-1 overflow-y-auto">
-          <div className="mx-auto max-w-7xl space-y-6 px-4 py-6 sm:px-6 lg:px-8">
-            <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-              <div className="flex items-start gap-3">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
-                  <BriefcaseBusiness size={23} />
-                </div>
-
-                <div>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
-                    Presensi dan Kepegawaian
-                  </p>
-                  <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-                    Kategori Jabatan
-                  </h1>
-                  <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">
-                    Kelola kategori jabatan pegawai dan tarif per jam
-                    sebagai dasar perhitungan penggajian.
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex flex-wrap items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => loadData({ quiet: true })}
-                  disabled={loading || refreshing}
-                  className={buttonSecondary}
-                >
-                  <RefreshCw
-                    size={16}
-                    className={refreshing ? "animate-spin" : ""}
-                  />
-                  Refresh
-                </button>
-
-                <button
-                  type="button"
-                  onClick={openCreate}
-                  className={buttonPrimary}
-                >
-                  <Plus size={17} />
-                  Tambah Kategori
-                </button>
-              </div>
-            </div>
-
-            {notice && (
-              <div className="flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300">
-                <CheckCircle2 size={18} className="mt-0.5 shrink-0" />
-                <p>{notice}</p>
-                <button
-                  type="button"
-                  onClick={() => setNotice("")}
-                  className="ml-auto rounded-md p-1"
-                  aria-label="Tutup pemberitahuan"
-                >
-                  <X size={15} />
-                </button>
-              </div>
-            )}
-
-            {error && !modal && (
-              <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-300">
-                <AlertCircle size={18} className="mt-0.5 shrink-0" />
-                <p className="min-w-0 flex-1">{error}</p>
-                <button
-                  type="button"
-                  onClick={() => setError("")}
-                  aria-label="Tutup pesan error"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-            )}
-
-            <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-3">
-              <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                    Kategori pada halaman
-                  </span>
-                  <BriefcaseBusiness
-                    size={19}
-                    className="text-blue-600 dark:text-blue-400"
-                  />
-                </div>
-                <p className="mt-3 text-2xl font-bold text-slate-900 dark:text-white">
-                  {loading ? "—" : pagination.total}
-                </p>
-                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                  Total sesuai hasil endpoint
-                </p>
-              </div>
-
-              <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                    Kategori aktif
-                  </span>
-                  <CheckCircle2
-                    size={19}
-                    className="text-emerald-600 dark:text-emerald-400"
-                  />
-                </div>
-                <p className="mt-3 text-2xl font-bold text-slate-900 dark:text-white">
-                  {loading ? "—" : summary.active}
-                </p>
-                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                  Dari data halaman saat ini
-                </p>
-              </div>
-
-              <div className="flex h-full flex-col rounded-2xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
-                <div className="flex items-center justify-between">
-                  <span className="text-sm font-medium text-slate-500 dark:text-slate-400">
-                    Pegawai pada halaman
-                  </span>
-                  <Users
-                    size={19}
-                    className="text-indigo-600 dark:text-indigo-400"
-                  />
-                </div>
-                <p className="mt-3 text-2xl font-bold text-slate-900 dark:text-white">
-                  {loading ? "—" : summary.employees}
-                </p>
-                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                  Berdasarkan jumlah pengguna per kategori
-                </p>
-              </div>
-            </div>
-
-            <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-              <div className="border-b border-slate-200 p-4 dark:border-slate-800 sm:p-5">
-                <form
-                  onSubmit={handleSearch}
-                  className="flex flex-col gap-3 md:flex-row"
-                >
-                  <div className="relative min-w-0 flex-1">
-                    <Search
-                      size={18}
-                      className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
-                    />
-                    <input
-                      value={searchInput}
-                      onChange={(event) => setSearchInput(event.target.value)}
-                      placeholder="Cari nama atau kode kategori..."
-                      className={`${inputClass} pl-10`}
-                    />
+        <main className="min-w-0 flex-1 overflow-y-auto theme-page theme-text">
+          <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+            <div className="mx-auto w-full max-w-7xl space-y-6">
+              {/* ============================================
+                  PAGE HEADER
+              ============================================ */}
+              <div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+                    <BriefcaseBusiness size={23} />
                   </div>
 
-                  <select
-                    value={statusFilter}
-                    onChange={(event) => {
-                      setStatusFilter(event.target.value);
-                      setPage(1);
-                    }}
-                    className={`${inputClass} md:w-48`}
-                    aria-label="Filter status kategori"
-                  >
-                    <option value="">Semua status</option>
-                    <option value="aktif">Aktif</option>
-                    <option value="nonaktif">Nonaktif</option>
-                  </select>
+                  <div>
+                   
+                    <h1 className="mt-1 text-2xl font-bold tracking-tight theme-text">
+                      Kategori Jabatan
+                    </h1>
+                    <p className="mt-1 max-w-2xl text-sm leading-6 theme-text-secondary">
+                      Kelola kategori jabatan pegawai dan tarif per jam
+                      sebagai dasar perhitungan penggajian.
+                    </p>
+                  </div>
+                </div>
 
-                  <button type="submit" className={buttonPrimary}>
-                    <Search size={16} />
-                    Cari
-                  </button>
-                </form>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[900px] text-left text-sm">
-                  <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-950/70 dark:text-slate-400">
-                    <tr>
-                      <th className="px-5 py-4 font-semibold w-16">No</th>
-                      <SortableHeader
-                        label="Kategori"
-                        column="nama"
-                        sortBy={sortBy}
-                        sortOrder={sortOrder}
-                        onSort={handleSort}
-                      />
-                      <SortableHeader
-                        label="Tarif per jam"
-                        column="tarif"
-                        sortBy={sortBy}
-                        sortOrder={sortOrder}
-                        onSort={handleSort}
-                      />
-                      <SortableHeader
-                        label="Pegawai"
-                        column="pegawai"
-                        sortBy={sortBy}
-                        sortOrder={sortOrder}
-                        onSort={handleSort}
-                      />
-                      <SortableHeader
-                        label="Status"
-                        column="status"
-                        sortBy={sortBy}
-                        sortOrder={sortOrder}
-                        onSort={handleSort}
-                      />
-                      <th className="px-5 py-4 text-right font-semibold">
-                        Tindakan
-                      </th>
-                    </tr>
-                  </thead>
-
-                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                    {loading ? (
-                      <tr>
-                        <td colSpan={6} className="px-5 py-16 text-center">
-                          <LoaderCircle
-                            size={25}
-                            className="mx-auto animate-spin text-blue-600"
-                          />
-                          <p className="mt-3 text-sm text-slate-500">
-                            Memuat kategori jabatan...
-                          </p>
-                        </td>
-                      </tr>
-                    ) : sortedItems.length === 0 ? (
-                      <tr>
-                        <td colSpan={6} className="px-5 py-16 text-center">
-                          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-100 text-slate-500 dark:bg-slate-800">
-                            <BriefcaseBusiness size={22} />
-                          </div>
-                          <p className="mt-3 font-medium text-slate-800 dark:text-slate-200">
-                            Belum ada kategori jabatan
-                          </p>
-                          <p className="mt-1 text-sm text-slate-500">
-                            Coba ubah pencarian atau tambahkan kategori baru.
-                          </p>
-                          <button
-                            type="button"
-                            onClick={openCreate}
-                            className={`${buttonPrimary} mt-4`}
-                          >
-                            <Plus size={16} />
-                            Tambah Kategori
-                          </button>
-                        </td>
-                      </tr>
-                    ) : (
-                      sortedItems.map((item, index) => (
-                        <tr
-                          key={item.id}
-                          className="transition hover:bg-slate-50/80 dark:hover:bg-slate-800/40"
-                        >
-                          <td className="px-5 py-4">
-                            <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                              {(page - 1) * limit + index + 1}
-                            </span>
-                          </td>
-
-                          <td className="px-5 py-4">
-                            <div className="flex items-center gap-3">
-                              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
-                                <BriefcaseBusiness size={18} />
-                              </div>
-                              <div className="min-w-0">
-                                <p className="font-semibold text-slate-900 dark:text-white">
-                                  {item.nama || "-"}
-                                </p>
-                                <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
-                                  Kode: {item.kode || "Tidak ada kode"}
-                                </p>
-                              </div>
-                            </div>
-                          </td>
-
-                          <td className="px-5 py-4">
-                            <p className="font-semibold text-slate-900 dark:text-white">
-                              {item.tarifAktif
-                                ? formatRupiah(item.tarifAktif.tarifPerJam)
-                                : "Belum diatur"}
-                            </p>
-                            {item.tarifAktif?.berlakuMulai && (
-                              <p className="mt-1 text-xs text-slate-500">
-                                Berlaku sejak{" "}
-                                {formatTanggal(item.tarifAktif.berlakuMulai)}
-                              </p>
-                            )}
-                          </td>
-
-                          <td className="px-5 py-4">
-                            <span className="inline-flex items-center gap-1.5 text-slate-700 dark:text-slate-300">
-                              <Users size={15} className="text-slate-400" />
-                              {Number(item.jumlahPengguna ?? 0)}
-                            </span>
-                          </td>
-
-                          <td className="px-5 py-4">
-                            <StatusBadge status={item.status} />
-                          </td>
-
-                          <td className="px-5 py-4">
-                            <div className="flex items-center justify-end gap-1.5">
-                              <button
-                                type="button"
-                                onClick={() => openDetail(item)}
-                                title="Detail dan riwayat tarif"
-                                aria-label={`Detail ${item.nama}`}
-                                className="rounded-lg p-2 text-slate-500 transition hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-blue-950/50 dark:hover:text-blue-300"
-                              >
-                                <Eye size={17} />
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() => openEdit(item)}
-                                title="Edit kategori"
-                                aria-label={`Edit ${item.nama}`}
-                                className="rounded-lg p-2 text-slate-500 transition hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-white"
-                              >
-                                <Pencil size={17} />
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() => openTarif(item)}
-                                title="Atur tarif baru"
-                                aria-label={`Atur tarif ${item.nama}`}
-                                className="rounded-lg p-2 text-slate-500 transition hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-emerald-950/50 dark:hover:text-emerald-300"
-                              >
-                                <Wallet size={17} />
-                              </button>
-
-                              <button
-                                type="button"
-                                onClick={() => handleDelete(item)}
-                                title="Nonaktifkan kategori"
-                                aria-label={`Nonaktifkan ${item.nama}`}
-                                className="rounded-lg p-2 text-slate-500 transition hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950/40 dark:hover:text-red-300"
-                              >
-                                <Trash2 size={17} />
-                              </button>
-                            </div>
-                          </td>
-                        </tr>
-                      ))
-                    )}
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="flex flex-col gap-3 border-t border-slate-200 px-4 py-4 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                  Menampilkan{" "}
-                  <span className="font-medium text-slate-700 dark:text-slate-200">
-                    {sortedItems.length}
-                  </span>{" "}
-                  data pada halaman ini dari{" "}
-                  <span className="font-medium text-slate-700 dark:text-slate-200">
-                    {pagination.total}
-                  </span>{" "}
-                  kategori
-                </p>
-
-                <div className="flex items-center gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <button
                     type="button"
-                    disabled={page <= 1 || loading}
-                    onClick={() => setPage((current) => current - 1)}
+                    onClick={() => loadData({ quiet: true })}
+                    disabled={loading || refreshing}
                     className={buttonSecondary}
                   >
-                    <ChevronLeft size={16} />
-                    Sebelumnya
+                    <RefreshCw
+                      size={16}
+                      className={refreshing ? "animate-spin" : ""}
+                    />
+                    Refresh
                   </button>
-
-                  <span className="min-w-20 text-center text-sm text-slate-600 dark:text-slate-300">
-                    {page} / {pagination.totalPages}
-                  </span>
 
                   <button
                     type="button"
-                    disabled={page >= pagination.totalPages || loading}
-                    onClick={() => setPage((current) => current + 1)}
-                    className={buttonSecondary}
+                    onClick={openCreate}
+                    className={buttonPrimary}
                   >
-                    Berikutnya
-                    <ChevronRight size={16} />
+                    <Plus size={17} />
+                    Tambah Kategori
                   </button>
                 </div>
               </div>
-            </section>
 
-            <div className="flex items-start gap-2 rounded-xl border border-blue-100 bg-blue-50/70 p-4 text-sm text-blue-900 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-200">
-              <Info size={18} className="mt-0.5 shrink-0" />
-              <p className="leading-6">
-                Perubahan tarif disimpan sebagai riwayat baru. Perhitungan
-                gaji tetap mengikuti aturan sistem dan riwayat tarif yang
-                berlaku pada periode penggajian.
-              </p>
+              {/* ============================================
+                  INFO BANNER
+              ============================================ */}
+              <div className="flex items-start gap-3 rounded-lg border theme-border theme-card p-4">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+                  <Info size={18} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium theme-text">
+                    Perubahan tarif disimpan sebagai riwayat baru
+                  </p>
+                  <p className="mt-1 text-xs leading-5 theme-text-muted">
+                    Perhitungan gaji mengikuti aturan sistem dan riwayat tarif
+                    yang berlaku pada periode penggajian.
+                  </p>
+                </div>
+              </div>
+
+              {/* ============================================
+                  ALERTS
+              ============================================ */}
+              {notice && (
+                <div
+                  role="status"
+                  className="flex items-start gap-3 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/30 dark:text-emerald-300"
+                >
+                  <CheckCircle2 size={18} className="mt-0.5 shrink-0" />
+                  <p className="flex-1">{notice}</p>
+                  <button
+                    type="button"
+                    onClick={() => setNotice("")}
+                    aria-label="Tutup pemberitahuan"
+                    className="rounded p-1 hover:bg-emerald-100 dark:hover:bg-emerald-900/40"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              )}
+
+              {error && !modal && (
+                <div
+                  role="alert"
+                  className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300"
+                >
+                  <AlertCircle size={19} className="mt-0.5 shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold">Permintaan gagal</p>
+                    <p className="mt-1 break-words">{error}</p>
+                  </div>
+                  <button
+                    type="button"
+                    aria-label="Tutup pesan error"
+                    onClick={() => setError("")}
+                    className="rounded p-1 hover:bg-red-100 dark:hover:bg-red-900/40"
+                  >
+                    <X size={16} />
+                  </button>
+                </div>
+              )}
+
+              {/* ============================================
+                  SUMMARY CARDS
+              ============================================ */}
+              <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-3">
+                <SummaryCard
+                  title="Kategori pada halaman"
+                  value={loading ? "—" : pagination.total}
+                  description="Total sesuai hasil sistem"
+                  icon={BriefcaseBusiness}
+                  tone="blue"
+                />
+                <SummaryCard
+                  title="Kategori aktif"
+                  value={loading ? "—" : summary.active}
+                  description="Dari data halaman saat ini"
+                  icon={CheckCircle2}
+                  tone="emerald"
+                />
+                <SummaryCard
+                  title="Pegawai pada halaman"
+                  value={loading ? "—" : summary.employees}
+                  description="Berdasarkan jumlah pengguna per kategori"
+                  icon={Users}
+                  tone="indigo"
+                />
+              </div>
+
+              {/* ============================================
+                  TABLE SECTION
+              ============================================ */}
+              <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
+                <div className="border-b theme-border p-4 sm:p-5">
+                  <form
+                    onSubmit={handleSearch}
+                    className="flex flex-col gap-3 md:flex-row"
+                  >
+                    <div className="relative min-w-0 flex-1">
+                      <Search
+                        size={18}
+                        className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 theme-text-muted"
+                      />
+                      <input
+                        value={searchInput}
+                        onChange={(event) =>
+                          setSearchInput(event.target.value)
+                        }
+                        placeholder="Cari nama atau kode kategori..."
+                        className={`${inputClass} pl-10`}
+                      />
+                    </div>
+
+                    <select
+                      value={statusFilter}
+                      onChange={(event) => {
+                        setStatusFilter(event.target.value);
+                        setPage(1);
+                      }}
+                      className={`${inputClass} md:w-48`}
+                      aria-label="Filter status kategori"
+                    >
+                      <option value="">Semua status</option>
+                      <option value="aktif">Aktif</option>
+                      <option value="nonaktif">Nonaktif</option>
+                    </select>
+
+                    <button type="submit" className={buttonPrimary}>
+                      <Search size={16} />
+                      Cari
+                    </button>
+                  </form>
+                </div>
+
+                <div className="relative">
+                  {loading ? (
+                    <div className="flex min-h-64 flex-col items-center justify-center px-4 text-center">
+                      <LoaderCircle
+                        size={28}
+                        className="animate-spin theme-primary-text"
+                      />
+                      <p className="mt-3 text-sm font-medium theme-text">
+                        Memuat kategori jabatan...
+                      </p>
+                      <p className="mt-1 text-xs theme-text-muted">
+                        Mengambil data dari sistem
+                      </p>
+                    </div>
+                  ) : sortedItems.length === 0 ? (
+                    <div className="flex min-h-64 flex-col items-center justify-center px-4 text-center">
+                      <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] theme-text-muted">
+                        <BriefcaseBusiness size={23} />
+                      </div>
+                      <p className="mt-4 font-semibold theme-text">
+                        Belum ada kategori jabatan
+                      </p>
+                      <p className="mt-1 max-w-sm text-sm theme-text-muted">
+                        Coba ubah pencarian atau tambahkan kategori baru.
+                      </p>
+                      <button
+                        type="button"
+                        onClick={openCreate}
+                        className={`${buttonPrimary} mt-4`}
+                      >
+                        <Plus size={16} />
+                        Tambah Kategori
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="overflow-x-auto">
+                      <table className="w-full min-w-[900px] text-left text-sm">
+                        <thead className="bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] text-xs uppercase tracking-wide theme-text-muted border-b theme-border">
+                          <tr>
+                            <th className="px-5 py-4 font-semibold w-16">No</th>
+                            <SortableHeader
+                              label="Kategori"
+                              column="nama"
+                              sortBy={sortBy}
+                              sortOrder={sortOrder}
+                              onSort={handleSort}
+                            />
+                            <SortableHeader
+                              label="Tarif per jam"
+                              column="tarif"
+                              sortBy={sortBy}
+                              sortOrder={sortOrder}
+                              onSort={handleSort}
+                            />
+                            <SortableHeader
+                              label="Pegawai"
+                              column="pegawai"
+                              sortBy={sortBy}
+                              sortOrder={sortOrder}
+                              onSort={handleSort}
+                            />
+                            <SortableHeader
+                              label="Status"
+                              column="status"
+                              sortBy={sortBy}
+                              sortOrder={sortOrder}
+                              onSort={handleSort}
+                            />
+                            <th className="px-5 py-4 text-right font-semibold">
+                              Tindakan
+                            </th>
+                          </tr>
+                        </thead>
+
+                        <tbody className="divide-y divide-[color-mix(in_srgb,var(--color-text)_5%,transparent)]">
+                          {sortedItems.map((item, index) => (
+                            <tr
+                              key={item.id}
+                              className="hover:bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)] transition"
+                            >
+                              <td className="px-5 py-4">
+                                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] text-xs font-semibold theme-text-secondary">
+                                  {(page - 1) * limit + index + 1}
+                                </span>
+                              </td>
+
+                              <td className="px-5 py-4">
+                                <div className="flex items-center gap-3">
+                                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+                                    <BriefcaseBusiness size={18} />
+                                  </div>
+                                  <div className="min-w-0">
+                                    <p className="font-semibold theme-text">
+                                      {item.nama || "-"}
+                                    </p>
+                                    <p className="mt-1 text-xs theme-text-muted">
+                                      Kode: {item.kode || "Tidak ada kode"}
+                                    </p>
+                                  </div>
+                                </div>
+                              </td>
+
+                              <td className="px-5 py-4">
+                                <p className="font-semibold theme-text">
+                                  {item.tarifAktif
+                                    ? formatRupiah(item.tarifAktif.tarifPerJam)
+                                    : "Belum diatur"}
+                                </p>
+                                {item.tarifAktif?.berlakuMulai && (
+                                  <p className="mt-1 text-xs theme-text-muted">
+                                    Berlaku sejak{" "}
+                                    {formatTanggal(
+                                      item.tarifAktif.berlakuMulai,
+                                    )}
+                                  </p>
+                                )}
+                              </td>
+
+                              <td className="px-5 py-4">
+                                <span className="inline-flex items-center gap-1.5 theme-text-secondary">
+                                  <Users
+                                    size={15}
+                                    className="theme-text-muted"
+                                  />
+                                  {Number(item.jumlahPengguna ?? 0)}
+                                </span>
+                              </td>
+
+                              <td className="px-5 py-4">
+                                <StatusBadge status={item.status} />
+                              </td>
+
+                              <td className="px-5 py-4">
+                                <div className="flex items-center justify-end gap-1.5">
+                                  <button
+                                    type="button"
+                                    onClick={() => openDetail(item)}
+                                    title="Detail dan riwayat tarif"
+                                    aria-label={`Detail ${item.nama}`}
+                                    className="rounded-lg p-2 theme-text-muted transition hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-blue-950/40 dark:hover:text-blue-300"
+                                  >
+                                    <Eye size={17} />
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => openEdit(item)}
+                                    title="Edit kategori"
+                                    aria-label={`Edit ${item.nama}`}
+                                    className="rounded-lg p-2 theme-text-muted transition hover:bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] hover:theme-text"
+                                  >
+                                    <Pencil size={17} />
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => openTarif(item)}
+                                    title="Atur tarif baru"
+                                    aria-label={`Atur tarif ${item.nama}`}
+                                    className="rounded-lg p-2 theme-text-muted transition hover:bg-emerald-50 hover:text-emerald-700 dark:hover:bg-emerald-950/40 dark:hover:text-emerald-300"
+                                  >
+                                    <Wallet size={17} />
+                                  </button>
+
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDelete(item)}
+                                    title="Nonaktifkan kategori"
+                                    aria-label={`Nonaktifkan ${item.nama}`}
+                                    className="rounded-lg p-2 theme-text-muted transition hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950/40 dark:hover:text-red-300"
+                                  >
+                                    <Trash2 size={17} />
+                                  </button>
+                                </div>
+                              </td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    </div>
+                  )}
+                </div>
+
+                {/* ============================================
+                    PAGINATION
+                ============================================ */}
+                <div className="flex flex-col gap-3 border-t theme-border px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+                  <p className="text-sm theme-text-muted">
+                    Menampilkan{" "}
+                    <span className="font-medium theme-text">
+                      {sortedItems.length}
+                    </span>{" "}
+                    data pada halaman ini dari{" "}
+                    <span className="font-medium theme-text">
+                      {pagination.total}
+                    </span>{" "}
+                    kategori
+                  </p>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      disabled={page <= 1 || loading}
+                      onClick={() => setPage((current) => current - 1)}
+                      className={buttonSecondary}
+                    >
+                      <ChevronLeft size={16} />
+                      Sebelumnya
+                    </button>
+
+                    <span className="min-w-20 text-center text-sm theme-text">
+                      {page} / {pagination.totalPages}
+                    </span>
+
+                    <button
+                      type="button"
+                      disabled={page >= pagination.totalPages || loading}
+                      onClick={() => setPage((current) => current + 1)}
+                      className={buttonSecondary}
+                    >
+                      Berikutnya
+                      <ChevronRight size={16} />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="border-t theme-border px-5 py-3 text-xs theme-text-muted">
+                  Data kategori jabatan diambil dari sistem.
+                </div>
+              </section>
             </div>
           </div>
         </main>
       </div>
 
+      {/* ============================================================
+          MODAL: CREATE / EDIT
+      ============================================================ */}
       {(modal === "create" || modal === "edit") && (
         <Modal
           title={
@@ -934,7 +961,7 @@ export default function KategoriJabatanPage() {
         >
           <form onSubmit={handleSubmit} className="space-y-5">
             {error && (
-              <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-300">
+              <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300">
                 <AlertCircle size={17} className="mt-0.5 shrink-0" />
                 <span>{error}</span>
               </div>
@@ -946,17 +973,24 @@ export default function KategoriJabatanPage() {
                   required
                   maxLength={100}
                   value={form.nama}
-                  onChange={(event) => updateForm("nama", event.target.value)}
+                  onChange={(event) =>
+                    updateForm("nama", event.target.value)
+                  }
                   placeholder="Contoh: Guru"
                   className={inputClass}
                 />
               </Field>
 
-              <Field label="Kode kategori" hint="Opsional, maksimal 50 karakter.">
+              <Field
+                label="Kode kategori"
+                hint="Opsional, maksimal 50 karakter."
+              >
                 <input
                   maxLength={50}
                   value={form.kode}
-                  onChange={(event) => updateForm("kode", event.target.value)}
+                  onChange={(event) =>
+                    updateForm("kode", event.target.value)
+                  }
                   placeholder="Contoh: GR"
                   className={inputClass}
                 />
@@ -978,7 +1012,9 @@ export default function KategoriJabatanPage() {
             <Field label="Status">
               <select
                 value={form.status}
-                onChange={(event) => updateForm("status", event.target.value)}
+                onChange={(event) =>
+                  updateForm("status", event.target.value)
+                }
                 className={inputClass}
               >
                 <option value="aktif">Aktif</option>
@@ -987,12 +1023,10 @@ export default function KategoriJabatanPage() {
             </Field>
 
             {modal === "create" && (
-              <div className="space-y-4 rounded-xl border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-950/60">
+              <div className="space-y-4 rounded-lg border theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] p-4">
                 <div className="flex items-center gap-2">
-                  <Wallet size={18} className="text-blue-600" />
-                  <h3 className="font-semibold text-slate-900 dark:text-white">
-                    Tarif awal
-                  </h3>
+                  <Wallet size={18} className="theme-primary-text" />
+                  <h3 className="font-semibold theme-text">Tarif awal</h3>
                 </div>
 
                 <Field label="Tarif per jam (Rp)" required>
@@ -1037,13 +1071,13 @@ export default function KategoriJabatanPage() {
             )}
 
             {modal === "edit" && (
-              <p className="rounded-xl border border-blue-100 bg-blue-50 p-3 text-xs leading-5 text-blue-800 dark:border-blue-900 dark:bg-blue-950/30 dark:text-blue-200">
+              <p className="rounded-lg border border-blue-200 bg-blue-50 p-3 text-xs leading-5 text-blue-800 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-200">
                 Tarif tidak diubah dari formulir ini. Gunakan tindakan Atur
                 Tarif agar riwayat tarif lama tetap tersimpan.
               </p>
             )}
 
-            <div className="flex flex-col-reverse gap-2 border-t border-slate-100 pt-4 dark:border-slate-800 sm:flex-row sm:justify-end">
+            <div className="flex flex-col-reverse gap-2 border-t theme-border pt-4 sm:flex-row sm:justify-end">
               <button
                 type="button"
                 onClick={closeModal}
@@ -1053,7 +1087,11 @@ export default function KategoriJabatanPage() {
                 Batal
               </button>
 
-              <button type="submit" disabled={saving} className={buttonPrimary}>
+              <button
+                type="submit"
+                disabled={saving}
+                className={buttonPrimary}
+              >
                 {saving ? (
                   <LoaderCircle size={16} className="animate-spin" />
                 ) : (
@@ -1070,6 +1108,9 @@ export default function KategoriJabatanPage() {
         </Modal>
       )}
 
+      {/* ============================================================
+          MODAL: TARIF
+      ============================================================ */}
       {modal === "tarif" && selected && (
         <Modal
           title="Atur Tarif Jabatan"
@@ -1078,17 +1119,15 @@ export default function KategoriJabatanPage() {
         >
           <form onSubmit={handleTarifSubmit} className="space-y-5">
             {error && (
-              <div className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-300">
+              <div className="flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300">
                 <AlertCircle size={17} className="mt-0.5 shrink-0" />
                 <span>{error}</span>
               </div>
             )}
 
-            <div className="rounded-xl bg-slate-50 p-4 dark:bg-slate-950">
-              <p className="text-xs text-slate-500 dark:text-slate-400">
-                Tarif saat ini
-              </p>
-              <p className="mt-1 text-xl font-bold text-slate-900 dark:text-white">
+            <div className="rounded-lg bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] border theme-border p-4">
+              <p className="text-xs theme-text-muted">Tarif saat ini</p>
+              <p className="mt-1 text-xl font-bold tabular-nums theme-text">
                 {selected.tarifAktif
                   ? formatRupiah(selected.tarifAktif.tarifPerJam)
                   : "Belum diatur"}
@@ -1134,12 +1173,12 @@ export default function KategoriJabatanPage() {
               />
             </Field>
 
-            <p className="text-xs leading-5 text-slate-500 dark:text-slate-400">
+            <p className="text-xs leading-5 theme-text-muted">
               Sistem yang mengatur penutupan tarif sebelumnya dan pembuatan
               riwayat tarif baru.
             </p>
 
-            <div className="flex flex-col-reverse gap-2 border-t border-slate-100 pt-4 dark:border-slate-800 sm:flex-row sm:justify-end">
+            <div className="flex flex-col-reverse gap-2 border-t theme-border pt-4 sm:flex-row sm:justify-end">
               <button
                 type="button"
                 onClick={closeModal}
@@ -1148,7 +1187,11 @@ export default function KategoriJabatanPage() {
               >
                 Batal
               </button>
-              <button type="submit" disabled={saving} className={buttonPrimary}>
+              <button
+                type="submit"
+                disabled={saving}
+                className={buttonPrimary}
+              >
                 {saving ? (
                   <LoaderCircle size={16} className="animate-spin" />
                 ) : (
@@ -1161,34 +1204,37 @@ export default function KategoriJabatanPage() {
         </Modal>
       )}
 
+      {/* ============================================================
+          MODAL: DETAIL
+      ============================================================ */}
       {modal === "detail" && selected && (
         <Modal
           title="Detail Kategori Jabatan"
-          description="Informasi kategori dan riwayat tarif yang dikembalikan sistem."
+          description="Informasi kategori dan riwayat tarif dari sistem."
           onClose={closeModal}
           wide
         >
           {error && (
-            <div className="mb-4 flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-300">
+            <div className="mb-4 flex items-start gap-2 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300">
               <AlertCircle size={17} className="mt-0.5 shrink-0" />
               <span>{error}</span>
             </div>
           )}
 
           <div className="space-y-5">
-            <div className="flex flex-col justify-between gap-3 rounded-xl border border-slate-200 p-4 dark:border-slate-800 sm:flex-row sm:items-start">
+            <div className="flex flex-col justify-between gap-3 rounded-lg border theme-border p-4 sm:flex-row sm:items-start">
               <div className="flex items-start gap-3">
-                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                   <BriefcaseBusiness size={21} />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-slate-900 dark:text-white">
+                  <h3 className="font-semibold theme-text">
                     {selected.nama}
                   </h3>
-                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                  <p className="mt-1 text-sm theme-text-muted">
                     Kode: {selected.kode || "-"}
                   </p>
-                  <p className="mt-2 text-sm text-slate-600 dark:text-slate-300">
+                  <p className="mt-2 text-sm theme-text-secondary">
                     {selected.keterangan || "Tidak ada keterangan."}
                   </p>
                 </div>
@@ -1197,27 +1243,23 @@ export default function KategoriJabatanPage() {
             </div>
 
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-              <div className="rounded-xl bg-slate-50 p-4 dark:bg-slate-950">
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                  Tarif aktif
-                </p>
-                <p className="mt-2 text-xl font-bold text-slate-900 dark:text-white">
+              <div className="rounded-lg bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] border theme-border p-4">
+                <p className="text-sm theme-text-muted">Tarif aktif</p>
+                <p className="mt-2 text-xl font-bold tabular-nums theme-text">
                   {currentTarif
                     ? formatRupiah(currentTarif.tarifPerJam)
                     : "Belum diatur"}
                 </p>
                 {currentTarif?.berlakuMulai && (
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-xs theme-text-muted">
                     Sejak {formatTanggal(currentTarif.berlakuMulai)}
                   </p>
                 )}
               </div>
 
-              <div className="rounded-xl bg-slate-50 p-4 dark:bg-slate-950">
-                <p className="text-sm text-slate-500 dark:text-slate-400">
-                  Jumlah pegawai
-                </p>
-                <p className="mt-2 text-xl font-bold text-slate-900 dark:text-white">
+              <div className="rounded-lg bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] border theme-border p-4">
+                <p className="text-sm theme-text-muted">Jumlah pegawai</p>
+                <p className="mt-2 text-xl font-bold tabular-nums theme-text">
                   {Number(selected.jumlahPengguna ?? 0)}
                 </p>
               </div>
@@ -1225,48 +1267,51 @@ export default function KategoriJabatanPage() {
 
             <div>
               <div className="mb-3 flex items-center gap-2">
-                <History size={18} className="text-slate-500" />
-                <h3 className="font-semibold text-slate-900 dark:text-white">
-                  Riwayat Tarif
-                </h3>
+                <History size={18} className="theme-text-muted" />
+                <h3 className="font-semibold theme-text">Riwayat Tarif</h3>
               </div>
 
               {!selected.tarifRiwayat?.length ? (
-                <div className="rounded-xl border border-dashed border-slate-300 p-6 text-center text-sm text-slate-500 dark:border-slate-700">
+                <div className="rounded-lg border border-dashed theme-border p-6 text-center text-sm theme-text-muted">
                   Belum ada riwayat tarif yang tersedia.
                 </div>
               ) : (
-                <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-800">
+                <div className="overflow-x-auto rounded-lg border theme-border">
                   <table className="w-full min-w-[600px] text-left text-sm">
-                    <thead className="bg-slate-50 text-xs text-slate-500 dark:bg-slate-950 dark:text-slate-400">
+                    <thead className="bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] text-xs theme-text-muted border-b theme-border">
                       <tr>
                         <th className="px-4 py-3 font-medium w-12">No</th>
                         <th className="px-4 py-3 font-medium">Tarif per jam</th>
-                        <th className="px-4 py-3 font-medium">Mulai berlaku</th>
+                        <th className="px-4 py-3 font-medium">
+                          Mulai berlaku
+                        </th>
                         <th className="px-4 py-3 font-medium">Berakhir</th>
                         <th className="px-4 py-3 font-medium">Catatan</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                    <tbody className="divide-y divide-[color-mix(in_srgb,var(--color-text)_5%,transparent)]">
                       {selected.tarifRiwayat.map((tarif, index) => (
-                        <tr key={tarif.id ?? `${tarif.berlakuMulai}-${index}`}>
+                        <tr
+                          key={tarif.id ?? `${tarif.berlakuMulai}-${index}`}
+                          className="hover:bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)] transition"
+                        >
                           <td className="px-4 py-3">
-                            <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-100 text-[11px] font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                            <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] text-[11px] font-semibold theme-text-secondary">
                               {index + 1}
                             </span>
                           </td>
-                          <td className="px-4 py-3 font-semibold text-slate-900 dark:text-white">
+                          <td className="px-4 py-3 font-semibold tabular-nums theme-text">
                             {formatRupiah(tarif.tarifPerJam)}
                           </td>
-                          <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
+                          <td className="px-4 py-3 theme-text-secondary">
                             {formatTanggal(tarif.berlakuMulai)}
                           </td>
-                          <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
+                          <td className="px-4 py-3 theme-text-secondary">
                             {tarif.berakhirPada
                               ? formatTanggal(tarif.berakhirPada)
                               : "Masih berlaku"}
                           </td>
-                          <td className="px-4 py-3 text-slate-600 dark:text-slate-300">
+                          <td className="px-4 py-3 theme-text-secondary">
                             {tarif.catatan || "-"}
                           </td>
                         </tr>
@@ -1277,7 +1322,7 @@ export default function KategoriJabatanPage() {
               )}
             </div>
 
-            <div className="flex flex-col-reverse gap-2 border-t border-slate-100 pt-4 dark:border-slate-800 sm:flex-row sm:justify-end">
+            <div className="flex flex-col-reverse gap-2 border-t theme-border pt-4 sm:flex-row sm:justify-end">
               <button
                 type="button"
                 onClick={closeModal}
@@ -1297,6 +1342,39 @@ export default function KategoriJabatanPage() {
           </div>
         </Modal>
       )}
+    </div>
+  );
+}
+
+/* =========================================================
+   SUMMARY CARD
+========================================================= */
+
+function SummaryCard({ title, value, description, icon: Icon, tone = "blue" }) {
+  const toneClasses = {
+    blue: "bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300",
+    emerald:
+      "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300",
+    indigo:
+      "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300",
+    slate:
+      "bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] theme-text-muted",
+  };
+
+  return (
+    <div className="theme-card flex h-full flex-col rounded-xl border theme-border p-5 shadow-sm">
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-sm font-medium theme-text-muted">{title}</span>
+        <div
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${toneClasses[tone] ?? toneClasses.blue}`}
+        >
+          <Icon size={19} />
+        </div>
+      </div>
+      <p className="mt-3 text-2xl font-bold tracking-tight tabular-nums theme-text">
+        {typeof value === "number" ? value.toLocaleString("id-ID") : value}
+      </p>
+      <p className="mt-1 text-xs theme-text-muted">{description}</p>
     </div>
   );
 }

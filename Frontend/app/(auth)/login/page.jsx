@@ -1,146 +1,217 @@
-
 "use client";
 
 import Image from "next/image";
 import Link from "next/link";
-
-import {
-  GraduationCap,
-  BarChart3,
-  ShieldCheck,
-  Users,
-} from "lucide-react";
+import { Plus_Jakarta_Sans } from "next/font/google";
+import { GraduationCap, ArrowLeft } from "lucide-react";
 
 import LoginForm from "@/app/components/auth/LoginForm";
 
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ["latin"],
+  weight: ["400", "500", "600", "700", "800"],
+  display: "swap",
+});
+
+const u = (n) => `calc(var(--u) * ${n})`;
+
+const ICONS = {
+  siswa:
+    "M16 11c1.66 0 2.99-1.34 2.99-3S17.66 5 16 5c-1.66 0-3 1.34-3 3s1.34 3 3 3zm-8 0c1.66 0 2.99-1.34 2.99-3S9.66 5 8 5C6.34 5 5 6.34 5 8s1.34 3 3 3zm0 2c-2.33 0-7 1.17-7 3.5V19h14v-2.5c0-2.33-4.67-3.5-7-3.5zm8 0c-.29 0-.62.02-.97.05 1.16.84 1.97 1.97 1.97 3.45V19h6v-2.5c0-2.33-4.67-3.5-7-3.5z",
+  jadwal:
+    "M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z",
+  absensi:
+    "M14 2H6c-1.1 0-1.99.9-1.99 2L4 20c0 1.1.89 2 1.99 2H18c1.1 0 2-.9 2-2V8l-6-6zm2 16H8v-2h8v2zm0-4H8v-2h8v2zm-3-5V3.5L18.5 9H13z",
+  kolaborasi:
+    "M12 12.75c1.63 0 3.07.39 4.24.9 1.08.48 1.76 1.56 1.76 2.73V18H6v-1.61c0-1.18.68-2.26 1.76-2.73 1.17-.52 2.61-.91 4.24-.91zM4 13c1.1 0 2-.9 2-2 0-1.1-.9-2-2-2s-2 .9-2 2c0 1.1.9 2 2 2zm1.13 1.1c-.37-.06-.74-.1-1.13-.1-.99 0-1.93.21-2.78.58C.48 14.9 0 15.62 0 16.43V18h4.5v-1.61c0-.83.23-1.61.63-2.29zM20 13c1.1 0 2-.9 2-2 0-1.1-.9-2-2-2s-2 .9-2 2c0 1.1.9 2 2 2zm4 3.43c0-.81-.48-1.53-1.22-1.85-.85-.37-1.79-.58-2.78-.58-.39 0-.76.04-1.13.1.4.68.63 1.46.63 2.29V18H24v-1.57zM12 6c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3z",
+};
+
+const features = [
+  { icon: ICONS.siswa, label: "Manajemen", secondLine: "Siswa", width: 117, padLeft: 0 },
+  { icon: ICONS.jadwal, label: "Jadwal &", secondLine: "Kurikulum", width: 144, padLeft: 38 },
+  { icon: ICONS.absensi, label: "Absensi &", secondLine: "Penilaian", width: 148, padLeft: 38 },
+  { icon: ICONS.kolaborasi, label: "Kolaborasi", secondLine: "Sekolah", width: undefined, padLeft: 54 },
+];
+
 export default function LoginPage() {
   return (
-    <section className="relative flex min-h-screen items-center justify-center overflow-hidden">
-      {/* BACKGROUND */}
-      <div className="absolute inset-0">
+    <main className={`${jakarta.className} relative isolate min-h-screen overflow-hidden bg-[#EAF3FF]`}>
+      
+      <style>{`
+        :root { --u: 1px; }
+        @media (min-width: 1024px) {
+          :root { --u: clamp(0.65px, calc(100vw / 1746), 1px); }
+          .ss-left  { margin-top: calc(var(--u) * 14); }
+          .ss-right { margin-top: calc(var(--u) * 68); }
+          .ss-logo  { left: 4.9% !important; top: calc(var(--u) * 50) !important; }
+        }
+      `}</style>
+
+      {/* 1. BACKGROUND SEKOLAH (Tanpa overlay apapun) */}
+      <div className="absolute inset-0 -z-30">
         <Image
           src="/hero/hero.png"
-          alt="Smart School"
+          alt="Gedung Smart School"
           fill
           priority
-          className="object-cover"
+          sizes="100vw"
+          className="object-cover object-center"
         />
       </div>
 
-      <div
-        className="absolute inset-0"
-        style={{
-          background: `
-            radial-gradient(
-              ellipse at 30% 50%,
-              rgba(255,255,255,0.08) 0%,
-              rgba(255,255,255,0.04) 30%,
-              rgba(255,255,255,0.02) 55%,
-              rgba(255,255,255,0) 75%,
-              rgba(255,255,255,0.03) 100%
-            )
-          `,
-        }}
-      />
+      {/* ================= HEADER KIRI ATAS ================= */}
+      <div 
+        className="ss-logo absolute z-10 flex items-center"
+        style={{ left: 20, top: 20, gap: u(16) }}
+      >
+        {/* Tombol Back: Dibuat putih solid agar sangat kelihatan */}
+        <Link
+          href="/"
+          aria-label="Kembali"
+          className="flex items-center justify-center rounded-full bg-white text-[#0F2A66] shadow-md transition-all hover:bg-gray-100"
+          style={{ width: u(48), height: u(48) }}
+        >
+          <ArrowLeft style={{ width: u(24), height: u(24) }} strokeWidth={2.5} />
+        </Link>
 
-      {/* CONTENT */}
-      <div className="relative z-10 mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
-        <div className="grid items-center gap-10 lg:grid-cols-2 lg:gap-12">
-          {/* LEFT */}
-          <div className="space-y-5">
-            {/* LOGO */}
-            <div className="flex items-center gap-3">
-              <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl border border-white/50 bg-white/90 shadow-xl backdrop-blur-sm">
-                <Image
-                  src="/logo/logoSS.png"
-                  alt="Smart School Logo"
-                  width={32}
-                  height={32}
-                  className="object-contain"
-                />
-              </div>
+        {/* Logo */}
+        <Link
+          href="/"
+          aria-label="Smart School Beranda"
+          className="flex items-center gap-3 transition-opacity hover:opacity-80"
+        >
+          <Image
+            src="/logo/logoSS.png"
+            alt="Logo Smart School"
+            width={48}
+            height={48}
+            priority
+            className="object-contain"
+            style={{ width: u(48), height: u(48) }}
+          />
+          <span
+            className="font-extrabold text-[#0F2A66]"
+            style={{ fontSize: u(24), letterSpacing: "-0.01em", lineHeight: 1 }}
+          >
+            SMART <span className="text-[#2878F0]">SCHOOL</span>
+          </span>
+        </Link>
+      </div>
 
-              <span className="text-2xl font-extrabold text-white drop-shadow-[0_3px_8px_rgba(15,23,42,0.75)]">
-                SMART{" "}
-                <span className="text-blue-300">
-                  SCHOOL
-                </span>
-              </span>
-            </div>
+      {/* 4. KONTEN UTAMA */}
+      <div className="relative flex min-h-screen w-full items-center justify-center px-5 pb-8 pt-24 lg:justify-start lg:p-0">
+        
+        {/* ================= KIRI ================= */}
+        <section
+          className="ss-left hidden shrink-0 flex-col lg:flex"
+          style={{ width: "58.8%", paddingLeft: "9.1%" }}
+        >
+          {/* Badge: Dibuat Putih Solid dengan teks biru agar sangat jelas */}
+          <div
+            className="flex w-fit items-center rounded-full bg-white font-bold text-[#0F2A66] shadow-sm"
+            style={{
+              height: u(42),
+              padding: `0 ${u(20)}`,
+              gap: u(10),
+              fontSize: u(16),
+            }}
+          >
+            <GraduationCap strokeWidth={2.5} style={{ width: u(22), height: u(22) }} className="text-[#2878F0]"/>
+            <span>Sistem Informasi Sekolah</span>
+          </div>
 
-            {/* TITLE */}
-            <div className="space-y-4">
-              <h1 className="text-4xl font-extrabold leading-tight text-white drop-shadow-[0_4px_10px_rgba(15,23,42,0.8)] sm:text-5xl">
-                Selamat Datang
-                <br />
-                <span className="text-blue-300">
-                  Kembali!
-                </span>
-              </h1>
+          {/* Judul: Shadow hitam tipis agar terpisah dari jendela gedung */}
+          <h1
+            className="font-extrabold text-[#0F2A66] drop-shadow-[0_2px_4px_rgba(0,0,0,0.15)]"
+            style={{
+              marginTop: u(16),
+              fontSize: `clamp(40px, ${u(64)}, 64px)`,
+              lineHeight: `clamp(48px, ${u(72)}, 72px)`,
+              letterSpacing: "-0.01em",
+            }}
+          >
+            Selamat Datang
+            <br />
+            <span className="text-[#2878F0]">Kembali!</span>
+          </h1>
 
-              <p className="max-w-md text-sm font-medium leading-relaxed text-white drop-shadow-[0_3px_8px_rgba(15,23,42,0.75)] sm:text-base">
-                Masuk ke akun Anda untuk
-                mengelola seluruh aktivitas
-                sekolah dengan mudah.
-              </p>
-            </div>
+          {/* Deskripsi: Warna gelap dan bold */}
+          <p
+            className="font-bold text-[#0F2A66] drop-shadow-[0_1px_3px_rgba(0,0,0,0.1)]"
+            style={{ 
+              marginTop: u(8), 
+              fontSize: `clamp(14px, ${u(18)}, 18px)`, 
+              lineHeight: `clamp(24px, ${u(30)}, 30px)` 
+            }}
+          >
+            Masuk ke akun Anda untuk mengelola seluruh aktivitas
+            <br />
+            sekolah dengan mudah, aman, dan efisien.
+          </p>
 
-            {/* FEATURES */}
-            <div className="flex flex-wrap gap-2">
-              {[
-                {
-                  icon: GraduationCap,
-                  label: "Efisien",
-                },
-                {
-                  icon: BarChart3,
-                  label: "Terintegrasi",
-                },
-                {
-                  icon: ShieldCheck,
-                  label: "Aman",
-                },
-                {
-                  icon: Users,
-                  label: "Kolaboratif",
-                },
-              ].map(({ icon: Icon, label }) => (
+          {/* Fitur */}
+          <div className="flex items-start" style={{ marginTop: u(35) }}>
+            {features.map(({ icon, label, secondLine, width, padLeft }, index) => (
                 <div
                   key={label}
-                  className="flex items-center gap-1.5 rounded-lg border border-white/10 bg-white/10 px-3 py-1.5 shadow-lg backdrop-blur-md"
+                  className="relative shrink-0"
+                  style={{
+                    width: width ? u(width) : "auto",
+                    paddingLeft: u(padLeft),
+                  }}
                 >
-                  <Icon
-                    size={14}
-                    className="text-blue-300"
-                  />
+                  {/* Garis Pemisah: Lebih Gelap */}
+                  {index !== 0 && (
+                    <div
+                      className="absolute left-0 bg-[#0F2A66]/30"
+                      style={{ top: u(11), width: 1, height: u(88) }}
+                    />
+                  )}
 
-                  <span className="text-xs font-semibold text-white">
+                  {/* Kotak Ikon: Putih Solid (Sangat kontras, tidak membaur) */}
+                  <div
+                    className="flex items-center justify-center bg-white text-[#2878F0] shadow-md"
+                    style={{
+                      width: u(52),
+                      height: u(52),
+                      borderRadius: u(14),
+                    }}
+                  >
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="currentColor"
+                      aria-hidden="true"
+                      style={{ width: u(28), height: u(28) }}
+                    >
+                      <path d={icon} />
+                    </svg>
+                  </div>
+
+                  {/* Teks Fitur: Bold dan tegas */}
+                  <p
+                    className="font-bold text-[#0F2A66] drop-shadow-[0_1px_2px_rgba(0,0,0,0.1)]"
+                    style={{
+                      marginTop: u(10),
+                      fontSize: u(15),
+                      lineHeight: u(20),
+                    }}
+                  >
                     {label}
-                  </span>
+                    <br />
+                    {secondLine}
+                  </p>
                 </div>
-              ))}
-            </div>
-
-            {/* REGISTER */}
-            <p className="text-sm text-white/80">
-              Belum punya akun?{" "}
-              <Link
-                href="/register"
-                className="font-semibold text-blue-300 transition-colors duration-200 hover:text-white hover:underline"
-              >
-                Daftar di sini
-              </Link>
-            </p>
+              )
+            )}
           </div>
+        </section>
 
-          {/* LOGIN */}
-          <div className="flex justify-center lg:justify-end">
-            <div className="w-full max-w-sm">
-              <LoginForm />
-            </div>
-          </div>
-        </div>
+        {/* ================= KANAN ================= */}
+        <section className="ss-right flex w-full justify-center lg:w-[41.2%] lg:justify-start">
+          <LoginForm />
+        </section>
+        
       </div>
-    </section>
+    </main>
   );
 }

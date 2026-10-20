@@ -34,10 +34,22 @@ function getApiBaseUrl() {
 ========================================================= */
 
 export default function PublicCmsPage() {
-  const params = useParams();
-
-const subdomain = params?.tenant;
+ const params = useParams();
 const pageSlug = params?.pageSlug;
+
+const [subdomain, setSubdomain] = useState("");
+
+useEffect(() => {
+  const hostname = window.location.hostname;
+  const parts = hostname.split(".");
+
+  if (
+    hostname.endsWith(".localhost") &&
+    parts.length >= 2
+  ) {
+    setSubdomain(parts[0]);
+  }
+}, []);
 
   const [page, setPage] = useState(null);
   const [loading, setLoading] = useState(true);

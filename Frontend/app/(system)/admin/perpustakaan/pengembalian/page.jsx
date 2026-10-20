@@ -1,1302 +1,925 @@
+
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  BookOpen,
   Search,
-  Plus,
-  Pencil,
-  Trash2,
-  Eye,
-  X,
   RefreshCw,
-  ChevronDown,
-  Library,
+  RotateCcw,
+  BookOpen,
+  UserRound,
+  CalendarDays,
+  Clock3,
   CheckCircle2,
-  Archive,
-  ExternalLink,
-  FileText,
-  AlertTriangle,
+  AlertCircle,
+  Loader2,
+  X,
+  ArrowLeft,
 } from "lucide-react";
+import { useRouter } from "next/navigation";
 
+import Header from "@/app/components/Header";
+import Sidebar from "@/app/components/Sidebar";
 import {
-  getBuku,
-  getBukuById,
-  createBuku,
-  updateBuku,
-  deleteBuku,
+  getPeminjaman,
+  kembalikanBuku,
 } from "@/services/perpustakaan.service";
 
-import Sidebar from "@/app/components/Sidebar";
-import Header from "@/app/components/Header";
+/* =========================================================
+   HELPERS
+========================================================= */
 
-const themePrimarySoft =
-  "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
-const themePrimarySoftBorder =
-  "border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]";
-const themePrimaryHover =
-  "hover:bg-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
-const themeTextHover =
-  "hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
-const themeCardShadow =
-  "shadow-[0_6px_24px_color-mix(in_srgb,var(--color-text)_6%,transparent)]";
-const themePrimaryShadow =
-  "shadow-[0_10px_25px_color-mix(in_srgb,var(--color-primary)_20%,transparent)]";
-
-function normalizeBook(book) {
-  return {
-    ...book,
-    id: book?.id ?? book?.bukuId ?? "",
-    kodeBuku: book?.kodeBuku ?? book?.kode ?? "",
-    judul: book?.judul ?? "",
-    penulis: book?.penulis ?? "",
-    penerbit: book?.penerbit ?? "",
-    tahunTerbit: book?.tahunTerbit ?? "",
-    isbn: book?.isbn ?? "",
-    tipe: String(book?.tipe ?? "FISIK").toUpperCase(),
-    kategori: book?.kategori ?? "",
-    deskripsi: book?.deskripsi ?? "",
-    coverUrl: book?.coverUrl ?? "",
-    urlEbook: book?.urlEbook ?? "",
-    jumlah: Number(book?.jumlah ?? 0),
-    jumlahTersedia: Number(book?.jumlahTersedia ?? 0),
-    status: String(book?.status ?? "aktif").toLowerCase(),
-  };
+function unwrapValue(response) {
+  if (response?.data !== undefined) return response.data;
+  return response;
 }
 
-function getDipinjam(book) {
+function toArray(response) {
+  const data = unwrapValue(response);
+
+  if (Array.isArray(data)) return data;
+  if (Array.isArray(data?.data)) return data.data;
+  if (Array.isArray(data?.rows)) return data.rows;
+
+  return [];
+}
+
+function formatTanggal(value) {
+  if (!value) return "-";
+
+  const date = new Date(value);
+
+  if (Number.isNaN(date.getTime())) return "-";
+
+  return new Intl.DateTimeFormat("id-ID", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  }).format(date);
+}
+
+function hitungTerlambat(value) {
+  if (!value) return 0;
+
+  const jatuhTempo = new Date(value);
+
+  if (Number.isNaN(jatuhTempo.getTime())) return 0;
+
+  jatuhTempo.setHours(0, 0, 0, 0);
+
+  const hariIni = new Date();
+  hariIni.setHours(0, 0, 0, 0);
+
   return Math.max(
     0,
-    Number(book?.jumlah ?? 0) - Number(book?.jumlahTersedia ?? 0),
+    Math.floor(
+      (hariIni.getTime() - jatuhTempo.getTime()) / 86400000
+    )
   );
 }
 
-function getErrorMessage(error) {
-  if (error instanceof Error) return error.message;
+function namaPeminjam(item) {
+  const pengguna =
+    item?.pengguna ??
+    item?.peminjam ??
+    item?.user ??
+    null;
+
+  return (
+    pengguna?.namaLengkap ||
+    pengguna?.nama ||
+    pengguna?.name ||
+    pengguna?.email ||
+    "Pengguna"
+  );
+}
+
+function identitasPeminjam(item) {
+  const pengguna =
+    item?.pengguna ??
+    item?.peminjam ??
+    item?.user ??
+    null;
+
+  return (
+    pengguna?.nisn ||
+    pengguna?.nis ||
+    pengguna?.email ||
+    item?.penggunaId ||
+    "-"
+  );
+}
+
+function getErrorMessage(error, fallback) {
+  if (!error) return fallback;
+
   if (typeof error === "string") return error;
-  return (
-    error?.message ||
-    error?.error ||
-    "Terjadi kesalahan pada server."
-  );
+
+  return error?.message || error?.error || fallback;
 }
 
-function formatTipe(tipe) {
-  return tipe === "EBOOK" ? "E-Book" : "Buku Fisik";
-}
+/* =========================================================
+   PAGE
+========================================================= */
 
-function formatStatus(status) {
-  if (status === "aktif") return "Aktif";
-  if (status === "nonaktif") return "Nonaktif";
-  return status
-    ? status.charAt(0).toUpperCase() + status.slice(1)
-    : "-";
-}
+export default function PengembalianBukuPage() {
+  const router = useRouter();
 
-function StatCard({ icon: Icon, label, value, type = "blue" }) {
-  const styles = {
-    blue: {
-      iconBg: themePrimarySoft,
-      iconText: "text-[var(--color-primary)]",
-      value: "theme-text",
-    },
-    green: {
-      iconBg:
-        "bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)]",
-      iconText: "text-[var(--color-success)]",
-      value: "text-[var(--color-success)]",
-    },
-    orange: {
-      iconBg:
-        "bg-[color-mix(in_srgb,var(--color-warning)_12%,transparent)]",
-      iconText: "text-[var(--color-warning)]",
-      value: "text-[var(--color-warning)]",
-    },
-    purple: {
-      iconBg:
-        "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
-      iconText: "text-[var(--color-primary)]",
-      value: "text-[var(--color-primary)]",
-    },
-  };
+  const [peminjaman, setPeminjaman] = useState([]);
+  const [search, setSearch] = useState("");
+  const [filterStatus, setFilterStatus] = useState("semua");
 
-  const style = styles[type];
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [processingId, setProcessingId] = useState(null);
 
-  return (
-    <div
-      className={`theme-card theme-border rounded-xl border p-4 ${themeCardShadow} sm:p-5`}
-    >
-      <div className="flex items-center gap-3">
-        <div
-          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${style.iconBg} ${style.iconText}`}
-        >
-          <Icon size={19} />
-        </div>
-        <div>
-          <p className="theme-text-muted text-[11px] font-medium uppercase tracking-wide">
-            {label}
-          </p>
-          <p className={`mt-1 text-2xl font-bold tracking-tight ${style.value}`}>
-            {value}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}
+  const [selectedItem, setSelectedItem] = useState(null);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
-function StatusBadge({ status }) {
-  const active = status === "aktif";
+  /* =========================================================
+     LOAD DATA DARI BE
+  ========================================================= */
 
-  return (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium ${
-        active
-          ? "border-[color-mix(in_srgb,var(--color-success)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)] text-[var(--color-success)]"
-          : "theme-border theme-card-soft theme-text-muted"
-      }`}
-    >
-      {active ? <CheckCircle2 size={13} /> : <Archive size={13} />}
-      {formatStatus(status)}
-    </span>
-  );
-}
+  const loadPeminjaman = useCallback(async (refresh = false) => {
+    if (refresh) {
+      setRefreshing(true);
+    } else {
+      setLoading(true);
+    }
 
-function TypeBadge({ tipe }) {
-  const ebook = tipe === "EBOOK";
+    setError("");
 
-  return (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded-md border px-2.5 py-1 text-xs font-medium ${
-        ebook
-          ? "border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] text-[var(--color-primary)]"
-          : "theme-border theme-card-soft theme-text-secondary"
-      }`}
-    >
-      {ebook ? <FileText size={12} /> : <BookOpen size={12} />}
-      {formatTipe(tipe)}
-    </span>
-  );
-}
+    try {
+      // Filter status dikirim ke service BE.
+      const response = await getPeminjaman({
+        status: "dipinjam",
+      });
 
-function BookForm({
-  initial,
-  onCancel,
-  onSave,
-  editMode,
-  saving,
-  error,
-}) {
-  const [form, setForm] = useState(initial);
+      const rows = toArray(response);
+
+      // Hanya transaksi aktif yang dapat diproses kembali.
+      setPeminjaman(
+        rows.filter(
+          (item) =>
+            String(item?.status || "").toLowerCase() === "dipinjam"
+        )
+      );
+    } catch (err) {
+      console.error("Gagal memuat peminjaman:", err);
+
+      setError(
+        getErrorMessage(
+          err,
+          "Gagal memuat daftar peminjaman. Silakan coba lagi."
+        )
+      );
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  }, []);
 
   useEffect(() => {
-    setForm(initial);
-  }, [initial]);
+    loadPeminjaman();
+  }, [loadPeminjaman]);
 
-  const update = (key) => (event) => {
-    const value = event.target.value;
+  /* =========================================================
+     FILTER DAN PENCARIAN
+  ========================================================= */
 
-    setForm((current) => ({
-      ...current,
-      [key]: value,
-      ...(key === "tipe" && value === "EBOOK" ? { jumlah: 0 } : {}),
-    }));
-  };
+  const daftarPeminjaman = useMemo(() => {
+    const keyword = search.trim().toLowerCase();
 
-  const submit = (event) => {
-    event.preventDefault();
+    return peminjaman.filter((item) => {
+      const judul = String(
+        item?.buku?.judul || item?.judulBuku || ""
+      ).toLowerCase();
 
-    if (!form.kodeBuku?.trim()) return;
-    if (!form.judul?.trim()) return;
-    if (!form.penulis?.trim()) return;
-    if (!form.kategori?.trim()) return;
+      const kodeBuku = String(
+        item?.buku?.kodeBuku || item?.kodeBuku || ""
+      ).toLowerCase();
 
-    if (form.tipe === "EBOOK" && !form.urlEbook?.trim()) return;
+      const nomor = String(
+        item?.nomorPeminjaman || ""
+      ).toLowerCase();
 
-    onSave(form);
-  };
+      const nama = namaPeminjam(item).toLowerCase();
+      const identitas = identitasPeminjam(item).toLowerCase();
+
+      const cocokSearch =
+        !keyword ||
+        judul.includes(keyword) ||
+        kodeBuku.includes(keyword) ||
+        nomor.includes(keyword) ||
+        nama.includes(keyword) ||
+        identitas.includes(keyword);
+
+      const terlambat =
+        hitungTerlambat(item?.tanggalJatuhTempo) > 0;
+
+      const cocokStatus =
+        filterStatus === "semua" ||
+        (filterStatus === "terlambat" && terlambat) ||
+        (filterStatus === "belum" && !terlambat);
+
+      return cocokSearch && cocokStatus;
+    });
+  }, [peminjaman, search, filterStatus]);
+
+  const jumlahTerlambat = useMemo(
+    () =>
+      peminjaman.filter(
+        (item) => hitungTerlambat(item?.tanggalJatuhTempo) > 0
+      ).length,
+    [peminjaman]
+  );
+
+  /* =========================================================
+     PROSES PENGEMBALIAN
+  ========================================================= */
+
+
+const handlePengembalian = async () => {
+  const id = selectedItem?.id;
+
+  if (!id) {
+    setError("ID peminjaman tidak ditemukan.");
+    return;
+  }
+
+  if (processingId) return;
+
+  setProcessingId(id);
+  setError("");
+  setSuccess("");
+
+  try {
+    await kembalikanBuku(id);
+
+    setSuccess("Buku berhasil dikembalikan.");
+
+    // Muat ulang daftar setelah BE berhasil memproses pengembalian.
+    await loadPeminjaman(true);
+
+    setSelectedItem(null);
+  } catch (err) {
+    console.error("Gagal mengembalikan buku:", err);
+
+    setError(
+      err instanceof Error
+        ? err.message
+        : "Gagal mengembalikan buku."
+    );
+  } finally {
+    setProcessingId(null);
+  }
+};
+
+
+  /* =========================================================
+     STYLING
+  ========================================================= */
 
   const inputClass =
     "theme-input theme-border theme-text h-11 w-full rounded-lg border px-3.5 text-sm outline-none transition placeholder:text-[var(--color-text-placeholder)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
 
   const selectClass =
-    "theme-input theme-border theme-text h-11 w-full appearance-none rounded-lg border px-3.5 pr-9 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
+    "theme-input theme-border theme-text h-11 w-full rounded-lg border px-3 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] sm:w-48";
 
-  const labelClass = "theme-text-secondary mb-2 block text-xs font-semibold";
-
-  return (
-    <form onSubmit={submit} className="space-y-5">
-      {error && (
-        <div className="flex items-start gap-2 rounded-lg border border-[color-mix(in_srgb,var(--color-danger,#ef4444)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-danger,#ef4444)_8%,transparent)] p-3 text-sm theme-danger">
-          <AlertTriangle size={17} className="mt-0.5 shrink-0" />
-          <span>{error}</span>
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div>
-          <label className={labelClass}>Kode Buku *</label>
-          <input
-            required
-            value={form.kodeBuku}
-            onChange={update("kodeBuku")}
-            placeholder="Contoh: BK-0011"
-            className={inputClass}
-          />
-        </div>
-
-        <div>
-          <label className={labelClass}>ISBN</label>
-          <input
-            value={form.isbn}
-            onChange={update("isbn")}
-            placeholder="978-602-xxxx-xx-x"
-            className={inputClass}
-          />
-        </div>
-      </div>
-
-      <div>
-        <label className={labelClass}>Judul Buku *</label>
-        <input
-          required
-          value={form.judul}
-          onChange={update("judul")}
-          placeholder="Masukkan judul buku"
-          className={inputClass}
-        />
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <div>
-          <label className={labelClass}>Penulis *</label>
-          <input
-            required
-            value={form.penulis}
-            onChange={update("penulis")}
-            placeholder="Nama penulis"
-            className={inputClass}
-          />
-        </div>
-
-        <div>
-          <label className={labelClass}>Penerbit</label>
-          <input
-            value={form.penerbit}
-            onChange={update("penerbit")}
-            placeholder="Nama penerbit"
-            className={inputClass}
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div>
-          <label className={labelClass}>Tahun Terbit</label>
-          <input
-            type="number"
-            min="0"
-            value={form.tahunTerbit}
-            onChange={update("tahunTerbit")}
-            placeholder="2025"
-            className={inputClass}
-          />
-        </div>
-
-        <div>
-          <label className={labelClass}>Tipe *</label>
-          <div className="relative">
-            <select
-              value={form.tipe}
-              onChange={update("tipe")}
-              className={selectClass}
-            >
-              <option value="FISIK">Buku Fisik</option>
-              <option value="EBOOK">E-Book</option>
-            </select>
-            <ChevronDown
-              size={15}
-              className="theme-text-muted pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
-            />
-          </div>
-        </div>
-
-        <div>
-          <label className={labelClass}>Status *</label>
-          <div className="relative">
-            <select
-              value={form.status}
-              onChange={update("status")}
-              className={selectClass}
-            >
-              <option value="aktif">Aktif</option>
-              <option value="nonaktif">Nonaktif</option>
-            </select>
-            <ChevronDown
-              size={15}
-              className="theme-text-muted pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
-            />
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <label className={labelClass}>Kategori *</label>
-        <input
-          required
-          value={form.kategori}
-          onChange={update("kategori")}
-          placeholder="Contoh: Matematika, IPA, Sejarah"
-          className={inputClass}
-        />
-        <p className="theme-text-muted mt-1.5 text-[11px]">
-          Kategori mengikuti data yang tersimpan di backend.
-        </p>
-      </div>
-
-      <div>
-        <label className={labelClass}>Jumlah Eksemplar</label>
-        <input
-          type="number"
-          min="0"
-          disabled={form.tipe === "EBOOK"}
-          value={form.tipe === "EBOOK" ? 0 : form.jumlah}
-          onChange={update("jumlah")}
-          placeholder="10"
-          className={`${inputClass} disabled:cursor-not-allowed disabled:opacity-60`}
-        />
-        <p className="theme-text-muted mt-1.5 text-[11px]">
-          Jumlah tersedia dan jumlah dipinjam dihitung oleh backend.
-          {form.tipe === "EBOOK" ? " E-Book otomatis memiliki jumlah 0." : ""}
-        </p>
-      </div>
-
-      {form.tipe === "EBOOK" && (
-        <div>
-          <label className={labelClass}>URL E-Book *</label>
-          <input
-            required
-            type="url"
-            value={form.urlEbook}
-            onChange={update("urlEbook")}
-            placeholder="https://..."
-            className={inputClass}
-          />
-        </div>
-      )}
-
-      <div>
-        <label className={labelClass}>URL Cover</label>
-        <input
-          type="url"
-          value={form.coverUrl}
-          onChange={update("coverUrl")}
-          placeholder="https://..."
-          className={inputClass}
-        />
-      </div>
-
-      <div>
-        <label className={labelClass}>Deskripsi</label>
-        <textarea
-          value={form.deskripsi}
-          onChange={update("deskripsi")}
-          placeholder="Deskripsi buku..."
-          rows={4}
-          className={`${inputClass} h-auto py-3`}
-        />
-      </div>
-
-      <div className="flex flex-col-reverse gap-2 border-t border-[var(--color-border-soft)] pt-5 sm:flex-row sm:justify-end">
-        <button
-          type="button"
-          onClick={onCancel}
-          disabled={saving}
-          className={`theme-card theme-border theme-text-secondary h-10 rounded-lg border px-5 text-sm font-medium transition ${themeTextHover} disabled:opacity-50`}
-        >
-          Batal
-        </button>
-
-        <button
-          type="submit"
-          disabled={saving}
-          className={`flex h-10 items-center justify-center gap-2 rounded-lg bg-[var(--color-primary)] px-5 text-sm font-semibold text-[var(--color-card)] transition hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-60 ${themePrimaryShadow}`}
-        >
-          {saving && <RefreshCw size={15} className="animate-spin" />}
-          {saving ? "Menyimpan..." : editMode ? "Simpan Perubahan" : "Simpan Buku"}
-        </button>
-      </div>
-    </form>
-  );
-}
-
-function DetailModal({ book, loading, onClose }) {
-  if (!book && !loading) return null;
+  /* =========================================================
+     RENDER
+  ========================================================= */
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4 backdrop-blur-[2px]">
-      <div
-        className={`theme-card theme-border max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl border ${themeCardShadow}`}
-      >
-        <div className="theme-card sticky top-0 z-10 flex items-center justify-between border-b border-[var(--color-border-soft)] px-5 py-4">
-          <div>
-            <h2 className="theme-text text-lg font-bold">Detail Data Buku</h2>
-            <p className="theme-text-muted mt-0.5 text-xs">
-              Informasi dari backend perpustakaan
-            </p>
-          </div>
+    <div className="theme-page flex h-screen w-full overflow-hidden">
+      <Sidebar />
 
-          <button
-            type="button"
-            onClick={onClose}
-            className={`theme-text-muted flex h-9 w-9 items-center justify-center rounded-lg transition ${themeTextHover}`}
-          >
-            <X size={18} />
-          </button>
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <div className="shrink-0">
+          <Header />
         </div>
 
-        {loading && !book ? (
-          <div className="px-6 py-16 text-center">
-            <RefreshCw size={24} className="theme-text-muted mx-auto animate-spin" />
-            <p className="theme-text-secondary mt-3 text-sm">
-              Memuat detail buku...
-            </p>
-          </div>
-        ) : book ? (
-          <div className="p-5 sm:p-6">
-            <div className="flex flex-col gap-4 sm:flex-row">
-              <div className="flex h-36 w-full shrink-0 items-center justify-center overflow-hidden rounded-xl bg-[var(--color-primary)] text-[var(--color-card)] sm:w-28">
-                {book.coverUrl ? (
-                  <img
-                    src={book.coverUrl}
-                    alt={book.judul}
-                    className="h-full w-full object-cover"
-                  />
-                ) : (
-                  <BookOpen size={45} strokeWidth={1.5} />
-                )}
-              </div>
+        <main className="min-w-0 flex-1 overflow-y-auto">
+          <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
+            {/* HEADER */}
+           
 
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap gap-2">
-                  <span
-                    className={`${themePrimarySoft} ${themePrimarySoftBorder} rounded-md border px-2.5 py-1 text-xs font-semibold text-[var(--color-primary)]`}
-                  >
-                    {book.kodeBuku}
-                  </span>
-                  <TypeBadge tipe={book.tipe} />
-                  <StatusBadge status={book.status} />
+            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex items-center gap-3">
+                <div className="theme-primary-soft flex h-12 w-12 shrink-0 items-center justify-center rounded-xl">
+                  <RotateCcw size={23} />
                 </div>
 
-                <h3 className="theme-text mt-3 text-xl font-bold leading-7">
-                  {book.judul}
-                </h3>
-                <p className="theme-text-secondary mt-1 text-sm">
-                  {book.penulis}
-                </p>
+                <div>
+                  <h1 className="theme-text text-2xl font-bold tracking-tight">
+                    Pengembalian Buku
+                  </h1>
+
+                  <p className="theme-text-secondary mt-1 text-sm">
+                    Kelola transaksi peminjaman yang belum dikembalikan.
+                  </p>
+                </div>
               </div>
-            </div>
-
-            <div className="mt-6 grid grid-cols-1 gap-x-6 gap-y-4 border-t border-[var(--color-border-soft)] pt-5 sm:grid-cols-2">
-              <Info label="ISBN" value={book.isbn} />
-              <Info label="Penerbit" value={book.penerbit} />
-              <Info label="Tahun Terbit" value={book.tahunTerbit} />
-              <Info label="Kategori" value={book.kategori} />
-              <Info label="Tipe" value={formatTipe(book.tipe)} />
-              <Info label="Status" value={formatStatus(book.status)} />
-            </div>
-
-            <div className="mt-6">
-              <p className="theme-text-muted mb-3 text-xs font-semibold uppercase tracking-wide">
-                Informasi Stok
-              </p>
-
-              <div className="grid grid-cols-3 gap-2">
-                <StockBox label="Total" value={book.jumlah} />
-                <StockBox
-                  label="Tersedia"
-                  value={book.jumlahTersedia}
-                  type="success"
-                />
-                <StockBox
-                  label="Dipinjam"
-                  value={getDipinjam(book)}
-                  type="warning"
-                />
-              </div>
-            </div>
-
-            {book.deskripsi && (
-              <div className="theme-border mt-5 rounded-xl border p-4">
-                <p className="theme-text-muted text-xs">Deskripsi</p>
-                <p className="theme-text-secondary mt-2 whitespace-pre-wrap text-sm leading-6">
-                  {book.deskripsi}
-                </p>
-              </div>
-            )}
-
-            <div className="mt-5 flex flex-wrap justify-end gap-2">
-              {book.urlEbook && (
-                <a
-                  href={book.urlEbook}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="flex h-10 items-center gap-2 rounded-lg bg-[var(--color-primary)] px-4 text-sm font-semibold text-[var(--color-card)] transition hover:brightness-110"
-                >
-                  <ExternalLink size={15} />
-                  Buka E-Book
-                </a>
-              )}
 
               <button
                 type="button"
-                onClick={onClose}
-                className={`theme-card theme-border theme-text-secondary h-10 rounded-lg border px-5 text-sm font-medium transition ${themeTextHover}`}
+                onClick={() => loadPeminjaman(true)}
+                disabled={loading || refreshing}
+                className="theme-card theme-border theme-text inline-flex h-10 items-center justify-center gap-2 rounded-lg border px-4 text-sm font-semibold transition hover:theme-card-soft disabled:cursor-not-allowed disabled:opacity-60"
               >
-                Tutup
+                <RefreshCw
+                  size={16}
+                  className={refreshing ? "animate-spin" : ""}
+                />
+                Muat Ulang
               </button>
             </div>
-          </div>
-        ) : null}
-      </div>
-    </div>
-  );
-}
 
-function Info({ label, value }) {
-  return (
-    <div>
-      <p className="theme-text-muted text-xs">{label}</p>
-      <p className="theme-text-secondary mt-1 text-sm font-medium">
-        {value || "-"}
-      </p>
-    </div>
-  );
-}
-
-function StockBox({ label, value, type }) {
-  const classes =
-    type === "success"
-      ? "border-[color-mix(in_srgb,var(--color-success)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-success)_8%,transparent)] text-[var(--color-success)]"
-      : type === "warning"
-        ? "border-[color-mix(in_srgb,var(--color-warning)_20%,transparent)] bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)] text-[var(--color-warning)]"
-        : "theme-card-soft theme-border theme-text";
-
-  return (
-    <div className={`rounded-xl border p-4 text-center ${classes}`}>
-      <p className="text-xs opacity-80">{label}</p>
-      <p className="mt-1 text-xl font-bold">{value}</p>
-    </div>
-  );
-}
-
-export default function DataBukuPage() {
-  const [books, setBooks] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  const [search, setSearch] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState("Semua");
-  const [typeFilter, setTypeFilter] = useState("Semua");
-  const [statusFilter, setStatusFilter] = useState("Semua");
-
-  const [modal, setModal] = useState(null);
-  const [activeBook, setActiveBook] = useState(null);
-  const [saving, setSaving] = useState(false);
-  const [formError, setFormError] = useState("");
-
-  const [detailBook, setDetailBook] = useState(null);
-  const [detailLoading, setDetailLoading] = useState(false);
-
-  const [deleteBook, setDeleteBook] = useState(null);
-  const [deleting, setDeleting] = useState(false);
-
-  async function loadBooks() {
-    try {
-      setLoading(true);
-      setError("");
-
-      const result = await getBuku();
-
-      const normalized = Array.isArray(result)
-        ? result.map(normalizeBook)
-        : [];
-
-      setBooks(normalized);
-    } catch (err) {
-      console.error("Gagal mengambil data buku:", err);
-      setError(getErrorMessage(err));
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  useEffect(() => {
-    loadBooks();
-  }, []);
-
-  const categories = useMemo(() => {
-    return [...new Set(
-      books.map((book) => book.kategori).filter(Boolean),
-    )].sort((a, b) => a.localeCompare(b));
-  }, [books]);
-
-  const filteredBooks = useMemo(() => {
-    const query = search.trim().toLowerCase();
-
-    return books.filter((book) => {
-      const matchSearch =
-        !query ||
-        book.kodeBuku.toLowerCase().includes(query) ||
-        book.judul.toLowerCase().includes(query) ||
-        book.penulis.toLowerCase().includes(query);
-
-      const matchCategory =
-        categoryFilter === "Semua" || book.kategori === categoryFilter;
-
-      const matchType =
-        typeFilter === "Semua" || book.tipe === typeFilter;
-
-      const matchStatus =
-        statusFilter === "Semua" || book.status === statusFilter;
-
-      return matchSearch && matchCategory && matchType && matchStatus;
-    });
-  }, [books, search, categoryFilter, typeFilter, statusFilter]);
-
-  const totalJudul = books.length;
-  const totalAktif = books.filter((book) => book.status === "aktif").length;
-  const totalTersedia = books.reduce(
-    (sum, book) => sum + Number(book.jumlahTersedia || 0),
-    0,
-  );
-  const totalDipinjam = books.reduce(
-    (sum, book) => sum + getDipinjam(book),
-    0,
-  );
-
-  const openAdd = () => {
-    setFormError("");
-    setActiveBook({
-      kodeBuku: "",
-      isbn: "",
-      judul: "",
-      penulis: "",
-      penerbit: "",
-      tahunTerbit: "",
-      tipe: "FISIK",
-      kategori: "",
-      deskripsi: "",
-      coverUrl: "",
-      urlEbook: "",
-      jumlah: 0,
-      jumlahTersedia: 0,
-      status: "aktif",
-    });
-    setModal("add");
-  };
-
-  const openEdit = (book) => {
-    setFormError("");
-    setActiveBook(normalizeBook(book));
-    setModal("edit");
-  };
-
-  const closeModal = () => {
-    if (saving) return;
-    setModal(null);
-    setActiveBook(null);
-    setFormError("");
-  };
-
-  const saveBook = async (form) => {
-    try {
-      setSaving(true);
-      setFormError("");
-
-      const payload = {
-        kodeBuku: form.kodeBuku.trim(),
-        judul: form.judul.trim(),
-        penulis: form.penulis.trim(),
-        penerbit: form.penerbit?.trim() || "",
-        isbn: form.isbn?.trim() || "",
-        tipe: form.tipe,
-        kategori: form.kategori.trim(),
-        deskripsi: form.deskripsi?.trim() || "",
-        coverUrl: form.coverUrl?.trim() || "",
-        urlEbook: form.urlEbook?.trim() || "",
-        jumlah:
-          form.tipe === "EBOOK" ? 0 : Number(form.jumlah || 0),
-        status: form.status || "aktif",
-      };
-
-      if (form.tahunTerbit !== "" && form.tahunTerbit != null) {
-        payload.tahunTerbit = Number(form.tahunTerbit);
-      }
-
-      if (modal === "add") {
-        await createBuku(payload);
-      } else {
-        await updateBuku(String(form.id), payload);
-      }
-
-      await loadBooks();
-      closeModal();
-    } catch (err) {
-      console.error("Gagal menyimpan buku:", err);
-      setFormError(getErrorMessage(err));
-    } finally {
-      setSaving(false);
-    }
-  };
-
-  const openDetail = async (book) => {
-    try {
-      setDetailLoading(true);
-      setDetailBook(normalizeBook(book));
-
-      const result = await getBukuById(String(book.id));
-      setDetailBook(normalizeBook(result));
-    } catch (err) {
-      console.error("Gagal mengambil detail buku:", err);
-      setError(getErrorMessage(err));
-      setDetailBook(null);
-    } finally {
-      setDetailLoading(false);
-    }
-  };
-
-  const confirmDelete = async () => {
-    if (!deleteBook) return;
-
-    try {
-      setDeleting(true);
-      setError("");
-
-      await deleteBuku(String(deleteBook.id));
-      setDeleteBook(null);
-      await loadBooks();
-    } catch (err) {
-      console.error("Gagal menghapus buku:", err);
-      setError(getErrorMessage(err));
-    } finally {
-      setDeleting(false);
-    }
-  };
-
-  const resetFilter = () => {
-    setSearch("");
-    setCategoryFilter("Semua");
-    setTypeFilter("Semua");
-    setStatusFilter("Semua");
-  };
-
-  return (
-    <div className="theme-page flex min-h-screen">
-      <Sidebar />
-
-      <div className="flex min-w-0 flex-1 flex-col">
-        <Header />
-
-        <main className="min-w-0 flex-1 px-4 py-5 sm:px-6 lg:px-8">
-          <div className="mx-auto max-w-[1400px]">
-            <div className="mb-5 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-              <div className="flex items-center gap-3">
-                <div
-                  className={`flex h-12 w-12 items-center justify-center rounded-xl bg-[var(--color-primary)] text-[var(--color-card)] ${themePrimaryShadow}`}
-                >
-                  <Library size={23} />
-                </div>
-
-                <div>
-                  <h1 className="theme-text text-[25px] font-bold tracking-tight">
-                    Data Buku Perpustakaan
-                  </h1>
-                  <p className="theme-text-secondary mt-0.5 text-sm">
-                    Kelola koleksi buku perpustakaan sekolah
-                  </p>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={loadBooks}
-                  disabled={loading}
-                  className={`theme-card theme-border theme-text-secondary flex h-10 items-center gap-2 rounded-lg border px-3.5 text-sm font-medium transition ${themeTextHover}`}
-                >
-                  <RefreshCw
-                    size={16}
-                    className={loading ? "animate-spin" : ""}
-                  />
-                  <span className="hidden sm:inline">Refresh</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={openAdd}
-                  className={`flex h-10 items-center gap-2 rounded-lg bg-[var(--color-primary)] px-4 text-sm font-semibold text-[var(--color-card)] transition hover:brightness-110 ${themePrimaryShadow}`}
-                >
-                  <Plus size={17} />
-                  Tambah Buku
-                </button>
-              </div>
-            </div>
-
+            {/* ERROR */}
             {error && (
-              <div className="mb-5 flex items-start gap-2 rounded-xl border border-[color-mix(in_srgb,var(--color-warning)_25%,transparent)] bg-[color-mix(in_srgb,var(--color-warning)_8%,transparent)] p-4 text-sm text-[var(--color-warning)]">
-                <AlertTriangle size={18} className="mt-0.5 shrink-0" />
-                <div className="min-w-0 flex-1">
-                  <p className="font-semibold">Gagal memuat data</p>
-                  <p className="mt-1">{error}</p>
-                </div>
+              <div
+                role="alert"
+                className="theme-danger mb-5 flex items-start gap-3 rounded-xl border theme-border p-4"
+              >
+                <AlertCircle
+                  size={19}
+                  className="mt-0.5 shrink-0"
+                />
+
+                <p className="min-w-0 flex-1 break-words text-sm">
+                  {error}
+                </p>
+
                 <button
                   type="button"
                   onClick={() => setError("")}
-                  className="shrink-0"
+                  aria-label="Tutup pesan error"
+                  className="rounded p-1 hover:opacity-70"
                 >
-                  <X size={17} />
+                  <X size={16} />
                 </button>
               </div>
             )}
 
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-              <StatCard
-                icon={BookOpen}
-                label="Judul Buku"
-                value={totalJudul}
-                type="blue"
-              />
-              <StatCard
-                icon={Library}
-                label="Buku Aktif"
-                value={totalAktif}
-                type="purple"
-              />
-              <StatCard
-                icon={CheckCircle2}
-                label="Buku Tersedia"
-                value={totalTersedia}
-                type="green"
-              />
-              <StatCard
-                icon={Archive}
-                label="Sedang Dipinjam"
-                value={totalDipinjam}
-                type="orange"
-              />
-            </div>
-
-            <div
-              className={`theme-card theme-border mt-5 rounded-xl border p-4 ${themeCardShadow}`}
-            >
-              <div className="relative">
-                <Search
-                  size={18}
-                  className="theme-text-muted pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2"
+            {/* SUCCESS */}
+            {success && (
+              <div
+                role="status"
+                className="mb-5 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-emerald-800"
+              >
+                <CheckCircle2
+                  size={19}
+                  className="mt-0.5 shrink-0"
                 />
-                <input
-                  value={search}
-                  onChange={(event) => setSearch(event.target.value)}
-                  placeholder="Cari kode, judul buku, atau penulis..."
-                  className="theme-input theme-border theme-text h-11 w-full rounded-lg border pl-10 pr-4 text-sm outline-none transition placeholder:text-[var(--color-text-placeholder)] focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]"
-                />
-              </div>
 
-              <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-3 lg:grid-cols-4 xl:flex xl:items-center">
-                <div className="relative xl:w-56">
-                  <select
-                    value={categoryFilter}
-                    onChange={(event) => setCategoryFilter(event.target.value)}
-                    className="theme-input theme-border theme-text h-10 w-full appearance-none rounded-lg border px-3.5 pr-9 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]"
-                  >
-                    <option value="Semua">Semua Kategori</option>
-                    {categories.map((category) => (
-                      <option key={category} value={category}>
-                        {category}
-                      </option>
-                    ))}
-                  </select>
-                  <ChevronDown
-                    size={15}
-                    className="theme-text-muted pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
-                  />
-                </div>
-
-                <div className="relative xl:w-44">
-                  <select
-                    value={typeFilter}
-                    onChange={(event) => setTypeFilter(event.target.value)}
-                    className="theme-input theme-border theme-text h-10 w-full appearance-none rounded-lg border px-3.5 pr-9 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]"
-                  >
-                    <option value="Semua">Semua Tipe</option>
-                    <option value="FISIK">Buku Fisik</option>
-                    <option value="EBOOK">E-Book</option>
-                  </select>
-                  <ChevronDown
-                    size={15}
-                    className="theme-text-muted pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
-                  />
-                </div>
-
-                <div className="relative xl:w-44">
-                  <select
-                    value={statusFilter}
-                    onChange={(event) => setStatusFilter(event.target.value)}
-                    className="theme-input theme-border theme-text h-10 w-full appearance-none rounded-lg border px-3.5 pr-9 text-sm outline-none transition focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]"
-                  >
-                    <option value="Semua">Semua Status</option>
-                    <option value="aktif">Aktif</option>
-                    <option value="nonaktif">Nonaktif</option>
-                  </select>
-                  <ChevronDown
-                    size={15}
-                    className="theme-text-muted pointer-events-none absolute right-3 top-1/2 -translate-y-1/2"
-                  />
-                </div>
+                <p className="min-w-0 flex-1 text-sm">
+                  {success}
+                </p>
 
                 <button
                   type="button"
-                  onClick={resetFilter}
-                  className={`h-10 px-3 text-left text-sm font-medium text-[var(--color-primary)] transition ${themePrimaryHover} xl:text-center`}
+                  onClick={() => setSuccess("")}
+                  aria-label="Tutup pesan berhasil"
+                  className="rounded p-1 hover:bg-emerald-100"
                 >
-                  Reset Filter
+                  <X size={16} />
                 </button>
-
-                <div className="xl:ml-auto">
-                  <span className="theme-text-secondary text-sm">
-                    {filteredBooks.length} data ditemukan
-                  </span>
-                </div>
               </div>
+            )}
+
+            {/* SUMMARY */}
+            <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <section className="theme-card rounded-xl border theme-border p-5">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="theme-text-secondary text-sm">
+                      Peminjaman Aktif
+                    </p>
+
+                    <p className="theme-text mt-2 text-3xl font-bold">
+                      {loading ? "—" : peminjaman.length}
+                    </p>
+
+                    <p className="theme-text-muted mt-1 text-xs">
+                      Transaksi belum dikembalikan
+                    </p>
+                  </div>
+
+                  <div className="theme-primary-soft rounded-xl p-3">
+                    <BookOpen size={24} />
+                  </div>
+                </div>
+              </section>
+
+              <section className="theme-card rounded-xl border theme-border p-5">
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="theme-text-secondary text-sm">
+                      Terlambat
+                    </p>
+
+                    <p className="theme-text mt-2 text-3xl font-bold">
+                      {loading ? "—" : jumlahTerlambat}
+                    </p>
+
+                    <p className="theme-text-muted mt-1 text-xs">
+                      Melewati tanggal jatuh tempo
+                    </p>
+                  </div>
+
+                  <div className="rounded-xl bg-amber-50 p-3 text-amber-700">
+                    <Clock3 size={24} />
+                  </div>
+                </div>
+              </section>
             </div>
 
-            <div
-              className={`theme-card theme-border mt-5 overflow-hidden rounded-xl border ${themeCardShadow}`}
-            >
-              <div className="theme-border flex flex-col gap-1 border-b px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
-                <div>
-                  <h2 className="theme-text text-sm font-bold">Koleksi Buku</h2>
-                  <p className="theme-text-muted mt-0.5 text-xs">
-                    Data langsung dari backend perpustakaan
+            {/* TABLE CARD */}
+            <section className="theme-card overflow-hidden rounded-2xl border theme-border shadow-sm">
+              <div className="border-b theme-border p-4 sm:p-5">
+                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                  <div>
+                    <h2 className="theme-text text-base font-semibold">
+                      Daftar Peminjaman
+                    </h2>
+
+                    <p className="theme-text-secondary mt-1 text-xs">
+                      Pilih transaksi untuk mengonfirmasi buku yang telah
+                      diterima kembali.
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col gap-3 sm:flex-row">
+                    <div className="relative min-w-0 flex-1 sm:w-72">
+                      <Search
+                        size={17}
+                        className="theme-text-muted pointer-events-none absolute left-3 top-1/2 -translate-y-1/2"
+                      />
+
+                      <input
+                        type="search"
+                        value={search}
+                        onChange={(event) =>
+                          setSearch(event.target.value)
+                        }
+                        placeholder="Cari buku atau peminjam..."
+                        className={`${inputClass} pl-9`}
+                      />
+                    </div>
+
+                    <select
+                      value={filterStatus}
+                      onChange={(event) =>
+                        setFilterStatus(event.target.value)
+                      }
+                      className={selectClass}
+                      aria-label="Filter keterlambatan"
+                    >
+                      <option value="semua">
+                        Semua peminjaman
+                      </option>
+                      <option value="terlambat">
+                        Terlambat
+                      </option>
+                      <option value="belum">
+                        Belum terlambat
+                      </option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              {/* LOADING */}
+              {loading ? (
+                <div className="flex min-h-64 flex-col items-center justify-center gap-3">
+                  <Loader2
+                    size={30}
+                    className="animate-spin theme-primary-text"
+                  />
+                  <p className="theme-text-secondary text-sm">
+                    Memuat data peminjaman...
                   </p>
                 </div>
-                <div className="theme-text-secondary flex items-center gap-2 text-xs">
-                  <BookOpen size={14} />
-                  {filteredBooks.length} buku
+              ) : daftarPeminjaman.length === 0 ? (
+                /* EMPTY STATE */
+                <div className="flex min-h-64 flex-col items-center justify-center px-6 py-12 text-center">
+                  <div className="theme-card-soft rounded-full p-4">
+                    <BookOpen
+                      size={30}
+                      className="theme-text-muted"
+                    />
+                  </div>
+
+                  <h3 className="theme-text mt-4 font-semibold">
+                    {peminjaman.length === 0
+                      ? "Tidak ada peminjaman aktif"
+                      : "Data tidak ditemukan"}
+                  </h3>
+
+                  <p className="theme-text-secondary mt-2 max-w-md text-sm leading-6">
+                    {peminjaman.length === 0
+                      ? "Belum ada transaksi yang perlu diproses pengembaliannya."
+                      : "Coba gunakan kata kunci atau filter yang berbeda."}
+                  </p>
+
+                  {(search || filterStatus !== "semua") && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setSearch("");
+                        setFilterStatus("semua");
+                      }}
+                      className="theme-primary-text mt-4 text-sm font-semibold hover:underline"
+                    >
+                      Reset filter
+                    </button>
+                  )}
                 </div>
-              </div>
+              ) : (
+                <>
+                  {/* DESKTOP TABLE */}
+                  <div className="hidden overflow-x-auto md:block">
+                    <table className="w-full min-w-[850px] text-left text-sm">
+                      <thead className="theme-card-soft theme-text-secondary text-xs">
+                        <tr>
+                          <th className="px-5 py-4 font-semibold">
+                            Buku
+                          </th>
+                          <th className="px-5 py-4 font-semibold">
+                            Peminjam
+                          </th>
+                          <th className="px-5 py-4 font-semibold">
+                            Tanggal Pinjam
+                          </th>
+                          <th className="px-5 py-4 font-semibold">
+                            Jatuh Tempo
+                          </th>
+                          <th className="px-5 py-4 font-semibold">
+                            Status
+                          </th>
+                          <th className="px-5 py-4 text-right font-semibold">
+                            Aksi
+                          </th>
+                        </tr>
+                      </thead>
 
-              <div className="overflow-x-auto">
-                <table className="w-full min-w-[1050px] text-left">
-                  <thead>
-                    <tr className="border-b border-[var(--color-border-soft)] bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]">
-                      <th className="theme-text-muted px-5 py-3 text-[11px] font-semibold uppercase tracking-wide">
-                        Buku
-                      </th>
-                      <th className="theme-text-muted px-4 py-3 text-[11px] font-semibold uppercase tracking-wide">
-                        Tipe
-                      </th>
-                      <th className="theme-text-muted px-4 py-3 text-[11px] font-semibold uppercase tracking-wide">
-                        Kategori
-                      </th>
-                      <th className="theme-text-muted px-4 py-3 text-[11px] font-semibold uppercase tracking-wide">
-                        Stok
-                      </th>
-                      <th className="theme-text-muted px-4 py-3 text-[11px] font-semibold uppercase tracking-wide">
-                        Status
-                      </th>
-                      <th className="theme-text-muted px-5 py-3 text-right text-[11px] font-semibold uppercase tracking-wide">
-                        Aksi
-                      </th>
-                    </tr>
-                  </thead>
+                      <tbody className="divide-y theme-border">
+                        {daftarPeminjaman.map((item) => {
+                          const terlambat = hitungTerlambat(
+                            item?.tanggalJatuhTempo
+                          );
 
-                  <tbody className="divide-y divide-[var(--color-border-soft)]">
-                    {loading ? (
-                      <tr>
-                        <td colSpan={6} className="px-5 py-16 text-center">
-                          <RefreshCw
-                            size={24}
-                            className="theme-text-muted mx-auto animate-spin"
-                          />
-                          <p className="theme-text-secondary mt-3 text-sm">
-                            Memuat data buku...
-                          </p>
-                        </td>
-                      </tr>
-                    ) : filteredBooks.length > 0 ? (
-                      filteredBooks.map((book) => {
-                        const borrowed = getDipinjam(book);
-                        const percentage =
-                          book.jumlah > 0
-                            ? Math.min(
-                                100,
-                                (book.jumlahTersedia / book.jumlah) * 100,
-                              )
-                            : 0;
-
-                        return (
-                          <tr
-                            key={book.id}
-                            className={`transition ${themeTextHover}`}
-                          >
-                            <td className="px-5 py-4">
-                              <div className="flex items-center gap-3">
-                                <div
-                                  className={`flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-lg ${themePrimarySoft} text-[var(--color-primary)]`}
-                                >
-                                  {book.coverUrl ? (
-                                    <img
-                                      src={book.coverUrl}
-                                      alt=""
-                                      className="h-full w-full object-cover"
-                                    />
-                                  ) : (
-                                    <BookOpen size={19} />
-                                  )}
-                                </div>
-
-                                <div className="min-w-0">
-                                  <p className="theme-text max-w-[300px] truncate text-sm font-semibold">
-                                    {book.judul}
-                                  </p>
-                                  <div className="mt-1 flex items-center gap-2">
-                                    <span className="text-[11px] font-medium text-[var(--color-primary)]">
-                                      {book.kodeBuku}
-                                    </span>
-                                    {book.tahunTerbit && (
-                                      <>
-                                        <span className="theme-text-muted text-[11px]">
-                                          •
-                                        </span>
-                                        <span className="theme-text-muted text-[11px]">
-                                          {book.tahunTerbit}
-                                        </span>
-                                      </>
-                                    )}
-                                  </div>
-                                  <p className="theme-text-muted mt-0.5 text-xs">
-                                    {book.penulis}
-                                  </p>
-                                </div>
-                              </div>
-                            </td>
-
-                            <td className="px-4 py-4">
-                              <TypeBadge tipe={book.tipe} />
-                            </td>
-
-                            <td className="px-4 py-4">
-                              <span className="theme-card-soft theme-border theme-text-secondary inline-flex rounded-md border px-2.5 py-1 text-xs font-medium">
-                                {book.kategori || "-"}
-                              </span>
-                            </td>
-
-                            <td className="px-4 py-4">
-                              <div className="min-w-[120px]">
-                                <div className="flex items-center justify-between text-xs">
-                                  <span className="theme-text font-semibold">
-                                    {book.jumlahTersedia}
-                                  </span>
-                                  <span className="theme-text-muted">
-                                    / {book.jumlah}
-                                  </span>
-                                </div>
-
-                                <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)]">
-                                  <div
-                                    className="h-full rounded-full bg-[var(--color-primary)]"
-                                    style={{ width: `${percentage}%` }}
-                                  />
-                                </div>
-
-                                <p className="theme-text-muted mt-1 text-[10px]">
-                                  {borrowed} dipinjam
+                          return (
+                            <tr
+                              key={item.id}
+                              className="transition hover:theme-card-soft"
+                            >
+                              <td className="px-5 py-4">
+                                <p className="theme-text font-semibold">
+                                  {item?.buku?.judul ||
+                                    item?.judulBuku ||
+                                    "Buku tanpa judul"}
                                 </p>
-                              </div>
-                            </td>
 
-                            <td className="px-4 py-4">
-                              <StatusBadge status={book.status} />
-                            </td>
+                                <p className="theme-text-muted mt-1 text-xs">
+                                  Kode:{" "}
+                                  {item?.buku?.kodeBuku ||
+                                    item?.kodeBuku ||
+                                    "-"}
+                                </p>
 
-                            <td className="px-5 py-4">
-                              <div className="flex items-center justify-end gap-1">
+                                <p className="theme-text-muted mt-1 text-xs">
+                                  No. peminjaman:{" "}
+                                  {item?.nomorPeminjaman || "-"}
+                                </p>
+                              </td>
+
+                              <td className="px-5 py-4">
+                                <div className="flex items-center gap-2.5">
+                                  <div className="theme-card-soft rounded-full p-2">
+                                    <UserRound
+                                      size={16}
+                                      className="theme-text-secondary"
+                                    />
+                                  </div>
+
+                                  <div className="min-w-0">
+                                    <p className="theme-text font-medium">
+                                      {namaPeminjam(item)}
+                                    </p>
+
+                                    <p className="theme-text-muted mt-1 break-all text-xs">
+                                      {identitasPeminjam(item)}
+                                    </p>
+                                  </div>
+                                </div>
+                              </td>
+
+                              <td className="theme-text-secondary whitespace-nowrap px-5 py-4">
+                                {formatTanggal(item?.tanggalPinjam)}
+                              </td>
+
+                              <td className="px-5 py-4">
+                                <p className="theme-text whitespace-nowrap">
+                                  {formatTanggal(
+                                    item?.tanggalJatuhTempo
+                                  )}
+                                </p>
+
+                                {terlambat > 0 && (
+                                  <p className="mt-1 text-xs font-medium text-red-600">
+                                    Terlambat {terlambat} hari
+                                  </p>
+                                )}
+                              </td>
+
+                              <td className="px-5 py-4">
+                                {terlambat > 0 ? (
+                                  <span className="inline-flex items-center gap-1.5 rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700">
+                                    <AlertCircle size={13} />
+                                    Terlambat
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center gap-1.5 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
+                                    <Clock3 size={13} />
+                                    Dipinjam
+                                  </span>
+                                )}
+                              </td>
+
+                              <td className="px-5 py-4 text-right">
                                 <button
                                   type="button"
-                                  onClick={() => openDetail(book)}
-                                  title="Detail"
-                                  className={`theme-text-muted flex h-8 w-8 items-center justify-center rounded-md transition ${themePrimaryHover} hover:text-[var(--color-primary)]`}
+                                  onClick={() =>
+                                    setSelectedItem(item)
+                                  }
+                                  disabled={Boolean(processingId)}
+                                  className="theme-primary inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-xs font-semibold transition hover:opacity-90 disabled:opacity-50"
                                 >
-                                  <Eye size={16} />
+                                  <RotateCcw size={14} />
+                                  Proses Kembali
                                 </button>
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
 
-                                <button
-                                  type="button"
-                                  onClick={() => openEdit(book)}
-                                  title="Edit"
-                                  className={`theme-text-muted flex h-8 w-8 items-center justify-center rounded-md transition ${themePrimaryHover} hover:text-[var(--color-primary)]`}
-                                >
-                                  <Pencil size={16} />
-                                </button>
+                  {/* MOBILE LIST */}
+                  <div className="divide-y theme-border md:hidden">
+                    {daftarPeminjaman.map((item) => {
+                      const terlambat = hitungTerlambat(
+                        item?.tanggalJatuhTempo
+                      );
 
-                                <button
-                                  type="button"
-                                  onClick={() => setDeleteBook(book)}
-                                  title="Hapus"
-                                  className="theme-text-muted theme-danger flex h-8 w-8 items-center justify-center rounded-md transition hover:bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)]"
-                                >
-                                  <Trash2 size={16} />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })
-                    ) : (
-                      <tr>
-                        <td colSpan={6} className="px-5 py-16 text-center">
-                          <div
-                            className={`mx-auto flex h-12 w-12 items-center justify-center rounded-full ${themePrimarySoft} text-[var(--color-primary)]`}
-                          >
-                            <Search size={20} />
+                      return (
+                        <article
+                          key={item.id}
+                          className="space-y-4 p-4"
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <h3 className="theme-text font-semibold">
+                                {item?.buku?.judul ||
+                                  item?.judulBuku ||
+                                  "Buku tanpa judul"}
+                              </h3>
+
+                              <p className="theme-text-muted mt-1 text-xs">
+                                Kode:{" "}
+                                {item?.buku?.kodeBuku ||
+                                  item?.kodeBuku ||
+                                  "-"}
+                              </p>
+
+                              <p className="theme-text-muted mt-1 break-all text-xs">
+                                No. peminjaman:{" "}
+                                {item?.nomorPeminjaman || "-"}
+                              </p>
+                            </div>
+
+                            {terlambat > 0 ? (
+                              <span className="shrink-0 rounded-full bg-red-50 px-2.5 py-1 text-xs font-semibold text-red-700">
+                                Terlambat
+                              </span>
+                            ) : (
+                              <span className="shrink-0 rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700">
+                                Dipinjam
+                              </span>
+                            )}
                           </div>
-                          <p className="theme-text mt-3 text-sm font-semibold">
-                            Data buku tidak ditemukan
-                          </p>
-                          <p className="theme-text-muted mt-1 text-xs">
-                            Coba ubah kata kunci atau filter.
-                          </p>
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
 
-              <div className="theme-border flex flex-col gap-2 border-t px-5 py-3 sm:flex-row sm:items-center sm:justify-between">
-                <p className="theme-text-muted text-xs">
-                  Menampilkan{" "}
-                  <span className="theme-text-secondary font-medium">
-                    {filteredBooks.length}
-                  </span>{" "}
-                  dari{" "}
-                  <span className="theme-text-secondary font-medium">
-                    {books.length}
-                  </span>{" "}
-                  buku
-                </p>
+                          <div className="flex items-start gap-2">
+                            <UserRound
+                              size={16}
+                              className="theme-text-muted mt-0.5 shrink-0"
+                            />
 
-                <p className="theme-text-muted text-xs">
-                  Total{" "}
-                  <span className="theme-text-secondary font-medium">
-                    {books.reduce(
-                      (sum, book) => sum + Number(book.jumlah || 0),
-                      0,
-                    )}
-                  </span>{" "}
-                  eksemplar
-                </p>
-              </div>
-            </div>
+                            <div className="min-w-0">
+                              <p className="theme-text text-sm font-medium">
+                                {namaPeminjam(item)}
+                              </p>
+
+                              <p className="theme-text-muted mt-1 break-all text-xs">
+                                {identitasPeminjam(item)}
+                              </p>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <p className="theme-text-muted text-xs">
+                                Tanggal Pinjam
+                              </p>
+
+                              <p className="theme-text mt-1 text-sm">
+                                {formatTanggal(item?.tanggalPinjam)}
+                              </p>
+                            </div>
+
+                            <div>
+                              <p className="theme-text-muted text-xs">
+                                Jatuh Tempo
+                              </p>
+
+                              <p className="theme-text mt-1 text-sm">
+                                {formatTanggal(
+                                  item?.tanggalJatuhTempo
+                                )}
+                              </p>
+                            </div>
+                          </div>
+
+                          {terlambat > 0 && (
+                            <p className="text-xs font-medium text-red-600">
+                              Terlambat {terlambat} hari
+                            </p>
+                          )}
+
+                          <button
+                            type="button"
+                            onClick={() => setSelectedItem(item)}
+                            disabled={Boolean(processingId)}
+                            className="theme-primary inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition hover:opacity-90 disabled:opacity-50"
+                          >
+                            <RotateCcw size={16} />
+                            Proses Pengembalian
+                          </button>
+                        </article>
+                      );
+                    })}
+                  </div>
+                </>
+              )}
+
+              {!loading && daftarPeminjaman.length > 0 && (
+                <div className="theme-card-soft theme-text-muted border-t theme-border px-5 py-3 text-xs">
+                  Menampilkan {daftarPeminjaman.length} dari{" "}
+                  {peminjaman.length} peminjaman aktif.
+                </div>
+              )}
+            </section>
+
+            <p className="theme-text-muted mt-4 text-xs leading-5">
+              Status peminjaman dan penambahan stok dilakukan oleh
+              backend setelah pengembalian berhasil diproses.
+            </p>
           </div>
         </main>
       </div>
 
-      {modal && activeBook && (
-        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/40 p-4 backdrop-blur-[2px]">
-          <div
-            className={`theme-card theme-border max-h-[92vh] w-full max-w-2xl overflow-y-auto rounded-2xl border ${themeCardShadow}`}
+      {/* =====================================================
+          DIALOG KONFIRMASI
+      ===================================================== */}
+
+      {selectedItem && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/40 p-4"
+          onMouseDown={(event) => {
+            if (
+              event.target === event.currentTarget &&
+              !processingId
+            ) {
+              setSelectedItem(null);
+            }
+          }}
+        >
+          <section
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="dialog-title"
+            className="theme-card w-full max-w-md rounded-2xl border theme-border p-6 shadow-xl"
           >
-            <div className="theme-card sticky top-0 z-10 flex items-center justify-between border-b border-[var(--color-border-soft)] px-5 py-4 sm:px-6">
-              <div>
-                <h2 className="theme-text text-lg font-bold">
-                  {modal === "add" ? "Tambah Data Buku" : "Edit Data Buku"}
-                </h2>
-                <p className="theme-text-muted mt-0.5 text-xs">
-                  {modal === "add"
-                    ? "Tambahkan koleksi buku baru ke database"
-                    : "Perbarui data buku yang tersimpan di database"}
-                </p>
+            <div className="flex items-start justify-between gap-3">
+              <div className="theme-primary-soft rounded-xl p-3">
+                <RotateCcw size={23} />
               </div>
 
               <button
                 type="button"
-                onClick={closeModal}
-                className={`theme-text-muted flex h-9 w-9 items-center justify-center rounded-lg transition ${themeTextHover}`}
+                onClick={() => setSelectedItem(null)}
+                disabled={Boolean(processingId)}
+                aria-label="Tutup konfirmasi"
+                className="theme-text-muted rounded-lg p-2 transition hover:theme-card-soft disabled:opacity-50"
               >
-                <X size={18} />
+                <X size={19} />
               </button>
             </div>
 
-            <div className="p-5 sm:p-6">
-              <BookForm
-                initial={activeBook}
-                editMode={modal === "edit"}
-                onCancel={closeModal}
-                onSave={saveBook}
-                saving={saving}
-                error={formError}
-              />
-            </div>
-          </div>
-        </div>
-      )}
+            <h2
+              id="dialog-title"
+              className="theme-text mt-4 text-xl font-bold"
+            >
+              Konfirmasi Pengembalian
+            </h2>
 
-      <DetailModal
-        book={detailBook}
-        loading={detailLoading}
-        onClose={() => {
-          if (!detailLoading) setDetailBook(null);
-        }}
-      />
+            <p className="theme-text-secondary mt-2 text-sm leading-6">
+              Pastikan buku sudah diterima sebelum kamu memproses
+              pengembaliannya.
+            </p>
 
-      {deleteBook && (
-        <div className="fixed inset-0 z-[110] flex items-center justify-center bg-black/40 p-4 backdrop-blur-[2px]">
-          <div
-            className={`theme-card theme-border w-full max-w-md rounded-2xl border p-6 ${themeCardShadow}`}
-          >
-            <div className="flex items-start gap-4">
-              <div className="theme-danger flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)]">
-                <Trash2 size={20} />
+            <div className="theme-card-soft mt-5 space-y-4 rounded-xl border theme-border p-4">
+              <div>
+                <p className="theme-text-muted text-xs">
+                  Judul Buku
+                </p>
+
+                <p className="theme-text mt-1 text-sm font-semibold">
+                  {selectedItem?.buku?.judul ||
+                    selectedItem?.judulBuku ||
+                    "Buku tanpa judul"}
+                </p>
               </div>
 
               <div>
-                <h2 className="theme-text text-lg font-bold">
-                  Hapus data buku?
-                </h2>
-                <p className="theme-text-secondary mt-1.5 text-sm leading-6">
-                  Data buku{" "}
-                  <span className="theme-text font-semibold">
-                    "{deleteBook.judul}"
-                  </span>{" "}
-                  akan dihapus melalui backend.
+                <p className="theme-text-muted text-xs">
+                  Peminjam
+                </p>
+
+                <p className="theme-text mt-1 text-sm font-medium">
+                  {namaPeminjam(selectedItem)}
+                </p>
+              </div>
+
+              <div>
+                <p className="theme-text-muted text-xs">
+                  Nomor Peminjaman
+                </p>
+
+                <p className="theme-text mt-1 break-all text-sm font-medium">
+                  {selectedItem?.nomorPeminjaman || "-"}
+                </p>
+              </div>
+
+              <div>
+                <p className="theme-text-muted text-xs">
+                  Tanggal Jatuh Tempo
+                </p>
+
+                <p className="theme-text mt-1 text-sm font-medium">
+                  {formatTanggal(
+                    selectedItem?.tanggalJatuhTempo
+                  )}
                 </p>
               </div>
             </div>
 
-            <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+            <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
               <button
                 type="button"
-                onClick={() => setDeleteBook(null)}
-                disabled={deleting}
-                className={`theme-card theme-border theme-text-secondary h-10 rounded-lg border px-5 text-sm font-medium transition ${themeTextHover} disabled:opacity-50`}
+                onClick={() => setSelectedItem(null)}
+                disabled={Boolean(processingId)}
+                className="theme-card theme-border theme-text-secondary h-10 rounded-lg border px-4 text-sm font-semibold transition hover:theme-card-soft disabled:opacity-50"
               >
                 Batal
               </button>
 
               <button
                 type="button"
-                onClick={confirmDelete}
-                disabled={deleting}
-                className="theme-danger flex h-10 items-center justify-center gap-2 rounded-lg bg-[var(--color-text)] px-5 text-sm font-semibold text-[var(--color-card)] transition hover:opacity-90 disabled:opacity-50"
+                onClick={handlePengembalian}
+                disabled={Boolean(processingId)}
+                className="theme-primary inline-flex h-10 items-center justify-center gap-2 rounded-lg px-4 text-sm font-semibold transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
               >
-                {deleting && <RefreshCw size={15} className="animate-spin" />}
-                {deleting ? "Menghapus..." : "Ya, Hapus"}
+                {processingId ? (
+                  <>
+                    <Loader2
+                      size={16}
+                      className="animate-spin"
+                    />
+                    Memproses...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircle2 size={16} />
+                    Konfirmasi Kembali
+                  </>
+                )}
               </button>
             </div>
-          </div>
+          </section>
         </div>
       )}
     </div>

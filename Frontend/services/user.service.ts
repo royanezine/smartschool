@@ -448,12 +448,20 @@ export async function updateUser(
       typeof value === "string" ? value.trim() : value;
   }
 
-  for (const key of ["email", "namaPengguna", "namaLengkap"]) {
-    const value = cleanPayload[key];
+  // Validasi hanya untuk field yang memang dikirim.
+  // Ini memungkinkan update status saja tanpa mengirim seluruh profil.
+  if (
+    "email" in cleanPayload &&
+    !cleanPayload.email
+  ) {
+    throw new Error("Email tidak boleh kosong.");
+  }
 
-    if (typeof value !== "string" || !value) {
-      throw new Error(`${key} wajib diisi.`);
-    }
+  if (
+    "namaLengkap" in cleanPayload &&
+    !cleanPayload.namaLengkap
+  ) {
+    throw new Error("Nama lengkap tidak boleh kosong.");
   }
 
   return request<UserMutationResponse>(
@@ -559,3 +567,37 @@ export async function resetUserPassword(
     }
   );
 }
+
+
+
+export interface UpdateProfilePayload {
+  namaLengkap?: string;
+  noTelepon?: string | null;
+  alamat?: string | null;
+  avatar?: string | null;
+  alamatDomisili?: string | null;
+  tempatLahir?: string | null;
+  tanggalLahir?: string | null;
+}
+
+export async function getProfile() {
+  return request<{
+    success: boolean;
+    message: string;
+    data: User;
+  }>("/users/profile");
+}
+
+export async function updateProfile(
+  payload: UpdateProfilePayload
+) {
+  return request<{
+    success: boolean;
+    message: string;
+    data: User;
+  }>("/users/profile", {
+    method: "PUT",
+    body: JSON.stringify(payload),
+  });
+}
+

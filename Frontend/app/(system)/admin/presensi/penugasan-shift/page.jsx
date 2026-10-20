@@ -16,9 +16,7 @@ import {
   CalendarClock,
   ChevronLeft,
   ChevronRight,
-  ArrowUpDown,
-  ArrowUp,
-  ArrowDown,
+  Info,
 } from "lucide-react";
 
 import Header from "@/app/components/Header";
@@ -28,54 +26,132 @@ import { getUsers } from "@/services/user.service";
 import { getShiftKerja } from "@/services/shiftKerja.service";
 
 const PAGE_SIZE = 10;
-
 const JABATAN_ENDPOINT = "/api/kategori-jabatan";
+const CACHE_KEY = "smartschool-penugasan-shift-cache";
 
-/* =========================================================
-   RESPONSE HELPERS
-========================================================= */
+function getArray(response, keys = []) {
+  let current = response;
 
-function unwrapResponse(response) {
-  let result = response;
+  for (let i = 0; i < 6 && current != null; i++) {
+    if (Array.isArray(current)) return current;
 
-  for (let i = 0; i < 3; i++) {
-    if (
-      result &&
-      typeof result === "object" &&
-      "data" in result
-    ) {
-      result = result.data;
-    } else {
-      break;
+    if (typeof current !== "object") return [];
+
+    for (const key of keys) {
+      if (Array.isArray(current[key])) return current[key];
     }
+
+    if (Array.isArray(current.items)) return current.items;
+
+    if (!("data" in current)) return [];
+    current = current.data;
   }
 
-  return result;
+  return Array.isArray(current) ? current : [];
 }
 
-function getArray(response) {
-  const result = unwrapResponse(response);
+function getCache() {
+  try {
+    const value = localStorage.getItem(CACHE_KEY);
+    const parsed = value ? JSON.parse(value) : {};
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+}
 
-  if (Array.isArray(result)) return result;
-  if (Array.isArray(result?.items)) return result.items;
-  if (Array.isArray(result?.data)) return result.data;
-  if (Array.isArray(result?.users)) return result.users;
-  if (Array.isArray(result?.pengguna)) return result.pengguna;
-  if (Array.isArray(result?.kategoriJabatan)) {
-    return result.kategoriJabatan;
+function getId(value) {
+  return value == null ? "" : String(value);
+}
+
+function getNamaJabatan(value) {
+  if (typeof value === "string") return value;
+
+  return (
+    value?.nama ??
+    value?.namaKategori ??
+    value?.namaJabatan ??
+    value?.namaKategoriJabatan ??
+    ""
+  );
+}
+
+function getJabatanName(item, jabatanList, cache) {
+  const id =
+    item?.kategoriJabatanId ??
+    item?.kategoriJabatan?.id ??
+    cache?.kategoriJabatanId;
+
+  const relation = item?.kategoriJabatan;
+
+  if (typeof relation === "string" && relation.trim()) {
+    return relation;
   }
 
-  return [];
+  const relationName = getNamaJabatan(relation);
+  if (relationName) return relationName;
+
+  if (!id) return "";
+
+  const found = jabatanList.find((x) => getId(x.id) === getId(id));
+  return getNamaJabatan(found);
+}
+
+function getShiftForPegawai(item, shiftList, cache) {
+  if (!item) return null;
+
+  const masterRelation =
+    item.shiftKerjaMaster ??
+    (typeof item.shiftKerja === "object" ? item.shiftKerja : null);
+
+  const id = item.shiftKerjaId ?? masterRelation?.id;
+
+  if (id) {
+    const found = shiftList.find((x) => getId(x.id) === getId(id));
+    if (found) return found;
+
+    if (masterRelation) return masterRelation;
+  }
+
+  const cachedId = cache?.shiftKerjaId;
+
+  if (cachedId) {
+    const found = shiftList.find((x) => getId(x.id) === getId(cachedId));
+    if (found) return found;
+  }
+
+  const legacy =
+    typeof item.shiftKerja === "string" ? item.shiftKerja.trim() : "";
+
+  if (legacy) {
+    const found = shiftList.find((shift) => {
+      const nama = String(shift.nama ?? "").trim().toLowerCase();
+      const kode = String(shift.kode ?? "").trim().toLowerCase();
+      const value = legacy.toLowerCase();
+
+      return nama === value || kode === value;
+    });
+
+    if (found) return found;
+
+    return {
+      nama: legacy,
+      kode: "",
+      jamMasuk: null,
+      jamKeluar: null,
+    };
+  }
+
+  return null;
 }
 
 function formatJam(value) {
   if (!value) return "-";
 
   const text = String(value);
+  const match = text.match(/^(\d{1,2}):(\d{2})/);
 
-  if (/^\d{1,2}:\d{2}/.test(text)) {
-    const match = text.match(/^(\d{1,2}):(\d{2})/);
-
+  if (match) {
     return `${match[1].padStart(2, "0")}:${match[2]}`;
   }
 
@@ -92,154 +168,63 @@ function formatJam(value) {
   return text;
 }
 
-function getErrorMessage(error) {
-  return error instanceof Error
-    ? error.message
-    : "Terjadi kesalahan. Silakan coba lagi.";
-}
-
-function getJabatanName(item, jabatanList = []) {
-  const relation = item?.kategoriJabatan;
-
-  if (typeof relation === "string" && relation.trim()) {
-    return relation;
-  }
-
-  const relationName =
-    relation?.nama ??
-    relation?.namaKategori ??
-    relation?.namaJabatan;
-
-  if (relationName) return relationName;
-
-  const id = item?.kategoriJabatanId;
-
-  if (id == null) return "";
-
-  const found = jabatanList.find(
-    (jabatan) => String(jabatan.id) === String(id)
-  );
+function StatCard({ title, value, description, icon: Icon, tone = "blue" }) {
+  const toneClasses = {
+    blue: "bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300",
+    emerald:
+      "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300",
+    amber:
+      "bg-amber-50 text-amber-700 dark:bg-amber-950/50 dark:text-amber-300",
+    slate:
+      "bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] theme-text-muted",
+  };
 
   return (
-    found?.nama ??
-    found?.namaKategori ??
-    found?.namaJabatan ??
-    ""
-  );
-}
+    <div className="theme-card rounded-xl border theme-border p-5 shadow-sm">
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0">
+          <p className="text-sm font-medium theme-text-muted">{title}</p>
+          <p className="mt-3 text-2xl font-bold tracking-tight tabular-nums theme-text">
+            {typeof value === "number" ? value.toLocaleString("id-ID") : value}
+          </p>
+          {description && (
+            <p className="mt-1 text-xs theme-text-muted">{description}</p>
+          )}
+        </div>
 
-/* =========================================================
-   STAT CARD
-========================================================= */
-
-function StatCard({ title, value, icon }) {
-  return (
-    <div className="flex min-w-0 items-center justify-between gap-4 rounded-xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:p-5">
-      <div className="min-w-0">
-        <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-          {title}
-        </p>
-        <p className="mt-2 text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-          {value}
-        </p>
-      </div>
-
-      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300">
-        {icon}
+        <div
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${toneClasses[tone] ?? toneClasses.blue}`}
+        >
+          <Icon size={20} />
+        </div>
       </div>
     </div>
   );
 }
 
-/* =========================================================
-   SORTABLE HEADER
-========================================================= */
-
-function SortableHeader({
-  label,
-  column,
-  sortBy,
-  sortOrder,
-  onSort,
-  align = "left",
-}) {
-  const active = sortBy === column;
-
-  return (
-    <th
-      className={`px-5 py-4 font-semibold ${
-        align === "right" ? "text-right" : "text-left"
-      }`}
-    >
-      <button
-        type="button"
-        onClick={() => onSort(column)}
-        className={`inline-flex items-center gap-1.5 transition hover:text-slate-800 dark:hover:text-slate-100 ${
-          active ? "text-blue-700 dark:text-blue-300" : ""
-        }`}
-        title={`Urutkan ${label} ${
-          active && sortOrder === "asc" ? "DESC" : "ASC"
-        }`}
-      >
-        {label}
-        {active ? (
-          sortOrder === "asc" ? (
-            <ArrowUp size={13} />
-          ) : (
-            <ArrowDown size={13} />
-          )
-        ) : (
-          <ArrowUpDown size={13} className="opacity-40" />
-        )}
-      </button>
-    </th>
-  );
-}
-
-/* =========================================================
-   PAGE
-========================================================= */
-
 export default function PenugasanShiftPage() {
   const router = useRouter();
+
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   const [pegawai, setPegawai] = useState([]);
   const [shiftList, setShiftList] = useState([]);
   const [jabatanList, setJabatanList] = useState([]);
+  const [cache, setCache] = useState({});
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
-
   const [search, setSearch] = useState("");
   const [filterShift, setFilterShift] = useState("semua");
   const [page, setPage] = useState(1);
-
-  // ============================================================
-  // SORTING
-  // ============================================================
-  const [sortBy, setSortBy] = useState("nama");
-  const [sortOrder, setSortOrder] = useState("asc");
-
-  function handleSort(column) {
-    if (sortBy === column) {
-      setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
-    } else {
-      setSortBy(column);
-      setSortOrder("asc");
-    }
-  }
-
-  /* =======================================================
-     LOAD DATA
-  ======================================================= */
 
   const loadData = useCallback(async () => {
     setLoading(true);
     setError("");
 
     try {
-      const [pegawaiResponse, shiftResponse, jabatanResponse] =
+      const [usersResponse, shiftsResponse, jabatanResponse] =
         await Promise.all([
           getUsers({ page: 1, limit: 100 }),
           getShiftKerja({
@@ -250,21 +235,30 @@ export default function PenugasanShiftPage() {
           apiFetch(JABATAN_ENDPOINT, { method: "GET" }),
         ]);
 
-      const pegawaiData = Array.isArray(pegawaiResponse?.data)
-        ? pegawaiResponse.data
-        : [];
+      const users = getArray(usersResponse, [
+        "users",
+        "pengguna",
+        "pegawai",
+      ]).filter((x) => x?.id);
 
-      const jabatanData = getArray(jabatanResponse);
-      const shifts = Array.isArray(shiftResponse?.data)
-        ? shiftResponse.data
-        : [];
+      const shifts = getArray(shiftsResponse, ["shifts", "shiftKerja"]);
 
-      setPegawai(pegawaiData);
+      const jabatan = getArray(jabatanResponse, [
+        "kategoriJabatan",
+        "kategoriJabatans",
+        "jabatan",
+      ]);
+
+      setPegawai(users);
       setShiftList(shifts);
-      setJabatanList(jabatanData);
-      setPage(1);
+      setJabatanList(jabatan);
+      setCache(getCache());
     } catch (err) {
-      setError(getErrorMessage(err));
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Data penugasan belum bisa dimuat. Silakan coba lagi."
+      );
     } finally {
       setLoading(false);
     }
@@ -272,20 +266,15 @@ export default function PenugasanShiftPage() {
 
   useEffect(() => {
     loadData();
-  }, [loadData]);
 
-  // Ambil notice dari sessionStorage (dari halaman atur shift)
-  useEffect(() => {
     try {
-      const saved = sessionStorage.getItem("penugasan-notice");
-      if (saved) {
-        setNotice(saved);
+      const savedNotice = sessionStorage.getItem("penugasan-notice");
+      if (savedNotice) {
+        setNotice(savedNotice);
         sessionStorage.removeItem("penugasan-notice");
       }
-    } catch {
-      // ignore
-    }
-  }, []);
+    } catch {}
+  }, [loadData]);
 
   useEffect(() => {
     if (!notice) return;
@@ -293,190 +282,150 @@ export default function PenugasanShiftPage() {
     return () => clearTimeout(timeout);
   }, [notice]);
 
-  /* =======================================================
-     DERIVED DATA
-  ======================================================= */
+  const enrichedPegawai = useMemo(() => {
+    return pegawai.map((item) => {
+      const saved = cache[getId(item.id)] ?? {};
+      return {
+        ...item,
+        _shift: getShiftForPegawai(item, shiftList, saved),
+        _jabatan: getJabatanName(item, jabatanList, saved),
+      };
+    });
+  }, [pegawai, shiftList, jabatanList, cache]);
 
   const filteredPegawai = useMemo(() => {
     const keyword = search.trim().toLowerCase();
 
-    return pegawai.filter((item) => {
-      const nama = String(item?.namaLengkap ?? "").toLowerCase();
-      const email = String(item?.email ?? "").toLowerCase();
-      const shiftId = item?.shiftKerjaId;
-
+    return enrichedPegawai.filter((item) => {
       const matchSearch =
-        !keyword || nama.includes(keyword) || email.includes(keyword);
+        !keyword ||
+        String(item.namaLengkap ?? "").toLowerCase().includes(keyword) ||
+        String(item.email ?? "").toLowerCase().includes(keyword);
 
-      const matchShift =
-        filterShift === "semua"
-          ? true
-          : filterShift === "belum"
-            ? shiftId == null || shiftId === ""
-            : String(shiftId) === String(filterShift);
+      let matchShift = true;
+
+      if (filterShift === "belum") {
+        matchShift = !item._shift;
+      } else if (filterShift !== "semua") {
+        matchShift = getId(item._shift?.id) === getId(filterShift);
+      }
 
       return matchSearch && matchShift;
     });
-  }, [pegawai, search, filterShift]);
-
-  // ============================================================
-  // SORTED DATA
-  // ============================================================
-  const sortedPegawai = useMemo(() => {
-    const data = [...filteredPegawai];
-
-    data.sort((a, b) => {
-      let valA;
-      let valB;
-
-      switch (sortBy) {
-        case "jabatan": {
-          valA = getJabatanName(a, jabatanList).toLowerCase();
-          valB = getJabatanName(b, jabatanList).toLowerCase();
-          break;
-        }
-        case "shift": {
-          const shiftA = a.shiftKerjaMaster ?? shiftList.find(
-            (s) => String(s.id) === String(a.shiftKerjaId)
-          );
-          const shiftB = b.shiftKerjaMaster ?? shiftList.find(
-            (s) => String(s.id) === String(b.shiftKerjaId)
-          );
-          valA = String(shiftA?.nama ?? "").toLowerCase();
-          valB = String(shiftB?.nama ?? "").toLowerCase();
-          break;
-        }
-        case "jamKerja": {
-          const shiftA = a.shiftKerjaMaster ?? shiftList.find(
-            (s) => String(s.id) === String(a.shiftKerjaId)
-          );
-          const shiftB = b.shiftKerjaMaster ?? shiftList.find(
-            (s) => String(s.id) === String(b.shiftKerjaId)
-          );
-          valA = String(shiftA?.jamMasuk ?? "");
-          valB = String(shiftB?.jamMasuk ?? "");
-          break;
-        }
-        case "email":
-          valA = String(a.email ?? "").toLowerCase();
-          valB = String(b.email ?? "").toLowerCase();
-          break;
-        case "nama":
-        default:
-          valA = String(a.namaLengkap ?? "").toLowerCase();
-          valB = String(b.namaLengkap ?? "").toLowerCase();
-          break;
-      }
-
-      if (valA < valB) return sortOrder === "asc" ? -1 : 1;
-      if (valA > valB) return sortOrder === "asc" ? 1 : -1;
-      return 0;
-    });
-
-    return data;
-  }, [filteredPegawai, sortBy, sortOrder, jabatanList, shiftList]);
+  }, [enrichedPegawai, search, filterShift]);
 
   const totalPages = Math.max(
     1,
-    Math.ceil(sortedPegawai.length / PAGE_SIZE)
+    Math.ceil(filteredPegawai.length / PAGE_SIZE)
   );
 
   const currentPage = Math.min(page, totalPages);
 
-  const visiblePegawai = useMemo(() => {
-    const start = (currentPage - 1) * PAGE_SIZE;
-    return sortedPegawai.slice(start, start + PAGE_SIZE);
-  }, [sortedPegawai, currentPage]);
+  const visiblePegawai = filteredPegawai.slice(
+    (currentPage - 1) * PAGE_SIZE,
+    currentPage * PAGE_SIZE
+  );
 
-  const totalSudahDitugaskan = pegawai.filter(
-    (item) =>
-      item?.shiftKerjaId != null && item.shiftKerjaId !== ""
+  const totalSudahDitugaskan = enrichedPegawai.filter(
+    (item) => Boolean(item._shift)
   ).length;
 
-  const totalBelumDitugaskan =
-    pegawai.length - totalSudahDitugaskan;
-
-  /* =======================================================
-     NAVIGASI KE HALAMAN ATUR SHIFT
-  ======================================================= */
+  const totalBelumDitugaskan = pegawai.length - totalSudahDitugaskan;
 
   function openAssignment(item) {
     if (!item?.id) {
       setError("ID pegawai tidak ditemukan.");
       return;
     }
+
     router.push(`/admin/presensi/penugasan-shift/${item.id}`);
   }
 
-  /* =======================================================
-     RENDER
-  ======================================================= */
-
   return (
-    <div className="flex h-dvh w-full overflow-hidden bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
-      <aside className="relative z-30 h-full shrink-0">
-        <Sidebar role="admin_sekolah" />
-      </aside>
+    <div className="theme-page flex h-screen w-full overflow-hidden">
+      <Sidebar
+        role="admin"
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
 
-      <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-        <header className="relative z-20 flex h-16 shrink-0 items-center border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-          <div className="w-full min-w-0">
-            <Header />
-          </div>
-        </header>
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <div className="shrink-0">
+          <Header onMenuClick={() => setSidebarOpen(true)} />
+        </div>
 
-        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain">
-          <div className="mx-auto flex w-full max-w-[1600px] flex-col gap-6 p-4 sm:p-6 lg:p-8">
-            {/* PAGE TITLE */}
-            <section className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-              <div className="min-w-0">
-                <div className="mb-2 flex flex-wrap items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-                  <BriefcaseBusiness size={16} />
-                  <span>Presensi</span>
-                  <span>/</span>
-                  <span className="font-medium text-blue-700 dark:text-blue-400">
-                    Penugasan Shift
-                  </span>
-                </div>
+        <main className="min-w-0 flex-1 overflow-y-auto theme-page theme-text">
+          <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+            {/* ============================================
+                PAGE HEADER
+            ============================================ */}
+            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                
 
-                <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
+                <h1 className="text-2xl font-bold tracking-tight sm:text-3xl theme-text">
                   Penugasan Shift Pegawai
                 </h1>
 
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">
-                  Kelola penempatan shift kerja dan kategori jabatan
-                  untuk guru serta pegawai sekolah.
+                <p className="mt-2 max-w-2xl text-sm leading-6 theme-text-secondary">
+                  Kelola shift kerja dan kategori jabatan pegawai sekolah.
                 </p>
               </div>
 
-              <button
-                type="button"
-                onClick={loadData}
-                disabled={loading}
-                className="inline-flex h-10 shrink-0 items-center justify-center gap-2 self-start rounded-lg border border-slate-200 bg-white px-4 text-sm font-semibold transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-slate-800 dark:bg-slate-900 dark:hover:bg-slate-800 sm:self-center"
-              >
-                <RefreshCw
-                  size={16}
-                  className={loading ? "animate-spin" : ""}
-                />
-                Muat ulang
-              </button>
-            </section>
+              <div className="flex flex-wrap items-center gap-2">
+                <button
+                  type="button"
+                  onClick={loadData}
+                  disabled={loading}
+                  className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border theme-border theme-card px-3 text-sm font-medium theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] disabled:cursor-not-allowed disabled:opacity-60 transition"
+                >
+                  <RefreshCw
+                    size={16}
+                    className={loading ? "animate-spin" : ""}
+                  />
+                  Muat Ulang
+                </button>
+              </div>
+            </div>
 
+            {/* ============================================
+                INFO BANNER
+            ============================================ */}
+            <div className="mb-6 flex items-start gap-3 rounded-lg border theme-border theme-card p-4">
+              <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+                <Info size={18} />
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium theme-text">
+                  Atur shift dan jabatan pegawai di sini
+                </p>
+                <p className="mt-1 text-xs leading-5 theme-text-muted">
+                  Klik <strong>"Atur shift"</strong> pada baris pegawai untuk
+                  menetapkan atau mengubah shift kerja dan kategori jabatannya.
+                </p>
+              </div>
+            </div>
+
+            {/* ============================================
+                ALERTS
+            ============================================ */}
             {error && (
               <div
                 role="alert"
-                className="flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300"
+                className="mb-5 flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300"
               >
                 <AlertCircle size={19} className="mt-0.5 shrink-0" />
-                <p className="min-w-0 flex-1 break-words">{error}</p>
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold">Permintaan gagal</p>
+                  <p className="mt-1 break-words">{error}</p>
+                </div>
                 <button
                   type="button"
-                  onClick={() => setError("")}
                   aria-label="Tutup pesan error"
-                  className="shrink-0 rounded-md p-1 hover:bg-red-100 dark:hover:bg-red-900/40"
+                  onClick={() => setError("")}
+                  className="rounded p-1 hover:bg-red-100 dark:hover:bg-red-900/40"
                 >
-                  <X size={17} />
+                  <X size={16} />
                 </button>
               </div>
             )}
@@ -484,184 +433,227 @@ export default function PenugasanShiftPage() {
             {notice && (
               <div
                 role="status"
-                className="flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-800 dark:border-emerald-900/60 dark:bg-emerald-950/30 dark:text-emerald-300"
+                className="mb-5 flex items-center gap-3 rounded-lg border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700 dark:border-emerald-900/60 dark:bg-emerald-950/30 dark:text-emerald-300"
               >
-                <CheckCircle2 size={19} className="mt-0.5 shrink-0" />
-                <p className="min-w-0 flex-1">{notice}</p>
+                <CheckCircle2 size={18} />
+                <p className="flex-1">{notice}</p>
                 <button
                   type="button"
+                  aria-label="Tutup notifikasi"
                   onClick={() => setNotice("")}
-                  aria-label="Tutup pesan"
-                  className="shrink-0 rounded-md p-1 hover:bg-emerald-100 dark:hover:bg-emerald-900/40"
+                  className="rounded p-1 hover:bg-emerald-100 dark:hover:bg-emerald-900/40"
                 >
-                  <X size={17} />
+                  <X size={16} />
                 </button>
               </div>
             )}
 
-            <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {/* ============================================
+                STAT CARDS
+            ============================================ */}
+            <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               <StatCard
                 title="Total Pegawai"
                 value={loading ? "—" : pegawai.length}
-                icon={<Users size={20} />}
+                description="Pegawai terdaftar di sekolah"
+                icon={Users}
+                tone="blue"
               />
               <StatCard
                 title="Sudah Memiliki Shift"
                 value={loading ? "—" : totalSudahDitugaskan}
-                icon={<CheckCircle2 size={20} />}
+                description="Pegawai yang sudah di-assign shift"
+                icon={CheckCircle2}
+                tone="emerald"
               />
               <StatCard
                 title="Belum Memiliki Shift"
                 value={loading ? "—" : totalBelumDitugaskan}
-                icon={<CalendarClock size={20} />}
+                description="Perlu ditugaskan shift kerja"
+                icon={CalendarClock}
+                tone="amber"
               />
-            </section>
+            </div>
 
-            <section className="min-w-0 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-              <div className="border-b border-slate-200 p-4 dark:border-slate-800 sm:p-5">
-                <div className="flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
-                  <div className="min-w-0">
-                    <h2 className="font-semibold text-slate-900 dark:text-white">
+            {/* ============================================
+                TABLE SECTION
+            ============================================ */}
+            <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
+              <div className="border-b theme-border p-4 sm:p-5">
+                <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h2 className="font-semibold theme-text">
                       Daftar Penugasan
                     </h2>
-                    <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                    <p className="mt-1 text-sm theme-text-muted">
                       Pilih pegawai untuk menetapkan atau mengubah shift.
                     </p>
                   </div>
 
-                  <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 xl:w-auto">
-                    <div className="relative min-w-0">
+                  <div className="flex flex-col gap-3 sm:flex-row">
+                    <div className="relative min-w-0 sm:w-64">
                       <Search
                         size={17}
-                        className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                        className="absolute left-3 top-1/2 -translate-y-1/2 theme-text-muted"
                       />
                       <input
                         type="search"
                         value={search}
-                        onChange={(event) => {
-                          setSearch(event.target.value);
+                        onChange={(e) => {
+                          setSearch(e.target.value);
                           setPage(1);
                         }}
                         placeholder="Cari nama atau email..."
-                        className="h-10 w-full rounded-lg border border-slate-200 bg-white pl-9 pr-3 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-950 dark:focus:ring-blue-900/40 xl:w-64"
+                        className="theme-input h-10 w-full rounded-lg border pl-10 pr-3 text-sm outline-none transition"
                       />
                     </div>
 
                     <select
                       value={filterShift}
-                      onChange={(event) => {
-                        setFilterShift(event.target.value);
+                      onChange={(e) => {
+                        setFilterShift(e.target.value);
                         setPage(1);
                       }}
-                      className="h-10 min-w-0 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-950 dark:focus:ring-blue-900/40 xl:w-56"
-                      aria-label="Filter penugasan shift"
+                      className="theme-input h-10 rounded-lg border px-3 text-sm outline-none sm:w-52"
                     >
                       <option value="semua">Semua penugasan</option>
                       <option value="belum">Belum memiliki shift</option>
                       {shiftList.map((shift) => (
-                        <option key={shift.id} value={String(shift.id)}>
+                        <option key={shift.id} value={getId(shift.id)}>
                           {shift.nama}
                         </option>
                       ))}
                     </select>
                   </div>
                 </div>
+
+                <div className="flex items-center gap-2 text-xs theme-text-muted">
+                  <Users size={14} />
+                  <span>
+                    {filteredPegawai.length} dari {pegawai.length} pegawai
+                    ditampilkan
+                  </span>
+                </div>
               </div>
 
-              {loading ? (
-                <div className="flex min-h-64 flex-col items-center justify-center gap-3 p-6 text-slate-500 dark:text-slate-400">
-                  <LoaderCircle
-                    size={28}
-                    className="animate-spin text-blue-600"
-                  />
-                  <p className="text-sm">Memuat data penugasan...</p>
-                </div>
-              ) : (
-                <>
-                  <div className="w-full overflow-x-auto">
-                    <table className="w-full min-w-[900px] border-collapse text-left text-sm">
-                      <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-950/60 dark:text-slate-400">
+              {/* TABLE AREA */}
+              <div className="relative">
+                {loading ? (
+                  <div className="flex min-h-64 flex-col items-center justify-center px-4 text-center">
+                    <LoaderCircle
+                      size={28}
+                      className="animate-spin theme-primary-text"
+                    />
+                    <p className="mt-3 text-sm font-medium theme-text">
+                      Memuat data penugasan...
+                    </p>
+                    <p className="mt-1 text-xs theme-text-muted">
+                      Mengambil data dari sistem
+                    </p>
+                  </div>
+                ) : error && pegawai.length === 0 ? (
+                  <div className="flex min-h-64 flex-col items-center justify-center px-4 text-center">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 text-red-600 dark:bg-red-950/50 dark:text-red-400">
+                      <AlertCircle size={23} />
+                    </div>
+                    <p className="mt-4 font-semibold theme-text">
+                      Data penugasan gagal dimuat
+                    </p>
+                    <p className="mt-1 max-w-md text-sm theme-text-muted">
+                      Periksa koneksi internet Anda, lalu coba muat ulang.
+                    </p>
+                    <button
+                      type="button"
+                      onClick={loadData}
+                      className="mt-4 inline-flex h-9 items-center gap-2 rounded-lg theme-primary px-3 text-sm font-medium text-white hover:opacity-90"
+                    >
+                      <RefreshCw size={15} />
+                      Muat Ulang
+                    </button>
+                  </div>
+                ) : visiblePegawai.length === 0 ? (
+                  <div className="flex min-h-64 flex-col items-center justify-center px-4 text-center">
+                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] theme-text-muted">
+                      <Users size={23} />
+                    </div>
+                    <p className="mt-4 font-semibold theme-text">
+                      {pegawai.length === 0
+                        ? "Belum ada data pegawai"
+                        : "Data pegawai tidak ditemukan"}
+                    </p>
+                    <p className="mt-1 max-w-sm text-sm theme-text-muted">
+                      {pegawai.length === 0
+                        ? "Pastikan data pegawai sudah terdaftar di sistem."
+                        : "Coba ubah kata kunci atau filter penugasan."}
+                    </p>
+                    {(search || filterShift !== "semua") && (
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setSearch("");
+                          setFilterShift("semua");
+                          setPage(1);
+                        }}
+                        className="mt-3 text-sm font-semibold theme-primary-text hover:underline"
+                      >
+                        Hapus filter
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full min-w-[950px] text-left text-sm">
+                      <thead className="bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] text-xs uppercase tracking-wide theme-text-muted border-b theme-border">
                         <tr>
-                          <th className="w-16 px-5 py-4 font-semibold">No</th>
-                          <SortableHeader
-                            label="Pegawai"
-                            column="nama"
-                            sortBy={sortBy}
-                            sortOrder={sortOrder}
-                            onSort={handleSort}
-                          />
-                          <SortableHeader
-                            label="Kategori Jabatan"
-                            column="jabatan"
-                            sortBy={sortBy}
-                            sortOrder={sortOrder}
-                            onSort={handleSort}
-                          />
-                          <SortableHeader
-                            label="Shift Kerja"
-                            column="shift"
-                            sortBy={sortBy}
-                            sortOrder={sortOrder}
-                            onSort={handleSort}
-                          />
-                          <SortableHeader
-                            label="Jam Kerja"
-                            column="jamKerja"
-                            sortBy={sortBy}
-                            sortOrder={sortOrder}
-                            onSort={handleSort}
-                          />
+                          <th className="w-12 px-4 py-4 text-center font-semibold">
+                            No
+                          </th>
+                          <th className="px-5 py-4 font-semibold">Pegawai</th>
+                          <th className="px-5 py-4 font-semibold">
+                            Kategori Jabatan
+                          </th>
+                          <th className="px-5 py-4 font-semibold">
+                            Shift Kerja
+                          </th>
+                          <th className="px-5 py-4 font-semibold">Jam Kerja</th>
                           <th className="px-5 py-4 text-right font-semibold">
                             Aksi
                           </th>
                         </tr>
                       </thead>
 
-                      <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                      <tbody className="divide-y divide-[color-mix(in_srgb,var(--color-text)_5%,transparent)]">
                         {visiblePegawai.map((item, index) => {
-                          const shiftId = item?.shiftKerjaId;
-                          const shift =
-                            item?.shiftKerjaMaster ??
-                            shiftList.find(
-                              (entry) =>
-                                String(entry.id) === String(shiftId)
-                            );
-                          const jabatan = getJabatanName(item, jabatanList);
+                          const shift = item._shift;
 
                           return (
                             <tr
                               key={item.id}
-                              className="transition hover:bg-slate-50/80 dark:hover:bg-slate-800/40"
+                              className="hover:bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)] transition"
                             >
-                              <td className="px-5 py-4">
-                                <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                                  {(currentPage - 1) * PAGE_SIZE + index + 1}
-                                </span>
+                              <td className="px-4 py-4 text-center text-sm tabular-nums theme-text-muted">
+                                {(currentPage - 1) * PAGE_SIZE + index + 1}
                               </td>
 
                               <td className="px-5 py-4">
                                 <div className="flex items-center gap-3">
-                                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300">
+                                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                                     <UserRound size={19} />
                                   </div>
                                   <div className="min-w-0">
-                                    <p className="max-w-xs truncate font-semibold text-slate-800 dark:text-slate-100">
+                                    <p className="max-w-xs truncate font-semibold theme-text">
                                       {item.namaLengkap || "Tanpa nama"}
                                     </p>
-                                    <p className="mt-1 max-w-xs truncate text-xs text-slate-500 dark:text-slate-400">
+                                    <p className="mt-1 max-w-xs truncate text-xs theme-text-muted">
                                       {item.email || "-"}
                                     </p>
                                   </div>
                                 </div>
                               </td>
 
-                              <td className="px-5 py-4">
-                                {jabatan ? (
-                                  <span className="text-slate-700 dark:text-slate-300">
-                                    {jabatan}
-                                  </span>
-                                ) : (
-                                  <span className="text-slate-400">
+                              <td className="px-5 py-4 theme-text">
+                                {item._jabatan || (
+                                  <span className="theme-text-muted">
                                     Belum ditentukan
                                   </span>
                                 )}
@@ -669,38 +661,32 @@ export default function PenugasanShiftPage() {
 
                               <td className="px-5 py-4">
                                 {shift ? (
-                                  <div>
-                                    <p className="font-medium text-slate-800 dark:text-slate-200">
-                                      {shift.nama}
+                                  <>
+                                    <p className="font-medium theme-text">
+                                      {shift.nama || "Shift"}
                                     </p>
                                     {shift.kode && (
-                                      <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">
+                                      <p className="mt-1 text-xs theme-text-muted">
                                         {shift.kode}
                                       </p>
                                     )}
-                                  </div>
+                                  </>
                                 ) : (
-                                  <span className="inline-flex whitespace-nowrap rounded-full bg-amber-50 px-2.5 py-1 text-xs font-medium text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">
+                                  <span className="inline-flex items-center gap-1.5 whitespace-nowrap rounded-full bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-700 dark:bg-amber-950/50 dark:text-amber-300">
                                     Belum ditugaskan
                                   </span>
                                 )}
                               </td>
 
-                              <td className="px-5 py-4">
+                              <td className="whitespace-nowrap px-5 py-4">
                                 {shift ? (
-                                  <div className="flex items-center gap-2 whitespace-nowrap text-slate-600 dark:text-slate-300">
-                                    <Clock3
-                                      size={15}
-                                      className="shrink-0 text-slate-400"
-                                    />
-                                    <span>
-                                      {formatJam(shift.jamMasuk)}
-                                      {" – "}
-                                      {formatJam(shift.jamKeluar)}
-                                    </span>
-                                  </div>
+                                  <span className="inline-flex items-center gap-2 theme-text">
+                                    <Clock3 size={15} />
+                                    {formatJam(shift.jamMasuk)} –{" "}
+                                    {formatJam(shift.jamKeluar)}
+                                  </span>
                                 ) : (
-                                  <span className="text-slate-400">—</span>
+                                  <span className="theme-text-muted">—</span>
                                 )}
                               </td>
 
@@ -708,7 +694,7 @@ export default function PenugasanShiftPage() {
                                 <button
                                   type="button"
                                   onClick={() => openAssignment(item)}
-                                  className="inline-flex h-9 items-center justify-center gap-2 whitespace-nowrap rounded-lg bg-blue-600 px-3 text-sm font-semibold text-white transition hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 dark:focus:ring-offset-slate-900"
+                                  className="inline-flex h-9 items-center gap-2 rounded-lg theme-primary px-3 text-sm font-semibold text-white hover:opacity-90 transition"
                                 >
                                   <BriefcaseBusiness size={15} />
                                   Atur shift
@@ -717,87 +703,62 @@ export default function PenugasanShiftPage() {
                             </tr>
                           );
                         })}
-
-                        {visiblePegawai.length === 0 && (
-                          <tr>
-                            <td
-                              colSpan={6}
-                              className="px-5 py-16 text-center"
-                            >
-                              <Users
-                                size={30}
-                                className="mx-auto mb-3 text-slate-300 dark:text-slate-600"
-                              />
-                              <p className="font-medium text-slate-800 dark:text-slate-200">
-                                Data pegawai tidak ditemukan
-                              </p>
-                              <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                                Coba ubah kata kunci atau filter penugasan.
-                              </p>
-                            </td>
-                          </tr>
-                        )}
                       </tbody>
                     </table>
                   </div>
+                )}
+              </div>
 
-                  <div className="flex flex-col gap-3 border-t border-slate-200 px-4 py-4 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-                    <p className="text-sm text-slate-500 dark:text-slate-400">
-                      Menampilkan{" "}
-                      <span className="font-semibold text-slate-700 dark:text-slate-200">
-                        {sortedPegawai.length === 0
-                          ? 0
-                          : (currentPage - 1) * PAGE_SIZE + 1}
-                        {"–"}
-                        {Math.min(
-                          currentPage * PAGE_SIZE,
-                          sortedPegawai.length
-                        )}
-                      </span>{" "}
-                      dari{" "}
-                      <span className="font-semibold text-slate-700 dark:text-slate-200">
-                        {sortedPegawai.length}
-                      </span>{" "}
-                      pegawai
-                    </p>
+              {/* PAGINATION */}
+              {!loading && filteredPegawai.length > 0 && (
+                <div className="flex flex-col gap-3 border-t theme-border px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
+                  <p className="text-sm theme-text-muted">
+                    Menampilkan{" "}
+                    {filteredPegawai.length === 0
+                      ? 0
+                      : (currentPage - 1) * PAGE_SIZE + 1}
+                    {"–"}
+                    {Math.min(
+                      currentPage * PAGE_SIZE,
+                      filteredPegawai.length
+                    )}{" "}
+                    dari {filteredPegawai.length} pegawai
+                  </p>
 
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        disabled={currentPage <= 1}
-                        onClick={() =>
-                          setPage((value) => Math.max(1, value - 1))
-                        }
-                        className="inline-flex h-9 items-center gap-1 rounded-lg border border-slate-200 px-3 text-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:hover:bg-slate-800"
-                      >
-                        <ChevronLeft size={16} />
-                        Sebelumnya
-                      </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      disabled={currentPage <= 1}
+                      onClick={() => setPage((v) => Math.max(1, v - 1))}
+                      className="inline-flex h-9 items-center gap-1 rounded-lg border theme-border px-3 text-sm font-medium theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] disabled:cursor-not-allowed disabled:opacity-40 transition"
+                    >
+                      <ChevronLeft size={16} />
+                      Sebelumnya
+                    </button>
 
-                      <span className="whitespace-nowrap px-2 text-sm text-slate-600 dark:text-slate-300">
-                        {currentPage} / {totalPages}
-                      </span>
+                    <span className="min-w-20 text-center text-sm theme-text">
+                      {currentPage} / {totalPages}
+                    </span>
 
-                      <button
-                        type="button"
-                        disabled={currentPage >= totalPages}
-                        onClick={() =>
-                          setPage((value) =>
-                            Math.min(totalPages, value + 1)
-                          )
-                        }
-                        className="inline-flex h-9 items-center gap-1 rounded-lg border border-slate-200 px-3 text-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:hover:bg-slate-800"
-                      >
-                        Berikutnya
-                        <ChevronRight size={16} />
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      disabled={currentPage >= totalPages}
+                      onClick={() =>
+                        setPage((v) => Math.min(totalPages, v + 1))
+                      }
+                      className="inline-flex h-9 items-center gap-1 rounded-lg border theme-border px-3 text-sm font-medium theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] disabled:cursor-not-allowed disabled:opacity-40 transition"
+                    >
+                      Berikutnya
+                      <ChevronRight size={16} />
+                    </button>
                   </div>
-                </>
+                </div>
               )}
-            </section>
 
-            <div className="h-2 shrink-0" />
+              <div className="border-t theme-border px-5 py-3 text-xs theme-text-muted">
+                Data pegawai dan shift diambil dari sistem.
+              </div>
+            </section>
           </div>
         </main>
       </div>

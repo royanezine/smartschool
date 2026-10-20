@@ -469,6 +469,7 @@ export async function checkOutShift(
    GET /api/absensi/shift-saya
 ========================================================= */
 
+
 export async function getRiwayatShiftSaya(
   page = 1,
   limit = 20,
@@ -484,21 +485,114 @@ export async function getRiwayatShiftSaya(
   );
 
   const result = unwrapObject(response);
-  const data = unwrapArray<Absensi>(response);
-  const total = Number(result.total ?? data.length);
-  const responseLimit = Number(result.limit ?? limit);
+
+  // Mendukung response dengan atau tanpa pembungkus data.
+  const payload = unwrapObject(result.data);
+
+  const candidates = [
+    result.data,
+    payload.data,
+    payload.items,
+    result.items,
+  ];
+
+  const records = candidates.find(Array.isArray);
+  const data = (records ?? []) as Absensi[];
+
+  const pagination = Object.keys(payload).length > 0
+    ? payload
+    : result;
+
+  const total = Number(pagination.total ?? data.length);
+  const responseLimit = Number(pagination.limit ?? limit);
+  const currentPage = Number(pagination.page ?? page);
 
   return {
     data,
-    page: Number(result.page ?? page),
+    page: currentPage,
     limit: responseLimit,
     total,
     totalPages: Number(
-      result.totalPages ??
+      pagination.totalPages ??
         Math.ceil(total / Math.max(responseLimit, 1)),
     ),
   };
 }
+
+
+
+/* =========================================================
+   MONITORING KEHADIRAN GURU
+   GET /api/absensi/monitoring-guru?tanggal=YYYY-MM-DD
+========================================================= */
+
+export interface MonitoringKehadiranGuru {
+  id: string;
+  namaLengkap: string;
+  nip?: string | null;
+  email?: string | null;
+
+  shiftKerja?: AbsensiShiftKerja | null;
+
+  absensi?: Absensi | null;
+  statusMonitoring: string;
+}
+
+export interface MonitoringGuruResponse {
+  tanggal: string;
+  totalGuru: number;
+  sudahAbsen: number;
+  belumAbsen: number;
+  data: MonitoringKehadiranGuru[];
+}
+
+export async function getMonitoringKehadiranGuru(
+  tanggal: string,
+): Promise<MonitoringGuruResponse> {
+  if (!tanggal) {
+    throw new Error("Tanggal monitoring wajib diisi.");
+  }
+
+  const response = await apiFetch(
+    `/api/absensi/monitoring-guru?tanggal=${encodeURIComponent(tanggal)}`,
+    { method: "GET" },
+  );
+
+  const result = unwrapObject(response);
+  const payload = unwrapObject(result.data);
+
+  // Menyesuaikan struktur response successResponse.
+  const data = Array.isArray(payload.data)
+    ? payload.data
+    : Array.isArray(result.data)
+      ? result.data
+      : [];
+
+  return {
+    tanggal: String(payload.tanggal ?? tanggal),
+    totalGuru: Number(payload.totalGuru ?? data.length),
+    sudahAbsen: Number(payload.sudahAbsen ?? 0),
+    belumAbsen: Number(payload.belumAbsen ?? 0),
+    data: data as MonitoringKehadiranGuru[],
+  };
+}
+
+
+export async function getMetodeAbsensiAktif(): Promise<string[]> {
+  const response = await apiFetch("/api/absensi/metode-aktif", {
+    method: "GET",
+  });
+
+  const result = unwrapObject(response);
+  const payload = unwrapObject(result.data);
+
+  const metodeAktif = payload.metodeAktif;
+
+  return Array.isArray(metodeAktif)
+    ? metodeAktif.map((metode) => String(metode).toLowerCase())
+    : [];
+}
+
 
 /* =========================================================
    DEFAULT EXPORT
@@ -517,6 +611,8 @@ const absensiService = {
   checkInShift,
   checkOutShift,
   getRiwayatShiftSaya,
+   getMonitoringKehadiranGuru,
+   getMetodeAbsensiAktif,
 };
 
 export default absensiService;

@@ -21,6 +21,10 @@ import {
   Sparkles,
   UserRound,
   X,
+  Layers3,
+  BookCopy,
+  AlertTriangle,
+  BookHeart,
 } from "lucide-react";
 
 import {
@@ -41,6 +45,9 @@ const themeCardShadow =
 
 const themeCardHoverShadow =
   "hover:shadow-[0_18px_45px_color-mix(in_srgb,var(--color-primary)_12%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
 
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
@@ -63,11 +70,26 @@ const themeDivider =
 const themeSuccessSoft =
   "bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)]";
 
+const themeSuccessText =
+  "text-[var(--color-success)]";
+
 const themeWarningSoft =
   "bg-[color-mix(in_srgb,var(--color-warning)_12%,transparent)]";
 
+const themeWarningText =
+  "text-[var(--color-warning)]";
+
+const themeInfoSoft =
+  "bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)]";
+
+const themeInfoText =
+  "text-[var(--color-info)]";
+
 const themeDangerSoft =
   "bg-red-500/10";
+
+const themeDangerText =
+  "text-red-500";
 
 const themeFocus =
   "focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)]";
@@ -612,73 +634,6 @@ function LoanStatusBadge({ loan }) {
 }
 
 /* =========================================================
-   STAT CARD
-========================================================= */
-
-function StatCard({
-  label,
-  value,
-  description,
-  icon: Icon,
-  tone = "blue",
-}) {
-  const toneMap = {
-    blue: {
-      surface: themePrimarySoft,
-      text: "text-[var(--color-primary)]",
-    },
-    green: {
-      surface: themeSuccessSoft,
-      text: "text-[var(--color-success)]",
-    },
-    amber: {
-      surface: themeWarningSoft,
-      text: "text-[var(--color-warning)]",
-    },
-    red: {
-      surface: themeDangerSoft,
-      text: "text-red-500",
-    },
-  };
-
-  const theme = toneMap[tone] || toneMap.blue;
-
-  return (
-    <div
-      className={`theme-card group relative overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow} ${themeCardHoverShadow} p-5 transition-all duration-300 hover:-translate-y-0.5`}
-    >
-      <div
-        className={`absolute -right-8 -top-8 h-24 w-24 rounded-full ${theme.surface} transition-transform duration-500 group-hover:scale-150`}
-      />
-
-      <div className="relative flex items-start justify-between gap-4">
-        <div>
-          <p className="theme-text-secondary text-sm font-medium">
-            {label}
-          </p>
-
-          <p
-            className={`mt-2 text-3xl font-bold tracking-tight ${theme.text}`}
-          >
-            {value}
-          </p>
-
-          <p className="theme-text-muted mt-1.5 text-xs">
-            {description}
-          </p>
-        </div>
-
-        <div
-          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${theme.surface} ${theme.text}`}
-        >
-          <Icon size={20} />
-        </div>
-      </div>
-    </div>
-  );
-}
-
-/* =========================================================
    BOOK DETAIL MODAL
 ========================================================= */
 
@@ -1100,69 +1055,70 @@ export default function PerpustakaanSiswaPage() {
     [loans],
   );
 
+  const totalCategories = useMemo(
+    () => new Set(books.map((b) => b.kategori)).size,
+    [books],
+  );
+
   const recentBooks = useMemo(
-    () => filteredBooks.slice(0, 6),
+    () => filteredBooks.slice(0, 12),
     [filteredBooks],
   );
 
- 
-const handleBorrow = async (book) => {
-  if (!book?.id || !userId) {
-    setError("Data siswa atau buku tidak lengkap.");
-    return;
-  }
+  const handleBorrow = async (book) => {
+    if (!book?.id || !userId) {
+      setError("Data siswa atau buku tidak lengkap.");
+      return;
+    }
 
-  if (
-    book.tipe === "EBOOK" ||
-    book.status !== "aktif" ||
-    Number(book.jumlahTersedia || 0) <= 0
-  ) {
-    setError("Buku tidak tersedia untuk dipinjam.");
-    return;
-  }
+    if (
+      book.tipe === "EBOOK" ||
+      book.status !== "aktif" ||
+      Number(book.jumlahTersedia || 0) <= 0
+    ) {
+      setError("Buku tidak tersedia untuk dipinjam.");
+      return;
+    }
 
-  setSavingId(String(book.id));
-  setError("");
+    setSavingId(String(book.id));
+    setError("");
 
-  try {
-    // Contoh lama peminjaman 7 hari dari hari ini.
-    // Format tanggal harus YYYY-MM-DD.
-    const tanggalJatuhTempo = new Date();
-    tanggalJatuhTempo.setDate(
-      tanggalJatuhTempo.getDate() + 7
-    );
+    try {
+      const tanggalJatuhTempo = new Date();
+      tanggalJatuhTempo.setDate(
+        tanggalJatuhTempo.getDate() + 7
+      );
 
-    const tahun = tanggalJatuhTempo.getFullYear();
-    const bulan = String(
-      tanggalJatuhTempo.getMonth() + 1
-    ).padStart(2, "0");
-    const tanggal = String(
-      tanggalJatuhTempo.getDate()
-    ).padStart(2, "0");
+      const tahun = tanggalJatuhTempo.getFullYear();
+      const bulan = String(
+        tanggalJatuhTempo.getMonth() + 1
+      ).padStart(2, "0");
+      const tanggal = String(
+        tanggalJatuhTempo.getDate()
+      ).padStart(2, "0");
 
-    const tanggalJatuhTempoString =
-      `${tahun}-${bulan}-${tanggal}`;
+      const tanggalJatuhTempoString =
+        `${tahun}-${bulan}-${tanggal}`;
 
-    await pinjamBuku({
-      bukuId: String(book.id),
-      tanggalJatuhTempo: tanggalJatuhTempoString,
-    });
+      await pinjamBuku({
+        bukuId: String(book.id),
+        tanggalJatuhTempo: tanggalJatuhTempoString,
+      });
 
-    setSelectedBook(null);
+      setSelectedBook(null);
 
-    await loadData(true);
-  } catch (err) {
-    setError(
-      getErrorMessage(
-        err,
-        "Gagal membuat transaksi peminjaman."
-      )
-    );
-  } finally {
-    setSavingId("");
-  }
-};
-
+      await loadData(true);
+    } catch (err) {
+      setError(
+        getErrorMessage(
+          err,
+          "Gagal membuat transaksi peminjaman."
+        )
+      );
+    } finally {
+      setSavingId("");
+    }
+  };
 
   const handleReturn = async (loan) => {
     if (!loan?.id) {
@@ -1197,9 +1153,10 @@ const handleBorrow = async (book) => {
   };
 
   return (
-    <div className="theme-page min-h-full w-full">
+    <main className="min-w-0 flex-1 overflow-y-auto theme-page theme-text">
+      {/* Konten w-full: melebar saat zoom out, tidak dibatasi max-width */}
       <div
-        className={`mx-auto w-full max-w-[1600px] space-y-6 p-4 transition-all duration-700 sm:p-6 lg:p-8 ${
+        className={`w-full space-y-6 px-4 py-5 transition-all duration-700 sm:px-6 sm:py-6 lg:px-8 ${
           mounted
             ? "translate-y-0 opacity-100"
             : "translate-y-4 opacity-0"
@@ -1373,42 +1330,94 @@ const handleBorrow = async (book) => {
         )}
 
         {/* =====================================================
-            STATS
+            STAT CARDS — grid responsif dengan 2xl:grid-cols-6
         ====================================================== */}
 
-        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
-          <StatCard
-            label="Total Koleksi"
-            value={books.length}
-            description="Buku di katalog sekolah"
-            icon={Library}
-            tone="blue"
-          />
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6">
+          <div className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl px-4 py-4`}>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs theme-text-muted">Total koleksi</p>
+                <p className="mt-1 text-xl font-bold theme-text">
+                  {loading ? "—" : books.length}
+                </p>
+              </div>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themePrimarySoft} text-[var(--color-primary)]`}>
+                <Layers3 size={17} />
+              </div>
+            </div>
+          </div>
 
-          <StatCard
-            label="Buku Tersedia"
-            value={availablePhysicalBooks}
-            description={`${availablePhysicalCopies} eksemplar fisik siap dipinjam`}
-            icon={BookMarked}
-            tone="green"
-          />
+          <div className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl px-4 py-4`}>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs theme-text-muted">Buku tersedia</p>
+                <p className="mt-1 text-xl font-bold theme-text">
+                  {loading ? "—" : availablePhysicalBooks}
+                </p>
+              </div>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeSuccessSoft} ${themeSuccessText}`}>
+                <BookCopy size={17} />
+              </div>
+            </div>
+          </div>
 
-          <StatCard
-            label="Peminjaman Saya"
-            value={activeLoans.length}
-            description={`${totalBorrowedCount} transaksi tercatat`}
-            icon={BookOpenCheck}
-            tone="blue"
-          />
+          <div className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl px-4 py-4`}>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs theme-text-muted">E-Book</p>
+                <p className="mt-1 text-xl font-bold theme-text">
+                  {loading ? "—" : digitalBooks}
+                </p>
+              </div>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeInfoSoft} ${themeInfoText}`}>
+                <MonitorPlay size={17} />
+              </div>
+            </div>
+          </div>
 
-          <StatCard
-            label="Perlu Perhatian"
-            value={overdueLoans.length}
-            description="Pinjaman yang melewati jatuh tempo"
-            icon={CalendarClock}
-            tone={overdueLoans.length > 0 ? "red" : "amber"}
-          />
-        </section>
+          <div className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl px-4 py-4`}>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs theme-text-muted">Dipinjam saya</p>
+                <p className="mt-1 text-xl font-bold theme-text">
+                  {loading ? "—" : activeLoans.length}
+                </p>
+              </div>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themePrimarySoft} text-[var(--color-primary)]`}>
+                <BookOpenCheck size={17} />
+              </div>
+            </div>
+          </div>
+
+          <div className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl px-4 py-4`}>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs theme-text-muted">Jatuh tempo</p>
+                <p className="mt-1 text-xl font-bold theme-text">
+                  {loading ? "—" : overdueLoans.length}
+                </p>
+              </div>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${overdueLoans.length > 0 ? `${themeDangerSoft} ${themeDangerText}` : `${themeWarningSoft} ${themeWarningText}`}`}>
+                <AlertTriangle size={17} />
+              </div>
+            </div>
+          </div>
+
+          <div className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl px-4 py-4`}>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs theme-text-muted">Kategori</p>
+                <p className="mt-1 text-xl font-bold theme-text">
+                  {loading ? "—" : totalCategories}
+                </p>
+              </div>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeInfoSoft} ${themeInfoText}`}>
+                <BookHeart size={17} />
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* =====================================================
             CATALOG
@@ -1567,7 +1576,8 @@ const handleBorrow = async (book) => {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              /* Grid buku diperluas ke 2xl:grid-cols-6 */
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
                 {recentBooks.map(
                   (book) => {
                     const isEbook =
@@ -1739,10 +1749,10 @@ const handleBorrow = async (book) => {
         </section>
 
         {/* =====================================================
-            POPULAR + CATEGORY
+            POPULAR + CATEGORY — diperluas ke 2xl
         ====================================================== */}
 
-        <section className="grid gap-5 xl:grid-cols-[1.25fr_.75fr]">
+        <section className="grid gap-5 xl:grid-cols-[1.25fr_.75fr] 2xl:grid-cols-[1.4fr_.6fr]">
           <div
             className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
           >
@@ -2027,7 +2037,8 @@ const handleBorrow = async (book) => {
             </div>
           </div>
 
-          <div className="p-5 sm:p-6">
+          {/* overflow-x-auto agar daftar peminjaman tidak merusak layout di layar kecil */}
+          <div className="overflow-x-auto p-5 sm:p-6">
             {loading ? (
               <div className="flex min-h-[180px] items-center justify-center">
                 <Loader2
@@ -2063,7 +2074,7 @@ const handleBorrow = async (book) => {
                 </Link>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-3 min-w-[560px]">
                 {activeLoans.map(
                   (loan) => {
                     const overdue =
@@ -2223,10 +2234,10 @@ const handleBorrow = async (book) => {
         </section>
 
         {/* =====================================================
-            RECENT TRANSACTIONS
+            RECENT TRANSACTIONS — diperluas ke 2xl
         ====================================================== */}
 
-        <section className="grid gap-5 xl:grid-cols-[1.15fr_.85fr]">
+        <section className="grid gap-5 xl:grid-cols-[1.15fr_.85fr] 2xl:grid-cols-[1.3fr_.7fr]">
           <div
             className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
           >
@@ -2437,6 +2448,6 @@ const handleBorrow = async (book) => {
           handleBorrow
         }
       />
-    </div>
+    </main>
   );
 }

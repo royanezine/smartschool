@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -19,10 +20,6 @@ import {
 } from "lucide-react";
 
 import { createGedung } from "@/services/infrastruktur.service";
-
-// ============================================================
-// GLOBAL THEME HELPERS
-// ============================================================
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
@@ -91,7 +88,7 @@ export default function TambahGedungPage() {
   const [formData, setFormData] = useState({
     nama: "",
     kode: "",
-    fotoUrl: "",
+    fotoGedung: "",
   });
 
   const handleChange = (field, value) => {
@@ -100,16 +97,12 @@ export default function TambahGedungPage() {
       [field]: value,
     }));
 
-    if (errors[field]) {
-      setErrors((prev) => ({
-        ...prev,
-        [field]: "",
-      }));
-    }
+    setErrors((prev) => ({
+      ...prev,
+      [field]: "",
+    }));
 
-    if (submitError) {
-      setSubmitError("");
-    }
+    setSubmitError("");
   };
 
   const validate = () => {
@@ -117,25 +110,33 @@ export default function TambahGedungPage() {
 
     const nama = formData.nama.trim();
     const kode = formData.kode.trim();
-    const fotoUrl = formData.fotoUrl.trim();
+    const fotoGedung = formData.fotoGedung.trim();
 
     if (!nama) {
-      newErrors.nama = "Nama gedung wajib diisi";
+      newErrors.nama = "Nama gedung wajib diisi.";
     } else if (nama.length > 100) {
-      newErrors.nama = "Nama gedung maksimal 100 karakter";
+      newErrors.nama = "Nama gedung maksimal 100 karakter.";
     }
 
-    if (!kode) {
-      newErrors.kode = "Kode gedung wajib diisi";
-    } else if (kode.length > 50) {
-      newErrors.kode = "Kode gedung maksimal 50 karakter";
+    if (kode.length > 20) {
+      newErrors.kode = "Kode gedung maksimal 20 karakter.";
     }
 
-    if (fotoUrl) {
-      try {
-        new URL(fotoUrl);
-      } catch {
-        newErrors.fotoUrl = "URL foto tidak valid";
+    if (fotoGedung) {
+      if (fotoGedung.length > 255) {
+        newErrors.fotoGedung =
+          "URL foto maksimal 255 karakter.";
+      } else {
+        try {
+          const url = new URL(fotoGedung);
+
+          if (!["http:", "https:"].includes(url.protocol)) {
+            newErrors.fotoGedung =
+              "URL foto harus menggunakan HTTP atau HTTPS.";
+          }
+        } catch {
+          newErrors.fotoGedung = "URL foto tidak valid.";
+        }
       }
     }
 
@@ -149,19 +150,20 @@ export default function TambahGedungPage() {
 
     if (isSaving) return;
 
-    if (!validate()) {
-      return;
-    }
+    setSubmitError("");
+    setSaved(false);
+
+    if (!validate()) return;
 
     setIsSaving(true);
-    setSaved(false);
-    setSubmitError("");
 
     try {
       const payload = {
         nama: formData.nama.trim(),
-        kode: formData.kode.trim(),
-        fotoUrl: formData.fotoUrl.trim() || null,
+        kode: formData.kode.trim() || null,
+        ...(formData.fotoGedung.trim()
+          ? { fotoGedung: formData.fotoGedung.trim() }
+          : {}),
       };
 
       console.log("Payload create gedung:", payload);
@@ -182,8 +184,6 @@ export default function TambahGedungPage() {
         error?.message ||
           "Gagal menambahkan gedung. Silakan coba lagi."
       );
-
-      setSaved(false);
     } finally {
       setIsSaving(false);
     }
@@ -217,23 +217,19 @@ export default function TambahGedungPage() {
 
         <main className="flex-1 p-3 sm:p-5 lg:p-7 xl:p-8">
           <div className="mx-auto w-full max-w-[1200px] space-y-4 sm:space-y-5 lg:space-y-6">
-
-            {/* BACK */}
             <button
               type="button"
               onClick={handleBack}
               disabled={isSaving}
-              className="group inline-flex items-center gap-2 text-sm font-medium theme-text-secondary transition-colors hover:text-[var(--color-primary)] disabled:cursor-not-allowed disabled:opacity-60"
+              className="group inline-flex items-center gap-2 text-sm font-medium theme-text-secondary transition-colors hover:text-[var(--color-primary)] disabled:opacity-60"
             >
               <ArrowLeft
                 size={18}
                 className="transition-transform group-hover:-translate-x-0.5"
               />
-
               Kembali ke Daftar Gedung
             </button>
 
-            {/* HEADER */}
             <section
               className={`relative overflow-hidden rounded-2xl border theme-border theme-card ${themeCardShadow}`}
             >
@@ -243,15 +239,10 @@ export default function TambahGedungPage() {
 
               <div className="relative flex flex-col gap-4 p-5 sm:p-6 lg:flex-row lg:items-center lg:justify-between lg:px-8 lg:py-6">
                 <div className="flex min-w-0 items-start gap-3 sm:gap-4">
-
                   <div
                     className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl text-[var(--color-card)] ${themePrimaryGradient} ${themePrimaryShadow} sm:h-14 sm:w-14`}
                   >
-                    <Plus
-                      size={22}
-                      strokeWidth={1.9}
-                      className="sm:h-[25px] sm:w-[25px]"
-                    />
+                    <Plus size={24} strokeWidth={1.9} />
                   </div>
 
                   <div className="min-w-0">
@@ -261,23 +252,18 @@ export default function TambahGedungPage() {
                       </h1>
 
                       <span
-                        className={`inline-flex items-center gap-1.5 rounded-full border ${themePrimarySoftBorder} ${themePrimarySoft} px-2.5 py-0.5 text-[10px] font-semibold text-[var(--color-primary)] sm:px-3 sm:py-1 sm:text-[11px]`}
+                        className={`inline-flex items-center gap-1.5 rounded-full border ${themePrimarySoftBorder} ${themePrimarySoft} px-2.5 py-1 text-[10px] font-semibold text-[var(--color-primary)] sm:text-[11px]`}
                       >
-                        <span
-                          className="h-1.5 w-1.5 rounded-full bg-[var(--color-primary)]"
-                        />
-
+                        <span className="h-1.5 w-1.5 rounded-full bg-[var(--color-primary)]" />
                         Sarana & Prasarana
                       </span>
                     </div>
 
-                    <div className="mt-1 flex items-center gap-1.5 sm:gap-2">
+                    <div className="mt-1 flex items-center gap-2">
                       <Building
-                        size={13}
-                        className="shrink-0 text-[var(--color-primary)] sm:h-[14px] sm:w-[14px]"
-                        strokeWidth={2}
+                        size={14}
+                        className="shrink-0 text-[var(--color-primary)]"
                       />
-
                       <p className="theme-text-muted text-xs leading-5 sm:text-sm">
                         Lengkapi informasi gedung untuk
                         ditambahkan ke sistem.
@@ -286,52 +272,35 @@ export default function TambahGedungPage() {
                   </div>
                 </div>
 
-                <div className="flex w-full flex-wrap gap-2 sm:flex-row lg:w-auto">
-
-                  {/* BATAL */}
+                <div className="flex w-full flex-wrap gap-2 lg:w-auto">
                   <button
                     type="button"
                     onClick={handleBack}
                     disabled={isSaving}
-                    className={`inline-flex h-10 items-center justify-center gap-2 rounded-xl border ${themeNeutralBorder} theme-card px-4 text-sm font-medium theme-text-secondary ${themeButtonShadow} transition-all ${themeNeutralHover} hover:border-[color-mix(in_srgb,var(--color-text)_18%,transparent)] hover:text-[var(--color-text)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 sm:h-11 sm:px-5`}
+                    className={`inline-flex h-10 items-center justify-center gap-2 rounded-xl border ${themeNeutralBorder} theme-card px-4 text-sm font-medium theme-text-secondary ${themeButtonShadow} transition-all ${themeNeutralHover} disabled:opacity-60 sm:h-11 sm:px-5`}
                   >
-                    <X
-                      size={16}
-                      className="sm:h-[17px] sm:w-[17px]"
-                    />
-
+                    <X size={17} />
                     Batal
                   </button>
 
-                  {/* SIMPAN */}
                   <button
                     type="button"
                     onClick={handleSubmit}
                     disabled={isSaving}
                     className={`inline-flex h-10 items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-4 text-sm font-semibold text-[var(--color-card)] ${themeButtonShadow} transition-all ${themeButtonHoverShadow} active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60 sm:h-11 sm:px-5`}
                   >
-                    <Save
-                      size={16}
-                      strokeWidth={2.3}
-                      className="sm:h-[17px] sm:w-[17px]"
-                    />
-
+                    <Save size={17} />
                     {isSaving ? "Menyimpan..." : "Simpan Gedung"}
                   </button>
                 </div>
               </div>
             </section>
 
-            {/* SUCCESS */}
             {saved && (
               <div
                 className={`flex items-center gap-3 rounded-2xl border ${themeSuccessBorder} ${themeSuccessSurface} px-4 py-3 text-sm theme-success`}
               >
-                <CheckCircle
-                  size={18}
-                  className="shrink-0 theme-success"
-                />
-
+                <CheckCircle size={18} className="shrink-0" />
                 <span>
                   Gedung berhasil ditambahkan! Mengalihkan ke
                   daftar gedung...
@@ -339,21 +308,16 @@ export default function TambahGedungPage() {
               </div>
             )}
 
-            {/* ERROR */}
             {submitError && (
               <div
                 className={`flex items-start gap-3 rounded-2xl border ${themeDangerBorder} ${themeDangerSurface} px-4 py-3 text-sm theme-danger`}
               >
-                <AlertCircle
-                  size={18}
-                  className="mt-0.5 shrink-0 theme-danger"
-                />
+                <AlertCircle size={18} className="mt-0.5 shrink-0" />
 
                 <div className="min-w-0">
                   <p className="font-semibold">
                     Gagal menambahkan gedung
                   </p>
-
                   <p className="mt-0.5 break-words">
                     {submitError}
                   </p>
@@ -361,7 +325,6 @@ export default function TambahGedungPage() {
               </div>
             )}
 
-            {/* FORM CARD */}
             <section
               className={`rounded-2xl border theme-border theme-card p-5 ${themeCardShadow} sm:p-6 lg:p-7`}
             >
@@ -378,43 +341,31 @@ export default function TambahGedungPage() {
                   <p className="theme-text text-sm font-semibold">
                     Informasi Gedung
                   </p>
-
                   <p className="theme-text-muted text-xs">
-                    Masukkan data gedung yang tersedia pada
-                    sistem
+                    Masukkan data gedung yang akan ditambahkan.
                   </p>
                 </div>
               </div>
 
-              <form
-                onSubmit={handleSubmit}
-                className="space-y-5"
-              >
+              <form onSubmit={handleSubmit} className="space-y-5">
                 <div className="grid grid-cols-1 gap-5 md:grid-cols-2">
-
-                  {/* NAMA */}
+                  {/* NAMA GEDUNG */}
                   <div>
                     <label className="theme-text-secondary mb-1.5 block text-xs font-medium">
-                      Nama Gedung{" "}
-                      <span className="theme-danger">*</span>
+                      Nama Gedung <span className="theme-danger">*</span>
                     </label>
 
                     <input
                       type="text"
                       value={formData.nama}
                       onChange={(e) =>
-                        handleChange(
-                          "nama",
-                          e.target.value
-                        )
+                        handleChange("nama", e.target.value)
                       }
                       placeholder="Contoh: Gedung Utama"
                       maxLength={100}
                       disabled={isSaving}
-                      className={`theme-input w-full rounded-xl border px-4 py-2.5 text-sm outline-none transition-all placeholder:theme-text-placeholder ${themeFocus} disabled:cursor-not-allowed disabled:opacity-60 ${
-                        errors.nama
-                          ? "border-[color-mix(in_srgb,var(--color-text)_30%,transparent)]"
-                          : "theme-border"
+                      className={`theme-input w-full rounded-xl border px-4 py-2.5 text-sm outline-none transition-all placeholder:theme-text-placeholder ${themeFocus} disabled:opacity-60 ${
+                        errors.nama ? "border-red-400" : "theme-border"
                       }`}
                     />
 
@@ -434,29 +385,26 @@ export default function TambahGedungPage() {
                     </div>
                   </div>
 
-                  {/* KODE */}
+                  {/* KODE GEDUNG */}
                   <div>
                     <label className="theme-text-secondary mb-1.5 block text-xs font-medium">
                       Kode Gedung{" "}
-                      <span className="theme-danger">*</span>
+                      <span className="theme-text-muted text-xs font-normal">
+                        (opsional)
+                      </span>
                     </label>
 
                     <input
                       type="text"
                       value={formData.kode}
                       onChange={(e) =>
-                        handleChange(
-                          "kode",
-                          e.target.value
-                        )
+                        handleChange("kode", e.target.value)
                       }
                       placeholder="Contoh: A, B, C"
-                      maxLength={50}
+                      maxLength={20}
                       disabled={isSaving}
-                      className={`theme-input w-full rounded-xl border px-4 py-2.5 text-sm outline-none transition-all placeholder:theme-text-placeholder ${themeFocus} disabled:cursor-not-allowed disabled:opacity-60 ${
-                        errors.kode
-                          ? "border-[color-mix(in_srgb,var(--color-text)_30%,transparent)]"
-                          : "theme-border"
+                      className={`theme-input w-full rounded-xl border px-4 py-2.5 text-sm outline-none transition-all placeholder:theme-text-placeholder ${themeFocus} disabled:opacity-60 ${
+                        errors.kode ? "border-red-400" : "theme-border"
                       }`}
                     />
 
@@ -471,17 +419,16 @@ export default function TambahGedungPage() {
                       )}
 
                       <span className="theme-text-muted text-[10px]">
-                        {formData.kode.length}/50
+                        {formData.kode.length}/20
                       </span>
                     </div>
                   </div>
 
-                  {/* FOTO */}
+                  {/* FOTO GEDUNG */}
                   <div className="md:col-span-2">
                     <label className="theme-text-secondary mb-1.5 block text-xs font-medium">
-                      URL Foto Gedung
-
-                      <span className="theme-text-muted ml-1 text-xs font-normal">
+                      URL Foto Gedung{" "}
+                      <span className="theme-text-muted text-xs font-normal">
                         (opsional)
                       </span>
                     </label>
@@ -494,38 +441,35 @@ export default function TambahGedungPage() {
 
                       <input
                         type="url"
-                        value={formData.fotoUrl}
+                        value={formData.fotoGedung}
                         onChange={(e) =>
-                          handleChange(
-                            "fotoUrl",
-                            e.target.value
-                          )
+                          handleChange("fotoGedung", e.target.value)
                         }
                         placeholder="https://contoh.com/foto-gedung.jpg"
+                        maxLength={255}
                         disabled={isSaving}
-                        className={`theme-input w-full rounded-xl border py-2.5 pl-11 pr-4 text-sm outline-none transition-all placeholder:theme-text-placeholder ${themeFocus} disabled:cursor-not-allowed disabled:opacity-60 ${
-                          errors.fotoUrl
-                            ? "border-[color-mix(in_srgb,var(--color-text)_30%,transparent)]"
+                        className={`theme-input w-full rounded-xl border py-2.5 pl-11 pr-4 text-sm outline-none transition-all placeholder:theme-text-placeholder ${themeFocus} disabled:opacity-60 ${
+                          errors.fotoGedung
+                            ? "border-red-400"
                             : "theme-border"
                         }`}
                       />
                     </div>
 
-                    {errors.fotoUrl && (
+                    {errors.fotoGedung && (
                       <p className="theme-danger mt-1.5 flex items-center gap-1 text-xs">
                         <AlertCircle size={12} />
-                        {errors.fotoUrl}
+                        {errors.fotoGedung}
                       </p>
                     )}
 
                     <p className="theme-text-muted mt-1.5 text-xs">
-                      Masukkan URL gambar jika gedung memiliki
-                      foto.
+                      Masukkan URL gambar jika tersedia. Kamu juga
+                      bisa menyimpan gedung tanpa foto.
                     </p>
                   </div>
                 </div>
 
-                {/* INFO */}
                 <div
                   className={`flex items-start gap-3 rounded-xl border ${themeInfoBorder} ${themeInfoSurface} px-4 py-3`}
                 >
@@ -535,59 +479,46 @@ export default function TambahGedungPage() {
                   />
 
                   <div>
-                    <p className="text-[var(--color-info)] text-xs font-semibold">
+                    <p className="text-xs font-semibold text-[var(--color-info)]">
                       Informasi
                     </p>
-
                     <p className="mt-0.5 text-xs leading-5 text-[var(--color-info)]">
-                      Data yang dikirim adalah nama, kode, dan
-                      URL foto. Foto akan disimpan oleh backend
-                      pada field yang sesuai dengan struktur
-                      database.
+                      Nama gedung wajib diisi. Kode dan foto
+                      bersifat opsional. Data foto menggunakan
+                      field fotoGedung sesuai model database.
                     </p>
                   </div>
                 </div>
 
-                {/* FOOTER ACTION */}
                 <div
                   className={`flex flex-col-reverse gap-2.5 border-t ${themeNeutralDivider} pt-5 sm:flex-row sm:items-center sm:justify-end`}
                 >
-                  {/* BATAL */}
                   <button
                     type="button"
                     onClick={handleBack}
                     disabled={isSaving}
-                    className={`inline-flex h-11 items-center justify-center rounded-xl border ${themeNeutralBorder} theme-card px-6 text-sm font-medium theme-text-secondary ${themeButtonShadow} transition-all ${themeNeutralHover} hover:border-[color-mix(in_srgb,var(--color-text)_18%,transparent)] hover:text-[var(--color-text)] active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60`}
+                    className={`inline-flex h-11 items-center justify-center rounded-xl border ${themeNeutralBorder} theme-card px-6 text-sm font-medium theme-text-secondary ${themeButtonShadow} transition-all ${themeNeutralHover} disabled:opacity-60`}
                   >
                     Batal
                   </button>
 
-                  {/* SIMPAN */}
                   <button
                     type="submit"
                     disabled={isSaving}
                     className={`inline-flex h-11 items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-6 text-sm font-semibold text-[var(--color-card)] ${themeButtonShadow} transition-all ${themeButtonHoverShadow} active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-60`}
                   >
-                    <Save
-                      size={17}
-                      strokeWidth={2.3}
-                    />
-
-                    {isSaving
-                      ? "Menyimpan..."
-                      : "Simpan Gedung"}
+                    <Save size={17} />
+                    {isSaving ? "Menyimpan..." : "Simpan Gedung"}
                   </button>
                 </div>
               </form>
             </section>
 
-            {/* FOOTER */}
             <div
               className={`border-t ${themeNeutralDivider} pt-4 text-center sm:pt-5`}
             >
               <p className="theme-text-muted text-xs">
-                © 2026 SmartSchool • Tambah Gedung - Sarana &
-                Prasarana
+                © 2026 SmartSchool • Tambah Gedung - Sarana & Prasarana
               </p>
             </div>
           </div>

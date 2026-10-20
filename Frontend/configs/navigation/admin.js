@@ -1,4 +1,3 @@
-
 import {
   LayoutDashboard,
   Users,
@@ -8,6 +7,7 @@ import {
   GraduationCap,
   Split,
   WalletCards,
+  Landmark,
   KeyRound,
   BriefcaseBusiness,
   Globe2,
@@ -51,6 +51,8 @@ import {
   FileInput,
   PiggyBank,
   DollarSign,
+  Clock,
+  Activity,
 } from "lucide-react";
 
 export const adminSidebarConfig = {
@@ -71,7 +73,6 @@ export const adminSidebarConfig = {
       path: "/admin/dashboard",
     },
 
-  
     // =====================================================
     // SHIFT & PENUGASAN
     // =====================================================
@@ -122,17 +123,28 @@ export const adminSidebarConfig = {
           path: "/admin/presensi/izin-siswa",
         },
         {
-          key: "rekapPresensiGuru",
-          icon: CalendarCheck,
-          label: "Rekap Presensi Guru",
-          path: "/admin/presensi/rekap-guru",
-        },
-        {
           key: "permohonanIzinGuru",
           icon: FileSignature,
           label: "Permohonan Izin Guru",
           path: "/admin/presensi/izin-guru",
         },
+
+        // ✅ MENU BARU: Rekap Absensi Shift
+        {
+          key: "rekapAbsensiShift",
+          icon: Clock,
+          label: "Rekap Absensi Shift",
+          path: "/admin/presensi/rekap-absensi-shift",
+        },
+
+        // ✅ MENU BARU: Monitoring Kehadiran Guru
+        {
+          key: "monitoringKehadiranGuru",
+          icon: Activity,
+          label: "Monitoring Kehadiran Guru",
+          path: "/admin/presensi/monitoring-kehadiran-guru",
+        },
+
         {
           key: "pengaturanPresensi",
           icon: Settings,
@@ -160,10 +172,10 @@ export const adminSidebarConfig = {
 
       children: [
         {
-          key: "laporanKeuangan",
+          key: "laporanKas",
           icon: FileSpreadsheet,
-          label: "Laporan Keuangan",
-          path: "/admin/keuangan/laporan",
+          label: "Laporan Kas",
+          path: "/admin/keuangan/laporanKas",
         },
         {
           key: "tabunganSiswa",
@@ -176,6 +188,12 @@ export const adminSidebarConfig = {
           icon: DollarSign,
           label: "SPP",
           path: "/admin/keuangan/SPP",
+        },
+        {
+          key: "akunKas",
+          icon: Landmark,
+          label: "Akun Kas",
+          path: "/admin/keuangan/akunKas",
         },
         {
           key: "jurnalKasSekolah",
@@ -435,7 +453,7 @@ export const adminSidebarConfig = {
           key: "peminjaman",
           icon: BookUp,
           label: "Peminjaman",
-          path: "/admin/perpustakaan/pinjam",
+          path: "/admin/perpustakaan/peminjaman",
         },
         {
           key: "pengembalian",

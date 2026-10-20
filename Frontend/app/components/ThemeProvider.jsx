@@ -1,6 +1,10 @@
+
 "use client";
 
-import { ThemeProvider as NextThemesProvider } from "next-themes";
+import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes";
+import { CmsThemeProvider } from "@/app/components/CmsThemeProvider";
+
+export { useTheme };
 
 export default function ThemeProvider({ children }) {
   return (
@@ -11,7 +15,9 @@ export default function ThemeProvider({ children }) {
       storageKey="theme"
       disableTransitionOnChange
     >
-      {children}
+      <CmsThemeProvider>
+        {children}
+      </CmsThemeProvider>
     </NextThemesProvider>
   );
 }

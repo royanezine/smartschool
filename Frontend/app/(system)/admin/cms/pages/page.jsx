@@ -387,7 +387,7 @@ export default function PagesPage() {
                   </button>
 
                   <Link
-                    href="/cmsAdmin/pages/tambah"
+                    href="/admin/cms/pages/tambah"
                     className="theme-primary inline-flex flex-1 items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-semibold shadow-lg transition-all duration-200 hover:-translate-y-0.5 sm:flex-none"
                   >
                     <Plus className="h-4 w-4" />
@@ -759,7 +759,7 @@ export default function PagesPage() {
                                     {/* EDIT */}
 
                                     <Link
-                                      href={`/cmsAdmin/pages/${page.id}/edit`}
+                                      href={`/admin/cms/pages/${page.id}/edit`}
                                       title="Edit"
                                       className="theme-text-muted flex h-9 w-9 items-center justify-center rounded-lg transition hover:bg-[var(--color-sidebar-active)] hover:text-[var(--color-primary)]"
                                     >

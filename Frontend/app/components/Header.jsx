@@ -50,59 +50,54 @@ export default function Header({ notifications = [], user: userProp = null }) {
   /* ============================================================
      STATE PROFIL PENGGUNA
   ============================================================ */
-
  
-const [currentUser, setCurrentUser] = useState(null);
-const [authRole, setAuthRole] = useState(null);
-const [isProfileOpen, setIsProfileOpen] = useState(false);
-const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
+  const [authRole, setAuthRole] = useState(null);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
 
-useEffect(() => {
-  // Satu sumber kebenaran: token + user dari lib/auth.
-  const syncSession = () => {
-    try {
-      setCurrentUser(getSessionUser());
-      setAuthRole(getAuthRole());
-    } catch (error) {
-      console.error("Gagal membaca data pengguna:", error);
-      setCurrentUser(null);
-      setAuthRole(null);
-    }
-  };
+  useEffect(() => {
+    // Satu sumber kebenaran: token + user dari lib/auth.
+    const syncSession = () => {
+      try {
+        setCurrentUser(getSessionUser());
+        setAuthRole(getAuthRole());
+      } catch (error) {
+        console.error("Gagal membaca data pengguna:", error);
+        setCurrentUser(null);
+        setAuthRole(null);
+      }
+    };
 
-  syncSession();
+    syncSession();
 
-  // `subscribeAuth` menangani perubahan sesi pada TAB INI (`user-updated`)
-  // maupun TAB LAIN pada origin yang sama (`storage`). Sesi produksi
-  // memang dibagi satu browser, jadi profil yang tampil selalu mengikuti
-  // token aktif dan tidak pernah tertinggal akun sebelumnya.
-  const unsubscribe = subscribeAuth(syncSession);
+    // `subscribeAuth` menangani perubahan sesi pada TAB INI (`user-updated`)
+    // maupun TAB LAIN pada origin yang sama (`storage`). Sesi produksi
+    // memang dibagi satu browser, jadi profil yang tampil selalu mengikuti
+    // token aktif dan tidak pernah tertinggal akun sebelumnya.
+    const unsubscribe = subscribeAuth(syncSession);
 
-  return () => {
-    unsubscribe();
-  };
-}, []);
+    return () => {
+      unsubscribe();
+    };
+  }, []);
 
-const profileUser = currentUser || userProp || {};
+  const profileUser = currentUser || userProp || {};
 
-// Ambil nama dari akun yang sedang login.
-const displayName =
-  profileUser.namaLengkap ||
-  profileUser.name ||
-  profileUser.nama ||
-  profileUser.fullName ||
-  "Pengguna";
+  const displayName =
+    profileUser.namaLengkap ||
+    profileUser.name ||
+    profileUser.nama ||
+    profileUser.fullName ||
+    "Pengguna";
 
-// Email hanya ditampilkan di baris kedua.
-const displayEmail = profileUser.email || "";
+  const displayEmail = profileUser.email || "";
 
-// Avatar menggunakan huruf pertama nama pengguna.
-const displayAvatar =
-  typeof profileUser.avatar === "string" &&
-  profileUser.avatar.length === 1
-    ? profileUser.avatar.toUpperCase()
-    : displayName.charAt(0).toUpperCase();
-
+  const displayAvatar =
+    typeof profileUser.avatar === "string" &&
+    profileUser.avatar.length === 1
+      ? profileUser.avatar.toUpperCase()
+      : displayName.charAt(0).toUpperCase();
 
   /* ============================================================
      ROLE DARI PATHNAME
@@ -155,10 +150,6 @@ const displayAvatar =
     AUTH_ROLE_TO_HEADER_ROLE[authRole] ||
     resolveRoleFromPath(pathname) ||
     "user";
-
-  /* ============================================================
-     PATH PER ROLE
-  ============================================================ */
 
   const pathMap = {
     "super-admin": {
@@ -437,24 +428,50 @@ const displayAvatar =
   ============================================================ */
 
   return (
-    <header className="h-16 sticky top-0 z-30 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl border-b border-slate-200/70 dark:border-slate-700/70">
+    <header
+      className="
+        h-16 sticky top-0 z-30
+        theme-header
+        border-b
+        backdrop-blur-xl
+        transition-colors duration-200
+      "
+    >
       <div className="h-full flex items-center justify-between px-4 md:px-6 lg:px-8">
         {/* KIRI: PENCARIAN */}
         <div className="flex items-center gap-3 md:gap-5 min-w-0">
           <div className="relative hidden lg:block">
             <Search
               size={16}
-              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"
+              className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"
             />
 
             <input
               type="text"
               placeholder="Cari menu, fitur, atau halaman..."
-              className="pl-10 pr-16 py-2 bg-slate-50/80 dark:bg-slate-800/80 border border-slate-200/60 dark:border-slate-700 rounded-xl text-sm text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 w-64 xl:w-80 transition-all duration-200 hover:bg-slate-50 dark:hover:bg-slate-800"
+              className="
+                header-search
+                pl-10 pr-16 py-2
+                rounded-xl
+                text-sm
+                text-slate-900 dark:text-white
+                placeholder:text-slate-400
+                focus:outline-none
+                w-64 xl:w-80
+                transition-all duration-200
+              "
             />
 
-            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[10px] font-mono text-slate-400">
-              <kbd className="bg-slate-100 dark:bg-slate-700 px-1.5 py-0.5 rounded border border-slate-200 dark:border-slate-600 flex items-center gap-0.5">
+            <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1 text-[10px] font-mono">
+              <kbd
+                className="
+                  header-kbd
+                  px-1.5 py-0.5
+                  rounded
+                  border
+                  flex items-center gap-0.5
+                "
+              >
                 <Command size={10} />
                 K
               </kbd>
@@ -463,7 +480,7 @@ const displayAvatar =
 
           <button
             type="button"
-            className="lg:hidden p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-all"
+            className="header-icon-btn lg:hidden p-2 rounded-xl transition-all"
             aria-label="Cari"
           >
             <Search size={19} />
@@ -477,7 +494,13 @@ const displayAvatar =
             <button
               type="button"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:scale-105 relative group"
+              className="
+                header-icon-btn
+                p-2 rounded-xl
+                transition-all duration-200
+                hover:scale-105
+                relative group
+              "
               aria-label={theme === "dark" ? "Mode terang" : "Mode gelap"}
             >
               {theme === "dark" ? (
@@ -486,7 +509,17 @@ const displayAvatar =
                 <Moon size={18} />
               )}
 
-              <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-slate-800 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none z-50">
+              <span
+                className="
+                  absolute -bottom-8 left-1/2 -translate-x-1/2
+                  px-2 py-0.5
+                  bg-slate-800 text-white
+                  text-[10px] rounded
+                  opacity-0 group-hover:opacity-100
+                  transition-opacity duration-200
+                  whitespace-nowrap pointer-events-none z-50
+                "
+              >
                 {theme === "dark" ? "Mode Terang" : "Mode Gelap"}
               </span>
             </button>
@@ -499,14 +532,30 @@ const displayAvatar =
             <button
               type="button"
               onClick={() => setIsNotifOpen((current) => !current)}
-              className="p-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:scale-105 relative group"
+              className="
+                header-icon-btn
+                p-2 rounded-xl
+                transition-all duration-200
+                hover:scale-105
+                relative group
+              "
               aria-label="Notifikasi"
             >
               <Bell size={19} />
 
               {unreadCount > 0 && (
                 <>
-                  <span className="absolute -top-0.5 -right-0.5 min-w-5 h-5 px-1 bg-gradient-to-r from-red-500 to-rose-500 text-white text-[10px] rounded-full flex items-center justify-center font-bold shadow-lg shadow-red-500/30">
+                  <span
+                    className="
+                      header-notif-badge
+                      absolute -top-0.5 -right-0.5
+                      min-w-5 h-5 px-1
+                      text-white text-[10px]
+                      rounded-full
+                      flex items-center justify-center
+                      font-bold
+                    "
+                  >
                     {unreadCount > 99 ? "99+" : unreadCount}
                   </span>
 
@@ -514,13 +563,34 @@ const displayAvatar =
                 </>
               )}
 
-              <span className="absolute -bottom-8 left-1/2 -translate-x-1/2 px-2 py-0.5 bg-slate-800 text-white text-[10px] rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none">
+              <span
+                className="
+                  absolute -bottom-8 left-1/2 -translate-x-1/2
+                  px-2 py-0.5
+                  bg-slate-800 text-white
+                  text-[10px] rounded
+                  opacity-0 group-hover:opacity-100
+                  transition-opacity duration-200
+                  whitespace-nowrap pointer-events-none
+                "
+              >
                 Notifikasi
               </span>
             </button>
 
             {isNotifOpen && (
-              <div className="absolute right-0 mt-2 w-[360px] max-w-[calc(100vw-24px)] bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200/60 dark:border-slate-700 py-1 z-40 overflow-hidden">
+              <div
+                className="
+                  absolute right-0 mt-2
+                  w-[360px] max-w-[calc(100vw-24px)]
+                  bg-white dark:bg-slate-900
+                  rounded-2xl
+                  shadow-2xl
+                  border border-slate-200/60 dark:border-slate-700
+                  py-1 z-40
+                  overflow-hidden
+                "
+              >
                 <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700 flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-950/40 flex items-center justify-center">
@@ -543,7 +613,7 @@ const displayAvatar =
                     <button
                       type="button"
                       onClick={handleMarkAllAsRead}
-                      className="flex items-center gap-1.5 text-[10px] text-blue-600 font-medium hover:text-blue-700 hover:underline"
+                      className="header-link flex items-center gap-1.5 text-[10px] font-medium hover:underline"
                     >
                       <CheckCheck size={13} />
                       Tandai semua
@@ -554,22 +624,29 @@ const displayAvatar =
                 <div className="max-h-[360px] overflow-y-auto">
                   {loadingNotif ? (
                     <div className="px-4 py-10 text-center">
-                      <Loader2 size={25} className="text-blue-500 animate-spin mx-auto mb-2" />
-                      <p className="text-xs text-slate-400">Memuat notifikasi...</p>
+                      <Loader2
+                        size={25}
+                        className="text-blue-500 animate-spin mx-auto mb-2"
+                      />
+                      <p className="text-xs text-slate-400">
+                        Memuat notifikasi...
+                      </p>
                     </div>
                   ) : notifError ? (
                     <div className="px-4 py-8 text-center">
                       <div className="w-10 h-10 rounded-full bg-red-50 dark:bg-red-950/30 flex items-center justify-center mx-auto mb-2">
                         <Bell size={18} className="text-red-400" />
                       </div>
-                      <p className="text-xs text-red-500 font-medium">Gagal memuat notifikasi</p>
+                      <p className="text-xs text-red-500 font-medium">
+                        Gagal memuat notifikasi
+                      </p>
                       <p className="text-[10px] text-slate-400 mt-1 px-4 line-clamp-2">
                         {notifError}
                       </p>
                       <button
                         type="button"
                         onClick={() => loadNotifications(true)}
-                        className="mt-2 text-[11px] text-blue-600 hover:underline"
+                        className="header-link mt-2 text-[11px] hover:underline"
                       >
                         Coba lagi
                       </button>
@@ -580,19 +657,29 @@ const displayAvatar =
                         type="button"
                         key={notif.id}
                         onClick={() => handleNotificationClick(notif)}
-                        className={`w-full text-left px-4 py-3 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-150 border-l-4 ${
-                          !notif.dibaca
-                            ? "border-l-blue-500 bg-blue-50/30 dark:bg-blue-950/20"
-                            : "border-l-transparent"
-                        }`}
+                        className={`
+                          w-full text-left px-4 py-3
+                          hover:bg-slate-50 dark:hover:bg-slate-800
+                          transition-all duration-150
+                          border-l-4
+                          ${
+                            !notif.dibaca
+                              ? "header-notif-unread"
+                              : "border-l-transparent"
+                          }
+                        `}
                       >
                         <div className="flex gap-3">
                           <div
-                            className={`mt-0.5 w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 ${
-                              !notif.dibaca
-                                ? "bg-blue-100 dark:bg-blue-950/50 text-blue-600"
-                                : "bg-slate-100 dark:bg-slate-800 text-slate-400"
-                            }`}
+                            className={`
+                              mt-0.5 w-8 h-8 rounded-lg
+                              flex items-center justify-center flex-shrink-0
+                              ${
+                                !notif.dibaca
+                                  ? "header-notif-icon-unread"
+                                  : "bg-slate-100 dark:bg-slate-800 text-slate-400"
+                              }
+                            `}
                           >
                             <Bell size={14} />
                           </div>
@@ -600,17 +687,20 @@ const displayAvatar =
                           <div className="min-w-0 flex-1">
                             <div className="flex items-start justify-between gap-2">
                               <p
-                                className={`text-sm leading-tight ${
-                                  !notif.dibaca
-                                    ? "font-semibold text-slate-700 dark:text-slate-100"
-                                    : "font-medium text-slate-600 dark:text-slate-300"
-                                }`}
+                                className={`
+                                  text-sm leading-tight
+                                  ${
+                                    !notif.dibaca
+                                      ? "font-semibold text-slate-700 dark:text-slate-100"
+                                      : "font-medium text-slate-600 dark:text-slate-300"
+                                  }
+                                `}
                               >
                                 {notif.judul || "Notifikasi"}
                               </p>
 
                               {!notif.dibaca && (
-                                <span className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0 mt-1.5" />
+                                <span className="header-unread-dot w-2 h-2 rounded-full flex-shrink-0 mt-1.5" />
                               )}
                             </div>
 
@@ -657,7 +747,7 @@ const displayAvatar =
                         router.push(currentPathMap.profile);
                       }
                     }}
-                    className="text-xs text-blue-600 font-medium hover:text-blue-700 transition-colors w-full text-center"
+                    className="header-link text-xs font-medium transition-colors w-full text-center"
                   >
                     Lihat semua notifikasi →
                   </button>
@@ -668,39 +758,52 @@ const displayAvatar =
 
           {/* PROFIL PENGGUNA */}
           <div className="relative">
-           
-<button
-  type="button"
-  onClick={() => setIsProfileOpen((current) => !current)}
-  className="flex items-center gap-2.5 px-2.5 py-1.5 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-all duration-200 group"
-  aria-label="Menu profil"
->
-  <div className="relative flex-shrink-0">
-    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white text-xs font-bold shadow-md">
-      {displayAvatar}
-    </div>
+            <button
+              type="button"
+              onClick={() => setIsProfileOpen((current) => !current)}
+              className="
+                flex items-center gap-2.5
+                px-2.5 py-1.5
+                rounded-xl
+                hover:bg-slate-100 dark:hover:bg-slate-800
+                transition-all duration-200
+                group
+              "
+              aria-label="Menu profil"
+            >
+              <div className="relative flex-shrink-0">
+                <div
+                  className="
+                    header-avatar
+                    w-8 h-8 rounded-full
+                    flex items-center justify-center
+                    text-white text-xs font-bold
+                    shadow-md
+                  "
+                >
+                  {displayAvatar}
+                </div>
 
-    <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-white dark:border-slate-900" />
-  </div>
+                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-400 rounded-full border-2 border-white dark:border-slate-900" />
+              </div>
 
-  <div className="hidden md:block text-left min-w-0">
-    <p className="text-sm font-semibold text-slate-700 dark:text-slate-100 leading-tight truncate max-w-[180px]">
-      {displayName}
-    </p>
+              <div className="hidden md:block text-left min-w-0">
+                <p className="text-sm font-semibold text-slate-700 dark:text-slate-100 leading-tight truncate max-w-[180px]">
+                  {displayName}
+                </p>
 
-    <p className="text-[10px] text-slate-400 leading-tight truncate max-w-[180px]">
-      {displayEmail}
-    </p>
-  </div>
+                <p className="text-[10px] text-slate-400 leading-tight truncate max-w-[180px]">
+                  {displayEmail}
+                </p>
+              </div>
 
-  <ChevronDown
-    size={16}
-    className={`text-slate-400 transition-transform ${
-      isProfileOpen ? "rotate-180" : ""
-    }`}
-  />
-</button>
-
+              <ChevronDown
+                size={16}
+                className={`text-slate-400 transition-transform ${
+                  isProfileOpen ? "rotate-180" : ""
+                }`}
+              />
+            </button>
 
             {isProfileOpen && (
               <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl border border-slate-200/60 dark:border-slate-700 py-1 z-40 overflow-hidden">
@@ -708,7 +811,9 @@ const displayAvatar =
                 <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-700 flex items-center gap-1.5 text-[10px] font-medium text-slate-500 dark:text-slate-400">
                   <Crown size={11} className="text-yellow-500" />
                   <span>Role:</span>
-                  <span className={`px-2 py-0.5 rounded-full ${roleBadgeColor}`}>
+                  <span
+                    className={`px-2 py-0.5 rounded-full ${roleBadgeColor}`}
+                  >
                     {roleLabel}
                   </span>
                 </div>
@@ -723,9 +828,18 @@ const displayAvatar =
                         type="button"
                         key={item.path}
                         onClick={() => navigateTo(item.path)}
-                        className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all duration-150 group"
+                        className="
+                          flex items-center gap-3 w-full
+                          px-4 py-2.5
+                          text-sm text-slate-600 dark:text-slate-300
+                          hover:bg-slate-50 dark:hover:bg-slate-800
+                          transition-all duration-150
+                          group
+                        "
                       >
-                        <div className={`w-8 h-8 rounded-lg ${item.iconBg} flex items-center justify-center ${item.iconColor} group-hover:scale-110 transition-transform`}>
+                        <div
+                          className={`w-8 h-8 rounded-lg ${item.iconBg} flex items-center justify-center ${item.iconColor} group-hover:scale-110 transition-transform`}
+                        >
                           <Icon size={16} />
                         </div>
                         <span>{item.label}</span>
@@ -739,7 +853,14 @@ const displayAvatar =
                   <button
                     type="button"
                     onClick={handleLogout}
-                    className="flex items-center gap-3 w-full px-4 py-2.5 text-sm text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 transition-all duration-150 group"
+                    className="
+                      flex items-center gap-3 w-full
+                      px-4 py-2.5
+                      text-sm text-red-600
+                      hover:bg-red-50 dark:hover:bg-red-950/30
+                      transition-all duration-150
+                      group
+                    "
                   >
                     <div className="w-8 h-8 rounded-lg bg-red-50 dark:bg-red-950/30 flex items-center justify-center text-red-400 group-hover:bg-red-100 dark:group-hover:bg-red-950/50 group-hover:scale-110 transition-all">
                       <LogOut size={16} />

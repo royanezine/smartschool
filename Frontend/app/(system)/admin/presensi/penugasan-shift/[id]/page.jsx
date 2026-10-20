@@ -15,6 +15,7 @@ import {
   Mail,
   CalendarClock,
   Info,
+  RefreshCw,
 } from "lucide-react";
 
 import Header from "@/app/components/Header";
@@ -27,45 +28,117 @@ import {
 } from "@/services/shiftKerja.service";
 
 const JABATAN_ENDPOINT = "/api/kategori-jabatan";
+const CACHE_KEY = "smartschool-penugasan-shift-cache";
 
-/* =========================================================
-   HELPERS
-========================================================= */
+function getArray(response, keys = []) {
+  let current = response;
 
-function unwrapResponse(response) {
-  let result = response;
+  for (let i = 0; i < 6 && current != null; i++) {
+    if (Array.isArray(current)) return current;
 
-  for (let i = 0; i < 3; i++) {
-    if (result && typeof result === "object" && "data" in result) {
-      result = result.data;
-    } else {
-      break;
+    if (typeof current !== "object") return [];
+
+    for (const key of keys) {
+      if (Array.isArray(current[key])) return current[key];
     }
+
+    if (Array.isArray(current.items)) return current.items;
+
+    if (!("data" in current)) return [];
+    current = current.data;
   }
 
-  return result;
+  return Array.isArray(current) ? current : [];
 }
 
-function getArray(response) {
-  const result = unwrapResponse(response);
+function getId(value) {
+  return value == null ? "" : String(value);
+}
 
-  if (Array.isArray(result)) return result;
-  if (Array.isArray(result?.items)) return result.items;
-  if (Array.isArray(result?.data)) return result.data;
-  if (Array.isArray(result?.users)) return result.users;
-  if (Array.isArray(result?.pengguna)) return result.pengguna;
-  if (Array.isArray(result?.kategoriJabatan)) return result.kategoriJabatan;
+function getCache() {
+  try {
+    const parsed = JSON.parse(
+      localStorage.getItem(CACHE_KEY) || "{}"
+    );
+    return parsed && typeof parsed === "object" ? parsed : {};
+  } catch {
+    return {};
+  }
+}
 
-  return [];
+function saveCache(id, assignment) {
+  try {
+    const cache = getCache();
+
+    cache[getId(id)] = {
+      ...(cache[getId(id)] || {}),
+      ...assignment,
+      updatedAt: new Date().toISOString(),
+    };
+
+    localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+  } catch {
+    // Cache hanya untuk membantu tampilan FE; bukan penyimpanan utama.
+  }
+}
+
+function getNamaJabatan(value) {
+  if (typeof value === "string") return value;
+
+  return (
+    value?.nama ??
+    value?.namaKategori ??
+    value?.namaJabatan ??
+    value?.namaKategoriJabatan ??
+    ""
+  );
+}
+
+function getNamaShift(pegawai, shiftList, cached) {
+  const relation =
+    pegawai?.shiftKerjaMaster ??
+    (typeof pegawai?.shiftKerja === "object"
+      ? pegawai.shiftKerja
+      : null);
+
+  const id = pegawai?.shiftKerjaId ?? relation?.id;
+
+  if (id) {
+    const found = shiftList.find((x) => getId(x.id) === getId(id));
+    if (found) return found;
+    if (relation?.nama) return relation.nama;
+  }
+
+  if (cached?.shiftKerjaId) {
+    const found = shiftList.find(
+      (x) => getId(x.id) === getId(cached.shiftKerjaId)
+    );
+    if (found) return found;
+  }
+
+  if (typeof pegawai?.shiftKerja === "string" && pegawai.shiftKerja.trim()) {
+    const legacy = pegawai.shiftKerja.trim();
+    const found = shiftList.find((shift) => {
+      const value = legacy.toLowerCase();
+      return (
+        String(shift.nama ?? "").trim().toLowerCase() === value ||
+        String(shift.kode ?? "").trim().toLowerCase() === value
+      );
+    });
+
+    return found?.nama || legacy;
+  }
+
+  return "";
 }
 
 function formatJam(value) {
   if (!value) return "-";
 
   const text = String(value);
+  const match = text.match(/^(\d{1,2}):(\d{2})/);
 
-  if (/^\d{1,2}:\d{2}/.test(text)) {
-    const match = text.match(/^(\d{1,2}):(\d{2})/);
+  if (match) {
     return `${match[1].padStart(2, "0")}:${match[2]}`;
   }
 
@@ -82,114 +155,144 @@ function formatJam(value) {
   return text;
 }
 
-function getErrorMessage(error) {
-  return error instanceof Error
-    ? error.message
-    : "Terjadi kesalahan. Silakan coba lagi.";
-}
+/* =========================================================
+   STYLE HELPERS — pakai token tema
+========================================================= */
 
 const inputClass =
-  "h-11 w-full rounded-xl border border-slate-200 bg-white px-3.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-4 focus:ring-blue-500/10 disabled:cursor-not-allowed disabled:bg-slate-50 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-blue-500 dark:disabled:bg-slate-900";
+  "theme-input h-11 w-full rounded-xl border px-3.5 text-sm outline-none transition disabled:opacity-50";
 
 const buttonSecondary =
-  "inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800";
+  "inline-flex items-center justify-center gap-2 rounded-xl border theme-border theme-card px-4 py-2.5 text-sm font-medium theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] disabled:cursor-not-allowed disabled:opacity-50 transition";
 
 const buttonPrimary =
-  "inline-flex items-center justify-center gap-2 rounded-xl bg-blue-700 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-50";
+  "inline-flex items-center justify-center gap-2 rounded-xl theme-primary px-4 py-2.5 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50 transition";
 
-function Field({ label, required, hint, children }) {
+function Field({ label, required, hint, error, children }) {
   return (
     <label className="block space-y-1.5">
-      <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
+      <span className="text-sm font-medium theme-text">
         {label}
         {required && <span className="ml-1 text-red-500">*</span>}
       </span>
       {children}
-      {hint && (
-        <span className="block text-xs leading-5 text-slate-500 dark:text-slate-400">
-          {hint}
+      {error ? (
+        <span className="block text-xs leading-5 text-red-600 dark:text-red-400">
+          {error}
         </span>
+      ) : (
+        hint && (
+          <span className="block text-xs leading-5 theme-text-muted">
+            {hint}
+          </span>
+        )
       )}
     </label>
   );
 }
-
-/* =========================================================
-   PAGE
-========================================================= */
 
 export default function AturShiftPegawaiPage() {
   const params = useParams();
   const router = useRouter();
   const id = params?.id;
 
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+
   const [pegawai, setPegawai] = useState(null);
   const [shiftList, setShiftList] = useState([]);
   const [jabatanList, setJabatanList] = useState([]);
+  const [cache, setCache] = useState({});
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-
   const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
 
   const [form, setForm] = useState({
     shiftKerjaId: "",
     kategoriJabatanId: "",
   });
 
-  /* =======================================================
-     LOAD DATA
-  ======================================================= */
-
   const loadData = useCallback(async () => {
-    if (!id) return;
+    if (!id) {
+      setLoading(false);
+      setError("ID pegawai tidak ditemukan pada URL.");
+      return;
+    }
 
     setLoading(true);
     setError("");
 
     try {
-      const [usersResponse, shiftResponse, jabatanResponse] =
+      const [usersResponse, shiftsResponse, jabatanResponse] =
         await Promise.all([
           getUsers({ page: 1, limit: 200 }),
-          getShiftKerja({ page: 1, limit: 100, status: "aktif" }),
+          getShiftKerja({
+            page: 1,
+            limit: 100,
+            status: "aktif",
+          }),
           apiFetch(JABATAN_ENDPOINT, { method: "GET" }),
         ]);
 
-      const listPegawai = Array.isArray(usersResponse?.data)
-        ? usersResponse.data
-        : [];
+      const users = getArray(usersResponse, [
+        "users",
+        "pengguna",
+        "pegawai",
+      ]);
 
-      const foundPegawai = listPegawai.find(
-        (item) => String(item.id) === String(id)
-      );
+      const shifts = getArray(shiftsResponse, [
+        "shifts",
+        "shiftKerja",
+      ]);
 
-      if (!foundPegawai) {
-        throw new Error("Data pegawai tidak ditemukan.");
+      const jabatan = getArray(jabatanResponse, [
+        "kategoriJabatan",
+        "kategoriJabatans",
+        "jabatan",
+      ]);
+
+      const found = users.find((x) => getId(x?.id) === getId(id));
+
+      if (!found) {
+        throw new Error(
+          "Pegawai tidak ditemukan dalam data pengguna. Pastikan akun sudah terdaftar di sistem."
+        );
       }
 
-      const shifts = Array.isArray(shiftResponse?.data)
-        ? shiftResponse.data
-        : [];
+      const savedCache = getCache();
+      const cached = savedCache[getId(found.id)] || {};
 
-      const jabatanData = getArray(jabatanResponse);
+      const shiftRelation =
+        found.shiftKerjaMaster ??
+        (typeof found.shiftKerja === "object" ? found.shiftKerja : null);
 
-      setPegawai(foundPegawai);
+      const shiftId =
+        found.shiftKerjaId ??
+        shiftRelation?.id ??
+        cached.shiftKerjaId ??
+        "";
+
+      const categoryId =
+        found.kategoriJabatanId ??
+        found.kategoriJabatan?.id ??
+        cached.kategoriJabatanId ??
+        "";
+
+      setPegawai(found);
       setShiftList(shifts);
-      setJabatanList(jabatanData);
+      setJabatanList(jabatan);
+      setCache(cached);
 
       setForm({
-        shiftKerjaId:
-          foundPegawai?.shiftKerjaId != null
-            ? String(foundPegawai.shiftKerjaId)
-            : "",
-        kategoriJabatanId:
-          foundPegawai?.kategoriJabatanId != null
-            ? String(foundPegawai.kategoriJabatanId)
-            : "",
+        shiftKerjaId: getId(shiftId),
+        kategoriJabatanId: getId(categoryId),
       });
     } catch (err) {
-      setError(getErrorMessage(err));
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Data pegawai belum bisa dimuat. Silakan coba lagi."
+      );
     } finally {
       setLoading(false);
     }
@@ -199,356 +302,372 @@ export default function AturShiftPegawaiPage() {
     loadData();
   }, [loadData]);
 
-  useEffect(() => {
-    if (!notice) return;
-    const timeout = setTimeout(() => setNotice(""), 4000);
-    return () => clearTimeout(timeout);
-  }, [notice]);
-
-  /* =======================================================
-     SUBMIT
-  ======================================================= */
-
   async function handleSubmit(event) {
     event.preventDefault();
     setError("");
 
     if (!pegawai?.id) {
-      setError("Pegawai tidak valid.");
+      setError("Data pegawai tidak valid.");
       return;
     }
 
     if (!form.shiftKerjaId) {
-      setError("Silakan pilih shift kerja.");
+      setError("Silakan pilih shift kerja terlebih dahulu.");
+      return;
+    }
+
+    const selectedShift = shiftList.find(
+      (x) => getId(x.id) === getId(form.shiftKerjaId)
+    );
+
+    if (!selectedShift) {
+      setError(
+        "Shift yang dipilih tidak ditemukan pada daftar shift aktif. Muat ulang halaman."
+      );
       return;
     }
 
     setSaving(true);
 
     try {
-      await assignUserShiftAndJabatan({
+      const payload = {
         penggunaId: pegawai.id,
         shiftKerjaId: form.shiftKerjaId,
-        ...(form.kategoriJabatanId
-          ? { kategoriJabatanId: form.kategoriJabatanId }
-          : {}),
+      };
+
+      if (form.kategoriJabatanId) {
+        payload.kategoriJabatanId = form.kategoriJabatanId;
+      }
+
+      await assignUserShiftAndJabatan(payload);
+
+      saveCache(pegawai.id, {
+        shiftKerjaId: form.shiftKerjaId,
+        kategoriJabatanId:
+          form.kategoriJabatanId || cache?.kategoriJabatanId || "",
       });
 
-      // Simpan notice untuk ditampilkan di halaman list
       try {
         sessionStorage.setItem(
           "penugasan-notice",
-          `Penugasan untuk ${
-            pegawai.namaLengkap || "pegawai"
-          } berhasil diperbarui.`
+          `Penugasan untuk ${pegawai.namaLengkap || "pegawai"} berhasil diperbarui.`
         );
-      } catch {
-        // ignore
-      }
+      } catch {}
 
       router.push("/admin/presensi/penugasan-shift");
     } catch (err) {
-      setError(getErrorMessage(err));
+      setError(
+        err instanceof Error
+          ? err.message
+          : "Penugasan gagal disimpan. Silakan coba lagi."
+      );
     } finally {
       setSaving(false);
     }
   }
 
   function handleBack() {
-    if (saving) return;
-    router.push("/admin/presensi/penugasan-shift");
+    if (!saving) router.push("/admin/presensi/penugasan-shift");
   }
 
-  /* =======================================================
-     RENDER
-  ======================================================= */
+  const currentShiftName = getNamaShift(pegawai, shiftList, cache);
+
+  const currentCategoryId =
+    pegawai?.kategoriJabatanId ??
+    pegawai?.kategoriJabatan?.id ??
+    cache?.kategoriJabatanId ??
+    "";
+
+  const currentCategory =
+    jabatanList.find(
+      (x) => getId(x.id) === getId(currentCategoryId)
+    ) ?? pegawai?.kategoriJabatan;
 
   const selectedShift = shiftList.find(
-    (s) => String(s.id) === String(form.shiftKerjaId)
+    (x) => getId(x.id) === getId(form.shiftKerjaId)
   );
 
   return (
-    <div className="flex h-dvh w-full overflow-hidden bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
-      <aside className="relative z-30 h-full shrink-0">
-        <Sidebar role="admin_sekolah" />
-      </aside>
+    <div className="theme-page flex h-screen w-full overflow-hidden">
+      <Sidebar
+        role="admin"
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
+      />
 
-      <div className="flex h-full min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
-        <header className="relative z-20 flex h-16 shrink-0 items-center border-b border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-          <div className="w-full min-w-0">
-            <Header />
-          </div>
-        </header>
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <div className="shrink-0">
+          <Header onMenuClick={() => setSidebarOpen(true)} />
+        </div>
 
-        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto overscroll-contain">
-          <div className="mx-auto w-full max-w-4xl space-y-6 p-4 sm:p-6 lg:p-8">
-            {/* PAGE TITLE */}
-            <section className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
-              <div className="flex items-start gap-3">
-                <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-100 text-blue-700 dark:bg-blue-950 dark:text-blue-300">
-                  <BriefcaseBusiness size={23} />
-                </div>
-
-                <div>
-                  <div className="mb-1 flex flex-wrap items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-                    <span>Presensi</span>
-                    <span>/</span>
-                    <span>Penugasan Shift</span>
-                    <span>/</span>
-                    <span className="font-medium text-blue-700 dark:text-blue-400">
-                      Atur Shift
-                    </span>
+        <main className="min-w-0 flex-1 overflow-y-auto theme-page theme-text">
+          <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+            <div className="mx-auto w-full max-w-4xl space-y-6">
+              {/* ============================================
+                  PAGE HEADER
+              ============================================ */}
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                <div className="flex items-start gap-3">
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+                    <BriefcaseBusiness size={23} />
                   </div>
-
-                  <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-white">
-                    Atur Penugasan Pegawai
-                  </h1>
-
-                  <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">
-                    Tentukan shift kerja dan kategori jabatan untuk pegawai
-                    berikut.
-                  </p>
+                  <div>
+                    <div className="mb-1 flex items-center gap-2 text-sm theme-text-muted">
+                      <span>Presensi</span>
+                      <span>/</span>
+                      <span>Penugasan Shift</span>
+                      <span>/</span>
+                      <span>Atur Shift</span>
+                    </div>
+                    <h1 className="text-2xl font-bold tracking-tight theme-text">
+                      Atur Penugasan Pegawai
+                    </h1>
+                    <p className="mt-1 text-sm theme-text-secondary">
+                      Tentukan shift kerja dan kategori jabatan pegawai.
+                    </p>
+                  </div>
                 </div>
-              </div>
 
-              <button
-                type="button"
-                onClick={handleBack}
-                disabled={saving}
-                className={buttonSecondary}
-              >
-                <ArrowLeft size={17} />
-                Kembali
-              </button>
-            </section>
-
-            {error && (
-              <div
-                role="alert"
-                className="flex items-start gap-2 rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/30 dark:text-red-300"
-              >
-                <AlertCircle size={18} className="mt-0.5 shrink-0" />
-                <p className="min-w-0 flex-1">{error}</p>
-                <button
-                  type="button"
-                  onClick={() => setError("")}
-                  aria-label="Tutup pesan error"
-                >
-                  <X size={16} />
-                </button>
-              </div>
-            )}
-
-            {notice && (
-              <div
-                role="status"
-                className="flex items-start gap-2 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-800 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300"
-              >
-                <CheckCircle2 size={18} className="mt-0.5 shrink-0" />
-                <p className="min-w-0 flex-1">{notice}</p>
-              </div>
-            )}
-
-            {loading ? (
-              <div className="flex min-h-[300px] flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-                <LoaderCircle
-                  size={28}
-                  className="animate-spin text-blue-600"
-                />
-                <p className="mt-3 text-sm text-slate-500">
-                  Memuat data pegawai...
-                </p>
-              </div>
-            ) : !pegawai ? (
-              <div className="flex min-h-[300px] flex-col items-center justify-center rounded-2xl border border-slate-200 bg-white text-center dark:border-slate-800 dark:bg-slate-900">
-                <AlertCircle size={30} className="text-red-500" />
-                <p className="mt-3 font-semibold text-slate-900 dark:text-white">
-                  Pegawai tidak ditemukan
-                </p>
                 <button
                   type="button"
                   onClick={handleBack}
-                  className={`${buttonPrimary} mt-4`}
+                  disabled={saving}
+                  className={buttonSecondary}
                 >
-                  <ArrowLeft size={16} />
-                  Kembali ke Daftar
+                  <ArrowLeft size={17} />
+                  Kembali
                 </button>
               </div>
-            ) : (
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {/* INFO PEGAWAI */}
-                <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-                  <div className="flex items-start gap-4 border-b border-slate-200 p-5 dark:border-slate-800 sm:p-6">
-                    <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
-                      <UserRound size={24} />
-                    </div>
 
-                    <div className="min-w-0">
-                      <h2 className="text-lg font-bold text-slate-900 dark:text-white">
-                        {pegawai.namaLengkap || "Tanpa nama"}
-                      </h2>
-                      <p className="mt-1 flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400">
-                        <Mail size={14} />
-                        {pegawai.email || "Email tidak tersedia"}
-                      </p>
-                    </div>
+              {/* ============================================
+                  ALERT ERROR
+              ============================================ */}
+              {error && (
+                <div
+                  role="alert"
+                  className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900/60 dark:bg-red-950/30 dark:text-red-300"
+                >
+                  <AlertCircle size={19} className="mt-0.5 shrink-0" />
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold">Permintaan gagal</p>
+                    <p className="mt-1 break-words">{error}</p>
                   </div>
-
-                  <div className="grid grid-cols-1 gap-4 p-5 sm:grid-cols-2 sm:p-6">
-                    <div className="rounded-xl bg-slate-50 p-4 dark:bg-slate-950">
-                      <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                        Shift saat ini
-                      </p>
-                      <p className="mt-2 text-sm font-semibold text-slate-900 dark:text-white">
-                        {selectedShift?.nama || "Belum ditugaskan"}
-                      </p>
-                      {selectedShift && (
-                        <p className="mt-1 flex items-center gap-1.5 text-xs text-slate-500">
-                          <Clock3 size={12} />
-                          {formatJam(selectedShift.jamMasuk)} –{" "}
-                          {formatJam(selectedShift.jamKeluar)}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="rounded-xl bg-slate-50 p-4 dark:bg-slate-950">
-                      <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
-                        Kategori jabatan
-                      </p>
-                      <p className="mt-2 text-sm font-semibold text-slate-900 dark:text-white">
-                        {(() => {
-                          const j =
-                            pegawai.kategoriJabatan ??
-                            jabatanList.find(
-                              (item) =>
-                                String(item.id) ===
-                                String(form.kategoriJabatanId)
-                            );
-
-                          if (typeof j === "string") return j;
-
-                          return (
-                            j?.nama ??
-                            j?.namaKategori ??
-                            j?.namaJabatan ??
-                            "Belum ditentukan"
-                          );
-                        })()}
-                      </p>
-                    </div>
-                  </div>
-                </section>
-
-                {/* FORM PENUGASAN */}
-                <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-                  <div className="flex items-start gap-3 border-b border-slate-200 p-5 dark:border-slate-800 sm:p-6">
-                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-blue-700 dark:bg-blue-950/60 dark:text-blue-300">
-                      <CalendarClock size={19} />
-                    </div>
-
-                    <div>
-                      <h2 className="font-semibold text-slate-900 dark:text-white">
-                        Penugasan Shift & Jabatan
-                      </h2>
-                      <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                        Pilih shift kerja aktif dan kategori jabatan pegawai.
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-5 p-5 sm:p-6">
-                    <Field
-                      label="Shift Kerja"
-                      required
-                      hint="Pilih shift aktif yang akan digunakan pada presensi pegawai."
-                    >
-                      <select
-                        required
-                        value={form.shiftKerjaId}
-                        onChange={(e) =>
-                          setForm((prev) => ({
-                            ...prev,
-                            shiftKerjaId: e.target.value,
-                          }))
-                        }
-                        className={inputClass}
-                        disabled={saving}
-                      >
-                        <option value="">Pilih shift kerja</option>
-                        {shiftList.map((shift) => (
-                          <option key={shift.id} value={String(shift.id)}>
-                            {shift.nama} ({formatJam(shift.jamMasuk)}–
-                            {formatJam(shift.jamKeluar)})
-                          </option>
-                        ))}
-                      </select>
-                    </Field>
-
-                    <Field
-                      label="Kategori Jabatan"
-                      hint="Jika dibiarkan kosong, kategori jabatan sebelumnya tidak diubah."
-                    >
-                      <select
-                        value={form.kategoriJabatanId}
-                        onChange={(e) =>
-                          setForm((prev) => ({
-                            ...prev,
-                            kategoriJabatanId: e.target.value,
-                          }))
-                        }
-                        className={inputClass}
-                        disabled={saving}
-                      >
-                        <option value="">
-                          Tidak mengubah kategori jabatan
-                        </option>
-                        {jabatanList.map((jabatan) => (
-                          <option key={jabatan.id} value={String(jabatan.id)}>
-                            {jabatan.nama ??
-                              jabatan.namaKategori ??
-                              jabatan.namaJabatan ??
-                              jabatan.id}
-                          </option>
-                        ))}
-                      </select>
-                    </Field>
-
-                    <div className="flex items-start gap-2 rounded-xl border border-blue-100 bg-blue-50/70 p-4 text-sm text-blue-900 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-200">
-                      <Info size={18} className="mt-0.5 shrink-0" />
-                      <p className="leading-6">
-                        Perubahan penugasan akan langsung tersimpan pada data
-                        pegawai dan digunakan pada proses presensi berikutnya.
-                      </p>
-                    </div>
-                  </div>
-                </section>
-
-                {/* TOMBOL AKSI */}
-                <div className="flex flex-col-reverse gap-3 border-t border-slate-200 pt-5 dark:border-slate-800 sm:flex-row sm:justify-end">
                   <button
                     type="button"
-                    onClick={handleBack}
-                    disabled={saving}
-                    className={buttonSecondary}
+                    aria-label="Tutup pesan error"
+                    onClick={() => setError("")}
+                    className="rounded p-1 hover:bg-red-100 dark:hover:bg-red-900/40"
                   >
-                    Batal
-                  </button>
-
-                  <button
-                    type="submit"
-                    disabled={saving || shiftList.length === 0}
-                    className={buttonPrimary}
-                  >
-                    {saving ? (
-                      <LoaderCircle size={17} className="animate-spin" />
-                    ) : (
-                      <Save size={17} />
-                    )}
-                    {saving ? "Menyimpan..." : "Simpan Penugasan"}
+                    <X size={16} />
                   </button>
                 </div>
-              </form>
-            )}
+              )}
+
+              {/* ============================================
+                  LOADING / NOT FOUND / FORM
+              ============================================ */}
+              {loading ? (
+                <div className="flex min-h-[300px] flex-col items-center justify-center gap-3 theme-card rounded-xl border theme-border">
+                  <LoaderCircle
+                    size={28}
+                    className="animate-spin theme-primary-text"
+                  />
+                  <p className="text-sm font-medium theme-text">
+                    Memuat data pegawai...
+                  </p>
+                  <p className="text-xs theme-text-muted">
+                    Mengambil data dari sistem
+                  </p>
+                </div>
+              ) : !pegawai ? (
+                <div className="flex min-h-[300px] flex-col items-center justify-center theme-card rounded-xl border theme-border p-6 text-center">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 text-red-600 dark:bg-red-950/50 dark:text-red-400">
+                    <AlertCircle size={23} />
+                  </div>
+                  <p className="mt-4 font-semibold theme-text">
+                    Pegawai tidak ditemukan
+                  </p>
+                  <p className="mt-1 max-w-sm text-sm theme-text-muted">
+                    Pastikan akun pegawai sudah terdaftar di sistem.
+                  </p>
+                  <button
+                    type="button"
+                    onClick={loadData}
+                    className={`${buttonSecondary} mt-4`}
+                  >
+                    <RefreshCw size={16} />
+                    Muat Ulang
+                  </button>
+                </div>
+              ) : (
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  {/* ============================================
+                      KARTU PEGAWAI
+                  ============================================ */}
+                  <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
+                    <div className="flex items-start gap-4 border-b theme-border p-5 sm:p-6">
+                      <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+                        <UserRound size={24} />
+                      </div>
+                      <div className="min-w-0">
+                        <h2 className="text-lg font-bold theme-text">
+                          {pegawai.namaLengkap || "Tanpa nama"}
+                        </h2>
+                        <p className="mt-1 flex items-center gap-1.5 text-sm theme-text-muted">
+                          <Mail size={14} />
+                          {pegawai.email || "Email tidak tersedia"}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 gap-4 p-5 sm:grid-cols-2 sm:p-6">
+                      <div className="rounded-xl bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] border theme-border p-4">
+                        <p className="text-xs theme-text-muted">
+                          Shift saat ini
+                        </p>
+                        <p className="mt-2 text-sm font-semibold theme-text">
+                          {currentShiftName ||
+                            "Belum tersedia pada data pegawai"}
+                        </p>
+                        {selectedShift && (
+                          <p className="mt-1 flex items-center gap-1.5 text-xs theme-text-muted">
+                            <Clock3 size={12} />
+                            {formatJam(selectedShift.jamMasuk)} –{" "}
+                            {formatJam(selectedShift.jamKeluar)}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="rounded-xl bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] border theme-border p-4">
+                        <p className="text-xs theme-text-muted">
+                          Kategori jabatan
+                        </p>
+                        <p className="mt-2 text-sm font-semibold theme-text">
+                          {getNamaJabatan(currentCategory) ||
+                            "Belum tersedia"}
+                        </p>
+                      </div>
+                    </div>
+                  </section>
+
+                  {/* ============================================
+                      FORM PENUGASAN
+                  ============================================ */}
+                  <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
+                    <div className="flex items-start gap-3 border-b theme-border p-5 sm:p-6">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
+                        <CalendarClock size={19} />
+                      </div>
+                      <div>
+                        <h2 className="font-semibold theme-text">
+                          Penugasan Shift & Jabatan
+                        </h2>
+                        <p className="mt-1 text-sm theme-text-muted">
+                          Pilih shift aktif dan kategori jabatan pegawai.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="space-y-5 p-5 sm:p-6">
+                      <Field
+                        label="Shift Kerja"
+                        required
+                        hint="Pilih shift aktif yang digunakan pada presensi pegawai."
+                      >
+                        <select
+                          required
+                          value={form.shiftKerjaId}
+                          onChange={(e) =>
+                            setForm((prev) => ({
+                              ...prev,
+                              shiftKerjaId: e.target.value,
+                            }))
+                          }
+                          className={inputClass}
+                          disabled={saving}
+                        >
+                          <option value="">Pilih shift kerja</option>
+                          {shiftList.map((shift) => (
+                            <option key={shift.id} value={getId(shift.id)}>
+                              {shift.nama} ({formatJam(shift.jamMasuk)}–
+                              {formatJam(shift.jamKeluar)})
+                            </option>
+                          ))}
+                        </select>
+                        {shiftList.length === 0 && (
+                          <span className="block text-xs text-amber-600 dark:text-amber-400">
+                            Tidak ada shift aktif. Periksa data master shift.
+                          </span>
+                        )}
+                      </Field>
+
+                      <Field
+                        label="Kategori Jabatan"
+                        hint="Kosongkan jika kategori jabatan sebelumnya tidak ingin diubah."
+                      >
+                        <select
+                          value={form.kategoriJabatanId}
+                          onChange={(e) =>
+                            setForm((prev) => ({
+                              ...prev,
+                              kategoriJabatanId: e.target.value,
+                            }))
+                          }
+                          className={inputClass}
+                          disabled={saving}
+                        >
+                          <option value="">
+                            Tidak mengubah kategori jabatan
+                          </option>
+                          {jabatanList.map((jabatan) => (
+                            <option
+                              key={jabatan.id}
+                              value={getId(jabatan.id)}
+                            >
+                              {getNamaJabatan(jabatan) || jabatan.id}
+                            </option>
+                          ))}
+                        </select>
+                      </Field>
+
+                      <div className="flex items-start gap-2 rounded-lg border border-blue-200 bg-blue-50/70 p-4 text-sm text-blue-900 dark:border-blue-900/60 dark:bg-blue-950/30 dark:text-blue-200">
+                        <Info size={18} className="mt-0.5 shrink-0" />
+                        <p className="leading-6">
+                          Penugasan dikirim ke sistem. Data yang dikembalikan
+                          sistem tetap menjadi acuan utama.
+                        </p>
+                      </div>
+                    </div>
+                  </section>
+
+                  {/* ============================================
+                      ACTION BUTTONS
+                  ============================================ */}
+                  <div className="flex flex-col-reverse gap-3 border-t theme-border pt-5 sm:flex-row sm:justify-end">
+                    <button
+                      type="button"
+                      onClick={handleBack}
+                      disabled={saving}
+                      className={buttonSecondary}
+                    >
+                      Batal
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={saving || shiftList.length === 0}
+                      className={buttonPrimary}
+                    >
+                      {saving ? (
+                        <LoaderCircle size={17} className="animate-spin" />
+                      ) : (
+                        <Save size={17} />
+                      )}
+                      {saving ? "Menyimpan..." : "Simpan Penugasan"}
+                    </button>
+                  </div>
+                </form>
+              )}
+            </div>
           </div>
         </main>
       </div>

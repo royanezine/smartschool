@@ -23,7 +23,7 @@ const API_URL = (
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
 ).replace(/\/+$/, "");
 
-const SLUG_AKADEMIK = "akademik-1789494009456";
+const SLUG_AKADEMIK = "akademik-1792383561852";
 
 function getPublicApiBase() {
   if (API_URL.endsWith("/api")) {

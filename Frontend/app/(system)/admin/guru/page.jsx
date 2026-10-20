@@ -42,7 +42,6 @@ import { getShiftKerja } from "@/services/shiftKerja.service";
 export default function AdminGuruPage() {
   const router = useRouter();
 
-  // SIDEBAR
   const [isCollapsed, setIsCollapsed] = useState(false);
 
   // DATA
@@ -91,10 +90,11 @@ export default function AdminGuruPage() {
     if (Array.isArray(response?.data?.items)) {
       return response.data.items;
     }
+    if (Array.isArray(response?.items)) return response.items;
     return [];
   };
 
-  const getResponsePagination = (response) => {
+  const getResponsePagination = (response, fallbackData = []) => {
     const meta =
       response?.pagination ??
       response?.meta ??
@@ -102,18 +102,17 @@ export default function AdminGuruPage() {
       response?.data?.meta ??
       {};
 
+    const total = Number(
+      meta.totalData ?? meta.total ?? fallbackData.length
+    );
+    const limit = Number(meta.limit ?? itemsPerPage);
+
     return {
       page: Number(meta.page ?? currentPage),
-      limit: Number(meta.limit ?? itemsPerPage),
-      totalData: Number(
-        meta.totalData ?? meta.total ?? getResponseData(response).length
-      ),
+      limit,
+      totalData: total,
       totalPages: Number(
-        meta.totalPages ??
-          Math.ceil(
-            Number(meta.totalData ?? meta.total ?? getResponseData(response).length) /
-              Math.max(Number(meta.limit ?? itemsPerPage), 1)
-          )
+        meta.totalPages ?? Math.ceil(total / Math.max(limit, 1))
       ),
     };
   };
@@ -148,9 +147,10 @@ export default function AdminGuruPage() {
         const users = getResponseData(response);
 
         setGuru(users);
-        setPagination(getResponsePagination(response));
+        setPagination(getResponsePagination(response, users));
       } catch (err) {
         console.error("[AdminGuruPage] Gagal mengambil guru:", err);
+
         setGuru([]);
         setPagination({
           page: currentPage,
@@ -158,6 +158,7 @@ export default function AdminGuruPage() {
           totalData: 0,
           totalPages: 0,
         });
+
         setError(err?.message || "Gagal mengambil data guru.");
       } finally {
         if (showLoading) setLoading(false);
@@ -174,7 +175,7 @@ export default function AdminGuruPage() {
   );
 
   // =======================================================
-  // FETCH MASTER SHIFT ASLI DARI BACKEND
+  // FETCH MASTER SHIFT DARI BACKEND
   // =======================================================
 
   const fetchShiftKerja = useCallback(async () => {
@@ -188,14 +189,20 @@ export default function AdminGuruPage() {
         status: "aktif",
       });
 
-      setShiftKerjaList(
-        Array.isArray(response?.data) ? response.data : []
-      );
+      if (response?.success === false) {
+        throw new Error(
+          response?.message || "Gagal mengambil master shift kerja."
+        );
+      }
+
+      const shifts = getResponseData(response);
+      setShiftKerjaList(shifts);
     } catch (err) {
       console.error(
         "[AdminGuruPage] Gagal mengambil shift kerja:",
         err
       );
+
       setShiftKerjaList([]);
       setShiftError(
         err?.message || "Gagal mengambil master shift kerja."
@@ -227,6 +234,7 @@ export default function AdminGuruPage() {
         "[AdminGuruPage] Gagal mengambil mata pelajaran:",
         err
       );
+
       setTotalMapel(0);
     } finally {
       setLoadingMapel(false);
@@ -247,63 +255,96 @@ export default function AdminGuruPage() {
   }, [fetchShiftKerja, fetchMapel]);
 
   // =======================================================
-  // COCOKKAN SHIFT GURU DENGAN MASTER SHIFT
-  // Tidak ada pembagian shift berdasarkan urutan baris.
+  // FORMAT JAM
+  // =======================================================
+
+  const formatJam = (value) => {
+    if (value === null || value === undefined || value === "") {
+      return null;
+    }
+
+    const text = String(value).trim();
+
+    // Mendukung HH:mm, HH:mm:ss, serta nilai ISO datetime.
+    const match = text.match(/(?:T|\s)?(\d{1,2}):(\d{2})(?::\d{2})?/);
+
+    if (match) {
+      return `${match[1].padStart(2, "0")}:${match[2]}`;
+    }
+
+    return text;
+  };
+
+  // =======================================================
+  // COCOKKAN SHIFT GURU DENGAN MASTER SHIFT BACKEND
   // =======================================================
 
   const getShiftFromUser = useCallback(
     (item) => {
       if (!item) return null;
 
-      // Prioritaskan relasi shift yang dikembalikan Backend.
+      // 1. Prioritaskan relasi shift yang dikirim Backend.
       const relation =
         item.shiftKerjaMaster ??
         item.shiftKerjaUser?.shiftKerjaMaster ??
-        item.shiftKerja?.shiftKerjaMaster;
+        item.shiftKerja?.shiftKerjaMaster ??
+        item.shiftKerjaUser?.shiftKerja ??
+        null;
 
       if (relation && typeof relation === "object") {
         return relation;
       }
 
-      // Sebagian respons mungkin mengembalikan shiftKerja sebagai objek.
+      // 2. Jika shiftKerja berupa objek langsung.
       if (
         item.shiftKerja &&
         typeof item.shiftKerja === "object" &&
-        (item.shiftKerja.id || item.shiftKerja.nama)
+        (
+          item.shiftKerja.id ||
+          item.shiftKerja.nama ||
+          item.shiftKerja.jamMasuk ||
+          item.shiftKerja.jamKeluar
+        )
       ) {
         return item.shiftKerja;
       }
 
-      // Jika hanya ID yang tersedia, cocokkan dengan master shift.
+      // 3. Jika Backend hanya mengirim ID shift.
       const shiftId =
         item.shiftKerjaId ??
+        item.shiftKerjaUser?.shiftKerjaId ??
         item.shiftKerja?.id ??
-        item.shiftKerjaUser?.shiftKerjaId;
+        null;
 
       if (shiftId) {
-        return (
-          shiftKerjaList.find(
-            (shift) => String(shift.id) === String(shiftId)
-          ) ?? null
+        const found = shiftKerjaList.find(
+          (shift) => String(shift.id) === String(shiftId)
         );
+
+        if (found) return found;
       }
 
-      // Beberapa respons mungkin hanya memberikan nama shift.
-      if (typeof item.shiftKerja === "string" && item.shiftKerja.trim()) {
+      // 4. Jika Backend mengirim nama shift.
+      if (
+        typeof item.shiftKerja === "string" &&
+        item.shiftKerja.trim()
+      ) {
         const shiftName = item.shiftKerja.trim().toLowerCase();
 
-        return (
-          shiftKerjaList.find(
-            (shift) =>
-              String(shift.nama || "").trim().toLowerCase() === shiftName ||
-              String(shift.kode || "").trim().toLowerCase() === shiftName
-          ) ?? {
-            nama: item.shiftKerja,
-            kode: null,
-            jamMasuk: null,
-            jamKeluar: null,
-          }
+        const found = shiftKerjaList.find(
+          (shift) =>
+            String(shift.nama || "").trim().toLowerCase() === shiftName ||
+            String(shift.kode || "").trim().toLowerCase() === shiftName
         );
+
+        if (found) return found;
+
+        return {
+          nama: item.shiftKerja,
+          kode: null,
+          jamMasuk: null,
+          jamKeluar: null,
+        };
       }
 
       return null;
@@ -313,18 +354,28 @@ export default function AdminGuruPage() {
 
   const getShiftName = (shift) => {
     if (!shift) return "Belum ditentukan";
+
     return shift.nama || shift.kode || "Shift tanpa nama";
   };
 
   const getShiftHours = (shift) => {
-    if (!shift) return "-";
+    if (!shift) return "Belum ditentukan";
 
-    const masuk = shift.jamMasuk || "-";
-    const keluar = shift.jamKeluar || "-";
+    const masuk = formatJam(
+      shift.jamMasuk ??
+      shift.jam_masuk ??
+      shift.waktuMasuk
+    );
 
-    if (masuk === "-" && keluar === "-") return "-";
+    const keluar = formatJam(
+      shift.jamKeluar ??
+      shift.jam_keluar ??
+      shift.waktuKeluar
+    );
 
-    return `${masuk} - ${keluar}`;
+    if (!masuk && !keluar) return "Jam belum tersedia";
+
+    return `${masuk || "--:--"} - ${keluar || "--:--"}`;
   };
 
   // =======================================================
@@ -358,8 +409,6 @@ export default function AdminGuruPage() {
   // =======================================================
 
   const handleSortChange = (value) => {
-    setCurrentPage(1);
-
     const options = {
       nama_asc: ["namaLengkap", "asc"],
       nama_desc: ["namaLengkap", "desc"],
@@ -372,6 +421,7 @@ export default function AdminGuruPage() {
     const selected = options[value];
     if (!selected) return;
 
+    setCurrentPage(1);
     setSortBy(selected[0]);
     setSortOrder(selected[1]);
   };
@@ -389,7 +439,7 @@ export default function AdminGuruPage() {
   }, [sortBy, sortOrder]);
 
   // =======================================================
-  // DELETE GURU
+  // NONAKTIFKAN GURU
   // =======================================================
 
   const handleDelete = async (id, nama) => {
@@ -415,7 +465,7 @@ export default function AdminGuruPage() {
 
       window.alert(
         response?.message ||
-          `Guru "${nama}" berhasil dinonaktifkan.`
+        `Permintaan menonaktifkan guru "${nama}" berhasil.`
       );
 
       if (guru.length === 1 && currentPage > 1) {
@@ -424,7 +474,8 @@ export default function AdminGuruPage() {
         await fetchGuru();
       }
     } catch (err) {
-      console.error("[AdminGuruPage] Gagal menghapus guru:", err);
+      console.error("[AdminGuruPage] Gagal menonaktifkan guru:", err);
+
       window.alert(err?.message || "Gagal menonaktifkan guru.");
     } finally {
       setDeletingId(null);
@@ -458,7 +509,10 @@ export default function AdminGuruPage() {
     const maxButtons = 5;
 
     if (totalPages <= maxButtons) {
-      return Array.from({ length: totalPages }, (_, index) => index + 1);
+      return Array.from(
+        { length: totalPages },
+        (_, index) => index + 1
+      );
     }
 
     if (currentPage <= 3) return [1, 2, 3, 4, 5];
@@ -488,14 +542,20 @@ export default function AdminGuruPage() {
 
   const totalGuru = totalData;
 
+  // Jumlah aktif/nonaktif dihitung dari halaman yang sedang tampil.
+  // Ini menghindari klaim total global yang tidak dikirim Backend.
   const totalAktif = guru.filter(
     (item) =>
-      String(item.status || "").toLowerCase() === "aktif"
+      ["aktif", "active"].includes(
+        String(item.status || "").toLowerCase()
+      )
   ).length;
 
   const totalNonaktif = guru.filter(
     (item) =>
-      String(item.status || "").toLowerCase() !== "aktif"
+      !["aktif", "active"].includes(
+        String(item.status || "").toLowerCase()
+      )
   ).length;
 
   const normalizeStatus = (status) => {
@@ -523,10 +583,11 @@ export default function AdminGuruPage() {
     return cleanName.substring(0, 2).toUpperCase();
   };
 
-  const getAvatarColor = () => "bg-[image:var(--color-brand-logo-bg)]";
+  const getAvatarColor = () =>
+    "bg-[image:var(--color-brand-logo-bg)]";
 
   // =======================================================
-  // HELPER EKSPOR
+  // DATA EKSPOR
   // =======================================================
 
   const escapeHTML = (value) =>
@@ -558,8 +619,12 @@ export default function AdminGuruPage() {
         golongan: item.golongan || "",
         jenisKelamin: item.jenisKelamin || "",
         shift: getShiftName(shift),
-        jamMasuk: shift?.jamMasuk || "-",
-        jamKeluar: shift?.jamKeluar || "-",
+        jamMasuk: formatJam(
+          shift?.jamMasuk ?? shift?.jam_masuk ?? shift?.waktuMasuk
+        ) || "-",
+        jamKeluar: formatJam(
+          shift?.jamKeluar ?? shift?.jam_keluar ?? shift?.waktuKeluar
+        ) || "-",
         sekolah: item.sekolah?.nama || "",
       };
     });
@@ -710,7 +775,9 @@ export default function AdminGuruPage() {
           <h2>Data Guru SmartSchool</h2>
           <table>
             <thead>
-              <tr>${headers.map((header) => `<th>${escapeHTML(header)}</th>`).join("")}</tr>
+              <tr>
+                ${headers.map((header) => `<th>${escapeHTML(header)}</th>`).join("")}
+              </tr>
             </thead>
             <tbody>${tableRows}</tbody>
           </table>
@@ -747,7 +814,11 @@ export default function AdminGuruPage() {
       return;
     }
 
-    const printWindow = window.open("", "_blank", "width=1200,height=800");
+    const printWindow = window.open(
+      "",
+      "_blank",
+      "width=1200,height=800"
+    );
 
     if (!printWindow) {
       window.alert("Mohon izinkan popup pada browser untuk mencetak.");
@@ -923,11 +994,13 @@ export default function AdminGuruPage() {
                   >
                     <RefreshCw
                       size={17}
-                      className={loading || loadingShift ? "animate-spin" : ""}
+                      className={
+                        loading || loadingShift ? "animate-spin" : ""
+                      }
                     />
                   </button>
 
-                  {/* TAMBAH */}
+                  {/* TAMBAH GURU */}
                   <button
                     type="button"
                     onClick={() => setShowModal(true)}
@@ -939,7 +1012,7 @@ export default function AdminGuruPage() {
                 </div>
               </div>
 
-              {/* INFO MASTER SHIFT ASLI */}
+              {/* MASTER SHIFT */}
               <div className="theme-card rounded-xl border theme-border shadow-sm p-4">
                 <div className="flex flex-col gap-4">
                   <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
@@ -953,7 +1026,7 @@ export default function AdminGuruPage() {
                           Master Shift Kerja
                         </p>
                         <p className="text-xs theme-text-muted mt-0.5">
-                          Data shift aktif yang diambil langsung dari Backend.
+                          Jadwal shift aktif dari Backend.
                         </p>
                       </div>
                     </div>
@@ -961,7 +1034,7 @@ export default function AdminGuruPage() {
                     <span className="text-xs theme-text-muted">
                       {loadingShift
                         ? "Memuat shift..."
-                        : `${shiftKerjaList.length} shift aktif`}
+                        : `${shiftKerjaList.length} shift tersedia`}
                     </span>
                   </div>
 
@@ -973,7 +1046,7 @@ export default function AdminGuruPage() {
                     !shiftError &&
                     shiftKerjaList.length === 0 && (
                       <p className="text-sm theme-text-muted">
-                        Belum ada master shift aktif.
+                        Belum ada master shift yang tersedia.
                       </p>
                     )}
 
@@ -984,16 +1057,19 @@ export default function AdminGuruPage() {
                         className="flex items-center gap-2 px-3 py-2 theme-card-soft border theme-border rounded-lg"
                       >
                         <span className="w-2 h-2 rounded-full bg-[var(--color-primary)]" />
+
                         <span className="text-xs font-medium theme-text-secondary">
-                          {shift.nama}
+                          {getShiftName(shift)}
                         </span>
+
                         {shift.kode && (
                           <span className="text-xs theme-text-muted">
                             ({shift.kode})
                           </span>
                         )}
+
                         <span className="text-xs theme-text-muted">
-                          {shift.jamMasuk} - {shift.jamKeluar}
+                          {getShiftHours(shift)}
                         </span>
                       </div>
                     ))}
@@ -1001,16 +1077,18 @@ export default function AdminGuruPage() {
                 </div>
               </div>
 
-              {/* ERROR GURU */}
+              {/* ERROR */}
               {error && (
                 <div className="flex items-start gap-3 p-4 rounded-xl border theme-danger">
                   <AlertCircle size={20} className="mt-0.5 shrink-0" />
+
                   <div className="flex-1">
                     <p className="text-sm font-semibold">
                       Gagal mengambil data guru
                     </p>
                     <p className="text-sm mt-1">{error}</p>
                   </div>
+
                   <button
                     type="button"
                     onClick={handleRefresh}
@@ -1043,7 +1121,7 @@ export default function AdminGuruPage() {
                       <CheckCircle size={16} />
                     </div>
                     <p className="text-[10px] font-medium theme-text-muted uppercase tracking-wider">
-                      Aktif
+                      Aktif di Halaman
                     </p>
                   </div>
                   <p className="text-2xl font-bold theme-text mt-1">
@@ -1057,17 +1135,12 @@ export default function AdminGuruPage() {
                       <XCircle size={16} />
                     </div>
                     <p className="text-[10px] font-medium theme-text-muted uppercase tracking-wider">
-                      Nonaktif
+                      Nonaktif di Halaman
                     </p>
                   </div>
                   <p className="text-2xl font-bold theme-text mt-1">
                     {loading ? "—" : totalNonaktif}
                   </p>
-                  {totalGuru > guru.length && (
-                    <p className="text-[10px] theme-text-muted mt-1">
-                      Dari halaman aktif
-                    </p>
-                  )}
                 </div>
 
                 <div className="theme-card rounded-xl border theme-border p-4 shadow-sm">
@@ -1076,7 +1149,7 @@ export default function AdminGuruPage() {
                       <Users size={16} />
                     </div>
                     <p className="text-[10px] font-medium theme-text-muted uppercase tracking-wider">
-                      Mapel
+                      Mata Pelajaran
                     </p>
                   </div>
                   <p className="text-2xl font-bold text-[var(--color-info)] mt-1">
@@ -1096,6 +1169,7 @@ export default function AdminGuruPage() {
                       size={17}
                       className="absolute left-3.5 top-1/2 -translate-y-1/2 theme-text-muted"
                     />
+
                     <input
                       type="text"
                       placeholder="Cari nama, NIP, email, atau username..."
@@ -1108,7 +1182,11 @@ export default function AdminGuruPage() {
                   </div>
 
                   <div className="flex items-center gap-2">
-                    <Filter size={17} className="theme-text-muted shrink-0" />
+                    <Filter
+                      size={17}
+                      className="theme-text-muted shrink-0"
+                    />
+
                     <select
                       value={filterStatus}
                       onChange={(event) =>
@@ -1127,6 +1205,7 @@ export default function AdminGuruPage() {
                       size={17}
                       className="theme-text-muted shrink-0"
                     />
+
                     <select
                       value={sortValue}
                       onChange={(event) =>
@@ -1278,6 +1357,7 @@ export default function AdminGuruPage() {
                                       <Clock3 size={13} />
                                       {getShiftName(shift)}
                                     </span>
+
                                     {shift.kode && (
                                       <span className="text-[11px] theme-text-muted">
                                         Kode: {shift.kode}
@@ -1291,18 +1371,22 @@ export default function AdminGuruPage() {
                                 )}
                               </td>
 
-                              {/* JAM SHIFT DARI BACKEND */}
+                              {/* JAM KERJA DARI BACKEND */}
                               <td className="px-4 py-4 align-middle">
-                                <div className="flex flex-col">
+                                <div className="flex flex-col gap-1">
                                   <span className="text-sm font-medium theme-text-secondary whitespace-nowrap">
                                     {getShiftHours(shift)}
                                   </span>
+
                                   <span className="text-[11px] theme-text-muted">
-                                    Jam kerja
+                                    {shift?.nama
+                                      ? `Jadwal ${getShiftName(shift)}`
+                                      : "Jadwal kerja"}
                                   </span>
                                 </div>
                               </td>
 
+                              {/* STATUS */}
                               <td className="px-4 py-4 align-middle">
                                 <span
                                   className={
@@ -1316,6 +1400,7 @@ export default function AdminGuruPage() {
                                 </span>
                               </td>
 
+                              {/* AKSI */}
                               <td className="px-4 py-4 align-middle">
                                 <div className="flex justify-center gap-1.5">
                                   <button
@@ -1425,6 +1510,7 @@ export default function AdminGuruPage() {
 
                       <div className="flex items-center gap-1.5">
                         <span>Tampil</span>
+
                         <select
                           value={itemsPerPage}
                           onChange={(event) => {

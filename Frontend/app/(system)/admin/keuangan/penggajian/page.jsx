@@ -57,6 +57,15 @@ const MONTHS = [
   "Desember",
 ];
 
+const inputClass =
+  "theme-input h-10 w-full rounded-lg border px-3 text-sm outline-none transition disabled:cursor-not-allowed disabled:opacity-60";
+
+const buttonSecondary =
+  "inline-flex h-10 items-center justify-center gap-2 rounded-lg border theme-border theme-card px-3 text-sm font-medium theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] disabled:cursor-not-allowed disabled:opacity-60 transition";
+
+const buttonPrimary =
+  "inline-flex h-10 items-center justify-center gap-2 rounded-lg theme-primary px-4 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 transition";
+
 function formatCurrency(value) {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -73,9 +82,7 @@ function formatNumber(value, digits = 2) {
 
 function formatDate(value) {
   if (!value) return "-";
-
   const date = new Date(value);
-
   if (Number.isNaN(date.getTime())) return "-";
 
   return date.toLocaleDateString("id-ID", {
@@ -100,7 +107,7 @@ function getStatusStyle(status) {
     case "dibayar":
       return "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300";
     default:
-      return "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300";
+      return "bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] theme-text-secondary";
   }
 }
 
@@ -108,7 +115,6 @@ function getStatusLabel(status) {
   const found = STATUS_OPTIONS.find(
     (item) => item.value === String(status ?? "").toLowerCase()
   );
-
   return found?.label ?? status ?? "Tidak diketahui";
 }
 
@@ -116,9 +122,7 @@ function normalizeListResponse(response) {
   let result = response;
 
   for (let index = 0; index < 3; index += 1) {
-    if (Array.isArray(result?.data)) {
-      return result;
-    }
+    if (Array.isArray(result?.data)) return result;
 
     if (
       result?.data &&
@@ -128,7 +132,6 @@ function normalizeListResponse(response) {
       result = result.data;
       continue;
     }
-
     break;
   }
 
@@ -139,9 +142,7 @@ function normalizeListResponse(response) {
 }
 
 function normalizeActionResponse(response) {
-  if (!response || typeof response !== "object") {
-    return {};
-  }
+  if (!response || typeof response !== "object") return {};
 
   const payload =
     response.data &&
@@ -157,10 +158,14 @@ function normalizeActionResponse(response) {
   };
 }
 
-/**
- * Header kolom yang bisa diklik untuk sorting ASC/DESC.
- */
-function SortableHeader({ label, column, sortBy, sortOrder, onSort, align = "left" }) {
+function SortableHeader({
+  label,
+  column,
+  sortBy,
+  sortOrder,
+  onSort,
+  align = "left",
+}) {
   const active = sortBy === column;
 
   return (
@@ -172,10 +177,12 @@ function SortableHeader({ label, column, sortBy, sortOrder, onSort, align = "lef
       <button
         type="button"
         onClick={() => onSort(column)}
-        className={`inline-flex items-center gap-1.5 transition hover:text-slate-800 dark:hover:text-slate-100 ${
-          active ? "text-blue-700 dark:text-blue-300" : ""
+        className={`inline-flex items-center gap-1.5 transition hover:theme-text ${
+          active ? "theme-primary-text" : ""
         }`}
-        title={`Urutkan ${label} ${active && sortOrder === "asc" ? "DESC" : "ASC"}`}
+        title={`Urutkan ${label} ${
+          active && sortOrder === "asc" ? "DESC" : "ASC"
+        }`}
       >
         {label}
         {active ? (
@@ -227,24 +234,20 @@ export default function PenggajianPage() {
   const [notice, setNotice] = useState("");
 
   const [showCalculation, setShowCalculation] = useState(false);
-  const [calcMonth, setCalcMonth] = useState(
-    String(now.getMonth() + 1)
-  );
+  const [calcMonth, setCalcMonth] = useState(String(now.getMonth() + 1));
   const [calcYear, setCalcYear] = useState(String(now.getFullYear()));
   const [calcEmployeeId, setCalcEmployeeId] = useState("");
   const [calculating, setCalculating] = useState(false);
   const [calcResult, setCalcResult] = useState(null);
 
   const [showFreeze, setShowFreeze] = useState(false);
-  const [freezeMonth, setFreezeMonth] = useState(
-    String(now.getMonth() + 1)
-  );
+  const [freezeMonth, setFreezeMonth] = useState(String(now.getMonth() + 1));
   const [freezeYear, setFreezeYear] = useState(String(now.getFullYear()));
   const [freezing, setFreezing] = useState(false);
 
-  // ============================================================
-  // SORTING STATE
-  // ============================================================
+  /* ============================================================
+     SORTING STATE
+  ============================================================ */
   const [sortBy, setSortBy] = useState("nama");
   const [sortOrder, setSortOrder] = useState("asc");
 
@@ -259,11 +262,8 @@ export default function PenggajianPage() {
 
   const loadData = useCallback(
     async (isRefresh = false) => {
-      if (isRefresh) {
-        setRefreshing(true);
-      } else {
-        setLoading(true);
-      }
+      if (isRefresh) setRefreshing(true);
+      else setLoading(true);
 
       setError("");
 
@@ -285,27 +285,20 @@ export default function PenggajianPage() {
         const responseSummary = result.summary ?? {};
 
         const total = Number(
-          responseMeta.total ??
-            responseMeta.totalData ??
-            records.length
+          responseMeta.total ?? responseMeta.totalData ?? records.length
         );
-
         const totalPages = Number(
           responseMeta.totalPages ??
             (total > 0 ? Math.ceil(total / limit) : 0)
         );
 
         setItems(records);
-
         setSummary({
           totalAnggaranGaji: Number(
             responseSummary.totalAnggaranGaji ?? 0
           ),
-          totalJamKerja: Number(
-            responseSummary.totalJamKerja ?? 0
-          ),
+          totalJamKerja: Number(responseSummary.totalJamKerja ?? 0),
         });
-
         setMeta({
           total,
           totalPages,
@@ -313,23 +306,12 @@ export default function PenggajianPage() {
           limit: Number(responseMeta.limit ?? limit),
         });
 
-        if (totalPages > 0 && page > totalPages) {
-          setPage(totalPages);
-        } else if (total === 0 && page !== 1) {
-          setPage(1);
-        }
+        if (totalPages > 0 && page > totalPages) setPage(totalPages);
+        else if (total === 0 && page !== 1) setPage(1);
       } catch (err) {
         setItems([]);
-        setSummary({
-          totalAnggaranGaji: 0,
-          totalJamKerja: 0,
-        });
-        setMeta({
-          total: 0,
-          totalPages: 0,
-          page,
-          limit,
-        });
+        setSummary({ totalAnggaranGaji: 0, totalJamKerja: 0 });
+        setMeta({ total: 0, totalPages: 0, page, limit });
         setError(getErrorMessage(err));
       } finally {
         setLoading(false);
@@ -343,9 +325,9 @@ export default function PenggajianPage() {
     loadData();
   }, [loadData]);
 
-  // ============================================================
-  // DATA YANG SUDAH DI-SORT
-  // ============================================================
+  /* ============================================================
+     SORTED DATA
+  ============================================================ */
   const sortedItems = useMemo(() => {
     const data = [...items];
 
@@ -433,16 +415,13 @@ export default function PenggajianPage() {
 
     setItems(records);
     setSummary({
-      totalAnggaranGaji: Number(
-        responseSummary.totalAnggaranGaji ?? 0
-      ),
+      totalAnggaranGaji: Number(responseSummary.totalAnggaranGaji ?? 0),
       totalJamKerja: Number(responseSummary.totalJamKerja ?? 0),
     });
     setMeta({
       total,
       totalPages: Number(
-        responseMeta.totalPages ??
-          (total > 0 ? Math.ceil(total / limit) : 0)
+        responseMeta.totalPages ?? (total > 0 ? Math.ceil(total / limit) : 0)
       ),
       page: Number(responseMeta.page ?? 1),
       limit: Number(responseMeta.limit ?? limit),
@@ -451,7 +430,6 @@ export default function PenggajianPage() {
 
   async function handleCalculate(event) {
     event.preventDefault();
-
     if (calculating) return;
 
     const monthNumber = Number(calcMonth);
@@ -490,7 +468,6 @@ export default function PenggajianPage() {
       setNotice(
         result.message || "Permintaan kalkulasi penggajian berhasil."
       );
-
       setShowCalculation(false);
       setPage(1);
       await reloadFirstPage();
@@ -503,7 +480,6 @@ export default function PenggajianPage() {
 
   async function handleFreezePeriod(event) {
     event.preventDefault();
-
     if (freezing) return;
 
     const monthNumber = Number(freezeMonth);
@@ -538,11 +514,8 @@ export default function PenggajianPage() {
       });
 
       const result = normalizeActionResponse(response);
-
       const totalDibekukan = Number(
-        result.totalDibekukan ??
-          result.data?.totalDibekukan ??
-          0
+        result.totalDibekukan ?? result.data?.totalDibekukan ?? 0
       );
 
       setNotice(
@@ -567,13 +540,11 @@ export default function PenggajianPage() {
       setError("ID data penggajian tidak ditemukan.");
       return;
     }
-
     router.push(`/admin/keuangan/penggajian/${item.id}/edit`);
   }
 
   function handleDelete(item) {
-    const namaPegawai =
-      item.pengguna?.namaLengkap ?? "pegawai ini";
+    const namaPegawai = item.pengguna?.namaLengkap ?? "pegawai ini";
 
     const confirmed = window.confirm(
       `Kamu memilih data penggajian ${namaPegawai} untuk dihapus. Lanjutkan?`
@@ -582,17 +553,15 @@ export default function PenggajianPage() {
     if (!confirmed) return;
 
     setNotice(
-      "Penghapusan belum dilakukan karena sistem belum menyediakan endpoint DELETE penggajian. Data tetap aman dan tidak berubah."
+      "Penghapusan belum dilakukan karena sistem belum menyediakan fitur hapus penggajian. Data tetap aman dan tidak berubah."
     );
   }
 
-  const firstItem =
-    meta.total === 0 ? 0 : (page - 1) * limit + 1;
-
+  const firstItem = meta.total === 0 ? 0 : (page - 1) * limit + 1;
   const lastItem = Math.min(page * limit, meta.total);
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar
         role="admin"
         isOpen={sidebarOpen}
@@ -604,25 +573,20 @@ export default function PenggajianPage() {
           <Header onMenuClick={() => setSidebarOpen(true)} />
         </div>
 
-        <main className="flex-1 overflow-y-auto">
-          <div className="mx-auto w-full max-w-[1600px] p-4 sm:p-6 lg:p-8">
-            <div className="mb-7 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <main className="min-w-0 flex-1 overflow-y-auto theme-page theme-text">
+          <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+            {/* ============================================
+                PAGE HEADER
+            ============================================ */}
+            <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
               <div>
-                <div className="mb-2 flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-                  <span>Keuangan</span>
-                  <span>/</span>
-                  <span className="text-blue-700 dark:text-blue-400">
-                    Penggajian
-                  </span>
-                </div>
-
-                <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+               
+                <h1 className="text-2xl font-bold tracking-tight theme-text sm:text-3xl">
                   Penggajian Pegawai
                 </h1>
-
-                <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">
-                  Kelola hasil kalkulasi gaji berdasarkan jam kerja dan
-                  tarif yang tercatat di sistem.
+                <p className="mt-2 max-w-2xl text-sm leading-6 theme-text-secondary">
+                  Kelola hasil kalkulasi gaji berdasarkan jam kerja dan tarif
+                  yang tercatat di sistem.
                 </p>
               </div>
 
@@ -631,7 +595,7 @@ export default function PenggajianPage() {
                   type="button"
                   onClick={() => loadData(true)}
                   disabled={refreshing || loading}
-                  className="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 hover:bg-slate-100 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                  className={buttonSecondary}
                 >
                   <RefreshCw
                     size={16}
@@ -646,7 +610,7 @@ export default function PenggajianPage() {
                     setCalcResult(null);
                     setShowCalculation(true);
                   }}
-                  className="inline-flex h-10 items-center gap-2 rounded-lg bg-blue-700 px-4 text-sm font-semibold text-white hover:bg-blue-800"
+                  className={buttonPrimary}
                 >
                   <Calculator size={17} />
                   Kalkulasi Gaji
@@ -655,7 +619,7 @@ export default function PenggajianPage() {
                 <button
                   type="button"
                   onClick={() => setShowFreeze(true)}
-                  className="inline-flex h-10 items-center gap-2 rounded-lg border border-slate-200 bg-white px-3 text-sm font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                  className={buttonSecondary}
                 >
                   <LockKeyhole size={16} />
                   Bekukan Periode
@@ -663,6 +627,7 @@ export default function PenggajianPage() {
               </div>
             </div>
 
+            {/* ALERT */}
             {error && (
               <AlertBox
                 type="error"
@@ -679,16 +644,17 @@ export default function PenggajianPage() {
               />
             )}
 
+            {/* CALC RESULT */}
             {calcResult && (
-              <div className="mb-5 rounded-xl border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950/30">
+              <div className="mb-5 rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-900/60 dark:bg-blue-950/30">
                 <div className="flex items-start justify-between gap-3">
                   <div>
                     <h2 className="font-semibold text-blue-900 dark:text-blue-200">
                       Hasil kalkulasi penggajian
                     </h2>
                     <p className="mt-1 text-sm text-blue-800 dark:text-blue-300">
-                      Berhasil diproses: {calcResult.totalDiproses ?? 0}{" "}
-                      data. Dilewati: {calcResult.totalDilewati ?? 0} data.
+                      Berhasil diproses: {calcResult.totalDiproses ?? 0} data.
+                      Dilewati: {calcResult.totalDilewati ?? 0} data.
                     </p>
                   </div>
 
@@ -708,12 +674,12 @@ export default function PenggajianPage() {
                       {calcResult.dilewati.map((item, index) => (
                         <div
                           key={`${item.nama ?? "pegawai"}-${index}`}
-                          className="rounded-lg border border-blue-200 bg-white p-3 text-sm dark:border-blue-900 dark:bg-slate-900"
+                          className="theme-card rounded-lg border theme-border p-3 text-sm"
                         >
-                          <p className="font-medium">
+                          <p className="font-medium theme-text">
                             {item.nama ?? "Pegawai"}
                           </p>
-                          <p className="mt-1 text-slate-600 dark:text-slate-300">
+                          <p className="mt-1 theme-text-secondary">
                             {item.alasan ?? "Tidak ada keterangan."}
                           </p>
                         </div>
@@ -723,36 +689,41 @@ export default function PenggajianPage() {
               </div>
             )}
 
-            <div className="mb-7 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {/* SUMMARY */}
+            <div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
               <SummaryCard
                 title="Total Data Penggajian"
                 value={meta.total.toLocaleString("id-ID")}
                 description="Sesuai filter yang diterapkan"
                 icon={Users}
+                tone="blue"
               />
-
               <SummaryCard
                 title="Total Anggaran Gaji"
                 value={formatCurrency(summary.totalAnggaranGaji)}
                 description="Akumulasi anggaran gaji dalam sistem"
                 icon={Wallet}
+                tone="emerald"
               />
-
               <SummaryCard
                 title="Total Jam Kerja"
                 value={`${formatNumber(summary.totalJamKerja)} jam`}
                 description="Akumulasi jam kerja dalam sistem"
                 icon={Clock3}
+                tone="indigo"
               />
             </div>
 
-            <section className="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-              <div className="border-b border-slate-200 p-4 dark:border-slate-800 sm:p-5">
+            {/* TABLE */}
+            <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
+              <div className="border-b theme-border p-4 sm:p-5">
                 <div className="mb-4">
-                  <h2 className="font-semibold">Daftar Penggajian</h2>
-                  <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                    Cari pegawai dan saring data berdasarkan periode
-                    atau status penggajian.
+                  <h2 className="font-semibold theme-text">
+                    Daftar Penggajian
+                  </h2>
+                  <p className="mt-1 text-sm theme-text-muted">
+                    Cari pegawai dan saring data berdasarkan periode atau
+                    status penggajian.
                   </p>
                 </div>
 
@@ -763,7 +734,7 @@ export default function PenggajianPage() {
                   <div className="relative min-w-0 lg:col-span-2">
                     <Search
                       size={17}
-                      className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"
+                      className="absolute left-3 top-1/2 -translate-y-1/2 theme-text-muted"
                     />
                     <input
                       type="search"
@@ -772,7 +743,7 @@ export default function PenggajianPage() {
                         setSearchInput(event.target.value)
                       }
                       placeholder="Cari nama pegawai..."
-                      className="h-10 w-full rounded-lg border border-slate-200 bg-white pl-10 pr-3 text-sm outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-950 dark:focus:ring-blue-950"
+                      className={`${inputClass} pl-10`}
                     />
                   </div>
 
@@ -783,7 +754,7 @@ export default function PenggajianPage() {
                       setBulan(event.target.value);
                       setPage(1);
                     }}
-                    className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm dark:border-slate-700 dark:bg-slate-950"
+                    className={inputClass}
                   >
                     <option value="">Semua Bulan</option>
                     {MONTHS.map((month, index) => (
@@ -800,7 +771,7 @@ export default function PenggajianPage() {
                       setTahun(event.target.value);
                       setPage(1);
                     }}
-                    className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm dark:border-slate-700 dark:bg-slate-950"
+                    className={inputClass}
                   >
                     <option value="">Semua Tahun</option>
                     {Array.from(
@@ -820,7 +791,7 @@ export default function PenggajianPage() {
                       setStatus(event.target.value);
                       setPage(1);
                     }}
-                    className="h-10 rounded-lg border border-slate-200 bg-white px-3 text-sm dark:border-slate-700 dark:bg-slate-950"
+                    className={inputClass}
                   >
                     {STATUS_OPTIONS.map((option) => (
                       <option key={option.value} value={option.value}>
@@ -830,18 +801,14 @@ export default function PenggajianPage() {
                   </select>
 
                   <div className="flex gap-2">
-                    <button
-                      type="submit"
-                      className="inline-flex h-10 flex-1 items-center justify-center gap-2 rounded-lg bg-slate-900 px-3 text-sm font-medium text-white hover:bg-slate-800 dark:bg-blue-700 dark:hover:bg-blue-600"
-                    >
+                    <button type="submit" className={`${buttonPrimary} flex-1`}>
                       <Search size={16} />
                       Cari
                     </button>
-
                     <button
                       type="button"
                       onClick={resetFilters}
-                      className="h-10 rounded-lg border border-slate-200 px-3 text-sm font-medium text-slate-600 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                      className={buttonSecondary}
                     >
                       Reset
                     </button>
@@ -850,32 +817,34 @@ export default function PenggajianPage() {
               </div>
 
               {loading ? (
-                <div className="flex min-h-64 flex-col items-center justify-center">
+                <div className="flex min-h-64 flex-col items-center justify-center px-4 text-center">
                   <LoaderCircle
                     size={28}
-                    className="animate-spin text-blue-600"
+                    className="animate-spin theme-primary-text"
                   />
-                  <p className="mt-3 text-sm font-medium">
+                  <p className="mt-3 text-sm font-medium theme-text">
                     Memuat data penggajian...
                   </p>
-                  <p className="mt-1 text-xs text-slate-500">
+                  <p className="mt-1 text-xs theme-text-muted">
                     Mengambil data dari sistem
                   </p>
                 </div>
               ) : error && items.length === 0 ? (
                 <div className="flex min-h-64 flex-col items-center justify-center px-4 text-center">
-                  <AlertCircle size={30} className="text-red-500" />
-                  <p className="mt-3 font-semibold">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 text-red-600 dark:bg-red-950/50 dark:text-red-400">
+                    <AlertCircle size={23} />
+                  </div>
+                  <p className="mt-4 font-semibold theme-text">
                     Data penggajian gagal dimuat
                   </p>
-                  <p className="mt-1 max-w-md text-sm text-slate-500">
-                    Periksa koneksi sistem dan hak akses akun, kemudian
-                    coba muat ulang.
+                  <p className="mt-1 max-w-md text-sm theme-text-muted">
+                    Periksa koneksi sistem dan hak akses akun, kemudian coba
+                    muat ulang.
                   </p>
                   <button
                     type="button"
                     onClick={() => loadData(true)}
-                    className="mt-4 inline-flex h-9 items-center gap-2 rounded-lg bg-blue-700 px-3 text-sm font-medium text-white hover:bg-blue-800"
+                    className={`${buttonPrimary} mt-4`}
                   >
                     <RefreshCw size={15} />
                     Coba Lagi
@@ -883,20 +852,20 @@ export default function PenggajianPage() {
                 </div>
               ) : items.length === 0 ? (
                 <div className="flex min-h-64 flex-col items-center justify-center px-4 text-center">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-slate-500 dark:bg-slate-800">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] theme-text-muted">
                     <Wallet size={23} />
                   </div>
-                  <p className="mt-4 font-semibold">
+                  <p className="mt-4 font-semibold theme-text">
                     Belum ada data penggajian
                   </p>
-                  <p className="mt-1 max-w-md text-sm text-slate-500 dark:text-slate-400">
-                    Belum ada data untuk filter ini. Jalankan kalkulasi
-                    jika periode yang dibutuhkan sudah siap.
+                  <p className="mt-1 max-w-md text-sm theme-text-muted">
+                    Belum ada data untuk filter ini. Jalankan kalkulasi jika
+                    periode yang dibutuhkan sudah siap.
                   </p>
                   <button
                     type="button"
                     onClick={() => setShowCalculation(true)}
-                    className="mt-4 inline-flex h-9 items-center gap-2 rounded-lg bg-blue-700 px-3 text-sm font-medium text-white hover:bg-blue-800"
+                    className={`${buttonPrimary} mt-4`}
                   >
                     <Calculator size={15} />
                     Kalkulasi Penggajian
@@ -906,7 +875,7 @@ export default function PenggajianPage() {
                 <>
                   <div className="overflow-x-auto">
                     <table className="w-full min-w-[1150px] text-left text-sm">
-                      <thead className="bg-slate-50 text-xs uppercase tracking-wide text-slate-500 dark:bg-slate-950/60 dark:text-slate-400">
+                      <thead className="bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] text-xs uppercase tracking-wide theme-text-muted border-b theme-border">
                         <tr>
                           <th className="px-5 py-4 font-semibold w-16">No</th>
                           <SortableHeader
@@ -964,33 +933,33 @@ export default function PenggajianPage() {
                         </tr>
                       </thead>
 
-                      <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                      <tbody className="divide-y divide-[color-mix(in_srgb,var(--color-text)_5%,transparent)]">
                         {sortedItems.map((item, index) => (
                           <tr
                             key={item.id}
-                            className="transition hover:bg-slate-50/80 dark:hover:bg-slate-800/40"
+                            className="hover:bg-[color-mix(in_srgb,var(--color-text)_2%,transparent)] transition"
                           >
                             <td className="px-5 py-4">
-                              <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-slate-100 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                              <span className="inline-flex h-7 w-7 items-center justify-center rounded-full bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] text-xs font-semibold theme-text-secondary">
                                 {(page - 1) * limit + index + 1}
                               </span>
                             </td>
 
                             <td className="px-5 py-4">
                               <div className="flex items-center gap-3">
-                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300">
+                                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                                   <Users size={18} />
                                 </div>
                                 <div className="min-w-0">
-                                  <p className="font-semibold">
+                                  <p className="font-semibold theme-text">
                                     {item.pengguna?.namaLengkap ?? "-"}
                                   </p>
-                                  <p className="mt-1 text-xs text-slate-500">
+                                  <p className="mt-1 text-xs theme-text-muted">
                                     {item.pengguna?.nip ||
                                       item.pengguna?.email ||
                                       "-"}
                                   </p>
-                                  <p className="mt-1 text-xs text-slate-500">
+                                  <p className="mt-1 text-xs theme-text-muted">
                                     {item.pengguna?.kategoriJabatan?.nama ??
                                       "-"}
                                   </p>
@@ -999,31 +968,30 @@ export default function PenggajianPage() {
                             </td>
 
                             <td className="px-5 py-4">
-                              <p className="font-medium">
-                                {MONTHS[Number(item.bulan) - 1] ??
-                                  item.bulan}{" "}
+                              <p className="font-medium theme-text">
+                                {MONTHS[Number(item.bulan) - 1] ?? item.bulan}{" "}
                                 {item.tahun}
                               </p>
-                              <p className="mt-1 text-xs text-slate-500">
+                              <p className="mt-1 text-xs theme-text-muted">
                                 {formatDate(item.tanggalMulai)} –{" "}
                                 {formatDate(item.tanggalSelesai)}
                               </p>
                             </td>
 
-                            <td className="px-5 py-4 tabular-nums">
+                            <td className="px-5 py-4 tabular-nums theme-text-secondary">
                               {formatNumber(item.totalHariKerja, 0)} hari
                             </td>
 
-                            <td className="px-5 py-4 tabular-nums">
+                            <td className="px-5 py-4 tabular-nums theme-text-secondary">
                               {formatNumber(item.totalJamKerja)} jam
                             </td>
 
-                            <td className="px-5 py-4 tabular-nums">
+                            <td className="px-5 py-4 tabular-nums theme-text-secondary">
                               {formatCurrency(item.tarifPerJam)}
                             </td>
 
                             <td className="px-5 py-4">
-                              <p className="font-semibold tabular-nums">
+                              <p className="font-semibold tabular-nums theme-text">
                                 {formatCurrency(item.totalGaji)}
                               </p>
                             </td>
@@ -1049,7 +1017,7 @@ export default function PenggajianPage() {
                                       `/admin/keuangan/penggajian/${item.id}`
                                     )
                                   }
-                                  className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-blue-50 hover:text-blue-700 dark:text-slate-400 dark:hover:bg-blue-950/40 dark:hover:text-blue-300"
+                                  className="inline-flex h-9 w-9 items-center justify-center rounded-lg theme-text-muted transition hover:bg-blue-50 hover:text-blue-700 dark:hover:bg-blue-950/40 dark:hover:text-blue-300"
                                 >
                                   <Eye size={16} />
                                 </button>
@@ -1059,7 +1027,7 @@ export default function PenggajianPage() {
                                   title="Edit penggajian"
                                   aria-label={`Edit penggajian ${item.pengguna?.namaLengkap ?? ""}`}
                                   onClick={() => handleEdit(item)}
-                                  className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-amber-50 hover:text-amber-700 dark:text-slate-400 dark:hover:bg-amber-950/40 dark:hover:text-amber-300"
+                                  className="inline-flex h-9 w-9 items-center justify-center rounded-lg theme-text-muted transition hover:bg-amber-50 hover:text-amber-700 dark:hover:bg-amber-950/40 dark:hover:text-amber-300"
                                 >
                                   <Pencil size={16} />
                                 </button>
@@ -1069,7 +1037,7 @@ export default function PenggajianPage() {
                                   title="Hapus penggajian"
                                   aria-label={`Hapus penggajian ${item.pengguna?.namaLengkap ?? ""}`}
                                   onClick={() => handleDelete(item)}
-                                  className="inline-flex h-9 w-9 items-center justify-center rounded-lg text-slate-500 transition hover:bg-red-50 hover:text-red-700 dark:text-slate-400 dark:hover:bg-red-950/40 dark:hover:text-red-300"
+                                  className="inline-flex h-9 w-9 items-center justify-center rounded-lg theme-text-muted transition hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950/40 dark:hover:text-red-300"
                                 >
                                   <Trash2 size={16} />
                                 </button>
@@ -1081,14 +1049,14 @@ export default function PenggajianPage() {
                     </table>
                   </div>
 
-                  <div className="flex flex-col gap-3 border-t border-slate-200 px-5 py-4 dark:border-slate-800 sm:flex-row sm:items-center sm:justify-between">
-                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                  <div className="flex flex-col gap-3 border-t theme-border px-5 py-4 sm:flex-row sm:items-center sm:justify-between">
+                    <p className="text-sm theme-text-muted">
                       Menampilkan{" "}
-                      <span className="font-semibold text-slate-700 dark:text-slate-200">
+                      <span className="font-semibold theme-text">
                         {firstItem}–{lastItem}
                       </span>{" "}
                       dari{" "}
-                      <span className="font-semibold text-slate-700 dark:text-slate-200">
+                      <span className="font-semibold theme-text">
                         {meta.total}
                       </span>{" "}
                       data penggajian
@@ -1101,13 +1069,13 @@ export default function PenggajianPage() {
                         onClick={() =>
                           setPage((current) => Math.max(1, current - 1))
                         }
-                        className="inline-flex h-9 items-center gap-1 rounded-lg border border-slate-200 px-3 text-sm font-medium hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:hover:bg-slate-800"
+                        className={buttonSecondary}
                       >
                         <ChevronLeft size={16} />
                         Sebelumnya
                       </button>
 
-                      <span className="min-w-20 text-center text-sm text-slate-600 dark:text-slate-300">
+                      <span className="min-w-20 text-center text-sm theme-text">
                         {page} / {Math.max(meta.totalPages, 1)}
                       </span>
 
@@ -1123,7 +1091,7 @@ export default function PenggajianPage() {
                             Math.min(meta.totalPages, current + 1)
                           )
                         }
-                        className="inline-flex h-9 items-center gap-1 rounded-lg border border-slate-200 px-3 text-sm font-medium hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-40 dark:border-slate-700 dark:hover:bg-slate-800"
+                        className={buttonSecondary}
                       >
                         Berikutnya
                         <ChevronRight size={16} />
@@ -1134,14 +1102,15 @@ export default function PenggajianPage() {
               )}
             </section>
 
-            <p className="mt-5 text-xs leading-5 text-slate-400">
-              Data penggajian dan ringkasan mengikuti data yang tercatat
-              dalam sistem.
+            <p className="mt-5 text-xs leading-5 theme-text-muted">
+              Data penggajian dan ringkasan mengikuti data yang tercatat dalam
+              sistem.
             </p>
           </div>
         </main>
       </div>
 
+      {/* MODAL KALKULASI */}
       {showCalculation && (
         <Modal
           title="Kalkulasi Penggajian"
@@ -1154,7 +1123,7 @@ export default function PenggajianPage() {
                 required
                 value={calcMonth}
                 onChange={(event) => setCalcMonth(event.target.value)}
-                className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm dark:border-slate-700 dark:bg-slate-950"
+                className={inputClass}
               >
                 {MONTHS.map((month, index) => (
                   <option key={month} value={String(index + 1)}>
@@ -1172,7 +1141,7 @@ export default function PenggajianPage() {
                 max="2100"
                 value={calcYear}
                 onChange={(event) => setCalcYear(event.target.value)}
-                className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm dark:border-slate-700 dark:bg-slate-950"
+                className={inputClass}
               />
             </FormField>
 
@@ -1182,16 +1151,16 @@ export default function PenggajianPage() {
                 value={calcEmployeeId}
                 onChange={(event) => setCalcEmployeeId(event.target.value)}
                 placeholder="Kosongkan untuk semua pegawai"
-                className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm dark:border-slate-700 dark:bg-slate-950"
+                className={inputClass}
               />
-              <p className="mt-1 text-xs text-slate-500">
+              <p className="mt-1 text-xs theme-text-muted">
                 Jika diisi, masukkan ID pengguna sesuai data sistem.
               </p>
             </FormField>
 
-            <div className="rounded-lg bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
-              Data berstatus dibekukan atau disetujui akan dilewati
-              oleh sistem saat kalkulasi.
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-300">
+              Data berstatus dibekukan atau disetujui akan dilewati oleh sistem
+              saat kalkulasi.
             </div>
 
             <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
@@ -1199,15 +1168,14 @@ export default function PenggajianPage() {
                 type="button"
                 disabled={calculating}
                 onClick={() => setShowCalculation(false)}
-                className="h-10 rounded-lg border border-slate-200 px-4 text-sm font-medium dark:border-slate-700"
+                className={buttonSecondary}
               >
                 Batal
               </button>
-
               <button
                 type="submit"
                 disabled={calculating}
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-blue-700 px-4 text-sm font-semibold text-white hover:bg-blue-800 disabled:opacity-60"
+                className={buttonPrimary}
               >
                 {calculating ? (
                   <LoaderCircle size={16} className="animate-spin" />
@@ -1221,6 +1189,7 @@ export default function PenggajianPage() {
         </Modal>
       )}
 
+      {/* MODAL FREEZE */}
       {showFreeze && (
         <Modal
           title="Bekukan Periode Penggajian"
@@ -1233,7 +1202,7 @@ export default function PenggajianPage() {
                 required
                 value={freezeMonth}
                 onChange={(event) => setFreezeMonth(event.target.value)}
-                className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm dark:border-slate-700 dark:bg-slate-950"
+                className={inputClass}
               >
                 {MONTHS.map((month, index) => (
                   <option key={month} value={String(index + 1)}>
@@ -1251,13 +1220,13 @@ export default function PenggajianPage() {
                 max="2100"
                 value={freezeYear}
                 onChange={(event) => setFreezeYear(event.target.value)}
-                className="h-10 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm dark:border-slate-700 dark:bg-slate-950"
+                className={inputClass}
               />
             </FormField>
 
-            <div className="rounded-lg bg-amber-50 p-3 text-sm text-amber-800 dark:bg-amber-950/30 dark:text-amber-300">
-              Tindakan ini mengunci data draft pada periode tersebut.
-              Pastikan hasil kalkulasi sudah benar sebelum melanjutkan.
+            <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-300">
+              Tindakan ini mengunci data draft pada periode tersebut. Pastikan
+              hasil kalkulasi sudah benar sebelum melanjutkan.
             </div>
 
             <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
@@ -1265,15 +1234,14 @@ export default function PenggajianPage() {
                 type="button"
                 disabled={freezing}
                 onClick={() => setShowFreeze(false)}
-                className="h-10 rounded-lg border border-slate-200 px-4 text-sm font-medium dark:border-slate-700"
+                className={buttonSecondary}
               >
                 Batal
               </button>
-
               <button
                 type="submit"
                 disabled={freezing}
-                className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-amber-600 px-4 text-sm font-semibold text-white hover:bg-amber-700 disabled:opacity-60"
+                className="inline-flex h-10 items-center justify-center gap-2 rounded-lg bg-amber-600 px-4 text-sm font-semibold text-white hover:bg-amber-700 disabled:cursor-not-allowed disabled:opacity-60 transition"
               >
                 {freezing ? (
                   <LoaderCircle size={16} className="animate-spin" />
@@ -1290,27 +1258,45 @@ export default function PenggajianPage() {
   );
 }
 
-function SummaryCard({ title, value, description, icon: Icon }) {
+/* =========================================================
+   SUMMARY CARD
+========================================================= */
+
+function SummaryCard({ title, value, description, icon: Icon, tone = "blue" }) {
+  const toneClasses = {
+    blue: "bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300",
+    emerald:
+      "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300",
+    indigo:
+      "bg-indigo-50 text-indigo-700 dark:bg-indigo-950/50 dark:text-indigo-300",
+    slate:
+      "bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] theme-text-muted",
+  };
+
   return (
-    <div className="rounded-xl border border-slate-200 bg-white p-5 dark:border-slate-800 dark:bg-slate-900">
+    <div className="theme-card rounded-xl border theme-border p-5 shadow-sm">
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
-          <p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-            {title}
-          </p>
-          <p className="mt-3 break-words text-xl font-bold tracking-tight tabular-nums sm:text-2xl">
+          <p className="text-sm font-medium theme-text-muted">{title}</p>
+          <p className="mt-3 break-words text-xl font-bold tracking-tight tabular-nums theme-text sm:text-2xl">
             {value}
           </p>
-          <p className="mt-1 text-xs text-slate-400">{description}</p>
+          <p className="mt-1 text-xs theme-text-muted">{description}</p>
         </div>
 
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300">
+        <div
+          className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-lg ${toneClasses[tone] ?? toneClasses.blue}`}
+        >
           <Icon size={20} />
         </div>
       </div>
     </div>
   );
 }
+
+/* =========================================================
+   ALERT BOX
+========================================================= */
 
 function AlertBox({ type, message, onClose }) {
   const success = type === "success";
@@ -1339,14 +1325,24 @@ function AlertBox({ type, message, onClose }) {
   );
 }
 
+/* =========================================================
+   FORM FIELD
+========================================================= */
+
 function FormField({ label, children }) {
   return (
     <div>
-      <label className="mb-2 block text-sm font-medium">{label}</label>
+      <label className="mb-2 block text-sm font-medium theme-text">
+        {label}
+      </label>
       {children}
     </div>
   );
 }
+
+/* =========================================================
+   MODAL
+========================================================= */
 
 function Modal({ title, description, onClose, children }) {
   return (
@@ -1359,12 +1355,12 @@ function Modal({ title, description, onClose, children }) {
       <div
         role="dialog"
         aria-modal="true"
-        className="my-auto w-full max-w-lg rounded-xl border border-slate-200 bg-white p-5 shadow-xl dark:border-slate-700 dark:bg-slate-900 sm:p-6"
+        className="theme-card my-auto w-full max-w-lg rounded-xl border theme-border p-5 shadow-xl sm:p-6"
       >
         <div className="mb-5 flex items-start justify-between gap-4">
           <div>
-            <h2 className="text-lg font-bold">{title}</h2>
-            <p className="mt-1 text-sm leading-6 text-slate-500 dark:text-slate-400">
+            <h2 className="text-lg font-bold theme-text">{title}</h2>
+            <p className="mt-1 text-sm leading-6 theme-text-muted">
               {description}
             </p>
           </div>
@@ -1373,7 +1369,7 @@ function Modal({ title, description, onClose, children }) {
             type="button"
             aria-label="Tutup dialog"
             onClick={onClose}
-            className="rounded-lg p-1.5 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800"
+            className="rounded-lg p-1.5 theme-text-muted hover:bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)] transition"
           >
             <X size={18} />
           </button>

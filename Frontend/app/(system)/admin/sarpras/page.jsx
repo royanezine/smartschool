@@ -361,15 +361,7 @@ export default function SarprasPage() {
               {/* PAGE HEADER */}
               <div className="mb-6 flex flex-col gap-4 xl:flex-row xl:items-center xl:justify-between">
                 <div className="min-w-0">
-                  <div className="mb-2 flex items-center gap-2 text-sm theme-text-muted">
-                    <span>Admin</span>
-
-                    <ChevronRight size={15} />
-
-                    <span className={`font-medium ${themePrimaryText}`}>
-                      Sarana & Prasarana
-                    </span>
-                  </div>
+                  
 
                   <h1 className="text-2xl font-bold tracking-tight theme-text sm:text-3xl">
                     Sarana & Prasarana

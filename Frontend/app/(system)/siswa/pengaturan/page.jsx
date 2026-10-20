@@ -3,11 +3,9 @@
 import { useState } from "react";
 import {
   Lock,
-  Bell,
   Eye,
   EyeOff,
   Check,
-  Save,
   ShieldCheck,
   AlertCircle,
   Info,
@@ -30,7 +28,7 @@ export default function PengaturanSiswaPage() {
           </h1>
 
           <p className="mt-1 text-sm theme-text-muted">
-            Kelola keamanan akun dan preferensi notifikasi kamu.
+            Kelola keamanan akun kamu.
           </p>
         </header>
 
@@ -50,11 +48,6 @@ export default function PengaturanSiswaPage() {
 
         <div className="space-y-6">
           <KeamananSection
-            onSuccess={setSuccess}
-            onError={setError}
-          />
-
-          <NotifikasiSection
             onSuccess={setSuccess}
             onError={setError}
           />
@@ -247,113 +240,6 @@ function PasswordInput({
           {show ? <EyeOff size={16} /> : <Eye size={16} />}
         </button>
       </div>
-    </div>
-  );
-}
-
-/* =========================================================
-   PREFERENSI NOTIFIKASI
-========================================================= */
-
-function NotifikasiSection({ onSuccess, onError }) {
-  const [tugasBaru, setTugasBaru] = useState(true);
-  const [materiBaru, setMateriBaru] = useState(true);
-  const [pengingatUjian, setPengingatUjian] = useState(true);
-  const [pengumuman, setPengumuman] = useState(false);
-
-  function handleSave() {
-    onSuccess("");
-    onError(
-      "Preferensi belum disimpan ke server. Hubungkan pengaturan notifikasi ke endpoint backend terlebih dahulu."
-    );
-  }
-
-  return (
-    <SettingsCard
-      icon={Bell}
-      title="Preferensi Notifikasi"
-      desc="Pilih pemberitahuan yang ingin kamu terima."
-    >
-      <div className="divide-y theme-border-soft">
-        <ToggleRow
-          label="Tugas Baru"
-          desc="Pemberitahuan saat guru memberikan tugas baru."
-          checked={tugasBaru}
-          onChange={setTugasBaru}
-        />
-
-        <ToggleRow
-          label="Materi Baru"
-          desc="Pemberitahuan saat materi pembelajaran baru tersedia."
-          checked={materiBaru}
-          onChange={setMateriBaru}
-        />
-
-        <ToggleRow
-          label="Pengingat Ujian"
-          desc="Pengingat sebelum jadwal ujian berlangsung."
-          checked={pengingatUjian}
-          onChange={setPengingatUjian}
-        />
-
-        <ToggleRow
-          label="Pengumuman Sekolah"
-          desc="Pemberitahuan informasi umum dari sekolah."
-          checked={pengumuman}
-          onChange={setPengumuman}
-        />
-      </div>
-
-      <div className="mt-4 flex flex-col gap-3 border-t theme-border-soft pt-4 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-xs leading-5 theme-text-placeholder">
-          Pilihan saat ini masih tersimpan di halaman ini saja.
-        </p>
-
-        <button
-          type="button"
-          onClick={handleSave}
-          className="theme-primary inline-flex items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold shadow-sm transition"
-        >
-          <Save size={15} />
-          Simpan Preferensi
-        </button>
-      </div>
-    </SettingsCard>
-  );
-}
-
-function ToggleRow({ label, desc, checked, onChange }) {
-  return (
-    <div className="flex items-center justify-between gap-5 py-4">
-      <div className="min-w-0">
-        <p className="text-sm font-semibold theme-text-secondary">
-          {label}
-        </p>
-        {desc && (
-          <p className="mt-0.5 text-xs leading-5 theme-text-muted">
-            {desc}
-          </p>
-        )}
-      </div>
-
-      <button
-        type="button"
-        role="switch"
-        aria-label={label}
-        aria-checked={checked}
-        onClick={() => onChange(!checked)}
-        className={`relative h-6 w-11 shrink-0 rounded-full transition-colors ${
-          checked
-            ? "bg-[var(--color-primary)]"
-            : "bg-[var(--color-border)]"
-        }`}
-      >
-        <span
-          className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform ${
-            checked ? "translate-x-5" : "translate-x-0.5"
-          }`}
-        />
-      </button>
     </div>
   );
 }

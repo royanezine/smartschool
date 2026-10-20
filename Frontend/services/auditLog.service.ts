@@ -21,14 +21,17 @@ export interface AuditLog {
 }
 
 export interface AuditLogResponse {
-  success?: boolean;
-  message?: string;
-  data?: AuditLog[] | {
-    data?: AuditLog[];
-    total?: number;
-    page?: number;
-    limit?: number;
-    totalPages?: number;
+  success: boolean;
+  message: string;
+  data: AuditLog[];
+  meta: {
+    page: number;
+    limit: number;
+    total: number;
+    totalData: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
   };
 }
 
@@ -43,31 +46,25 @@ export async function getAuditLogs(
 ): Promise<AuditLogResponse> {
   const {
     page = 1,
-    limit = 100,
+    limit = 10,
     search = "",
   } = params;
 
-  const query = new URLSearchParams();
-
-  query.set("page", String(page));
-  query.set("limit", String(limit));
+  const query = new URLSearchParams({
+    page: String(page),
+    limit: String(limit),
+  });
 
   if (search.trim()) {
     query.set("search", search.trim());
   }
 
-  const response = await apiFetch(
+  return apiFetch(
     `/api/audit-log?${query.toString()}`,
-    {
-      method: "GET",
-    }
-  );
-
-  return response as AuditLogResponse;
+    { method: "GET" }
+  ) as Promise<AuditLogResponse>;
 }
 
-const auditLogService = {
-  getAuditLogs,
-};
+const auditLogService = { getAuditLogs };
 
-export default auditLogService; 
+export default auditLogService;

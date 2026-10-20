@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -50,6 +49,9 @@ const themePrimaryShadow =
 const themeCardShadow =
   "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
 
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
 const themeNeutralSurface =
   "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
 
@@ -68,11 +70,20 @@ const themeSuccessSurface =
 const themeSuccessBorder =
   "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
 
+const themeSuccessText = "text-[var(--color-success)]";
+
 const themeWarningSurface =
   "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
 
 const themeWarningBorder =
   "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
+
+const themeWarningText = "text-[var(--color-warning)]";
+
+const themeInfoSurface =
+  "bg-[color-mix(in_srgb,var(--color-info)_9%,transparent)]";
+
+const themeInfoText = "text-[var(--color-info)]";
 
 const themeDangerSurface =
   "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
@@ -188,13 +199,13 @@ function getThemeByJenis(jenis) {
     Kuis: {
       surface: themeWarningSurface,
       border: themeWarningBorder,
-      text: "text-[var(--color-warning)]",
+      text: themeWarningText,
     },
 
     Harian: {
       surface: themeSuccessSurface,
       border: themeSuccessBorder,
-      text: "text-[var(--color-success)]",
+      text: themeSuccessText,
     },
   };
 
@@ -470,7 +481,6 @@ export default function DaftarUjianPage() {
       setLoading(true);
       setError("");
 
-      // 1. Cari kelas siswa
       const kelasSiswa = await findStudentClass();
 
       if (!kelasSiswa?.id) {
@@ -479,13 +489,11 @@ export default function DaftarUjianPage() {
 
       const kelasSiswaId = String(kelasSiswa.id);
 
-      // 2. Ambil kelas mapel
       const kelasMapelResponse = await getKelasMapel();
 
       const semuaKelasMapel =
         normalizeArrayResponse(kelasMapelResponse);
 
-      // 3. Filter kelas mapel sesuai kelas siswa
       let kelasMapelData = semuaKelasMapel.filter((km) => {
         const kmKelasId =
           km?.kelasId || km?.kelas?.id || null;
@@ -496,7 +504,6 @@ export default function DaftarUjianPage() {
         );
       });
 
-      // Fallback kelas mapel dari detail kelas
       if (
         kelasMapelData.length === 0 &&
         Array.isArray(kelasSiswa?.kelasMapel)
@@ -522,7 +529,6 @@ export default function DaftarUjianPage() {
         return;
       }
 
-      // 4. Ambil ujian untuk setiap kelas mapel
       const hasilRequest = await Promise.allSettled(
         kelasMapelData.map(async (km) => {
           if (!km?.id) return [];
@@ -580,7 +586,6 @@ export default function DaftarUjianPage() {
         })
       );
 
-      // 5. Gabungkan hasil
       const hasilUjian = [];
 
       hasilRequest.forEach((result) => {
@@ -592,7 +597,6 @@ export default function DaftarUjianPage() {
         }
       });
 
-      // 6. Filter ujian sesuai kelas siswa
       const ujianKelasSiswa = hasilUjian.filter((ujian) => {
         const ujianKelasId =
           ujian?.kelasMapel?.kelasId ||
@@ -605,7 +609,6 @@ export default function DaftarUjianPage() {
         );
       });
 
-      // 7. Hilangkan duplikat
       const uniqueUjian = Array.from(
         new Map(
           ujianKelasSiswa
@@ -614,7 +617,6 @@ export default function DaftarUjianPage() {
         ).values()
       );
 
-      // 8. Mapping untuk UI
       const mapped = uniqueUjian.map((ujian) => {
         const kelas =
           ujian?.kelasMapel?.kelas ||
@@ -631,7 +633,6 @@ export default function DaftarUjianPage() {
 
         const status = getStatusUjian(ujian);
 
-        // Baca jenis ujian dari respons API
         const jenisUjian = getJenisUjian(ujian);
 
         return {
@@ -761,6 +762,14 @@ export default function DaftarUjianPage() {
       selesai: daftarUjian.filter(
         (u) => u.status === "selesai"
       ).length,
+
+      mapel: new Set(
+        daftarUjian.map((u) => u.mapel).filter(Boolean)
+      ).size,
+
+      jenis: new Set(
+        daftarUjian.map((u) => u.jenis).filter(Boolean)
+      ).size,
     }),
     [daftarUjian]
   );
@@ -812,8 +821,9 @@ export default function DaftarUjianPage() {
   // =======================================================
 
   return (
-    <div className="theme-page theme-text min-h-full">
-      <div className="mx-auto w-full max-w-[1600px] space-y-6 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 xl:px-10">
+    <main className="min-w-0 flex-1 overflow-y-auto theme-page theme-text">
+      {/* Konten w-full: melebar saat zoom out, tidak dibatasi max-width */}
+      <div className="w-full space-y-6 px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8 xl:px-10">
         {/* HERO */}
         <section
           className={`relative overflow-hidden rounded-[24px] ${themePrimaryGradient} ${themePrimaryShadow}`}
@@ -854,6 +864,93 @@ export default function DaftarUjianPage() {
           </div>
         </section>
 
+        {/* STAT CARDS — grid responsif dengan 2xl:grid-cols-6 */}
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6">
+          <div className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl px-4 py-4`}>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs theme-text-muted">Total ujian</p>
+                <p className="mt-1 text-xl font-bold theme-text">
+                  {loading ? "—" : stats.total}
+                </p>
+              </div>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText}`}>
+                <Layers size={17} />
+              </div>
+            </div>
+          </div>
+
+          <div className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl px-4 py-4`}>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs theme-text-muted">Belum dimulai</p>
+                <p className="mt-1 text-xl font-bold theme-text">
+                  {loading ? "—" : stats.belum}
+                </p>
+              </div>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeNeutralSurface} theme-text-secondary`}>
+                <Clock size={17} />
+              </div>
+            </div>
+          </div>
+
+          <div className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl px-4 py-4`}>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs theme-text-muted">Berlangsung</p>
+                <p className="mt-1 text-xl font-bold theme-text">
+                  {loading ? "—" : stats.sedang}
+                </p>
+              </div>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeWarningSurface} ${themeWarningText}`}>
+                <CircleDot size={17} />
+              </div>
+            </div>
+          </div>
+
+          <div className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl px-4 py-4`}>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs theme-text-muted">Selesai</p>
+                <p className="mt-1 text-xl font-bold theme-text">
+                  {loading ? "—" : stats.selesai}
+                </p>
+              </div>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeSuccessSurface} ${themeSuccessText}`}>
+                <CircleCheck size={17} />
+              </div>
+            </div>
+          </div>
+
+          <div className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl px-4 py-4`}>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs theme-text-muted">Mata pelajaran</p>
+                <p className="mt-1 text-xl font-bold theme-text">
+                  {loading ? "—" : stats.mapel}
+                </p>
+              </div>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeInfoSurface} ${themeInfoText}`}>
+                <BookOpen size={17} />
+              </div>
+            </div>
+          </div>
+
+          <div className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl px-4 py-4`}>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs theme-text-muted">Jenis ujian</p>
+                <p className="mt-1 text-xl font-bold theme-text">
+                  {loading ? "—" : stats.jenis}
+                </p>
+              </div>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText}`}>
+                <FileCheck size={17} />
+              </div>
+            </div>
+          </div>
+        </div>
+
         {/* TOOLBAR */}
         <section
           className={`theme-card theme-border ${themeCardShadow} rounded-2xl p-4 sm:p-5`}
@@ -874,6 +971,7 @@ export default function DaftarUjianPage() {
               />
             </div>
 
+            {/* overflow-x-auto agar filter tidak merusak layout di layar kecil */}
             <div
               className={`flex min-w-0 overflow-x-auto rounded-xl ${themeNeutralSurface} p-1`}
             >
@@ -975,7 +1073,8 @@ export default function DaftarUjianPage() {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+            {/* Grid ujian diperluas ke 2xl:grid-cols-6 agar card tidak terlalu besar saat layar lebar */}
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
               {filtered.map((ujian) => {
                 const jenisTheme = getThemeByJenis(ujian.jenis);
                 const statusBadge = getStatusBadge(ujian.status);
@@ -1138,7 +1237,7 @@ export default function DaftarUjianPage() {
           </div>
         </footer>
       </div>
-    </div>
+    </main>
   );
 }
 
@@ -1211,7 +1310,7 @@ function getStatusBadge(status) {
       label: "Berlangsung",
       surface: themeWarningSurface,
       border: themeWarningBorder,
-      text: "text-[var(--color-warning)]",
+      text: themeWarningText,
       dot: "bg-[var(--color-warning)]",
       icon: AlertCircle,
     },
@@ -1220,7 +1319,7 @@ function getStatusBadge(status) {
       label: "Selesai",
       surface: themeSuccessSurface,
       border: themeSuccessBorder,
-      text: "text-[var(--color-success)]",
+      text: themeSuccessText,
       dot: "bg-[var(--color-success)]",
       icon: CheckCircle,
     },
@@ -1235,8 +1334,8 @@ function getStatusBadge(status) {
 
 function LoadingState() {
   return (
-    <section className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {Array.from({ length: 8 }).map((_, index) => (
+    <section className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6">
+      {Array.from({ length: 12 }).map((_, index) => (
         <div
           key={index}
           className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder}`}

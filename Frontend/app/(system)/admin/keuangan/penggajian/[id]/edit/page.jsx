@@ -50,6 +50,15 @@ const MONTHS = [
   "Desember",
 ];
 
+const inputClass =
+  "theme-input h-11 w-full rounded-lg border px-3 text-sm outline-none transition disabled:cursor-not-allowed disabled:opacity-60";
+
+const buttonSecondary =
+  "inline-flex items-center justify-center gap-2 rounded-lg border theme-border theme-card px-4 text-sm font-medium theme-text-secondary hover:bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] disabled:cursor-not-allowed disabled:opacity-60 transition";
+
+const buttonPrimary =
+  "inline-flex h-11 items-center justify-center gap-2 rounded-lg theme-primary px-4 text-sm font-semibold text-white hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60 transition";
+
 function formatCurrency(value) {
   return new Intl.NumberFormat("id-ID", {
     style: "currency",
@@ -66,9 +75,7 @@ function formatNumber(value, digits = 2) {
 
 function formatDate(value) {
   if (!value) return "-";
-
   const date = new Date(value);
-
   if (Number.isNaN(date.getTime())) return "-";
 
   return date.toLocaleDateString("id-ID", {
@@ -88,11 +95,7 @@ function normalizeDetailResponse(response) {
   let result = response;
 
   for (let index = 0; index < 4; index += 1) {
-    if (
-      result &&
-      typeof result === "object" &&
-      result.id
-    ) {
+    if (result && typeof result === "object" && result.id) {
       return result;
     }
 
@@ -104,7 +107,6 @@ function normalizeDetailResponse(response) {
       result = result.data;
       continue;
     }
-
     break;
   }
 
@@ -115,9 +117,7 @@ function normalizeDetailResponse(response) {
 }
 
 function normalizeActionResponse(response) {
-  if (!response || typeof response !== "object") {
-    return {};
-  }
+  if (!response || typeof response !== "object") return {};
 
   const payload =
     response.data &&
@@ -142,7 +142,7 @@ function getStatusStyle(status) {
     case "dibayar":
       return "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/50 dark:text-emerald-300";
     default:
-      return "bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300";
+      return "bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] theme-text-secondary";
   }
 }
 
@@ -150,9 +150,7 @@ export default function EditPenggajianPage() {
   const router = useRouter();
   const params = useParams();
 
-  const id = Array.isArray(params?.id)
-    ? params.id[0]
-    : params?.id;
+  const id = Array.isArray(params?.id) ? params.id[0] : params?.id;
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [item, setItem] = useState(null);
@@ -222,7 +220,6 @@ export default function EditPenggajianPage() {
       const confirmed = window.confirm(
         "Status ini akan membekukan data penggajian. Pastikan data sudah benar sebelum melanjutkan."
       );
-
       if (!confirmed) return;
     }
 
@@ -239,13 +236,7 @@ export default function EditPenggajianPage() {
       const result = normalizeActionResponse(response);
 
       setItem((current) =>
-        current
-          ? {
-              ...current,
-              status,
-              catatan,
-            }
-          : current
+        current ? { ...current, status, catatan } : current
       );
 
       setNotice(
@@ -258,11 +249,10 @@ export default function EditPenggajianPage() {
     }
   }
 
-  const bulanLabel =
-    MONTHS[Number(item?.bulan) - 1] ?? item?.bulan ?? "-";
+  const bulanLabel = MONTHS[Number(item?.bulan) - 1] ?? item?.bulan ?? "-";
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100">
+    <div className="theme-page flex h-screen w-full overflow-hidden">
       <Sidebar
         role="admin"
         isOpen={sidebarOpen}
@@ -274,57 +264,47 @@ export default function EditPenggajianPage() {
           <Header onMenuClick={() => setSidebarOpen(true)} />
         </div>
 
-        <main className="flex-1 overflow-y-auto">
-          <div className="mx-auto w-full max-w-[1600px] p-4 sm:p-6 lg:p-8">
-            <div className="mb-7">
-              <div className="mb-2 flex flex-wrap items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
+        <main className="min-w-0 flex-1 overflow-y-auto theme-page theme-text">
+          <div className="w-full px-4 py-5 sm:px-6 sm:py-6 lg:px-8 lg:py-8">
+            {/* ============================================
+                PAGE HEADER
+            ============================================ */}
+            <div className="mb-6">
+              <div className="mb-2 flex flex-wrap items-center gap-2 text-sm theme-text-muted">
                 <button
                   type="button"
-                  onClick={() =>
-                    router.push("/admin/keuangan/penggajian")
-                  }
-                  className="transition hover:text-blue-700 dark:hover:text-blue-400"
+                  onClick={() => router.push("/admin/keuangan/penggajian")}
+                  className="transition hover:theme-primary-text"
                 >
                   Keuangan
                 </button>
-
                 <span>/</span>
-
                 <button
                   type="button"
-                  onClick={() =>
-                    router.push("/admin/keuangan/penggajian")
-                  }
-                  className="transition hover:text-blue-700 dark:hover:text-blue-400"
+                  onClick={() => router.push("/admin/keuangan/penggajian")}
+                  className="transition hover:theme-primary-text"
                 >
                   Penggajian
                 </button>
-
                 <span>/</span>
-
-                <span className="text-blue-700 dark:text-blue-400">
-                  Edit Penggajian
-                </span>
+                <span className="theme-primary-text">Edit Penggajian</span>
               </div>
 
-              <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
                 <div>
-                  <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">
+                  <h1 className="text-2xl font-bold tracking-tight theme-text sm:text-3xl">
                     Edit Penggajian
                   </h1>
-
-                  <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-500 dark:text-slate-400">
-                    Periksa data penggajian dan sesuaikan status serta
-                    catatan sesuai kebutuhan.
+                  <p className="mt-2 max-w-2xl text-sm leading-6 theme-text-secondary">
+                    Periksa data penggajian dan sesuaikan status serta catatan
+                    sesuai kebutuhan.
                   </p>
                 </div>
 
                 <button
                   type="button"
-                  onClick={() =>
-                    router.push("/admin/keuangan/penggajian")
-                  }
-                  className="inline-flex h-10 items-center justify-center gap-2 self-start rounded-lg border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800 sm:self-auto"
+                  onClick={() => router.push("/admin/keuangan/penggajian")}
+                  className={`${buttonSecondary} self-start sm:self-auto`}
                 >
                   <ArrowLeft size={16} />
                   Kembali
@@ -332,6 +312,7 @@ export default function EditPenggajianPage() {
               </div>
             </div>
 
+            {/* ALERT */}
             {error && (
               <AlertBox
                 type="error"
@@ -348,32 +329,35 @@ export default function EditPenggajianPage() {
               />
             )}
 
+            {/* LOADING / NOT FOUND / FORM */}
             {loading ? (
-              <div className="flex min-h-72 flex-col items-center justify-center rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+              <div className="flex min-h-72 flex-col items-center justify-center gap-3 theme-card rounded-xl border theme-border">
                 <LoaderCircle
                   size={28}
-                  className="animate-spin text-blue-600"
+                  className="animate-spin theme-primary-text"
                 />
-                <p className="mt-3 text-sm font-medium">
+                <p className="text-sm font-medium theme-text">
                   Memuat detail penggajian...
                 </p>
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="text-xs theme-text-muted">
                   Mengambil data dari sistem
                 </p>
               </div>
             ) : !item ? (
-              <div className="flex min-h-72 flex-col items-center justify-center rounded-xl border border-slate-200 bg-white px-5 text-center dark:border-slate-800 dark:bg-slate-900">
-                <AlertCircle size={30} className="text-red-500" />
-                <h2 className="mt-3 font-semibold">
+              <div className="flex min-h-72 flex-col items-center justify-center theme-card rounded-xl border theme-border px-5 text-center">
+                <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-50 text-red-600 dark:bg-red-950/50 dark:text-red-400">
+                  <AlertCircle size={23} />
+                </div>
+                <h2 className="mt-4 font-semibold theme-text">
                   Data penggajian tidak ditemukan
                 </h2>
-                <p className="mt-1 max-w-md text-sm text-slate-500 dark:text-slate-400">
+                <p className="mt-1 max-w-md text-sm theme-text-muted">
                   Periksa kembali data yang dipilih atau muat ulang halaman.
                 </p>
                 <button
                   type="button"
                   onClick={loadDetail}
-                  className="mt-4 inline-flex h-10 items-center gap-2 rounded-lg bg-blue-700 px-4 text-sm font-medium text-white hover:bg-blue-800"
+                  className={`${buttonPrimary} mt-4`}
                 >
                   <RefreshCw size={16} />
                   Coba Lagi
@@ -383,18 +367,20 @@ export default function EditPenggajianPage() {
               <form onSubmit={handleSubmit}>
                 <div className="grid grid-cols-1 gap-5 xl:grid-cols-3">
                   <div className="space-y-5 xl:col-span-2">
-                    <section className="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-                      <div className="border-b border-slate-200 p-4 dark:border-slate-800 sm:p-5">
+                    {/* ============================================
+                        INFORMASI PEGAWAI
+                    ============================================ */}
+                    <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
+                      <div className="border-b theme-border p-4 sm:p-5">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                             <UserRound size={20} />
                           </div>
-
                           <div>
-                            <h2 className="font-semibold">
+                            <h2 className="font-semibold theme-text">
                               Informasi Pegawai
                             </h2>
-                            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                            <p className="mt-1 text-sm theme-text-muted">
                               Identitas pegawai dan periode penggajian.
                             </p>
                           </div>
@@ -407,13 +393,11 @@ export default function EditPenggajianPage() {
                           value={item.pengguna?.namaLengkap}
                           icon={UserRound}
                         />
-
                         <ReadOnlyField
                           label="NIP"
                           value={item.pengguna?.nip}
                           icon={BriefcaseBusiness}
                         />
-
                         <ReadOnlyField
                           label="Kategori Jabatan"
                           value={
@@ -422,19 +406,16 @@ export default function EditPenggajianPage() {
                           }
                           icon={BriefcaseBusiness}
                         />
-
                         <ReadOnlyField
                           label="Periode Penggajian"
                           value={`${bulanLabel} ${item.tahun}`}
                           icon={CalendarDays}
                         />
-
                         <ReadOnlyField
                           label="Tanggal Mulai"
                           value={formatDate(item.tanggalMulai)}
                           icon={CalendarDays}
                         />
-
                         <ReadOnlyField
                           label="Tanggal Selesai"
                           value={formatDate(item.tanggalSelesai)}
@@ -443,19 +424,22 @@ export default function EditPenggajianPage() {
                       </div>
                     </section>
 
-                    <section className="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-                      <div className="border-b border-slate-200 p-4 dark:border-slate-800 sm:p-5">
+                    {/* ============================================
+                        RINCIAN PENGGAJIAN
+                    ============================================ */}
+                    <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
+                      <div className="border-b theme-border p-4 sm:p-5">
                         <div className="flex items-center gap-3">
-                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-700 dark:bg-blue-950/50 dark:text-blue-300">
+                          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)] theme-primary-text">
                             <Wallet size={20} />
                           </div>
-
                           <div>
-                            <h2 className="font-semibold">
+                            <h2 className="font-semibold theme-text">
                               Rincian Penggajian
                             </h2>
-                            <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-                              Nilai hasil kalkulasi yang tercatat dalam sistem.
+                            <p className="mt-1 text-sm theme-text-muted">
+                              Nilai hasil kalkulasi yang tercatat dalam
+                              sistem.
                             </p>
                           </div>
                         </div>
@@ -467,13 +451,11 @@ export default function EditPenggajianPage() {
                           value={`${formatNumber(item.totalHariKerja, 0)} hari`}
                           icon={CalendarDays}
                         />
-
                         <ReadOnlyField
                           label="Total Jam Kerja"
                           value={`${formatNumber(item.totalJamKerja)} jam`}
                           icon={Clock3}
                         />
-
                         <ReadOnlyField
                           label="Tarif per Jam"
                           value={formatCurrency(item.tarifPerJam)}
@@ -484,33 +466,36 @@ export default function EditPenggajianPage() {
                           <p className="text-sm font-medium text-blue-800 dark:text-blue-300">
                             Total Gaji
                           </p>
-                          <p className="mt-2 break-words text-xl font-bold text-blue-900 dark:text-blue-100 sm:text-2xl">
+                          <p className="mt-2 break-words text-xl font-bold tabular-nums text-blue-900 dark:text-blue-100 sm:text-2xl">
                             {formatCurrency(item.totalGaji)}
                           </p>
                         </div>
                       </div>
 
-                      <div className="mx-4 mb-4 flex items-start gap-2 rounded-lg border border-slate-200 bg-slate-50 p-3 text-xs leading-5 text-slate-600 dark:border-slate-700 dark:bg-slate-950 dark:text-slate-400 sm:mx-5 sm:mb-5">
+                      <div className="mx-4 mb-4 flex items-start gap-2 rounded-lg border theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] p-3 text-xs leading-5 theme-text-secondary sm:mx-5 sm:mb-5">
                         <Info
                           size={16}
-                          className="mt-0.5 shrink-0 text-blue-600"
+                          className="mt-0.5 shrink-0 theme-primary-text"
                         />
                         <p>
                           Rincian jam kerja, tarif, dan total gaji ditampilkan
-                          sebagai baca-saja. Perubahan nilai tersebut memerlukan
-                          endpoint pembaruan khusus dari BE.
+                          sebagai baca-saja. Perubahan nilai tersebut
+                          memerlukan fitur pembaruan khusus dari sistem.
                         </p>
                       </div>
                     </section>
                   </div>
 
+                  {/* ============================================
+                      PENGATURAN PENGGAJIAN
+                  ============================================ */}
                   <div className="space-y-5">
-                    <section className="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-                      <div className="border-b border-slate-200 p-4 dark:border-slate-800 sm:p-5">
-                        <h2 className="font-semibold">
+                    <section className="theme-card overflow-hidden rounded-xl border theme-border shadow-sm">
+                      <div className="border-b theme-border p-4 sm:p-5">
+                        <h2 className="font-semibold theme-text">
                           Pengaturan Penggajian
                         </h2>
-                        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                        <p className="mt-1 text-sm theme-text-muted">
                           Ubah status dan catatan data penggajian.
                         </p>
                       </div>
@@ -519,11 +504,10 @@ export default function EditPenggajianPage() {
                         <div>
                           <label
                             htmlFor="status"
-                            className="mb-2 block text-sm font-medium"
+                            className="mb-2 block text-sm font-medium theme-text"
                           >
                             Status Penggajian
                           </label>
-
                           <select
                             id="status"
                             value={status}
@@ -531,13 +515,10 @@ export default function EditPenggajianPage() {
                               setStatus(event.target.value)
                             }
                             required
-                            className="h-11 w-full rounded-lg border border-slate-200 bg-white px-3 text-sm outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-950 dark:focus:ring-blue-950"
+                            className={inputClass}
                           >
                             {STATUS_OPTIONS.map((option) => (
-                              <option
-                                key={option.value}
-                                value={option.value}
-                              >
+                              <option key={option.value} value={option.value}>
                                 {option.label}
                               </option>
                             ))}
@@ -545,7 +526,9 @@ export default function EditPenggajianPage() {
 
                           <div className="mt-3">
                             <span
-                              className={`inline-flex items-center rounded-md px-2.5 py-1 text-xs font-semibold ${getStatusStyle(status)}`}
+                              className={`inline-flex items-center rounded-md px-2.5 py-1 text-xs font-semibold ${getStatusStyle(
+                                status
+                              )}`}
                             >
                               Status dipilih:{" "}
                               {STATUS_OPTIONS.find(
@@ -558,11 +541,10 @@ export default function EditPenggajianPage() {
                         <div>
                           <label
                             htmlFor="catatan"
-                            className="mb-2 block text-sm font-medium"
+                            className="mb-2 block text-sm font-medium theme-text"
                           >
                             Catatan
                           </label>
-
                           <textarea
                             id="catatan"
                             value={catatan}
@@ -572,25 +554,24 @@ export default function EditPenggajianPage() {
                             rows={5}
                             maxLength={1000}
                             placeholder="Tambahkan catatan penggajian jika diperlukan..."
-                            className="w-full resize-y rounded-lg border border-slate-200 bg-white px-3 py-2.5 text-sm outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-950 dark:focus:ring-blue-950"
+                            className="theme-input w-full resize-y rounded-lg border px-3 py-2.5 text-sm outline-none transition disabled:cursor-not-allowed disabled:opacity-60"
                           />
-
-                          <p className="mt-1 text-right text-xs text-slate-400">
+                          <p className="mt-1 text-right text-xs theme-text-muted">
                             {catatan.length}/1000 karakter
                           </p>
                         </div>
 
                         <div className="rounded-lg border border-amber-200 bg-amber-50 p-3 text-xs leading-5 text-amber-800 dark:border-amber-900/60 dark:bg-amber-950/30 dark:text-amber-300">
-                          Perubahan status dapat memengaruhi proses
-                          penggajian berikutnya. Pastikan status yang dipilih
-                          sudah sesuai.
+                          Perubahan status dapat memengaruhi proses penggajian
+                          berikutnya. Pastikan status yang dipilih sudah
+                          sesuai.
                         </div>
 
                         <div className="flex flex-col gap-2 pt-1">
                           <button
                             type="submit"
                             disabled={saving || loading}
-                            className="inline-flex h-11 items-center justify-center gap-2 rounded-lg bg-blue-700 px-4 text-sm font-semibold text-white transition hover:bg-blue-800 disabled:cursor-not-allowed disabled:opacity-60"
+                            className={buttonPrimary}
                           >
                             {saving ? (
                               <LoaderCircle
@@ -600,7 +581,6 @@ export default function EditPenggajianPage() {
                             ) : (
                               <Save size={17} />
                             )}
-
                             {saving ? "Menyimpan..." : "Simpan Perubahan"}
                           </button>
 
@@ -610,7 +590,7 @@ export default function EditPenggajianPage() {
                             onClick={() =>
                               router.push("/admin/keuangan/penggajian")
                             }
-                            className="inline-flex h-10 items-center justify-center gap-2 rounded-lg border border-slate-200 bg-white px-4 text-sm font-medium text-slate-700 transition hover:bg-slate-50 disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                            className={buttonSecondary}
                           >
                             <ArrowLeft size={16} />
                             Kembali ke Daftar
@@ -619,22 +599,25 @@ export default function EditPenggajianPage() {
                       </div>
                     </section>
 
-                    <section className="rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 sm:p-5">
+                    {/* ============================================
+                        INFORMASI DATA
+                    ============================================ */}
+                    <section className="theme-card rounded-xl border theme-border p-4 shadow-sm sm:p-5">
                       <div className="flex items-start gap-3">
-                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-300">
+                        <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)] theme-text-secondary">
                           <FileText size={18} />
                         </div>
 
                         <div>
-                          <h3 className="text-sm font-semibold">
+                          <h3 className="text-sm font-semibold theme-text">
                             Informasi Data
                           </h3>
-                          <p className="mt-1 break-all text-xs leading-5 text-slate-500 dark:text-slate-400">
+                          <p className="mt-1 break-all text-xs leading-5 theme-text-muted">
                             ID Penggajian: {item.id}
                           </p>
-                          <p className="mt-1 text-xs leading-5 text-slate-500 dark:text-slate-400">
+                          <p className="mt-1 text-xs leading-5 theme-text-muted">
                             Perubahan status dan catatan dikirim ke sistem
-                            melalui endpoint pembaruan status penggajian.
+                            melalui fitur pembaruan status penggajian.
                           </p>
                         </div>
                       </div>
@@ -644,7 +627,7 @@ export default function EditPenggajianPage() {
               </form>
             )}
 
-            <p className="mt-5 text-xs leading-5 text-slate-400">
+            <p className="mt-5 text-xs leading-5 theme-text-muted">
               Data penggajian mengikuti data yang tercatat dalam sistem.
             </p>
           </div>
@@ -654,27 +637,28 @@ export default function EditPenggajianPage() {
   );
 }
 
+/* =========================================================
+   READ ONLY FIELD
+========================================================= */
+
 function ReadOnlyField({ label, value, icon: Icon }) {
   return (
     <div>
-      <p className="mb-2 text-sm font-medium text-slate-600 dark:text-slate-300">
-        {label}
-      </p>
+      <p className="mb-2 text-sm font-medium theme-text-secondary">{label}</p>
 
-      <div className="flex min-h-11 items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-950">
-        <Icon
-          size={16}
-          className="shrink-0 text-slate-400"
-        />
-        <span className="break-words text-sm font-medium">
-          {value === null || value === undefined || value === ""
-            ? "-"
-            : value}
+      <div className="flex min-h-11 items-center gap-3 rounded-lg border theme-border bg-[color-mix(in_srgb,var(--color-text)_3%,transparent)] px-3 py-2">
+        <Icon size={16} className="shrink-0 theme-text-muted" />
+        <span className="break-words text-sm font-medium theme-text">
+          {value === null || value === undefined || value === "" ? "-" : value}
         </span>
       </div>
     </div>
   );
 }
+
+/* =========================================================
+   ALERT BOX
+========================================================= */
 
 function AlertBox({ type, message, onClose }) {
   const success = type === "success";

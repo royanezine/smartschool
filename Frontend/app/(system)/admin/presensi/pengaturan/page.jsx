@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
@@ -90,7 +91,9 @@ function SectionCard({ icon: Icon, title, description, children }) {
         </div>
 
         <div className="min-w-0">
-          <h2 className="text-base font-semibold text-slate-900">{title}</h2>
+          <h2 className="text-base font-semibold text-slate-900">
+            {title}
+          </h2>
           <p className="mt-1 text-sm leading-5 text-slate-500">
             {description}
           </p>
@@ -151,7 +154,9 @@ export default function PengaturanPresensiPage() {
       const settingsData = getData(settingsResponse);
 
       const metode =
-        metodeData?.metodeAktif ?? metodeData?.data?.metodeAktif ?? null;
+        metodeData?.metodeAktif ??
+        metodeData?.data?.metodeAktif ??
+        null;
 
       const list = Array.isArray(settingsData)
         ? settingsData
@@ -232,7 +237,9 @@ export default function PengaturanPresensiPage() {
       setRadius(savedValue);
 
       setSettings((previous) => {
-        const exists = previous.some((item) => item.kunci === KEYS.radius);
+        const exists = previous.some(
+          (item) => item.kunci === KEYS.radius,
+        );
 
         if (exists) {
           return previous.map((item) =>
@@ -257,7 +264,7 @@ export default function PengaturanPresensiPage() {
       setStatus({
         type: "success",
         message:
-          "Nilai berhasil disimpan ke pengaturan sistem. Perubahan ini belum tentu memengaruhi validasi check-in karena Backend yang kamu kirim membaca radius dari data sekolah.",
+          "Nilai radius berhasil disimpan ke pengaturan sistem. Nilai ini belum mengubah radius validasi GPS karena Backend membaca radius dari data sekolah.",
       });
     } catch (error) {
       console.error("Gagal menyimpan radius presensi:", error);
@@ -265,7 +272,8 @@ export default function PengaturanPresensiPage() {
       setStatus({
         type: "error",
         message:
-          error?.message || "Pengaturan gagal disimpan. Silakan coba lagi.",
+          error?.message ||
+          "Pengaturan gagal disimpan. Silakan coba lagi.",
       });
     } finally {
       setSaving(false);
@@ -274,26 +282,26 @@ export default function PengaturanPresensiPage() {
 
   const hasRadiusChanged = radius !== originalRadius;
 
-  // ============================================================
-  // LAYOUT: sidebar full-height kiri, header + main di kanan
-  // ============================================================
+  const hasMetode =
+    metodeAktif != null &&
+    metodeAktif !== "" &&
+    (!Array.isArray(metodeAktif) || metodeAktif.length > 0);
+
   return (
     <div className="flex h-screen overflow-hidden bg-slate-50">
-      {/* SIDEBAR — full-height kiri */}
       <Sidebar />
 
-      {/* KOLOM KANAN — header + main */}
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        {/* HEADER — cuma di area kanan sidebar */}
         <Header />
 
-        {/* MAIN — hanya ini yang scroll */}
         <main className="min-h-0 flex-1 overflow-y-auto">
           <div className="mx-auto w-full max-w-[1500px] px-4 py-6 sm:px-6 lg:px-8">
             <div className="mb-5 flex items-center gap-2 text-sm text-slate-500">
               <span>Pengaturan</span>
               <ChevronRight size={15} />
-              <span className="font-medium text-slate-800">Presensi</span>
+              <span className="font-medium text-slate-800">
+                Presensi
+              </span>
             </div>
 
             <div className="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-start">
@@ -349,12 +357,7 @@ export default function PengaturanPresensiPage() {
                           Metode Presensi
                         </p>
                         <p className="mt-2 text-lg font-semibold text-slate-900">
-                          {metodeAktif != null &&
-                          metodeAktif !== "" &&
-                          (!Array.isArray(metodeAktif) ||
-                            metodeAktif.length > 0)
-                            ? "Data tersedia"
-                            : "Belum tersedia"}
+                          {hasMetode ? "Data tersedia" : "Belum tersedia"}
                         </p>
                         <p className="mt-1 text-xs text-slate-500">
                           Konfigurasi sekolah dari Backend
@@ -411,12 +414,7 @@ export default function PengaturanPresensiPage() {
                           </div>
 
                           <span className="shrink-0 rounded-full border border-slate-200 bg-white px-2.5 py-1 text-xs font-medium text-slate-600">
-                            {metodeAktif != null &&
-                            metodeAktif !== "" &&
-                            (!Array.isArray(metodeAktif) ||
-                              metodeAktif.length > 0)
-                              ? "Tersedia"
-                              : "Kosong"}
+                            {hasMetode ? "Tersedia" : "Kosong"}
                           </span>
                         </div>
                       </div>
@@ -431,9 +429,10 @@ export default function PengaturanPresensiPage() {
                           <code className="rounded bg-slate-100 px-1.5 py-0.5 text-xs">
                             GET /api/absensi/metode-aktif
                           </code>{" "}
-                          hanya membaca konfigurasi sekolah. Route penyimpanan
-                          metode belum terlihat pada kode Backend yang
-                          diberikan.
+                          digunakan untuk membaca metode presensi yang
+                          tersimpan pada data sekolah. Backend yang tersedia
+                          belum menyediakan endpoint untuk mengubah daftar
+                          metode melalui halaman ini.
                         </p>
                       </div>
                     </SectionCard>
@@ -441,7 +440,7 @@ export default function PengaturanPresensiPage() {
                     <SectionCard
                       icon={MapPin}
                       title="Konfigurasi Radius Presensi"
-                      description="Menyimpan nilai radius ke pengaturan sistem sekolah."
+                      description="Menyimpan nilai radius sebagai pengaturan tambahan sistem. Nilai validasi GPS tetap mengikuti konfigurasi pada data sekolah."
                     >
                       <form onSubmit={handleSaveRadius} className="space-y-5">
                         <div>
@@ -485,11 +484,11 @@ export default function PengaturanPresensiPage() {
                           <AlertCircle size={18} className="mt-0.5 shrink-0" />
                           <p>
                             Nilai ini disimpan pada tabel{" "}
-                            <code>pengaturanSistem</code>. Controller check-in
-                            yang kamu kirim membaca{" "}
-                            <code>sekolah.radiusAbsensi</code>, sehingga
-                            penyimpanan di sini belum tentu mengubah validasi
-                            GPS.
+                            <code>pengaturanSistem</code>. Sementara itu,
+                            validasi GPS pada Backend membaca{" "}
+                            <code>sekolah.radiusAbsensi</code>. Karena itu,
+                            perubahan di halaman ini belum mengubah radius
+                            validasi presensi.
                           </p>
                         </div>
 
@@ -543,9 +542,15 @@ export default function PengaturanPresensiPage() {
                           <table className="w-full min-w-[420px] text-left text-sm">
                             <thead>
                               <tr className="border-b border-slate-200 text-xs uppercase tracking-wide text-slate-500">
-                                <th className="pb-3 pr-4 font-semibold">Kunci</th>
-                                <th className="pb-3 pr-4 font-semibold">Nilai</th>
-                                <th className="pb-3 font-semibold">Kelompok</th>
+                                <th className="pb-3 pr-4 font-semibold">
+                                  Kunci
+                                </th>
+                                <th className="pb-3 pr-4 font-semibold">
+                                  Nilai
+                                </th>
+                                <th className="pb-3 font-semibold">
+                                  Kelompok
+                                </th>
                               </tr>
                             </thead>
 
@@ -565,11 +570,13 @@ export default function PengaturanPresensiPage() {
                                       </p>
                                     )}
                                   </td>
+
                                   <td className="max-w-56 break-words py-3 pr-4 text-slate-600">
                                     {item.kunci === KEYS.radius
                                       ? `${item.nilai ?? "-"} meter`
                                       : String(item.nilai ?? "-")}
                                   </td>
+
                                   <td className="py-3 text-slate-500">
                                     {item.kelompok || "-"}
                                   </td>
@@ -594,7 +601,7 @@ export default function PengaturanPresensiPage() {
 
                       <p className="mt-2 text-sm leading-6 text-slate-600">
                         Halaman membaca metode presensi dan konfigurasi sistem
-                        melalui endpoint yang terdaftar di aplikasi Express.
+                        melalui endpoint yang tersedia pada aplikasi Express.
                       </p>
 
                       <div className="mt-4 space-y-3">
@@ -603,7 +610,9 @@ export default function PengaturanPresensiPage() {
                             size={17}
                             className="mt-0.5 shrink-0 text-emerald-600"
                           />
-                          <span>Metode presensi dibaca dari API absensi.</span>
+                          <span>
+                            Metode presensi dibaca dari API absensi.
+                          </span>
                         </div>
 
                         <div className="flex items-start gap-2 text-sm text-slate-700">
@@ -635,6 +644,7 @@ export default function PengaturanPresensiPage() {
                         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-700">
                           <Clock3 size={20} />
                         </div>
+
                         <div>
                           <h2 className="text-sm font-semibold text-slate-900">
                             Shift Kerja
@@ -656,6 +666,7 @@ export default function PengaturanPresensiPage() {
                         <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-700">
                           <CalendarDays size={20} />
                         </div>
+
                         <div>
                           <h2 className="text-sm font-semibold text-slate-900">
                             Hari Aktif
@@ -667,9 +678,9 @@ export default function PengaturanPresensiPage() {
                       </div>
 
                       <p className="mt-3 text-sm leading-6 text-slate-500">
-                        Pengaturan hari aktif belum dibuat karena route dan
-                        controller penyimpanannya belum terlihat pada kode BE
-                        yang diberikan.
+                        Pengaturan hari aktif belum tersedia pada endpoint
+                        Backend yang diperiksa. Untuk saat ini, bagian ini
+                        hanya memberikan informasi.
                       </p>
                     </div>
                   </aside>

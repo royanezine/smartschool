@@ -249,7 +249,7 @@ export default function PageDetail() {
         }
       );
 
-      router.push("/cmsAdmin/pages");
+      router.push("/admin/cms/pages");
     } catch (err) {
       console.error("Gagal menghapus halaman:", err);
 
@@ -358,7 +358,7 @@ export default function PageDetail() {
                 </button>
 
                 <Link
-                  href="/cmsAdmin/pages"
+                  href="/admin/cms/pages"
                   className="theme-primary inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold transition"
                 >
                   <ArrowLeft className="h-4 w-4" />
@@ -423,7 +423,7 @@ export default function PageDetail() {
 
               <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                 <Link
-                  href="/cmsAdmin/pages"
+                  href="/admin/cms/pages"
                   className="theme-text-muted inline-flex w-fit items-center gap-2 text-sm font-semibold transition hover:text-[var(--color-primary)]"
                 >
                   <ArrowLeft className="h-4 w-4" />
@@ -550,7 +550,7 @@ export default function PageDetail() {
                         </Link>
 
                         <Link
-                          href={`/cmsAdmin/pages/${page.id}/edit`}
+                          href={`/admin/cms/pages/${page.id}/edit`}
                           className="theme-primary inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold shadow-lg transition"
                         >
                           <Pencil className="h-4 w-4" />
@@ -761,7 +761,7 @@ export default function PageDetail() {
                         </p>
 
                         <Link
-                          href={`/cmsAdmin/pages/${page.id}/edit`}
+                          href={`/admin/cms/pages/${page.id}/edit`}
                           className="theme-primary mt-5 inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs font-semibold transition"
                         >
                           <Pencil className="h-3.5 w-3.5" />

@@ -936,13 +936,13 @@ export default function PendaftarPPDBPage() {
                       />
                     </div>
 
-                    <button
-                      onClick={handleRefresh}
-                      className={`flex items-center justify-center ${theme-card} ${themeNeutralBorder} border ${themeNeutralHover} theme-text-secondary rounded-md w-9 h-9 transition-colors`}
-                      title="Refresh"
-                    >
-                      <RefreshCw size={15} />
-                    </button>
+                <button
+  onClick={handleRefresh}
+  className={`flex items-center justify-center theme-card ${themeNeutralBorder} border ${themeNeutralHover} theme-text-secondary rounded-md w-9 h-9 transition-colors`}
+  title="Refresh"
+>
+  <RefreshCw size={15} />
+</button>
 
                   </div>
                 </div>

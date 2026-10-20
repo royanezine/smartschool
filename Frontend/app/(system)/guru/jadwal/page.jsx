@@ -1,12 +1,7 @@
 "use client";
 
-import {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
-import { getStoredUser } from "@/lib/auth";
+import { useCallback, useEffect, useRef, useState } from "react";
+import { getStoredUser, getToken } from "@/lib/auth";
 import {
   Camera,
   MapPin,
@@ -26,96 +21,74 @@ import {
 import Sidebar from "@/app/components/Sidebar";
 import Header from "@/app/components/Header";
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
+/* =========================================================
+   API CONFIG
+   Mendukung NEXT_PUBLIC_API_URL dengan atau tanpa suffix /api
+========================================================= */
+
+const API_URL = (
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000"
+)
+  .replace(/\/+$/, "")
+  .replace(/\/api$/, "");
 
 /* =========================================================
-   GLOBAL THEME HELPERS
+   THEME HELPERS
 ========================================================= */
 
 const themePrimaryGradient =
   "bg-[linear-gradient(135deg,var(--color-primary),color-mix(in_srgb,var(--color-primary)_72%,var(--color-info)))]";
-
 const themePrimarySoft =
   "bg-[color-mix(in_srgb,var(--color-primary)_9%,transparent)]";
-
 const themePrimarySoftBorder =
   "border-[color-mix(in_srgb,var(--color-primary)_22%,transparent)]";
-
-const themePrimaryText =
-  "text-[var(--color-primary)]";
-
+const themePrimaryText = "text-[var(--color-primary)]";
 const themePrimaryShadow =
   "shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_18%,transparent)]";
-
 const themeCardShadow =
   "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
-
 const themeSmallShadow =
   "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
-
 const themeNeutralSurface =
   "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
-
 const themeNeutralHover =
   "hover:bg-[color-mix(in_srgb,var(--color-text)_7%,transparent)]";
-
 const themeNeutralBorder =
   "border-[color-mix(in_srgb,var(--color-text)_10%,transparent)]";
-
 const themeDivider =
   "border-[color-mix(in_srgb,var(--color-text)_8%,transparent)]";
-
 const themeDashedBorder =
   "border-[color-mix(in_srgb,var(--color-text)_14%,transparent)]";
-
 const themeInfoSurface =
   "bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]";
-
 const themeInfoBorder =
   "border-[color-mix(in_srgb,var(--color-info)_22%,transparent)]";
-
 const themeSuccessSurface =
   "bg-[color-mix(in_srgb,var(--color-success)_9%,transparent)]";
-
 const themeSuccessBorder =
   "border-[color-mix(in_srgb,var(--color-success)_24%,transparent)]";
-
 const themeWarningSurface =
   "bg-[color-mix(in_srgb,var(--color-warning)_9%,transparent)]";
-
 const themeWarningBorder =
   "border-[color-mix(in_srgb,var(--color-warning)_24%,transparent)]";
-
 const themeDangerSurface =
   "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]";
-
 const themeDangerBorder =
   "border-[color-mix(in_srgb,var(--color-text)_18%,transparent)]";
 
-const themeFocus =
-  "focus:border-[var(--color-primary)] focus:bg-[var(--color-card)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_14%,transparent)]";
-
 /* =========================================================
-   AUTH
-========================================================= */
-
-import { getToken } from "@/lib/auth";
-
-/* =========================================================
-   RESPONSE
+   RESPONSE HELPERS
 ========================================================= */
 
 async function parseResponse(response) {
   const text = await response.text();
-
   let data = null;
 
   try {
     data = text ? JSON.parse(text) : null;
   } catch {
     throw new Error(
-      `Response bukan JSON. Status: ${response.status}`
+      `Respons server bukan JSON. Status: ${response.status}`
     );
   }
 
@@ -128,16 +101,39 @@ async function parseResponse(response) {
     );
   }
 
+  if (data?.success === false) {
+    throw new Error(data?.message || "Permintaan tidak berhasil.");
+  }
+
   return data;
 }
 
+function getScheduleList(response) {
+  if (Array.isArray(response)) return response;
+  if (Array.isArray(response?.data)) return response.data;
+  if (Array.isArray(response?.jadwal)) return response.jadwal;
+  if (Array.isArray(response?.items)) return response.items;
+  if (Array.isArray(response?.rows)) return response.rows;
+
+  return [];
+}
+
+function getAbsensiList(response) {
+  if (Array.isArray(response)) return response;
+  if (Array.isArray(response?.data)) return response.data;
+  if (Array.isArray(response?.absensi)) return response.absensi;
+  if (Array.isArray(response?.items)) return response.items;
+  if (Array.isArray(response?.rows)) return response.rows;
+
+  return [];
+}
+
 /* =========================================================
-   DATE
+   DATE HELPERS
 ========================================================= */
 
 function getTodayDate() {
   const now = new Date();
-
   const year = now.getFullYear();
   const month = String(now.getMonth() + 1).padStart(2, "0");
   const day = String(now.getDate()).padStart(2, "0");
@@ -169,17 +165,14 @@ function formatTanggal(value) {
       year: "numeric",
     }).format(new Date(value));
   } catch {
-    return value;
+    return String(value);
   }
 }
 
 function formatJam(value) {
   if (!value) return "-";
 
-  if (
-    typeof value === "string" &&
-    /^\d{1,2}:\d{2}/.test(value)
-  ) {
+  if (typeof value === "string" && /^\d{1,2}:\d{2}/.test(value)) {
     return value.substring(0, 5);
   }
 
@@ -189,12 +182,12 @@ function formatJam(value) {
       minute: "2-digit",
     }).format(new Date(value));
   } catch {
-    return value;
+    return String(value);
   }
 }
 
 /* =========================================================
-   STATUS
+   STATUS HELPERS
 ========================================================= */
 
 function getStatusLabel(status) {
@@ -216,16 +209,12 @@ function getStatusClass(status) {
     return `${themeSuccessSurface} ${themeSuccessBorder} text-[var(--color-success)]`;
   }
 
-  if (value === "terlambat") {
+  if (value === "terlambat" || value === "sakit") {
     return `${themeWarningSurface} ${themeWarningBorder} text-[var(--color-warning)]`;
   }
 
   if (value === "izin") {
     return `${themeInfoSurface} ${themeInfoBorder} text-[var(--color-info)]`;
-  }
-
-  if (value === "sakit") {
-    return `${themeWarningSurface} ${themeWarningBorder} text-[var(--color-warning)]`;
   }
 
   if (value === "alpha" || value === "alpa") {
@@ -236,102 +225,104 @@ function getStatusClass(status) {
 }
 
 /* =========================================================
-   RESPONSE NORMALIZER
-========================================================= */
-
-function getScheduleList(data) {
-  if (Array.isArray(data)) return data;
-
-  if (Array.isArray(data?.data)) return data.data;
-  if (Array.isArray(data?.jadwal)) return data.jadwal;
-  if (Array.isArray(data?.items)) return data.items;
-  if (Array.isArray(data?.rows)) return data.rows;
-
-  return [];
-}
-
-function getAbsensiList(data) {
-  if (Array.isArray(data)) return data;
-
-  if (Array.isArray(data?.data)) return data.data;
-  if (Array.isArray(data?.absensi)) return data.absensi;
-  if (Array.isArray(data?.items)) return data.items;
-  if (Array.isArray(data?.rows)) return data.rows;
-
-  return [];
-}
-
-/* =========================================================
    SCHEDULE HELPERS
+   Struktur BE:
+   jadwal[].kelasMapel.kelas
+   jadwal[].kelasMapel.mataPelajaran
+   jadwal[].kelasMapel.guruPengajar
 ========================================================= */
 
 function getKelasIdFromSchedule(schedule) {
-  if (!schedule) return null;
-
   return (
-    schedule.kelasId ||
-    schedule.kelas?.id ||
-    schedule.kelasMapel?.kelasId ||
-    schedule.kelasMapel?.kelas?.id ||
-    schedule.kelasMataPelajaran?.kelasId ||
-    schedule.kelasMataPelajaran?.kelas?.id ||
+    schedule?.kelasMapel?.kelas?.id ||
+    schedule?.kelasMapel?.kelasId ||
+    schedule?.kelasMataPelajaran?.kelas?.id ||
+    schedule?.kelasMataPelajaran?.kelasId ||
+    schedule?.kelas?.id ||
+    schedule?.kelasId ||
     null
   );
 }
 
-function getScheduleDay(schedule) {
-  if (!schedule) return "";
+function getScheduleMapel(schedule) {
+  const mapel = schedule?.kelasMapel?.mataPelajaran;
 
+  if (typeof mapel === "string") return mapel;
+
+  return (
+    mapel?.namaMapel ||
+    mapel?.namaMataPelajaran ||
+    mapel?.nama ||
+    mapel?.mataPelajaran ||
+    schedule?.mataPelajaran?.namaMapel ||
+    schedule?.mataPelajaran?.nama ||
+    schedule?.mapel?.namaMapel ||
+    schedule?.mapel?.nama ||
+    schedule?.namaMapel ||
+    schedule?.mapelNama ||
+    "Mata Pelajaran belum tersedia"
+  );
+}
+
+function getScheduleKelas(schedule) {
+  const kelas = schedule?.kelasMapel?.kelas;
+
+  if (typeof kelas === "string") return kelas;
+
+  return (
+    kelas?.namaKelas ||
+    kelas?.nama ||
+    kelas?.namaLengkap ||
+    kelas?.tingkatKelas ||
+    schedule?.kelas?.namaKelas ||
+    schedule?.kelas?.nama ||
+    schedule?.namaKelas ||
+    schedule?.kelasNama ||
+    "Kelas belum tersedia"
+  );
+}
+
+function getScheduleGuru(schedule) {
+  return (
+    schedule?.kelasMapel?.guruPengajar?.namaLengkap ||
+    schedule?.kelasMapel?.guruPengajar?.nama ||
+    schedule?.guruPengajar?.namaLengkap ||
+    schedule?.guru?.namaLengkap ||
+    ""
+  );
+}
+
+function getScheduleDay(schedule) {
   return String(
-    schedule.hari ||
-      schedule.hariNama ||
-      schedule.hariMengajar ||
-      schedule.day ||
+    schedule?.hari ||
+      schedule?.hariNama ||
+      schedule?.hariMengajar ||
+      schedule?.day ||
       ""
-  ).toLowerCase();
+  )
+    .trim()
+    .toLowerCase();
 }
 
 function getScheduleStart(schedule) {
   return (
-    schedule.jamMulai ||
-    schedule.waktuMulai ||
-    schedule.mulai ||
-    schedule.jam?.mulai ||
-    schedule.jamPelajaran?.mulai ||
+    schedule?.jamMulai ||
+    schedule?.waktuMulai ||
+    schedule?.mulai ||
+    schedule?.jam?.mulai ||
+    schedule?.jamPelajaran?.mulai ||
     ""
   );
 }
 
 function getScheduleEnd(schedule) {
   return (
-    schedule.jamSelesai ||
-    schedule.waktuSelesai ||
-    schedule.selesai ||
-    schedule.jam?.selesai ||
-    schedule.jamPelajaran?.selesai ||
+    schedule?.jamSelesai ||
+    schedule?.waktuSelesai ||
+    schedule?.selesai ||
+    schedule?.jam?.selesai ||
+    schedule?.jamPelajaran?.selesai ||
     ""
-  );
-}
-
-function getScheduleMapel(schedule) {
-  return (
-    schedule.mapel?.nama ||
-    schedule.mapel?.namaMapel ||
-    schedule.mataPelajaran?.nama ||
-    schedule.mataPelajaran?.namaMapel ||
-    schedule.namaMapel ||
-    schedule.mapelNama ||
-    "Mata Pelajaran"
-  );
-}
-
-function getScheduleKelas(schedule) {
-  return (
-    schedule.kelas?.nama ||
-    schedule.kelas?.namaKelas ||
-    schedule.namaKelas ||
-    schedule.kelasNama ||
-    "Kelas"
   );
 }
 
@@ -339,7 +330,8 @@ function isTodaySchedule(schedule) {
   const currentDay = getCurrentDayName().toLowerCase();
   const scheduleDay = getScheduleDay(schedule);
 
-  if (!scheduleDay) return true;
+  // Jangan menganggap jadwal tanpa informasi hari sebagai jadwal hari ini.
+  if (!scheduleDay) return false;
 
   return (
     scheduleDay === currentDay ||
@@ -350,35 +342,20 @@ function isTodaySchedule(schedule) {
 function getTimeInMinutes(value) {
   if (!value) return null;
 
-  const match = String(value).match(
-    /(\d{1,2}):(\d{2})/
-  );
-
+  const match = String(value).match(/(\d{1,2}):(\d{2})/);
   if (!match) return null;
 
-  return (
-    Number(match[1]) * 60 +
-    Number(match[2])
-  );
+  return Number(match[1]) * 60 + Number(match[2]);
 }
 
 function isScheduleCurrentlyActive(schedule) {
-  const start = getTimeInMinutes(
-    getScheduleStart(schedule)
-  );
+  const start = getTimeInMinutes(getScheduleStart(schedule));
+  const end = getTimeInMinutes(getScheduleEnd(schedule));
 
-  const end = getTimeInMinutes(
-    getScheduleEnd(schedule)
-  );
-
-  if (start === null || end === null) {
-    return false;
-  }
+  if (start === null || end === null) return false;
 
   const now = new Date();
-
-  const current =
-    now.getHours() * 60 + now.getMinutes();
+  const current = now.getHours() * 60 + now.getMinutes();
 
   return current >= start && current <= end;
 }
@@ -405,21 +382,15 @@ export default function PresensiGuruPage() {
   const [success, setSuccess] = useState("");
 
   const [cameraOpen, setCameraOpen] = useState(false);
-  const [cameraLoading, setCameraLoading] =
-    useState(false);
+  const [cameraLoading, setCameraLoading] = useState(false);
   const [cameraError, setCameraError] = useState("");
-
-  const [capturedPhoto, setCapturedPhoto] =
-    useState(null);
+  const [capturedPhoto, setCapturedPhoto] = useState(null);
 
   const [location, setLocation] = useState(null);
-  const [locationLoading, setLocationLoading] =
-    useState(false);
-  const [locationError, setLocationError] =
-    useState("");
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [locationError, setLocationError] = useState("");
 
-  const [jadwalAktif, setJadwalAktif] =
-    useState(null);
+  const [jadwalAktif, setJadwalAktif] = useState(null);
 
   /* =======================================================
      LOAD DATA
@@ -429,7 +400,7 @@ export default function PresensiGuruPage() {
     const token = getToken();
 
     if (!token) {
-      setError("Sesi login tidak ditemukan.");
+      setError("Sesi login tidak ditemukan. Silakan login kembali.");
       setLoading(false);
       return;
     }
@@ -442,77 +413,68 @@ export default function PresensiGuruPage() {
         Authorization: `Bearer ${token}`,
       };
 
-      const [
-        absensiResponse,
-        jadwalResponse,
-      ] = await Promise.all([
-        fetch(
-          `${API_URL}/api/absensi/saya`,
-          {
-            method: "GET",
-            headers,
-            cache: "no-store",
-          }
-        ),
-        fetch(
-          `${API_URL}/api/jadwal-mengajar`,
-          {
-            method: "GET",
-            headers,
-            cache: "no-store",
-          }
-        ),
+      const [absensiResponse, jadwalResponse] = await Promise.all([
+        fetch(`${API_URL}/api/absensi/saya`, {
+          method: "GET",
+          headers,
+          cache: "no-store",
+        }),
+        fetch(`${API_URL}/api/jadwal-mengajar`, {
+          method: "GET",
+          headers,
+          cache: "no-store",
+        }),
       ]);
 
-      const absensiResult =
-        await parseResponse(absensiResponse);
+      const [absensiResult, jadwalResult] = await Promise.all([
+        parseResponse(absensiResponse),
+        parseResponse(jadwalResponse),
+      ]);
 
-      const jadwalResult =
-        await parseResponse(jadwalResponse);
-
-      const absensiData =
-        getAbsensiList(absensiResult);
-
-      const jadwalData =
-        getScheduleList(jadwalResult);
+      const absensiData = getAbsensiList(absensiResult);
+      const jadwalData = getScheduleList(jadwalResult);
 
       setAbsensi(absensiData);
       setJadwal(jadwalData);
 
-      const userRaw =
-        typeof window !== "undefined"
-          ? getStoredUser()
-          : null;
+      const userRaw = getStoredUser();
 
       if (userRaw) {
         try {
-          setUser(JSON.parse(userRaw));
+          setUser(
+            typeof userRaw === "string"
+              ? JSON.parse(userRaw)
+              : userRaw
+          );
         } catch {
           setUser(null);
         }
       }
 
-      const todaySchedules =
-        jadwalData.filter(isTodaySchedule);
+      const todaySchedules = jadwalData.filter(isTodaySchedule);
 
-      const active =
-        todaySchedules.find(
-          isScheduleCurrentlyActive
-        ) ||
-        todaySchedules[0] ||
-        null;
+      const activeSchedule = todaySchedules.find(
+        isScheduleCurrentlyActive
+      );
 
-      setJadwalAktif(active);
+      const currentMinutes =
+        new Date().getHours() * 60 + new Date().getMinutes();
+
+      const nextSchedule = todaySchedules
+        .filter((schedule) => {
+          const start = getTimeInMinutes(getScheduleStart(schedule));
+          return start !== null && start > currentMinutes;
+        })
+        .sort(
+          (a, b) =>
+            getTimeInMinutes(getScheduleStart(a)) -
+            getTimeInMinutes(getScheduleStart(b))
+        )[0];
+
+      setJadwalAktif(activeSchedule || nextSchedule || null);
     } catch (err) {
-      console.error(
-        "Gagal mengambil data presensi:",
-        err
-      );
-
-      setError(
-        err?.message ||
-          "Gagal mengambil data presensi."
-      );
+      console.error("Gagal mengambil data presensi:", err);
+      setError(err?.message || "Gagal mengambil data presensi.");
     } finally {
       setLoading(false);
     }
@@ -523,21 +485,17 @@ export default function PresensiGuruPage() {
   }, [loadData]);
 
   /* =======================================================
-     CLEANUP
+     CAMERA CLEANUP
   ======================================================= */
 
   useEffect(() => {
     return () => {
       if (streamRef.current) {
-        streamRef.current
-          .getTracks()
-          .forEach((track) => track.stop());
+        streamRef.current.getTracks().forEach((track) => track.stop());
       }
 
       if (capturedPhoto?.url) {
-        URL.revokeObjectURL(
-          capturedPhoto.url
-        );
+        URL.revokeObjectURL(capturedPhoto.url);
       }
     };
   }, [capturedPhoto]);
@@ -549,12 +507,7 @@ export default function PresensiGuruPage() {
   const getCurrentLocation = () => {
     return new Promise((resolve, reject) => {
       if (!navigator.geolocation) {
-        reject(
-          new Error(
-            "Browser tidak mendukung GPS."
-          )
-        );
-
+        reject(new Error("Browser tidak mendukung GPS."));
         return;
       }
 
@@ -563,23 +516,19 @@ export default function PresensiGuruPage() {
           resolve({
             lintang: position.coords.latitude,
             bujur: position.coords.longitude,
-            accuracy:
-              position.coords.accuracy,
+            accuracy: position.coords.accuracy,
           });
         },
         (err) => {
-          let message =
-            "Lokasi tidak dapat diperoleh.";
+          let message = "Lokasi tidak dapat diperoleh.";
 
           if (err.code === 1) {
             message =
-              "Izin lokasi ditolak. Silakan aktifkan lokasi pada browser.";
+              "Izin lokasi ditolak. Aktifkan izin lokasi pada browser.";
           } else if (err.code === 2) {
-            message =
-              "Lokasi tidak tersedia.";
+            message = "Lokasi tidak tersedia.";
           } else if (err.code === 3) {
-            message =
-              "Pengambilan lokasi terlalu lama.";
+            message = "Pengambilan lokasi terlalu lama.";
           }
 
           reject(new Error(message));
@@ -598,20 +547,13 @@ export default function PresensiGuruPage() {
       setLocationLoading(true);
       setLocationError("");
 
-      const currentLocation =
-        await getCurrentLocation();
-
+      const currentLocation = await getCurrentLocation();
       setLocation(currentLocation);
 
       return currentLocation;
     } catch (err) {
       console.error("GPS error:", err);
-
-      setLocationError(
-        err?.message ||
-          "Lokasi tidak dapat diperoleh."
-      );
-
+      setLocationError(err?.message || "Lokasi tidak dapat diperoleh.");
       return null;
     } finally {
       setLocationLoading(false);
@@ -626,53 +568,41 @@ export default function PresensiGuruPage() {
     try {
       setCameraLoading(true);
       setCameraError("");
+      setLocationError("");
       setError("");
       setSuccess("");
 
       if (!navigator.mediaDevices?.getUserMedia) {
-        throw new Error(
-          "Browser tidak mendukung akses kamera."
-        );
+        throw new Error("Browser tidak mendukung akses kamera.");
       }
 
       if (streamRef.current) {
-        streamRef.current
-          .getTracks()
-          .forEach((track) => track.stop());
+        streamRef.current.getTracks().forEach((track) => track.stop());
       }
 
-      const stream =
-        await navigator.mediaDevices.getUserMedia({
-          video: {
-            facingMode: "user",
-            width: { ideal: 1280 },
-            height: { ideal: 720 },
-          },
-          audio: false,
-        });
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: {
+          facingMode: "user",
+          width: { ideal: 1280 },
+          height: { ideal: 720 },
+        },
+        audio: false,
+      });
 
       streamRef.current = stream;
-
       setCameraOpen(true);
 
       requestAnimationFrame(() => {
         if (videoRef.current) {
           videoRef.current.srcObject = stream;
-
-          videoRef.current
-            .play()
-            .catch(() => {});
+          videoRef.current.play().catch(() => {});
         }
       });
 
       await checkLocation();
     } catch (err) {
       console.error("Camera error:", err);
-
-      setCameraError(
-        err?.message ||
-          "Kamera tidak dapat dibuka."
-      );
+      setCameraError(err?.message || "Kamera tidak dapat dibuka.");
     } finally {
       setCameraLoading(false);
     }
@@ -680,10 +610,7 @@ export default function PresensiGuruPage() {
 
   const stopCamera = () => {
     if (streamRef.current) {
-      streamRef.current
-        .getTracks()
-        .forEach((track) => track.stop());
-
+      streamRef.current.getTracks().forEach((track) => track.stop());
       streamRef.current = null;
     }
 
@@ -704,96 +631,62 @@ export default function PresensiGuruPage() {
         return;
       }
 
-      if (
-        video.readyState <
-        HTMLMediaElement.HAVE_CURRENT_DATA
-      ) {
-        setCameraError(
-          "Tunggu kamera siap terlebih dahulu."
-        );
+      if (video.readyState < HTMLMediaElement.HAVE_CURRENT_DATA) {
+        setCameraError("Tunggu kamera siap terlebih dahulu.");
         return;
       }
 
-      const width =
-        video.videoWidth || 1280;
-
-      const height =
-        video.videoHeight || 720;
+      const width = video.videoWidth || 1280;
+      const height = video.videoHeight || 720;
 
       if (!width || !height) {
-        setCameraError(
-          "Ukuran kamera belum tersedia."
-        );
+        setCameraError("Ukuran kamera belum tersedia.");
         return;
       }
 
       canvas.width = width;
       canvas.height = height;
 
-      const context =
-        canvas.getContext("2d");
+      const context = canvas.getContext("2d");
 
       if (!context) {
-        setCameraError(
-          "Gagal menyiapkan kamera."
-        );
+        setCameraError("Gagal menyiapkan kamera.");
         return;
       }
 
-      context.drawImage(
-        video,
-        0,
-        0,
-        width,
-        height
-      );
+      context.drawImage(video, 0, 0, width, height);
 
       canvas.toBlob(
         (blob) => {
           if (!blob) {
-            setCameraError(
-              "Gagal mengambil foto wajah."
-            );
+            setCameraError("Gagal mengambil foto wajah.");
             return;
           }
 
-          if (capturedPhoto?.url) {
-            URL.revokeObjectURL(
-              capturedPhoto.url
-            );
-          }
+          setCapturedPhoto((previous) => {
+            if (previous?.url) URL.revokeObjectURL(previous.url);
 
-          const url =
-            URL.createObjectURL(blob);
-
-          setCapturedPhoto({
-            blob,
-            url,
+            return {
+              blob,
+              url: URL.createObjectURL(blob),
+            };
           });
         },
         "image/jpeg",
         0.9
       );
     } catch (err) {
-      console.error(
-        "Capture photo error:",
-        err
-      );
-
-      setCameraError(
-        "Gagal mengambil foto wajah."
-      );
+      console.error("Capture photo error:", err);
+      setCameraError("Gagal mengambil foto wajah.");
     }
   };
 
   const retakePhoto = () => {
-    if (capturedPhoto?.url) {
-      URL.revokeObjectURL(
-        capturedPhoto.url
-      );
-    }
+    setCapturedPhoto((previous) => {
+      if (previous?.url) URL.revokeObjectURL(previous.url);
+      return null;
+    });
 
-    setCapturedPhoto(null);
     setCameraError("");
   };
 
@@ -802,14 +695,15 @@ export default function PresensiGuruPage() {
   ======================================================= */
 
   const getSelectedSchedule = () => {
-    if (jadwalAktif) {
-      return jadwalAktif;
-    }
+    if (jadwalAktif) return jadwalAktif;
 
-    const todaySchedules =
-      jadwal.filter(isTodaySchedule);
+    const todaySchedules = jadwal.filter(isTodaySchedule);
 
-    return todaySchedules[0] || null;
+    return (
+      todaySchedules.find(isScheduleCurrentlyActive) ||
+      todaySchedules[0] ||
+      null
+    );
   };
 
   /* =======================================================
@@ -824,21 +718,16 @@ export default function PresensiGuruPage() {
       if (submitting) return;
 
       if (!capturedPhoto?.blob) {
-        setError(
-          "Silakan ambil foto wajah terlebih dahulu."
-        );
+        setError("Silakan ambil foto wajah terlebih dahulu.");
         return;
       }
 
-      const schedule =
-        getSelectedSchedule();
-
-      const kelasId =
-        getKelasIdFromSchedule(schedule);
+      const schedule = getSelectedSchedule();
+      const kelasId = getKelasIdFromSchedule(schedule);
 
       if (!kelasId) {
         setError(
-          "Kelas pada jadwal mengajar tidak ditemukan."
+          "Kelas pada jadwal mengajar tidak ditemukan. Periksa data kelas pada respons BE."
         );
         return;
       }
@@ -846,9 +735,7 @@ export default function PresensiGuruPage() {
       let currentLocation = location;
 
       if (!currentLocation) {
-        currentLocation =
-          await getCurrentLocation();
-
+        currentLocation = await getCurrentLocation();
         setLocation(currentLocation);
       }
 
@@ -862,9 +749,7 @@ export default function PresensiGuruPage() {
       const token = getToken();
 
       if (!token) {
-        setError(
-          "Sesi login tidak ditemukan."
-        );
+        setError("Sesi login tidak ditemukan. Silakan login kembali.");
         return;
       }
 
@@ -872,64 +757,38 @@ export default function PresensiGuruPage() {
 
       const formData = new FormData();
 
-      formData.append(
-        "kelasId",
-        String(kelasId)
-      );
-
+      formData.append("kelasId", String(kelasId));
       formData.append("status", "hadir");
       formData.append("metode", "face");
-
-      formData.append(
-        "lintang",
-        String(currentLocation.lintang)
-      );
-
-      formData.append(
-        "bujur",
-        String(currentLocation.bujur)
-      );
-
+      formData.append("lintang", String(currentLocation.lintang));
+      formData.append("bujur", String(currentLocation.bujur));
       formData.append(
         "snapshot",
         capturedPhoto.blob,
         `face-${Date.now()}.jpg`
       );
 
-      const response = await fetch(
-        `${API_URL}/api/absensi/`,
-        {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-          body: formData,
-        }
-      );
+      const response = await fetch(`${API_URL}/api/absensi/`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+        body: formData,
+      });
 
-      const result =
-        await parseResponse(response);
+      const result = await parseResponse(response);
 
       setSuccess(
-        result?.message ||
-          "Presensi Face ID berhasil dicatat."
+        result?.message || "Presensi Face ID berhasil dicatat."
       );
 
       setCapturedPhoto(null);
-
       stopCamera();
 
       await loadData();
     } catch (err) {
-      console.error(
-        "Presensi Face ID gagal:",
-        err
-      );
-
-      setError(
-        err?.message ||
-          "Presensi Face ID gagal."
-      );
+      console.error("Presensi Face ID gagal:", err);
+      setError(err?.message || "Presensi Face ID gagal.");
     } finally {
       setSubmitting(false);
     }
@@ -941,46 +800,32 @@ export default function PresensiGuruPage() {
 
   const today = getTodayDate();
 
-  const absensiHariIni = absensi.find(
-    (item) => {
-      const tanggal =
-        item.tanggal ||
-        item.waktuAbsensi ||
-        item.dibuatPada ||
-        item.createdAt;
+  const absensiHariIni = absensi.find((item) => {
+    const tanggal =
+      item.tanggal ||
+      item.waktuAbsensi ||
+      item.dibuatPada ||
+      item.createdAt;
 
-      if (!tanggal) return false;
+    if (!tanggal) return false;
 
-      return (
-        String(tanggal).substring(0, 10) ===
-        today
-      );
-    }
-  );
+    return String(tanggal).substring(0, 10) === today;
+  });
 
   const jumlahHadir = absensi.filter(
-    (item) =>
-      String(item.status || "").toLowerCase() ===
-      "hadir"
+    (item) => String(item.status || "").toLowerCase() === "hadir"
   ).length;
 
   const jumlahTerlambat = absensi.filter(
-    (item) =>
-      String(item.status || "").toLowerCase() ===
-      "terlambat"
+    (item) => String(item.status || "").toLowerCase() === "terlambat"
   ).length;
 
   const jumlahIzin = absensi.filter(
-    (item) =>
-      String(item.status || "").toLowerCase() ===
-      "izin"
+    (item) => String(item.status || "").toLowerCase() === "izin"
   ).length;
 
-  const todaySchedules =
-    jadwal.filter(isTodaySchedule);
-
-  const selectedSchedule =
-    getSelectedSchedule();
+  const todaySchedules = jadwal.filter(isTodaySchedule);
+  const selectedSchedule = getSelectedSchedule();
 
   /* =======================================================
      RENDER
@@ -988,41 +833,23 @@ export default function PresensiGuruPage() {
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
-      {/* =====================================================
-          SIDEBAR GURU
-      ===================================================== */}
-
       <Sidebar
         role="guru"
         activeMenu="presensi"
         isOpen={sidebarOpen}
-        onToggle={() =>
-          setSidebarOpen(!sidebarOpen)
-        }
+        onToggle={() => setSidebarOpen(!sidebarOpen)}
       />
 
-      {/* =====================================================
-          MAIN
-      ===================================================== */}
-
-      <div className="flex min-w-0 flex-1 flex-col h-full overflow-hidden">
+      <div className="flex h-full min-w-0 flex-1 flex-col overflow-hidden">
         <Header
           title="Presensi"
-          onMenuClick={() =>
-            setSidebarOpen(!sidebarOpen)
-          }
+          onMenuClick={() => setSidebarOpen(!sidebarOpen)}
           user={user}
         />
 
-        {/* ===================================================
-            CONTENT SCROLL
-        =================================================== */}
-
         <main className="flex-1 overflow-y-auto">
           <div className="space-y-5 p-4 sm:space-y-6 sm:p-6 lg:p-8">
-            {/* =================================================
-                PAGE HEADER
-            ================================================= */}
+            {/* PAGE HEADER */}
 
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="flex min-w-0 items-center gap-3">
@@ -1036,14 +863,11 @@ export default function PresensiGuruPage() {
                   <h1 className="theme-text truncate text-xl font-bold sm:text-2xl">
                     Presensi Mengajar
                   </h1>
-
                   <p className="theme-text-secondary mt-1 text-xs sm:text-sm">
                     Presensi mengajar dengan verifikasi Face ID.
                   </p>
                 </div>
               </div>
-
-              {/* DATE */}
 
               <div
                 className={`theme-card rounded-xl border ${themeNeutralBorder} px-5 py-3 ${themeSmallShadow}`}
@@ -1051,24 +875,18 @@ export default function PresensiGuruPage() {
                 <p className="theme-text-muted text-[10px] font-medium uppercase tracking-wide">
                   Hari ini
                 </p>
-
                 <p className="theme-text mt-1 text-sm font-bold">
-                  {new Intl.DateTimeFormat(
-                    "id-ID",
-                    {
-                      weekday: "long",
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    }
-                  ).format(new Date())}
+                  {new Intl.DateTimeFormat("id-ID", {
+                    weekday: "long",
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  }).format(new Date())}
                 </p>
               </div>
             </div>
 
-            {/* =================================================
-                ERROR
-            ================================================= */}
+            {/* ERROR */}
 
             {error && (
               <div
@@ -1078,30 +896,26 @@ export default function PresensiGuruPage() {
                   size={19}
                   className="theme-danger mt-0.5 shrink-0"
                 />
-
                 <div className="flex-1">
                   <p className="theme-danger text-sm font-semibold">
                     Presensi gagal
                   </p>
-
                   <p className="theme-text-secondary mt-0.5 text-sm">
                     {error}
                   </p>
                 </div>
-
                 <button
                   type="button"
                   onClick={() => setError("")}
                   className="theme-danger transition-opacity hover:opacity-70"
+                  aria-label="Tutup pesan error"
                 >
                   <X size={18} />
                 </button>
               </div>
             )}
 
-            {/* =================================================
-                SUCCESS
-            ================================================= */}
+            {/* SUCCESS */}
 
             {success && (
               <div
@@ -1111,32 +925,28 @@ export default function PresensiGuruPage() {
                   size={19}
                   className="mt-0.5 shrink-0 text-[var(--color-success)]"
                 />
-
                 <div className="flex-1">
-                  <p className="text-[var(--color-success)] text-sm font-semibold">
+                  <p className="text-sm font-semibold text-[var(--color-success)]">
                     Berhasil
                   </p>
-
                   <p className="theme-text-secondary mt-0.5 text-sm">
                     {success}
                   </p>
                 </div>
-
                 <button
                   type="button"
                   onClick={() => setSuccess("")}
                   className="text-[var(--color-success)] transition-opacity hover:opacity-70"
+                  aria-label="Tutup pesan sukses"
                 >
                   <X size={18} />
                 </button>
               </div>
             )}
 
-            {/* =================================================
-                STATISTICS
-            ================================================= */}
+            {/* STATISTICS */}
 
-            <div className="grid grid-cols-2 gap-3 lg:grid-cols-4 sm:gap-4">
+            <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
               <StatCard
                 title="Hadir"
                 value={jumlahHadir}
@@ -1144,7 +954,6 @@ export default function PresensiGuruPage() {
                 icon={UserCheck}
                 iconClass="text-[var(--color-success)]"
               />
-
               <StatCard
                 title="Terlambat"
                 value={jumlahTerlambat}
@@ -1152,7 +961,6 @@ export default function PresensiGuruPage() {
                 icon={Clock}
                 iconClass="text-[var(--color-warning)]"
               />
-
               <StatCard
                 title="Izin"
                 value={jumlahIzin}
@@ -1160,7 +968,6 @@ export default function PresensiGuruPage() {
                 icon={Calendar}
                 iconClass="text-[var(--color-info)]"
               />
-
               <StatCard
                 title="Total Riwayat"
                 value={absensi.length}
@@ -1170,14 +977,10 @@ export default function PresensiGuruPage() {
               />
             </div>
 
-            {/* =================================================
-                MAIN GRID
-            ================================================= */}
+            {/* MAIN GRID */}
 
             <div className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1.4fr)_minmax(360px,0.8fr)]">
-              {/* =================================================
-                  CHECK-IN
-              ================================================= */}
+              {/* CHECK-IN */}
 
               <section
                 className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -1200,21 +1003,24 @@ export default function PresensiGuruPage() {
                           Jadwal Mengajar
                         </p>
 
-                        <p className="theme-text mt-1 truncate text-base font-bold">
+                        <p className="theme-text mt-1 text-base font-bold">
                           {selectedSchedule
-                            ? getScheduleMapel(
-                                selectedSchedule
-                              )
+                            ? getScheduleMapel(selectedSchedule)
                             : "Belum ada jadwal"}
                         </p>
 
-                        <p className="theme-text-secondary mt-1 truncate text-sm">
+                        <p className="theme-text-secondary mt-1 text-sm">
                           {selectedSchedule
-                            ? getScheduleKelas(
-                                selectedSchedule
-                              )
+                            ? getScheduleKelas(selectedSchedule)
                             : "Tidak ada jadwal mengajar hari ini"}
                         </p>
+
+                        {selectedSchedule &&
+                          getScheduleGuru(selectedSchedule) && (
+                            <p className="theme-text-muted mt-1 text-xs">
+                              Guru: {getScheduleGuru(selectedSchedule)}
+                            </p>
+                          )}
                       </div>
 
                       {selectedSchedule && (
@@ -1224,19 +1030,9 @@ export default function PresensiGuruPage() {
                           <p className="theme-text-muted text-[10px]">
                             Jam
                           </p>
-
-                          <p className="text-[var(--color-info)] text-sm font-bold">
-                            {formatJam(
-                              getScheduleStart(
-                                selectedSchedule
-                              )
-                            )}{" "}
-                            -{" "}
-                            {formatJam(
-                              getScheduleEnd(
-                                selectedSchedule
-                              )
-                            )}
+                          <p className="text-sm font-bold text-[var(--color-info)]">
+                            {formatJam(getScheduleStart(selectedSchedule))}{" "}
+                            - {formatJam(getScheduleEnd(selectedSchedule))}
                           </p>
                         </div>
                       )}
@@ -1253,7 +1049,6 @@ export default function PresensiGuruPage() {
                         <p className="theme-text text-sm font-semibold">
                           Status Hari Ini
                         </p>
-
                         <p className="theme-text-secondary mt-1 text-xs">
                           Status presensi kamu untuk hari ini.
                         </p>
@@ -1262,16 +1057,12 @@ export default function PresensiGuruPage() {
                       <span
                         className={`rounded-full border px-3 py-1.5 text-xs font-semibold ${
                           absensiHariIni
-                            ? getStatusClass(
-                                absensiHariIni.status
-                              )
+                            ? getStatusClass(absensiHariIni.status)
                             : `${themeWarningBorder} ${themeWarningSurface} text-[var(--color-warning)]`
                         }`}
                       >
                         {absensiHariIni
-                          ? getStatusLabel(
-                              absensiHariIni.status
-                            )
+                          ? getStatusLabel(absensiHariIni.status)
                           : "Belum Absen"}
                       </span>
                     </div>
@@ -1284,10 +1075,10 @@ export default function PresensiGuruPage() {
                   >
                     <div className="flex items-start gap-3">
                       <div
-                      className={`theme-card flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themePrimaryText} ${themeSmallShadow}`}
-                    >
-                      <MapPin size={18} />
-                    </div>
+                        className={`theme-card flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${themePrimaryText} ${themeSmallShadow}`}
+                      >
+                        <MapPin size={18} />
+                      </div>
 
                       <div className="min-w-0 flex-1">
                         <p className="theme-text text-sm font-semibold">
@@ -1302,9 +1093,7 @@ export default function PresensiGuruPage() {
                           <p className="mt-1 text-xs text-[var(--color-success)]">
                             Lokasi berhasil didapatkan
                             {location.accuracy
-                              ? ` • Akurasi ±${Math.round(
-                                  location.accuracy
-                                )} m`
+                              ? ` • Akurasi ±${Math.round(location.accuracy)} m`
                               : ""}
                           </p>
                         ) : (
@@ -1327,9 +1116,7 @@ export default function PresensiGuruPage() {
                           disabled={locationLoading}
                           className={`theme-card theme-text-secondary shrink-0 rounded-lg border ${themeNeutralBorder} px-3 py-2 text-xs font-semibold transition ${themeNeutralHover} disabled:cursor-not-allowed disabled:opacity-50`}
                         >
-                          {locationLoading
-                            ? "Memuat..."
-                            : "Aktifkan"}
+                          {locationLoading ? "Memuat..." : "Aktifkan"}
                         </button>
                       )}
                     </div>
@@ -1349,10 +1136,7 @@ export default function PresensiGuruPage() {
                   >
                     {cameraLoading ? (
                       <>
-                        <Loader2
-                          size={18}
-                          className="animate-spin"
-                        />
+                        <Loader2 size={18} className="animate-spin" />
                         Membuka Kamera...
                       </>
                     ) : absensiHariIni ? (
@@ -1375,9 +1159,7 @@ export default function PresensiGuruPage() {
                 </div>
               </section>
 
-              {/* =================================================
-                  SUMMARY
-              ================================================= */}
+              {/* SUMMARY */}
 
               <section
                 className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -1396,7 +1178,6 @@ export default function PresensiGuruPage() {
                     border={themeSuccessBorder}
                     text="text-[var(--color-success)]"
                   />
-
                   <SummaryItem
                     label="Terlambat"
                     value={jumlahTerlambat}
@@ -1404,7 +1185,6 @@ export default function PresensiGuruPage() {
                     border={themeWarningBorder}
                     text="text-[var(--color-warning)]"
                   />
-
                   <SummaryItem
                     label="Izin"
                     value={jumlahIzin}
@@ -1414,17 +1194,13 @@ export default function PresensiGuruPage() {
                   />
                 </div>
 
-                <div
-                  className={`border-t ${themeDivider} p-6`}
-                >
+                <div className={`border-t ${themeDivider} p-6`}>
                   <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-wide">
                     Total Riwayat
                   </p>
-
                   <p className="theme-text mt-1 text-2xl font-bold">
                     {absensi.length}
                   </p>
-
                   <p className="theme-text-secondary mt-1 text-xs">
                     data presensi tersimpan
                   </p>
@@ -1432,9 +1208,7 @@ export default function PresensiGuruPage() {
               </section>
             </div>
 
-            {/* =================================================
-                JADWAL HARI INI
-            ================================================= */}
+            {/* JADWAL HARI INI */}
 
             <section
               className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -1457,83 +1231,57 @@ export default function PresensiGuruPage() {
                     <p className="theme-text text-sm font-medium">
                       Belum ada jadwal mengajar hari ini.
                     </p>
-
                     <p className="theme-text-secondary mt-1 text-xs">
                       Jadwal akan muncul jika sudah tersedia.
                     </p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-                    {todaySchedules.map(
-                      (schedule, index) => {
-                        const active =
-                          jadwalAktif ===
-                          schedule;
+                    {todaySchedules.map((schedule, index) => {
+                      const active = jadwalAktif === schedule;
 
-                        return (
-                          <div
-                            key={
-                              schedule.id ||
-                              schedule.jadwalId ||
-                              index
-                            }
-                            className={`rounded-xl border p-4 transition ${
-                              active
-                                ? `${themePrimarySoft} ${themePrimarySoftBorder}`
-                                : `theme-card ${themeNeutralBorder} ${themeNeutralHover}`
-                            }`}
-                          >
-                            <div className="flex items-start justify-between gap-3">
-                              <div className="min-w-0">
-                                <p className="theme-text truncate text-sm font-bold">
-                                  {getScheduleMapel(
-                                    schedule
-                                  )}
-                                </p>
-
-                                <p className="theme-text-secondary mt-1 truncate text-xs">
-                                  {getScheduleKelas(
-                                    schedule
-                                  )}
-                                </p>
-                              </div>
-
-                              {active && (
-                                <span
-                                  className={`shrink-0 rounded-full ${themePrimaryGradient} px-2.5 py-1 text-[10px] font-bold text-[var(--color-card)]`}
-                                >
-                                  Aktif
-                                </span>
-                              )}
+                      return (
+                        <div
+                          key={schedule.id || schedule.jadwalId || index}
+                          className={`rounded-xl border p-4 transition ${
+                            active
+                              ? `${themePrimarySoft} ${themePrimarySoftBorder}`
+                              : `theme-card ${themeNeutralBorder} ${themeNeutralHover}`
+                          }`}
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <p className="theme-text truncate text-sm font-bold">
+                                {getScheduleMapel(schedule)}
+                              </p>
+                              <p className="theme-text-secondary mt-1 truncate text-xs">
+                                {getScheduleKelas(schedule)}
+                              </p>
                             </div>
 
-                            <div className="theme-text-secondary mt-4 flex items-center gap-2 text-xs font-medium">
-                              <Clock size={13} />
-
-                              {formatJam(
-                                getScheduleStart(
-                                  schedule
-                                )
-                              )}{" "}
-                              -{" "}
-                              {formatJam(
-                                getScheduleEnd(
-                                  schedule
-                                )
-                              )}
-                            </div>
+                            {active && (
+                              <span
+                                className={`shrink-0 rounded-full ${themePrimaryGradient} px-2.5 py-1 text-[10px] font-bold text-[var(--color-card)]`}
+                              >
+                                Aktif
+                              </span>
+                            )}
                           </div>
-                        );
-                      }
-                    )}
+
+                          <div className="theme-text-secondary mt-4 flex items-center gap-2 text-xs font-medium">
+                            <Clock size={13} />
+                            {formatJam(getScheduleStart(schedule))} -{" "}
+                            {formatJam(getScheduleEnd(schedule))}
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
                 )}
               </div>
             </section>
 
-            {/* =================================================
-                RIWAYAT
-            ================================================= */}
+            {/* RIWAYAT PRESENSI */}
 
             <section
               className={`theme-card overflow-hidden rounded-2xl border ${themeNeutralBorder} ${themeCardShadow}`}
@@ -1554,7 +1302,6 @@ export default function PresensiGuruPage() {
                     <p className="theme-text text-sm font-medium">
                       Belum ada riwayat presensi.
                     </p>
-
                     <p className="theme-text-secondary mt-1 text-xs">
                       Data presensi akan muncul setelah kamu melakukan check-in.
                     </p>
@@ -1568,15 +1315,12 @@ export default function PresensiGuruPage() {
                         <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide">
                           Tanggal
                         </th>
-
                         <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide">
                           Jam
                         </th>
-
                         <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide">
                           Status
                         </th>
-
                         <th className="px-6 py-3 text-xs font-semibold uppercase tracking-wide">
                           Metode
                         </th>
@@ -1584,56 +1328,44 @@ export default function PresensiGuruPage() {
                     </thead>
 
                     <tbody>
-                      {absensi
-                        .slice(0, 10)
-                        .map((item, index) => {
-                          const date =
-                            item.tanggal ||
-                            item.waktuAbsensi ||
-                            item.dibuatPada ||
-                            item.createdAt;
+                      {absensi.slice(0, 10).map((item, index) => {
+                        const date =
+                          item.tanggal ||
+                          item.waktuAbsensi ||
+                          item.dibuatPada ||
+                          item.createdAt;
 
-                          return (
-                            <tr
-                              key={
-                                item.id || index
-                              }
-                              className={`border-b ${themeDivider} last:border-0 ${themeNeutralHover} transition-colors`}
-                            >
-                              <td className="theme-text px-6 py-4 text-sm font-medium">
-                                {formatTanggal(
-                                  date
-                                )}
-                              </td>
-
-                              <td className="theme-text-secondary px-6 py-4 text-sm">
-                                {formatJam(
-                                  item.jam ||
-                                    item.waktuAbsensi ||
-                                    item.dibuatPada ||
-                                    item.createdAt
-                                )}
-                              </td>
-
-                              <td className="px-6 py-4">
-                                <span
-                                  className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${getStatusClass(
-                                    item.status
-                                  )}`}
-                                >
-                                  {getStatusLabel(
-                                    item.status
-                                  )}
-                                </span>
-                              </td>
-
-                              <td className="theme-text-secondary px-6 py-4 text-sm capitalize">
-                                {item.metode ||
-                                  "-"}
-                              </td>
-                            </tr>
-                          );
-                        })}
+                        return (
+                          <tr
+                            key={item.id || index}
+                            className={`border-b ${themeDivider} last:border-0 ${themeNeutralHover} transition-colors`}
+                          >
+                            <td className="theme-text px-6 py-4 text-sm font-medium">
+                              {formatTanggal(date)}
+                            </td>
+                            <td className="theme-text-secondary px-6 py-4 text-sm">
+                              {formatJam(
+                                item.jam ||
+                                  item.waktuAbsensi ||
+                                  item.dibuatPada ||
+                                  item.createdAt
+                              )}
+                            </td>
+                            <td className="px-6 py-4">
+                              <span
+                                className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-semibold ${getStatusClass(
+                                  item.status
+                                )}`}
+                              >
+                                {getStatusLabel(item.status)}
+                              </span>
+                            </td>
+                            <td className="theme-text-secondary px-6 py-4 text-sm capitalize">
+                              {item.metode || "-"}
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 )}
@@ -1643,14 +1375,10 @@ export default function PresensiGuruPage() {
         </main>
       </div>
 
-      {/* =====================================================
-          CAMERA MODAL
-      ===================================================== */}
+      {/* CAMERA MODAL */}
 
       {cameraOpen && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-[color-mix(in_srgb,var(--color-text)_78%,transparent)] p-4 backdrop-blur-sm"
-        >
+        <div className="fixed inset-0 z-[100] flex items-center justify-center bg-[color-mix(in_srgb,var(--color-text)_78%,transparent)] p-4 backdrop-blur-sm">
           <div
             className={`theme-card w-full max-w-2xl overflow-hidden rounded-2xl ${themeCardShadow}`}
           >
@@ -1661,19 +1389,14 @@ export default function PresensiGuruPage() {
             >
               <div className="flex items-center gap-3">
                 <div
-                  className={`flex h-9 w-9 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimarySoftBorder} border`}
+                  className={`flex h-9 w-9 items-center justify-center rounded-lg border ${themePrimarySoft} ${themePrimarySoftBorder}`}
                 >
-                  <Shield
-                    size={17}
-                    className={themePrimaryText}
-                  />
+                  <Shield size={17} className={themePrimaryText} />
                 </div>
-
                 <div>
                   <h3 className="theme-text text-sm font-bold">
                     Verifikasi Face ID
                   </h3>
-
                   <p className="theme-text-muted mt-0.5 text-[11px]">
                     Posisikan wajah di tengah oval.
                   </p>
@@ -1685,16 +1408,15 @@ export default function PresensiGuruPage() {
                 onClick={stopCamera}
                 disabled={submitting}
                 className={`theme-text-secondary flex h-9 w-9 items-center justify-center rounded-lg transition ${themeNeutralHover} hover:text-[var(--color-primary)] disabled:opacity-50`}
+                aria-label="Tutup kamera"
               >
                 <X size={18} />
               </button>
             </div>
 
-            {/* CAMERA */}
+            {/* CAMERA PREVIEW */}
 
-            <div
-              className="bg-[color-mix(in_srgb,var(--color-text)_92%,var(--color-card))] p-4 sm:p-6"
-            >
+            <div className="bg-[color-mix(in_srgb,var(--color-text)_92%,var(--color-card))] p-4 sm:p-6">
               <div className="relative mx-auto w-full max-w-[620px] overflow-hidden rounded-2xl bg-[color-mix(in_srgb,var(--color-text)_96%,var(--color-card))]">
                 {!capturedPhoto ? (
                   <>
@@ -1704,27 +1426,17 @@ export default function PresensiGuruPage() {
                       muted
                       playsInline
                       className="aspect-video h-auto w-full object-cover"
-                      style={{
-                        transform:
-                          "scaleX(-1)",
-                      }}
+                      style={{ transform: "scaleX(-1)" }}
                     />
 
-                    {/* FACE OVAL */}
-
                     <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-                      <div
-                        className="h-[76%] w-[34%] min-w-[170px] max-w-[260px] rounded-[50%] border-2 border-[var(--color-card)] shadow-[0_0_0_9999px_color-mix(in_srgb,var(--color-text)_18%,transparent)]"
-                      />
+                      <div className="h-[76%] w-[34%] min-w-[170px] max-w-[260px] rounded-[50%] border-2 border-[var(--color-card)] shadow-[0_0_0_9999px_color-mix(in_srgb,var(--color-text)_18%,transparent)]" />
                     </div>
-
-                    {/* CAMERA GUIDE */}
 
                     <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-[linear-gradient(to_top,color-mix(in_srgb,var(--color-text)_72%,transparent),color-mix(in_srgb,var(--color-text)_20%,transparent),transparent)] px-5 pb-5 pt-14 text-center">
                       <p className="text-sm font-semibold text-[var(--color-card)]">
                         Posisikan wajah di dalam oval
                       </p>
-
                       <p className="mt-1 text-xs text-[color-mix(in_srgb,var(--color-card)_75%,transparent)]">
                         Pastikan pencahayaan cukup dan wajah terlihat jelas
                       </p>
@@ -1737,9 +1449,8 @@ export default function PresensiGuruPage() {
                       alt="Preview wajah"
                       className="aspect-video h-auto w-full object-cover"
                     />
-
                     <div
-                      className={`absolute left-3 top-3 rounded-full ${themeSuccessSurface} border ${themeSuccessBorder} px-3 py-1.5 text-xs font-bold text-[var(--color-success)] ${themeSmallShadow}`}
+                      className={`absolute left-3 top-3 rounded-full border ${themeSuccessSurface} ${themeSuccessBorder} px-3 py-1.5 text-xs font-bold text-[var(--color-success)] ${themeSmallShadow}`}
                     >
                       Foto siap diverifikasi
                     </div>
@@ -1747,10 +1458,7 @@ export default function PresensiGuruPage() {
                 )}
               </div>
 
-              <canvas
-                ref={canvasRef}
-                className="hidden"
-              />
+              <canvas ref={canvasRef} className="hidden" />
 
               {cameraError && (
                 <div
@@ -1762,12 +1470,11 @@ export default function PresensiGuruPage() {
 
               <div className="mt-4 flex items-center justify-center gap-2 text-xs text-[color-mix(in_srgb,var(--color-card)_70%,transparent)]">
                 <MapPin size={14} />
-
                 {location
-                  ? `GPS aktif • akurasi ±${Math.round(
-                      location.accuracy || 0
-                    )} m`
-                  : "Mengambil lokasi GPS..."}
+                  ? `GPS aktif • akurasi ±${Math.round(location.accuracy || 0)} m`
+                  : locationLoading
+                    ? "Mengambil lokasi GPS..."
+                    : "Lokasi GPS belum tersedia"}
               </div>
             </div>
 
@@ -1786,14 +1493,10 @@ export default function PresensiGuruPage() {
                   >
                     Batal
                   </button>
-
                   <button
                     type="button"
                     onClick={capturePhoto}
-                    disabled={
-                      submitting ||
-                      cameraLoading
-                    }
+                    disabled={submitting || cameraLoading}
                     className={`rounded-xl ${themePrimaryGradient} px-6 py-3 text-sm font-bold text-[var(--color-card)] ${themePrimaryShadow} transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60`}
                   >
                     Ambil Foto
@@ -1809,29 +1512,20 @@ export default function PresensiGuruPage() {
                   >
                     Ambil Ulang
                   </button>
-
                   <button
                     type="button"
                     onClick={handleCheckin}
-                    disabled={
-                      submitting ||
-                      !location
-                    }
+                    disabled={submitting || !location}
                     className={`inline-flex items-center justify-center gap-2 rounded-xl ${themePrimaryGradient} px-6 py-3 text-sm font-bold text-[var(--color-card)] ${themePrimaryShadow} transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60`}
                   >
                     {submitting ? (
                       <>
-                        <Loader2
-                          size={15}
-                          className="animate-spin"
-                        />
+                        <Loader2 size={15} className="animate-spin" />
                         Memverifikasi Wajah...
                       </>
                     ) : (
                       <>
-                        <CheckCircle2
-                          size={15}
-                        />
+                        <CheckCircle2 size={15} />
                         Verifikasi & Check-in
                       </>
                     )}
@@ -1850,33 +1544,18 @@ export default function PresensiGuruPage() {
    SECTION HEADER
 ========================================================= */
 
-function SectionHeader({
-  icon: Icon,
-  title,
-  description,
-}) {
+function SectionHeader({ icon: Icon, title, description }) {
   return (
-    <div
-      className={`border-b ${themeDivider} px-4 py-4 sm:px-5 lg:px-6`}
-    >
+    <div className={`border-b ${themeDivider} px-4 py-4 sm:px-5 lg:px-6`}>
       <div className="flex items-center gap-2">
         <div
           className={`flex h-8 w-8 items-center justify-center rounded-lg border ${themePrimarySoft} ${themePrimarySoftBorder}`}
         >
-          <Icon
-            size={15}
-            className={themePrimaryText}
-          />
+          <Icon size={15} className={themePrimaryText} />
         </div>
-
-        <h2 className="theme-text text-sm font-bold">
-          {title}
-        </h2>
+        <h2 className="theme-text text-sm font-bold">{title}</h2>
       </div>
-
-      <p className="theme-text-muted mt-1 text-xs">
-        {description}
-      </p>
+      <p className="theme-text-muted mt-1 text-xs">{description}</p>
     </div>
   );
 }
@@ -1885,28 +1564,11 @@ function SectionHeader({
    SUMMARY ITEM
 ========================================================= */
 
-function SummaryItem({
-  label,
-  value,
-  surface,
-  border,
-  text,
-}) {
+function SummaryItem({ label, value, surface, border, text }) {
   return (
-    <div
-      className={`rounded-xl border ${border} ${surface} p-4`}
-    >
-      <p
-        className={`${text} text-xs font-medium`}
-      >
-        {label}
-      </p>
-
-      <p
-        className={`mt-2 text-2xl font-bold ${text}`}
-      >
-        {value}
-      </p>
+    <div className={`rounded-xl border ${border} ${surface} p-4`}>
+      <p className={`${text} text-xs font-medium`}>{label}</p>
+      <p className={`mt-2 text-2xl font-bold ${text}`}>{value}</p>
     </div>
   );
 }
@@ -1915,13 +1577,7 @@ function SummaryItem({
    STAT CARD
 ========================================================= */
 
-function StatCard({
-  title,
-  value,
-  description,
-  icon: Icon,
-  iconClass,
-}) {
+function StatCard({ title, value, description, icon: Icon, iconClass }) {
   return (
     <div
       className={`theme-card rounded-2xl border ${themeNeutralBorder} p-4 ${themeCardShadow} transition-all duration-200 hover:-translate-y-0.5`}
@@ -1931,23 +1587,17 @@ function StatCard({
           <p className="theme-text-secondary text-[11px] font-medium sm:text-xs">
             {title}
           </p>
-
           <p className="theme-text mt-1.5 text-2xl font-bold sm:text-3xl">
             {value}
           </p>
-
           <p className="theme-text-muted mt-1 text-[10px] sm:text-xs">
             {description}
           </p>
         </div>
-
         <div
           className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border ${themeNeutralBorder} ${themeNeutralSurface}`}
         >
-          <Icon
-            size={18}
-            className={iconClass}
-          />
+          <Icon size={18} className={iconClass} />
         </div>
       </div>
     </div>

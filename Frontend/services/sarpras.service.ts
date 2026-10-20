@@ -70,16 +70,16 @@ export async function createKategoriAset(data) {
 
 export async function updateKategoriAset(id, data) {
   if (!id) {
-    throw new Error("ID kategori aset tidak ditemukan.");
+    throw new Error("ID kategori wajib diisi.");
   }
 
-  return apiFetch(`${API_ENDPOINT}/kategori/${id}`, {
-    method: "PUT",
-    body: JSON.stringify({
-      nama: data.nama,
-      status: data.status ?? "aktif",
-    }),
-  });
+  return apiFetch(
+    `/api/sarpras/kategori/${encodeURIComponent(id)}`,
+    {
+      method: "PUT",
+      body: JSON.stringify(data),
+    }
+  );
 }
 
 export async function deleteKategoriAset(id) {

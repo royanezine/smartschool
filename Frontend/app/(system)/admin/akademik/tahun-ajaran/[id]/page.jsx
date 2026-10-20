@@ -690,7 +690,7 @@ export default function DetailTahunAjaranPage() {
                         </span>
 
                         <Link
-                          href="/admin/kelas"
+                          href="/admin/akademik/kelas"
                           className="theme-card theme-border inline-flex items-center gap-2 rounded-lg border px-4 py-2 text-xs font-semibold theme-text-secondary transition theme-header-hover"
                         >
                           <GraduationCap
@@ -739,7 +739,7 @@ export default function DetailTahunAjaranPage() {
                           </p>
 
                           <Link
-                            href="/admin/kelas"
+                            href="/admin/akademik/kelas"
                             className="theme-primary mt-4 inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-xs font-semibold transition"
                           >
                             <GraduationCap

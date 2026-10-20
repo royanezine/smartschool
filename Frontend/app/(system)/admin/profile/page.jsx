@@ -1,10 +1,11 @@
+
 "use client";
 
-import { useState, useEffect } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { apiFetch } from "@/lib/api";
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
-
 import {
   User,
   Mail,
@@ -12,9 +13,7 @@ import {
   MapPin,
   Calendar,
   Clock,
-  Building,
-  Users,
-  GraduationCap,
+  Building2,
   FileText,
   Settings,
   Edit,
@@ -23,362 +22,209 @@ import {
   Activity,
   CheckCircle,
   LogOut,
-  BookOpen,
-  Award,
   School,
-  CalendarDays,
-  Bell,
-  ChevronRight,
+  RefreshCw,
+  AlertCircle,
+  LoaderCircle,
   UserCircle,
-  Briefcase,
-  Star,
-  Linkedin,
-  Github,
-  Twitter,
-  Globe,
-  MailCheck,
-  PhoneCall,
-  MapPinned,
   BadgeCheck,
-  Sparkles,
-  TrendingUp,
-  Zap,
+  ChevronRight,
 } from "lucide-react";
 
-// =========================================================
-// THEME HELPERS
-// HANYA UNTUK WARNA / SHADOW / HOVER
-// =========================================================
+const PROFILE_ENDPOINT = "/api/users/profile";
 
-const themeShadow =
-  "shadow-[0_2px_10px_color-mix(in_srgb,var(--color-text)_6%,transparent)]";
+function formatDate(value, withTime = false) {
+  if (!value) return "Belum tersedia";
 
-const themeHoverShadow =
-  "hover:shadow-[0_7px_20px_color-mix(in_srgb,var(--color-text)_10%,transparent)]";
+  const date = new Date(value);
 
-const themePrimarySoft =
-  "bg-[color-mix(in_srgb,var(--color-primary)_8%,transparent)]";
+  if (Number.isNaN(date.getTime())) return "Belum tersedia";
 
-const themePrimarySoftHover =
-  "hover:bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]";
+  return date.toLocaleString("id-ID", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    ...(withTime
+      ? { hour: "2-digit", minute: "2-digit" }
+      : {}),
+  });
+}
 
-const themePrimaryBorder =
-  "border-[color-mix(in_srgb,var(--color-primary)_25%,transparent)]";
+function displayValue(value) {
+  if (value === null || value === undefined || value === "") {
+    return "Belum tersedia";
+  }
 
-const themePrimaryBorderHover =
-  "hover:border-[color-mix(in_srgb,var(--color-primary)_35%,transparent)]";
+  return String(value);
+}
 
-// =========================================================
-// DATA PROFIL
-// =========================================================
+function getInitials(name) {
+  if (!name || typeof name !== "string") return "—";
 
-const profileData = {
-  id: 1,
-  nama: "Dr. Ahmad Fauzi, M.Pd.",
-  email: "ahmad.fauzi@smartschool.com",
-  phone: "0812-3456-7890",
-  alamat: "Jl. Merdeka No. 45, Jakarta Pusat, DKI Jakarta",
-  posisi: "Administrator Utama",
-  role: "Super Admin",
-  status: "Aktif",
-  bergabung: "15 Januari 2024",
-  terakhirLogin: "2026-09-01T08:30:00Z",
-  tglLahir: "1 Januari 1985",
-  gender: "Laki-laki",
-  nip: "198501012010011001",
-  deskripsi:
-    "Administrator utama sistem SmartSchool dengan pengalaman 10+ tahun di bidang manajemen pendidikan dan teknologi informasi. Berkomitmen untuk menghadirkan solusi digital yang inovatif dan efisien bagi dunia pendidikan.",
-  keahlian: [
-    "Manajemen Pendidikan",
-    "Sistem Informasi",
-    "Analisis Data",
-    "Manajemen Proyek",
-    "Digital Transformation",
-    "Strategic Planning",
-  ],
-  pendidikan: [
-    {
-      tahun: "2015 - 2018",
-      gelar: "S3 Manajemen Pendidikan",
-      institusi: "Universitas Indonesia",
-      predikat: "Cum Laude",
-    },
-    {
-      tahun: "2010 - 2012",
-      gelar: "S2 Teknologi Pendidikan",
-      institusi: "Universitas Negeri Jakarta",
-      predikat: "Dengan Pujian",
-    },
-    {
-      tahun: "2005 - 2009",
-      gelar: "S1 Pendidikan Matematika",
-      institusi: "Universitas Pendidikan Indonesia",
-      predikat: "Cum Laude",
-    },
-  ],
-  sertifikasi: [
-    "Sertifikasi Manajemen Proyek (PMP)",
-    "Sertifikasi Pendidikan Digital",
-    "Sertifikasi Analisis Data",
-  ],
-};
+  return name
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((part) => part[0])
+    .join("")
+    .toUpperCase();
+}
 
-const statsData = [
-  {
-    label: "Total Sekolah",
-    value: "6",
-    icon: School,
-    color: "primary",
-    change: "+2",
-    trend: "up",
-  },
-  {
-    label: "Total Guru",
-    value: "237",
-    icon: Users,
-    color: "success",
-    change: "+12",
-    trend: "up",
-  },
-  {
-    label: "Total Siswa",
-    value: "4.312",
-    icon: GraduationCap,
-    color: "info",
-    change: "+89",
-    trend: "up",
-  },
-  {
-    label: "Total Kelas",
-    value: "28",
-    icon: BookOpen,
-    color: "warning",
-    change: "+3",
-    trend: "up",
-  },
-];
+function normalizeProfile(response) {
+  // Controller profile mengembalikan { success, message, data }.
+  const user = response?.data;
 
-const activityLogs = [
-  {
-    id: 1,
-    action: "Login ke sistem",
-    time: "2 jam lalu",
-    device: "Chrome - Windows",
-    type: "login",
-  },
-  {
-    id: 2,
-    action: "Menambahkan data guru baru (5 guru)",
-    time: "3 jam lalu",
-    device: "Chrome - Windows",
-    type: "create",
-  },
-  {
-    id: 3,
-    action: "Mengupdate data siswa (12 siswa)",
-    time: "5 jam lalu",
-    device: "Firefox - macOS",
-    type: "update",
-  },
-  {
-    id: 4,
-    action: "Export laporan kehadiran",
-    time: "1 hari lalu",
-    device: "Chrome - Windows",
-    type: "export",
-  },
-  {
-    id: 5,
-    action: "Mengelola pengaturan sistem",
-    time: "2 hari lalu",
-    device: "Edge - Windows",
-    type: "settings",
-  },
-  {
-    id: 6,
-    action: "Menambahkan sekolah baru",
-    time: "3 hari lalu",
-    device: "Chrome - Windows",
-    type: "create",
-  },
-];
+  if (!response?.success || !user || !user.id) {
+    throw new Error(
+      response?.message || "Data profil tidak ditemukan."
+    );
+  }
 
-// =========================================================
-// STAT CARD
-// =========================================================
+  return user;
+}
 
-function StatCard({
-  icon: Icon,
-  label,
-  value,
-  color,
-  change,
-  trend,
-}) {
-  const colorMap = {
-    primary:
-      "theme-primary bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
-
-    success:
-      "theme-success bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)]",
-
-    info:
-      "theme-info bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)]",
-
-    warning:
-      "theme-warning bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)]",
-  };
-
+function InfoItem({ icon: Icon, label, value, className = "" }) {
   return (
-    <div
-      className={`group theme-card theme-border rounded-2xl border p-4 ${themeShadow} transition-all hover:-translate-y-0.5 ${themeHoverShadow} sm:p-5`}
-    >
-      <div className="flex items-center justify-between gap-3">
-        <div className="min-w-0">
-          <p className="theme-text-muted text-[10px] font-semibold uppercase tracking-[0.06em]">
-            {label}
-          </p>
+    <div className={`flex min-w-0 items-start gap-3 ${className}`}>
+      <Icon
+        size={17}
+        className="theme-text-muted mt-0.5 shrink-0"
+        aria-hidden="true"
+      />
 
-          <p className="theme-text mt-1 text-2xl font-bold tracking-tight">
-            {value}
-          </p>
-
-          {change && (
-            <div className="mt-1 flex items-center gap-1">
-              <span className="theme-success text-xs font-medium">
-                ↑ {change}
-              </span>
-
-              <span className="theme-text-muted text-xs">
-                dari bulan lalu
-              </span>
-            </div>
-          )}
-        </div>
-
-        <div
-          className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-xl ${colorMap[color]}`}
-        >
-          <Icon size={20} strokeWidth={1.8} />
-        </div>
+      <div className="min-w-0 flex-1">
+        <p className="theme-text-secondary text-xs font-medium">
+          {label}
+        </p>
+        <p className="theme-text mt-1 break-words text-sm font-medium">
+          {displayValue(value)}
+        </p>
       </div>
     </div>
   );
 }
 
-// =========================================================
-// MAIN PAGE
-// =========================================================
+function QuickAction({ icon: Icon, label, description, onClick }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className="theme-card theme-border flex min-w-0 items-center gap-3 rounded-xl border p-4 text-left transition-all hover:shadow-md"
+    >
+      <div className="theme-primary flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-500/10">
+        <Icon size={18} />
+      </div>
+
+      <div className="min-w-0 flex-1">
+        <p className="theme-text text-sm font-semibold">{label}</p>
+        <p className="theme-text-secondary mt-1 text-xs">
+          {description}
+        </p>
+      </div>
+
+      <ChevronRight
+        size={16}
+        className="theme-text-muted shrink-0"
+      />
+    </button>
+  );
+}
+
+function ProfileLoading() {
+  return (
+    <div className="theme-page flex min-h-screen items-center justify-center">
+      <div className="flex flex-col items-center gap-3">
+        <LoaderCircle
+          size={32}
+          className="animate-spin text-blue-600"
+        />
+        <p className="theme-text-secondary text-sm">
+          Memuat data profil...
+        </p>
+      </div>
+    </div>
+  );
+}
 
 export default function AdminProfilePage() {
   const router = useRouter();
 
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [profile, setProfile] = useState(profileData);
-  const [currentTime, setCurrentTime] = useState("");
-  const [isEditing, setIsEditing] = useState(false);
-  const [selectedTab, setSelectedTab] = useState("profile");
+  const [profile, setProfile] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+  const [error, setError] = useState("");
+
+  const fetchProfile = useCallback(
+    async (isRefresh = false) => {
+      if (isRefresh) {
+        setRefreshing(true);
+      } else {
+        setLoading(true);
+      }
+
+      setError("");
+
+      try {
+        const response = await apiFetch(PROFILE_ENDPOINT);
+        const user = normalizeProfile(response);
+
+        setProfile(user);
+      } catch (err) {
+        console.error("Gagal mengambil profil:", err);
+
+        setError(
+          err?.message || "Gagal mengambil data profil dari server."
+        );
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
+      }
+    },
+    []
+  );
 
   useEffect(() => {
-    const now = new Date();
+    fetchProfile();
+  }, [fetchProfile]);
 
-    const formatted = now.toLocaleDateString("id-ID", {
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      year: "numeric",
-    });
+  const handleLogout = () => {
+    if (!window.confirm("Yakin ingin logout?")) return;
 
-    setCurrentTime(formatted);
-  }, []);
-
-  const getInitials = (nama) => {
-    if (!nama) return "AD";
-
-    const parts = nama.trim().split(" ");
-
-    if (parts.length >= 2) {
-      return (parts[0][0] + parts[1][0]).toUpperCase();
-    }
-
-    return nama.substring(0, 2).toUpperCase();
+    // Gunakan fungsi pembersihan sesi yang sama dengan apiFetch.
+    import("@/lib/auth")
+      .then(({ clearSession }) => {
+        clearSession();
+        router.replace("/login");
+      })
+      .catch((err) => {
+        console.error("Gagal membersihkan sesi:", err);
+        router.replace("/login");
+      });
   };
 
-  const getActivityIcon = (type) => {
-    const icons = {
-      login: (
-        <LogOut
-          size={14}
-          className="theme-info"
-        />
-      ),
+  if (loading) {
+    return <ProfileLoading />;
+  }
 
-      create: (
-        <FileText
-          size={14}
-          className="theme-success"
-        />
-      ),
+  const nama =
+    profile?.namaLengkap || profile?.namaPengguna || "Pengguna";
 
-      update: (
-        <Edit
-          size={14}
-          className="theme-warning"
-        />
-      ),
+  const peran = profile?.peran;
+  const sekolah = profile?.sekolah;
 
-      export: (
-        <FileText
-          size={14}
-          className="theme-primary"
-        />
-      ),
+  const roleName =
+    peran?.namaTampilan || peran?.nama || "Belum tersedia";
 
-      settings: (
-        <Settings
-          size={14}
-          className="theme-text-muted"
-        />
-      ),
-    };
-
-    return (
-      icons[type] || (
-        <CheckCircle
-          size={14}
-          className="theme-text-muted"
-        />
-      )
-    );
-  };
-
-  const getActivityColor = (type) => {
-    const colors = {
-      login:
-        "bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)]",
-
-      create:
-        "bg-[color-mix(in_srgb,var(--color-success)_10%,transparent)]",
-
-      update:
-        "bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)]",
-
-      export:
-        "bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
-
-      settings:
-        "bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)]",
-    };
-
-    return (
-      colors[type] ||
-      "bg-[color-mix(in_srgb,var(--color-text)_5%,transparent)]"
-    );
-  };
+  const avatarUrl =
+    typeof profile?.avatar === "string" &&
+    /^https?:\/\//i.test(profile.avatar)
+      ? profile.avatar
+      : "";
 
   return (
     <div className="theme-page flex h-screen w-full overflow-hidden">
-      {/* SIDEBAR */}
       <Sidebar
         active="profile"
         setActive={() => {}}
@@ -386,175 +232,173 @@ export default function AdminProfilePage() {
         setCollapsed={setIsCollapsed}
       />
 
-      {/* MAIN CONTENT */}
       <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <Header
-          toggleSidebar={() => setIsCollapsed(!isCollapsed)}
+          toggleSidebar={() => setIsCollapsed((value) => !value)}
           notifications={[]}
           user={{
-            name: profile.nama,
-            email: profile.email,
-            avatar: getInitials(profile.nama),
+            name: nama,
+            email: profile?.email || "",
+            avatar: avatarUrl || getInitials(nama),
           }}
         />
 
         <main className="min-h-0 flex-1 overflow-y-auto">
-          <div className="w-full p-3 sm:p-5 lg:p-7 xl:p-8">
-            <div className="mx-auto w-full max-w-[1400px] space-y-4 sm:space-y-5 lg:space-y-6">
+          <div className="mx-auto w-full max-w-[1400px] space-y-5 p-4 sm:p-6 lg:p-8">
+            {/* HEADER */}
+            <section className="theme-card theme-border flex flex-col gap-4 rounded-2xl border p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+              <div className="flex min-w-0 items-center gap-3">
+                <div className="theme-primary flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-500/10">
+                  <UserCircle size={25} />
+                </div>
 
-              {/* =================================================
-                  PAGE HEADER
-              ================================================= */}
+                <div className="min-w-0">
+                  <h1 className="theme-text text-xl font-semibold sm:text-2xl">
+                    Profil Admin
+                  </h1>
+                  <p className="theme-text-secondary mt-1 text-sm">
+                    Informasi akun yang sedang login
+                  </p>
+                </div>
+              </div>
 
-              <section
-                className={`theme-card theme-border relative overflow-hidden rounded-2xl border ${themeShadow}`}
-              >
-                <div
-                  className="pointer-events-none absolute -right-20 -top-24 h-64 w-64 rounded-full blur-3xl"
-                  style={{
-                    background:
-                      "color-mix(in srgb, var(--color-primary) 10%, transparent)",
-                  }}
-                />
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  disabled={refreshing}
+                  onClick={() => fetchProfile(true)}
+                  className="theme-card theme-border theme-text-secondary inline-flex h-10 items-center gap-2 rounded-xl border px-4 text-sm font-medium hover:bg-black/5 disabled:opacity-60"
+                >
+                  <RefreshCw
+                    size={16}
+                    className={refreshing ? "animate-spin" : ""}
+                  />
+                  Muat Ulang
+                </button>
 
-                <div className="relative flex flex-col gap-4 p-5 sm:p-6 lg:flex-row lg:items-center lg:justify-between lg:px-8 lg:py-6">
-                  <div className="flex min-w-0 items-start gap-3 sm:gap-4">
-                    <div
-                      className="theme-primary flex h-11 w-11 shrink-0 items-center justify-center rounded-xl shadow-[0_8px_20px_color-mix(in_srgb,var(--color-primary)_25%,transparent)] sm:h-14 sm:w-14"
-                    >
-                      <UserCircle
-                        size={22}
-                        strokeWidth={1.9}
-                        className="sm:h-[25px] sm:w-[25px]"
-                      />
-                    </div>
+                <button
+                  type="button"
+                  onClick={() => router.push("/admin/profile/edit")}
+                  className="theme-card theme-border theme-text-secondary inline-flex h-10 items-center gap-2 rounded-xl border px-4 text-sm font-medium hover:bg-black/5"
+                >
+                  <Edit size={16} />
+                  Edit Profil
+                </button>
 
-                    <div className="min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h1 className="theme-text text-xl font-semibold tracking-[-0.025em] sm:text-2xl lg:text-[26px]">
-                          Profil Admin
-                        </h1>
+                <button
+                  type="button"
+                  onClick={() => router.push("/admin/settings")}
+                  className="theme-primary inline-flex h-10 items-center gap-2 rounded-xl px-4 text-sm font-semibold hover:opacity-90"
+                >
+                  <Settings size={16} />
+                  Pengaturan
+                </button>
+              </div>
+            </section>
 
-                        <span
-                          className={`theme-primary ${themePrimaryBorder} inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-[10px] font-semibold sm:px-3 sm:py-1 sm:text-[11px]`}
-                        >
-                          <span className="h-1.5 w-1.5 rounded-full bg-current" />
-                          {profile.role}
-                        </span>
-                      </div>
+            {/* ERROR */}
+            {error && (
+              <section className="theme-card theme-border rounded-2xl border p-5">
+                <div className="flex items-start gap-3">
+                  <AlertCircle
+                    size={20}
+                    className="mt-0.5 shrink-0 text-red-500"
+                  />
 
-                      <div className="mt-1 flex items-center gap-1.5 sm:gap-2">
-                        <Shield
-                          size={13}
-                          className="theme-primary shrink-0 sm:h-[14px] sm:w-[14px]"
-                          strokeWidth={2}
-                        />
-
-                        <p className="theme-text-secondary text-xs leading-5 sm:text-sm">
-                          Informasi profil dan aktivitas admin sekolah
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex w-full flex-wrap gap-2 sm:flex-row lg:w-auto">
+                  <div className="min-w-0 flex-1">
+                    <h2 className="theme-text text-sm font-semibold">
+                      Profil gagal dimuat
+                    </h2>
+                    <p className="theme-text-secondary mt-1 break-words text-sm">
+                      {error}
+                    </p>
                     <button
-                      onClick={() =>
-                        router.push("/admin/profile/edit")
-                      }
-                      className={`theme-card theme-border theme-text-secondary inline-flex h-10 items-center justify-center gap-2 rounded-xl border px-4 text-sm font-medium ${themeShadow} transition-all ${themePrimaryBorderHover} ${themePrimarySoftHover} active:scale-[0.98] sm:h-11 sm:px-5`}
+                      type="button"
+                      onClick={() => fetchProfile(true)}
+                      className="mt-3 text-sm font-semibold text-blue-600"
                     >
-                      <Edit
-                        size={16}
-                        className="sm:h-[17px] sm:w-[17px]"
-                      />
-                      Edit Profil
-                    </button>
-
-                    <button
-                      onClick={() =>
-                        router.push("/admin/settings")
-                      }
-                      className="theme-primary inline-flex h-10 items-center justify-center gap-2 rounded-xl px-4 text-sm font-semibold shadow-[0_7px_18px_color-mix(in_srgb,var(--color-primary)_20%,transparent)] transition-all hover:opacity-90 hover:shadow-[0_9px_22px_color-mix(in_srgb,var(--color-primary)_25%,transparent)] active:scale-[0.98] sm:h-11 sm:px-5"
-                    >
-                      <Settings
-                        size={16}
-                        strokeWidth={2.3}
-                        className="sm:h-[17px] sm:w-[17px]"
-                      />
-                      Pengaturan
+                      Coba lagi
                     </button>
                   </div>
                 </div>
               </section>
+            )}
 
-              {/* =================================================
-                  PROFILE CARD - PREMIUM
-              ================================================= */}
-
-              <section
-                className={`theme-card theme-border overflow-hidden rounded-2xl border ${themeShadow}`}
-              >
-                <div className="relative">
-
-                  {/* Cover Background */}
+            {profile && (
+              <>
+                {/* PROFIL UTAMA */}
+                <section className="theme-card theme-border overflow-hidden rounded-2xl border">
                   <div
-                    className="h-24 w-full sm:h-32 lg:h-40"
+                    className="h-24 sm:h-32"
                     style={{
                       background:
-                        "linear-gradient(90deg, var(--color-primary), color-mix(in srgb, var(--color-primary) 75%, var(--color-info)), color-mix(in srgb, var(--color-primary) 55%, var(--color-info)))",
+                        "linear-gradient(110deg, var(--color-primary), #3b82f6)",
                     }}
                   />
 
-                  <div className="relative -mt-12 px-4 pb-5 sm:px-6 sm:pb-6 lg:px-8 lg:pb-7">
-                    <div className="flex flex-col gap-6 lg:flex-row lg:gap-8">
-
-                      {/* AVATAR */}
-                      <div className="flex flex-col items-center gap-3 lg:w-48 lg:flex-none">
+                  <div className="relative -mt-12 p-5 sm:p-7">
+                    <div className="flex flex-col gap-6 lg:flex-row">
+                      {/* IDENTITAS */}
+                      <div className="flex flex-col items-center gap-3 lg:w-52 lg:shrink-0">
                         <div className="relative">
-                          <div
-                            className="theme-primary flex h-28 w-28 items-center justify-center rounded-2xl border-4 border-[var(--color-card)] text-4xl font-bold shadow-[0_8px_25px_color-mix(in_srgb,var(--color-primary)_30%,transparent)] sm:h-32 sm:w-32 sm:text-5xl"
-                          >
-                            {getInitials(profile.nama)}
-                          </div>
+                          {avatarUrl ? (
+                            <img
+                              src={avatarUrl}
+                              alt={`Foto profil ${nama}`}
+                              className="h-28 w-28 rounded-2xl border-4 border-[var(--color-card)] object-cover shadow-md sm:h-32 sm:w-32"
+                              onError={(event) => {
+                                event.currentTarget.style.display = "none";
+                              }}
+                            />
+                          ) : (
+                            <div className="theme-primary flex h-28 w-28 items-center justify-center rounded-2xl border-4 border-[var(--color-card)] text-4xl font-bold shadow-md sm:h-32 sm:w-32">
+                              {getInitials(nama)}
+                            </div>
+                          )}
 
                           <button
-                            className={`theme-card theme-border theme-text-muted absolute -bottom-1 -right-1 flex h-9 w-9 items-center justify-center rounded-xl border ${themeShadow} transition-all ${themePrimaryBorderHover} ${themePrimarySoftHover} hover:shadow-[0_4px_12px_color-mix(in_srgb,var(--color-text)_10%,transparent)]`}
+                            type="button"
+                            title="Edit foto profil"
+                            onClick={() =>
+                              router.push("/admin/profile/edit")
+                            }
+                            className="theme-card theme-border theme-text-muted absolute -bottom-1 -right-1 flex h-9 w-9 items-center justify-center rounded-xl border shadow-sm hover:bg-black/5"
                           >
                             <Camera size={16} />
                           </button>
                         </div>
 
                         <div className="text-center">
-                          <p className="theme-text text-base font-semibold">
-                            {profile.nama}
+                          <h2 className="theme-text break-words text-base font-semibold">
+                            {nama}
+                          </h2>
+                          <p className="theme-text-secondary mt-1 text-sm">
+                            {displayValue(profile.jabatan)}
                           </p>
 
-                          <p className="theme-text-secondary text-sm">
-                            {profile.posisi}
-                          </p>
+                          <span className="theme-success mt-3 inline-flex items-center gap-1.5 rounded-full border border-current/20 px-3 py-1 text-xs font-medium">
+                            <CheckCircle size={13} />
+                            {displayValue(profile.status)}
+                          </span>
+                        </div>
 
-                          <div className="mt-2 flex items-center justify-center gap-1.5">
-                            <span className="theme-success inline-flex items-center gap-1.5 rounded-full border border-current/20 px-3 py-1 text-xs font-medium">
-                              <span className="h-1.5 w-1.5 rounded-full bg-current" />
-                              {profile.status}
-                            </span>
-
-                            <BadgeCheck
-                              size={16}
-                              className="theme-primary"
-                            />
-                          </div>
+                        <div className="theme-primary inline-flex items-center gap-1.5 rounded-full bg-blue-500/10 px-3 py-1.5 text-xs font-semibold">
+                          <Shield size={13} />
+                          {roleName}
                         </div>
                       </div>
 
-                      {/* PROFILE INFO - GRID */}
-                      <div className="theme-border min-w-0 flex-1 border-t pt-5 lg:border-t-0 lg:pt-0">
-                        <div className="grid grid-cols-1 gap-x-6 gap-y-3 sm:grid-cols-2 lg:gap-y-4">
+                      {/* DATA PRIBADI */}
+                      <div className="theme-border min-w-0 flex-1 border-t pt-5 lg:border-l lg:border-t-0 lg:pl-7 lg:pt-1">
+                        <h2 className="theme-text mb-5 text-sm font-semibold">
+                          Informasi Pribadi
+                        </h2>
+
+                        <div className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
                           <InfoItem
                             icon={User}
                             label="Nama Lengkap"
-                            value={profile.nama}
+                            value={profile.namaLengkap}
                           />
 
                           <InfoItem
@@ -564,27 +408,39 @@ export default function AdminProfilePage() {
                           />
 
                           <InfoItem
+                            icon={UserCircle}
+                            label="Username"
+                            value={profile.namaPengguna}
+                          />
+
+                          <InfoItem
                             icon={Phone}
-                            label="Telepon"
-                            value={profile.phone}
+                            label="Nomor Telepon"
+                            value={profile.noTelepon}
                           />
 
                           <InfoItem
                             icon={Shield}
                             label="Role"
-                            value={profile.role}
+                            value={roleName}
+                          />
+
+                          <InfoItem
+                            icon={CheckCircle}
+                            label="Status Akun"
+                            value={profile.status}
+                          />
+
+                          <InfoItem
+                            icon={MapPin}
+                            label="Tempat Lahir"
+                            value={profile.tempatLahir}
                           />
 
                           <InfoItem
                             icon={Calendar}
                             label="Tanggal Lahir"
-                            value={profile.tglLahir}
-                          />
-
-                          <InfoItem
-                            icon={CalendarDays}
-                            label="Bergabung"
-                            value={profile.bergabung}
+                            value={formatDate(profile.tanggalLahir)}
                           />
 
                           <InfoItem
@@ -595,395 +451,202 @@ export default function AdminProfilePage() {
                           />
 
                           <InfoItem
+                            icon={MapPin}
+                            label="Alamat Domisili"
+                            value={profile.alamatDomisili}
+                            className="sm:col-span-2"
+                          />
+
+                          <InfoItem
                             icon={FileText}
                             label="NIP"
                             value={profile.nip}
-                            className="sm:col-span-2"
+                          />
+
+                          <InfoItem
+                            icon={FileText}
+                            label="NUPTK"
+                            value={profile.nuptk}
+                          />
+
+                          <InfoItem
+                            icon={Calendar}
+                            label="Tanggal Bergabung"
+                            value={formatDate(profile.dibuatPada)}
+                          />
+
+                          <InfoItem
+                            icon={Clock}
+                            label="Terakhir Login"
+                            value={formatDate(profile.terakhirLogin, true)}
                           />
                         </div>
                       </div>
                     </div>
-
-                    {/* DESKRIPSI */}
-                    <div className="theme-border mt-4 border-t pt-4 lg:mt-5 lg:pt-5">
-                      <div className="flex items-start gap-3">
-                        <div
-                          className={`theme-primary flex h-8 w-8 shrink-0 items-center justify-center rounded-xl ${themePrimarySoft}`}
-                        >
-                          <FileText size={15} />
-                        </div>
-
-                        <div className="min-w-0 flex-1">
-                          <p className="theme-text-secondary text-xs font-medium">
-                            Deskripsi Diri
-                          </p>
-
-                          <p className="theme-text-secondary mt-1 text-sm leading-relaxed">
-                            {profile.deskripsi}
-                          </p>
-                        </div>
-                      </div>
-                    </div>
                   </div>
-                </div>
-              </section>
+                </section>
 
-              {/* =================================================
-                  STATISTICS - PREMIUM
-              ================================================= */}
+                {/* INFORMASI SEKOLAH */}
+                <section className="theme-card theme-border rounded-2xl border p-5 sm:p-6">
+                  <h2 className="theme-text mb-5 flex items-center gap-2 text-sm font-semibold">
+                    <Building2 size={18} />
+                    Informasi Sekolah
+                  </h2>
 
-              <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                {statsData.map((stat) => (
-                  <StatCard
-                    key={stat.label}
-                    icon={stat.icon}
-                    label={stat.label}
-                    value={stat.value}
-                    color={stat.color}
-                    change={stat.change}
-                    trend={stat.trend}
-                  />
-                ))}
-              </section>
-
-              {/* =================================================
-                  TWO COLUMN: SKILLS + ACTIVITY
-              ================================================= */}
-
-              <section className="grid grid-cols-1 gap-5 lg:grid-cols-2">
-
-                {/* LEFT COLUMN */}
-                <div className="space-y-5">
-
-                  {/* SKILLS */}
-                  <div
-                    className={`theme-card theme-border rounded-2xl border p-5 ${themeShadow} sm:p-6`}
-                  >
-                    <h3 className="theme-text mb-4 flex items-center gap-2 text-sm font-semibold">
-                      <Award
-                        size={18}
-                        className="theme-primary"
+                  {sekolah ? (
+                    <div className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
+                      <InfoItem
+                        icon={School}
+                        label="Nama Sekolah"
+                        value={sekolah.nama}
                       />
-                      Keahlian
-                    </h3>
 
-                    <div className="flex flex-wrap gap-2">
-                      {profile.keahlian.map((skill) => (
-                        <span
-                          key={skill}
-                          className={`theme-border theme-card-soft theme-text-secondary rounded-xl border px-3.5 py-1.5 text-sm font-medium transition-all ${themePrimaryBorderHover} ${themePrimarySoftHover}`}
-                        >
-                          {skill}
-                        </span>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* SERTIFIKASI */}
-                  <div
-                    className={`theme-card theme-border rounded-2xl border p-5 ${themeShadow} sm:p-6`}
-                  >
-                    <h3 className="theme-text mb-4 flex items-center gap-2 text-sm font-semibold">
-                      <BadgeCheck
-                        size={18}
-                        className="theme-primary"
+                      <InfoItem
+                        icon={FileText}
+                        label="Kode Sekolah"
+                        value={sekolah.kode}
                       />
-                      Sertifikasi
-                    </h3>
 
-                    <div className="space-y-2">
-                      {profile.sertifikasi.map((cert, index) => (
-                        <div
-                          key={index}
-                          className="theme-card-soft theme-border flex items-center gap-3 rounded-xl border px-4 py-2.5"
-                        >
-                          <CheckCircle
-                            size={16}
-                            className="theme-success"
-                          />
-
-                          <span className="theme-text-secondary text-sm">
-                            {cert}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* EDUCATION */}
-                  <div
-                    className={`theme-card theme-border rounded-2xl border p-5 ${themeShadow} sm:p-6`}
-                  >
-                    <h3 className="theme-text mb-4 flex items-center gap-2 text-sm font-semibold">
-                      <GraduationCap
-                        size={18}
-                        className="theme-primary"
+                      <InfoItem
+                        icon={Mail}
+                        label="Email Sekolah"
+                        value={sekolah.email}
                       />
-                      Riwayat Pendidikan
-                    </h3>
 
-                    <div className="space-y-4">
-                      {profile.pendidikan.map((edu, index) => (
-                        <div
-                          key={index}
-                          className="relative border-l-2 border-[var(--color-primary)] pb-4 pl-4 last:pb-0"
-                        >
-                          <div className="absolute -left-[5px] top-0 h-2 w-2 rounded-full bg-[var(--color-primary)]" />
+                      <InfoItem
+                        icon={Phone}
+                        label="Telepon Sekolah"
+                        value={sekolah.telepon}
+                      />
 
-                          <p className="theme-primary text-xs font-medium">
-                            {edu.tahun}
-                          </p>
+                      <InfoItem
+                        icon={MapPin}
+                        label="Alamat Sekolah"
+                        value={sekolah.alamat}
+                        className="sm:col-span-2"
+                      />
 
-                          <p className="theme-text text-sm font-semibold">
-                            {edu.gelar}
-                          </p>
+                      <InfoItem
+                        icon={Building2}
+                        label="Subdomain"
+                        value={sekolah.subdomain}
+                      />
 
-                          <p className="theme-text-secondary text-sm">
-                            {edu.institusi}
-                          </p>
-
-                          {edu.predikat && (
-                            <span className="theme-success mt-1 inline-flex items-center gap-1 rounded-full border border-current/20 px-2 py-0.5 text-[10px] font-medium">
-                              <Star size={10} />
-                              {edu.predikat}
-                            </span>
-                          )}
-                        </div>
-                      ))}
+                      <InfoItem
+                        icon={CheckCircle}
+                        label="Status Sekolah"
+                        value={sekolah.status}
+                      />
                     </div>
+                  ) : (
+                    <p className="theme-text-secondary text-sm">
+                      Tidak ada data sekolah pada akun ini.
+                    </p>
+                  )}
+                </section>
+
+                {/* INFORMASI ROLE */}
+                <section className="theme-card theme-border rounded-2xl border p-5 sm:p-6">
+                  <h2 className="theme-text mb-5 flex items-center gap-2 text-sm font-semibold">
+                    <BadgeCheck size={18} />
+                    Informasi Peran
+                  </h2>
+
+                  <div className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
+                    <InfoItem
+                      icon={Shield}
+                      label="Nama Peran"
+                      value={peran?.nama}
+                    />
+
+                    <InfoItem
+                      icon={UserCircle}
+                      label="Nama Tampilan"
+                      value={peran?.namaTampilan}
+                    />
+
+                    <InfoItem
+                      icon={Activity}
+                      label="Deskripsi Peran"
+                      value={peran?.deskripsi}
+                      className="sm:col-span-2"
+                    />
                   </div>
-                </div>
+                </section>
 
-                {/* RIGHT COLUMN - ACTIVITY LOG */}
-                <div
-                  className={`theme-card theme-border rounded-2xl border ${themeShadow}`}
-                >
-                  <div className="theme-border border-b px-5 py-4 sm:px-6 sm:py-5">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <h3 className="theme-text flex items-center gap-2 text-sm font-semibold">
-                        <Activity
-                          size={18}
-                          className="theme-primary"
-                        />
-                        Aktivitas Terakhir
-                      </h3>
-
-                      <span className="theme-text-secondary flex items-center gap-1.5 text-xs">
-                        <Clock size={13} />
-                        {currentTime}
-                      </span>
+                {/* RINGKASAN AKUN: DATA DARI API */}
+                <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  <div className="theme-card theme-border rounded-2xl border p-5">
+                    <div className="theme-primary mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10">
+                      <Calendar size={19} />
                     </div>
+                    <p className="theme-text-secondary text-xs">
+                      Tanggal Bergabung
+                    </p>
+                    <p className="theme-text mt-2 text-sm font-semibold">
+                      {formatDate(profile.dibuatPada)}
+                    </p>
                   </div>
 
-                  <div className="divide-y divide-[var(--color-border-soft)] px-5 py-3 sm:px-6 sm:py-4">
-                    {activityLogs.map((log) => (
-                      <div
-                        key={log.id}
-                        className="flex items-start gap-3 py-3 first:pt-0 last:pb-0"
-                      >
-                        <div
-                          className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-xl ${getActivityColor(
-                            log.type
-                          )}`}
-                        >
-                          {getActivityIcon(log.type)}
-                        </div>
-
-                        <div className="min-w-0 flex-1">
-                          <p className="theme-text text-sm font-medium">
-                            {log.action}
-                          </p>
-
-                          <div className="mt-0.5 flex flex-wrap items-center gap-2">
-                            <span className="theme-text-secondary text-xs">
-                              {log.time}
-                            </span>
-
-                            <span className="hidden h-1 w-1 rounded-full bg-[color-mix(in_srgb,var(--color-text)_25%,transparent)] sm:block" />
-
-                            <span className="theme-text-muted text-xs">
-                              {log.device}
-                            </span>
-                          </div>
-                        </div>
-
-                        <ChevronRight
-                          size={16}
-                          className="theme-text-muted mt-1.5"
-                        />
-                      </div>
-                    ))}
+                  <div className="theme-card theme-border rounded-2xl border p-5">
+                    <div className="theme-primary mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10">
+                      <Clock size={19} />
+                    </div>
+                    <p className="theme-text-secondary text-xs">
+                      Terakhir Login
+                    </p>
+                    <p className="theme-text mt-2 text-sm font-semibold">
+                      {formatDate(profile.terakhirLogin, true)}
+                    </p>
                   </div>
 
-                  <div className="theme-border border-t px-5 py-3 sm:px-6 sm:py-4">
-                    <button className="theme-primary text-sm font-medium transition-opacity hover:opacity-80">
-                      Lihat Semua Aktivitas →
-                    </button>
+                  <div className="theme-card theme-border rounded-2xl border p-5">
+                    <div className="theme-primary mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-blue-500/10">
+                      <Shield size={19} />
+                    </div>
+                    <p className="theme-text-secondary text-xs">
+                      Status Akun
+                    </p>
+                    <p className="theme-text mt-2 text-sm font-semibold">
+                      {displayValue(profile.status)}
+                    </p>
                   </div>
-                </div>
-              </section>
+                </section>
+              </>
+            )}
 
-              {/* =================================================
-                  QUICK ACTIONS - PREMIUM
-              ================================================= */}
+            {/* AKSI */}
+            <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+              <QuickAction
+                icon={Edit}
+                label="Edit Profil"
+                description="Perbarui informasi pribadi"
+                onClick={() => router.push("/admin/profile/edit")}
+              />
 
-              <section className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-                <QuickAction
-                  icon={Settings}
-                  label="Pengaturan"
-                  desc="Kelola sistem"
-                  onClick={() =>
-                    router.push("/admin/settings")
-                  }
-                  color="primary"
-                />
+              <QuickAction
+                icon={Settings}
+                label="Pengaturan"
+                description="Kelola pengaturan akun"
+                onClick={() => router.push("/admin/settings")}
+              />
 
-                <QuickAction
-                  icon={Bell}
-                  label="Notifikasi"
-                  desc="Lihat semua"
-                  onClick={() =>
-                    router.push("/admin/notifikasi")
-                  }
-                  color="warning"
-                />
+              <QuickAction
+                icon={LogOut}
+                label="Logout"
+                description="Keluar dari akun"
+                onClick={handleLogout}
+              />
+            </section>
 
-                <QuickAction
-                  icon={FileText}
-                  label="Laporan"
-                  desc="Lihat laporan"
-                  onClick={() =>
-                    router.push("/admin/laporan")
-                  }
-                  color="info"
-                />
-
-                <QuickAction
-                  icon={LogOut}
-                  label="Logout"
-                  desc="Keluar sistem"
-                  onClick={() => {
-                    if (confirm("Yakin ingin logout?")) {
-                      router.push("/login");
-                    }
-                  }}
-                  color="danger"
-                />
-              </section>
-
-              {/* =================================================
-                  FOOTER
-              ================================================= */}
-
-              <footer className="theme-border border-t pt-4 text-center sm:pt-5">
-                <p className="theme-text-muted text-xs">
-                  © 2026 SmartSchool • Profil Admin • {currentTime}
-                </p>
-              </footer>
-            </div>
+            <footer className="theme-border border-t py-4 text-center">
+              <p className="theme-text-muted text-xs">
+                SmartSchool • Profil Admin
+              </p>
+            </footer>
           </div>
         </main>
       </div>
     </div>
-  );
-}
-
-// =========================================================
-// INFO ITEM COMPONENT
-// =========================================================
-
-function InfoItem({
-  icon: Icon,
-  label,
-  value,
-  className = "",
-}) {
-  return (
-    <div className={`flex items-start gap-3 ${className}`}>
-      <Icon
-        size={17}
-        className="theme-text-muted mt-0.5 shrink-0"
-      />
-
-      <div className="min-w-0">
-        <p className="theme-text-secondary text-xs font-medium">
-          {label}
-        </p>
-
-        <p className="theme-text truncate text-sm font-medium">
-          {value}
-        </p>
-      </div>
-    </div>
-  );
-}
-
-// =========================================================
-// QUICK ACTION COMPONENT
-// =========================================================
-
-function QuickAction({
-  icon: Icon,
-  label,
-  desc,
-  onClick,
-  color,
-}) {
-  const colorMap = {
-    primary: `${themePrimaryBorderHover} ${themePrimarySoftHover}`,
-
-    warning:
-      "hover:border-[color-mix(in_srgb,var(--color-warning)_30%,transparent)] hover:bg-[color-mix(in_srgb,var(--color-warning)_8%,transparent)]",
-
-    info:
-      "hover:border-[color-mix(in_srgb,var(--color-info)_30%,transparent)] hover:bg-[color-mix(in_srgb,var(--color-info)_8%,transparent)]",
-
-    danger:
-      "hover:border-[color-mix(in_srgb,var(--color-text)_25%,transparent)] hover:bg-[color-mix(in_srgb,var(--color-text)_6%,transparent)]",
-  };
-
-  const iconColorMap = {
-    primary:
-      "theme-primary bg-[color-mix(in_srgb,var(--color-primary)_10%,transparent)]",
-
-    warning:
-      "theme-warning bg-[color-mix(in_srgb,var(--color-warning)_10%,transparent)]",
-
-    info:
-      "theme-info bg-[color-mix(in_srgb,var(--color-info)_10%,transparent)]",
-
-    danger:
-      "theme-danger bg-[color-mix(in_srgb,var(--color-text)_8%,transparent)]",
-  };
-
-  return (
-    <button
-      onClick={onClick}
-      className={`theme-card theme-border flex items-center gap-3 rounded-2xl border p-4 ${themeShadow} transition-all hover:-translate-y-0.5 ${themeHoverShadow} ${colorMap[color]}`}
-    >
-      <div
-        className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-xl ${iconColorMap[color]}`}
-      >
-        <Icon
-          size={18}
-          strokeWidth={1.8}
-        />
-      </div>
-
-      <div className="min-w-0 text-left">
-        <p className="theme-text text-sm font-semibold">
-          {label}
-        </p>
-
-        <p className="theme-text-secondary text-xs">
-          {desc}
-        </p>
-      </div>
-
-      <ChevronRight
-        size={16}
-        className="theme-text-muted ml-auto"
-      />
-    </button>
   );
 }

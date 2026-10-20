@@ -1,8 +1,8 @@
-
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+
 import Header from "@/app/components/Header";
 import Sidebar from "@/app/components/Sidebar";
 import { getUserById, updateUser } from "@/services/user.service";
@@ -11,6 +11,7 @@ import {
   getShiftKerja,
   assignUserShiftAndJabatan,
 } from "@/services/shiftKerja.service";
+
 import {
   ArrowLeft,
   Save,
@@ -22,6 +23,10 @@ import {
   AlertCircle,
   CheckCircle2,
 } from "lucide-react";
+
+/* =========================================================
+   CONSTANTS
+========================================================= */
 
 const initialForm = {
   namaLengkap: "",
@@ -45,10 +50,13 @@ const initialForm = {
 };
 
 const inputClass =
-  "w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm text-slate-800 outline-none transition placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-100 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-100 dark:placeholder:text-slate-500 dark:focus:border-blue-400 dark:focus:ring-blue-900/40";
+  "w-full rounded-lg border theme-border theme-input px-3.5 py-2.5 text-sm outline-none transition placeholder:theme-text-placeholder focus:border-[var(--color-primary)] focus:ring-2 focus:ring-[color-mix(in_srgb,var(--color-primary)_15%,transparent)] disabled:opacity-60";
 
-const labelClass =
-  "mb-1.5 block text-sm font-medium text-slate-700 dark:text-slate-200";
+const labelClass = "mb-1.5 block text-sm font-medium theme-text-secondary";
+
+/* =========================================================
+   HELPERS
+========================================================= */
 
 function getErrorMessage(error) {
   return error instanceof Error
@@ -58,10 +66,8 @@ function getErrorMessage(error) {
 
 function toDateInput(value) {
   if (!value) return "";
-
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return String(value).slice(0, 10);
-
   return [
     date.getFullYear(),
     String(date.getMonth() + 1).padStart(2, "0"),
@@ -71,10 +77,7 @@ function toDateInput(value) {
 
 function normalizeRoleName(user) {
   return String(
-    user?.peran?.nama ||
-      user?.peran?.namaTampilan ||
-      user?.role ||
-      ""
+    user?.peran?.nama || user?.peran?.namaTampilan || user?.role || ""
   )
     .toLowerCase()
     .replace(/[\s-]+/g, "_");
@@ -91,17 +94,13 @@ function unwrapList(response) {
 
 function getKategoriId(user) {
   return String(
-    user?.kategoriJabatanId ??
-      user?.kategoriJabatan?.id ??
-      ""
+    user?.kategoriJabatanId ?? user?.kategoriJabatan?.id ?? ""
   );
 }
 
 function getShiftId(user) {
   return String(
-    user?.shiftKerjaId ??
-      user?.shiftKerjaMaster?.id ??
-      ""
+    user?.shiftKerjaId ?? user?.shiftKerjaMaster?.id ?? ""
   );
 }
 
@@ -115,6 +114,10 @@ function getShiftLabel(item) {
     "Shift kerja"
   );
 }
+
+/* =========================================================
+   PAGE
+========================================================= */
 
 export default function EditUserPage() {
   const params = useParams();
@@ -134,6 +137,9 @@ export default function EditUserPage() {
   const isGuru = userRole === "guru";
   const isSiswa = userRole === "siswa";
 
+  /* =======================================================
+     LOAD
+  ======================================================= */
   const loadUser = useCallback(async () => {
     if (!id) {
       setError("ID pengguna tidak ditemukan.");
@@ -170,8 +176,6 @@ export default function EditUserPage() {
       const kategoriId = getKategoriId(user);
       const shiftId = getShiftId(user);
 
-      // Pertahankan pilihan yang sudah tersimpan jika tidak ada
-      // dalam daftar aktif yang dikembalikan oleh endpoint master.
       const savedKategori = user?.kategoriJabatan;
       const savedShift = user?.shiftKerjaMaster;
 
@@ -234,9 +238,11 @@ export default function EditUserPage() {
     loadUser();
   }, [loadUser]);
 
+  /* =======================================================
+     HANDLERS
+  ======================================================= */
   function handleChange(event) {
     const { name, value } = event.target;
-
     setForm((previous) => ({ ...previous, [name]: value }));
     setError("");
     setSuccess("");
@@ -307,8 +313,6 @@ export default function EditUserPage() {
       }
 
       if (!isSiswa) {
-        // Pertahankan shift yang ada untuk pengguna non-guru,
-        // karena field shift tidak ditampilkan kepada mereka.
         const shiftIdToSave = isGuru
           ? form.shiftKerjaId
           : form.shiftKerjaId || null;
@@ -330,12 +334,17 @@ export default function EditUserPage() {
     }
   }
 
+  /* =======================================================
+     FIELD RENDERER
+  ======================================================= */
   function field(name, label, options = {}) {
     return (
       <div key={name}>
         <label className={labelClass} htmlFor={name}>
           {label}
-          {options.required && <span className="ml-1 text-red-500">*</span>}
+          {options.required && (
+            <span className="ml-1 text-[var(--color-danger)]">*</span>
+          )}
         </label>
 
         {options.type === "select" ? (
@@ -360,7 +369,7 @@ export default function EditUserPage() {
             value={form[name]}
             onChange={handleChange}
             rows={3}
-            className={inputClass}
+            className={`${inputClass} resize-y`}
             placeholder={`Masukkan ${label.toLowerCase()}`}
           />
         ) : (
@@ -379,12 +388,17 @@ export default function EditUserPage() {
     );
   }
 
+  /* =======================================================
+     OPTIONS
+  ======================================================= */
   const kategoriSelectOptions = [
     { value: "", label: "Pilih kategori jabatan" },
     ...kategoriOptions.map((item) => ({
       value: String(item.id),
       label: `${item.nama || item.namaKategori || item.namaJabatan || "Kategori"}${
-        String(item.status).toLowerCase() === "nonaktif" ? " (Nonaktif)" : ""
+        String(item.status).toLowerCase() === "nonaktif"
+          ? " (Nonaktif)"
+          : ""
       }`,
     })),
   ];
@@ -397,68 +411,100 @@ export default function EditUserPage() {
     })),
   ];
 
+  /* =======================================================
+     RENDER
+  ======================================================= */
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-slate-50 text-slate-800 dark:bg-slate-950 dark:text-slate-100">
+    <div className="flex h-screen w-full overflow-hidden theme-page">
       <Sidebar />
-      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <div className="shrink-0"><Header /></div>
 
-        <main className="flex-1 overflow-y-auto">
-          <div className="mx-auto w-full max-w-7xl p-4 sm:p-6 lg:p-8">
+      <div className="flex min-w-0 flex-1 flex-col overflow-hidden">
+        <div className="shrink-0">
+          <Header />
+        </div>
+
+        <main className="min-w-0 flex-1 overflow-y-auto">
+          <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
+            {/* BACK */}
             <button
               type="button"
-              onClick={() => router.push(`/admin/pengguna/kelola-user/${id}`)}
-              className="mb-5 inline-flex items-center gap-2 rounded-lg px-3 py-2 text-sm font-medium text-slate-600 hover:bg-slate-200/70 dark:text-slate-300 dark:hover:bg-slate-800"
+              onClick={() =>
+                router.push(`/admin/pengguna/kelola-user`)
+              }
+              className="mb-5 inline-flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm font-medium theme-text-secondary transition hover:theme-card-soft"
             >
               <ArrowLeft size={17} /> Kembali ke detail pengguna
             </button>
 
+            {/* HEADER */}
             <div className="mb-6">
-              <p className="text-sm font-medium text-blue-600 dark:text-blue-400">
+              <p className="text-xs font-semibold uppercase tracking-wide theme-primary-text">
                 Manajemen Pengguna
               </p>
-              <h1 className="mt-1 text-2xl font-bold tracking-tight text-slate-900 dark:text-white sm:text-3xl">
+              <h1 className="mt-1 text-2xl font-bold tracking-tight theme-text sm:text-3xl">
                 Edit Pengguna
               </h1>
-              <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
+              <p className="mt-2 text-sm theme-text-muted">
                 Perbarui informasi akun dan data pengguna SmartSchool.
               </p>
             </div>
 
+            {/* ALERTS */}
             {error && (
-              <div role="alert" className="mb-5 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300">
+              <div
+                role="alert"
+                className="theme-danger mb-5 flex items-start gap-3 rounded-xl border theme-border p-4 text-sm"
+              >
                 <AlertCircle size={19} className="mt-0.5 shrink-0" />
-                <span>{error}</span>
+                <span className="flex-1">{error}</span>
               </div>
             )}
 
             {success && (
-              <div className="mb-5 flex items-start gap-3 rounded-xl border border-emerald-200 bg-emerald-50 p-4 text-sm text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300">
-                <CheckCircle2 size={19} /><span>{success}</span>
+              <div
+                role="status"
+                className="theme-success mb-5 flex items-start gap-3 rounded-xl border theme-border p-4 text-sm"
+              >
+                <CheckCircle2 size={19} className="shrink-0" />
+                <span className="flex-1">{success}</span>
               </div>
             )}
 
+            {/* LOADING */}
             {loading ? (
-              <div className="flex min-h-64 items-center justify-center rounded-2xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
-                <Loader2 size={20} className="animate-spin" />
-                <span className="ml-3 text-sm text-slate-500">Memuat data pengguna...</span>
+              <div className="theme-card flex min-h-64 items-center justify-center rounded-2xl border theme-border">
+                <Loader2 size={20} className="animate-spin theme-primary-text" />
+                <span className="ml-3 text-sm theme-text-muted">
+                  Memuat data pengguna...
+                </span>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                  <div className="flex items-center gap-3 border-b border-slate-100 px-5 py-4 dark:border-slate-800 sm:px-6">
-                    <div className="rounded-xl bg-blue-50 p-2.5 text-blue-600 dark:bg-blue-950/50 dark:text-blue-400"><UserRound size={20} /></div>
+              <form onSubmit={handleSubmit} className="space-y-5">
+                {/* SECTION: INFORMASI AKUN */}
+                <section className="theme-card overflow-hidden rounded-2xl border theme-border shadow-sm">
+                  <div className="flex items-center gap-3 border-b theme-border px-5 py-4 sm:px-6">
+                    <div className="theme-primary-soft flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+                      <UserRound size={18} />
+                    </div>
                     <div>
-                      <h2 className="font-semibold text-slate-900 dark:text-white">Informasi Akun</h2>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">Identitas dasar pengguna.</p>
+                      <h2 className="text-sm font-semibold theme-text">
+                        Informasi Akun
+                      </h2>
+                      <p className="text-xs theme-text-muted">
+                        Identitas dasar pengguna.
+                      </p>
                     </div>
                   </div>
 
                   <div className="grid grid-cols-1 gap-5 p-5 sm:grid-cols-2 sm:p-6">
                     {field("namaLengkap", "Nama lengkap", { required: true })}
                     {field("namaPengguna", "Username", { required: true })}
-                    {field("email", "Email", { type: "email", required: true })}
+                    {field("email", "Email", {
+                      type: "email",
+                      required: true,
+                    })}
                     {field("noTelepon", "Nomor telepon", { type: "tel" })}
+
                     {field("status", "Status akun", {
                       type: "select",
                       options: [
@@ -469,26 +515,46 @@ export default function EditUserPage() {
 
                     <div>
                       <label className={labelClass}>Peran pengguna</label>
-                      <div className={`${inputClass} flex items-center bg-slate-50 dark:bg-slate-800`}>
-                        <ShieldCheck size={17} className="mr-2 text-blue-500" />
-                        {userRole.replace(/_/g, " ") || "-"}
+                      <div
+                        className={`${inputClass} flex items-center theme-card-soft`}
+                      >
+                        <ShieldCheck
+                          size={16}
+                          className="mr-2 theme-primary-text"
+                        />
+                        <span className="theme-text">
+                          {userRole.replace(/_/g, " ") || "-"}
+                        </span>
                       </div>
-                      <p className="mt-1 text-xs text-slate-500">Peran tidak diubah dari formulir ini.</p>
+                      <p className="mt-1 text-xs theme-text-muted">
+                        Peran tidak diubah dari formulir ini.
+                      </p>
                     </div>
 
                     <div className="sm:col-span-2">
                       <label className={labelClass}>Sekolah</label>
-                      <div className={`${inputClass} bg-slate-50 dark:bg-slate-800`}>{schoolName}</div>
+                      <div
+                        className={`${inputClass} theme-card-soft`}
+                      >
+                        {schoolName}
+                      </div>
                     </div>
                   </div>
                 </section>
 
-                <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                  <div className="flex items-center gap-3 border-b border-slate-100 px-5 py-4 dark:border-slate-800 sm:px-6">
-                    <div className="rounded-xl bg-indigo-50 p-2.5 text-indigo-600 dark:bg-indigo-950/50 dark:text-indigo-400"><BriefcaseBusiness size={20} /></div>
+                {/* SECTION: KEPEGAWAIAN */}
+                <section className="theme-card overflow-hidden rounded-2xl border theme-border shadow-sm">
+                  <div className="flex items-center gap-3 border-b theme-border px-5 py-4 sm:px-6">
+                    <div className="theme-info flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+                      <BriefcaseBusiness size={18} />
+                    </div>
                     <div>
-                      <h2 className="font-semibold text-slate-900 dark:text-white">Data Kepegawaian dan Identitas</h2>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">Informasi administrasi dan penempatan kerja.</p>
+                      <h2 className="text-sm font-semibold theme-text">
+                        Data Kepegawaian dan Identitas
+                      </h2>
+                      <p className="text-xs theme-text-muted">
+                        Informasi administrasi dan penempatan kerja.
+                      </p>
                     </div>
                   </div>
 
@@ -501,8 +567,12 @@ export default function EditUserPage() {
 
                     {!isSiswa && (
                       <div>
-                        <label className={labelClass} htmlFor="kategoriJabatanId">
-                          Kategori jabatan <span className="text-red-500">*</span>
+                        <label
+                          className={labelClass}
+                          htmlFor="kategoriJabatanId"
+                        >
+                          Kategori jabatan{" "}
+                          <span className="text-[var(--color-danger)]">*</span>
                         </label>
                         <select
                           id="kategoriJabatanId"
@@ -513,15 +583,20 @@ export default function EditUserPage() {
                           className={inputClass}
                         >
                           {kategoriSelectOptions.map((option) => (
-                            <option key={option.value} value={option.value}>{option.label}</option>
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
                           ))}
                         </select>
-                        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Pilihan berasal dari master kategori jabatan.</p>
+                        <p className="mt-1 text-xs theme-text-muted">
+                          Pilihan berasal dari master kategori jabatan.
+                        </p>
                       </div>
                     )}
 
                     {field("jabatan", "Jabatan (data profil lama)")}
                     {field("golongan", "Golongan")}
+
                     {field("jenisKelamin", "Jenis kelamin", {
                       type: "select",
                       options: [
@@ -530,13 +605,15 @@ export default function EditUserPage() {
                         { value: "P", label: "Perempuan" },
                       ],
                     })}
+
                     {field("tempatLahir", "Tempat lahir")}
                     {field("tanggalLahir", "Tanggal lahir", { type: "date" })}
 
                     {isGuru && (
                       <div>
                         <label className={labelClass} htmlFor="shiftKerjaId">
-                          Shift kerja <span className="text-red-500">*</span>
+                          Shift kerja{" "}
+                          <span className="text-[var(--color-danger)]">*</span>
                         </label>
                         <select
                           id="shiftKerjaId"
@@ -547,41 +624,62 @@ export default function EditUserPage() {
                           className={inputClass}
                         >
                           {shiftSelectOptions.map((option) => (
-                            <option key={option.value} value={option.value}>{option.label}</option>
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
                           ))}
                         </select>
-                        <p className="mt-1 text-xs text-slate-500 dark:text-slate-400">Pilihan berasal dari master shift kerja.</p>
+                        <p className="mt-1 text-xs theme-text-muted">
+                          Pilihan berasal dari master shift kerja.
+                        </p>
                       </div>
                     )}
                   </div>
                 </section>
 
-                <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-                  <div className="flex items-center gap-3 border-b border-slate-100 px-5 py-4 dark:border-slate-800 sm:px-6">
-                    <div className="rounded-xl bg-emerald-50 p-2.5 text-emerald-600 dark:bg-emerald-950/50 dark:text-emerald-400"><MapPin size={20} /></div>
+                {/* SECTION: ALAMAT */}
+                <section className="theme-card overflow-hidden rounded-2xl border theme-border shadow-sm">
+                  <div className="flex items-center gap-3 border-b theme-border px-5 py-4 sm:px-6">
+                    <div className="theme-success flex h-10 w-10 shrink-0 items-center justify-center rounded-xl">
+                      <MapPin size={18} />
+                    </div>
                     <div>
-                      <h2 className="font-semibold text-slate-900 dark:text-white">Informasi Alamat</h2>
-                      <p className="text-sm text-slate-500 dark:text-slate-400">Alamat yang tersimpan pada akun pengguna.</p>
+                      <h2 className="text-sm font-semibold theme-text">
+                        Informasi Alamat
+                      </h2>
+                      <p className="text-xs theme-text-muted">
+                        Alamat yang tersimpan pada akun pengguna.
+                      </p>
                     </div>
                   </div>
-                  <div className="p-5 sm:p-6">{field("alamat", "Alamat", { type: "textarea" })}</div>
+                  <div className="p-5 sm:p-6">
+                    {field("alamat", "Alamat", { type: "textarea" })}
+                  </div>
                 </section>
 
+                {/* ACTIONS */}
                 <div className="flex flex-col-reverse gap-3 pb-2 sm:flex-row sm:justify-end">
                   <button
                     type="button"
-                    onClick={() => router.push(`/admin/pengguna/kelola-user/${id}`)}
+                    onClick={() =>
+                      router.push(`/admin/pengguna/kelola-user/${id}`)
+                    }
                     disabled={saving}
-                    className="rounded-xl border border-slate-200 bg-white px-5 py-2.5 text-sm font-semibold text-slate-700 hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200 dark:hover:bg-slate-800"
+                    className="theme-card theme-border rounded-xl border px-5 py-2.5 text-sm font-semibold theme-text-secondary transition hover:theme-card-soft disabled:opacity-50"
                   >
                     Batal
                   </button>
+
                   <button
                     type="submit"
                     disabled={saving}
-                    className="inline-flex items-center justify-center gap-2 rounded-xl bg-blue-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="theme-primary inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-semibold shadow-sm transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    {saving ? <Loader2 size={17} className="animate-spin" /> : <Save size={17} />}
+                    {saving ? (
+                      <Loader2 size={17} className="animate-spin" />
+                    ) : (
+                      <Save size={17} />
+                    )}
                     {saving ? "Menyimpan..." : "Simpan Perubahan"}
                   </button>
                 </div>

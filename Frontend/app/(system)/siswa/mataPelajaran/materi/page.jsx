@@ -334,20 +334,30 @@ function getBackendFileUrl(url) {
   return `${backendOrigin}/${url}`;
 }
 
-function getCurrentUser() {
-  if (typeof window === "undefined") {
-    return null;
-  }
 
+function getCurrentUser() {
   try {
     const rawUser = getStoredUser();
 
-    return rawUser ? JSON.parse(rawUser) : null;
+    if (!rawUser) return null;
+
+    // Jika sudah berupa object, tidak perlu JSON.parse()
+    if (typeof rawUser === "object") {
+      return rawUser;
+    }
+
+    // Jika berupa string JSON, parse seperti biasa
+    if (typeof rawUser === "string") {
+      return JSON.parse(rawUser);
+    }
+
+    return null;
   } catch (error) {
     console.error("[SISWA MATERI] Gagal membaca user:", error);
     return null;
   }
 }
+
 
 /* =========================================================
    LOADING

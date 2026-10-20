@@ -105,7 +105,7 @@ export default function DetailArtikelPage() {
           </p>
 
           <Link
-            href="/website/articles"
+            href="/articles"
             className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition"
           >
             <ArrowLeft className="w-4 h-4" />
@@ -214,7 +214,7 @@ export default function DetailArtikelPage() {
 
           {/* Back */}
           <Link
-            href="/website/articles"
+            href="/articles"
             className="inline-flex items-center gap-2 text-sm font-medium text-blue-600 hover:text-blue-700 mb-8"
           >
             <ArrowLeft className="w-4 h-4" />

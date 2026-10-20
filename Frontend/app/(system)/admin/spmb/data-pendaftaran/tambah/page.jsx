@@ -109,7 +109,7 @@ export default function TambahPendaftarPage() {
 
     setTimeout(() => {
       setSaving(false);
-      router.push("/admin/spmb/pendaftaran");
+      router.push("/admin/spmb/data-pendaftaran");
     }, 800);
   };
 
@@ -747,7 +747,7 @@ export default function TambahPendaftarPage() {
                     type="button"
                     onClick={() =>
                       router.push(
-                        "/admin/spmb/pendaftaran"
+                        "/admin/spmb/data-pendaftaran"
                       )
                     }
                     className={`

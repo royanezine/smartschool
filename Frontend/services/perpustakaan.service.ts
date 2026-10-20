@@ -102,14 +102,29 @@ export async function getBukuById(id: string) {
   return unwrap(response);
 }
 
+
 export async function createBuku(payload: BukuPayload) {
+  const cleanPayload = { ...payload };
+
+  if (!cleanPayload.coverUrl?.trim()) {
+    delete cleanPayload.coverUrl;
+  }
+
+  if (!cleanPayload.urlEbook?.trim()) {
+    delete cleanPayload.urlEbook;
+  }
+
   const response = await apiFetch(`${BASE_PATH}/buku`, {
     method: "POST",
-    body: JSON.stringify(payload),
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(cleanPayload),
   });
 
   return unwrap(response);
 }
+
 
 export async function updateBuku(
   id: string,
@@ -156,25 +171,36 @@ export async function getPeminjaman(
 }
 
 export async function pinjamBuku(payload: PeminjamanPayload) {
+  if (!payload.tanggalJatuhTempo) {
+    throw new Error("Tanggal jatuh tempo wajib diisi.");
+  }
+
   const response = await apiFetch(`${BASE_PATH}/peminjaman`, {
     method: "POST",
-    body: JSON.stringify(payload),
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      bukuId: payload.bukuId,
+      tanggalJatuhTempo: payload.tanggalJatuhTempo,
+      catatan: payload.catatan || "",
+    }),
   });
 
   return unwrap(response);
 }
 
-export async function kembalikanBuku(
-  id: string,
-  payload: Record<string, unknown> = {},
-) {
+
+
+
+export async function kembalikanBuku(id: string) {
   const response = await apiFetch(
     `${BASE_PATH}/peminjaman/${encodeURIComponent(id)}/kembali`,
     {
       method: "PUT",
-      body: JSON.stringify(payload),
-    },
+    }
   );
 
   return unwrap(response);
 }
+

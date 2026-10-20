@@ -2,21 +2,13 @@
 import { apiFetch } from "../lib/api";
 
 export interface CreateSiswaData {
-  namaLengkap: string;
+  namaPengguna: string;
   email: string;
-  nisn: string;
+  kataSandi: string;
+  namaLengkap: string;
+  nisn?: string;
   nis?: string;
-  kelasId: string;
-  nik?: string;
-  namaAyah?: string;
-  pekerjaanAyah?: string;
-  namaIbu?: string;
-  pekerjaanIbu?: string;
-  alamatKtp?: string;
-  alamatDomisili?: string;
-  kecamatan?: string;
-  kelurahan?: string;
-  kota?: string;
+  jenisKelamin?: string;
 }
 
 export interface KelasSaya {
@@ -27,18 +19,32 @@ export interface KelasSaya {
 }
 
 export async function createSiswa(data: CreateSiswaData) {
-  if (!data.kelasId?.trim()) {
-    throw new Error("Kelas wajib dipilih.");
+  if (!data.namaPengguna.trim()) {
+    throw new Error("Username wajib diisi.");
+  }
+
+  if (!data.email.trim()) {
+    throw new Error("Email wajib diisi.");
+  }
+
+  if (!data.kataSandi) {
+    throw new Error("Kata sandi wajib diisi.");
+  }
+
+  if (!data.namaLengkap.trim()) {
+    throw new Error("Nama lengkap wajib diisi.");
   }
 
   return apiFetch("/api/siswa", {
     method: "POST",
     body: JSON.stringify({
-      ...data,
-      namaLengkap: data.namaLengkap.trim(),
+      namaPengguna: data.namaPengguna.trim(),
       email: data.email.trim(),
-      nisn: data.nisn.trim(),
-      kelasId: data.kelasId.trim(),
+      kataSandi: data.kataSandi,
+      namaLengkap: data.namaLengkap.trim(),
+      nisn: data.nisn?.trim() || undefined,
+      nis: data.nis?.trim() || undefined,
+      jenisKelamin: data.jenisKelamin || undefined,
     }),
   });
 }

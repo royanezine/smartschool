@@ -25,6 +25,11 @@ import {
   AlertCircle,
   RefreshCw,
   Award,
+  Layers3,
+  ClipboardList,
+  CheckCheck,
+  Timer,
+  GraduationCap,
 } from "lucide-react";
 
 /* =========================================================
@@ -40,7 +45,6 @@ const TASK_BASE_URL = `${API_URL}/api/tugas`;
 
 /* =========================================================
    THEME HELPERS
-   Mengikuti token global SmartSchool
 ========================================================= */
 
 const themePrimaryGradient =
@@ -291,9 +295,6 @@ function getArrayData(response) {
   return [];
 }
 
-
-
-
 function getNamaMapel(data) {
   return (
     data?.kelasMapel?.mataPelajaran?.nama ||
@@ -303,8 +304,6 @@ function getNamaMapel(data) {
     "Mata pelajaran belum tersedia"
   );
 }
-
-
 
 /* =========================================================
    GET KELAS ID SISWA
@@ -494,7 +493,6 @@ function statusLabel(status) {
 
 /* =========================================================
    STATUS CLASS
-   Semua mengikuti global theme
 ========================================================= */
 
 function statusClass(status) {
@@ -634,152 +632,142 @@ function TugasSiswaPageContent() {
      GET DAFTAR TUGAS
   ======================================================= */
 
-  
-const loadTugas = useCallback(async () => {
-  try {
-    setLoadingList(true);
-    setError("");
-    setSuccessMessage("");
+  const loadTugas = useCallback(async () => {
+    try {
+      setLoadingList(true);
+      setError("");
+      setSuccessMessage("");
 
-    const kelasMapelIds = kelasMapelId
-      ? [kelasMapelId]
-      : await getKelasMapelSiswa();
+      const kelasMapelIds = kelasMapelId
+        ? [kelasMapelId]
+        : await getKelasMapelSiswa();
 
-    if (!kelasMapelIds || kelasMapelIds.length === 0) {
-      setTugasList([]);
-      setSubmissionMap({});
-      setSelectedTugas(null);
-      return;
+      if (!kelasMapelIds || kelasMapelIds.length === 0) {
+        setTugasList([]);
+        setSubmissionMap({});
+        setSelectedTugas(null);
+        return;
+      }
+
+      const taskResponses = await Promise.all(
+        kelasMapelIds.map(async (id) => {
+          try {
+            const response = await apiRequest(
+              `${TASK_BASE_URL}/kelas-mapel/${id}`
+            );
+
+            const data = getData(response);
+
+            return Array.isArray(data) ? data : [];
+          } catch (err) {
+            console.error(
+              `Gagal mengambil tugas kelas-mapel ${id}:`,
+              err
+            );
+
+            return [];
+          }
+        })
+      );
+
+      const allTasks = taskResponses.flat();
+
+      const uniqueTasks = Array.from(
+        new Map(
+          allTasks
+            .filter((task) => task?.id)
+            .map((task) => [task.id, task])
+        ).values()
+      );
+
+      uniqueTasks.sort((a, b) => {
+        const dateA = a?.dibuatPada
+          ? new Date(a.dibuatPada).getTime()
+          : 0;
+
+        const dateB = b?.dibuatPada
+          ? new Date(b.dibuatPada).getTime()
+          : 0;
+
+        return dateB - dateA;
+      });
+
+      if (uniqueTasks.length === 0) {
+        setTugasList([]);
+        setSubmissionMap({});
+        setSelectedTugas(null);
+        return;
+      }
+
+      const detailResults = await Promise.all(
+        uniqueTasks.map(async (task) => {
+          try {
+            const detailResponse = await apiRequest(
+              `${TASK_BASE_URL}/${task.id}`
+            );
+
+            const detailData = getData(detailResponse);
+
+            const submission =
+              detailData?.pengumpulanTugasSiswa?.[0] ||
+              null;
+
+            const mergedTask = {
+              ...task,
+              ...detailData,
+              kelasMapel:
+                detailData?.kelasMapel ||
+                task?.kelasMapel ||
+                null,
+            };
+
+            return {
+              task: mergedTask,
+              tugasId: task.id,
+              submission,
+            };
+          } catch (err) {
+            console.error(
+              `Gagal mengambil detail tugas ${task.id}:`,
+              err
+            );
+
+            return {
+              task,
+              tugasId: task.id,
+              submission: null,
+            };
+          }
+        })
+      );
+
+      const mergedTasks = detailResults.map(
+        (item) => item.task
+      );
+
+      const newSubmissionMap = {};
+
+      detailResults.forEach((item) => {
+        newSubmissionMap[item.tugasId] =
+          item.submission;
+      });
+
+      setTugasList(mergedTasks);
+      setSubmissionMap(newSubmissionMap);
+    } catch (err) {
+      console.error(
+        "Gagal mengambil daftar tugas:",
+        err
+      );
+
+      setError(
+        err?.message ||
+          "Gagal mengambil daftar tugas dari backend."
+      );
+    } finally {
+      setLoadingList(false);
     }
-
-    // Ambil daftar tugas dari setiap kelas mapel
-    const taskResponses = await Promise.all(
-      kelasMapelIds.map(async (id) => {
-        try {
-          const response = await apiRequest(
-            `${TASK_BASE_URL}/kelas-mapel/${id}`
-          );
-
-          const data = getData(response);
-
-          return Array.isArray(data) ? data : [];
-        } catch (err) {
-          console.error(
-            `Gagal mengambil tugas kelas-mapel ${id}:`,
-            err
-          );
-
-          return [];
-        }
-      })
-    );
-
-    // Gabungkan tugas dan hilangkan duplikasi
-    const allTasks = taskResponses.flat();
-
-    const uniqueTasks = Array.from(
-      new Map(
-        allTasks
-          .filter((task) => task?.id)
-          .map((task) => [task.id, task])
-      ).values()
-    );
-
-    // Urutkan berdasarkan tanggal dibuat terbaru
-    uniqueTasks.sort((a, b) => {
-      const dateA = a?.dibuatPada
-        ? new Date(a.dibuatPada).getTime()
-        : 0;
-
-      const dateB = b?.dibuatPada
-        ? new Date(b.dibuatPada).getTime()
-        : 0;
-
-      return dateB - dateA;
-    });
-
-    if (uniqueTasks.length === 0) {
-      setTugasList([]);
-      setSubmissionMap({});
-      setSelectedTugas(null);
-      return;
-    }
-
-    // Ambil detail tugas agar nama mapel dan status
-    // pengumpulan tersedia pada daftar tugas.
-    const detailResults = await Promise.all(
-      uniqueTasks.map(async (task) => {
-        try {
-          const detailResponse = await apiRequest(
-            `${TASK_BASE_URL}/${task.id}`
-          );
-
-          const detailData = getData(detailResponse);
-
-          const submission =
-            detailData?.pengumpulanTugasSiswa?.[0] ||
-            null;
-
-          // Data detail melengkapi data dari daftar tugas.
-          // Data daftar tetap dipertahankan jika detail
-          // tidak menyediakan suatu properti.
-          const mergedTask = {
-            ...task,
-            ...detailData,
-            kelasMapel:
-              detailData?.kelasMapel ||
-              task?.kelasMapel ||
-              null,
-          };
-
-          return {
-            task: mergedTask,
-            tugasId: task.id,
-            submission,
-          };
-        } catch (err) {
-          console.error(
-            `Gagal mengambil detail tugas ${task.id}:`,
-            err
-          );
-
-          return {
-            task,
-            tugasId: task.id,
-            submission: null,
-          };
-        }
-      })
-    );
-
-    const mergedTasks = detailResults.map(
-      (item) => item.task
-    );
-
-    const newSubmissionMap = {};
-
-    detailResults.forEach((item) => {
-      newSubmissionMap[item.tugasId] =
-        item.submission;
-    });
-
-    setTugasList(mergedTasks);
-    setSubmissionMap(newSubmissionMap);
-  } catch (err) {
-    console.error(
-      "Gagal mengambil daftar tugas:",
-      err
-    );
-
-    setError(
-      err?.message ||
-        "Gagal mengambil daftar tugas dari backend."
-    );
-  } finally {
-    setLoadingList(false);
-  }
-}, [kelasMapelId]);
-
+  }, [kelasMapelId]);
 
   /* =======================================================
      INITIAL LOAD
@@ -869,6 +857,52 @@ const loadTugas = useCallback(async () => {
         selectedTugas?.batasWaktu
       );
     }, [selectedTugas]);
+
+  /* =======================================================
+     STATISTIK TUGAS
+  ======================================================= */
+
+  const stats = useMemo(() => {
+    let belum = 0;
+    let dikumpulkan = 0;
+    let dinilai = 0;
+    let terlambat = 0;
+
+    tugasList.forEach((tugas) => {
+      const submission =
+        submissionMap[tugas.id] || null;
+
+      const status = normalizeStatus(
+        submission,
+        tugas.batasWaktu
+      );
+
+      switch (status) {
+        case "dikumpulkan":
+          dikumpulkan += 1;
+          break;
+
+        case "dinilai":
+          dinilai += 1;
+          break;
+
+        case "terlambat":
+          terlambat += 1;
+          break;
+
+        default:
+          belum += 1;
+      }
+    });
+
+    return {
+      total: tugasList.length,
+      belum,
+      dikumpulkan,
+      dinilai,
+      terlambat,
+    };
+  }, [tugasList, submissionMap]);
 
   /* =======================================================
      SELECT TASK
@@ -1069,24 +1103,14 @@ const loadTugas = useCallback(async () => {
   ======================================================= */
 
   return (
-    <main className="theme-page theme-text min-h-full">
-      <div className="mx-auto w-full max-w-[1800px] px-4 py-6 sm:px-6 lg:px-8">
+    <main className="min-w-0 flex-1 overflow-y-auto theme-page theme-text">
+      {/* Konten w-full: melebar saat zoom out, tidak dibatasi max-width */}
+      <div className="w-full px-4 py-6 sm:px-6 lg:px-8">
         {/* =================================================
             PAGE HEADER
         ================================================= */}
 
         <div className="mb-6">
-          <button
-            type="button"
-            onClick={() =>
-              router.back()
-            }
-            className={`mb-4 inline-flex items-center gap-2 text-sm font-medium theme-text-secondary transition hover:text-[var(--color-primary)]`}
-          >
-            <ArrowLeft size={18} />
-            Kembali
-          </button>
-
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div>
               <div className="mb-2 flex items-center gap-3">
@@ -1130,6 +1154,96 @@ const loadTugas = useCallback(async () => {
 
               Refresh
             </button>
+          </div>
+        </div>
+
+        {/* =================================================
+            STAT CARDS — grid responsif dengan 2xl:grid-cols-6
+        ================================================= */}
+
+        <div className="mb-6 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6">
+          <div className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl px-4 py-4`}>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs theme-text-muted">Total tugas</p>
+                <p className="mt-1 text-xl font-bold theme-text">
+                  {loadingList ? "—" : stats.total}
+                </p>
+              </div>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themePrimarySurface} ${themePrimaryText}`}>
+                <Layers3 size={17} />
+              </div>
+            </div>
+          </div>
+
+          <div className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl px-4 py-4`}>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs theme-text-muted">Belum</p>
+                <p className="mt-1 text-xl font-bold theme-text">
+                  {loadingList ? "—" : stats.belum}
+                </p>
+              </div>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeWarningSurface} ${themeWarningText}`}>
+                <ClipboardList size={17} />
+              </div>
+            </div>
+          </div>
+
+          <div className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl px-4 py-4`}>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs theme-text-muted">Dikumpulkan</p>
+                <p className="mt-1 text-xl font-bold theme-text">
+                  {loadingList ? "—" : stats.dikumpulkan}
+                </p>
+              </div>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeInfoSurface} ${themeInfoText}`}>
+                <CheckCheck size={17} />
+              </div>
+            </div>
+          </div>
+
+          <div className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl px-4 py-4`}>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs theme-text-muted">Dinilai</p>
+                <p className="mt-1 text-xl font-bold theme-text">
+                  {loadingList ? "—" : stats.dinilai}
+                </p>
+              </div>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeSuccessSurface} ${themeSuccessText}`}>
+                <GraduationCap size={17} />
+              </div>
+            </div>
+          </div>
+
+          <div className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl px-4 py-4`}>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs theme-text-muted">Terlambat</p>
+                <p className="mt-1 text-xl font-bold theme-text">
+                  {loadingList ? "—" : stats.terlambat}
+                </p>
+              </div>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeDangerSurface} theme-text`}>
+                <Timer size={17} />
+              </div>
+            </div>
+          </div>
+
+          <div className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl px-4 py-4`}>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs theme-text-muted">Kelas mapel</p>
+                <p className="mt-1 text-xl font-bold theme-text">
+                  {loadingList ? "—" : kelasMapelId ? 1 : "—"}
+                </p>
+              </div>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themePrimarySurface} ${themePrimaryText}`}>
+                <BookOpen size={17} />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -1251,8 +1365,9 @@ const loadTugas = useCallback(async () => {
                 </p>
               </div>
             ) : (
-              <div className="max-h-[calc(100vh-320px)] overflow-y-auto p-3">
-                <div className="space-y-2">
+              /* overflow-x-auto agar daftar tidak merusak layout di layar kecil */
+              <div className="max-h-[calc(100vh-380px)] overflow-y-auto overflow-x-auto p-3">
+                <div className="space-y-2 min-w-[260px]">
                   {tugasList.map(
                     (tugas) => {
                       const isSelected =
@@ -1302,11 +1417,9 @@ const loadTugas = useCallback(async () => {
                                   "Tugas Tanpa Judul"}
                               </h3>
 
-                              
-<p className={`mt-1 text-xs font-medium ${themePrimaryText}`}>
-  {getNamaMapel(tugas)}
-</p>
-
+                              <p className={`mt-1 text-xs font-medium ${themePrimaryText}`}>
+                                {getNamaMapel(tugas)}
+                              </p>
 
                               <div className="mt-2 flex items-center gap-1.5 text-xs theme-text-muted">
                                 <Clock3
@@ -1410,11 +1523,10 @@ const loadTugas = useCallback(async () => {
                           {selectedTugas.judul ||
                             "Tugas Tanpa Judul"}
                         </h2>
-                        
-<p className={`mt-2 text-sm font-medium ${themePrimaryText}`}>
-  Mata Pelajaran: {getNamaMapel(selectedTugas)}
-</p>
 
+                        <p className={`mt-2 text-sm font-medium ${themePrimaryText}`}>
+                          Mata Pelajaran: {getNamaMapel(selectedTugas)}
+                        </p>
                       </div>
 
                       <span
@@ -1839,7 +1951,9 @@ export default function TugasSiswaPage() {
   return (
     <Suspense
       fallback={
-        <div className="theme-page min-h-full" />
+        <main className="min-w-0 flex-1 overflow-y-auto theme-page theme-text">
+          <div className="w-full px-4 py-6 sm:px-6 lg:px-8" />
+        </main>
       }
     >
       <TugasSiswaPageContent />

@@ -20,6 +20,9 @@ import {
   History,
   Plus,
   ShieldCheck,
+  Layers3,
+  CalendarClock,
+  XOctagon,
 } from "lucide-react";
 
 import {
@@ -45,6 +48,9 @@ const themePrimaryText =
 
 const themeCardShadow =
   "shadow-[0_4px_18px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
+
+const themeSmallShadow =
+  "shadow-[0_2px_8px_color-mix(in_srgb,var(--color-text)_5%,transparent)]";
 
 const themeNeutralSurface =
   "bg-[color-mix(in_srgb,var(--color-text)_4%,transparent)]";
@@ -113,7 +119,7 @@ const SLOT_WAKTU = [
 ];
 
 /* =========================================================
-   STATUS CONFIG (pakai CSS variables)
+   STATUS CONFIG
 ========================================================= */
 
 const STATUS_CONFIG = {
@@ -353,8 +359,10 @@ export default function BookingKonselingPage() {
       diajukan: countStatus("diajukan"),
       dijadwalkan: countStatus("dijadwalkan"),
       ditolak: countStatus("ditolak"),
+      dibatalkan: countStatus("dibatalkan"),
+      slotHariIni: sesiPadaTanggal.length,
     };
-  }, [sesiKonseling]);
+  }, [sesiKonseling, sesiPadaTanggal]);
 
   const selectedDateObject = useMemo(() => {
     if (!selectedDate) return null;
@@ -479,8 +487,10 @@ export default function BookingKonselingPage() {
   ======================================================= */
 
   return (
-    <div className="theme-page min-h-full w-full">
-      <div className="mx-auto w-full max-w-[1400px] space-y-6 p-4 sm:p-6 lg:p-8">
+    <main className="min-w-0 flex-1 overflow-y-auto theme-page theme-text">
+      {/* Konten w-full: melebar saat zoom out, tidak dibatasi max-width */}
+      <div className="w-full space-y-6 px-4 py-5 sm:px-6 sm:py-6 lg:px-8">
+
         {/* =================================================
             HEADER
         ================================================= */}
@@ -653,6 +663,96 @@ export default function BookingKonselingPage() {
         </section>
 
         {/* =================================================
+            STAT CARDS — grid responsif dengan 2xl:grid-cols-6
+        ================================================= */}
+
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4 2xl:grid-cols-6">
+          <div className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl px-4 py-4`}>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs theme-text-muted">Total sesi</p>
+                <p className="mt-1 text-xl font-bold theme-text">
+                  {isLoadingHistory ? "—" : stats.total}
+                </p>
+              </div>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText}`}>
+                <Layers3 size={17} />
+              </div>
+            </div>
+          </div>
+
+          <div className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl px-4 py-4`}>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs theme-text-muted">Menunggu</p>
+                <p className="mt-1 text-xl font-bold theme-text">
+                  {isLoadingHistory ? "—" : stats.diajukan}
+                </p>
+              </div>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeWarningSurface} ${themeWarningText}`}>
+                <Clock3 size={17} />
+              </div>
+            </div>
+          </div>
+
+          <div className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl px-4 py-4`}>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs theme-text-muted">Disetujui</p>
+                <p className="mt-1 text-xl font-bold theme-text">
+                  {isLoadingHistory ? "—" : stats.dijadwalkan}
+                </p>
+              </div>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeSuccessSurface} ${themeSuccessText}`}>
+                <CheckCircle2 size={17} />
+              </div>
+            </div>
+          </div>
+
+          <div className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl px-4 py-4`}>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs theme-text-muted">Ditolak</p>
+                <p className="mt-1 text-xl font-bold theme-text">
+                  {isLoadingHistory ? "—" : stats.ditolak}
+                </p>
+              </div>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeDangerSurface} ${themeDangerText}`}>
+                <XOctagon size={17} />
+              </div>
+            </div>
+          </div>
+
+          <div className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl px-4 py-4`}>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs theme-text-muted">Dibatalkan</p>
+                <p className="mt-1 text-xl font-bold theme-text">
+                  {isLoadingHistory ? "—" : stats.dibatalkan}
+                </p>
+              </div>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themeNeutralSurface} theme-text-secondary`}>
+                <CircleAlert size={17} />
+              </div>
+            </div>
+          </div>
+
+          <div className={`theme-card ${themeNeutralBorder} ${themeSmallShadow} rounded-xl px-4 py-4`}>
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p className="text-xs theme-text-muted">Sesi tanggal ini</p>
+                <p className="mt-1 text-xl font-bold theme-text">
+                  {isLoadingHistory ? "—" : stats.slotHariIni}
+                </p>
+              </div>
+              <div className={`flex h-9 w-9 items-center justify-center rounded-lg ${themePrimarySoft} ${themePrimaryText}`}>
+                <CalendarClock size={17} />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* =================================================
             TABS
         ================================================= */}
         <div
@@ -746,32 +846,9 @@ export default function BookingKonselingPage() {
         ================================================= */}
         {activeTab === "booking" && (
           <section>
-            <div className="mb-6 grid gap-4 sm:grid-cols-3">
-              <StatCard
-                icon={ClipboardList}
-                label="Total Pengajuan"
-                value={stats.total}
-                description="Semua sesi konseling"
-                tone="primary"
-              />
-              <StatCard
-                icon={Clock3}
-                label="Menunggu"
-                value={stats.diajukan}
-                description="Belum diproses guru BK"
-                tone="warning"
-              />
-              <StatCard
-                icon={CalendarCheck}
-                label="Disetujui"
-                value={stats.dijadwalkan}
-                description="Sesi telah dijadwalkan"
-                tone="success"
-              />
-            </div>
-
             <form onSubmit={handleSubmit}>
-              <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(300px,0.8fr)]">
+              {/* Layout grid diperluas ke 2xl agar lebih lega saat zoom out */}
+              <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1.5fr)_minmax(300px,0.8fr)] 2xl:grid-cols-[minmax(0,1.8fr)_minmax(380px,0.7fr)]">
                 <div className="space-y-6">
                   {/* =========================================
                       KALENDER
@@ -1020,7 +1097,8 @@ export default function BookingKonselingPage() {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                    {/* Grid slot waktu: 2xl:grid-cols-4 agar lebih banyak kolom di layar lebar */}
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 2xl:grid-cols-4">
                       {SLOT_WAKTU.map((slot) => {
                         const selected = selectedTime === slot.mulai;
                         const bentrok = sesiPadaTanggal.some((sesi) =>
@@ -1431,37 +1509,7 @@ export default function BookingKonselingPage() {
               </button>
             </div>
 
-            <div className="mb-6 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-              <StatCard
-                icon={ClipboardList}
-                label="Total Sesi"
-                value={stats.total}
-                description="Semua pengajuan konseling"
-                tone="primary"
-              />
-              <StatCard
-                icon={Clock3}
-                label="Menunggu"
-                value={stats.diajukan}
-                description="Menunggu keputusan"
-                tone="warning"
-              />
-              <StatCard
-                icon={CheckCircle2}
-                label="Disetujui"
-                value={stats.dijadwalkan}
-                description="Sesi terjadwal"
-                tone="success"
-              />
-              <StatCard
-                icon={XCircle}
-                label="Ditolak"
-                value={stats.ditolak}
-                description="Pengajuan ditolak"
-                tone="danger"
-              />
-            </div>
-
+            {/* Filter toolbar: grid responsif dengan 2xl:grid-cols-6 */}
             <div
               className={`
                 theme-card
@@ -1685,86 +1733,19 @@ export default function BookingKonselingPage() {
                 )}
               </div>
             ) : (
-              <div className="space-y-4">
-                {filteredHistory.map((sesi) => (
-                  <HistoryCard key={sesi.id} sesi={sesi} />
-                ))}
+              /* overflow-x-auto agar riwayat tidak merusak layout di layar kecil */
+              <div className="space-y-4 overflow-x-auto">
+                <div className="min-w-[560px] space-y-4">
+                  {filteredHistory.map((sesi) => (
+                    <HistoryCard key={sesi.id} sesi={sesi} />
+                  ))}
+                </div>
               </div>
             )}
           </section>
         )}
       </div>
-    </div>
-  );
-}
-
-/* =========================================================
-   STAT CARD
-========================================================= */
-
-function StatCard({ icon: Icon, label, value, description, tone = "primary" }) {
-  const toneMap = {
-    primary: {
-      surface: themePrimarySoft,
-      text: themePrimaryText,
-    },
-    warning: {
-      surface: themeWarningSurface,
-      text: themeWarningText,
-    },
-    success: {
-      surface: themeSuccessSurface,
-      text: themeSuccessText,
-    },
-    danger: {
-      surface: themeDangerSurface,
-      text: themeDangerText,
-    },
-  };
-
-  const current = toneMap[tone] || toneMap.primary;
-
-  return (
-    <div
-      className={`
-        theme-card
-        rounded-2xl
-        border
-        ${themeNeutralBorder}
-        p-5
-        ${themeCardShadow}
-        transition-all
-        duration-300
-        hover:-translate-y-0.5
-      `}
-    >
-      <div className="flex items-start justify-between gap-3">
-        <div>
-          <p className="theme-text-secondary text-sm font-medium">
-            {label}
-          </p>
-          <p className={`mt-2 text-3xl font-bold tracking-tight ${current.text}`}>
-            {value}
-          </p>
-        </div>
-
-        <div
-          className={`
-            flex
-            h-10
-            w-10
-            items-center
-            justify-center
-            rounded-xl
-            ${current.surface}
-            ${current.text}
-          `}
-        >
-          <Icon size={20} />
-        </div>
-      </div>
-      <p className="theme-text-muted mt-3 text-xs">{description}</p>
-    </div>
+    </main>
   );
 }
 
