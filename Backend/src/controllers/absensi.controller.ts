@@ -865,3 +865,150 @@ export const getMetodeAbsensiAktif = async (
     metodeAktif: sekolah.metodeAbsensiAktif,
   });
 };
+
+export const getMonitoringGuru = async (
+  req: AuthRequest,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const isSuper = isSuperAdmin(req.user?.role);
+    const sekolahId = req.user?.sekolahId;
+
+    if (!isSuper && !sekolahId) {
+      throw new AppError(
+        "Data tidak ditemukan atau Anda tidak memiliki akses",
+        403,
+      );
+    }
+
+    const { tanggal, status, search, shiftKerjaId } = req.query;
+
+    let targetDate = new Date();
+    if (tanggal) {
+      const parsed = new Date(String(tanggal));
+      if (!isNaN(parsed.getTime())) {
+        targetDate = parsed;
+      }
+    }
+
+    const startOfDay = new Date(targetDate);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(targetDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const where: any = {
+      tanggal: {
+        gte: startOfDay,
+        lte: endOfDay,
+      },
+      ...(!isSuper && sekolahId
+        ? {
+            OR: [
+              { sekolahId },
+              { pengguna: { sekolahId } },
+            ],
+          }
+        : {}),
+      pengguna: {
+        dihapusPada: null,
+        peran: {
+          is: {
+            OR: [
+              {
+                nama: {
+                  in: [
+                    "guru",
+                    "staf",
+                    "pegawai",
+                    "karyawan",
+                    "Guru",
+                    "Staf",
+                    "Pegawai",
+                    "Karyawan",
+                  ],
+                },
+              },
+              { nama: { contains: "guru", mode: "insensitive" } },
+              { nama: { contains: "staf", mode: "insensitive" } },
+              { nama: { contains: "pegawai", mode: "insensitive" } },
+            ],
+          },
+        },
+      },
+    };
+
+    if (status) {
+      where.status = String(status);
+    }
+
+    if (shiftKerjaId) {
+      where.shiftKerjaId = String(shiftKerjaId);
+    }
+
+    if (search) {
+      const searchStr = String(search);
+      where.pengguna = {
+        ...where.pengguna,
+        OR: [
+          { namaLengkap: { contains: searchStr, mode: "insensitive" } },
+          { nip: { contains: searchStr, mode: "insensitive" } },
+          { nuptk: { contains: searchStr, mode: "insensitive" } },
+          { email: { contains: searchStr, mode: "insensitive" } },
+        ],
+      };
+    }
+
+    const absensiGuru = await prisma.absensi.findMany({
+      where,
+      include: {
+        pengguna: {
+          select: {
+            id: true,
+            namaLengkap: true,
+            email: true,
+            avatar: true,
+            nip: true,
+            nuptk: true,
+            jabatan: true,
+            shiftKerja: true,
+            peran: {
+              select: {
+                id: true,
+                nama: true,
+                namaTampilan: true,
+              },
+            },
+            biometrikWajah: {
+              select: {
+                id: true,
+                status: true,
+                urlFotoReferensi: true,
+              },
+            },
+          },
+        },
+        shiftKerja: true,
+        kelas: {
+          select: {
+            id: true,
+            nama: true,
+          },
+        },
+      },
+      orderBy: [
+        { waktuMasuk: "desc" },
+        { dibuatPada: "desc" },
+      ],
+    });
+
+    return successResponse(
+      res,
+      "Data monitoring absensi guru berhasil diambil",
+      absensiGuru,
+    );
+  } catch (error) {
+    next(error);
+  }
+};

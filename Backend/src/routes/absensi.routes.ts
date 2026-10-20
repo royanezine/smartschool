@@ -6,17 +6,18 @@ import {
   createAbsensi,
   getAbsensiSaya,
   getAbsensiKelas,
+  getMonitoringGuru,
   exportRekapAbsensi,
   checkInShift,
   checkOutShift,
   getRiwayatShiftSaya,
   getMetodeAbsensiAktif,
+  registerFaceIdByAdmin,
 } from "../controllers/absensi.controller";
 import { authenticate } from "../middlewares/auth.middleware";
 import { requireTenant, requireSubscription } from "../middlewares/tenant.middleware";
 import { requireIzin } from "../middlewares/izin.middleware";
 import { uploadBiometrik } from "../middlewares/upload.middleware";
-import { registerFaceIdByAdmin } from "../controllers/absensi.controller";
 
 import { authorizeRoles } from "../middlewares/role.middleware";
 
@@ -45,6 +46,7 @@ router.post(
   createAbsensi,
 );
 router.get("/saya", requireIzin("lms.view"), getAbsensiSaya);
+router.get("/monitoring-guru", getMonitoringGuru);
 router.get("/kelas/:kelasId", requireIzin("lms.view"), getAbsensiKelas);
 router.get("/export", requireIzin("laporan.view"), exportRekapAbsensi);
 router.post(

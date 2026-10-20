@@ -194,6 +194,8 @@ export const getUsers = async (req: AuthRequest, res: Response) => {
               namaTampilan: true,
             },
           },
+
+          biometrikWajah: true,
         },
       }),
 
@@ -810,6 +812,8 @@ export const profile = async (req: AuthRequest, res: Response) => {
             status: true,
           },
         },
+
+        biometrikWajah: true,
       },
     });
 
@@ -938,6 +942,7 @@ export const getUserById = async (req: AuthRequest, res: Response) => {
         dibuatPada: true,
         sekolah: { select: { id: true, nama: true, kode: true } },
         peran: { select: { id: true, nama: true, namaTampilan: true } },
+        biometrikWajah: true,
       },
     });
 
