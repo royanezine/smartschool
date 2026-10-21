@@ -15,34 +15,63 @@ import {
   normalisasiHex,
 } from "../utils/temaDefault";
 
-export const createKategoriArtikel = async (req: Request, res: Response, next: NextFunction) => {
+export const createKategoriArtikel = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const sekolahId = (req as any).user.sekolahId;
     const validatedData = kategoriArtikelSchema.parse(req.body);
-    const rawJudul = validatedData.nama || (req.body.judul as string) || "kategori";
-    const slug = rawJudul.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 35) + '-' + Date.now();
+    const rawJudul =
+      validatedData.nama || (req.body.judul as string) || "kategori";
+    const slug =
+      rawJudul
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .slice(0, 35) +
+      "-" +
+      Date.now();
     const kategori = await prisma.kategoriArtikel.create({
       data: { ...validatedData, slug, sekolahId },
     });
-    return successResponse(res, "Kategori artikel berhasil dibuat", kategori, 201);
+    return successResponse(
+      res,
+      "Kategori artikel berhasil dibuat",
+      kategori,
+      201,
+    );
   } catch (error) {
     next(error);
   }
 };
 
-export const getKategoriArtikel = async (req: Request, res: Response, next: NextFunction) => {
+export const getKategoriArtikel = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const sekolahId = (req as any).user.sekolahId;
     const kategori = await prisma.kategoriArtikel.findMany({
       where: { sekolahId, dihapusPada: null },
     });
-    return successResponse(res, "Berhasil mengambil kategori artikel", kategori, 200);
+    return successResponse(
+      res,
+      "Berhasil mengambil kategori artikel",
+      kategori,
+      200,
+    );
   } catch (error) {
     next(error);
   }
 };
 
-export const updateKategoriArtikel = async (req: Request, res: Response, next: NextFunction) => {
+export const updateKategoriArtikel = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const id = req.params.id as string;
     const sekolahId = (req as any).user.sekolahId;
@@ -53,20 +82,36 @@ export const updateKategoriArtikel = async (req: Request, res: Response, next: N
     });
     if (!kategori) throw new AppError("Kategori artikel tidak ditemukan", 404);
 
-    const rawJudul = validatedData.nama || (req.body.judul as string) || kategori.nama;
-    const slug = rawJudul.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 35) + '-' + Date.now();
+    const rawJudul =
+      validatedData.nama || (req.body.judul as string) || kategori.nama;
+    const slug =
+      rawJudul
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .slice(0, 35) +
+      "-" +
+      Date.now();
 
     const updated = await prisma.kategoriArtikel.update({
       where: { id },
       data: { ...validatedData, slug },
     });
-    return successResponse(res, "Kategori artikel berhasil diperbarui", updated, 200);
+    return successResponse(
+      res,
+      "Kategori artikel berhasil diperbarui",
+      updated,
+      200,
+    );
   } catch (error) {
     next(error);
   }
 };
 
-export const deleteKategoriArtikel = async (req: Request, res: Response, next: NextFunction) => {
+export const deleteKategoriArtikel = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const id = req.params.id as string;
     const sekolahId = (req as any).user.sekolahId;
@@ -86,11 +131,21 @@ export const deleteKategoriArtikel = async (req: Request, res: Response, next: N
   }
 };
 
-export const createArtikelCms = async (req: Request, res: Response, next: NextFunction) => {
+export const createArtikelCms = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const sekolahId = (req as any).user.sekolahId;
     const validatedData = artikelCmsSchema.parse(req.body);
-    const slug = validatedData.judul.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 80) + '-' + Date.now();
+    const slug =
+      validatedData.judul
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .slice(0, 80) +
+      "-" +
+      Date.now();
     const artikel = await prisma.artikelCms.create({
       data: { ...validatedData, slug, sekolahId },
     });
@@ -100,7 +155,11 @@ export const createArtikelCms = async (req: Request, res: Response, next: NextFu
   }
 };
 
-export const getArtikelCms = async (req: Request, res: Response, next: NextFunction) => {
+export const getArtikelCms = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const sekolahId = (req as any).user.sekolahId;
     const artikel = await prisma.artikelCms.findMany({
@@ -113,7 +172,11 @@ export const getArtikelCms = async (req: Request, res: Response, next: NextFunct
   }
 };
 
-export const updateArtikelCms = async (req: Request, res: Response, next: NextFunction) => {
+export const updateArtikelCms = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const id = req.params.id as string;
     const sekolahId = (req as any).user.sekolahId;
@@ -125,7 +188,13 @@ export const updateArtikelCms = async (req: Request, res: Response, next: NextFu
     if (!artikel) throw new AppError("Artikel tidak ditemukan", 404);
 
     const rawJudul = validatedData.judul || artikel.judul;
-    const slug = rawJudul.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 80) + '-' + Date.now();
+    const slug =
+      rawJudul
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .slice(0, 80) +
+      "-" +
+      Date.now();
 
     const updated = await prisma.artikelCms.update({
       where: { id },
@@ -137,7 +206,11 @@ export const updateArtikelCms = async (req: Request, res: Response, next: NextFu
   }
 };
 
-export const deleteArtikelCms = async (req: Request, res: Response, next: NextFunction) => {
+export const deleteArtikelCms = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const id = req.params.id as string;
     const sekolahId = (req as any).user.sekolahId;
@@ -157,12 +230,21 @@ export const deleteArtikelCms = async (req: Request, res: Response, next: NextFu
   }
 };
 
-// === HALAMAN CMS ===
-export const createHalamanCms = async (req: Request, res: Response, next: NextFunction) => {
+export const createHalamanCms = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const sekolahId = (req as any).user.sekolahId;
     const validatedData = halamanCmsSchema.parse(req.body);
-    const slug = validatedData.judul.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 80) + '-' + Date.now();
+    const slug =
+      validatedData.judul
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .slice(0, 80) +
+      "-" +
+      Date.now();
     const halaman = await prisma.halamanCms.create({
       data: { ...validatedData, slug, sekolahId },
     });
@@ -172,7 +254,11 @@ export const createHalamanCms = async (req: Request, res: Response, next: NextFu
   }
 };
 
-export const getHalamanCms = async (req: Request, res: Response, next: NextFunction) => {
+export const getHalamanCms = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const sekolahId = (req as any).user.sekolahId;
     const halaman = await prisma.halamanCms.findMany({
@@ -184,7 +270,11 @@ export const getHalamanCms = async (req: Request, res: Response, next: NextFunct
   }
 };
 
-export const updateHalamanCms = async (req: Request, res: Response, next: NextFunction) => {
+export const updateHalamanCms = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const id = req.params.id as string;
     const sekolahId = (req as any).user.sekolahId;
@@ -196,7 +286,13 @@ export const updateHalamanCms = async (req: Request, res: Response, next: NextFu
     if (!halaman) throw new AppError("Halaman tidak ditemukan", 404);
 
     const rawJudul = validatedData.judul || halaman.judul;
-    const slug = rawJudul.toLowerCase().replace(/[^a-z0-9]+/g, '-').slice(0, 80) + '-' + Date.now();
+    const slug =
+      rawJudul
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .slice(0, 80) +
+      "-" +
+      Date.now();
 
     const updated = await prisma.halamanCms.update({
       where: { id },
@@ -208,7 +304,11 @@ export const updateHalamanCms = async (req: Request, res: Response, next: NextFu
   }
 };
 
-export const deleteHalamanCms = async (req: Request, res: Response, next: NextFunction) => {
+export const deleteHalamanCms = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const id = req.params.id as string;
     const sekolahId = (req as any).user.sekolahId;
@@ -228,10 +328,11 @@ export const deleteHalamanCms = async (req: Request, res: Response, next: NextFu
   }
 };
 
-// === TEMA WARNA (dikonsumsi FE) ===
-
-// GET /cms/tema -> default + override sekolah, format hex & rgb
-export const getTemaWarna = async (req: Request, res: Response, next: NextFunction) => {
+export const getTemaWarna = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const sekolahId = (req as any).user.sekolahId as string | undefined;
 
@@ -242,14 +343,22 @@ export const getTemaWarna = async (req: Request, res: Response, next: NextFuncti
         })
       : [];
 
-    return successResponse(res, "Berhasil mengambil tema warna", bangunTema(overrides), 200);
+    return successResponse(
+      res,
+      "Berhasil mengambil tema warna",
+      bangunTema(overrides),
+      200,
+    );
   } catch (error) {
     next(error);
   }
 };
 
-// PUT /cms/tema -> simpan/ubah warna (parsial, hanya yang dikirim)
-export const updateTemaWarna = async (req: Request, res: Response, next: NextFunction) => {
+export const updateTemaWarna = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { sekolahId, userId } = (req as any).user;
     if (!sekolahId) throw new AppError("Sekolah tidak ditemukan", 400);
@@ -303,14 +412,22 @@ export const updateTemaWarna = async (req: Request, res: Response, next: NextFun
       select: { kunci: true, nilai: true },
     });
 
-    return successResponse(res, "Tema warna berhasil diperbarui", bangunTema(overrides), 200);
+    return successResponse(
+      res,
+      "Tema warna berhasil diperbarui",
+      bangunTema(overrides),
+      200,
+    );
   } catch (error) {
     next(error);
   }
 };
 
-// DELETE /cms/tema -> reset ke warna default
-export const resetTemaWarna = async (req: Request, res: Response, next: NextFunction) => {
+export const resetTemaWarna = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { sekolahId, userId } = (req as any).user;
     if (!sekolahId) throw new AppError("Sekolah tidak ditemukan", 400);
@@ -320,8 +437,14 @@ export const resetTemaWarna = async (req: Request, res: Response, next: NextFunc
       data: { dihapusPada: new Date(), dihapusOleh: userId },
     });
 
-    return successResponse(res, "Tema warna dikembalikan ke default", bangunTema([]), 200);
+    return successResponse(
+      res,
+      "Tema warna dikembalikan ke default",
+      bangunTema([]),
+      200,
+    );
   } catch (error) {
     next(error);
   }
 };
+

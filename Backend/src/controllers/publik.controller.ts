@@ -4,7 +4,11 @@ import { AppError } from "../utils/appError";
 import { successResponse } from "../utils/responseFormatter";
 import { bangunTema } from "../utils/temaDefault";
 
-export const getPublicProfil = async (req: Request, res: Response, next: NextFunction) => {
+export const getPublicProfil = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const subdomain = req.params.subdomain as string;
 
@@ -39,16 +43,25 @@ export const getPublicProfil = async (req: Request, res: Response, next: NextFun
 
     if (!sekolah) throw new AppError("Sekolah tidak ditemukan", 404);
 
-    return successResponse(res, "Berhasil mengambil profil sekolah publik", {
-      ...sekolah,
-      daftarCms: sekolah.halamanCms,
-    }, 200);
+    return successResponse(
+      res,
+      "Berhasil mengambil profil sekolah publik",
+      {
+        ...sekolah,
+        daftarCms: sekolah.halamanCms,
+      },
+      200,
+    );
   } catch (error) {
     next(error);
   }
 };
 
-export const getPublicTema = async (req: Request, res: Response, next: NextFunction) => {
+export const getPublicTema = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const subdomain = req.params.subdomain as string;
 
@@ -82,16 +95,25 @@ export const getPublicTema = async (req: Request, res: Response, next: NextFunct
 
     const tema = bangunTema(normalizedOverrides);
 
-    return successResponse(res, "Berhasil mengambil tema sekolah publik", tema, 200);
+    return successResponse(
+      res,
+      "Berhasil mengambil tema sekolah publik",
+      tema,
+      200,
+    );
   } catch (error) {
     next(error);
   }
 };
 
-export const getPublicArtikel = async (req: Request, res: Response, next: NextFunction) => {
+export const getPublicArtikel = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const subdomain = req.params.subdomain as string;
-    
+
     const sekolah = await prisma.sekolah.findUnique({
       where: { subdomain },
     });
@@ -107,13 +129,22 @@ export const getPublicArtikel = async (req: Request, res: Response, next: NextFu
       orderBy: { dibuatPada: "desc" },
     });
 
-    return successResponse(res, "Berhasil mengambil artikel publik", artikel, 200);
+    return successResponse(
+      res,
+      "Berhasil mengambil artikel publik",
+      artikel,
+      200,
+    );
   } catch (error) {
     next(error);
   }
 };
 
-export const getPublicHalamanBySlug = async (req: Request, res: Response, next: NextFunction) => {
+export const getPublicHalamanBySlug = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const subdomain = req.params.subdomain as string;
     const slug = req.params.slug as string;
@@ -132,7 +163,49 @@ export const getPublicHalamanBySlug = async (req: Request, res: Response, next: 
     });
     if (!halaman) throw new AppError("Halaman tidak ditemukan", 404);
 
-    return successResponse(res, "Berhasil mengambil halaman publik", halaman, 200);
+    return successResponse(
+      res,
+      "Berhasil mengambil halaman publik",
+      halaman,
+      200,
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getHalamanPublikBySubdomain = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const subdomain = req.params.subdomain || req.query.subdomain;
+
+    if (!subdomain || typeof subdomain !== 'string') {
+      throw new AppError("Subdomain wajib disertakan", 400);
+    }
+
+    const sekolah = await prisma.sekolah.findUnique({
+      where: { subdomain },
+      select: { id: true, status: true },
+    });
+
+    if (!sekolah || sekolah.status !== "aktif") {
+      throw new AppError("Sekolah tidak ditemukan atau sedang tidak aktif", 404);
+    }
+
+    const halaman = await prisma.halamanCms.findMany({
+      where: {
+        sekolahId: sekolah.id,
+        dihapusPada: null,
+        status: "publikasi"
+      },
+      select: {
+        id: true,
+        judul: true,
+        slug: true,
+      },
+      orderBy: { dibuatPada: "asc" }
+    });
+
+    return successResponse(res, "Berhasil mengambil daftar halaman publik", halaman, 200);
   } catch (error) {
     next(error);
   }
